@@ -1,0 +1,328 @@
+##############
+# After snippet generation all snippet parameters will be stripped from
+# the '$' characters and will be able to 'jump' between parameters with the 
+# 'Tab' button.
+# Syntax:
+#  #         - comment line indicator
+#  <name>=>  - snippet name line; start of the snippet section; name must be a ingle token without any delimiters 
+#  $<value>$ - snippet parameter 
+#  $|$       - special snippet parameter indicating the 
+#              caret position after the snippet insertion is completed. 
+##############
+# You can define your own snippet here :
+##############
+
+##############
+# BELOW IS THE CONTENT OF P:\outils\config_appBuilder/p4gl.als
+##############
+DVMP=>
+DEFINE VARIABLE lm_$?$ AS MEMPTR NO-UNDO. /* */$|$
+##############
+IPDZ=>
+DEFINE INPUT  PARAMETER ipdz_$?$ AS DATETIME-TZ NO-UNDO. /* */$|$
+##############
+IOPWH=>
+DEFINE INPUT-OUTPUT PARAMETER iopwh_$?$ AS WIDGET-HANDLE NO-UNDO. /* */$|$
+##############
+IPHN=>
+DEFINE INPUT  PARAMETER iph_$?$ AS HANDLE NO-UNDO. /* */$|$
+##############
+GRHRA=>
+DYNAMIC-FUNCTION("runAction", INPUT "$?$").$|$
+##############
+GRHSD=>
+DYNAMIC-FUNCTION("setData", INPUT TEMP-TABLE $?$:DEFAULT-BUFFER-HANDLE, INPUT "").$|$
+##############
+IPIN=>
+DEFINE INPUT  PARAMETER ipi_$?$ AS INTEGER NO-UNDO. /* */$|$
+##############
+GRHSP=>
+DYNAMIC-FUNCTION("setParam", INPUT "$?$", INPUT "").$|$
+##############
+OPMP=>
+DEFINE OUTPUT PARAMETER opmp_$?$ AS MEMPTR NO-UNDO. /* */$|$
+##############
+IPLG=>
+DEFINE INPUT  PARAMETER ipl_$?$ AS LOGICAL NO-UNDO. /* */$|$
+##############
+DVDT=>
+DEFINE VARIABLE ldt_$?$ AS DATETIME NO-UNDO. /* */$|$
+##############
+IPDA=>
+DEFINE INPUT  PARAMETER ipda_$?$ AS DATE NO-UNDO. /* */$|$
+##############
+GRHGMB=>
+DYNAMIC-FUNCTION("getMappingBrowse", INPUT STRING(TEMP-TABLE $?$:HANDLE)).$|$
+##############
+RETURN=>
+RETURN "$?$".$|$
+##############
+GRHGMD=>
+DYNAMIC-FUNCTION("getMappingData", INPUT "$?$", INPUT "").$|$
+##############
+AFCTODAY=>
+DYNAMIC-FUNCTION("fi_TODAY")$|$
+##############
+DIPSLAY=>
+DISPLAY $?$$|$
+##############
+DVRI=>
+DEFINE VARIABLE lr_$?$ AS ROWID NO-UNDO. /* */$|$
+##############
+LOG=>
+LOG-MANAGER:WRITE-MESSAGE("$?$","MY LOG").$|$
+##############
+IPCH=>
+DEFINE INPUT  PARAMETER ipc_$?$ AS CHARACTER NO-UNDO. /* */$|$
+##############
+IPWH=>
+DEFINE INPUT  PARAMETER ipwh_$?$ AS WIDGET-HANDLE NO-UNDO. /* */$|$
+##############
+IPDE=>
+DEFINE INPUT  PARAMETER ipd_$?$ AS DECIMAL NO-UNDO. /* */$|$
+##############
+DVDZ=>
+DEFINE VARIABLE ldz_$?$ AS DATETIME-TZ NO-UNDO. /* */$|$
+##############
+OPDT=>
+DEFINE OUTPUT PARAMETER opdt_$?$ AS DATETIME NO-UNDO. /* */$|$
+##############
+DVHN=>
+DEFINE VARIABLE lh_$?$ AS HANDLE NO-UNDO. /* */$|$
+##############
+DB=>
+DEFINE BUFFER lb_$?$ FOR .$|$
+##############
+OPRI=>
+DEFINE OUTPUT PARAMETER opr_$?$ AS ROWID NO-UNDO. /* */$|$
+##############
+btGetConfig=>
+DYNAMIC-FUNCTION("btGetConfig", INPUT "%c", INPUT "", INPUT "") %\S$|$
+##############
+IOPDA=>
+DEFINE INPUT-OUTPUT PARAMETER iopda_$?$ AS DATE NO-UNDO. /* */$|$
+##############
+btRtAfficher=>
+DYNAMIC-FUNCTION("btRtAfficher", INPUT RT_$?$:HANDLE).$|$
+##############
+IOPCH=>
+DEFINE INPUT-OUTPUT PARAMETER iopc_$?$ AS CHARACTER NO-UNDO. /* */$|$
+##############
+IOPDE=>
+DEFINE INPUT-OUTPUT PARAMETER iopde_$?$ AS DECIMAL NO-UNDO. /* */$|$
+##############
+DVIN=>
+DEFINE VARIABLE li_$?$ AS INTEGER NO-UNDO. /* */$|$
+##############
+btRtActiver=>
+DYNAMIC-FUNCTION("btRtActiver", INPUT RT_$?$:HANDLE).$|$
+##############
+btRtGriser=>
+DYNAMIC-FUNCTION("btRtGriser", INPUT RT_$?$:HANDLE).$|$
+##############
+&SC=>
+&SCOPED-DEFINE $?$$|$
+##############
+IPMP=>
+DEFINE INPUT  PARAMETER ipm_$?$ AS MEMPTR NO-UNDO. /* */$|$
+##############
+btRtCacher=>
+DYNAMIC-FUNCTION("btRtCacher", INPUT RT_$?$:HANDLE).$|$
+##############
+OPDZ=>
+DEFINE OUTPUT PARAMETER opdz_$?$ AS DATETIME-TZ NO-UNDO. /* */$|$
+##############
+DVLG=>
+DEFINE VARIABLE ll_$?$ AS LOGICAL NO-UNDO. /* */$|$
+##############
+btGetSH=>
+DYNAMIC-FUNCTION("btGetServerHandle")$|$
+##############
+IOPDT=>
+DEFINE INPUT-OUTPUT PARAMETER iopdt_$?$ AS DATETIME NO-UNDO. /* */$|$
+##############
+DVDA=>
+DEFINE VARIABLE lda_$?$ AS DATE NO-UNDO. /* */$|$
+##############
+OPHN=>
+DEFINE OUTPUT PARAMETER oph_$?$ AS HANDLE NO-UNDO. /* */$|$
+##############
+IOPDZ=>
+DEFINE INPUT-OUTPUT PARAMETER iopdz_$?$ AS DATETIME-TZ NO-UNDO. /* */$|$
+##############
+IOPHN=>
+DEFINE INPUT-OUTPUT PARAMETER ioph_$?$ AS HANDLE NO-UNDO. /* */$|$
+##############
+GRHCD=>
+DYNAMIC-FUNCTION("createData", INPUT action, INPUT "$?$").$|$
+##############
+GRHAPB=>
+DYNAMIC-FUNCTION("addParamBuffer", INPUT "$?$", INPUT TEMP-TABLE :DEFAULT-BUFFER-HANDLE).$|$
+##############
+IOPIN=>
+DEFINE INPUT-OUTPUT PARAMETER iopi_$?$ AS INTEGER NO-UNDO. /* */$|$
+##############
+GRHCH=>
+DYNAMIC-FUNCTION("createHeader", INPUT action, INPUT "$?$").$|$
+##############
+GRHAP=>
+DYNAMIC-FUNCTION("addParam", INPUT "$?$", INPUT "").$|$
+##############
+OPIN=>
+DEFINE OUTPUT PARAMETER opi_$?$ AS INTEGER NO-UNDO. /* */$|$
+##############
+IOPLG=>
+DEFINE INPUT-OUTPUT PARAMETER iopl_$?$ AS LOGICAL NO-UNDO. /* */$|$
+##############
+DVCH=>
+DEFINE VARIABLE lc_$?$ AS CHARACTER NO-UNDO. /* */$|$
+##############
+DVWH=>
+DEFINE VARIABLE lwh_$?$ AS WIDGET-HANDLE NO-UNDO. /* */$|$
+##############
+GRHCM=>
+DYNAMIC-FUNCTION("createMessage", INPUT action, INPUT "0" + sptr + "Ok.").$|$
+##############
+DVDE=>
+DEFINE VARIABLE ld_$?$ AS DECIMAL NO-UNDO. /* */$|$
+##############
+&FR=>
+{&FRAME-NAME} $?$$|$
+##############
+GRHGC=>
+getChamp(INPUT "$?$").$|$
+##############
+GRHGD=>
+DYNAMIC-FUNCTION("getData", INPUT BUFFER $?$:HANDLE).$|$
+##############
+OPLG=>
+DEFINE OUTPUT PARAMETER opl_$?$ AS LOGICAL NO-UNDO. /* */$|$
+##############
+GRHGH=>
+DYNAMIC-FUNCTION("getHeader", INPUT TEMP-TABLE $?$:DEFAULT-BUFFER-HANDLE).$|$
+##############
+IOPMP=>
+DEFINE INPUT-OUTPUT PARAMETER iopm_$?$ AS MEMPTR NO-UNDO. /* */$|$
+##############
+IPDT=>
+DEFINE INPUT  PARAMETER ipdt_$?$ AS DATETIME NO-UNDO. /* */$|$
+##############
+OPDA=>
+DEFINE OUTPUT PARAMETER opda_$?$ AS DATE NO-UNDO. /* */$|$
+##############
+IPRI=>
+DEFINE INPUT  PARAMETER ipr_$?$ AS ROWID NO-UNDO. /* */$|$
+##############
+IOPRI=>
+DEFINE INPUT-OUTPUT PARAMETER iopr_$?$ AS ROWID NO-UNDO. /* */$|$
+##############
+OPCH=>
+DEFINE OUTPUT PARAMETER opc_$?$ AS CHARACTER NO-UNDO. /* */$|$
+##############
+OPWH=>
+DEFINE OUTPUT PARAMETER opwh_$?$ AS WIDGET-HANDLE NO-UNDO. /* */$|$
+##############
+OPDE=>
+DEFINE OUTPUT PARAMETER opde_$?$ AS DECIMAL NO-UNDO. /* */$|$
+##############
+&GL=>
+&GLOBAL-DEFINE $?$$|$
+##############
+CMO=>
+/* Mise en commentaire de l'ancien code */
+/* */$|$
+##############
+&IFND=>
+&IF (DEFINED $?$ = 0) &THEN
+&ENDIF$|$
+##############
+CODCLI=>
+/* Nouveau code */
+DEFINE VARIABLE date_sortie AS DATE  NO-UNDO.
+DEFINE VARIABLE motif_sortie AS CHAR  NO-UNDO.
+DEFINE VARIABLE presence AS CHAR NO-UNDO.
+DYNAMIC-FUNCTION("setParam","numagt", $?$).
+DYNAMIC-FUNCTION("runService","hr14rechabssrv.p","derniere_sortie_agent").
+presence = DYNAMIC-FUNCTION("getMappingData", "derniere_sortie_agent", "p_present").
+motif_sortie = DYNAMIC-FUNCTION("getMappingData", "derniere_sortie_agent", "p_b01").
+date_sortie = DYNAMIC-FUNCTION("getMappingData", "derniere_sortie_agent", "p_datb01").$|$
+##############
+RUNON=>
+/* */
+RUN $?$ ON DYNAMIC-FUNCTION("btGetServerHandle").$|$
+##############
+LOGSRV=>
+/* Uniquement pour LOG */
+define stream l_log. /* au début du fichier dans les variables globales*/
+output stream l_log to value(g_ficpar + "/mynicelog.log").
+put stream l_log unformatted "blabla".
+output stream l_log close.$|$
+##############
+&IF=>
+&IF $?$ &THEN
+&ENDIF$|$
+##############
+MES=>
+MESSAGE $?$
+%\iVIEW-AS ALERT-BOX INFORMATION BUTTONS OK.$|$
+##############
+RUN=>
+/* */
+RUN $?$.$|$
+##############
+DWH=>
+DO WHILE ($?$):
+%\i
+END.$|$
+##############
+PSU=>
+PUT STREAM str_$?$ UNFORMATTED
+%\iSKIP.$|$
+##############
+DERR=>
+DO ON ERROR UNDO, LEAVE:
+%\i$?$
+END.$|$
+##############
+&IFD=>
+&IF (DEFINED $?$ <> 0) &THEN
+&ENDIF$|$
+##############
+CP1=>
+/*--------------------------------------------------------------------------------------------*/
+/*#Modif $?$#
+CODE POSITION Phase 1: date - trigramme
+Recentrage sur la notion d'E/S de l'agent*/$|$
+##############
+AP1=>
+/*--------------------------------------------------------------------------------------------*/
+/*#Modif $?$#
+CODE OBSOLETE: date - trigramme
+Remplacement des tables anciennes paies*/$|$
+##############
+DFOR=>
+DO FOR $?$:
+%\i
+END.$|$
+##############
+ONB=>
+ON '$?$':U OF %\S
+DO:
+%\iRETURN.
+END.$|$
+##############
+lc_=>
+lc_$|$
+##############
+CODSRV=>
+/* Nouveau code */
+DEFINE VARIABLE presence AS LOG NO-UNDO.
+DEFINE VARIABLE motif_sortie AS CHAR NO-UNDO.
+DEFINE VARIABLE date_sortie AS DATE NO-UNDO.
+RUN hr99pres.p(INPUT $?$, INPUT TODAY, OUTPUT presence, OUTPUT motif_sortie, OUTPUT date_sortie).$|$
+##############
+DWF=>
+DO WITH FRAME {&FRAME-NAME}:
+%\i
+END. /* DO WITH FRAME {&FRAME-NAME}: */
+%\S$|$

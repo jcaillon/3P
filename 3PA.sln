@@ -1,0 +1,34 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3PA", "3PA\3PA.csproj", "{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamuiFramework", "YamuiFramework\YamuiFramework.csproj", "{0A4BE330-B2BB-43A5-B392-15DCE4736E55}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamuiDemoApp", "YamuiDemoApp\YamuiDemoApp.csproj", "{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

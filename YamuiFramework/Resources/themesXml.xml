@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Root>
+  <Item>
+    <UniqueId Value="0" />
+    <ThemeName Value="The classic" />
+    <RankNeeded Value="0" />
+    <FormColorBackColor Value="#E6E6E6" />
+    <FormColorForeColor Value="#1E1E1E" />
+    <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />
+    <ScrollBarsColorsNormalForeColor Value="#666666" />
+    <ScrollBarsColorsHoverBackColor Value="#CCCCCC" />
+    <ScrollBarsColorsHoverForeColor Value="#252526" />
+    <ScrollBarsColorsDisabledBackColor Value="#E6E6E6" />
+    <ScrollBarsColorsDisabledForeColor Value="#B3B3B3" />
+    <LabelsColorsNormalForeColor Value="#1E1E1E" />
+    <LabelsColorsPressForeColor Value="#000000" />
+    <LabelsColorsDisabledForeColor Value="#969696" />
+    <TabsColorsNormalBackColor Value="#E6E6E6" />
+    <TabsColorsNormalForeColor Value="#6E6E6E" />
+    <TabsColorsHoverForeColor Value="#3C3C3C" />
+    <TabsColorsPressForeColor Value="#1E1E1E" />
+    <ButtonColorsNormalBackColor Value="#E6E6E6" />
+    <ButtonColorsNormalForeColor Value="#1E1E1E" />
+    <ButtonColorsNormalBorderColor Value="#BEBEBE" />
+    <ButtonColorsHoverBackColor Value="#D2D2D2" />
+    <ButtonColorsHoverForeColor Value="#1E1E1E" />
+    <ButtonColorsHoverBorderColor Value="#BEBEBE" />
+    <ButtonColorsPressForeColor Value="#1E1E1E" />
+    <ButtonColorsDisabledBackColor Value="#E6E6E6" />
+    <ButtonColorsDisabledForeColor Value="#646464" />
+    <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+  </Item>
+  <Item>
+    <UniqueId Value="1" />
+    <ThemeName Value="Monokawai" />
+    <RankNeeded Value="0" />
+    <FormColorBackColor Value="#252526" />
+    <FormColorForeColor Value="#D2D2D2" />
+    <ScrollBarsColorsNormalBackColor Value="#333333" />
+    <ScrollBarsColorsNormalForeColor Value="#999999" />
+    <ScrollBarsColorsHoverBackColor Value="#333333" />
+    <ScrollBarsColorsHoverForeColor Value="#CCCCCC" />
+    <ScrollBarsColorsDisabledBackColor Value="#222222" />
+    <ScrollBarsColorsDisabledForeColor Value="#555555" />
+    <LabelsColorsNormalForeColor Value="#B4B4B5" />
+    <LabelsColorsPressForeColor Value="#5D5D5D" />
+    <LabelsColorsDisabledForeColor Value="#505050" />
+    <TabsColorsNormalBackColor Value="#252526" />
+    <TabsColorsNormalForeColor Value="#505050" />
+    <TabsColorsHoverForeColor Value="#8C8C8C" />
+    <TabsColorsPressForeColor Value="#C1C1C2" />
+    <ButtonColorsNormalBackColor Value="#333333" />
+    <ButtonColorsNormalForeColor Value="#D1D1D1" />
+    <ButtonColorsNormalBorderColor Value="#333333" />
+    <ButtonColorsHoverBackColor Value="#3E3E42" />
+    <ButtonColorsHoverForeColor Value="#D1D1D1" />
+    <ButtonColorsHoverBorderColor Value="#3E3E42" />
+    <ButtonColorsPressForeColor Value="#D1D1D1" />
+    <ButtonColorsDisabledBackColor Value="#333333" />
+    <ButtonColorsDisabledForeColor Value="#545454" />
+    <ButtonColorsDisabledBorderColor Value="#333333" />
+  </Item>
+  <Item>
+    <UniqueId Value="2" />
+    <ThemeName Value="Hi kitty" />
+    <RankNeeded Value="0" />
+    <PageBackGroundImage Value="hellokitty" />
+    
+    <UseCurrentAccentColor Value="false" />
+    <AccentColor Value="#FF1493" />
+    
+    <FormColorBackColor Value="#E6E6E6" />
+    <FormColorForeColor Value="#1E1E1E" />
+    <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />
+    <ScrollBarsColorsNormalForeColor Value="#666666" />
+    <ScrollBarsColorsHoverBackColor Value="#CCCCCC" />
+    <ScrollBarsColorsHoverForeColor Value="#252526" />
+    <ScrollBarsColorsDisabledBackColor Value="#E6E6E6" />
+    <ScrollBarsColorsDisabledForeColor Value="#B3B3B3" />
+    <LabelsColorsNormalForeColor Value="#1E1E1E" />
+    <LabelsColorsPressForeColor Value="#000000" />
+    <LabelsColorsDisabledForeColor Value="#969696" />
+    <TabsColorsNormalBackColor Value="#E6E6E6" />
+    <TabsColorsNormalForeColor Value="#6E6E6E" />
+    <TabsColorsHoverForeColor Value="#3C3C3C" />
+    <TabsColorsPressForeColor Value="#1E1E1E" />
+    <ButtonColorsNormalBackColor Value="#E6E6E6" />
+    <ButtonColorsNormalForeColor Value="#1E1E1E" />
+    <ButtonColorsNormalBorderColor Value="#BEBEBE" />
+    <ButtonColorsHoverBackColor Value="#D2D2D2" />
+    <ButtonColorsHoverForeColor Value="#1E1E1E" />
+    <ButtonColorsHoverBorderColor Value="#BEBEBE" />
+    <ButtonColorsPressForeColor Value="#1E1E1E" />
+    <ButtonColorsDisabledBackColor Value="#E6E6E6" />
+    <ButtonColorsDisabledForeColor Value="#646464" />
+    <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+  </Item>
+</Root>

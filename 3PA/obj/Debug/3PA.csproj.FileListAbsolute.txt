@@ -1,0 +1,58 @@
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\ProgressPlugin.Forms.AutoComplete.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\ProgressPlugin.Forms.Config.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\ProgressPlugin.frmGoToLine.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\_3PA.Data.DataResources.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\_3PA.Images.ImageResources.resources
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\bin\Debug\3PA.dll
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\bin\Debug\3PA.pdb
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\3PA.dll
+c:\users\julien\documents\visual studio 2013\Projects\3PA\3PA\obj\Debug\3PA.pdb
+C:\Work\3PA\Plugin\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Form1.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.control.Classic.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.control.ItemControl.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.control.Progress.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.control.Text.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.Navigation.Other.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.PageTemplate.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\YamuiDemoApp.Pages.SettingAppearance.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\_3PA.Data.DataResources.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\ProgressPlugin.Forms.AutoComplete.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\ProgressPlugin.Forms.Config.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\ProgressPlugin.frmGoToLine.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\_3PA.Images.ImageResources.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\_3PA.Properties.Resources.resources
+C:\Work\3PA\Plugin\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
+C:\Work\3PA\Plugin\3PA\obj\Debug\3PA.dll
+C:\Work\3PA\Plugin\3PA\bin\Debug\3PA.dll
+C:\Work\3PA\Plugin\3PA\bin\Debug\3PA.pdb
+C:\Work\3PA\Plugin\3PA\bin\Debug\YamuiFramework.dll
+C:\Work\3PA\Plugin\3PA\bin\Debug\YamuiFramework.pdb
+C:\Work\3PA\Plugin\3PA\obj\Debug\3PA.pdb
+C:\Work\3PA\3PA\bin\Debug\3PA.dll
+C:\Work\3PA\3PA\bin\Debug\3PA.pdb
+C:\Work\3PA\3PA\bin\Debug\YamuiFramework.dll
+C:\Work\3PA\3PA\bin\Debug\YamuiFramework.pdb
+C:\Work\3PA\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
+C:\Work\3PA\3PA\obj\Debug\_3PA.Data.DataResources.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Images.ImageResources.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
+C:\Work\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
+C:\Work\3PA\3PA\obj\Debug\3PA.dll
+C:\Work\3PA\3PA\obj\Debug\3PA.pdb
+C:\Work\3PA_side\npp\plugins\3PA.dll
+C:\Work\3PA_side\npp\plugins\3PA.pdb
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Form1.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.Classic.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.ItemControl.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.Progress.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.Text.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.Navigation.Other.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.PageTemplate.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.SettingAppearance.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.AutoComplete.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.Config.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.frmGoToLine.resources
