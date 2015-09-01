@@ -53,6 +53,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
@@ -166,10 +167,16 @@
     <Compile Include="Lib\SpecialDictionary.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoComplete.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.Designer.cs">
+      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\CodeFormatter.cs" />
     <Compile Include="MainFeatures\DataBaseInfo.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
-    <Compile Include="MainFeatures\keywords.cs" />
+    <Compile Include="MainFeatures\Keywords.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="Npp.cs" />
     <Compile Include="Plug.cs" />
@@ -224,6 +231,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ImageResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
+      <DependentUpon>AutoCompletionForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -232,17 +242,14 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\abbreviations.data" />
-    <None Include="Data\compilUnCCL.p" />
     <None Include="Data\keywords.data" />
     <None Include="Data\keywords_final.data" />
     <None Include="Data\nppTool.p" />
-    <None Include="Data\progress_getini.r" />
-    <None Include="Data\ReportDatabase.p" />
     <None Include="Data\snippets.data" />
     <None Include="Interop\DllExport\NppPlugin.DllExport.targets" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\dbout.txt" />
+    <None Include="Data\dbout.txt" />
     <Content Include="Images\autocompletion_all.png" />
     <Content Include="Images\autocompletion_buffer.png" />
     <Content Include="Images\autocompletion_cancel.png" />
@@ -289,8 +296,8 @@
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />
     <Content Include="Interop\DllExport\README.txt" />
+    <Content Include="Lib\ObjectListView\ObjectListView.dll" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
-    <Content Include="Lib\YamuiFolder\YamuiFramework.pdb" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -305,6 +312,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
+      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
+      <Name>ObjectListView2012</Name>
+      <Private>False</Private>
+    </ProjectReference>
     <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>YamuiFramework</Name>

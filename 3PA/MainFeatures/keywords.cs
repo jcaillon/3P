@@ -7,7 +7,7 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
 
-    internal class Keywords {
+    public class Keywords {
         public static SpecialDictionary<int> Map = new SpecialDictionary<int>(StringComparer.OrdinalIgnoreCase);
         private const string FileName = "keywords.data";
 

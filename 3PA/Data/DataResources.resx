@@ -121,12 +121,6 @@
   <data name="abbreviations" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>abbreviations.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="compilUnCCL" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>compilunccl.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="dbout" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dbout.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
   <data name="keywords" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>keywords.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -135,12 +129,6 @@
   </data>
   <data name="nppTool" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>npptool.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="progress_getini" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>progress_getini.r;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ReportDatabase" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>reportdatabase.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>snippets.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>

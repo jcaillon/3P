@@ -130,11 +130,20 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\3PA\3PA.csproj">
+      <Project>{9a5ec9f0-4db3-44d6-aa1f-27e031666936}</Project>
+      <Name>3PA</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
+      <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>
+      <Name>ObjectListView2012</Name>
+    </ProjectReference>
     <ProjectReference Include="..\YamuiFramework\YamuiFramework.csproj">
       <Project>{0a4be330-b2bb-43a5-b392-15dce4736e55}</Project>
       <Name>YamuiFramework</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

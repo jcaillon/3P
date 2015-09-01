@@ -73,41 +73,6 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] compilUnCCL {
-            get {
-                object obj = ResourceManager.GetObject("compilUnCCL", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to _TABLES____________________________
-        ///AAGRAC	
-        ///AASBUD	montant engage et paye par fonction PCAAS
-        ///ACOLAN	Action collective annuelle
-        ///ACTANN	Activité annuelle
-        ///ACTCEJ	Détail Action contrat CEJ
-        ///ADBUAD	Avoir Détail
-        ///ADDCOM	Avoir données démographiques communes
-        ///ADDSPC	Avoir détail décision SPC
-        ///ADEPNV	Avoir dépense nouvelle
-        ///ADONEQ	Avoir données équipement
-        ///ADPSPC	
-        ///ADTPAI	Avoir détail paiement
-        ///AFFSPC	Affectation générale SPC
-        ///AGENPS	Affectation générale PS
-        ///AGREMT	Agrément
-        ///AINCEN	Avoir interlocuteur contrat enfance-temps li [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string dbout {
-            get {
-                return ResourceManager.GetString("dbout", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] keywords {
             get {
                 object obj = ResourceManager.GetObject("keywords", resourceCulture);
@@ -131,26 +96,6 @@ namespace _3PA.Data {
         internal static byte[] nppTool {
             get {
                 object obj = ResourceManager.GetObject("nppTool", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] progress_getini {
-            get {
-                object obj = ResourceManager.GetObject("progress_getini", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] ReportDatabase {
-            get {
-                object obj = ResourceManager.GetObject("ReportDatabase", resourceCulture);
                 return ((byte[])(obj));
             }
         }

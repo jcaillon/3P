@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -11,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using YamuiDemoApp;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
@@ -173,15 +175,9 @@ namespace _3PA {
 
                     // copy .p and .r needed for the progress heavy lifting
                     var _rootDir = Path.Combine(Npp.GetThisAssemblyPath(), Resources.PluginFolderName);
-                    var _path = Path.Combine(_rootDir, @"compilUnCCL.p");
-                    if (!File.Exists(_path))
-                        File.WriteAllBytes(_path, DataResources.compilUnCCL);
-                    _path = Path.Combine(_rootDir, @"nppTool.p");
+                    var _path = Path.Combine(_rootDir, @"nppTool.p");
                     if (!File.Exists(_path))
                         File.WriteAllBytes(_path, DataResources.nppTool);
-                    _path = Path.Combine(_rootDir, @"progress_getini.r");
-                    if (!File.Exists(_path))
-                        File.WriteAllBytes(_path, DataResources.progress_getini);
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -543,6 +539,7 @@ namespace _3PA {
 
         
         static void hello() {
+
             ThemeManager.TabAnimationAllowed = true;
             MainForm = new Form1 {
                 Opacity = 0d,

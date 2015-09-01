@@ -152,7 +152,7 @@ namespace YamuiFramework.Forms {
             }
 
             // new message box
-            var msgbox = new YamuiFormMessageBox(type, text, buttonsList, dontWrapLines) { ShowInTaskbar = !waitResponse };
+            var msgbox = new YamuiFormMessageBox(type, text, buttonsList, dontWrapLines) { ShowInTaskbar = !waitResponse, TopMost = true };
             if (onLinkClicked != null)
                 msgbox.LinkClicked += onLinkClicked;
             if (ownerForm != null && ownerForm.Width > msgbox.Width && ownerForm.Height > msgbox.Height) {

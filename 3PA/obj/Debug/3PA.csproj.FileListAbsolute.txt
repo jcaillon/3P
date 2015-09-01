@@ -56,3 +56,4 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.SettingAppearance.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.AutoComplete.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.Config.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.frmGoToLine.resources
+C:\Work\3PA\3PA\obj\Debug\YamuiDemoApp.AutoCompletionForm.resources

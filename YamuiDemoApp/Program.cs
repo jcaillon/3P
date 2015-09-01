@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
+using _3PA.Lib;
+using _3PA.MainFeatures;
 
 namespace YamuiDemoApp {
     static class Program {
@@ -14,6 +17,14 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
+            Application.EnableVisualStyles();
+            Keywords.Init();
+            var TestAutoComp = new AutoCompletionForm(Keywords.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Keyword }).ToList());
+            TestAutoComp.ShowDialog();
+
+
+            return;
+
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
             ThemeManager.TabAnimationAllowed = true;

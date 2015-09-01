@@ -1,0 +1,4 @@
+C:\Work\AwesomeShit\ObjectListViewDemo\SparkleLibrary\bin\Debug\SparkleLibrary.dll
+C:\Work\AwesomeShit\ObjectListViewDemo\SparkleLibrary\bin\Debug\SparkleLibrary.pdb
+C:\Work\AwesomeShit\ObjectListViewDemo\SparkleLibrary\obj\Debug\SparkleLibrary.dll
+C:\Work\AwesomeShit\ObjectListViewDemo\SparkleLibrary\obj\Debug\SparkleLibrary.pdb
