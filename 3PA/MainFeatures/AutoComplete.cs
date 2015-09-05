@@ -215,9 +215,7 @@ namespace _3PA.MainFeatures {
                     return DataBaseInfo.KeysField(tableName).Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Field }).ToList();
                 case CompletionType.Snippet:
                     return Snippets.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Snippet }).ToList();
-                case CompletionType.Buffer:
-                    return null;
-                case CompletionType.Temptable:
+                case CompletionType.UserVariable:
                     return null;
                 case CompletionType.Function:
                     return null;

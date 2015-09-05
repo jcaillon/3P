@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
@@ -18,10 +19,12 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
             Application.EnableVisualStyles();
-            Keywords.Init();
-            var TestAutoComp = new AutoCompletionForm(Keywords.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Keyword }).ToList());
-            TestAutoComp.ShowDialog();
 
+            ThemeManager.CurrentThemeIdToUse = 1;
+            Keywords.Init();
+
+            var testAutoComp = new Form2();
+            testAutoComp.ShowDialog();
 
             return;
 

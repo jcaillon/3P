@@ -63,9 +63,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_all {
+        internal static System.Drawing.Bitmap Field {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_all", resourceCulture);
+                object obj = ResourceManager.GetObject("Field", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -73,9 +73,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_buffer {
+        internal static System.Drawing.Bitmap FieldPk {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_buffer", resourceCulture);
+                object obj = ResourceManager.GetObject("FieldPk", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -83,9 +83,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_cancel {
+        internal static System.Drawing.Bitmap Function {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_cancel", resourceCulture);
+                object obj = ResourceManager.GetObject("Function", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -93,9 +93,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_empty {
+        internal static System.Drawing.Bitmap Keyword {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_empty", resourceCulture);
+                object obj = ResourceManager.GetObject("Keyword", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -103,9 +103,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_field {
+        internal static System.Drawing.Bitmap Preprocessed {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_field", resourceCulture);
+                object obj = ResourceManager.GetObject("Preprocessed", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -113,9 +113,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_field_pk {
+        internal static System.Drawing.Bitmap Procedure {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_field_pk", resourceCulture);
+                object obj = ResourceManager.GetObject("Procedure", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -123,9 +123,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_keyword {
+        internal static System.Drawing.Bitmap Snippet {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_keyword", resourceCulture);
+                object obj = ResourceManager.GetObject("Snippet", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -133,9 +133,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_snippets {
+        internal static System.Drawing.Bitmap Table {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_snippets", resourceCulture);
+                object obj = ResourceManager.GetObject("Table", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -143,9 +143,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_snippets2 {
+        internal static System.Drawing.Bitmap TempTable {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_snippets2", resourceCulture);
+                object obj = ResourceManager.GetObject("TempTable", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -153,9 +153,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_snippets3 {
+        internal static System.Drawing.Bitmap UserVariableOther {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_snippets3", resourceCulture);
+                object obj = ResourceManager.GetObject("UserVariableOther", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -163,29 +163,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_table {
+        internal static System.Drawing.Bitmap UserVariablePrimitive {
             get {
-                object obj = ResourceManager.GetObject("autocompletion_table", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_temptable {
-            get {
-                object obj = ResourceManager.GetObject("autocompletion_temptable", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap autocompletion_variable {
-            get {
-                object obj = ResourceManager.GetObject("autocompletion_variable", resourceCulture);
+                object obj = ResourceManager.GetObject("UserVariablePrimitive", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

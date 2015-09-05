@@ -115,6 +115,16 @@ namespace BrightIdeasSoftware
             this.PrimarySortOrder = SortOrder.None;
             this.SetObjects(this.Objects);
         }
+
+        #region Custom for 3PA
+        public bool UseTabAsInput { get; set; }
+
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
+            if (UseTabAsInput && e.KeyCode == Keys.Tab) e.IsInputKey = true;
+            base.OnPreviewKeyDown(e);
+        }
+        #endregion
+
     }
 
     /// <summary>

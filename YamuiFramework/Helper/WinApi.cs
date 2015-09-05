@@ -7,7 +7,7 @@ using System.Security;
 namespace YamuiFramework.Helper {
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal static class WinApi {
+    public static class WinApi {
         #region Structs
 
         [StructLayout(LayoutKind.Sequential)]
@@ -365,7 +365,7 @@ namespace YamuiFramework.Helper {
         /// The handle of the window that currently has focus.
         /// </returns>
         [DllImport("user32")]
-        internal static extern IntPtr GetForegroundWindow();
+        public static extern IntPtr GetForegroundWindow();
 
         /// <summary>
         /// Activates the specified window.
@@ -377,7 +377,7 @@ namespace YamuiFramework.Helper {
         /// True if the window was focused; False otherwise.
         /// </returns>
         [DllImport("user32")]
-        internal static extern bool SetForegroundWindow(IntPtr hWnd);
+        public static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [DllImport("user32.dll")]
         public static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);

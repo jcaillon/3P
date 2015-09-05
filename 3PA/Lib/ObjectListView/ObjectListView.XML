@@ -5360,8 +5360,8 @@
             <remarks>
             <para>Subclasses should override this method if they never want
             to fall back on the default processing</para></remarks>
-            <param name="g">The graphics context that should be used for drawing</param>
-            <param name="r">The bounds of the subitem cell</param>
+            <param name="graphic">The graphics context that should be used for drawing</param>
+            <param name="rect">The bounds of the subitem cell</param>
         </member>
         <member name="M:BrightIdeasSoftware.BaseRenderer.HandleHitTest(System.Drawing.Graphics,BrightIdeasSoftware.OlvListViewHitTestInfo,System.Int32,System.Int32)">
             <summary>
@@ -5843,8 +5843,8 @@
             <summary>
             The real work of drawing the tree is done in this method
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.TreeListView.TreeRenderer.DrawExpansionGlyph(System.Drawing.Graphics,System.Drawing.Rectangle,System.Boolean)">
             <summary>
@@ -15271,8 +15271,8 @@
             <summary>
             Render our value
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.MappedImageRenderer.RenderCollection(System.Drawing.Graphics,System.Drawing.Rectangle,System.Collections.ICollection)">
             <summary>
@@ -15299,8 +15299,8 @@
             <summary>
             Draw our cell
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.CheckStateRenderer.HandleGetEditRectangle(System.Drawing.Graphics,System.Drawing.Rectangle,BrightIdeasSoftware.OLVListItem,System.Int32,System.Drawing.Size)">
             <summary>
@@ -15372,8 +15372,8 @@
             <summary>
             Draw our image
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.ImageRenderer.GetImageFromAspect">
              <summary>
@@ -15489,8 +15489,8 @@
             <summary>
             Draw our aspect
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.BarRenderer.HandleGetEditRectangle(System.Drawing.Graphics,System.Drawing.Rectangle,BrightIdeasSoftware.OLVListItem,System.Int32,System.Drawing.Size)">
             <summary>
@@ -15614,8 +15614,8 @@
             <summary>
             Draw our data value
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.MultiImageRenderer.HandleGetEditRectangle(System.Drawing.Graphics,System.Drawing.Rectangle,BrightIdeasSoftware.OLVListItem,System.Int32,System.Drawing.Size)">
             <summary>
@@ -15675,8 +15675,8 @@
             <summary>
             Draw the flags
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.FlagRenderer.HandleHitTest(System.Drawing.Graphics,BrightIdeasSoftware.OlvListViewHitTestInfo,System.Int32,System.Int32)">
             <summary>
@@ -15716,8 +15716,8 @@
             <summary>
             Draw our item
             </summary>
-            <param name="g"></param>
-            <param name="r"></param>
+            <param name="graphic"></param>
+            <param name="rect"></param>
         </member>
         <member name="M:BrightIdeasSoftware.DescribedTaskRenderer.DrawDescribedTask(System.Drawing.Graphics,System.Drawing.Rectangle,System.String,System.String,System.Drawing.Image)">
             <summary>
@@ -16244,6 +16244,118 @@
         <member name="F:BrightIdeasSoftware.ToolTipControl.StandardIcons.ErrorLarge">
             <summary>
             Large error (Vista and later only)
+            </summary>
+        </member>
+        <member name="T:BrightIdeasSoftware.Utilities.ImagelistAdd">
+            <summary>
+            This class contains static methods to overcome the problems with the imagelist control
+            and 32bit alphablended images. The methods allow you to add alphablended images to an
+            existing imagelist control from an external image or icon file, an embedded resource,
+            extracted file icon and extracted file extension icon.
+            </summary>
+        </member>
+        <member name="F:BrightIdeasSoftware.Utilities.ImagelistAdd.SHGFI_ICON">
+            <summary>
+            API Constants
+            </summary>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddFromImage(System.Drawing.Image,System.Windows.Forms.ImageList)">
+            <summary>
+            Adds an alphablended image to an existing imagelist from an Image object.
+            </summary>
+            <param name="sourceImage">The Image object to add to the imagelist.</param>
+            <param name="destinationImagelist">An existing imagelist to add the image to.</param>
+            <example>.AddFromImage( myImage, toolbarImageList );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddFromImage(System.Drawing.Icon,System.Windows.Forms.ImageList)">
+            <summary>
+            Adds an alphablended icon to an existing imagelist from an Icon object.
+            </summary>
+            <param name="sourceIcon">The Icon object to add to the imagelist</param>
+            <param name="destinationImagelist">An existing imagelist to add the icon to.</param>
+            <example>.AddFromImage( myIcon, toolbarImageList );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddFromFile(System.String,System.Windows.Forms.ImageList)">
+            <summary>
+            Adds an alphablended icon or image to an existing imagelist from an external image or icon file.
+            </summary>
+            <param name="FileName">The full path to a 32bit alphablended file.</param>
+            <param name="Imagelist">An existing imagelist to add the image or icon to.</param>
+            <example>.FromFile( "C:\\file.ico", toolbarImagelist );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddIconOfFile(System.String,BrightIdeasSoftware.Utilities.IconSizeZ,System.Boolean,System.Boolean,System.Boolean,System.Windows.Forms.ImageList)">
+            <summary>
+            Extracts the icon of an existing file or folder on the system and adds the icon to an imagelist.
+            </summary>
+            <param name="fileName">A file or folder path to extract the icon from.</param>
+            <param name="IconSizeZ">The size to extract.</param>
+            <param name="selectedState">A flag to add the selected state of the icon.</param>
+            <param name="openState">A flag to add the open state of the icon.</param>
+            <param name="linkOverlay">A flag to add a shortcut overlay to the icon.</param>
+            <param name="destinationImagelist">An existing imagelist to add the extracted icon to.</param>
+            <example>.AddIconOfFile( "C:\\folder\file.exe", Narbware.IconSizeZ.Small, false, false, false, toolbarImageList );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddIconOfFile(System.String,System.Windows.Forms.ImageList)">
+            <summary>
+            Extracts the icon of an existing file or folder on the system using default parameters and adds the icon to an imagelist.
+            </summary>
+            <param name="fileName">A file or folder path to extract the icon from.</param>
+            <param name="destinationImagelist">An existing imagelist to add the extracted icon to.</param>
+            <example>.AddIconOfFile( "C:\\folder\file.exe", toolbarImageList );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddIconOfFileExt(System.String,BrightIdeasSoftware.Utilities.IconSizeZ,System.Boolean,System.Boolean,System.Boolean,System.Windows.Forms.ImageList)">
+            <summary>
+            Extracts a file extension icon from the system and adds the icon to an imagelist.
+            </summary>
+            <param name="fileExtension">A file extension to extract the icon from.</param>
+            <param name="IconSizeZ">The size to extract.</param>
+            <param name="selectedState">A flag to add the selected state of the icon.</param>
+            <param name="openState">A flag to add the open state of the icon.</param>
+            <param name="linkOverlay">A flag to add a shortcut overlay to the icon.</param>
+            <param name="destinationImagelist">An existing imagelist to add the extracted icon to.</param>
+            <example>.AddIconOfFileExt( ".jpg", Narbware.IconSizeZ.Large, false, false, false, toolbarImagelist );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddIconOfFileExt(System.String,System.Windows.Forms.ImageList)">
+            <summary>
+            Extracts a file extension icon from the system using default parameters and adds the icon to an imagelist.
+            </summary>
+            <param name="fileExtension">A file extension to extract the icon from.</param>
+            <param name="destinationImagelist">An existing imagelist to add the extracted icon to.</param>
+            <example>.AddIconOfFileExt( ".jpg", toolbarImagelist );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddEmbeddedResource(System.String,System.Windows.Forms.ImageList)">
+            <summary>
+            Adds a 32bit alphablended icon or image to an existing imagelist from an embedded image or icon.
+            </summary>
+            <param name="ResourceName">The name of an embedded resource.</param>
+            <param name="Imagelist">An existing imagelist to add the resource to.</param>
+            <example>.AddEmbeddedResource( "ProjectName.file.ico", toolbarImagelist );</example>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.Add(System.String,System.Windows.Forms.ImageList,System.UInt32)">
+            <summary>
+            This method is used to add alphablended system icons to an imagelist using win32 api. This an added feature
+            which is not included in the framework.
+            </summary>
+            <param name="pszPath">Path of the file to extract icon from.</param>
+            <param name="il">Imagelist to which the image will be added to.</param>
+            <param name="uFlags">Options that return the specified icon.</param>
+        </member>
+        <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.Add(System.Drawing.Bitmap,System.Windows.Forms.ImageList)">
+            <summary>
+            This method is used to add alphablended images to an imagelist using win32 api functions to overcome the broken
+            .Add() method of the imagelist control which loses the alphablend info of images.
+            </summary>
+            <param name="bm">Bitmap containing alphablended image.</param>
+            <param name="il">Imagelist to which the image will be added to.</param>
+        </member>
+        <member name="T:BrightIdeasSoftware.Utilities.ImagelistAdd.SHFILEINFO">
+            <summary>
+            A SHFILEINFO structure used to extract the icon resource of a file or folder.
+            </summary>
+        </member>
+        <member name="T:BrightIdeasSoftware.Utilities.ImagelistAdd.BITMAPINFO">
+            <summary>
+            A BITMAPINFO stucture used to store an alphablended bitmap for adding to imagelist.
             </summary>
         </member>
         <member name="T:BrightIdeasSoftware.OLVExporter">

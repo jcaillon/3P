@@ -1056,10 +1056,10 @@ namespace BrightIdeasSoftware
         /// <remarks>
         /// <para>Subclasses should override this method if they never want
         /// to fall back on the default processing</para></remarks>
-        /// <param name="g">The graphics context that should be used for drawing</param>
-        /// <param name="r">The bounds of the subitem cell</param>
-        public virtual void Render(Graphics g, Rectangle r) {
-            this.StandardRender(g, r);
+        /// <param name="graphic">The graphics context that should be used for drawing</param>
+        /// <param name="rect">The bounds of the subitem cell</param>
+        public virtual void Render(Graphics graphic, Rectangle rect) {
+            this.StandardRender(graphic, rect);
         }
 
         /// <summary>
@@ -2050,17 +2050,17 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Render our value
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
-            r = this.ApplyCellPadding(r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
+            rect = this.ApplyCellPadding(rect);
 
             ICollection aspectAsCollection = this.Aspect as ICollection;
             if (aspectAsCollection == null)
-                this.RenderOne(g, r, this.Aspect);
+                this.RenderOne(graphic, rect, this.Aspect);
             else
-                this.RenderCollection(g, r, aspectAsCollection);
+                this.RenderCollection(graphic, rect, aspectAsCollection);
         }
 
         /// <summary>
@@ -2121,13 +2121,13 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw our cell
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
             if (this.Column == null)
                 return;
-            r = this.ApplyCellPadding(r);
+            rect = this.ApplyCellPadding(rect);
             CheckState state = this.Column.GetCheckState(this.RowObject);
             if (this.IsPrinting) {
                 // Renderers don't work onto printer DCs, so we have to draw the image ourselves
@@ -2136,10 +2136,10 @@ namespace BrightIdeasSoftware
                     key = ObjectListView.UNCHECKED_KEY;
                 if (state == CheckState.Indeterminate)
                     key = ObjectListView.INDETERMINATE_KEY;
-                this.DrawAlignedImage(g, r, this.ListView.SmallImageList.Images[key]);
+                this.DrawAlignedImage(graphic, rect, this.ListView.SmallImageList.Images[key]);
             } else {
-                r = this.CalculateCheckBoxBounds(g, r);
-                CheckBoxRenderer.DrawCheckBox(g, r.Location, this.GetCheckBoxState(state));
+                rect = this.CalculateCheckBoxBounds(graphic, rect);
+                CheckBoxRenderer.DrawCheckBox(graphic, rect.Location, this.GetCheckBoxState(state));
             }
         }
 
@@ -2284,23 +2284,23 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw our image
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
 
             if (this.Aspect == null || this.Aspect == System.DBNull.Value)
                 return;
-            r = this.ApplyCellPadding(r);
+            rect = this.ApplyCellPadding(rect);
 
             if (this.Aspect is System.Byte[]) {
-                this.DrawAlignedImage(g, r, this.GetImageFromAspect());
+                this.DrawAlignedImage(graphic, rect, this.GetImageFromAspect());
             } else {
                 ICollection imageSelectors = this.Aspect as ICollection;
                 if (imageSelectors == null)
-                    this.DrawAlignedImage(g, r, this.GetImageFromAspect());
+                    this.DrawAlignedImage(graphic, rect, this.GetImageFromAspect());
                 else
-                    this.DrawImages(g, r, imageSelectors);
+                    this.DrawImages(graphic, rect, imageSelectors);
             }
         }
 
@@ -2828,17 +2828,17 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw our aspect
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
 
-            r = this.ApplyCellPadding(r);
+            rect = this.ApplyCellPadding(rect);
 
-            Rectangle frameRect = Rectangle.Inflate(r, 0 - this.Padding, 0 - this.Padding);
+            Rectangle frameRect = Rectangle.Inflate(rect, 0 - this.Padding, 0 - this.Padding);
             frameRect.Width = Math.Min(frameRect.Width, this.MaximumWidth);
             frameRect.Height = Math.Min(frameRect.Height, this.MaximumHeight);
-            frameRect = this.AlignRectangle(r, frameRect);
+            frameRect = this.AlignRectangle(rect, frameRect);
 
             // Convert our aspect to a numeric value
             IConvertible convertable = this.Aspect as IConvertible;
@@ -2854,23 +2854,23 @@ namespace BrightIdeasSoftware
 
             // MS-themed progress bars don't work when printing
             if (this.UseStandardBar && ProgressBarRenderer.IsSupported && !this.IsPrinting) {
-                ProgressBarRenderer.DrawHorizontalBar(g, frameRect);
-                ProgressBarRenderer.DrawHorizontalChunks(g, fillRect);
+                ProgressBarRenderer.DrawHorizontalBar(graphic, frameRect);
+                ProgressBarRenderer.DrawHorizontalChunks(graphic, fillRect);
             } else {
-                g.FillRectangle(this.BackgroundBrush, frameRect);
+                graphic.FillRectangle(this.BackgroundBrush, frameRect);
                 if (fillRect.Width > 0) {
                     // FillRectangle fills inside the given rectangle, so expand it a little
                     fillRect.Width++;
                     fillRect.Height++;
                     if (this.GradientStartColor == Color.Empty)
-                        g.FillRectangle(this.Brush, fillRect);
+                        graphic.FillRectangle(this.Brush, fillRect);
                     else {
                         using (LinearGradientBrush gradient = new LinearGradientBrush(frameRect, this.GradientStartColor, this.GradientEndColor, LinearGradientMode.Horizontal)) {
-                            g.FillRectangle(gradient, fillRect);
+                            graphic.FillRectangle(gradient, fillRect);
                         }
                     }
                 }
-                g.DrawRectangle(this.Pen, frameRect);
+                graphic.DrawRectangle(this.Pen, frameRect);
             }
         }
 
@@ -3013,11 +3013,11 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw our data value
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
-            r = this.ApplyCellPadding(r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
+            rect = this.ApplyCellPadding(rect);
 
             Image image = this.GetImage(this.ImageSelector);
             if (image == null)
@@ -3041,24 +3041,24 @@ namespace BrightIdeasSoftware
             // If we need to shrink the image, what will its on-screen dimensions be?
             int imageScaledWidth = image.Width;
             int imageScaledHeight = image.Height;
-            if (r.Height < image.Height) {
-                imageScaledWidth = (int)((float)image.Width * (float)r.Height / (float)image.Height);
-                imageScaledHeight = r.Height;
+            if (rect.Height < image.Height) {
+                imageScaledWidth = (int)((float)image.Width * (float)rect.Height / (float)image.Height);
+                imageScaledHeight = rect.Height;
             }
             // Calculate where the images should be drawn
-            Rectangle imageBounds = r;
+            Rectangle imageBounds = rect;
             imageBounds.Width = (this.MaxNumberImages * (imageScaledWidth + this.Spacing)) - this.Spacing;
             imageBounds.Height = imageScaledHeight;
-            imageBounds = this.AlignRectangle(r, imageBounds);
+            imageBounds = this.AlignRectangle(rect, imageBounds);
 
             // Finally, draw the images
             Color backgroundColor = GetBackgroundColor();
             for (int i = 0; i < numberOfImages; i++)
             {
                 if (this.ListItem.Enabled)
-                    g.DrawImage(image, imageBounds.X, imageBounds.Y, imageScaledWidth, imageScaledHeight);
+                    graphic.DrawImage(image, imageBounds.X, imageBounds.Y, imageScaledWidth, imageScaledHeight);
                 else 
-                    ControlPaint.DrawImageDisabled(g, image, imageBounds.X, imageBounds.Y, backgroundColor);
+                    ControlPaint.DrawImageDisabled(graphic, image, imageBounds.X, imageBounds.Y, backgroundColor);
                 imageBounds.X += (imageScaledWidth + this.Spacing);
             }
         }
@@ -3099,16 +3099,16 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw the flags
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
 
             IConvertible convertable = this.Aspect as IConvertible;
             if (convertable == null)
                 return;
 
-            r = this.ApplyCellPadding(r);
+            rect = this.ApplyCellPadding(rect);
 
             Int32 v2 = convertable.ToInt32(NumberFormatInfo.InvariantInfo);
             ArrayList images = new ArrayList();
@@ -3120,7 +3120,7 @@ namespace BrightIdeasSoftware
                 }
             }
             if (images.Count > 0)
-                this.DrawImages(g, r, images);
+                this.DrawImages(graphic, rect, images);
         }
 
         /// <summary>
@@ -3329,12 +3329,12 @@ namespace BrightIdeasSoftware
         /// <summary>
         /// Draw our item
         /// </summary>
-        /// <param name="g"></param>
-        /// <param name="r"></param>
-        public override void Render(Graphics g, Rectangle r) {
-            this.DrawBackground(g, r);
-            r = this.ApplyCellPadding(r);
-            this.DrawDescribedTask(g, r, this.Aspect as String, this.GetDescription(), this.GetImage());
+        /// <param name="graphic"></param>
+        /// <param name="rect"></param>
+        public override void Render(Graphics graphic, Rectangle rect) {
+            this.DrawBackground(graphic, rect);
+            rect = this.ApplyCellPadding(rect);
+            this.DrawDescribedTask(graphic, rect, this.Aspect as String, this.GetDescription(), this.GetImage());
         }
 
         /// <summary>

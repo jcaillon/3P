@@ -155,6 +155,7 @@
     <Compile Include="TreeListView.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Utilities\ImageListAdd.cs" />
     <Compile Include="Utilities\OLVExporter.cs" />
     <Compile Include="Utilities\TypedObjectListView.cs" />
     <Compile Include="Implementation\VirtualGroups.cs" />

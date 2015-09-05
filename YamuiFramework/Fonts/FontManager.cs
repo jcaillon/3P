@@ -13,7 +13,8 @@ namespace YamuiFramework.Fonts {
         Title,
         FormTitle,
         TopLink,
-        Link
+        Link,
+        AutoCompletion
     }
 
     public enum TabFunction {
@@ -22,7 +23,7 @@ namespace YamuiFramework.Fonts {
         SecondaryNotSelected
     }
 
-    class FontManager {
+    public class FontManager {
 
         public static Font GetStandardFont() {
             return GetFont(FontStyle.Regular, 12f);
@@ -42,6 +43,8 @@ namespace YamuiFramework.Fonts {
                     return GetFont(FontStyle.Regular | FontStyle.Underline, 12f);
                 case LabelFunction.Small:
                     return GetFont(FontStyle.Regular, 10f);
+                case LabelFunction.AutoCompletion:
+                    return GetFont(FontStyle.Regular, 12f);
                 default:
                     return GetFont(FontStyle.Regular, 12f);
             }
@@ -63,7 +66,11 @@ namespace YamuiFramework.Fonts {
         }
 
         public static Font GetFont(FontStyle fontStyle, float size) {
-            return _fontResolver.ResolveFont("Segoe UI", size, fontStyle, GraphicsUnit.Pixel);
+            return _fontResolver.ResolveFont(@"Segoe UI", size, fontStyle, GraphicsUnit.Pixel);
+        }
+
+        public static Font GetOtherFont(string familyName, FontStyle fontStyle, float size) {
+            return _fontResolver.ResolveFont(familyName, size, fontStyle, GraphicsUnit.Pixel);
         }
 
         #region TextFormatForDrawText
@@ -155,30 +162,25 @@ namespace YamuiFramework.Fonts {
                 return new Font(fontFamily, emSize, fontStyle, unit);
             }
 
-            private const string SegoeRegular = "SEGOEUI";
-            private const string SegoeItalic = "SEGOEUII";
-            private const string SegoeBold = "SEGOEUIB";
-
             private readonly PrivateFontCollection _fontCollection = new PrivateFontCollection();
 
             private static bool TryResolve(ref string familyName, ref FontStyle fontStyle) {
-                if (familyName == "Segoe UI Light") {
-                    familyName = SegoeItalic;
+                if (familyName == @"SMALLFONT") return true;
+                if (familyName == @"Segoe UI Light") {
+                    familyName = @"SEGOEUII";
                     if (fontStyle != FontStyle.Bold) fontStyle = FontStyle.Regular;
                     return true;
                 }
-
-                if (familyName != "Segoe UI") return false;
+                if (familyName != @"Segoe UI") return false;
                 switch (fontStyle) {
                     case FontStyle.Bold:
-                        familyName = SegoeBold;
+                        familyName = @"SEGOEUIB";
                         return true;
                     case FontStyle.Italic:
-                        familyName = SegoeItalic;
+                        familyName = @"SEGOEUII";
                         return true;
                 }
-
-                familyName = SegoeRegular;
+                familyName = @"SEGOEUI";
                 return true;
             }
 

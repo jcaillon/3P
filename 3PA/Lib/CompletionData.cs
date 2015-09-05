@@ -3,19 +3,40 @@
     public class CompletionData {
         public string DisplayText { get; set; }
         public CompletionType Type { get; set; }
+
+        /// <summary>
+        /// Used for sorting the autocompletion list
+        /// </summary>
+        public int Ranking { get; set; }
+
+        /// <summary>
+        /// Used only when Type is = UserVariable
+        /// </summary>
+        public CompletionFlag Flag { get; set; }
+
+        public string VariableType { get; set; }
     }
 
     public enum CompletionType {
-        Keyword = 1,
-        Table = 2,
-        Field = 3,
-        Snippet = 4,
-        Buffer = 5,
-        Temptable = 6,
-        Function = 7,
-        Procedure = 8,
-        Special = 9,
-        Empty = 10,
-        Abbreviation = 11
+        Keyword,
+        Table,
+        TempTable,
+        Field,
+        FieldPk,
+        Snippet,
+        Function,
+        Procedure,
+        UserVariablePrimitive,
+        UserVariableOther,
+        Preprocessed
+    }
+
+    public enum CompletionFlag {
+        None,
+        Scope,
+        Global,
+        Parameter,
+        Reserved,
+        Abbreviation
     }
 }

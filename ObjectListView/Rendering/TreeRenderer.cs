@@ -65,14 +65,14 @@ namespace BrightIdeasSoftware {
             /// <summary>
             /// The real work of drawing the tree is done in this method
             /// </summary>
-            /// <param name="g"></param>
-            /// <param name="r"></param>
-            public override void Render(System.Drawing.Graphics g, System.Drawing.Rectangle r) {
-                this.DrawBackground(g, r);
+            /// <param name="graphic"></param>
+            /// <param name="rect"></param>
+            public override void Render(System.Drawing.Graphics graphic, System.Drawing.Rectangle rect) {
+                this.DrawBackground(graphic, rect);
 
                 Branch br = this.Branch;
 
-                Rectangle paddedRectangle = this.ApplyCellPadding(r);
+                Rectangle paddedRectangle = this.ApplyCellPadding(rect);
 
                 Rectangle expandGlyphRectangle = paddedRectangle;
                 expandGlyphRectangle.Offset((br.Level - 1) * PIXELS_PER_LEVEL, 0);
@@ -82,16 +82,16 @@ namespace BrightIdeasSoftware {
                 int expandGlyphRectangleMidVertical = expandGlyphRectangle.Y + (expandGlyphRectangle.Height/2);
 
                 if (this.IsShowLines)
-                    this.DrawLines(g, r, this.LinePen, br, expandGlyphRectangleMidVertical);
+                    this.DrawLines(graphic, rect, this.LinePen, br, expandGlyphRectangleMidVertical);
 
                 if (br.CanExpand) 
-                    this.DrawExpansionGlyph(g, expandGlyphRectangle, br.IsExpanded);
+                    this.DrawExpansionGlyph(graphic, expandGlyphRectangle, br.IsExpanded);
 
                 int indent = br.Level * PIXELS_PER_LEVEL;
                 paddedRectangle.Offset(indent, 0);
                 paddedRectangle.Width -= indent;
 
-                this.DrawImageAndText(g, paddedRectangle);
+                this.DrawImageAndText(graphic, paddedRectangle);
             }
 
             /// <summary>

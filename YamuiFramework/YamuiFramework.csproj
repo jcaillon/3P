@@ -272,31 +272,33 @@
     <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Fonts\SEGOEUI.TTF" />
     <None Include="Fonts\SEGOEUIB.TTF" />
     <None Include="Fonts\SEGOEUII.TTF" />
+    <None Include="Fonts\SMALLFONT.TTF" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\baseCss.css" />
     <Content Include="Resources\hellokitty.png" />
-    <Content Include="Resources\MessageBox\ant.png" />
-    <Content Include="Resources\MessageBox\error.png" />
-    <Content Include="Resources\MessageBox\high_importance.png" />
-    <Content Include="Resources\MessageBox\info.png" />
-    <Content Include="Resources\MessageBox\ok.png" />
-    <Content Include="Resources\MessageBox\pin.png" />
-    <Content Include="Resources\MessageBox\poison.png" />
-    <Content Include="Resources\MessageBox\question.png" />
-    <Content Include="Resources\MessageBox\question_shield.png" />
-    <Content Include="Resources\MessageBox\radio_active.png" />
-    <Content Include="Resources\MessageBox\services.png" />
-    <Content Include="Resources\MessageBox\skull.png" />
-    <Content Include="Resources\MessageBox\warning.png" />
-    <Content Include="Resources\MessageBox\warning_shield.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\ant.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\error.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\high_importance.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\info.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\ok.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\pin.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\poison.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\question.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\question_shield.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\radio_active.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\services.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\skull.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\warning.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\warning_shield.png" />
     <Content Include="Resources\themesXml.xml" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageError.png" />

@@ -1,9 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Root>
   <Item>
-    <UniqueId Value="0" />
     <ThemeName Value="The classic" />
+    <UniqueId Value="0" />
     <RankNeeded Value="0" />
+    <PageBackGroundImage Value="" />
+    <UseCurrentAccentColor Value="true" />
+    <AccentColor Value="#F0A30A" />
     <FormColorBackColor Value="#E6E6E6" />
     <FormColorForeColor Value="#1E1E1E" />
     <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />
@@ -29,11 +32,24 @@
     <ButtonColorsDisabledBackColor Value="#E6E6E6" />
     <ButtonColorsDisabledForeColor Value="#646464" />
     <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+    <AutoCompletionNormalBackColor Value="#FAFAFA" />
+    <AutoCompletionNormalAlternateBackColor Value="#E6E6E6" />
+    <AutoCompletionNormalForeColor Value="#1E1E1E" />
+    <AutoCompletionNormalSubTypeForeColor Value="#649AD1" />
+    <AutoCompletionHoverBackColor Value="#CEE2FC" />
+    <AutoCompletionHoverForeColor Value="#000000" />
+    <AutoCompletionFocusBackColor Value="#9AC2F9" />
+    <AutoCompletionFocusForeColor Value="#000000" />
+    <AutoCompletionHighlightBack Value="#FEE465" />
+    <AutoCompletionHighlightBorder Value="#FFAB00" />
   </Item>
   <Item>
-    <UniqueId Value="1" />
     <ThemeName Value="Monokawai" />
+    <UniqueId Value="1" />
     <RankNeeded Value="0" />
+    <PageBackGroundImage Value="" />
+    <UseCurrentAccentColor Value="true" />
+    <AccentColor Value="#F0A30A" />
     <FormColorBackColor Value="#252526" />
     <FormColorForeColor Value="#D2D2D2" />
     <ScrollBarsColorsNormalBackColor Value="#333333" />
@@ -59,16 +75,24 @@
     <ButtonColorsDisabledBackColor Value="#333333" />
     <ButtonColorsDisabledForeColor Value="#545454" />
     <ButtonColorsDisabledBorderColor Value="#333333" />
+    <AutoCompletionNormalBackColor Value="#252526" />
+    <AutoCompletionNormalAlternateBackColor Value="#333333" />
+    <AutoCompletionNormalForeColor Value="#D2D2D2" />
+    <AutoCompletionNormalSubTypeForeColor Value="#649AD1" />
+    <AutoCompletionHoverBackColor Value="#181718" />
+    <AutoCompletionHoverForeColor Value="#D7D2D8" />
+    <AutoCompletionFocusBackColor Value="#0A3259" />
+    <AutoCompletionFocusForeColor Value="#F5CDA6" />
+    <AutoCompletionHighlightBack Value="#5F0005" />
+    <AutoCompletionHighlightBorder Value="#9D0008" />
   </Item>
   <Item>
-    <UniqueId Value="2" />
     <ThemeName Value="Hi kitty" />
+    <UniqueId Value="2" />
     <RankNeeded Value="0" />
     <PageBackGroundImage Value="hellokitty" />
-    
     <UseCurrentAccentColor Value="false" />
     <AccentColor Value="#FF1493" />
-    
     <FormColorBackColor Value="#E6E6E6" />
     <FormColorForeColor Value="#1E1E1E" />
     <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />
@@ -94,5 +118,15 @@
     <ButtonColorsDisabledBackColor Value="#E6E6E6" />
     <ButtonColorsDisabledForeColor Value="#646464" />
     <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+    <AutoCompletionNormalBackColor Value="#FAFAFA" />
+    <AutoCompletionNormalAlternateBackColor Value="#E6E6E6" />
+    <AutoCompletionNormalForeColor Value="#1E1E1E" />
+    <AutoCompletionNormalSubTypeForeColor Value="#649AD1" />
+    <AutoCompletionHoverBackColor Value="#CEE2FC" />
+    <AutoCompletionHoverForeColor Value="#000000" />
+    <AutoCompletionFocusBackColor Value="#9AC2F9" />
+    <AutoCompletionFocusForeColor Value="#000000" />
+    <AutoCompletionHighlightBack Value="#FEE465" />
+    <AutoCompletionHighlightBorder Value="#FFAB00" />
   </Item>
 </Root>

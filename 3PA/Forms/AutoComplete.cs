@@ -509,10 +509,7 @@ namespace _3PA.Forms {
                 case CompletionType.Snippet:
                     img = ImageResources.autocompletion_snippets;
                     break;
-                case CompletionType.Buffer:
-                    img = ImageResources.autocompletion_snippets;
-                    break;
-                case CompletionType.Temptable:
+                case CompletionType.UserVariable:
                     img = ImageResources.autocompletion_snippets;
                     break;
                 case CompletionType.Function:
