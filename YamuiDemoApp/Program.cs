@@ -7,6 +7,7 @@ using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.DockableExplorer;
 
 namespace YamuiDemoApp {
     static class Program {
@@ -19,11 +20,10 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
             Application.EnableVisualStyles();
-            
-            ThemeManager.CurrentThemeIdToUse = 1;
+           
             Keywords.Init();
 
-            var testAutoComp = new Form2();
+            var testAutoComp = new DockableExplorerForm();
             testAutoComp.ShowDialog();
 
             return;

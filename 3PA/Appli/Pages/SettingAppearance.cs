@@ -102,7 +102,9 @@ namespace _3PA.Appli.Pages {
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
             // force the dockable to redraw
-            DockableExplorer.Redraw();
+            //DockableExplorer.Redraw();
+            DockableExplorer.Toggle();
+            DockableExplorer.Toggle();
             Application.DoEvents();
             Plug.MainForm.Invalidate();
             Application.DoEvents();

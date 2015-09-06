@@ -165,6 +165,7 @@
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.Designer.cs">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\DockableExplorer\ExplorerContent.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\Keywords.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
