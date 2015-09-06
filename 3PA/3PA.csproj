@@ -114,26 +114,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Forms\AutoComplete.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\AutoComplete.Designer.cs">
-      <DependentUpon>AutoComplete.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Config.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Config.Designer.cs">
-      <DependentUpon>Config.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\frmGoToLine.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\frmGoToLine.designer.cs">
       <DependentUpon>frmGoToLine.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\MsgBox.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\ShowFileTags.cs" />
     <Compile Include="Images\ImageResources.Designer.cs">
@@ -156,7 +141,7 @@
     <Compile Include="Interop\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />
     <Compile Include="Lib\BinWriter.cs" />
-    <Compile Include="Lib\Class2xml.cs" />
+    <Compile Include="Lib\Object2Xml.cs" />
     <Compile Include="Lib\CompletionData.cs" />
     <Compile Include="Lib\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
@@ -165,6 +150,7 @@
     <Compile Include="Lib\LibLoader.cs" />
     <Compile Include="Lib\LocalEnv.cs" />
     <Compile Include="Lib\SpecialDictionary.cs" />
+    <Compile Include="Lib\ThemeManagerNpp.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoComplete.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.cs">
@@ -218,12 +204,6 @@
       <LastGenOutput>DataResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\AutoComplete.resx">
-      <DependentUpon>AutoComplete.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Config.resx">
-      <DependentUpon>Config.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Forms\frmGoToLine.resx">
       <DependentUpon>frmGoToLine.cs</DependentUpon>
     </EmbeddedResource>
@@ -250,6 +230,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\dbout.txt" />
+    <Content Include="Data\ThemeNppInterface.xml" />
+    <Content Include="Images\3PA.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />

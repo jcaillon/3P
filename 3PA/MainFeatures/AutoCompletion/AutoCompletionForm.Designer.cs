@@ -86,7 +86,7 @@
             this.Keyword.IsEditable = false;
             this.Keyword.ShowTextInHeader = false;
             this.Keyword.Text = "Keywords";
-            this.Keyword.Width = 100;
+            this.Keyword.Width = 25;
             // 
             // Type
             // 

@@ -5,7 +5,7 @@ namespace YamuiFramework.Themes {
         
         /* public members will be exported to the xml configuration file (Class2xml) */
         /* This is the classic theme : */
-        public string ThemeName = "Classique theme";
+        public string ThemeName = "Classic theme";
 
         public int UniqueId = 0;
         public int RankNeeded = 0; /* rank needed by the user to access this theme */
@@ -51,7 +51,6 @@ namespace YamuiFramework.Themes {
 		public Color AutoCompletionFocusForeColor          = Color.FromArgb(0, 0, 0);
 		public Color AutoCompletionHighlightBack           = Color.FromArgb(254, 228, 101);
 		public Color AutoCompletionHighlightBorder         = Color.FromArgb(255, 171, 0);
-
     }
 
 }

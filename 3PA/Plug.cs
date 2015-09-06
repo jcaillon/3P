@@ -96,6 +96,9 @@ namespace _3PA {
 
             SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
             */
+            Interop.Plug.SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
+            idFrmGotToLine = --cmdIndex;
+
             //NPP already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
 
@@ -158,7 +161,6 @@ namespace _3PA {
             Registry.SetValue(Resources.RegistryPath, "notepadPath", Path.Combine(pathNotepadFolder, "notepad++.exe"), RegistryValueKind.String);
 
             Dispatcher.Init();
-
             Npp.HideDefaultAutoCompletion();
 
             // initialize autocompletion (asynchrone)
@@ -167,16 +169,11 @@ namespace _3PA {
                     Snippets.Init();
                     Keywords.Init();
                     FileTags.Init();
-
                     DataBaseInfo.Init();
-
                     Config.Save();
-
-                    // copy .p and .r needed for the progress heavy lifting
-                    var _rootDir = Path.Combine(Npp.GetThisAssemblyPath(), Resources.PluginFolderName);
-                    var _path = Path.Combine(_rootDir, @"nppTool.p");
-                    if (!File.Exists(_path))
-                        File.WriteAllBytes(_path, DataResources.nppTool);
+                    ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
+                    ThemeManagerNpp.CurrentThemeIdToUse = Config.Instance.ThemeNppId;
+                    ThemeManager.AccentColor = Config.Instance.AccentColor;
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -348,6 +345,9 @@ namespace _3PA {
             }
         }
 
+        /// <summary>
+        /// called when the user changes its selection in npp (the carret moves)
+        /// </summary>
         public static void OnUpdateSelection() {
             // close suggestions
             AutoComplete.CloseSuggestionList();
@@ -419,25 +419,6 @@ namespace _3PA {
         }
 
 
-
-        /*
-        static void ShowAboutBox()
-        {
-            using (var form = new AboutBox())
-                form.ShowDialog();
-        }
-         
-
-        static public void ShowConfig()
-        {
-            using (var form = new ConfigForm(Config.Instance))
-            {
-                form.ShowDialog();
-                Config.Instance.Save();
-                ReflectorExtensions.IgnoreDocumentationExceptions = Config.Instance.IgnoreDocExceptions;
-            }
-        }
-        */    
 
         static void run_ext(string command, string currentFile) {
 
@@ -529,14 +510,7 @@ namespace _3PA {
 
         #region " demo "
         static string sessionFilePath = @"C:\text.session";
-        static frmGoToLine frmGoToLine;
-        static internal int idFrmGotToLine = 15;
-        static Bitmap tbBmp = ImageResources.autocompletion_field;
-        static Bitmap tbBmp_tbTab = ImageResources.autocompletion_field_pk;
-        static Icon tbIcon;
-
-
-        
+       
         static void hello() {
 
             ThemeManager.TabAnimationAllowed = true;
@@ -586,6 +560,10 @@ namespace _3PA {
                 MessageBox.Show(sessionPath, "Saved Session File :", MessageBoxButtons.OK);
         }
 
+        static frmGoToLine frmGoToLine;
+        static internal int idFrmGotToLine = 15;
+        static Bitmap tbBmp_tbTab = ImageResources._3PA;
+        static Icon tbIcon;
         static void DockableDlgDemo() {
             // Dockable Dialog Demo
             // 
@@ -598,7 +576,7 @@ namespace _3PA {
                     Graphics g = Graphics.FromImage(newBmp);
                     ColorMap[] colorMap = new ColorMap[1];
                     colorMap[0] = new ColorMap();
-                    colorMap[0].OldColor = Color.Fuchsia;
+                    colorMap[0].OldColor = Color.FromArgb(255, 0, 255);
                     colorMap[0].NewColor = Color.FromKnownColor(KnownColor.ButtonFace);
                     ImageAttributes attr = new ImageAttributes();
                     attr.SetRemapTable(colorMap);
@@ -630,6 +608,9 @@ namespace _3PA {
                     Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMHIDE, 0, frmGoToLine.Handle);
                     Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, FuncItems.Items[idFrmGotToLine]._cmdID, 0);
                 }
+                // redraw :
+                //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, frmGoToLine.Handle);
+                
             }
             frmGoToLine.textBox1.Focus();
         }

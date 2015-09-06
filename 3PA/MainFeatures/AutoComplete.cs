@@ -2,12 +2,23 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
 
+    /// <summary>
+    /// This class manipulate the AutoCompletionForm
+    /// </summary>
     internal class AutoComplete {
+
+        /// <summary>
+        /// Was the autocompletion opened naturally or from the user shortkey?
+        /// </summary>
+        private static bool _openedFromShortCut;
 
         public static bool IsLastWordInDico(string keyword, int curPos, int offset) {
             return Keywords.Contains(keyword)
@@ -20,31 +31,32 @@ namespace _3PA.MainFeatures {
             get { return GetForm != null && GetForm.Visible; }
         }
 
-        public static Forms.AutoComplete GetForm { get; private set; }
+        public static AutoCompletionForm GetForm { get; private set; }
 
         public static void CloseSuggestionList() {
             try {
-                GetForm.Hide();
                 GetForm.Close();
+                GetForm = null;
+                _openedFromShortCut = false;
             } catch (Exception) {
                 // ignored
             }
         }
 
-        public static bool ActivatedAutoCompleteIfNeeded() {
-            bool activated = false;
-
+        public static void ActivatedAutoCompleteIfNeeded() {
             string keyword = Npp.GetKeyword();
 
             // either start to show the suggestion list, or filter an existing one
             if (keyword.Length >= Config.Instance.AutoCompleteStartShowingListAfterXChar || IsShowingAutocompletion) {
                 if (IsShowingAutocompletion) {
-                    if (!GetForm.DisplayFromShortcut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)
+                    if (!_openedFromShortCut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)
                         CloseSuggestionList();
                     else
                         FilterSuggestionList(keyword);
                 } else {
                     if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition())) {
+                        _openedFromShortCut = false;
+
                         // are we entering a field or a normal keyword?
                         if (Npp.WeAreEnteringAField() && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
                             ShowFieldsSuggestions(false);
@@ -52,12 +64,9 @@ namespace _3PA.MainFeatures {
                             ShowCompleteSuggestionList(false);
                     }
                 }
-                activated = true;
             } else {
                 CloseSuggestionList();
             }
-
-            return activated;   
         }
 
         /// <summary>
@@ -67,7 +76,7 @@ namespace _3PA.MainFeatures {
         public static void FilterSuggestionList(string keyword) {
             try {
                 if (IsShowingAutocompletion) {
-                    GetForm.FilterFor(keyword);
+                    GetForm.FilterByText = keyword;
                 }
             } catch (Exception e) {
                 Plug.ShowErrors(e, "Error in FilterSuggestionList");
@@ -140,34 +149,34 @@ namespace _3PA.MainFeatures {
         /// <param name="displayFromShortCut"></param>
         private static void ShowSuggestionList(List<CompletionData> items, bool displayFromShortCut) {
             CloseSuggestionList();
+            _openedFromShortCut = displayFromShortCut;
 
             if (items.Any()) {
                 string keyword = Npp.GetKeyword();
-                Action<CompletionData> onAccepted = OnAutocompletionAccepted;
-                GetForm = new Forms.AutoComplete(onAccepted, items.ToList(), displayFromShortCut);
-
                 var point = Npp.GetCaretScreenLocation();
-                GetForm.Left = point.X;
-                GetForm.Top = point.Y + Npp.GetTextHeight(Npp.GetCaretLineNumber());
+                var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+                point.Y += lineHeight;
+                GetForm = new AutoCompletionForm(items, point, lineHeight, keyword, Config.Instance.AutoCompleteOpacityUnfocused, Config.Instance.AutoCompleteShowListOfXSuggestions);
 
-                Dispatcher.Shedule(10, () => {
-                    GetForm.Show(Npp.Win32WindowNpp);
-                    FilterSuggestionList(keyword);
-                    Npp.GrabFocus();
-                });
+                GetForm.TabCompleted += GetFormOnTabCompleted;
+                GetForm.CurrentForegroundWindow = WinApi.GetForegroundWindow();
+                GetForm.Show(Npp.Win32WindowNpp);
+
+                //Dispatcher.Shedule(10, () => {
+                //    GetForm.Show(Npp.Win32WindowNpp);
+                //    FilterSuggestionList(keyword);
+                //    Npp.GrabFocus();
+                //});
             }
         }
 
-        /// <summary>
-        ///     Called when the user triggers the selection of a keyword from the autocomplete form
-        /// </summary>
-        /// <param name="data"></param>
-        private static void OnAutocompletionAccepted(CompletionData data) {
+        private static void GetFormOnTabCompleted(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
             try {
+                var data = tabCompletedEventArgs.CompletionItem;
                 if (data.DisplayText != "" && data.DisplayText != "<empty>") {
                     Point keywordPos;
                     var keywordToRep = Npp.GetKeywordOnLeftOfPosition(Npp.GetCaretPosition(), out keywordPos);
-                    
+
                     // if the "hint" is empty, don't replace the current hint, just add text at the carret position
                     if ((data.Type == CompletionType.Field && Npp.TextBeforeCaret(2).EndsWith(".")) ||
                         string.IsNullOrWhiteSpace(keywordToRep)) {
@@ -215,14 +224,6 @@ namespace _3PA.MainFeatures {
                     return DataBaseInfo.KeysField(tableName).Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Field }).ToList();
                 case CompletionType.Snippet:
                     return Snippets.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Snippet }).ToList();
-                case CompletionType.UserVariable:
-                    return null;
-                case CompletionType.Function:
-                    return null;
-                case CompletionType.Procedure:
-                    return null;
-                case CompletionType.Special:
-                    return null;
             }
             return null;
         }

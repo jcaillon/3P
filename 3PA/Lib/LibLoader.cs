@@ -16,9 +16,17 @@ namespace _3PA.Lib {
 
             _rootDir = Path.Combine(Npp.GetThisAssemblyPath(), Resources.PluginFolderName);
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
-            _pathToOLV = Path.Combine(_rootDir, @"ObjectListView.dll");
-
-            
+            _pathToOLV = Path.Combine(_rootDir, @"ObjectListView.dll");  
+          
+            // TODO: only for debug!
+            if (true) {
+                try {
+                    File.Delete(_pathToYamui);
+                    File.Delete(_pathToOLV);
+                } catch (Exception) {
+                    // ignored
+                }
+            }
         }
 
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {

@@ -17,6 +17,10 @@ using _3PA.Images;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
+
+    /// <summary>
+    /// This class create an autocompletion window
+    /// </summary>
     public partial class AutoCompletionForm : Form {
 
         #region fields
@@ -29,8 +33,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Raised when the user clicks on a link in the html.<br/>
-        /// Allows canceling the execution of the link.
+        /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
@@ -39,15 +42,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public IntPtr CurrentForegroundWindow;
 
-        /// <summary>
-        /// Number of items to display
-        /// </summary>
-        public int NbOfItemsToDisplay = 10;
+        private int _nbOfItemsToDisplay;
 
         /// <summary>
-        /// self explaining (no implementeed?)
+        /// fade in fade out animation?
         /// </summary>
-        public bool DisplayScrollBars = false;
+        public bool EnableAnimation = true;
+
+        /// <summary>
+        /// Opacity when the window isn't focused
+        /// </summary>
+        public double OpacityWhenUnfocused;
 
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
         private string _filterString = "";
@@ -57,11 +62,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private Rectangle? _nppRect;
         private Timer timer1;
         private bool _iGotActivated;
+        private int _normalWidth;
+        private List<CompletionData> _initialObjectsList;
         #endregion
 
         #region constructor
 
-        public AutoCompletionForm(List<CompletionData> objectsList, Point position, int lineHeight, string initialFilter) {
+        /// <summary>
+        /// Constructor for the autocompletion form
+        /// </summary>
+        /// <param name="objectsList"></param>
+        /// <param name="position"></param>
+        /// <param name="lineHeight"></param>
+        /// <param name="initialFilter"></param>
+        /// <param name="opacityWhenUnFocused"></param>
+        /// <param name="nbItemsToDisplay"></param>
+        public AutoCompletionForm(List<CompletionData> objectsList, Point position, int lineHeight, string initialFilter, double opacityWhenUnFocused, int nbItemsToDisplay) {
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
@@ -70,17 +86,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             InitializeComponent();
 
+            OpacityWhenUnfocused = opacityWhenUnFocused;
+
             // Style the control
             fastOLV.OwnerDraw = true;
             fastOLV.UseAlternatingBackColors = true;
             fastOLV.Font = FontManager.GetLabelFont(LabelFunction.AutoCompletion);
-            fastOLV.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
-            fastOLV.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-            fastOLV.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.AutoCompletionFocusBackColor;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.AutoCompletionFocusForeColor;
+            fastOLV.BackColor = ThemeManagerNpp.Current.AutoCompletionNormalBackColor;
+            fastOLV.AlternateRowBackColor = ThemeManagerNpp.Current.AutoCompletionNormalAlternateBackColor;
+            fastOLV.ForeColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
+            fastOLV.HighlightBackgroundColor = ThemeManagerNpp.Current.AutoCompletionFocusBackColor;
+            fastOLV.HighlightForegroundColor = ThemeManagerNpp.Current.AutoCompletionFocusForeColor;
             fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
             fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
+
+            // Decorate and configure hot item
+            fastOLV.UseHotItem = true;
+            fastOLV.HotItemStyle = new HotItemStyle();
+            fastOLV.HotItemStyle.BackColor = ThemeManagerNpp.Current.AutoCompletionHoverBackColor;
+            fastOLV.HotItemStyle.ForeColor = ThemeManagerNpp.Current.AutoCompletionHoverForeColor;
 
             // set the image list to use for the keywords
             var imageListOfTypes = new ImageList {
@@ -105,12 +129,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 return (int) x.Type;
             };
 
-            // Decorate and configure hot item
-            fastOLV.UseHotItem = true;
-            fastOLV.HotItemStyle = new HotItemStyle();
-            fastOLV.HotItemStyle.BackColor = ThemeManager.Current.AutoCompletionHoverBackColor;
-            fastOLV.HotItemStyle.ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor;
-
             // decorate rows
             fastOLV.UseCellFormatEvents = true;
             fastOLV.FormatCell += (sender, args) => {
@@ -121,11 +139,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     decoration.Alignment = ContentAlignment.MiddleRight;
                     decoration.Offset = new Size(-5, 0);
                     decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
-                    decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                    decoration.TextColor = ThemeManagerNpp.Current.AutoCompletionNormalSubTypeForeColor;
                     decoration.CornerRounding = 1f;
                     decoration.Rotation = 0;
                     decoration.BorderWidth = 1;
-                    decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                    decoration.BorderColor = ThemeManagerNpp.Current.AutoCompletionNormalSubTypeForeColor;
                     args.SubItem.Decoration = decoration; //NB. Sets Decoration
                 }
             };
@@ -133,20 +151,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // overlay of empty list :
             fastOLV.EmptyListMsg = "No suggestions!";
             TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
-            textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-            textOverlay.BackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-            textOverlay.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+            textOverlay.TextColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
+            textOverlay.BackColor = ThemeManagerNpp.Current.AutoCompletionNormalAlternateBackColor;
+            textOverlay.BorderColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
             textOverlay.BorderWidth = 4.0f;
             textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
             textOverlay.Rotation = -5;
 
             // we do the sorting, and prevent further sorting
             objectsList.Sort(new CompletionDataSortingClass());
+            _initialObjectsList = objectsList;
             fastOLV.BeforeSorting += (sender, args) => { args.Canceled = true; };
 
-            // set the height
-            fastOLV.Height = 21 * NbOfItemsToDisplay;
+            // set the default height / width
+            _nbOfItemsToDisplay = nbItemsToDisplay;
+            fastOLV.Height = 21 * _nbOfItemsToDisplay;
             Height = fastOLV.Height + 32;
+            //using (var g = nbitems.CreateGraphics()) {
+            //    var widthObj = objectsList.Select(x => (int) g.MeasureString(x.DisplayText, FontManager.GetLabelFont(LabelFunction.AutoCompletion)).Width).Max(x => x);
+            //    Width = widthObj + 30;
+            //}
+            Width = 280;
 
             // get distinct types, create a button for each
             int xPos = 4;
@@ -166,15 +191,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
             xPos += 65;
 
+            // correct width
+            Width = Math.Max(Width, xPos); ;
+            _normalWidth = Width - 2;
+            Keyword.Width = _normalWidth - 17;
+
             // label for the number of items
             _totalItems = objectsList.Count;
             nbitems.Text = _totalItems + " items";
-
-            // set the width of the form
-            using (var g = nbitems.CreateGraphics()) {
-                var widthObj = objectsList.Select(x => (int) g.MeasureString(x.DisplayText, FontManager.GetLabelFont(LabelFunction.AutoCompletion)).Width).Max(x => x);
-                Width = Math.Max(widthObj, xPos);
-            }
 
             // position the window smartly
             if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2*Screen.PrimaryScreen.WorkingArea.Width/3)
@@ -198,23 +222,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // handles mouse leave/mouse enter
             MouseLeave += CustomOnMouseLeave;
             fastOLV.MouseLeave += CustomOnMouseLeave;
-            //MouseMove += CustomOnMouseLeave;
-            //fastOLV.MouseMove += CustomOnMouseLeave;
+            fastOLV.DoubleClick += (sender, args) => { OnTabCompleted(new TabCompletedEventArgs(((CompletionData) fastOLV.SelectedItem.RowObject))); };
 
-            // fade out animation
-            Opacity = 0d;
-            Tag = false;
-            Closing += (sender, args) => {
-                if ((bool)Tag) return;
-                args.Cancel = true;
-                Tag = true;
-                var t = new Transition(new TransitionType_Acceleration(200));
-                t.add(this, "Opacity", 0d);
-                t.TransitionCompletedEvent += (o, args1) => { Close(); };
-                t.run();
-            };
-            // fade in animation
-            Transition.run(this, "Opacity", 0.9d, new TransitionType_Acceleration(200));
+            if (EnableAnimation) {
+                // fade out animation
+                Opacity = 0d;
+                Tag = false;
+                Closing += (sender, args) => {
+                    if ((bool) Tag) return;
+                    args.Cancel = true;
+                    Tag = true;
+                    var t = new Transition(new TransitionType_Acceleration(200));
+                    t.add(this, "Opacity", 0d);
+                    t.TransitionCompletedEvent += (o, args1) => { Close(); };
+                    t.run();
+                };
+                // fade in animation
+                Transition.run(this, "Opacity", OpacityWhenUnfocused, new TransitionType_Acceleration(200));
+            }
         }
         #endregion
 
@@ -223,7 +248,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private void GiveFocusBack() {
             WinApi.SetForegroundWindow(CurrentForegroundWindow);
             _iGotActivated = !_iGotActivated;
-            Opacity = 0.9;
+            Opacity = OpacityWhenUnfocused;
         }
 
         protected void CustomOnMouseLeave(object sender, EventArgs e) {
@@ -233,7 +258,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void OnActivated(EventArgs e) {
             // Activate the window that previously had focus
             if (!_focusAllowed)
-                GiveFocusBack();
+                WinApi.SetForegroundWindow(CurrentForegroundWindow);
             else {
                 _iGotActivated = true;
                 Opacity = 1;
@@ -296,7 +321,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Close();
 
                 // enter and tab accept the current selection
-            } else if ((key == Keys.Enter) || (key == Keys.Tab)) {
+            } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept)
+                       || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
                 OnTabCompleted(new TabCompletedEventArgs(((CompletionData)fastOLV.SelectedItem.RowObject)));
 
                 // else, any other key needs to be analysed by Npp
@@ -313,7 +339,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManagerNpp.Current.FormColorBackColor;
             var borderColor = ThemeManager.AccentColor;
             var borderWidth = 1;
 
@@ -330,6 +356,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region private methods
 
         private void ApplyFilter() {
+            fastOLV.SetObjects(_initialObjectsList.OrderBy(
+                x => {
+                    if (!x.DisplayText.StartsWith(_filterString, StringComparison.OrdinalIgnoreCase))
+                        return 2;
+                    if (x.DisplayText.Equals(_filterString, StringComparison.OrdinalIgnoreCase)) {
+                        return 0;
+                    }   
+                    return 1;
+            }).ToList());
+
             fastOLV.ModelFilter = new ModelFilter((o => ((CompletionData) o).DisplayText.Contains(_filterString, StringComparison.InvariantCultureIgnoreCase) && _activeTypes[((CompletionData) o).Type].Activated));
             fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(fastOLV, _filterString);
 
@@ -339,6 +375,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
+                Keyword.Width = _normalWidth - ((_totalItems <= _nbOfItemsToDisplay) ? 0 : 17);
                 if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } catch (Exception) {
@@ -389,7 +426,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return compare;
         }
     }
-
     #endregion
 
     #region SelectorButtons
@@ -406,8 +442,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region Paint Methods
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                Color borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
+                Color backColor = ThemeManagerNpp.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
+                Color borderColor = ThemeManagerNpp.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
                 // draw background
@@ -454,7 +490,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
     #endregion
 
-
     #region CustomHighlightRenderer
 
     /// <summary>
@@ -467,8 +502,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Create a HighlightTextRenderer
         /// </summary>
         public CustomHighlightTextRenderer() {
-            FillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
-            FramePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
+            FillBrush = new SolidBrush(ThemeManagerNpp.Current.AutoCompletionHighlightBack);
+            FramePen = new Pen(ThemeManagerNpp.Current.AutoCompletionHighlightBorder);
         }
 
         /// <summary>

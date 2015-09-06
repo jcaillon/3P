@@ -63,16 +63,6 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] abbreviations {
-            get {
-                object obj = ResourceManager.GetObject("abbreviations", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] keywords {
             get {
                 object obj = ResourceManager.GetObject("keywords", resourceCulture);
@@ -93,9 +83,9 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] nppTool {
+        internal static byte[] snippets {
             get {
-                object obj = ResourceManager.GetObject("nppTool", resourceCulture);
+                object obj = ResourceManager.GetObject("snippets", resourceCulture);
                 return ((byte[])(obj));
             }
         }
@@ -103,9 +93,9 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] snippets {
+        internal static byte[] ThemeNppInterface {
             get {
-                object obj = ResourceManager.GetObject("snippets", resourceCulture);
+                object obj = ResourceManager.GetObject("ThemeNppInterface", resourceCulture);
                 return ((byte[])(obj));
             }
         }

@@ -106,9 +106,9 @@ namespace YamuiFramework.Themes {
         /// <returns></returns>
         public static List<Theme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
-                Class2Xml<Theme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
-                //_listOfThemes.Add(new Theme());
-               // Class2Xml<Theme>.SaveToFile(_listOfThemes, @"C:\Work\3PA_side\themes.xml", true);
+                //Class2Xml<Theme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
+                _listOfThemes.Add(new Theme());
+                Class2Xml<Theme>.SaveToFile(_listOfThemes, @"C:\Work\3PA_side\themes.xml", true);
             }
             return _listOfThemes;
         }

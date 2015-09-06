@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Xml.Linq;
 
-namespace YamuiFramework.Themes {
+namespace _3PA.Lib {
     /// <summary>
     /// A class to read and write an object instance
     /// </summary>
-    public class Class2Xml<T> {
+    public class Object2Xml<T> {
 
         private const string KeyString = "Key";
         private const string ValueString = "Value";
@@ -82,16 +83,8 @@ namespace YamuiFramework.Themes {
             Load(instance, XDocument.Parse(xmlContent), valueInAttribute);
         }
 
-        /// <summary>
-        /// Reads an xml to instanciate an object
-        /// </summary>
-        /// <param name="instance"></param>
-        /// <param name="filename"></param>
-        /// <param name="valueInAttribute"></param>
         public static void LoadFromFile(T instance, string filename, bool valueInAttribute) {
-            var x = new List<T> {instance};
-            LoadFromFile(x, filename, valueInAttribute);
-            instance = x[0];
+            Load(instance, XDocument.Load(filename).Root.Descendants(InstanceListItemString).First(), valueInAttribute);
         }
 
         public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute) {
@@ -108,31 +101,37 @@ namespace YamuiFramework.Themes {
             foreach (XElement itemElement in rootElement.Descendants(InstanceListItemString)) {
                 T item = (T)Activator.CreateInstance(typeof(T), new object[] { });
 
-                /* loop through fields */
-                foreach (var property in properties) {
-                    if (property.IsPrivate) continue;
-                    XElement elm = itemElement.Element(property.Name);
-                    if (elm == null) continue;
-
-                    /* dico */
-                    if (property.FieldType == typeof(Dictionary<string, string>)) {
-                        property.SetValue(item, XmlToDictionary(elm, valueInAttribute));
-                    } else {
-
-                        /* color > to hex */
-                        if (property.FieldType == typeof(Color)) {
-                            if (valueInAttribute) property.SetValue(item, ColorTranslator.FromHtml(elm.Attribute(ValueString).Value));
-                            else property.SetValue(item, ColorTranslator.FromHtml(elm.Value));
-
-                            /* other type */
-                        } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
-                            if (valueInAttribute) property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Attribute(ValueString).Value));
-                            else property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Value));
-                        }
-                    }
-                }
+                Load(item, itemElement, valueInAttribute);
 
                 instance.Add(item);
+            }
+        }
+
+        private static void Load(T item, XElement itemElement, bool valueInAttribute) {
+            var properties = typeof(T).GetFields();
+
+            /* loop through fields */
+            foreach (var property in properties) {
+                if (property.IsPrivate) continue;
+                XElement elm = itemElement.Element(property.Name);
+                if (elm == null) continue;
+
+                /* dico */
+                if (property.FieldType == typeof(Dictionary<string, string>)) {
+                    property.SetValue(item, XmlToDictionary(elm, valueInAttribute));
+                } else {
+
+                    /* color > to hex */
+                    if (property.FieldType == typeof(Color)) {
+                        if (valueInAttribute) property.SetValue(item, ColorTranslator.FromHtml(elm.Attribute(ValueString).Value));
+                        else property.SetValue(item, ColorTranslator.FromHtml(elm.Value));
+
+                        /* other type */
+                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
+                        if (valueInAttribute) property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Attribute(ValueString).Value));
+                        else property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Value));
+                    }
+                }
             }
         }
 

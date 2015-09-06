@@ -36,7 +36,8 @@ C:\Work\3PA\3PA\bin\Debug\3PA.dll
 C:\Work\3PA\3PA\bin\Debug\3PA.pdb
 C:\Work\3PA\3PA\bin\Debug\YamuiFramework.dll
 C:\Work\3PA\3PA\bin\Debug\YamuiFramework.pdb
-C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
+C:\Work\3PA_side\npp\plugins\3PA.dll
+C:\Work\3PA_side\npp\plugins\3PA.pdb
 C:\Work\3PA\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Form1.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.Classic.resources
@@ -47,13 +48,10 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.Navigation.Other.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.PageTemplate.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.SettingAppearance.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Data.DataResources.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.AutoComplete.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.Config.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Forms.frmGoToLine.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Images.ImageResources.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
-C:\Work\3PA_side\npp\plugins\3PA.dll
-C:\Work\3PA_side\npp\plugins\3PA.pdb
 C:\Work\3PA\3PA\obj\Debug\3PA.dll
 C:\Work\3PA\3PA\obj\Debug\3PA.pdb
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources

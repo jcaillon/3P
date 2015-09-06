@@ -19,7 +19,7 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
             Application.EnableVisualStyles();
-
+            
             ThemeManager.CurrentThemeIdToUse = 1;
             Keywords.Init();
 

@@ -6,6 +6,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
+using _3PA.Lib;
 
 namespace _3PA.Appli.Pages {
     public partial class SettingAppearance : YamuiPage {
@@ -57,6 +58,7 @@ namespace _3PA.Appli.Pages {
             } finally {
                 ThemeManager.ImageName = ThemeManager.Current.PageBackGroundImage;
                 if (Plug.MainForm != null) PlsRefresh();
+                Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
             }
             
         }
@@ -72,9 +74,13 @@ namespace _3PA.Appli.Pages {
                 ThemeManager.AccentColor = rb.BackColor;
                 _checkButton = rb;
                 if (Plug.MainForm != null) PlsRefresh();
+                Config.Instance.AccentColor = ThemeManager.AccentColor;
             }
         }
 
+        /// <summary>
+        /// force all the html panel/label to refresh and try to refresh the main window
+        /// </summary>
         private void PlsRefresh() {
             try {
                 var x = ControlHelper.GetAll(FindForm(), typeof (HtmlLabel));
@@ -96,8 +102,8 @@ namespace _3PA.Appli.Pages {
             Plug.MainForm.Update();
             Application.DoEvents();
             Plug.MainForm.Refresh();
-            Application.DoEvents();
-            Plug.MainForm.Refresh();
+            //Application.DoEvents();
+            //Plug.MainForm.Refresh();
         }
     }
 }
