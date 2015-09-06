@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using _3PA.Lib;
 using Enumerable = System.Linq.Enumerable;
 
 namespace _3PA.MainFeatures {
@@ -153,7 +154,7 @@ namespace _3PA.MainFeatures {
                             }
                         }
                     } catch (Exception e) {
-                        Plug.ShowErrors(e, "Error while loading the database info!", DataBaseExportFile);
+                        ErrorHandler.ShowErrors(e, "Error while loading the database info!", DataBaseExportFile);
                     }
                 }
             }

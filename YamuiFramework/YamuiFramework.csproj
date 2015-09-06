@@ -276,12 +276,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Fonts\SEGOEUI.TTF" />
-    <None Include="Fonts\SEGOEUIB.TTF" />
-    <None Include="Fonts\SEGOEUII.TTF" />
-    <None Include="Fonts\SMALLFONT.TTF" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\baseCss.css" />
     <Content Include="Resources\hellokitty.png" />

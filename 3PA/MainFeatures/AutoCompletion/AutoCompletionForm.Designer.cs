@@ -1,4 +1,6 @@
-﻿namespace _3PA.MainFeatures.AutoCompletion {
+﻿using System;
+
+namespace _3PA.MainFeatures.AutoCompletion {
     partial class AutoCompletionForm {
         /// <summary>
         /// Required designer variable.
@@ -14,6 +16,20 @@
                 components.Dispose();
             }
             base.Dispose(disposing);
+            try {
+                _timer1.Tick -= timer1_Tick;
+                _timer1.Dispose();
+                _timer1 = null;
+                fastOLV.FormatCell -= FastOlvOnFormatCell;
+                fastOLV.BeforeSorting -= FastOlvOnBeforeSorting;
+                fastOLV.KeyDown -= FastOlvOnKeyDown;
+                MouseLeave -= CustomOnMouseLeave;
+                fastOLV.MouseLeave -= CustomOnMouseLeave;
+                fastOLV.DoubleClick -= FastOlvOnDoubleClick;
+
+            } catch (Exception) {
+                // ignored
+            }
         }
 
         #region Windows Form Designer generated code

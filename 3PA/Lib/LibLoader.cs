@@ -9,20 +9,23 @@ namespace _3PA.Lib {
 
         private static string _rootDir;
         private static string _pathToYamui;
-        private static string _pathToOLV;
+        private static string _pathToOlv;
 
+        /// <summary>
+        /// Should be called when the dll loads so it can call its dependencies freely
+        /// </summary>
         public static void Init() {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
             _rootDir = Path.Combine(Npp.GetThisAssemblyPath(), Resources.PluginFolderName);
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
-            _pathToOLV = Path.Combine(_rootDir, @"ObjectListView.dll");  
+            _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");  
           
-            // TODO: only for debug!
+            // TODO: only for debug! need to handle this when we do an update tho :/ we want to replace old files
             if (true) {
                 try {
                     File.Delete(_pathToYamui);
-                    File.Delete(_pathToOLV);
+                    File.Delete(_pathToOlv);
                 } catch (Exception) {
                     // ignored
                 }
@@ -41,12 +44,12 @@ namespace _3PA.Lib {
                 }
 
                 if (args.Name.StartsWith("ObjectListView,")) {
-                    if (!File.Exists(_pathToOLV))
-                        File.WriteAllBytes(_pathToOLV, Resources.ObjectListView);
-                    return Assembly.LoadFrom(_pathToOLV);
+                    if (!File.Exists(_pathToOlv))
+                        File.WriteAllBytes(_pathToOlv, Resources.ObjectListView);
+                    return Assembly.LoadFrom(_pathToOlv);
                 }
             } catch (Exception e) {
-                Plug.ShowErrors(e, "Error in LibLoader");
+                ErrorHandler.ShowErrors(e, "Error in LibLoader");
             }
             return null;
         }

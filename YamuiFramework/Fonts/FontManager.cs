@@ -7,6 +7,7 @@ using System.Windows.Forms;
 
 namespace YamuiFramework.Fonts {
     public enum LabelFunction {
+        AppliTitle,
         Small,
         Normal,
         Heading,
@@ -31,6 +32,8 @@ namespace YamuiFramework.Fonts {
 
         public static Font GetLabelFont(LabelFunction lbFunction) {
             switch (lbFunction) {
+                case LabelFunction.AppliTitle:
+                    return GetOtherFont(@"STRENUOUS", FontStyle.Regular, 22f);
                 case LabelFunction.Title:
                     return GetFont(FontStyle.Bold, 18f);
                 case LabelFunction.Heading:
@@ -153,63 +156,29 @@ namespace YamuiFramework.Fonts {
         internal class FontResolver : IFontResolver {
             public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
                 Font fontTester = new Font(familyName, emSize, fontStyle, unit);
-                if (fontTester.Name == familyName || !TryResolve(ref familyName, ref fontStyle)) {
+                if (fontTester.Name == familyName)
                     return fontTester;
-                }
+                // TODO: we should load a custom font here...
+                return fontTester;
                 fontTester.Dispose();
-
-                FontFamily fontFamily = GetFontFamily(familyName);
-                return new Font(fontFamily, emSize, fontStyle, unit);
+                //FontFamily fontFamily = GetFontFamily(familyName);
+                return new Font("Times New Roman", emSize, fontStyle, unit);
             }
 
-            private readonly PrivateFontCollection _fontCollection = new PrivateFontCollection();
+            //private readonly PrivateFontCollection _fontCollection = new PrivateFontCollection();
 
-            private static bool TryResolve(ref string familyName, ref FontStyle fontStyle) {
-                if (familyName == @"SMALLFONT") return true;
-                if (familyName == @"Segoe UI Light") {
-                    familyName = @"SEGOEUII";
-                    if (fontStyle != FontStyle.Bold) fontStyle = FontStyle.Regular;
-                    return true;
-                }
-                if (familyName != @"Segoe UI") return false;
-                switch (fontStyle) {
-                    case FontStyle.Bold:
-                        familyName = @"SEGOEUIB";
-                        return true;
-                    case FontStyle.Italic:
-                        familyName = @"SEGOEUII";
-                        return true;
-                }
-                familyName = @"SEGOEUI";
-                return true;
-            }
-
-            private FontFamily GetFontFamily(string familyName) {
-                lock (_fontCollection) {
-                    foreach (FontFamily fontFamily in _fontCollection.Families)
-                        if (fontFamily.Name == familyName) return fontFamily;
-
-                    string resourceName = GetType().Namespace + ".Fonts." + familyName.Replace(' ', '_') + ".ttf";
-
-                    Stream fontStream = null;
-                    IntPtr data = IntPtr.Zero;
-                    try {
-                        fontStream = GetType().Assembly.GetManifestResourceStream(resourceName);
-                        if (fontStream != null) {
-                            int bytes = (int) fontStream.Length;
-                            data = Marshal.AllocCoTaskMem(bytes);
-                            byte[] fontdata = new byte[bytes];
-                            fontStream.Read(fontdata, 0, bytes);
-                            Marshal.Copy(fontdata, 0, data, bytes);
-                            _fontCollection.AddMemoryFont(data, bytes);
-                        }
-                        return _fontCollection.Families[_fontCollection.Families.Length - 1];
-                    } finally {
-                        if (fontStream != null) fontStream.Dispose();
-                        if (data != IntPtr.Zero) Marshal.FreeCoTaskMem(data);
-                    }
-                }
-            }
+            //private FontFamily GetFontFamily(string familyName) {
+            //    lock (_fontCollection) {
+            //        foreach (FontFamily fontFamily in _fontCollection.Families)
+            //            if (fontFamily.Name == familyName) return fontFamily;
+            //        if (!File.Exists(@"C:\Work\3PA_side\SMALLFONT.ttf"))
+            //            File.WriteAllBytes(@"C:\Work\3PA_side\SMALLFONT.ttf", FontResources.SMALLFONT);
+            //        _fontCollection.AddFontFile("C:\\Work\\3PA_side\\SMALLFONT.ttf");
+            //        return _fontCollection.Families[_fontCollection.Families.Length - 1];
+            //        //FontResources.ResourceManager.GetObject(familyName.Replace(' ', '_') + ".ttf");
+            //        //string resourceName = GetType().Namespace + "." + familyName.Replace(' ', '_') + ".ttf";
+            //    }
+            //}
         }
 
         #endregion

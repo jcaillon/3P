@@ -20,7 +20,6 @@ C:\Work\3PA\3PA\YamuiFolder\YamuiFramework.dll
 C:\Work\3PA\3PA\YamuiFolder\YamuiFramework.pdb
 C:\Work\3PA\3PA\Lib\YamuiFolder\YamuiFramework.dll
 C:\Work\3PA\3PA\Lib\YamuiFolder\YamuiFramework.pdb
-C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiForm.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiFormMessageBox.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiNotifications.resources
@@ -28,3 +27,4 @@ C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resource
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.pdb
+C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache

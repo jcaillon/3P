@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Map.Load(ConfigFile);
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error while loading keywords!", ConfigFile);
+                    ErrorHandler.ShowErrors(e, "Error while loading keywords!", ConfigFile);
                 }
             }
         }
@@ -62,7 +62,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Map.Save(ConfigFile);
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error while saving keywords!");
+                    ErrorHandler.ShowErrors(e, "Error while saving keywords!");
                 }
             }
         }

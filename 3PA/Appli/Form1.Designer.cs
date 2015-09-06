@@ -33,18 +33,25 @@ namespace _3PA.Appli {
             this.pageClassic = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControl2 = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabPage2 = new YamuiFramework.Controls.YamuiTabPage();
+            this.classic1 = new _3PA.Appli.Pages.control.Classic();
             this.yamuiTabPage6 = new YamuiFramework.Controls.YamuiTabPage();
+            this.itemControl1 = new _3PA.Appli.Pages.control.ItemControl();
             this.yamuiTabPage7 = new YamuiFramework.Controls.YamuiTabPage();
+            this.text1 = new _3PA.Appli.Pages.control.Text();
             this.yamuiTabPage4 = new YamuiFramework.Controls.YamuiTabPage();
+            this.progress1 = new _3PA.Appli.Pages.control.Progress();
             this.yamuiTabPage3 = new YamuiFramework.Controls.YamuiTabPage();
             this.pageFormAndNav = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControl4 = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabPage12 = new YamuiFramework.Controls.YamuiTabPage();
+            this.navigation1 = new _3PA.Appli.Pages.PageTemplate();
             this.yamuiTabPage11 = new YamuiFramework.Controls.YamuiTabPage();
+            this.other1 = new _3PA.Appli.Pages.Navigation.Other();
             this.yamuiTabPage10 = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabMainSetting = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControlSecSetting = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabSecAppearance = new YamuiFramework.Controls.YamuiTabPage();
+            this.settingAppearance1 = new _3PA.Appli.Pages.SettingAppearance();
             this.yamuiPanel3 = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel24 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLink6 = new YamuiFramework.Controls.YamuiLink();
@@ -53,13 +60,6 @@ namespace _3PA.Appli {
             this.yamuiLink8 = new YamuiFramework.Controls.YamuiLink();
             this.yamuiLabel19 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel23 = new YamuiFramework.Controls.YamuiLabel();
-            this.classic1 = new Classic();
-            this.itemControl1 = new ItemControl();
-            this.text1 = new Text();
-            this.progress1 = new Progress();
-            this.navigation1 = new PageTemplate();
-            this.other1 = new Other();
-            this.settingAppearance1 = new SettingAppearance();
             this.statusLabel = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiTabControlMain.SuspendLayout();
             this.pageClassic.SuspendLayout();
@@ -140,6 +140,15 @@ namespace _3PA.Appli {
             this.yamuiTabPage2.TabIndex = 0;
             this.yamuiTabPage2.Text = "CLASSIC";
             // 
+            // classic1
+            // 
+            this.classic1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.classic1.Location = new System.Drawing.Point(30, 25);
+            this.classic1.Name = "classic1";
+            this.classic1.Size = new System.Drawing.Size(709, 327);
+            this.classic1.TabIndex = 0;
+            this.classic1.Load += new System.EventHandler(this.classic1_Load);
+            // 
             // yamuiTabPage6
             // 
             this.yamuiTabPage6.Controls.Add(this.itemControl1);
@@ -150,6 +159,14 @@ namespace _3PA.Appli {
             this.yamuiTabPage6.Size = new System.Drawing.Size(739, 352);
             this.yamuiTabPage6.TabIndex = 3;
             this.yamuiTabPage6.Text = "ITEM CONTROL";
+            // 
+            // itemControl1
+            // 
+            this.itemControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.itemControl1.Location = new System.Drawing.Point(30, 25);
+            this.itemControl1.Name = "itemControl1";
+            this.itemControl1.Size = new System.Drawing.Size(709, 327);
+            this.itemControl1.TabIndex = 0;
             // 
             // yamuiTabPage7
             // 
@@ -162,6 +179,15 @@ namespace _3PA.Appli {
             this.yamuiTabPage7.TabIndex = 4;
             this.yamuiTabPage7.Text = "TEXT";
             // 
+            // text1
+            // 
+            this.text1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.text1.Location = new System.Drawing.Point(30, 25);
+            this.text1.Name = "text1";
+            this.text1.Size = new System.Drawing.Size(709, 327);
+            this.text1.TabIndex = 0;
+            this.text1.Load += new System.EventHandler(this.text1_Load);
+            // 
             // yamuiTabPage4
             // 
             this.yamuiTabPage4.Controls.Add(this.progress1);
@@ -172,6 +198,14 @@ namespace _3PA.Appli {
             this.yamuiTabPage4.Size = new System.Drawing.Size(739, 352);
             this.yamuiTabPage4.TabIndex = 2;
             this.yamuiTabPage4.Text = "PROGRESS / SCROLL BAR";
+            // 
+            // progress1
+            // 
+            this.progress1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.progress1.Location = new System.Drawing.Point(30, 25);
+            this.progress1.Name = "progress1";
+            this.progress1.Size = new System.Drawing.Size(709, 327);
+            this.progress1.TabIndex = 0;
             // 
             // yamuiTabPage3
             // 
@@ -222,6 +256,14 @@ namespace _3PA.Appli {
             this.yamuiTabPage12.TabIndex = 2;
             this.yamuiTabPage12.Text = "THIS FORM NAVIGATION";
             // 
+            // navigation1
+            // 
+            this.navigation1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.navigation1.Location = new System.Drawing.Point(30, 25);
+            this.navigation1.Name = "navigation1";
+            this.navigation1.Size = new System.Drawing.Size(709, 327);
+            this.navigation1.TabIndex = 0;
+            // 
             // yamuiTabPage11
             // 
             this.yamuiTabPage11.Controls.Add(this.other1);
@@ -232,6 +274,14 @@ namespace _3PA.Appli {
             this.yamuiTabPage11.Size = new System.Drawing.Size(739, 352);
             this.yamuiTabPage11.TabIndex = 1;
             this.yamuiTabPage11.Text = "OTHER";
+            // 
+            // other1
+            // 
+            this.other1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.other1.Location = new System.Drawing.Point(30, 25);
+            this.other1.Name = "other1";
+            this.other1.Size = new System.Drawing.Size(709, 327);
+            this.other1.TabIndex = 0;
             // 
             // yamuiTabPage10
             // 
@@ -279,6 +329,14 @@ namespace _3PA.Appli {
             this.yamuiTabSecAppearance.TabIndex = 0;
             this.yamuiTabSecAppearance.Text = "APPEARANCE";
             this.yamuiTabSecAppearance.Click += new System.EventHandler(this.yamuiTabPage9_Click);
+            // 
+            // settingAppearance1
+            // 
+            this.settingAppearance1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.settingAppearance1.Location = new System.Drawing.Point(30, 25);
+            this.settingAppearance1.Name = "settingAppearance1";
+            this.settingAppearance1.Size = new System.Drawing.Size(709, 327);
+            this.settingAppearance1.TabIndex = 0;
             // 
             // yamuiPanel3
             // 
@@ -362,11 +420,11 @@ namespace _3PA.Appli {
             // 
             this.yamuiLabel19.AutoSize = true;
             this.yamuiLabel19.Enabled = false;
-            this.yamuiLabel19.Function = YamuiFramework.Fonts.LabelFunction.FormTitle;
+            this.yamuiLabel19.Function = YamuiFramework.Fonts.LabelFunction.Heading;
             this.yamuiLabel19.Location = new System.Drawing.Point(8, 10);
-            this.yamuiLabel19.Margin = new System.Windows.Forms.Padding(5);
+            this.yamuiLabel19.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel19.Name = "yamuiLabel19";
-            this.yamuiLabel19.Size = new System.Drawing.Size(354, 17);
+            this.yamuiLabel19.Size = new System.Drawing.Size(385, 19);
             this.yamuiLabel19.TabIndex = 10;
             this.yamuiLabel19.Text = "Yet Another Modern U.I. Framework - Demo application";
             // 
@@ -376,64 +434,6 @@ namespace _3PA.Appli {
             this.yamuiLabel23.Name = "yamuiLabel23";
             this.yamuiLabel23.Size = new System.Drawing.Size(100, 23);
             this.yamuiLabel23.TabIndex = 11;
-            // 
-            // classic1
-            // 
-            this.classic1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.classic1.Location = new System.Drawing.Point(30, 25);
-            this.classic1.Name = "classic1";
-            this.classic1.Size = new System.Drawing.Size(709, 327);
-            this.classic1.TabIndex = 0;
-            this.classic1.Load += new System.EventHandler(this.classic1_Load);
-            // 
-            // itemControl1
-            // 
-            this.itemControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.itemControl1.Location = new System.Drawing.Point(30, 25);
-            this.itemControl1.Name = "itemControl1";
-            this.itemControl1.Size = new System.Drawing.Size(709, 327);
-            this.itemControl1.TabIndex = 0;
-            // 
-            // text1
-            // 
-            this.text1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.text1.Location = new System.Drawing.Point(30, 25);
-            this.text1.Name = "text1";
-            this.text1.Size = new System.Drawing.Size(709, 327);
-            this.text1.TabIndex = 0;
-            this.text1.Load += new System.EventHandler(this.text1_Load);
-            // 
-            // progress1
-            // 
-            this.progress1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.progress1.Location = new System.Drawing.Point(30, 25);
-            this.progress1.Name = "progress1";
-            this.progress1.Size = new System.Drawing.Size(709, 327);
-            this.progress1.TabIndex = 0;
-            // 
-            // navigation1
-            // 
-            this.navigation1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.navigation1.Location = new System.Drawing.Point(30, 25);
-            this.navigation1.Name = "navigation1";
-            this.navigation1.Size = new System.Drawing.Size(709, 327);
-            this.navigation1.TabIndex = 0;
-            // 
-            // other1
-            // 
-            this.other1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.other1.Location = new System.Drawing.Point(30, 25);
-            this.other1.Name = "other1";
-            this.other1.Size = new System.Drawing.Size(709, 327);
-            this.other1.TabIndex = 0;
-            // 
-            // settingAppearance1
-            // 
-            this.settingAppearance1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.settingAppearance1.Location = new System.Drawing.Point(30, 25);
-            this.settingAppearance1.Name = "settingAppearance1";
-            this.settingAppearance1.Size = new System.Drawing.Size(709, 327);
-            this.settingAppearance1.TabIndex = 0;
             // 
             // statusLabel
             // 
@@ -454,9 +454,9 @@ namespace _3PA.Appli {
             this.Controls.Add(this.yamuiPanel3);
             this.Controls.Add(this.yamuiTabControlMain);
             this.Controls.Add(this.yamuiLabel23);
+            this.IsMainForm = true;
             this.MinimumSize = new System.Drawing.Size(806, 469);
             this.Name = "Form1";
-            this.IsMainForm = true;
             this.Load += new System.EventHandler(this.Form1_Load);
             this.yamuiTabControlMain.ResumeLayout(false);
             this.pageClassic.ResumeLayout(false);

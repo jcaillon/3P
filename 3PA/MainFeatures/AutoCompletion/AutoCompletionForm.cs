@@ -8,12 +8,12 @@ using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using BrightIdeasSoftware.Utilities;
-using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Images;
+using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -32,6 +32,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             set { _filterString = value; ApplyFilter(); }
         }
 
+        public bool UseAlternateBackColor {
+            set { fastOLV.UseAlternatingBackColors = value; }
+        }
+
         /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
@@ -42,28 +46,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public IntPtr CurrentForegroundWindow;
 
-        private int _nbOfItemsToDisplay;
-
-        /// <summary>
-        /// fade in fade out animation?
-        /// </summary>
-        public bool EnableAnimation = true;
-
-        /// <summary>
-        /// Opacity when the window isn't focused
-        /// </summary>
-        public double OpacityWhenUnfocused;
-
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
-        private string _filterString = "";
+        private string _filterString;
         private int _totalItems;
         private bool _focusAllowed;
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private Rectangle? _nppRect;
-        private Timer timer1;
+        private Timer _timer1;
         private bool _iGotActivated;
         private int _normalWidth;
         private List<CompletionData> _initialObjectsList;
+        private ImageList _imageListOfTypes;
+        private bool _allowshowdisplay;
         #endregion
 
         #region constructor
@@ -71,13 +65,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Constructor for the autocompletion form
         /// </summary>
-        /// <param name="objectsList"></param>
-        /// <param name="position"></param>
-        /// <param name="lineHeight"></param>
         /// <param name="initialFilter"></param>
-        /// <param name="opacityWhenUnFocused"></param>
-        /// <param name="nbItemsToDisplay"></param>
-        public AutoCompletionForm(List<CompletionData> objectsList, Point position, int lineHeight, string initialFilter, double opacityWhenUnFocused, int nbItemsToDisplay) {
+        public AutoCompletionForm(string initialFilter) {
             SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
@@ -86,113 +75,185 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             InitializeComponent();
 
-            OpacityWhenUnfocused = opacityWhenUnFocused;
-
             // Style the control
             fastOLV.OwnerDraw = true;
-            fastOLV.UseAlternatingBackColors = true;
             fastOLV.Font = FontManager.GetLabelFont(LabelFunction.AutoCompletion);
-            fastOLV.BackColor = ThemeManagerNpp.Current.AutoCompletionNormalBackColor;
-            fastOLV.AlternateRowBackColor = ThemeManagerNpp.Current.AutoCompletionNormalAlternateBackColor;
-            fastOLV.ForeColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
-            fastOLV.HighlightBackgroundColor = ThemeManagerNpp.Current.AutoCompletionFocusBackColor;
-            fastOLV.HighlightForegroundColor = ThemeManagerNpp.Current.AutoCompletionFocusForeColor;
+            fastOLV.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
+            fastOLV.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
+            fastOLV.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+            fastOLV.HighlightBackgroundColor = ThemeManager.Current.AutoCompletionFocusBackColor;
+            fastOLV.HighlightForegroundColor = ThemeManager.Current.AutoCompletionFocusForeColor;
             fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
             fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
 
             // Decorate and configure hot item
             fastOLV.UseHotItem = true;
             fastOLV.HotItemStyle = new HotItemStyle();
-            fastOLV.HotItemStyle.BackColor = ThemeManagerNpp.Current.AutoCompletionHoverBackColor;
-            fastOLV.HotItemStyle.ForeColor = ThemeManagerNpp.Current.AutoCompletionHoverForeColor;
+            fastOLV.HotItemStyle.BackColor = ThemeManager.Current.AutoCompletionHoverBackColor;
+            fastOLV.HotItemStyle.ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor;
 
             // set the image list to use for the keywords
-            var imageListOfTypes = new ImageList {
+            _imageListOfTypes = new ImageList {
                 TransparentColor = Color.Transparent,
                 ColorDepth = ColorDepth.Depth32Bit,
                 ImageSize = new Size(20, 20)
             };
-            ImagelistAdd.AddFromImage(ImageResources.Keyword, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Table, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.TempTable, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Field, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.FieldPk, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Snippet, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Function, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Procedure, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariablePrimitive, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, imageListOfTypes);
-            fastOLV.SmallImageList = imageListOfTypes;
+            ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Table, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.TempTable, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Field, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.FieldPk, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Snippet, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Function, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Procedure, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.UserVariablePrimitive, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, _imageListOfTypes);
+            fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData) rowObject;
                 return (int) x.Type;
             };
 
-            // decorate rows
-            fastOLV.UseCellFormatEvents = true;
-            fastOLV.FormatCell += (sender, args) => {
-                var type = ((CompletionData) args.Model).Flag;
-                if (type != CompletionFlag.None) {
-                    // Add a opaque, rotated text decoration
-                    TextDecoration decoration = new TextDecoration(Enum.GetName(typeof (CompletionFlag), type), 100);
-                    decoration.Alignment = ContentAlignment.MiddleRight;
-                    decoration.Offset = new Size(-5, 0);
-                    decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
-                    decoration.TextColor = ThemeManagerNpp.Current.AutoCompletionNormalSubTypeForeColor;
-                    decoration.CornerRounding = 1f;
-                    decoration.Rotation = 0;
-                    decoration.BorderWidth = 1;
-                    decoration.BorderColor = ThemeManagerNpp.Current.AutoCompletionNormalSubTypeForeColor;
-                    args.SubItem.Decoration = decoration; //NB. Sets Decoration
-                }
-            };
-
             // overlay of empty list :
             fastOLV.EmptyListMsg = "No suggestions!";
             TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
-            textOverlay.TextColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
-            textOverlay.BackColor = ThemeManagerNpp.Current.AutoCompletionNormalAlternateBackColor;
-            textOverlay.BorderColor = ThemeManagerNpp.Current.AutoCompletionNormalForeColor;
-            textOverlay.BorderWidth = 4.0f;
-            textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
-            textOverlay.Rotation = -5;
+            if (textOverlay != null) {
+                textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+                textOverlay.BackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
+                textOverlay.BorderColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+                textOverlay.BorderWidth = 4.0f;
+                textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
+                textOverlay.Rotation = -5;
+            }
 
-            // we do the sorting, and prevent further sorting
+            // decorate rows
+            fastOLV.UseCellFormatEvents = true;
+            fastOLV.FormatCell += FastOlvOnFormatCell;
+
+            // we prevent further sorting
+            fastOLV.BeforeSorting += FastOlvOnBeforeSorting;
+            fastOLV.KeyDown += FastOlvOnKeyDown;
+
+            fastOLV.UseTabAsInput = true;
+            _filterString = initialFilter;
+
+            // timer to check if the npp window changed
+            _timer1 = new Timer();
+            _timer1.Enabled = true;
+            _timer1.Interval = 500;
+            _timer1.Tick += timer1_Tick;
+
+            // handles mouse leave/mouse enter
+            MouseLeave += CustomOnMouseLeave;
+            fastOLV.MouseLeave += CustomOnMouseLeave;
+            fastOLV.DoubleClick += FastOlvOnDoubleClick;
+
+            // register to Npp
+            FormIntegration.RegisterToNpp(Handle);
+
+            Visible = false;
+            Opacity = 0d;
+            Tag = false;
+            Closing += OnClosing;
+        }
+
+        /// <summary>
+        /// hides the form
+        /// </summary>
+        public void Cloack() {
+            Visible = false;
+            GiveFocusBack();
+        }
+
+        /// <summary>
+        /// show the form
+        /// </summary>
+        public void UnCloack() {
+            _allowshowdisplay = true;
+            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
+            Visible = true;
+            GiveFocusBack();
+        }
+
+        /// <summary>
+        /// instead of closing, cload this form (invisible)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="cancelEventArgs"></param>
+        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
+            if ((bool)Tag) return;
+            cancelEventArgs.Cancel = true;
+            Cloack();
+        }
+
+        /// <summary>
+        /// Event on format cell
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
+            var type = ((CompletionData)args.Model).Flag;
+            if (type != CompletionFlag.None) {
+                TextDecoration decoration = new TextDecoration(Enum.GetName(typeof(CompletionFlag), type), 100);
+                decoration.Alignment = ContentAlignment.MiddleRight;
+                decoration.Offset = new Size(-5, 0);
+                decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
+                decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                decoration.CornerRounding = 1f;
+                decoration.Rotation = 0;
+                decoration.BorderWidth = 1;
+                decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                args.SubItem.Decoration = decoration; //NB. Sets Decoration
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// set the items of the object view list, correct the width and height of the form and the list
+        /// create a button for each type of completion present in the list of items
+        /// </summary>
+        /// <param name="objectsList"></param>
+        public void SetItems(List<CompletionData> objectsList) {
+            // we do the sorting
             objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
-            fastOLV.BeforeSorting += (sender, args) => { args.Canceled = true; };
 
             // set the default height / width
-            _nbOfItemsToDisplay = nbItemsToDisplay;
-            fastOLV.Height = 21 * _nbOfItemsToDisplay;
+            fastOLV.Height = 21 * Config.Instance.AutoCompleteShowListOfXSuggestions;
             Height = fastOLV.Height + 32;
-            //using (var g = nbitems.CreateGraphics()) {
-            //    var widthObj = objectsList.Select(x => (int) g.MeasureString(x.DisplayText, FontManager.GetLabelFont(LabelFunction.AutoCompletion)).Width).Max(x => x);
-            //    Width = widthObj + 30;
-            //}
             Width = 280;
+
+            // delete any existing buttons
+            if (_activeTypes != null) {
+                foreach (var selectorButton in _activeTypes) {
+                    selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                    if (Controls.Contains(selectorButton.Value))
+                        Controls.Remove(selectorButton.Value);
+                    selectorButton.Value.Dispose();
+                }
+            }
 
             // get distinct types, create a button for each
             int xPos = 4;
             _activeTypes = new Dictionary<CompletionType, SelectorButton>();
             foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
                 var but = new SelectorButton();
-                but.BackGrndImage = imageListOfTypes.Images[(int) type];
+                but.BackGrndImage = _imageListOfTypes.Images[(int)type];
                 but.Activated = true;
                 but.Size = new Size(24, 24);
                 but.TabStop = false;
                 but.Location = new Point(xPos, Height - 28);
                 but.Type = type;
-                but.ButtonPressed += (sender, args) => { HandleTypeClick(but.Type); };
-                Controls.Add(but);
+                but.ButtonPressed += HandleTypeClick;
                 _activeTypes.Add(type, but);
+                Controls.Add(but);
                 xPos += but.Width;
             }
             xPos += 65;
 
             // correct width
-            Width = Math.Max(Width, xPos); ;
+            Width = Math.Max(Width, xPos);
             _normalWidth = Width - 2;
             Keyword.Width = _normalWidth - 17;
 
@@ -200,55 +261,134 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _totalItems = objectsList.Count;
             nbitems.Text = _totalItems + " items";
 
-            // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2*Screen.PrimaryScreen.WorkingArea.Width/3)
-                position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3*Screen.PrimaryScreen.WorkingArea.Height/5)
-                position.Y = position.Y - Height - lineHeight;
-            Location = position;
-
-            fastOLV.KeyDown += (sender, args) => args.Handled = OnKeyDown(args.KeyCode);
-            fastOLV.UseTabAsInput = true;
-            _filterString = initialFilter;
-
             fastOLV.SetObjects(objectsList);
+        }
 
-            // timer to check if the npp window changed
-            timer1 = new Timer();
-            timer1.Enabled = true;
-            timer1.Interval = 500;
-            timer1.Tick += timer1_Tick;
-
-            // handles mouse leave/mouse enter
-            MouseLeave += CustomOnMouseLeave;
-            fastOLV.MouseLeave += CustomOnMouseLeave;
-            fastOLV.DoubleClick += (sender, args) => { OnTabCompleted(new TabCompletedEventArgs(((CompletionData) fastOLV.SelectedItem.RowObject))); };
-
-            if (EnableAnimation) {
-                // fade out animation
-                Opacity = 0d;
-                Tag = false;
-                Closing += (sender, args) => {
-                    if ((bool) Tag) return;
-                    args.Cancel = true;
-                    Tag = true;
-                    var t = new Transition(new TransitionType_Acceleration(200));
-                    t.add(this, "Opacity", 0d);
-                    t.TransitionCompletedEvent += (o, args1) => { Close(); };
-                    t.run();
-                };
-                // fade in animation
-                Transition.run(this, "Opacity", OpacityWhenUnfocused, new TransitionType_Acceleration(200));
+        /// <summary>
+        /// use this to programmatically uncheck any type that is not in the given list
+        /// </summary>
+        /// <param name="allowedType"></param>
+        public void SetActiveType(List<CompletionType> allowedType) {
+            if (_activeTypes == null) return;
+            foreach (var selectorButton in _activeTypes) {
+                if (allowedType.IndexOf(selectorButton.Value.Type) < 0) {
+                    selectorButton.Value.Activated = false;
+                    selectorButton.Value.Invalidate();
+                }
             }
         }
-        #endregion
+
+        /// <summary>
+        /// reset all the button Types to activated
+        /// </summary>
+        public void ResetActiveType() {
+            if (_activeTypes == null) return;
+            foreach (var selectorButton in _activeTypes) {
+                selectorButton.Value.Activated = true;
+                selectorButton.Value.Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// allows to programmatically select the first item of the list
+        /// </summary>
+        public void SelectFirstItem() {
+            try {
+                fastOLV.SelectedIndex = 0;
+            } catch (Exception e) {
+                // ignored
+            }
+        }
+
+        /// <summary>
+        /// Position the window in a smart way according to the Point in input
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="lineHeight"></param>
+        public void SetPosition(Point position, int lineHeight) {
+            // position the window smartly
+            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2 * Screen.PrimaryScreen.WorkingArea.Width / 3)
+                position.X = position.X - Width;
+            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3 * Screen.PrimaryScreen.WorkingArea.Height / 5)
+                position.Y = position.Y - Height - lineHeight;
+            Location = position;
+        }
+
+        /// <summary>
+        /// handles double click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void FastOlvOnDoubleClick(object sender, EventArgs eventArgs) {
+            OnTabCompleted(new TabCompletedEventArgs(((CompletionData)fastOLV.SelectedItem.RowObject)));
+        }
+
+        /// <summary>
+        /// Handles keydown event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="keyEventArgs"></param>
+        private void FastOlvOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = OnKeyDown(keyEventArgs.KeyCode);
+        }
+
+        /// <summary>
+        /// cancel any sort of.. sorting
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="beforeSortingEventArgs"></param>
+        private void FastOlvOnBeforeSorting(object sender, BeforeSortingEventArgs beforeSortingEventArgs) {
+            beforeSortingEventArgs.Canceled = true;
+        }
+
+
+        /// <summary>
+        /// This ensures the form is never visible at start
+        /// </summary>
+        /// <param name="value"></param>
+        protected override void SetVisibleCore(bool value) {
+            base.SetVisibleCore(_allowshowdisplay ? value : _allowshowdisplay);
+        }
+
 
         #region events
+        /// <summary>
+        /// handles click on a type
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void HandleTypeClick(object sender, EventArgs args) {
+            CompletionType clickedType = ((SelectorButton) sender).Type;
+            if (_activeTypes[clickedType].Activated) {
+                // if everything is active, what we want to do is make everything but this one inactive
+                if (_activeTypes.Count(b => !b.Value.Activated) == 0) {
+                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
+                        _activeTypes[key].Activated = false;
+                        _activeTypes[key].Invalidate();
+                    }
+                    _activeTypes[clickedType].Activated = true;
+                } else if (_activeTypes.Count(b => b.Value.Activated) == 1) {
+                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
+                        _activeTypes[key].Activated = true;
+                        _activeTypes[key].Invalidate();
+                    }
+                } else
+                    _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
+            } else
+                _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
+            _activeTypes[clickedType].Invalidate();
+            ApplyFilter();
+            // give focus back
+            GiveFocusBack();
+        }
 
+        /// <summary>
+        /// Gives focus back to the owner window
+        /// </summary>
         private void GiveFocusBack() {
             WinApi.SetForegroundWindow(CurrentForegroundWindow);
             _iGotActivated = !_iGotActivated;
-            Opacity = OpacityWhenUnfocused;
+            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
         }
 
         protected void CustomOnMouseLeave(object sender, EventArgs e) {
@@ -263,14 +403,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _iGotActivated = true;
                 Opacity = 1;
             }
-                
             base.OnActivated(e);
         }
 
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
             fastOLV.SelectedIndex = 0;
-            if (!string.IsNullOrEmpty(_filterString)) ApplyFilter();
+            //if (!string.IsNullOrEmpty(_filterString)) ApplyFilter();
         }
 
         protected override void OnShown(EventArgs e) {
@@ -313,16 +452,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     fastOLV.SelectedIndex = 0;
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
 
-                // left and right key change the selector
-            //} else if (key == Keys.Left || key == Keys.Right) {
-
                 // escape close
             } else if (key == Keys.Escape) {
                 Close();
 
                 // enter and tab accept the current selection
-            } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept)
-                       || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
+            } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept) || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
                 OnTabCompleted(new TabCompletedEventArgs(((CompletionData)fastOLV.SelectedItem.RowObject)));
 
                 // else, any other key needs to be analysed by Npp
@@ -339,7 +474,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManagerNpp.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormColorBackColor;
             var borderColor = ThemeManager.AccentColor;
             var borderWidth = 1;
 
@@ -354,7 +489,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         #region private methods
-
+        /// <summary>
+        /// this methods sorts the items to put the best match on top and then filter it with modelFilter
+        /// </summary>
         private void ApplyFilter() {
             fastOLV.SetObjects(_initialObjectsList.OrderBy(
                 x => {
@@ -375,41 +512,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
-                Keyword.Width = _normalWidth - ((_totalItems <= _nbOfItemsToDisplay) ? 0 : 17);
+                Keyword.Width = _normalWidth - ((_totalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions) ? 0 : 17);
                 if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } catch (Exception) {
                 // ignored
             }
         }
-
-        private void HandleTypeClick(CompletionType clickedType) {
-            if (_activeTypes[clickedType].Activated) {
-                // if everything is active, what we want to do is make everything but this one inactive
-                if (_activeTypes.Count(b => !b.Value.Activated) == 0) {
-                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
-                        _activeTypes[key].Activated = false;
-                        _activeTypes[key].Invalidate();
-                    }
-                    _activeTypes[clickedType].Activated = true;
-                } else if (_activeTypes.Count(b => b.Value.Activated) == 1) {
-                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
-                        _activeTypes[key].Activated = true;
-                        _activeTypes[key].Invalidate();
-                    }
-                } else
-                    _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
-            } else
-                _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
-            _activeTypes[clickedType].Invalidate();
-            ApplyFilter();
-            // give focus back
-            GiveFocusBack();
-        }
         #endregion
-
-
-
     }
 
     #region sorting
@@ -442,8 +552,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region Paint Methods
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = ThemeManagerNpp.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                Color borderColor = ThemeManagerNpp.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
+                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
+                Color borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
                 // draw background
@@ -502,14 +612,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Create a HighlightTextRenderer
         /// </summary>
         public CustomHighlightTextRenderer() {
-            FillBrush = new SolidBrush(ThemeManagerNpp.Current.AutoCompletionHighlightBack);
-            FramePen = new Pen(ThemeManagerNpp.Current.AutoCompletionHighlightBorder);
+            FillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
+            FramePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
         }
 
         /// <summary>
         /// Create a HighlightTextRenderer
         /// </summary>
-        /// <param name="filter"></param>
         public CustomHighlightTextRenderer(ObjectListView fastOvl, string filterStr)
             : this() {
             Filter = new TextMatchFilter(fastOvl, filterStr, StringComparison.OrdinalIgnoreCase);
@@ -525,11 +634,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
          DefaultValue(3.0f),
          Description("How rounded will be the corners of the text match frame?")]
         public float CornerRoundness {
-            get { return cornerRoundness; }
-            set { cornerRoundness = value; }
+            get { return _cornerRoundness; }
+            set { _cornerRoundness = value; }
         }
 
-        private float cornerRoundness = 4.0f;
+        private float _cornerRoundness = 4.0f;
 
         /// <summary>
         /// Gets or set the brush will be used to paint behind the matched substrings.
@@ -538,11 +647,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         [Browsable(false),
          DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Brush FillBrush {
-            get { return fillBrush; }
-            set { fillBrush = value; }
+            get { return _fillBrush; }
+            set { _fillBrush = value; }
         }
 
-        private Brush fillBrush;
+        private Brush _fillBrush;
 
         /// <summary>
         /// Gets or sets the filter that is filtering the ObjectListView and for
@@ -551,11 +660,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         [Browsable(false),
          DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public TextMatchFilter Filter {
-            get { return filter; }
-            set { filter = value; }
+            get { return _filter; }
+            set { _filter = value; }
         }
 
-        private TextMatchFilter filter;
+        private TextMatchFilter _filter;
 
         /// <summary>
         /// Gets or set the pen will be used to frame the matched substrings.
@@ -564,11 +673,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         [Browsable(false),
          DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Pen FramePen {
-            get { return framePen; }
-            set { framePen = value; }
+            get { return _framePen; }
+            set { _framePen = value; }
         }
 
-        private Pen framePen;
+        private Pen _framePen;
 
         /// <summary>
         /// Gets or sets whether the frame around a text match will have rounded corners
@@ -577,11 +686,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
          DefaultValue(true),
          Description("Will the frame around a text match will have rounded corners?")]
         public bool UseRoundedRectangle {
-            get { return useRoundedRectangle; }
-            set { useRoundedRectangle = value; }
+            get { return _useRoundedRectangle; }
+            set { _useRoundedRectangle = value; }
         }
 
-        private bool useRoundedRectangle = true;
+        private bool _useRoundedRectangle = true;
 
         #endregion
 

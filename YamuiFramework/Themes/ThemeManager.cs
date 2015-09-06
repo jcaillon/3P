@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.IO.Compression;
 using YamuiFramework.Resources;
 
 namespace YamuiFramework.Themes {
@@ -12,6 +14,12 @@ namespace YamuiFramework.Themes {
         private static List<Theme> _listOfThemes = new List<Theme>();
         public static string ImageName;
         public static int CurrentThemeIndex;
+
+        /// <summary>
+        /// You can set this property to read the theme.xml file from a local path instead of
+        /// the embedded ressource file
+        /// </summary>
+        public static string ThemeXmlPath;
 
         /// <summary>
         /// Default theme id to use when the ThemeManager is first called, 
@@ -106,9 +114,12 @@ namespace YamuiFramework.Themes {
         /// <returns></returns>
         public static List<Theme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
-                //Class2Xml<Theme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
-                _listOfThemes.Add(new Theme());
-                Class2Xml<Theme>.SaveToFile(_listOfThemes, @"C:\Work\3PA_side\themes.xml", true);
+                if (string.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
+                    Class2Xml<Theme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
+                    if (!string.IsNullOrEmpty(ThemeXmlPath))
+                        Class2Xml<Theme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
+                } else
+                    Class2Xml<Theme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
             }
             return _listOfThemes;
         }

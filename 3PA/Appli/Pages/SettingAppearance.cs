@@ -7,6 +7,8 @@ using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.DockableExplorer;
 
 namespace _3PA.Appli.Pages {
     public partial class SettingAppearance : YamuiPage {
@@ -82,6 +84,7 @@ namespace _3PA.Appli.Pages {
         /// force all the html panel/label to refresh and try to refresh the main window
         /// </summary>
         private void PlsRefresh() {
+            // Refresh panels and labels (html)
             try {
                 var x = ControlHelper.GetAll(FindForm(), typeof (HtmlLabel));
                 if (x != null)
@@ -96,14 +99,16 @@ namespace _3PA.Appli.Pages {
             } catch (Exception) {
                 throw;
             }
+            // force the autocomplete to redraw
+            AutoComplete.ForceClose();
+            // force the dockable to redraw
+            DockableExplorer.Redraw();
             Application.DoEvents();
             Plug.MainForm.Invalidate();
             Application.DoEvents();
             Plug.MainForm.Update();
             Application.DoEvents();
             Plug.MainForm.Refresh();
-            //Application.DoEvents();
-            //Plug.MainForm.Refresh();
         }
     }
 }

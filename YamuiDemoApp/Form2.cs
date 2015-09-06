@@ -33,7 +33,7 @@ namespace YamuiDemoApp {
                 }
             if (_testAutoComp == null) {
                 var derp = new Random();
-                _testAutoComp = new AutoCompletionForm(Keywords.Keys.Select(x => new CompletionData {DisplayText = x, Type = (CompletionType) derp.Next(0, 9), Ranking = derp.Next(0, 1000), Flag = ((CompletionFlag) derp.Next(0, 5))}).ToList(), new Point(Screen.PrimaryScreen.Bounds.Width - 200, Screen.PrimaryScreen.Bounds.Height - 200), 15, y.Text, 0.8d, 12);
+                //_testAutoComp = new AutoCompletionForm(Keywords.Keys.Select(x => new CompletionData {DisplayText = x, Type = (CompletionType) derp.Next(0, 9), Ranking = derp.Next(0, 1000), Flag = ((CompletionFlag) derp.Next(0, 5))}).ToList(), new Point(Screen.PrimaryScreen.Bounds.Width - 200, Screen.PrimaryScreen.Bounds.Height - 200), 15, y.Text, 0.8d, 12, true, true);
             } else {
                 _testAutoComp.FilterByText = y.Text;
             }

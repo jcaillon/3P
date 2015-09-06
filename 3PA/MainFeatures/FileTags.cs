@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 
+// TODO: instead of keeping everything in one file, create a folder in /config, one file per file, and only load info on the current file during the OnTabSwitched notification
 namespace _3PA.MainFeatures {
     public struct FileTag {
         public string Nb { get; set; }
@@ -65,7 +66,7 @@ namespace _3PA.MainFeatures {
                     try {
                         Map.Load(ConfigFile);
                     } catch (Exception e) {
-                        Plug.ShowErrors(e, "Error while loading file info!");
+                        ErrorHandler.ShowErrors(e, "Error while loading file info!");
                     }
                 }
                 try {
@@ -74,7 +75,7 @@ namespace _3PA.MainFeatures {
                     if (!Contains("last_tag"))
                         SetFileTags("last_tag", "", "", "", "AFC", "", "", "");
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error while setting default file info!");
+                    ErrorHandler.ShowErrors(e, "Error while setting default file info!");
                 }
             }
         }
@@ -147,7 +148,7 @@ namespace _3PA.MainFeatures {
                 }
                 Save();
             } catch (Exception e) {
-                Plug.ShowErrors(e, "Error while setting a file info!");
+                ErrorHandler.ShowErrors(e, "Error while setting a file info!");
             }
         }
 
@@ -156,7 +157,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Map.Save(ConfigFile);
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error while saving file info!", ConfigFile);
+                    ErrorHandler.ShowErrors(e, "Error while saving file info!", ConfigFile);
                 }
             }
         }

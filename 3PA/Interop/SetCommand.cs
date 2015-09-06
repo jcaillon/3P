@@ -50,7 +50,7 @@ namespace _3PA.Interop {
                 if (!String.IsNullOrWhiteSpace(commandName))
                     SetCommand(index, commandName, functionPointer, thisShortcut, checkOnInit);
             } catch (Exception e) {
-                _3PA.Plug.ShowErrors(e, "Error in SetCommand");
+                ErrorHandler.ShowErrors(e, "Error in SetCommand");
             }
         }
 
@@ -104,7 +104,7 @@ namespace _3PA.Interop {
                     Config.Instance.ShortCuts.Add(shortcutName, ShortcutKey2String(shortcut));
                     Config.Save();
                     if (!_alreadyWarnedUserAboutShortkey) {
-                        _3PA.Plug.MessageToUser("You successfully changed a shortcut, a restart of notepad++ is needed to correctly take this change into account");
+                        UserCommunication.MessageUser("You successfully changed a shortcut, a restart of notepad++ is needed to correctly take this change into account");
                         _alreadyWarnedUserAboutShortkey = true;
                     }
                 }

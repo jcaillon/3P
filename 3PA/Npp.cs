@@ -329,6 +329,49 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Gets the file path of each file currently opened, return
+        /// the files separated by a new line
+        /// </summary>
+        /// <returns></returns>
+        public static string GetOpenedFiles() {
+            var output = new StringBuilder();
+            int nbFile = (int)Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, 0);
+            using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
+                if (Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+                    foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
+            }
+            return output.ToString();
+        }
+
+        /// <summary>
+        /// Gets the file path of each file in the session file, return
+        /// the files separated by a new line
+        /// </summary>
+        /// <param name="sessionFilePath"></param>
+        /// <returns></returns>
+        public static string GetSessionFiles(string sessionFilePath) {
+            var output = new StringBuilder();
+            int nbFile = (int)Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
+            if (nbFile > 0) {
+                using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
+                    if (Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
+                        foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
+                }
+            }
+            return output.ToString();
+        }
+
+        /// <summary>
+        /// Saves the session into a file
+        /// </summary>
+        /// <param name="sessionFilePath"></param>
+        /// <returns></returns>
+        public static bool SaveSession(string sessionFilePath) {
+            string sessionPath = Marshal.PtrToStringUni(Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, sessionFilePath));
+            return !string.IsNullOrEmpty(sessionPath);
+        }
+
+        /// <summary>
         ///  barbarian method to force the default autocompletion window to hide
         /// </summary>
         public static void HideDefaultAutoCompletion() {
@@ -807,14 +850,15 @@ namespace _3PA {
             Win32.SendMessage(HandleScintilla, NppMsg.NPPM_DOOPEN, 0, file);
         }
 
+        /// <summary>
+        /// Move the caret and the view to the specified line (lines starts at 1 not 0)
+        /// </summary>
+        /// <param name="line"></param>
         public static void GoToLine(int line) {
-            //Win32.SendMessage(HandleScintilla, SciMsg.SCI_ENSUREVISIBLE, line - 1, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + 20, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ENSUREVISIBLE, line - 1, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESONSCREEN, 0, 0), 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line - 1, 0);
-            /*
-            SCI_GETFIRSTVISIBLELINE = 2152,
-            SCI_GETLINE = 2153,
-            SCI_GETLINECOUNT = 2154,*/
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
         }
 
         public static string TextBeforePosition(int position, int maxLength) {
@@ -871,6 +915,10 @@ namespace _3PA {
                 SwpNoactivate);
         }
 
+        /// <summary>
+        /// returns a rectangle representing the location and size of the npp window
+        /// </summary>
+        /// <returns></returns>
         public static Rectangle GetWindowRect() {
             var r = new Rectangle();
             Win32.GetWindowRect(HandleScintilla, ref r);
@@ -897,7 +945,6 @@ namespace _3PA {
                 // set text for the existing part with index 0
                 var text = Marshal.StringToHGlobalAuto(labelText);
                 Win32.SendMessage(statusBarHandle, SbSettext, 0, text);
-
                 Marshal.FreeHGlobal(text);
 
                 //the foolowing may be needed for puture features
@@ -914,7 +961,7 @@ namespace _3PA {
                 Marshal.FreeHGlobal(memPtr);
 
                 //// set text for the new part
-                var text0 = Marshal.StringToHGlobalAuto("new section text 1");
+                var text0 = Marshal.StringToHGlobalAuto(labelText);
                 Win32.SendMessage(statusBarHandle, SbGetparts, nParts - 1, text0);
                 Marshal.FreeHGlobal(text0);
             }
@@ -1317,7 +1364,7 @@ namespace _3PA {
             return Call(SciMsg.SCI_POSITIONAFTER, pos);
         }
 
-        #region " private Call "
+        #region private Call
 
         private static int Call(SciMsg msg, int wParam, IntPtr lParam) {
             return (int) Win32.SendMessage(HandleScintilla, msg, wParam, lParam);

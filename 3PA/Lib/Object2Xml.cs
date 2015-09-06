@@ -8,6 +8,9 @@ using System.Xml.Linq;
 namespace _3PA.Lib {
     /// <summary>
     /// A class to read and write an object instance
+    /// FYI : no fields of the T class can be null when saving an instance
+    /// TODO: save more than a simple string, string dico
+    /// <remarks>/!\ THIS CLASS IS DUPLICATED IN YAMUIFRAMEWORK!!!!!!!!</remarks>
     /// </summary>
     public class Object2Xml<T> {
 
@@ -18,7 +21,8 @@ namespace _3PA.Lib {
         private const string PrefixToParentOfDico = "Dico";
 
         /// <summary>
-        /// Saves an object of type <T> into an xml
+        /// Saves an object of type T into an xml,
+        /// It mirrors LoadFromFile
         /// </summary>
         /// <param name="instance"></param>
         /// <param name="filename"></param>
@@ -29,85 +33,136 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Method to save a list of object of type <T> into an xml
+        /// Method to save a list of object of type T into an xml,
+        /// It mirrors LoadFromFile
         /// </summary>
         /// <param name="instance">your list of item</param>
         /// <param name="filename">destination</param>
         /// <param name="valueInAttribute">set to true will store all values in attributes</param>
         public static void SaveToFile(List<T> instance, string filename, bool valueInAttribute = false) {
+            SaveToXDocument(instance, valueInAttribute).Save(filename);
+        }
+
+        /// <summary>
+        /// Saves a list of object into an xml document
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="valueInAttribute"></param>
+        /// <returns></returns>
+        public static XDocument SaveToXDocument(List<T> instance, bool valueInAttribute = false) {
             XDocument document = new XDocument();
             XElement root = new XElement(RootString);
 
             /* loop through list */
             foreach (T item in instance) {
-                XElement itemElement = new XElement(InstanceListItemString);
-                var properties = typeof(T).GetFields();
-
-                /* loop through fields */
-                foreach (var property in properties) {
-                    if (property.IsPrivate) continue;
-
-                    XElement fieldElement = new XElement(property.Name);
-                    if (property.FieldType == typeof(Dictionary<string, string>)) {
-                        itemElement.Add(DictToXml((Dictionary<string, string>)property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
-                    } else {
-                        if (property.FieldType == typeof(Color)) {
-                            if (valueInAttribute)
-                                fieldElement.Add(new XAttribute(ValueString, ColorTranslator.ToHtml((Color)property.GetValue(item))));
-                            else
-                                fieldElement.Add(ColorTranslator.ToHtml((Color)property.GetValue(item)));
-                        } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
-                            // case of a simple value
-                            if (valueInAttribute)
-                                fieldElement.Add(new XAttribute(ValueString, property.GetValue(item)));
-                            else
-                                fieldElement.Add(property.GetValue(item));
-                            //elm.Add(Convert.ChangeType(property.GetValue(instance), typeof(string)));
-                        }
-                        itemElement.Add(fieldElement);
-                    }
-                }
-                root.Add(itemElement);
+                root.Add(SaveToXElement(item, valueInAttribute));
             }
             document.Add(root);
-            document.Save(filename);
+            return document;
         }
 
         /// <summary>
-        /// This reads xmlContent and load a list of item from it
+        /// Saves an object to an XElement,
+        /// it mirrors LoadFromXElement
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="valueInAttribute"></param>
+        /// <returns></returns>
+        public static XElement SaveToXElement(T item, bool valueInAttribute = false) {
+            XElement itemElement = new XElement(InstanceListItemString);
+            var properties = typeof(T).GetFields();
+
+            /* loop through fields */
+            foreach (var property in properties) {
+                if (property.IsPrivate) continue;
+
+                XElement fieldElement = new XElement(property.Name);
+                if (property.FieldType == typeof(Dictionary<string, string>)) {
+                    itemElement.Add(DictToXml((Dictionary<string, string>)property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
+                } else {
+                    if (property.FieldType == typeof(Color)) {
+                        if (valueInAttribute)
+                            fieldElement.Add(new XAttribute(ValueString, ColorTranslator.ToHtml((Color)property.GetValue(item))));
+                        else
+                            fieldElement.Add(ColorTranslator.ToHtml((Color)property.GetValue(item)));
+                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
+                        // case of a simple value
+                        if (valueInAttribute)
+                            fieldElement.Add(new XAttribute(ValueString, property.GetValue(item)));
+                        else
+                            fieldElement.Add(property.GetValue(item));
+                        //elm.Add(Convert.ChangeType(property.GetValue(instance), typeof(string)));
+                    }
+                    itemElement.Add(fieldElement);
+                }
+            }
+            return itemElement;
+        }
+
+        /// <summary>
+        /// This reads xmlContent and load a list of item from it,
+        /// it has no mirrored save function
         /// </summary>
         /// <param name="instance"></param>
         /// <param name="xmlContent"></param>
         /// <param name="valueInAttribute"></param>
-        public static void LoadFromRaw(List<T> instance, string xmlContent, bool valueInAttribute = false) {
-            Load(instance, XDocument.Parse(xmlContent), valueInAttribute);
+        public static void LoadFromString(List<T> instance, string xmlContent, bool valueInAttribute = false) {
+            LoadFromXDocument(instance, XDocument.Parse(xmlContent), valueInAttribute);
         }
 
+        /// <summary>
+        /// Load an instance of the object T from an xml file,
+        /// it mirrors SaveToFile
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="filename"></param>
+        /// <param name="valueInAttribute"></param>
         public static void LoadFromFile(T instance, string filename, bool valueInAttribute) {
-            Load(instance, XDocument.Load(filename).Root.Descendants(InstanceListItemString).First(), valueInAttribute);
+            var root = XDocument.Load(filename).Root;
+            if (root != null)
+                LoadFromXElement(instance, root.Descendants(InstanceListItemString).First(), valueInAttribute);
         }
 
+        /// <summary>
+        /// Load a list of object T from an xml file,
+        /// it mirrors SaveToFile
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="filename"></param>
+        /// <param name="valueInAttribute"></param>
         public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute) {
-            Load(instance, XDocument.Load(filename), valueInAttribute);
+            LoadFromXDocument(instance, XDocument.Load(filename), valueInAttribute);
         }
 
-        private static void Load(List<T> instance, XDocument document, bool valueInAttribute) {
+        /// <summary>
+        /// Load an instance of objetc T from a XDocument,
+        /// it mirros SaveToXDocument
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <param name="document"></param>
+        /// <param name="valueInAttribute"></param>
+        public static void LoadFromXDocument(List<T> instance, XDocument document, bool valueInAttribute) {
             XElement rootElement = document.Root;
             if (rootElement == null) return;
-
-            var properties = typeof(T).GetFields();
 
             /* loop through InstanceListItemString elements */
             foreach (XElement itemElement in rootElement.Descendants(InstanceListItemString)) {
                 T item = (T)Activator.CreateInstance(typeof(T), new object[] { });
 
-                Load(item, itemElement, valueInAttribute);
+                LoadFromXElement(item, itemElement, valueInAttribute);
 
                 instance.Add(item);
             }
         }
 
-        private static void Load(T item, XElement itemElement, bool valueInAttribute) {
+        /// <summary>
+        /// Load an instance of object T from an XElement,
+        /// it mirrors SaveToXElement
+        /// </summary>
+        /// <param name="item"></param>
+        /// <param name="itemElement"></param>
+        /// <param name="valueInAttribute"></param>
+        private static void LoadFromXElement(T item, XElement itemElement, bool valueInAttribute) {
             var properties = typeof(T).GetFields();
 
             /* loop through fields */

@@ -7,6 +7,7 @@ using System.Text;
 using _3PA.Data;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
     public class SnippetContext {
@@ -45,7 +46,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Read(ConfigFile);
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error while loading snippets!", ConfigFile);
+                    ErrorHandler.ShowErrors(e, "Error while loading snippets!", ConfigFile);
                 }
                 SetupFileWatcher();
             }

@@ -26,14 +26,13 @@ namespace _3PA.Lib {
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
         public bool AutoCompleteShowInCommentsAndStrings = true;
-        public bool AutoCompleteAnimate = false;
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
         public double AutoCompleteOpacityUnfocused = 0.92d;
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+        public bool AutoCompleteAlternateBackColor = true;
 
         public int ThemeId = 1;
-        public int ThemeNppId = 0;
         public Color AccentColor = Color.DarkOrange;
 
         public string ProgressProwin32ExePath = @"C:\Progress\client\v1110_dv\dlc\bin\prowin32.exe";
@@ -67,7 +66,7 @@ namespace _3PA.Lib {
                 try {
                     Object2Xml<ConfigObject>.LoadFromFile(_instance, _filePath, false);
                 } catch (Exception e) {
-                    Plug.ShowErrors(e, "Error when loading settings", _filePath);
+                    ErrorHandler.ShowErrors(e, "Error when loading settings", _filePath);
                 }
             }
             SetupFileWatcher();
@@ -79,7 +78,7 @@ namespace _3PA.Lib {
                 if (!string.IsNullOrWhiteSpace(_filePath))
                     Object2Xml<ConfigObject>.SaveToFile(_instance, _filePath, false);
             } catch (Exception e) {
-                Plug.ShowErrors(e, "Error when saving settings");
+                ErrorHandler.ShowErrors(e, "Error when saving settings");
             }
         }
 

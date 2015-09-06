@@ -30,7 +30,7 @@ a:link { text-decoration: none; }
 
 /* this decorates the htmllabels */
 .yamui-text { 
-    Font: 12px SEGOEUI;
+    Font: 12px "Segoe UI";
     color: %FormForeGroundColor%;
     margin: 0;
     padding: 0;
@@ -43,5 +43,5 @@ a:link { text-decoration: none; }
     background-color: black;
     color: %FormForeGroundColor%;
     padding: 5px;
-    Font: 12px SEGOEUI;
+    Font: 12px "Segoe UI";
 }

@@ -1,4 +1,4 @@
-﻿namespace _3PA.Lib {
+﻿namespace _3PA.MainFeatures.AutoCompletion {
 
     public class CompletionData {
         public string DisplayText { get; set; }

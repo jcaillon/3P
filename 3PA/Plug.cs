@@ -22,8 +22,9 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.DockableExplorer;
 using _3PA.Properties;
-using AutoComplete = _3PA.MainFeatures.AutoComplete;
+using AutoComplete = _3PA.MainFeatures.AutoCompletion.AutoComplete;
 using Config = _3PA.Lib.Config;
 
 #pragma warning disable 1591
@@ -59,9 +60,9 @@ namespace _3PA {
             
             //                                                                      " name of the shortcut in config file : keys "
             Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.ShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Show table names list", AutoComplete.ShowTablesSuggestions, "Show_TablesSuggestions:Alt+Space", false, uniqueKeys);
             Interop.Plug.SetCommand(cmdIndex++, "Show code snippet list", AutoComplete.ShowSnippetsList, "Show_SnippetsList:Ctrl+Shift+Space", false, uniqueKeys);
-            
+            Interop.Plug.SetCommand(cmdIndex++, "Open main window", hello, "Open_main_window:Alt+Space", false, uniqueKeys);
+
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
             Interop.Plug.SetCommand(cmdIndex++, "Test", hello, "_Test:Ctrl+D", false, uniqueKeys);
@@ -96,8 +97,8 @@ namespace _3PA {
 
             SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
             */
-            Interop.Plug.SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
-            idFrmGotToLine = --cmdIndex;
+            Interop.Plug.SetCommand(cmdIndex++, "Dockable explorer", DockableExplorer.Toggle);
+            DockableExplorer.DockableCommandIndex = cmdIndex - 1;
 
             //NPP already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
@@ -124,28 +125,33 @@ namespace _3PA {
         /// display images in the npp toolbar
         /// </summary>
         static internal void InitToolbarImages() {
-
+            Npp.SetToolbarImage(ImageResources._3PA, DockableExplorer.DockableCommandIndex);
         }
 
         /// <summary>
         /// Called on Npp shutdown
         /// </summary>
         static internal void CleanUp() {
-            // save config (should be done but just in case)
-            Config.Save();
-
-            // set options back to client's default
-            ApplyPluginSpecificOptions(false);
-
-            // remember the most used keywords
-            Keywords.Save();
+            try {
+                // set options back to client's default
+                ApplyPluginSpecificOptions(true);
+                // save config (should be done but just in case)
+                Config.Save();
+                // remember the most used keywords
+                Keywords.Save();
+                // dispose of autocomplete
+                AutoComplete.ForceClose();
+                PluginIsFullyLoaded = false;
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "CleanUp");
+            }
         }
 
         /// <summary>
         /// Called on npp ready
         /// </summary>
         static internal void OnNppReady() {
-
+            // This allows to correctly feed the dll with dependencies
             LibLoader.Init();
 
             // registry : temp folder path
@@ -161,7 +167,9 @@ namespace _3PA {
             Registry.SetValue(Resources.RegistryPath, "notepadPath", Path.Combine(pathNotepadFolder, "notepad++.exe"), RegistryValueKind.String);
 
             Dispatcher.Init();
-            Npp.HideDefaultAutoCompletion();
+
+            // Simulates a OnDocumentSwitched when we start this dll
+            OnDocumentSwitched();
 
             // initialize autocompletion (asynchrone)
             Task.Factory.StartNew(() => {
@@ -171,9 +179,15 @@ namespace _3PA {
                     FileTags.Init();
                     DataBaseInfo.Init();
                     Config.Save();
+
+                    // initialize the list of objects of the autocompletion form
+                    AutoComplete.FillItems();
+
+                    // themes
                     ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
-                    ThemeManagerNpp.CurrentThemeIdToUse = Config.Instance.ThemeNppId;
                     ThemeManager.AccentColor = Config.Instance.AccentColor;
+                    // TODO: delete when releasing! (we dont want the user to access those themes!)
+                    ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -188,9 +202,6 @@ namespace _3PA {
         /// <param name="c"></param>
         static public void OnCharTyped(char c) {
             try {
-                // only do stuff if we are in a progress file
-                if (!Npp.IsCurrentProgressFile()) return;
-
                 string newStr = c.ToString();
                 Point keywordPos;
                 string keyword;
@@ -200,9 +211,9 @@ namespace _3PA {
                     AutoComplete.ActivatedAutoCompleteIfNeeded();
 
                 // we finished entering a keyword
-                } else { 
-
+                } else {
                     AutoComplete.CloseSuggestionList();
+                    return;
 
                     int offset = (newStr.Equals("\n") && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
                     int curPos = Npp.GetCaretPosition();
@@ -231,12 +242,12 @@ namespace _3PA {
                         return;
                     }                    
 
-                    // replace the last keyword by the correct case, check the context of the caret, can't upper case in comments for example
-                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Npp.IsNormalContext(curPos) && lastWordInDico)
+                    // replace the last keyword by the correct case, check the context of the caret
+                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && lastWordInDico)
                         Npp.WrappedKeywordReplace(Npp.AutoCaseToUserLiking(keyword), keywordPos, curPos);
 
                     // replace semicolon by a point
-                    if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && Npp.IsNormalContext(curPos) && lastWordInDico)
+                    if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && lastWordInDico)
                         Npp.WrappedKeywordReplace(".", new Point(curPos - 1, curPos), curPos);
 
                     // on DO: add an END
@@ -275,7 +286,7 @@ namespace _3PA {
 
                 }
             } catch (Exception e) {
-                ShowErrors(e, "Error in OnCharTyped");
+                ErrorHandler.ShowErrors(e, "Error in OnCharTyped");
             }
         }
 
@@ -285,17 +296,19 @@ namespace _3PA {
         /// <param name="key"></param>
         /// <param name="repeatCount"></param>
         /// <param name="handled"></param>
+        // ReSharper disable once RedundantAssignment
         static void Instance_KeyDown(Keys key, int repeatCount, ref bool handled) {
+            // if set to true, the keyinput is completly intercepted, otherwise npp sill do its stuff
+            handled = false; 
+
             // only do stuff if we are in a progress file
-            handled = false;
             if (!Npp.IsCurrentProgressFile()) return;
 
             try {
-                if (AutoComplete.IsShowingAutocompletion) {
-                    Modifiers modifiers = KeyInterceptor.GetModifiers();
+                if (AutoComplete.IsVisible) {
                     if (key == Keys.Up || key == Keys.Down || key == Keys.Right || key == Keys.Left || key == Keys.Tab || key == Keys.Return ||
                         key == Keys.Escape) {
-                        handled = AutoComplete.GetForm.OnKeyDown(key);
+                        handled = AutoComplete.OnKeyDown(key);
                     } else if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                         AutoComplete.CloseSuggestionList();
                     }
@@ -341,7 +354,7 @@ namespace _3PA {
                 }
 
             } catch (Exception e) {
-                ShowErrors(e, "Error in Instance_KeyDown");
+                ErrorHandler.ShowErrors(e, "Error in Instance_KeyDown");
             }
         }
 
@@ -351,12 +364,19 @@ namespace _3PA {
         public static void OnUpdateSelection() {
             // close suggestions
             AutoComplete.CloseSuggestionList();
+            Snippets.FinalizeCurrent();
         }
 
+        /// <summary>
+        /// called when the user scrolls..
+        /// </summary>
         public static void OnPageScrolled() {
             AutoComplete.CloseSuggestionList();
         }
 
+        /// <summary>
+        /// Called when a line is removed or added in the current doc
+        /// </summary>
         public static void OnLineAddedOrRemoved() {
             if (!Npp.GetCurrentFile().Equals(CurrentFile) && Npp.IsCurrentProgressFile()) {
                 CurrentFile = Npp.GetCurrentFile();
@@ -365,11 +385,11 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
-        /// when the user modifiy the doc, change the selection or when we leave npp
+        /// Called when the user switches tab document
         /// </summary>
-        public static void ApplyPluginSpecificOptions() {
+        public static void OnDocumentSwitched() {
             ApplyPluginSpecificOptions(false);
+            AutoComplete.CloseSuggestionList();
         }
 
         /// <summary>
@@ -378,139 +398,21 @@ namespace _3PA {
         /// </summary>
         /// <param name="forceToDefault"></param>
         public static void ApplyPluginSpecificOptions(bool forceToDefault) {
-            string cur = Npp.GetCurrentFile();
-            if (!cur.Equals(CurrentFile) || forceToDefault) {
-                CurrentFile = cur;
-                if (!Npp.IsCurrentProgressFile() || forceToDefault) {
-                    Npp.ResetDefaultAutoCompletion();
-                    Npp.SetIndent(_indentWidth);
-                    Npp.SetUseTabs(_indentWithTabs);
-                } else {
-                    Npp.HideDefaultAutoCompletion();
-                    _indentWidth = Npp.GetIndent();
-                    _indentWithTabs = Npp.GetUseTabs();
-                    Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
-                    Npp.SetUseTabs(false);
-                }
-            }
-        }
-        #endregion
-
-        #region " other functions "
-        static void GoToDefinition() {
-            var cursor = Cursor.Current;
-            try {
-                Cursor.Current = Cursors.WaitCursor;
-
-                if (Npp.IsCurrentProgressFile()) {
-                    //DomRegion region = ResolveMemberAtCaret();
-
-                    //if (region != DomRegion.Empty)
-                    //{
-                    //    Npp.OpenFile(region.FileName);
-                    //    Npp.GoToLine(region.BeginLine);
-                    //    Npp.ScrollToCaret();
-                    //    Npp.GrabFocus();
-                    //}
-                }
-            } catch { } finally {
-                Cursor.Current = cursor;
-            }
-        }
-
-
-
-        static void run_ext(string command, string currentFile) {
-
-            string baseini = @"P:\appli\sac1\sacdev.ini";
-            string basepf = @"P:\base\tmaprogress\newtmap.pf";
-            string assemblies = @"C:\Progress\proparse.net";
-            string tempfolder = @"C:\Temp";
-
-            // save the path to the progress files in the registry
-            Registry.SetValue(Resources.RegistryPath, "scriptLoc", Npp.GetConfigDir(), RegistryValueKind.String);
-
-            StringBuilder args = new StringBuilder();
-
-            args.Append(
-                " -cpinternal ISO8859-1" +
-                " -inp 20000 -tok 2048 -numsep 46" +
-                " -p " + Quoter("nppTool.p"));
-
-            if (Directory.Exists(tempfolder)) {
-                args.Append(" -T " + Quoter(tempfolder));
-            }
-
-            StringBuilder param = new StringBuilder();
-            param.Append(command + "," + currentFile);
-
-            if (File.Exists(baseini) && File.Exists(basepf)) {
-                args.Append(
-                " -ini " + Quoter(baseini) +
-                " -pf " + Quoter(basepf));
-                param.Append(",1");
+            if (!Npp.IsCurrentProgressFile() || forceToDefault) {
+                Npp.ResetDefaultAutoCompletion();
+                Npp.SetIndent(_indentWidth);
+                Npp.SetUseTabs(_indentWithTabs);
             } else {
-                param.Append(",0");
+                Npp.HideDefaultAutoCompletion();
+                _indentWidth = Npp.GetIndent();
+                _indentWithTabs = Npp.GetUseTabs();
+                Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
+                Npp.SetUseTabs(false);
             }
-
-            if (Directory.Exists(assemblies)) {
-                args.Append(" -assemblies " + Quoter(assemblies));
-                param.Append(",1");
-            } else {
-                param.Append(",0");
-            }
-
-            args.Append(" -param " + Quoter(param.ToString()));
-
-            // execute
-            Process process = new Process();
-            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-            process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.FileName = Config.Instance.ProgressProwin32ExePath;
-            process.StartInfo.Arguments = args.ToString();
-            process.StartInfo.WorkingDirectory = Npp.GetConfigDir();
-            process.EnableRaisingEvents = true;
-            process.Exited += afterProgressExecution;
-            process.Start();
-
-            MessageBox.Show(args.ToString(), "yo", MessageBoxButtons.OK);
-        }
-
-        // Handle Exited event and display process information. 
-        static void afterProgressExecution(object sender, EventArgs e) {
-            MessageBox.Show("ok", "yo", MessageBoxButtons.OK);
         }
         #endregion
 
-        #region " helper "
-
-        public static string Quoter(string inString) { return "\"" + inString + "\""; }
-
-        public static void ShowErrors(Exception e, string message, string fileName) {
-            MessageBox.Show("Error in " + AssemblyInfo.ProductTitle + ", couldn't load the following file : \n" +
-                            fileName +
-                            "\nThe file has been renamed with the '_errors' suffix to avoid further problems.");
-            if (File.Exists(fileName + "_errors"))
-                File.Delete(fileName + "_errors");
-            File.Move(fileName, fileName + "_errors");
-            ShowErrors(e, message);
-        }
-
-        public static void ShowErrors(Exception e, string message) {
-#if DEBUG
-            MessageBox.Show("Custom error : " + message + "\n" + e.ToString());
-#else
-#endif
-        }
-
-        public static void MessageToUser(string text) {
-            MessageBox.Show(text);
-        }
-        #endregion
-
-        #region " demo "
-        static string sessionFilePath = @"C:\text.session";
-       
+        #region " demo "       
         static void hello() {
 
             ThemeManager.TabAnimationAllowed = true;
@@ -530,92 +432,6 @@ namespace _3PA {
             Transition.run(MainForm, "Opacity", 1d, new TransitionType_Acceleration(200));
             Application.Run(MainForm);
         }
-
-        static void getFileNamesDemo() {
-            int nbFile = (int)Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, 0);
-            MessageBox.Show(nbFile.ToString(), "Number of opened files:");
-
-            using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
-                if (Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
-                    foreach (string file in cStrArray.ManagedStringsUnicode) MessageBox.Show(file);
-            }
-        }
-        static void getSessionFileNamesDemo() {
-            int nbFile = (int)Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
-
-            if (nbFile < 1) {
-                MessageBox.Show("Please modify \"sessionFilePath\" in \"Demo.cs\" in order to point to a valid session file", "Error");
-                return;
-            }
-            MessageBox.Show(nbFile.ToString(), "Number of session files:");
-
-            using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
-                if (Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
-                    foreach (string file in cStrArray.ManagedStringsUnicode) MessageBox.Show(file);
-            }
-        }
-        static void saveCurrentSessionDemo() {
-            string sessionPath = Marshal.PtrToStringUni(Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, sessionFilePath));
-            if (!string.IsNullOrEmpty(sessionPath))
-                MessageBox.Show(sessionPath, "Saved Session File :", MessageBoxButtons.OK);
-        }
-
-        static frmGoToLine frmGoToLine;
-        static internal int idFrmGotToLine = 15;
-        static Bitmap tbBmp_tbTab = ImageResources._3PA;
-        static Icon tbIcon;
-        static void DockableDlgDemo() {
-            // Dockable Dialog Demo
-            // 
-            // This demonstration shows you how to do a dockable dialog.
-            // You can create your own non dockable dialog - in this case you don't nedd this demonstration.
-            if (frmGoToLine == null) {
-                frmGoToLine = new frmGoToLine();
-
-                using (Bitmap newBmp = new Bitmap(16, 16)) {
-                    Graphics g = Graphics.FromImage(newBmp);
-                    ColorMap[] colorMap = new ColorMap[1];
-                    colorMap[0] = new ColorMap();
-                    colorMap[0].OldColor = Color.FromArgb(255, 0, 255);
-                    colorMap[0].NewColor = Color.FromKnownColor(KnownColor.ButtonFace);
-                    ImageAttributes attr = new ImageAttributes();
-                    attr.SetRemapTable(colorMap);
-                    g.DrawImage(tbBmp_tbTab, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
-                    tbIcon = Icon.FromHandle(newBmp.GetHicon());
-                }
-
-                NppTbData _nppTbData = new NppTbData();
-                _nppTbData.hClient = frmGoToLine.Handle;
-                _nppTbData.pszName = "Go To Line #";
-                // the dlgDlg should be the index of funcItem where the current function pointer is in
-                // this case is 15.. so the initial value of funcItem[15]._cmdID - not the updated internal one !
-                _nppTbData.dlgID = idFrmGotToLine;
-                // define the default docking behaviour
-                _nppTbData.uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR;
-                _nppTbData.hIconTab = (uint)tbIcon.Handle;
-                _nppTbData.pszModuleName = Assembly.GetExecutingAssembly().GetName().Name;
-                IntPtr _ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(_nppTbData));
-                Marshal.StructureToPtr(_nppTbData, _ptrNppTbData, false);
-
-                Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, _ptrNppTbData);
-                // Following message will toogle both menu item state and toolbar button
-                Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, FuncItems.Items[idFrmGotToLine]._cmdID, 1);
-            } else {
-                if (!frmGoToLine.Visible) {
-                    Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMSHOW, 0, frmGoToLine.Handle);
-                    Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, FuncItems.Items[idFrmGotToLine]._cmdID, 1);
-                } else {
-                    Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMHIDE, 0, frmGoToLine.Handle);
-                    Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, FuncItems.Items[idFrmGotToLine]._cmdID, 0);
-                }
-                // redraw :
-                //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, frmGoToLine.Handle);
-                
-            }
-            frmGoToLine.textBox1.Focus();
-        }
-
         #endregion
-
     }
 }
