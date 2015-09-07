@@ -13,7 +13,8 @@ namespace YamuiFramework.Themes {
         /// </summary>
         public static void UpdateBaseCssData() {
             var baseCss = Resources.Resources.baseCss;
-            baseCss = baseCss.Replace("%FormForeGroundColor%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
+            baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
+            baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.FormColorBackColor));
             _baseCssData = HtmlRender.ParseStyleSheet(baseCss);
         }
 

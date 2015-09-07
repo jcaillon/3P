@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Reflection;
@@ -6,6 +8,7 @@ using System.Runtime.InteropServices;
 using _3PA.Forms;
 using _3PA.Images;
 using _3PA.Interop;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.DockableExplorer {
     public class DockableExplorer {
@@ -14,8 +17,33 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
         public static DockableExplorerForm ExplorerForm { get; private set; }
 
+        private static List<ExplorerCategories> _listOfCategories; 
+
         public static bool IsVisible {
             get { return ExplorerForm != null && ExplorerForm.Visible; }
+        }
+
+        /// <summary>
+        /// Call this method to refresh the content of the code explorer
+        /// it remembers the expanded categories when refreshing
+        /// </summary>
+        public static void RefreshContent() {
+            if (ExplorerContent.Categories == null) {
+                ExplorerContent.Init();
+                ExplorerForm.RefreshExplorer();
+            }
+
+            // build the list of items of the tree
+            var items = new List<ExplorerItems>() {
+                new ExplorerItems() {DisplayText = "function 5", MyIcon = IconType.Functions},
+                new ExplorerItems() {DisplayText = "function 1", MyIcon = IconType.Functions},
+                new ExplorerItems() {DisplayText = "function 9", MyIcon = IconType.Functions},
+                new ExplorerItems() {DisplayText = "function 2", MyIcon = IconType.Functions},
+                new ExplorerItems() {DisplayText = "proc 1", MyIcon = IconType.Procedures}
+            };
+            ExplorerContent.SetItems(items);
+
+            ExplorerForm.ForceRebuildAll();
         }
 
         /// <summary>
@@ -23,10 +51,13 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void Toggle() {
             // initialize if not done
-            if (ExplorerForm == null) 
+            if (ExplorerForm == null)
                 Init();
-            else
+            else {
                 Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
+            }
+            if (ExplorerForm == null) return;
+            ExplorerForm.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
             UpdateMenuItemChecked();
         }
 
@@ -34,8 +65,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// Use this to redraw the docked form
         /// </summary>
         public static void Redraw() {
-            if (IsVisible)
+            if (IsVisible) {
                 Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
+                ExplorerForm.StyleOvlTree();
+                ExplorerForm.Invalidate();
+            }
         }
 
         /// <summary>
@@ -81,6 +115,9 @@ namespace _3PA.MainFeatures.DockableExplorer {
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
 
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+
+            RefreshContent();
+            ExplorerForm.ExpandAll();
         }
 
 

@@ -12,7 +12,7 @@ ul li {margin: .25em}
 
 body {
     Font: 12px SEGOEUI;
-    color: %FormForeGroundColor%;
+    color: %FGcolor%;
     padding: 0;
     margin: 0;
 }
@@ -31,7 +31,7 @@ a:link { text-decoration: none; }
 /* this decorates the htmllabels */
 .yamui-text { 
     Font: 12px "Segoe UI";
-    color: %FormForeGroundColor%;
+    color: %FGcolor%;
     margin: 0;
     padding: 0;
 }
@@ -40,8 +40,8 @@ a:link { text-decoration: none; }
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
     border: solid 1px #767676;
-    background-color: black;
-    color: %FormForeGroundColor%;
+    background-color: %BGcolor%;
+    color: %FGcolor%;
     padding: 5px;
     Font: 12px "Segoe UI";
 }

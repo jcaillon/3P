@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>_3PA</RootNamespace>
-    <AssemblyName>3PA</AssemblyName>
+    <AssemblyName>2P2B</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
@@ -156,6 +156,9 @@
     <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.Designer.cs">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\AutoCompletion\CustomHighlightTextRenderer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainFeatures\CodeFormatter.cs" />
     <Compile Include="MainFeatures\DataBaseInfo.cs" />
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorer.cs" />
@@ -254,6 +257,14 @@
     <Content Include="Images\AutoCompletion\CompletionType\UserVariableOther.png" />
     <Content Include="Images\AutoCompletion\CompletionType\UserVariablePrimitive.png" />
     <Content Include="Images\DockableExplorer\3PA.png" />
+    <Content Include="Images\DockableExplorer\clear_filters.png" />
+    <Content Include="Images\DockableExplorer\code.png" />
+    <Content Include="Images\DockableExplorer\collapse.png" />
+    <Content Include="Images\DockableExplorer\eraser.png" />
+    <Content Include="Images\DockableExplorer\expand.png" />
+    <Content Include="Images\DockableExplorer\exterior.png" />
+    <Content Include="Images\DockableExplorer\numerical_sorting_12.png" />
+    <Content Include="Images\DockableExplorer\refresh.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />

@@ -36,8 +36,6 @@ C:\Work\3PA\3PA\bin\Debug\3PA.dll
 C:\Work\3PA\3PA\bin\Debug\3PA.pdb
 C:\Work\3PA\3PA\bin\Debug\YamuiFramework.dll
 C:\Work\3PA\3PA\bin\Debug\YamuiFramework.pdb
-C:\Work\3PA_side\npp\plugins\3PA.dll
-C:\Work\3PA_side\npp\plugins\3PA.pdb
 C:\Work\3PA\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Form1.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Appli.Pages.control.Classic.resources
@@ -52,6 +50,8 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Images.ImageResources.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
-C:\Work\3PA\3PA\obj\Debug\3PA.dll
-C:\Work\3PA\3PA\obj\Debug\3PA.pdb
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.DockableExplorer.DockableExplorerForm.resources
+C:\Work\3PA_side\npp\plugins\2P2B.dll
+C:\Work\3PA_side\npp\plugins\2P2B.pdb
+C:\Work\3PA\3PA\obj\Debug\2P2B.dll
+C:\Work\3PA\3PA\obj\Debug\2P2B.pdb

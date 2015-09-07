@@ -30,7 +30,9 @@ namespace _3PA.Lib {
         public int AutoCompleteShowListOfXSuggestions = 12;
         public double AutoCompleteOpacityUnfocused = 0.92d;
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
-        public bool AutoCompleteAlternateBackColor = true;
+        public bool AutoCompleteAlternateBackColor = false;
+
+        public bool ExplorerUseAlternateColors = false;
 
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;

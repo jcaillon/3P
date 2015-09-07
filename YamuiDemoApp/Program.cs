@@ -24,6 +24,8 @@ namespace YamuiDemoApp {
             Keywords.Init();
 
             var testAutoComp = new DockableExplorerForm();
+            ExplorerContent.Init();
+            testAutoComp.RefreshExplorer();
             testAutoComp.ShowDialog();
 
             return;

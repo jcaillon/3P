@@ -66,6 +66,9 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
+    <Compile Include="Controls\YamuiImageButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiCharButton.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -145,6 +148,7 @@
     <Compile Include="Forms\YamuiFormMessageBox.Designer.cs">
       <DependentUpon>YamuiFormMessageBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />
     <Compile Include="HtmlRenderer.Core\Adapters\Entities\RColor.cs" />
     <Compile Include="HtmlRenderer.Core\Adapters\Entities\RDashStyle.cs" />
