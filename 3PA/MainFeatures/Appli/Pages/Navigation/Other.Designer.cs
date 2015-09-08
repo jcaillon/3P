@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 
-namespace _3PA.Appli.Pages.Navigation {
+namespace _3PA.MainFeatures.Appli.Pages.Navigation {
     partial class Other {
         /// <summary> 
         /// Required designer variable.

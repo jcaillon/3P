@@ -1,11 +1,11 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
-using _3PA.Appli.Pages;
-using _3PA.Appli.Pages.control;
-using _3PA.Appli.Pages.Navigation;
+using _3PA.MainFeatures.Appli.Pages;
+using _3PA.MainFeatures.Appli.Pages.control;
+using _3PA.MainFeatures.Appli.Pages.Navigation;
 
-namespace _3PA.Appli {
-    partial class Form1 {
+namespace _3PA.MainFeatures.Appli {
+    partial class AppliForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -19,6 +19,7 @@ namespace _3PA.Appli {
             if (disposing && (components != null)) {
                 components.Dispose();
             }
+            Closing -= OnClosing;
             base.Dispose(disposing);
         }
 
@@ -33,25 +34,25 @@ namespace _3PA.Appli {
             this.pageClassic = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControl2 = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabPage2 = new YamuiFramework.Controls.YamuiTabPage();
-            this.classic1 = new _3PA.Appli.Pages.control.Classic();
+            this.classic1 = new Classic();
             this.yamuiTabPage6 = new YamuiFramework.Controls.YamuiTabPage();
-            this.itemControl1 = new _3PA.Appli.Pages.control.ItemControl();
+            this.itemControl1 = new ItemControl();
             this.yamuiTabPage7 = new YamuiFramework.Controls.YamuiTabPage();
-            this.text1 = new _3PA.Appli.Pages.control.Text();
+            this.text1 = new Text();
             this.yamuiTabPage4 = new YamuiFramework.Controls.YamuiTabPage();
-            this.progress1 = new _3PA.Appli.Pages.control.Progress();
+            this.progress1 = new Progress();
             this.yamuiTabPage3 = new YamuiFramework.Controls.YamuiTabPage();
             this.pageFormAndNav = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControl4 = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabPage12 = new YamuiFramework.Controls.YamuiTabPage();
-            this.navigation1 = new _3PA.Appli.Pages.PageTemplate();
+            this.navigation1 = new PageTemplate();
             this.yamuiTabPage11 = new YamuiFramework.Controls.YamuiTabPage();
-            this.other1 = new _3PA.Appli.Pages.Navigation.Other();
+            this.other1 = new Other();
             this.yamuiTabPage10 = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabMainSetting = new YamuiFramework.Controls.YamuiTabPage();
             this.yamuiTabControlSecSetting = new YamuiFramework.Controls.YamuiTabControl();
             this.yamuiTabSecAppearance = new YamuiFramework.Controls.YamuiTabPage();
-            this.settingAppearance1 = new _3PA.Appli.Pages.SettingAppearance();
+            this.settingAppearance1 = new SettingAppearance();
             this.yamuiPanel3 = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel24 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLink6 = new YamuiFramework.Controls.YamuiLink();

@@ -34,6 +34,9 @@ namespace _3PA.Lib {
 
         public bool ExplorerUseAlternateColors = false;
 
+        public double AppliOpacityUnfocused = 0.5;
+        public bool AppliAllowTabAnimation = true;
+
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
 

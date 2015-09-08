@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using BrightIdeasSoftware.Utilities;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.DockableExplorer {
     public partial class DockableExplorerForm : Form {
@@ -114,6 +111,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;
             }
+
+            CleanTextRenderer();
         }
 
         /// <summary>
@@ -130,14 +129,14 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         /// <param name="e"></param>
         protected override void OnResize(EventArgs e) {
-            DisplayText.Width = Width - 2;
+            DisplayText.Width = ovlTree.Width - 17;
             base.OnResize(e);
         }
 
         /// <summary>
-        /// Call this method to refresh the content of the tree view
+        /// Call this method to initiate the content of the tree view
         /// </summary>
-        public void RefreshExplorer() {
+        public void InitSetObjects() {
             ovlTree.SetObjects(_displayUnSorted ? ExplorerContent.UnsortedCategory : ExplorerContent.Categories);
         }
 
@@ -188,8 +187,12 @@ namespace _3PA.MainFeatures.DockableExplorer {
             buttonExpandRetract.Invalidate();
         }
 
+        /// <summary>
+        /// Update the renderer (the filter)
+        /// </summary>
         private void CleanTextRenderer() {
-            DisplayText.Renderer = new TreeListView.TreeRenderer();
+            DisplayText.Renderer = null;
+            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(ovlTree, "");
         }
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
@@ -199,9 +202,9 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 ovlTree.ModelFilter = null;
                 return;
             }
-            ovlTree.ModelFilter = new ModelFilter((o => o is ExplorerItems && ((ExplorerItems)o).DisplayText.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase)));
-            ovlTree.AdditionalFilter = TextMatchFilter.Contains(ovlTree, textBoxFilter.Text);
-            DisplayText.Renderer = new CustomHighlightTextRenderer(ovlTree, textBoxFilter.Text);
+            // filter the tree..
+            ovlTree.ModelFilter = new ModelFilter((o => (o is ExplorerItems && ((ExplorerItems)o).DisplayText.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase)) || (o is ExplorerCategories && !((ExplorerCategories)o).HasChildren && ((ExplorerCategories)o).DisplayText.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase))));
+            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(ovlTree, textBoxFilter.Text);
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
@@ -213,7 +216,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
         private void buttonSort_Click(object sender, EventArgs e) {
             _displayUnSorted = !_displayUnSorted;
-            RefreshExplorer();
+            InitSetObjects();
             ExpandAll();
             buttonSort.BackGrndImage = _displayUnSorted ? ImageResources.clear_filters : ImageResources.numerical_sorting_12;
             buttonSort.Invalidate();

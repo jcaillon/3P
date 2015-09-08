@@ -113,7 +113,8 @@ namespace BrightIdeasSoftware {
             /// </summary>
             protected virtual bool UseStyles {
                 get {
-                    return !this.IsPrinting && Application.RenderWithVisualStyles;
+                    return false;
+                    //return !this.IsPrinting && Application.RenderWithVisualStyles;
                 }
             }
 

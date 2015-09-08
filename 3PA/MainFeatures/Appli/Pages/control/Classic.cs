@@ -8,7 +8,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 
-namespace _3PA.Appli.Pages.control {
+namespace _3PA.MainFeatures.Appli.Pages.control {
     public partial class Classic : YamuiPage {
         public Classic() {
             InitializeComponent();

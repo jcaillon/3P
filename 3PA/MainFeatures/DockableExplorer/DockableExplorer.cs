@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using _3PA.Forms;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -17,29 +15,26 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
         public static DockableExplorerForm ExplorerForm { get; private set; }
 
-        private static List<ExplorerCategories> _listOfCategories; 
-
         public static bool IsVisible {
             get { return ExplorerForm != null && ExplorerForm.Visible; }
         }
 
         /// <summary>
         /// Call this method to refresh the content of the code explorer
-        /// it remembers the expanded categories when refreshing
         /// </summary>
         public static void RefreshContent() {
             if (ExplorerContent.Categories == null) {
                 ExplorerContent.Init();
-                ExplorerForm.RefreshExplorer();
+                ExplorerForm.InitSetObjects();
             }
 
-            // build the list of items of the tree
-            var items = new List<ExplorerItems>() {
-                new ExplorerItems() {DisplayText = "function 5", MyIcon = IconType.Functions},
-                new ExplorerItems() {DisplayText = "function 1", MyIcon = IconType.Functions},
-                new ExplorerItems() {DisplayText = "function 9", MyIcon = IconType.Functions},
-                new ExplorerItems() {DisplayText = "function 2", MyIcon = IconType.Functions},
-                new ExplorerItems() {DisplayText = "proc 1", MyIcon = IconType.Procedures}
+            // build the list of items of the tree (modify the categories in ExplorerContent!)
+            var items = new List<ExplorerItems> {
+                new ExplorerItems {DisplayText = "function 5", MyIcon = IconType.Functions},
+                new ExplorerItems {DisplayText = "function 1", MyIcon = IconType.Functions},
+                new ExplorerItems {DisplayText = "function 9", MyIcon = IconType.Functions},
+                new ExplorerItems {DisplayText = "function 2", MyIcon = IconType.Functions},
+                new ExplorerItems {DisplayText = "proc 1", MyIcon = IconType.Procedures}
             };
             ExplorerContent.SetItems(items);
 

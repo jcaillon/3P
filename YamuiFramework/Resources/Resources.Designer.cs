@@ -85,7 +85,7 @@ namespace YamuiFramework.Resources {
         ///
         ///body {
         ///    Font: 12px SEGOEUI;
-        ///    color: %FormForeGroundColor%;
+        ///    color: %FGcolor%;
         ///    padding: 0;
         ///    margin: 0;
         ///}
@@ -94,7 +94,7 @@ namespace YamuiFramework.Resources {
         ///pre  { border:solid 1px gray; background-color:#eee; padding:1em }
         ///a:link { text-decoration: none; }
         ///.gray    { color:gray; }
-        ///.examp [rest of string was truncated]&quot;;.
+        ///.example { backgro [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string baseCss {
             get {
@@ -226,16 +226,17 @@ namespace YamuiFramework.Resources {
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;Root&gt;
         ///  &lt;Item&gt;
-        ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
         ///    &lt;ThemeName Value=&quot;The classic&quot; /&gt;
+        ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
         ///    &lt;RankNeeded Value=&quot;0&quot; /&gt;
+        ///    &lt;PageBackGroundImage Value=&quot;&quot; /&gt;
+        ///    &lt;UseCurrentAccentColor Value=&quot;true&quot; /&gt;
+        ///    &lt;AccentColor Value=&quot;#F0A30A&quot; /&gt;
         ///    &lt;FormColorBackColor Value=&quot;#E6E6E6&quot; /&gt;
         ///    &lt;FormColorForeColor Value=&quot;#1E1E1E&quot; /&gt;
         ///    &lt;ScrollBarsColorsNormalBackColor Value=&quot;#CCCCCC&quot; /&gt;
         ///    &lt;ScrollBarsColorsNormalForeColor Value=&quot;#666666&quot; /&gt;
-        ///    &lt;ScrollBarsColorsHoverBackColor Value=&quot;#CCCCCC&quot; /&gt;
-        ///    &lt;ScrollBarsColorsHoverForeColor Value=&quot;#252526&quot; /&gt;
-        ///    &lt;ScrollBarsColorsDisabledBackColor Valu [rest of string was truncated]&quot;;.
+        ///    &lt;ScrollBarsColorsHoverBackColor  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string themesXml {
             get {

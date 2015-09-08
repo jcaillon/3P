@@ -1,7 +1,7 @@
 ﻿using System;
 using YamuiFramework.Controls;
 
-namespace _3PA.Appli.Pages.Navigation {
+namespace _3PA.MainFeatures.Appli.Pages.Navigation {
     public partial class Other : YamuiPage {
         public Other() {
             InitializeComponent();

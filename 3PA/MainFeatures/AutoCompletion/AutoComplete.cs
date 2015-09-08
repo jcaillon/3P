@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // the form is already visible
                 if (IsVisible) {
                     if (!_openedFromShortCut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)
-                        CloseSuggestionList();
+                        Close();
                     else {
                         // if opened with fields only, show complete if the user deleted the . char
                         _form.FilterByText = keyword;
@@ -108,7 +108,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     }
                 }
             } else {
-                CloseSuggestionList();
+                Close();
             }
         }
 
@@ -156,7 +156,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _openedFromShortCut = displayFromShortCut;
 
             if (_currentItems == null || !_currentItems.Any()) {
-                CloseSuggestionList();
+                Close();
                 return;
             }
 
@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         Snippets.TriggerCodeSnippetInsertion();
                 }
 
-                CloseSuggestionList();
+                Close();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error during AutoCompletionAccepted");
             }
@@ -241,7 +241,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Closes the form
         /// </summary>
-        public static void CloseSuggestionList() {
+        public static void Close() {
             try {
                 _form.Cloack();
                 _openedFromShortCut = false;
@@ -255,8 +255,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void ForceClose() {
             try {
-                _form.Tag = true;
-                _form.Close();
+                _form.ForceClose();
                 _form = null;
             } catch (Exception) {
                 // ignored

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 
-namespace _3PA.Appli.Pages.control {
+namespace _3PA.MainFeatures.Appli.Pages.control {
     partial class ItemControl {
         /// <summary> 
         /// Required designer variable.

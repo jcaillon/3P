@@ -38,6 +38,8 @@
             // 
             // textBoxFilter
             // 
+            this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxFilter.Lines = new string[0];
             this.textBoxFilter.Location = new System.Drawing.Point(110, 4);
             this.textBoxFilter.MaxLength = 32767;
@@ -45,7 +47,7 @@
             this.textBoxFilter.PasswordChar = '\0';
             this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textBoxFilter.SelectedText = "";
-            this.textBoxFilter.Size = new System.Drawing.Size(177, 25);
+            this.textBoxFilter.Size = new System.Drawing.Size(175, 25);
             this.textBoxFilter.TabIndex = 0;
             this.textBoxFilter.TabStop = false;
             this.textBoxFilter.WaterMark = "Filter here!";
@@ -71,7 +73,7 @@
             this.ovlTree.OwnerDraw = true;
             this.ovlTree.RowHeight = 20;
             this.ovlTree.ShowGroups = false;
-            this.ovlTree.Size = new System.Drawing.Size(283, 494);
+            this.ovlTree.Size = new System.Drawing.Size(282, 87);
             this.ovlTree.TabIndex = 1;
             this.ovlTree.TabStop = false;
             this.ovlTree.UseCompatibleStateImageBehavior = false;
@@ -91,7 +93,7 @@
             // buttonExpandRetract
             // 
             this.buttonExpandRetract.BackGrndImage = null;
-            this.buttonExpandRetract.Location = new System.Drawing.Point(4, 4);
+            this.buttonExpandRetract.Location = new System.Drawing.Point(29, 4);
             this.buttonExpandRetract.Name = "buttonExpandRetract";
             this.buttonExpandRetract.Size = new System.Drawing.Size(25, 25);
             this.buttonExpandRetract.TabIndex = 2;
@@ -119,9 +121,9 @@
             this.panelBottom.HorizontalScrollbar = true;
             this.panelBottom.HorizontalScrollbarHighlightOnWheel = false;
             this.panelBottom.HorizontalScrollbarSize = 10;
-            this.panelBottom.Location = new System.Drawing.Point(1, 535);
+            this.panelBottom.Location = new System.Drawing.Point(1, 128);
             this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(289, 47);
+            this.panelBottom.Size = new System.Drawing.Size(288, 47);
             this.panelBottom.TabIndex = 4;
             this.panelBottom.VerticalScrollbar = true;
             this.panelBottom.VerticalScrollbarHighlightOnWheel = false;
@@ -130,7 +132,7 @@
             // buttonRefresh
             // 
             this.buttonRefresh.BackGrndImage = null;
-            this.buttonRefresh.Location = new System.Drawing.Point(29, 4);
+            this.buttonRefresh.Location = new System.Drawing.Point(4, 4);
             this.buttonRefresh.Name = "buttonRefresh";
             this.buttonRefresh.Size = new System.Drawing.Size(25, 25);
             this.buttonRefresh.TabIndex = 5;
@@ -163,7 +165,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(291, 583);
+            this.ClientSize = new System.Drawing.Size(290, 176);
             this.Controls.Add(this.buttonSort);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.panelBottom);

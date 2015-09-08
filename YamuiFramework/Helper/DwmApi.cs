@@ -6,7 +6,7 @@ using System.Security;
 namespace YamuiFramework.Helper {
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal class DwmApi {
+    public class DwmApi {
         #region API calls
         [DllImport("dwmapi.dll")]
         public static extern int DwmExtendFrameIntoClientArea(IntPtr hdc, ref MARGINS marInset);
@@ -19,7 +19,6 @@ namespace YamuiFramework.Helper {
 
         public const int DwmwaTransitionsForcedisabled = 3;
         #endregion
-
 
         #region Structs
         [StructLayout(LayoutKind.Sequential)]

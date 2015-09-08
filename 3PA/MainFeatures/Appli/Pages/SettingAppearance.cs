@@ -8,9 +8,8 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.DockableExplorer;
 
-namespace _3PA.Appli.Pages {
+namespace _3PA.MainFeatures.Appli.Pages {
     public partial class SettingAppearance : YamuiPage {
 
         private static YamuiColorRadioButton _checkButton;
@@ -102,7 +101,7 @@ namespace _3PA.Appli.Pages {
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
             // force the dockable to redraw
-            DockableExplorer.Redraw();
+            DockableExplorer.DockableExplorer.Redraw();
             Application.DoEvents();
             Plug.MainForm.Invalidate();
             Application.DoEvents();

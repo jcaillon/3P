@@ -32,6 +32,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
             _items = items.OrderBy(explorerItems => explorerItems.DisplayText).ToList();
         }
 
+        /// <summary>
+        /// Static method used by ExplorerCategories to return the list of their children
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
         public static List<ExplorerItems> GetItemsFor(IconType type) {
             if (type != IconType.EverythingCodeOrder)
                 return _items.Where(item => item.MyIcon == type).ToList();
@@ -84,10 +89,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
         Functions
     }
 
-    public class ExplorerCategories {
-        public string DisplayText { get; set; }
-
-        public IconType MyIcon { get; set; }
+    /// <summary>
+    /// represent a root item
+    /// </summary>
+    public class ExplorerCategories : ExplorerObject {
 
         public List<ExplorerItems> Items {
             get {
@@ -101,7 +106,17 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public bool HasChildren { get; set; }
     }
 
-    public class ExplorerItems {
+    /// <summary>
+    /// represent a child item
+    /// </summary>
+    public class ExplorerItems : ExplorerObject {
+
+    }
+
+    /// <summary>
+    /// base class
+    /// </summary>
+    public class ExplorerObject {
         public string DisplayText { get; set; }
 
         public IconType MyIcon { get; set; }

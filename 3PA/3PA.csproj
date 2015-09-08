@@ -62,52 +62,52 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Appli\Form1.cs">
+    <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Appli\Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\AppliForm.Designer.cs">
+      <DependentUpon>AppliForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\control\Classic.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Classic.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\control\Classic.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Classic.Designer.cs">
       <DependentUpon>Classic.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\control\ItemControl.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\ItemControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\control\ItemControl.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\ItemControl.Designer.cs">
       <DependentUpon>ItemControl.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\control\Progress.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Progress.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\control\Progress.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Progress.Designer.cs">
       <DependentUpon>Progress.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\control\Text.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Text.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\control\Text.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\control\Text.Designer.cs">
       <DependentUpon>Text.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\Navigation\Other.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Navigation\Other.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\Navigation\Other.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Navigation\Other.Designer.cs">
       <DependentUpon>Other.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\PageTemplate.cs">
+    <Compile Include="MainFeatures\Appli\Pages\PageTemplate.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\PageTemplate.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\PageTemplate.Designer.cs">
       <DependentUpon>PageTemplate.cs</DependentUpon>
     </Compile>
-    <Compile Include="Appli\Pages\SettingAppearance.cs">
+    <Compile Include="MainFeatures\Appli\Pages\SettingAppearance.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Appli\Pages\SettingAppearance.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\SettingAppearance.Designer.cs">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\DataResources.Designer.cs">
@@ -139,6 +139,7 @@
     <Compile Include="Lib\DropToWindows.cs" />
     <Compile Include="Lib\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
+    <Compile Include="MainFeatures\Appli\Appli.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="Lib\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
@@ -161,6 +162,9 @@
     </Compile>
     <Compile Include="MainFeatures\CodeFormatter.cs" />
     <Compile Include="MainFeatures\DataBaseInfo.cs" />
+    <Compile Include="MainFeatures\DockableExplorer\CustomTreeRenderer.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorer.cs" />
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.cs">
       <SubType>Form</SubType>
@@ -173,6 +177,19 @@
     <Compile Include="MainFeatures\Keywords.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
+    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.Designer.cs">
+      <DependentUpon>NppInterfaceForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
+    <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.Designer.cs">
+      <DependentUpon>InfoToolTipForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Npp.cs" />
     <Compile Include="Plug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -184,28 +201,28 @@
     <Compile Include="UnmanagedExports.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Appli\Form1.resx">
-      <DependentUpon>Form1.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\AppliForm.resx">
+      <DependentUpon>AppliForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\control\Classic.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\control\Classic.resx">
       <DependentUpon>Classic.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\control\ItemControl.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\control\ItemControl.resx">
       <DependentUpon>ItemControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\control\Progress.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\control\Progress.resx">
       <DependentUpon>Progress.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\control\Text.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\control\Text.resx">
       <DependentUpon>Text.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\Navigation\Other.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Navigation\Other.resx">
       <DependentUpon>Other.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\PageTemplate.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\PageTemplate.resx">
       <DependentUpon>PageTemplate.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Appli\Pages\SettingAppearance.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\SettingAppearance.resx">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\DataResources.resx">
@@ -222,6 +239,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\DockableExplorer\DockableExplorerForm.resx">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
+      <DependentUpon>NppInterfaceForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\InfoToolTip\InfoToolTipForm.resx">
+      <DependentUpon>InfoToolTipForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -296,7 +319,9 @@
       <Private>False</Private>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="MainFeatures\SmallMenu\" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildProjectDirectory)\Interop\DllExport\NppPlugin.DllExport.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

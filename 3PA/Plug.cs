@@ -1,13 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,23 +9,21 @@ using Microsoft.Win32;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
-using _3PA.Appli;
-using _3PA.Data;
-using _3PA.Forms;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.DockableExplorer;
+using _3PA.MainFeatures.ToolTip;
 using _3PA.Properties;
-using AutoComplete = _3PA.MainFeatures.AutoCompletion.AutoComplete;
-using Config = _3PA.Lib.Config;
 
 #pragma warning disable 1591
 
 namespace _3PA {
 
-    public partial class Plug {
+    public class Plug {
 
         #region " Properties "
         public static YamuiForm MainForm;
@@ -61,11 +53,11 @@ namespace _3PA {
             //                                                                      " name of the shortcut in config file : keys "
             Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.ShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
             Interop.Plug.SetCommand(cmdIndex++, "Show code snippet list", AutoComplete.ShowSnippetsList, "Show_SnippetsList:Ctrl+Shift+Space", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Open main window", hello, "Open_main_window:Alt+Space", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false, uniqueKeys);
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Test", hello, "_Test:Ctrl+D", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "_Test:Ctrl+D", false, uniqueKeys);
             /*
             SetCommand(cmdIndex++, "---", null);
 
@@ -139,8 +131,8 @@ namespace _3PA {
                 Config.Save();
                 // remember the most used keywords
                 Keywords.Save();
-                // dispose of autocomplete
-                AutoComplete.ForceClose();
+                // dispose of all popup
+                ForceCloseAllWindows();
                 PluginIsFullyLoaded = false;
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");
@@ -186,6 +178,7 @@ namespace _3PA {
                     // themes
                     ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
                     ThemeManager.AccentColor = Config.Instance.AccentColor;
+                    ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
                     // TODO: delete when releasing! (we dont want the user to access those themes!)
                     ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
                 } finally {
@@ -212,7 +205,7 @@ namespace _3PA {
 
                 // we finished entering a keyword
                 } else {
-                    AutoComplete.CloseSuggestionList();
+                    AutoComplete.Close();
                     return;
 
                     int offset = (newStr.Equals("\n") && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
@@ -267,7 +260,7 @@ namespace _3PA {
                             };
 
                         // add dot atfer an end
-                        else if (keyword.EqualsCi("end")) {
+                        if (keyword.EqualsCi("end")) {
                             Npp.WrappedKeywordReplace(Npp.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
                             Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
                             ActionAfterUpdateUi = () => {
@@ -305,12 +298,13 @@ namespace _3PA {
             if (!Npp.IsCurrentProgressFile()) return;
 
             try {
+                // Close interfacePopups
+                if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
+                    ClosePopups();
+                }
                 if (AutoComplete.IsVisible) {
-                    if (key == Keys.Up || key == Keys.Down || key == Keys.Right || key == Keys.Left || key == Keys.Tab || key == Keys.Return ||
-                        key == Keys.Escape) {
+                    if (key == Keys.Up || key == Keys.Down || key == Keys.Right || key == Keys.Left || key == Keys.Tab || key == Keys.Return || key == Keys.Escape) {
                         handled = AutoComplete.OnKeyDown(key);
-                    } else if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
-                        AutoComplete.CloseSuggestionList();
                     }
                 } else {
                     if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
@@ -359,11 +353,25 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// When the user leaves his cursor inactive on npp
+        /// </summary>
+        public static void OnDwellStart() {
+            InfoToolTip.ShowToolTip(true);
+        }
+
+        /// <summary>
+        /// When the user moves his cursor
+        /// </summary>
+        public static void OnDwellEnd() {
+            InfoToolTip.Close();
+        }
+
+        /// <summary>
         /// called when the user changes its selection in npp (the carret moves)
         /// </summary>
         public static void OnUpdateSelection() {
             // close suggestions
-            AutoComplete.CloseSuggestionList();
+            ClosePopups();
             Snippets.FinalizeCurrent();
         }
 
@@ -371,7 +379,7 @@ namespace _3PA {
         /// called when the user scrolls..
         /// </summary>
         public static void OnPageScrolled() {
-            AutoComplete.CloseSuggestionList();
+            ClosePopups();
         }
 
         /// <summary>
@@ -389,7 +397,7 @@ namespace _3PA {
         /// </summary>
         public static void OnDocumentSwitched() {
             ApplyPluginSpecificOptions(false);
-            AutoComplete.CloseSuggestionList();
+            ClosePopups();
         }
 
         /// <summary>
@@ -412,25 +420,31 @@ namespace _3PA {
         }
         #endregion
 
-        #region " demo "       
-        static void hello() {
+        #region public
 
-            ThemeManager.TabAnimationAllowed = true;
-            MainForm = new Form1 {
-                Opacity = 0d,
-                Tag = false
-            };
-            MainForm.Closing += (sender, args) => {
-                if ((bool) MainForm.Tag) return;
-                args.Cancel = true;
-                MainForm.Tag = true;
-                var t = new Transition(new TransitionType_Acceleration(200));
-                t.add(MainForm, "Opacity", 0d);
-                t.TransitionCompletedEvent += (o, args1) => { MainForm.Close(); };
-                t.run();
-            };
-            Transition.run(MainForm, "Opacity", 1d, new TransitionType_Acceleration(200));
-            Application.Run(MainForm);
+        /// <summary>
+        /// Call this method to close all popup/autocompletion form and alike
+        /// </summary>
+        public static void ClosePopups() {
+            AutoComplete.Close();
+            InfoToolTip.Close();
+        }
+
+        /// <summary>
+        /// Call this method to force close all popup/autocompletion form and alike
+        /// </summary>
+        public static void ForceCloseAllWindows() {
+            AutoComplete.ForceClose();
+            InfoToolTip.ForceClose();
+            Appli.ForceClose();
+        }
+
+        #endregion
+
+
+        #region tests
+        static void Test() {
+            InfoToolTip.ShowToolTip(true);
         }
         #endregion
     }

@@ -1,19 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using BrightIdeasSoftware.Utilities;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
-using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -21,7 +17,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// This class create an autocompletion window
     /// </summary>
-    public partial class AutoCompletionForm : Form {
+    public partial class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
         /// <summary>
@@ -41,23 +37,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
-        /// <summary>
-        /// Set this to the parent form handle, this gives him back the focus when needed
-        /// </summary>
-        public IntPtr CurrentForegroundWindow;
-
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
         private string _filterString;
         private int _totalItems;
-        private bool _focusAllowed;
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
-        private Rectangle? _nppRect;
-        private Timer _timer1;
-        private bool _iGotActivated;
         private int _normalWidth;
         private List<CompletionData> _initialObjectsList;
         private ImageList _imageListOfTypes;
-        private bool _allowshowdisplay;
         #endregion
 
         #region constructor
@@ -138,54 +124,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.UseTabAsInput = true;
             _filterString = initialFilter;
 
-            // timer to check if the npp window changed
-            _timer1 = new Timer();
-            _timer1.Enabled = true;
-            _timer1.Interval = 500;
-            _timer1.Tick += timer1_Tick;
-
             // handles mouse leave/mouse enter
             MouseLeave += CustomOnMouseLeave;
             fastOLV.MouseLeave += CustomOnMouseLeave;
             fastOLV.DoubleClick += FastOlvOnDoubleClick;
-
-            // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
-
-            Visible = false;
-            Opacity = 0d;
-            Tag = false;
-            Closing += OnClosing;
         }
 
-        /// <summary>
-        /// hides the form
-        /// </summary>
-        public void Cloack() {
-            Visible = false;
-            GiveFocusBack();
-        }
+        #endregion
 
-        /// <summary>
-        /// show the form
-        /// </summary>
-        public void UnCloack() {
-            _allowshowdisplay = true;
-            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
-            Visible = true;
-            GiveFocusBack();
-        }
-
-        /// <summary>
-        /// instead of closing, cload this form (invisible)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="cancelEventArgs"></param>
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            if ((bool)Tag) return;
-            cancelEventArgs.Cancel = true;
-            Cloack();
-        }
+        #region cell formatting
 
         /// <summary>
         /// Event on format cell
@@ -193,9 +140,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            var type = ((CompletionData)args.Model).Flag;
+            var type = ((CompletionData) args.Model).Flag;
             if (type != CompletionFlag.None) {
-                TextDecoration decoration = new TextDecoration(Enum.GetName(typeof(CompletionFlag), type), 100);
+                TextDecoration decoration = new TextDecoration(Enum.GetName(typeof (CompletionFlag), type), 100);
                 decoration.Alignment = ContentAlignment.MiddleRight;
                 decoration.Offset = new Size(-5, 0);
                 decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
@@ -207,7 +154,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 args.SubItem.Decoration = decoration; //NB. Sets Decoration
             }
         }
+
         #endregion
+
+        #region public methods
 
         /// <summary>
         /// set the items of the object view list, correct the width and height of the form and the list
@@ -220,7 +170,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _initialObjectsList = objectsList;
 
             // set the default height / width
-            fastOLV.Height = 21 * Config.Instance.AutoCompleteShowListOfXSuggestions;
+            fastOLV.Height = 21*Config.Instance.AutoCompleteShowListOfXSuggestions;
             Height = fastOLV.Height + 32;
             Width = 280;
 
@@ -239,7 +189,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _activeTypes = new Dictionary<CompletionType, SelectorButton>();
             foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
                 var but = new SelectorButton();
-                but.BackGrndImage = _imageListOfTypes.Images[(int)type];
+                but.BackGrndImage = _imageListOfTypes.Images[(int) type];
                 but.Activated = true;
                 but.Size = new Size(24, 24);
                 but.TabStop = false;
@@ -307,13 +257,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
             // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2 * Screen.PrimaryScreen.WorkingArea.Width / 3)
+            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2*Screen.PrimaryScreen.WorkingArea.Width/3)
                 position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3 * Screen.PrimaryScreen.WorkingArea.Height / 5)
+            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3*Screen.PrimaryScreen.WorkingArea.Height/5)
                 position.Y = position.Y - Height - lineHeight;
             Location = position;
         }
 
+        #endregion
+
+
+        #region events
         /// <summary>
         /// handles double click
         /// </summary>
@@ -341,17 +295,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             beforeSortingEventArgs.Canceled = true;
         }
 
-
-        /// <summary>
-        /// This ensures the form is never visible at start
-        /// </summary>
-        /// <param name="value"></param>
-        protected override void SetVisibleCore(bool value) {
-            base.SetVisibleCore(_allowshowdisplay ? value : _allowshowdisplay);
-        }
-
-
-        #region events
         /// <summary>
         /// handles click on a type
         /// </summary>
@@ -382,28 +325,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             GiveFocusBack();
         }
 
-        /// <summary>
-        /// Gives focus back to the owner window
-        /// </summary>
-        private void GiveFocusBack() {
-            WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            _iGotActivated = !_iGotActivated;
-            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
-        }
-
         protected void CustomOnMouseLeave(object sender, EventArgs e) {
-            if (_iGotActivated) GiveFocusBack();
-        }
-
-        protected override void OnActivated(EventArgs e) {
-            // Activate the window that previously had focus
-            if (!_focusAllowed)
-                WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            else {
-                _iGotActivated = true;
-                Opacity = 1;
-            }
-            base.OnActivated(e);
+            if (IsActivated) GiveFocusBack();
         }
 
         protected override void OnLoad(EventArgs e) {
@@ -412,25 +335,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             //if (!string.IsNullOrEmpty(_filterString)) ApplyFilter();
         }
 
-        protected override void OnShown(EventArgs e) {
-            _focusAllowed = true;
-            base.OnShown(e);
-        }
-
         protected virtual void OnTabCompleted(TabCompletedEventArgs e) {
             var handler = TabCompleted;
             if (handler != null) handler(this, e);
-        }
-
-        private void timer1_Tick(object sender, EventArgs e) {
-            try {
-                var rect = Npp.GetWindowRect();
-                if (_nppRect.HasValue && _nppRect.Value != rect)
-                    Close();
-                _nppRect = rect;
-            } catch (Exception) {
-                // ignored
-            }
         }
         #endregion
 
@@ -465,25 +372,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 handled = false;
             }
             return handled;
-        }
-
-        #endregion
-
-        #region Paint Methods
-
-        protected override void OnPaintBackground(PaintEventArgs e) { }
-
-        protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
-            var borderColor = ThemeManager.AccentColor;
-            var borderWidth = 1;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width - borderWidth, Height - borderWidth));
-            var pen = new Pen(borderColor, borderWidth);
-            e.Graphics.DrawRectangle(pen, rect);
         }
 
         #endregion

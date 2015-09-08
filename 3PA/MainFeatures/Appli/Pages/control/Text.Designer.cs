@@ -2,7 +2,7 @@
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
-namespace _3PA.Appli.Pages.control {
+namespace _3PA.MainFeatures.Appli.Pages.control {
     partial class Text {
         /// <summary> 
         /// Required designer variable.

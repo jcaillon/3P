@@ -17,9 +17,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
             base.Dispose(disposing);
             try {
-                _timer1.Tick -= timer1_Tick;
-                _timer1.Dispose();
-                _timer1 = null;
                 fastOLV.FormatCell -= FastOlvOnFormatCell;
                 fastOLV.BeforeSorting -= FastOlvOnBeforeSorting;
                 fastOLV.KeyDown -= FastOlvOnKeyDown;
