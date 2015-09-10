@@ -33,13 +33,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
+        ///  gets or sets the total items currently displayed in the form
+        /// </summary>
+        public int TotalItems { get; set; }
+
+        /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
         private string _filterString;
-        private int _totalItems;
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private int _normalWidth;
         private List<CompletionData> _initialObjectsList;
@@ -165,7 +169,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="objectsList"></param>
         public void SetItems(List<CompletionData> objectsList) {
-            // we do the sorting
+            // we do the sorting (by type and then by ranking)
             objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
 
@@ -208,8 +212,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             Keyword.Width = _normalWidth - 17;
 
             // label for the number of items
-            _totalItems = objectsList.Count;
-            nbitems.Text = _totalItems + " items";
+            TotalItems = objectsList.Count;
+            nbitems.Text = TotalItems + " items";
 
             fastOLV.SetObjects(objectsList);
         }
@@ -350,10 +354,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (fastOLV.SelectedIndex > 0)
                     fastOLV.SelectedIndex--;
                 else
-                    fastOLV.SelectedIndex = (_totalItems - 1);
+                    fastOLV.SelectedIndex = (TotalItems - 1);
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } else if (key == Keys.Down) {
-                if (fastOLV.SelectedIndex < (_totalItems - 1))
+                if (fastOLV.SelectedIndex < (TotalItems - 1))
                     fastOLV.SelectedIndex++;
                 else
                     fastOLV.SelectedIndex = 0;
@@ -395,12 +399,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(fastOLV, _filterString);
 
             // update total items
-            _totalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
-            nbitems.Text = _totalItems + " items";
+            TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
+            nbitems.Text = TotalItems + " items";
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
-                Keyword.Width = _normalWidth - ((_totalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions) ? 0 : 17);
+                Keyword.Width = _normalWidth - ((TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions) ? 0 : 17);
                 if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } catch (Exception) {

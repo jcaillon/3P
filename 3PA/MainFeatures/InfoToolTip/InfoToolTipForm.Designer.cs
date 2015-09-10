@@ -1,4 +1,4 @@
-﻿namespace _3PA.MainFeatures.ToolTip {
+﻿namespace _3PA.MainFeatures.InfoToolTip {
     partial class InfoToolTipForm {
         /// <summary>
         /// Required designer variable.
@@ -28,26 +28,28 @@
             // 
             // labelContent
             // 
+            this.labelContent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.labelContent.AutoSize = false;
             this.labelContent.AutoSizeHeightOnly = true;
             this.labelContent.BackColor = System.Drawing.Color.Transparent;
             this.labelContent.BaseStylesheet = null;
-            this.labelContent.Dock = System.Windows.Forms.DockStyle.Fill;
             this.labelContent.Location = new System.Drawing.Point(1, 1);
             this.labelContent.Name = "labelContent";
-            this.labelContent.Size = new System.Drawing.Size(306, 147);
+            this.labelContent.Size = new System.Drawing.Size(200, 15);
             this.labelContent.TabIndex = 0;
+            this.labelContent.Text = "ok";
             // 
-            // ToolTipForm
+            // InfoToolTipForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(308, 149);
+            this.ClientSize = new System.Drawing.Size(202, 203);
             this.Controls.Add(this.labelContent);
             this.Location = new System.Drawing.Point(0, 0);
-            this.Name = "ToolTipForm";
+            this.Name = "InfoToolTipForm";
             this.Padding = new System.Windows.Forms.Padding(1);
+            this.Text = "";
             this.ResumeLayout(false);
 
         }

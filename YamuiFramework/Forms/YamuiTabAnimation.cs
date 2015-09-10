@@ -44,6 +44,7 @@ namespace YamuiFramework.Forms {
             ClientSize = _pageToFadeIn.ClientSize;
             tocover.LocationChanged += Cover_LocationChanged;
             tocover.ClientSizeChanged += Cover_ClientSizeChanged;
+            tocover.VisibleChanged += Cover_OnVisibleChanged;
             Show(tocover);
             tocover.Focus();
             // Disable Aero transitions, the plexiglass gets too visible
@@ -51,14 +52,6 @@ namespace YamuiFramework.Forms {
                 int value = 1;
                 DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
-        }
-        #endregion
-
-        #region dispose
-        protected override void Dispose(bool disposing) {
-            LocationChanged -= Cover_LocationChanged;
-            ClientSizeChanged -= Cover_ClientSizeChanged;
-            base.Dispose(disposing);
         }
         #endregion
 
@@ -80,8 +73,11 @@ namespace YamuiFramework.Forms {
         }
         #endregion
 
-
         #region Events
+        private void Cover_OnVisibleChanged(object sender, EventArgs eventArgs) {
+            Visible = Owner.Visible;
+        }
+
         private void Cover_LocationChanged(object sender, EventArgs e) {
             // Ensure the plexiglass follows the owner
             Location = _pageToFadeIn.PointToScreen(Point.Empty);
@@ -96,6 +92,7 @@ namespace YamuiFramework.Forms {
             // Restore owner
             Owner.LocationChanged -= Cover_LocationChanged;
             Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
+            Owner.VisibleChanged -= Cover_OnVisibleChanged;
             if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                 int value = 0;
                 DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);

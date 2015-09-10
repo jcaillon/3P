@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
@@ -24,6 +25,11 @@ namespace YamuiFramework.Forms {
         private IntPtr _currentForegroundWindow;
         private int _duration;
         private YamuiPanel _progressPanel;
+
+        //Very important to keep it. It prevents the form from stealing the focus
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
         #endregion
 
         /// <summary>
@@ -76,15 +82,7 @@ namespace YamuiFramework.Forms {
             // fade out animation
             Opacity = 0d;
             Tag = false;
-            Closing += (sender, args) => {
-                if ((bool)Tag) return;
-                args.Cancel = true;
-                Tag = true;
-                var t = new Transition(new TransitionType_Acceleration(200));
-                t.add(this, "Opacity", 0d);
-                t.TransitionCompletedEvent += (o, args1) => { Close(); };
-                t.run();
-            };
+            Closing += YamuiNotificationsOnClosing;
             // fade in animation
             Transition.run(this, "Opacity", 1d, new TransitionType_Acceleration(200));
         }
@@ -99,6 +97,16 @@ namespace YamuiFramework.Forms {
         #endregion // Methods
 
         #region Event Handlers
+        private void YamuiNotificationsOnClosing(object sender, CancelEventArgs args) {
+            if ((bool)Tag) return;
+            args.Cancel = true;
+            Tag = true;
+            var t = new Transition(new TransitionType_Acceleration(200));
+            t.add(this, "Opacity", 0d);
+            t.TransitionCompletedEvent += (o, args1) => { Close(); };
+            t.run();
+        }
+
         private void YamuiNotificationsActivated(object sender, EventArgs e) {
             // Prevent the form taking focus when it is initially shown
             if (!_allowFocus) {

@@ -38,7 +38,7 @@
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\3PA_side\npp\plugins\</OutputPath>
+    <OutputPath>..\..\..\LiberKey\Apps\Notepad++\App\Notepad++\plugins\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
@@ -62,6 +62,7 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Html\RegisterCssAndImages.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -115,7 +116,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Forms\ShowFileTags.cs" />
+    <Compile Include="MainFeatures\Appli\ShowFileTags.cs" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -262,7 +263,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\dbout.txt" />
-    <Content Include="Data\ThemeNppInterface.xml" />
+    <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />
@@ -288,6 +289,7 @@
     <Content Include="Images\DockableExplorer\exterior.png" />
     <Content Include="Images\DockableExplorer\numerical_sorting_12.png" />
     <Content Include="Images\DockableExplorer\refresh.png" />
+    <Content Include="Images\Html\wink.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />

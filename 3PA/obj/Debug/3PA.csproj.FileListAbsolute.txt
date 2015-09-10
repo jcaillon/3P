@@ -48,7 +48,6 @@ C:\Work\3PA_side\npp\plugins\2P2B.pdb
 C:\Work\3PA\3PA\obj\Debug\2P2B.dll
 C:\Work\3PA\3PA\obj\Debug\2P2B.pdb
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.ToolTip.InfoToolTipForm.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.AppliForm.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.Classic.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.ItemControl.resources
@@ -57,3 +56,8 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.Text.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Navigation.Other.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.PageTemplate.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.SettingAppearance.resources
+C:\LiberKey\Apps\Notepad++\plugins\2P2B.dll
+C:\LiberKey\Apps\Notepad++\plugins\2P2B.pdb
+C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\2P2B.dll
+C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\2P2B.pdb
+C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.InfoToolTip.InfoToolTipForm.resources

@@ -127,6 +127,11 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Fonts\FontManager.cs" />
+    <Compile Include="Fonts\ResourceFont.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ResourceFont.resx</DependentUpon>
+    </Compile>
     <Compile Include="Forms\YamuiNotifications.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -264,6 +269,10 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <EmbeddedResource Include="Fonts\ResourceFont.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>ResourceFont.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiForm.resx">
       <DependentUpon>YamuiForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -281,7 +290,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Animations\readme.txt" />
-    <Content Include="Resources\baseCss.css" />
+    <Content Include="Resources\BaseStyleSheet.css" />
     <Content Include="Resources\BackGround\hellokitty.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\ant.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\error.png" />
@@ -300,6 +309,7 @@
     <Content Include="Resources\themesXml.xml" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageError.png" />
+    <None Include="Fonts\REDCIRCL.ttf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

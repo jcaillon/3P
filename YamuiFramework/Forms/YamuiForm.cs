@@ -64,6 +64,12 @@ namespace YamuiFramework.Forms {
             set { _isResizable = value; }
         }
 
+        /// <summary>
+        /// is set to true when this form is the parent of a yamuimsgbox
+        /// </summary>
+        [Browsable(false)]
+        public bool HasModalOpened { get; set; }
+
         private const int BorderWidth = 1;
 
         private List<int[]> _formHistory = new List<int[]>();
@@ -285,48 +291,12 @@ namespace YamuiFramework.Forms {
                 UpdateWindowButtonPosition();
             }
 
-
             // add the fonts to the html renderer
-            try {
-                HtmlRender.AddFontFamily(GetFontFamily("SEGOEUI"));
-                HtmlRender.AddFontFamily(GetFontFamily("SEGOEUII"));
-                HtmlRender.AddFontFamily(GetFontFamily("SEGOEUIB"));
-            } catch (Exception) {
-                // ignored
-            }
+            //HtmlRender.AddFontFamily(GetFontFamily("SEGOEUI"));
 
             // animate the current tab
             if (IsMainForm)
                 GetSelectSecondaryTabControl(GetMainTabControl()).TabAnimator();
-        }
-
-        private readonly PrivateFontCollection _fontCollection = new PrivateFontCollection();
-
-        private FontFamily GetFontFamily(string familyName) {
-            lock (_fontCollection) {
-                foreach (FontFamily fontFamily in _fontCollection.Families)
-                    if (fontFamily.Name == familyName) return fontFamily;
-
-                string resourceName = GetType().Namespace + ".Fonts." + familyName.Replace(' ', '_') + ".ttf";
-
-                Stream fontStream = null;
-                IntPtr data = IntPtr.Zero;
-                try {
-                    fontStream = GetType().Assembly.GetManifestResourceStream(resourceName);
-                    if (fontStream != null) {
-                        int bytes = (int) fontStream.Length;
-                        data = Marshal.AllocCoTaskMem(bytes);
-                        byte[] fontdata = new byte[bytes];
-                        fontStream.Read(fontdata, 0, bytes);
-                        Marshal.Copy(fontdata, 0, data, bytes);
-                        _fontCollection.AddMemoryFont(data, bytes);
-                    }
-                    return _fontCollection.Families[_fontCollection.Families.Length - 1];
-                } finally {
-                    if (fontStream != null) fontStream.Dispose();
-                    if (data != IntPtr.Zero) Marshal.FreeCoTaskMem(data);
-                }
-            }
         }
 
         [SecuritySafeCritical]

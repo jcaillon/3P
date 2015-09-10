@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -29,6 +27,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // contains the whole list of items (minus the fields) to show, can be updated through FillItems() method
         private static List<CompletionData> _persistentItems;
 
+        // bool that indicates to the method showing the popup if the _currentItems have changed
+        // and therefore as to be reloaded into the list
+        private static bool _needToUpdateItemsInTheList;
+
         /// <summary>
         /// this method should be called by the parser to update the completion form according to the data
         /// of each features
@@ -42,6 +44,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _currentItems = _persistentItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
+            _needToUpdateItemsInTheList = true;
         }
 
         /// <summary>
@@ -54,6 +57,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _currentItems = fieldsItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
+            _needToUpdateItemsInTheList = true;
         }
 
         /// <summary>
@@ -65,6 +69,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _currentItems = _persistentItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
+            _needToUpdateItemsInTheList = true;
+        }
+
+        /// <summary>
+        /// return a list of CompletionData object to be used in the autocompletion list
+        /// </summary>
+        /// <param name="compType"></param>
+        /// <param name="tableName">Used only when compType is Field</param>
+        /// <returns></returns>
+        private static List<CompletionData> GetListOf(CompletionType compType, string tableName = "") {
+            switch (compType) {
+                case CompletionType.Keyword:
+                    return Keywords.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Keyword }).ToList();
+                case CompletionType.Table:
+                    return DataBaseInfo.KeysTable.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Table }).ToList();
+                case CompletionType.Field:
+                    return DataBaseInfo.KeysField(tableName).Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Field }).ToList();
+                case CompletionType.Snippet:
+                    return Snippets.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Snippet }).ToList();
+            }
+            return null;
         }
 
         /// <summary>
@@ -74,16 +99,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="curPos"></param>
         /// <param name="offset"></param>
         /// <returns></returns>
-        public static bool IsLastWordInDico(string keyword, int curPos, int offset) {
-            return Keywords.Contains(keyword)
-                   || DataBaseInfo.ContainsTable(keyword)
-                   || (Npp.WeAreEnteringAField(curPos - offset)
-                       && DataBaseInfo.ContainsField(Npp.GetCurrentTable(curPos - offset), keyword));
+        public static bool IsWordInSuggestionsList(string keyword, int curPos, int offset) {
+            bool itIs = Keywords.Contains(keyword);
+            itIs = itIs || DataBaseInfo.ContainsTable(keyword);
+            itIs = itIs || (Npp.WeAreEnteringAField(curPos - offset) && DataBaseInfo.ContainsField(Npp.GetCurrentTable(curPos - offset), keyword));
+            return itIs;
         }
 
 
         /// <summary>
-        /// handles the appearance or the closing of the autocompletion form, filter by the current input and so on..
+        /// handles the opening or the closing of the autocompletion form on key input, 
+        /// filter by the current input and so on..
         /// </summary>
         public static void ActivatedAutoCompleteIfNeeded() {
             string keyword = Npp.GetKeyword();
@@ -97,6 +123,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     else {
                         // if opened with fields only, show complete if the user deleted the . char
                         _form.FilterByText = keyword;
+
+                        // close it if the list is empty and we the user selected the option to close it
+                        if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0)
+                            Close();
                     }
                 } else {
                     if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition())) {
@@ -165,18 +195,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
             point.Y += lineHeight;
 
-            // instanciate the form
+            // instanciate the form if needed
             if (_form == null) {
-                _form = new AutoCompletionForm(keyword);
+                _form = new AutoCompletionForm(keyword) {
+                    UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity
+                };
                 _form.TabCompleted += OnTabCompleted;
-                _form.CurrentForegroundWindow = WinApi.GetForegroundWindow();
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetItems(_currentItems);
+            } else if (_needToUpdateItemsInTheList) {
+                _form.SetItems(_currentItems);
+                _needToUpdateItemsInTheList = false;
             }
 
             // update position (and alternate color config)
             _form.UseAlternateBackColor = Config.Instance.AutoCompleteAlternateBackColor;
-            _form.SetPosition(point, lineHeight);
+            _form.SetPosition(point, lineHeight + 2);
 
             // only activate certain types
             if (allowedType != null)
@@ -184,15 +218,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
             else
                 _form.ResetActiveType();
 
-            // filter with keyword (can be empty)
+            // filter with keyword (keyword can be empty)
             _form.FilterByText = keyword;
             _form.SelectFirstItem();
 
-            if (!_form.Visible)
+            if (!_form.Visible) {
+                // we uncloak conditionnally
+                if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) 
+                    return;
+
                 _form.UnCloack();
-                
+            }
+
         }
 
+        /// <summary>
+        /// Method called by the form when the user accepts a suggestion (tab or enter or doubleclick)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="tabCompletedEventArgs"></param>
         private static void OnTabCompleted(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
             try {
                 var data = tabCompletedEventArgs.CompletionItem;
@@ -269,26 +313,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static bool OnKeyDown(Keys key) {
             return IsVisible && _form.OnKeyDown(key);
-        }
-
-        /// <summary>
-        /// return a list of CompletionData object to be used in the autocompletion list
-        /// </summary>
-        /// <param name="compType"></param>
-        /// <param name="tableName">Used only when compType is Field</param>
-        /// <returns></returns>
-        private static List<CompletionData> GetListOf(CompletionType compType, string tableName = "") {
-            switch (compType) {
-                case CompletionType.Keyword:
-                    return Keywords.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Keyword }).ToList();
-                case CompletionType.Table:
-                    return DataBaseInfo.KeysTable.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Table }).ToList();
-                case CompletionType.Field:
-                    return DataBaseInfo.KeysField(tableName).Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Field }).ToList();
-                case CompletionType.Snippet:
-                    return Snippets.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Snippet }).ToList();
-            }
-            return null;
         }
     }
 }

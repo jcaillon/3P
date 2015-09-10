@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace _3PA.Properties {
+namespace YamuiFramework.Fonts {
     using System;
     
     
@@ -22,14 +22,14 @@ namespace _3PA.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    internal class ResourceFont {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
         private static global::System.Globalization.CultureInfo resourceCulture;
         
         [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
-        internal Resources() {
+        internal ResourceFont() {
         }
         
         /// <summary>
@@ -39,7 +39,7 @@ namespace _3PA.Properties {
         internal static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("_3PA.Properties.Resources", typeof(Resources).Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("YamuiFramework.Fonts.ResourceFont", typeof(ResourceFont).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -63,69 +63,9 @@ namespace _3PA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] ObjectListView {
+        internal static byte[] REDCIRCL {
             get {
-                object obj = ResourceManager.GetObject("ObjectListView", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 3PA.
-        /// </summary>
-        internal static string PluginFolderName {
-            get {
-                return ResourceManager.GetString("PluginFolderName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to HKEY_CURRENT_USER\Software\NppTool.
-        /// </summary>
-        internal static string RegistryPath {
-            get {
-                return ResourceManager.GetString("RegistryPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to html {
-        ///    padding: 0;
-        ///    margin: 0;
-        ///    Font: 12px &quot;Segoe UI&quot;;
-        ///    color: %FGcolor%;
-        ///}
-        ///
-        ///h1, h2, h3 { color: navy; font-weight:normal; }
-        ///h1 { margin-bottom: .47em }
-        ///h2 { margin-bottom: .3em }
-        ///h3 { margin-bottom: .4em }
-        ///ul { margin-top: .5em }
-        ///ul li {margin: .25em}
-        ///
-        ///body {
-        ///    Font: 12px SEGOEUI;
-        ///    color: %FGcolor%;
-        ///    padding: 0;
-        ///    margin: 0;
-        ///}
-        ///
-        ///a:hover { text-decoration: underline; }
-        ///pre  { border:solid 1px gray; background-color:#eee; padding:1em }
-        ///a:link { text-decoration: no [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string StyleSheet {
-            get {
-                return ResourceManager.GetString("StyleSheet", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] YamuiFramework {
-            get {
-                object obj = ResourceManager.GetObject("YamuiFramework", resourceCulture);
+                object obj = ResourceManager.GetObject("REDCIRCL", resourceCulture);
                 return ((byte[])(obj));
             }
         }

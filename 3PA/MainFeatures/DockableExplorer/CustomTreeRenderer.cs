@@ -138,28 +138,28 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <param name="br"></param>
         /// <param name="glyphMidVertical"> </param>
         protected new virtual void DrawLines(Graphics g, Rectangle r, Pen p, TreeListView.Branch br, int glyphMidVertical) {
-            var r2 = r;
+            Rectangle r2 = r;
             r2.Width = PIXELS_PER_LEVEL;
 
             // Vertical lines have to start on even points, otherwise the dotted line looks wrong.
             // This is only needed if pen is dotted.
-            var top = r2.Top;
+            int top = r2.Top;
             //if (p.DashStyle == DashStyle.Dot && (top & 1) == 0)
             //    top += 1;
 
             // Draw lines for ancestors
             int midX;
-            var ancestors = br.Ancestors;
-            foreach (var ancestor in ancestors) {
+            IList<TreeListView.Branch> ancestors = br.Ancestors;
+            foreach (TreeListView.Branch ancestor in ancestors) {
                 if (!ancestor.IsLastChild && !ancestor.IsOnlyBranch) {
-                    midX = r2.Left + r2.Width/2;
+                    midX = r2.Left + r2.Width / 2;
                     g.DrawLine(p, midX, top, midX, r2.Bottom);
                 }
                 r2.Offset(PIXELS_PER_LEVEL, 0);
             }
 
             // Draw lines for this branch
-            midX = r2.Left + r2.Width/2;
+            midX = r2.Left + r2.Width / 2;
 
             // Horizontal line first
             g.DrawLine(p, midX, glyphMidVertical, r2.Right, glyphMidVertical);

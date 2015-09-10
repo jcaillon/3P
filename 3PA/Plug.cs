@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
+using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -16,7 +17,7 @@ using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.DockableExplorer;
-using _3PA.MainFeatures.ToolTip;
+using _3PA.MainFeatures.InfoToolTip;
 using _3PA.Properties;
 
 #pragma warning disable 1591
@@ -26,8 +27,6 @@ namespace _3PA {
     public class Plug {
 
         #region " Properties "
-        public static YamuiForm MainForm;
-
         public static string tempPath;
 
         public static bool PluginIsFullyLoaded;
@@ -57,7 +56,7 @@ namespace _3PA {
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "_Test:Ctrl+D", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Test", OnDwellStart, "_Test:Ctrl+D", false, uniqueKeys);
             /*
             SetCommand(cmdIndex++, "---", null);
 
@@ -171,6 +170,7 @@ namespace _3PA {
                     FileTags.Init();
                     DataBaseInfo.Init();
                     Config.Save();
+                    RegisterCssAndImages.Init();
 
                     // initialize the list of objects of the autocompletion form
                     AutoComplete.FillItems();
@@ -181,6 +181,13 @@ namespace _3PA {
                     ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
                     // TODO: delete when releasing! (we dont want the user to access those themes!)
                     ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
+
+                    // SCINTILLA
+                    // set the timer of dwell time, if the user let the mouse inactive for this period of time, npp fires the dwellstart notif
+                    Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMOUSEDWELLTIME, Config.Instance.ToolTipmsBeforeShowing, 0);
+                    // Set a mask for notifications received
+                    Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMODEVENTMASK,
+                        SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER, 0);
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -213,14 +220,14 @@ namespace _3PA {
                     bool isNormalContext = Npp.IsNormalContext(curPos);
 
                     // show suggestions on fields
-                    if (c == '.' && Config.Instance.AutoCompleteShowFieldSuggestionsOnPointInput && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
+                    if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
                         AutoComplete.ShowFieldsSuggestions(true);
 
                     // only do more stuff if we are not in a string/comment/include definition 
                     if (!isNormalContext) return;
 
                     keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
-                    bool lastWordInDico = AutoComplete.IsLastWordInDico(keyword, curPos, offset);
+                    bool lastWordInDico = AutoComplete.IsWordInSuggestionsList(keyword, curPos, offset);
 
                     // trigger snippet insertion on space if the setting is activated (and the leave)
                     Npp.SetStatusbarLabel(keyword + " " + Snippets.Contains(keyword));
@@ -363,7 +370,7 @@ namespace _3PA {
         /// When the user moves his cursor
         /// </summary>
         public static void OnDwellEnd() {
-            InfoToolTip.Close();
+            InfoToolTip.Close(true);
         }
 
         /// <summary>
@@ -444,7 +451,6 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            InfoToolTip.ShowToolTip(true);
         }
         #endregion
     }

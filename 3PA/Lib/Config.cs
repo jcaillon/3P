@@ -15,27 +15,34 @@ namespace _3PA.Lib {
         // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
         [Display(Name = "User trigram", Description = "This is your user trigram duh")]
         public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
+
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
         public int AutoCompleteStartShowingListAfterXChar = 1;
         public bool AutoCompleteUseTabToAccept = true;
         public bool AutoCompleteUseEnterToAccept = false;
-        public bool AutoCompleteShowFieldSuggestionsOnPointInput = true;
-        public bool AutoCompleteShowCompleteListOnKeyInput = true;
+        
         public bool AutoCompleteUseSpaceToInsertSnippet = true;
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
         public bool AutoCompleteShowInCommentsAndStrings = true;
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
-        public double AutoCompleteOpacityUnfocused = 0.92d;
+        public double AutoCompleteUnfocusedOpacity = 0.92d;
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
         public bool AutoCompleteAlternateBackColor = false;
+
+        public bool AutoCompleteOnKeyInputShowSuggestions = true;
+        public bool AutoCompleteOnKeyInputHideIfEmpty = false;
 
         public bool ExplorerUseAlternateColors = false;
 
         public double AppliOpacityUnfocused = 0.5;
         public bool AppliAllowTabAnimation = true;
+
+        public int ToolTipmsBeforeShowing = 1000;
+        public double ToolTipUnfocusedOpacity = 0.9;
+        public bool ToolTipDeactivate = false;
 
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;

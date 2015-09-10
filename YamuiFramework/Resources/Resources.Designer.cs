@@ -74,6 +74,8 @@ namespace YamuiFramework.Resources {
         ///   Looks up a localized string similar to html {
         ///    padding: 0;
         ///    margin: 0;
+        ///    Font: 12px &quot;Segoe UI&quot;;
+        ///    color: %FGcolor%;
         ///}
         ///
         ///h1, h2, h3 { color: navy; font-weight:normal; }
@@ -92,13 +94,11 @@ namespace YamuiFramework.Resources {
         ///
         ///a:hover { text-decoration: underline; }
         ///pre  { border:solid 1px gray; background-color:#eee; padding:1em }
-        ///a:link { text-decoration: none; }
-        ///.gray    { color:gray; }
-        ///.example { backgro [rest of string was truncated]&quot;;.
+        ///a:link { text-decoration: no [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string baseCss {
+        internal static string BaseStyleSheet {
             get {
-                return ResourceManager.GetString("baseCss", resourceCulture);
+                return ResourceManager.GetString("BaseStyleSheet", resourceCulture);
             }
         }
         

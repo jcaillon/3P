@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
@@ -77,7 +78,8 @@ namespace _3PA.MainFeatures.Appli {
         /// Gives focus back to the owner window
         /// </summary>
         public void GiveFocusBack() {
-            WinApi.SetForegroundWindow(CurrentForegroundWindow);
+            //WinApi.SetForegroundWindow(CurrentForegroundWindow);
+            Npp.GrabFocus();
             Opacity = Config.Instance.AppliOpacityUnfocused;
         }
 
@@ -91,7 +93,8 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         protected override void OnDeactivate(EventArgs e) {
-            Opacity = Config.Instance.AppliOpacityUnfocused;
+            if (!HasModalOpened)
+                Opacity = Config.Instance.AppliOpacityUnfocused;
             base.OnDeactivate(e);
         }
 

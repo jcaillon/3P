@@ -21,6 +21,7 @@ namespace YamuiFramework.Forms {
             Shown -= YamuiNotificationsShown;
             FormClosed -= YamuiNotificationsFormClosed;
             contentLabel.LinkClicked -= OnLinkClicked;
+            Closing -= YamuiNotificationsOnClosing;
             base.Dispose(disposing);
         }
 

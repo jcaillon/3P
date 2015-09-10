@@ -20,6 +20,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
         /// </summary>
         public IntPtr CurrentForegroundWindow;
+        /// <summary>
+        /// Sets the Opacity to give to the window when it's not focused
+        /// </summary>
+        public double UnfocusedOpacity;
         private bool _focusAllowed;
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private Rectangle? _nppRect;
@@ -73,7 +77,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public void UnCloack() {
             _allowshowdisplay = true;
-            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
+            Opacity = Config.Instance.AutoCompleteUnfocusedOpacity;
             Visible = true;
             GiveFocusBack();
         }
@@ -101,15 +105,17 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Gives focus back to the owner window
         /// </summary>
         public void GiveFocusBack() {
-            WinApi.SetForegroundWindow(CurrentForegroundWindow);
+            //WinApi.SetForegroundWindow(CurrentForegroundWindow);
+            Npp.GrabFocus();
             IsActivated = !IsActivated;
-            Opacity = Config.Instance.AutoCompleteOpacityUnfocused;
+            Opacity = Config.Instance.AutoCompleteUnfocusedOpacity;
         }
 
         protected override void OnActivated(EventArgs e) {
             // Activate the window that previously had focus
             if (!_focusAllowed)
-                WinApi.SetForegroundWindow(CurrentForegroundWindow);
+                //WinApi.SetForegroundWindow(CurrentForegroundWindow);
+                Npp.GrabFocus();
             else {
                 IsActivated = true;
                 Opacity = 1;

@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.Security;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
+using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(Panel))]
@@ -71,6 +72,10 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        [Category("Yamui")]
+        [DefaultValue(false)]
+        public bool DontUseTransparentBackGround { get; set; }
+
         #endregion
 
         #region Constructor
@@ -117,10 +122,13 @@ namespace YamuiFramework.Controls {
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                if (!UseCustomBackColor)
+                if (!UseCustomBackColor && !DontUseTransparentBackGround)
                     PaintTransparentBackground(e.Graphics, DisplayRectangle);
                 else
-                    e.Graphics.Clear(BackColor);
+                    if (!UseCustomBackColor)
+                        e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                    else
+                        e.Graphics.Clear(BackColor);
             } catch {
                 Invalidate();
             }
@@ -165,7 +173,6 @@ namespace YamuiFramework.Controls {
             }
         }
         #endregion
-
 
         #region Scroll Events
 

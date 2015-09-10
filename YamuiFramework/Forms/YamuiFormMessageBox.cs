@@ -110,8 +110,8 @@ namespace YamuiFramework.Forms {
                     minButtonsWidth = minButtonsWidth * (compHeight / minButtonsWidth);
                     j++;
                 } while (j < 2 && Height > Width);
-                MinimumSize = new Size(Width, Height);
             }
+            MinimumSize = new Size(Width, Height);
 
             // add outro animation
             Tag = false;
@@ -163,17 +163,25 @@ namespace YamuiFramework.Forms {
                 msgbox.Location = new Point((Screen.PrimaryScreen.WorkingArea.Width - msgbox.Width) / 2 + Screen.PrimaryScreen.WorkingArea.Location.X, (Screen.PrimaryScreen.WorkingArea.Height - msgbox.Height) / 2 + Screen.PrimaryScreen.WorkingArea.Location.Y);
             }
 
+            // we either display a modal or a normal messagebox
             FadeIn(msgbox, ownerForm);
             if (waitResponse) {
+                if (ownerForm != null) ownerForm.HasModalOpened = true;
                 msgbox.ShowDialog(new WindowWrapper(ownerHandle));
+                if (ownerForm != null) ownerForm.HasModalOpened = false;
                 if (OwnerSmokeScreen != null) {
                     OwnerSmokeScreen.Close();
                     OwnerSmokeScreen = null;
                 }
+                // get focus back to owner
+                try {
+                    WinApi.SetForegroundWindow(ownerHandle);
+                } catch (Exception) {
+                    //ignored
+                }
             } else {
                 msgbox.Show(new WindowWrapper(ownerHandle));
             }
-
             return _dialogResult;
         }
 

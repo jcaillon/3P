@@ -56,7 +56,6 @@ namespace _3PA
         private static void beNotified(IntPtr notifyCode) {
             try {
                 SCNotification nc = (SCNotification) Marshal.PtrToStructure(notifyCode, typeof (SCNotification));
-
                 #region must 
                 switch (nc.nmhdr.code) {
                     case (uint) NppMsg.NPPN_TBMODIFICATION:
@@ -67,11 +66,6 @@ namespace _3PA
                     case (uint) NppMsg.NPPN_READY:
                         // notify plugins that all the procedures of launchment of notepad++ are done
                         Plug.OnNppReady();
-                        // Set a mask for notifications received
-                        Win32.SendMessage(Npp.HandleNpp, SciMsg.SCI_SETMODEVENTMASK,
-                            SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER, 0);
-                        // set the timer of dwell time, if the user let the mouse inactive for this period of time, npp fires the dwellstart notif
-                        Win32.SendMessage(Npp.HandleNpp, SciMsg.SCI_SETMOUSEDWELLTIME, 500, 0);
                         return;
 
                     case (uint) NppMsg.NPPN_SHUTDOWN:
@@ -124,12 +118,12 @@ namespace _3PA
 
                     case (uint) SciMsg.SCN_DWELLSTART:
                         // when the user hover at a fixed position for too long
-
+                        Plug.OnDwellStart();
                         return;
 
                     case (uint) SciMsg.SCN_DWELLEND:
                         // when he moves his cursor
-
+                        Plug.OnDwellEnd();
                         return;
 
                     case (uint) SciMsg.SCN_MODIFIED:

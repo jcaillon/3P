@@ -73,29 +73,9 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] keywords_final {
-            get {
-                object obj = ResourceManager.GetObject("keywords_final", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
         internal static byte[] snippets {
             get {
                 object obj = ResourceManager.GetObject("snippets", resourceCulture);
-                return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
-        /// </summary>
-        internal static byte[] ThemeNppInterface {
-            get {
-                object obj = ResourceManager.GetObject("ThemeNppInterface", resourceCulture);
                 return ((byte[])(obj));
             }
         }

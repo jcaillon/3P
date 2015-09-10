@@ -127,6 +127,9 @@
   <data name="RegistryPath" xml:space="preserve">
     <value>HKEY_CURRENT_USER\Software\NppTool</value>
   </data>
+  <data name="StyleSheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\html\stylesheet.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
   <data name="YamuiFramework" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\yamuifolder\yamuiframework.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>

@@ -1,0 +1,28 @@
+﻿html {
+    padding: 0;
+    margin: 0;
+    Font: 12px "Segoe UI";
+    color: %FGcolor%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+/* this decorates the htmllabels */
+.yamui-text { 
+    Font: 12px "Segoe UI";
+    color: %FGcolor%;
+    margin: 0;
+    padding: 0;
+}
+
+/*This is the class of the HtmlToolTip*/
+.yamui-tooltip {
+    border: solid 1px #767676;
+    background-color: %BGcolor%;
+    color: %FGcolor%;
+    padding: 5px;
+    Font: 12px "Segoe UI";
+}

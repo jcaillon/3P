@@ -58,8 +58,8 @@ namespace _3PA.MainFeatures.Appli.Pages {
                 // ignored
             } finally {
                 ThemeManager.ImageName = ThemeManager.Current.PageBackGroundImage;
-                if (Plug.MainForm != null) PlsRefresh();
                 Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
+                PlsRefresh();
             }
             
         }
@@ -74,8 +74,8 @@ namespace _3PA.MainFeatures.Appli.Pages {
             if (rb != null && rb.Checked) {
                 ThemeManager.AccentColor = rb.BackColor;
                 _checkButton = rb;
-                if (Plug.MainForm != null) PlsRefresh();
                 Config.Instance.AccentColor = ThemeManager.AccentColor;
+                PlsRefresh();
             }
         }
 
@@ -102,12 +102,15 @@ namespace _3PA.MainFeatures.Appli.Pages {
             AutoComplete.ForceClose();
             // force the dockable to redraw
             DockableExplorer.DockableExplorer.Redraw();
-            Application.DoEvents();
-            Plug.MainForm.Invalidate();
-            Application.DoEvents();
-            Plug.MainForm.Update();
-            Application.DoEvents();
-            Plug.MainForm.Refresh();
+            var thisForm = FindForm();
+            if (thisForm != null) {
+                Application.DoEvents();
+                thisForm.Invalidate();
+                Application.DoEvents();
+                thisForm.Update();
+                Application.DoEvents();
+                thisForm.Refresh();
+            }
         }
     }
 }

@@ -229,6 +229,17 @@ namespace _3PA {
             EndUndoAction();
         }
 
+        /// <summary>
+        /// returns the x,y point location of the character at the position given
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public static Point GetPointXyFromPosition(int position) {
+            int x = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTXFROMPOSITION, 0, position);
+            int y = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTYFROMPOSITION, 0, position);
+            return new Point(x, y);
+        }
+
         public static void ReplaceKeyword(string keyword) {
             Point keywordPos;
             GetKeywordOnLeftOfPosition(GetCaretPosition(), out keywordPos);

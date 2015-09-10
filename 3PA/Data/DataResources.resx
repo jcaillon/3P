@@ -121,13 +121,7 @@
   <data name="keywords" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>keywords.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="keywords_final" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywords_final.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>snippets.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="ThemeNppInterface" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>themenppinterface.xml;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

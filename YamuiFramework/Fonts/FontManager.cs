@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Text;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
@@ -33,7 +32,7 @@ namespace YamuiFramework.Fonts {
         public static Font GetLabelFont(LabelFunction lbFunction) {
             switch (lbFunction) {
                 case LabelFunction.AppliTitle:
-                    return GetOtherFont(@"STRENUOUS", FontStyle.Regular, 22f);
+                    return GetOtherFont(@"REDCIRCL", FontStyle.Regular, 20f);
                 case LabelFunction.Title:
                     return GetFont(FontStyle.Bold, 18f);
                 case LabelFunction.Heading:
@@ -158,27 +157,46 @@ namespace YamuiFramework.Fonts {
                 Font fontTester = new Font(familyName, emSize, fontStyle, unit);
                 if (fontTester.Name == familyName)
                     return fontTester;
-                // TODO: we should load a custom font here...
+
+                var familyFont = GetFontFamily(familyName);
+                if (familyFont != null)
+                    fontTester = new Font(familyFont, emSize, fontStyle, unit);
                 return fontTester;
                 fontTester.Dispose();
                 //FontFamily fontFamily = GetFontFamily(familyName);
                 return new Font("Times New Roman", emSize, fontStyle, unit);
             }
 
-            //private readonly PrivateFontCollection _fontCollection = new PrivateFontCollection();
+            private PrivateFontCollection _pfc = new PrivateFontCollection();
 
-            //private FontFamily GetFontFamily(string familyName) {
-            //    lock (_fontCollection) {
-            //        foreach (FontFamily fontFamily in _fontCollection.Families)
-            //            if (fontFamily.Name == familyName) return fontFamily;
-            //        if (!File.Exists(@"C:\Work\3PA_side\SMALLFONT.ttf"))
-            //            File.WriteAllBytes(@"C:\Work\3PA_side\SMALLFONT.ttf", FontResources.SMALLFONT);
-            //        _fontCollection.AddFontFile("C:\\Work\\3PA_side\\SMALLFONT.ttf");
-            //        return _fontCollection.Families[_fontCollection.Families.Length - 1];
-            //        //FontResources.ResourceManager.GetObject(familyName.Replace(' ', '_') + ".ttf");
-            //        //string resourceName = GetType().Namespace + "." + familyName.Replace(' ', '_') + ".ttf";
-            //    }
-            //}
+            private FontFamily GetFontFamily(string familyName) {
+                lock (_pfc) {
+                    foreach (FontFamily fontFamily in _pfc.Families)
+                        if (fontFamily.Name == familyName) return fontFamily;
+
+                    byte[] fontdata;
+                    switch (familyName) {
+                        case @"REDCIRCL":
+                            fontdata = ResourceFont.REDCIRCL;
+                            break;
+                        default:
+                            return null;
+                    }
+
+                    int fontLength = fontdata.Length;
+
+                    // create an unsafe memory block for the font data and copy the bytes to the unsafe memory block
+                    IntPtr data = Marshal.AllocCoTaskMem(fontLength);
+                    Marshal.Copy(fontdata, 0, data, fontLength);
+
+                    // pass the font to the font collection
+                    _pfc.AddMemoryFont(data, fontLength);
+
+                    Marshal.FreeCoTaskMem(data);
+
+                    return _pfc.Families[0];
+                }
+            }
         }
 
         #endregion
