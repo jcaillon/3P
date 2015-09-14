@@ -3,6 +3,7 @@ using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Globalization;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
@@ -12,234 +13,375 @@ namespace YamuiFramework.Controls {
     [Designer("YamuiFramework.Controls.YamuiProgressBarDesigner")]
     [ToolboxBitmap(typeof(ProgressBar))]
     public class YamuiProgressBar : Control {
-        #region Fields
 
-        private ContentAlignment _textAlign = ContentAlignment.MiddleRight;
-        [DefaultValue(ContentAlignment.MiddleRight)]
-        [Category("Yamui")]
-        public ContentAlignment TextAlign {
-            get { return _textAlign; }
-            set { _textAlign = value; }
-        }
+        #region fields
 
-        private bool _hideProgressText = true;
-        [DefaultValue(true)]
-        [Category("Yamui")]
-        public bool HideProgressText {
-            get { return _hideProgressText; }
-            set { _hideProgressText = value; }
-        }
+        private float _progress;
 
-        private ProgressBarStyle _progressBarStyle = ProgressBarStyle.Continuous;
-        [DefaultValue(ProgressBarStyle.Continuous)]
-        [Category("Yamui")]
-        public ProgressBarStyle ProgressBarStyle {
-            get { return _progressBarStyle; }
-            set { _progressBarStyle = value; }
-        }
-
+        [Description("The value ranging from 0-100 which represents progress")]
         [DefaultValue(0)]
         [Category("Yamui")]
-        public int Maximum { get; set; }
+        public float Progress {
+            get { return _progress; }
+            set {
+                if (value >= 100) {
+                    _progress = 100;
+                    OnProgressCompleted();
+                } else if (value < 0) _progress = 0;
+                else _progress = value;
 
-        private int _currentValue;
-        [DefaultValue(0)]
+                Invalidate();
+                OnProgressChanged();
+            }
+        }
+
+        private ProgressStyle _progressStyle;
+
+        [DefaultValue(ProgressStyle.Normal)]
+        [Description("The progress animation style"), Category("Yamui")]
+        public ProgressStyle Style {
+            get { return _progressStyle; }
+            set {
+                _progressStyle = value;
+                Invalidate();
+            }
+        }
+
+        private CenterElement _centerElement;
+
+        [Description("The element to draw at the center")]
         [Category("Yamui")]
-        public int CurrentValue {
-            get { return _currentValue; }
-            set { _currentValue = Math.Max(value, Maximum); Invalidate(); }
+        [DefaultValue(CenterElement.None)]
+        public CenterElement CenterText {
+            get { return _centerElement; }
+            set {
+                _centerElement = value;
+                Invalidate();
+            }
         }
 
-        [Browsable(false)]
-        public double ProgressTotalPercent {
-            get { return ((1 - (double)(Maximum - CurrentValue) / Maximum) * 100); }
-        }
+        private bool _vertical;
 
-        [Browsable(false)]
-        public double ProgressTotalValue {
-            get { return (1 - (double)(Maximum - CurrentValue) / Maximum); }
-        }
+        [Description("Determines the orientation of the progress bar")]
+        [Category("Yamui")]
+        [DefaultValue(false)]
+        public bool Vertical {
+            get { return _vertical; }
+            set {
+                bool changed = _vertical != value;
 
-        [Browsable(false)]
-        public string ProgressPercentText {
-            get { return (string.Format("{0}%", Math.Round(ProgressTotalPercent))); }
-        }
-
-        private double ProgressBarWidth {
-            get { return (((double)CurrentValue / Maximum) * ClientRectangle.Width); }
-        }
-
-        private int ProgressBarMarqueeWidth {
-            get { return (ClientRectangle.Width / 3); }
-        }
-
-        #endregion
-
-        #region Constructor
-
-        public YamuiProgressBar() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
-            
-        }
-
-        #endregion
-
-        #region Paint Methods
-        protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-            graphics.Clear(Color.Transparent);
-            if ((Parent != null)) {
-                clipRect.Offset(Location);
-                PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                GraphicsState state = graphics.Save();
-                graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                try {
-                    graphics.TranslateTransform(-Location.X, -Location.Y);
-                    InvokePaintBackground(Parent, e);
-                    InvokePaint(Parent, e);
-                } finally {
-                    graphics.Restore(state);
-                    clipRect.Offset(-Location.X, -Location.Y);
+                if (changed) {
+                    _vertical = value;
+                    UpdateLgBrushes();
+                    Invalidate();
                 }
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        private bool _useMarquee;
 
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, false, false, false, Enabled);
-                if (backColor != Color.Transparent)
-                    e.Graphics.Clear(backColor);
-                else
-                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
+        [Description("Determines whether to use the marquee in opposed to direction")]
+        [Category("Yamui")]
+        [DefaultValue(false)]
+        public bool UseMarquee {
+            get { return _useMarquee; }
+            set {
+                _useMarquee = value;
+                _tmrMarquee.Enabled = value;
                 Invalidate();
             }
+        }
+
+        [Description("The width of the animated marquee")]
+        [Category("Yamui")]
+        [DefaultValue(80)]
+        public int MarqueeWidth { get; set; }
+
+        private int _gradientIntensity;
+
+        [Description("The intensity of the outer color in relation to the inner")]
+        [Category("Yamui")]
+        [DefaultValue(20)]
+        public int GradientIntensity {
+            get { return _gradientIntensity; }
+            set {
+                _gradientIntensity = value;
+                UpdateLgBrushes();
+                Invalidate();
+            }
+        }
+
+        private bool _autoSetOrientation = true;
+
+        [Description("When true, automatically sets the Vertical property according to the controls size")]
+        [Category("Yamui")]
+        [DefaultValue(true)]
+        public bool AutoSetOrientation {
+            get { return _autoSetOrientation; }
+            set {
+                _autoSetOrientation = value;
+                if (_autoSetOrientation) AutoSetIsVertical();
+                Invalidate();
+            }
+        }
+
+        private readonly BufferedGraphicsContext _bufContext = BufferedGraphicsManager.Current;
+        private readonly Timer _tmrMarquee = new Timer();
+        private LinearGradientBrush _foreLgb, _backLgb;
+        private BufferedGraphics _bufGraphics;
+        private int _marqueePos;
+
+        #endregion
+
+
+        public YamuiProgressBar() {
+            _tmrMarquee.Tick += _tmrMarquee_Tick;
+
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw, true);
+
+            // Set defaults
+            GradientIntensity = 20;
+            MarqueeWidth = 50;
+            _tmrMarquee.Interval = 30;
+            Size = new Size(200, 23);
+        }
+
+        #region Virtual and Overridden
+        [Description("Occurs when the progress property has changed and the control has invalidated")]
+        public event EventHandler ProgressChanged;
+        /// <summary>
+        /// Raises the ProgressChanged event
+        /// </summary>
+        protected virtual void OnProgressChanged() {
+            if (ProgressChanged != null)
+                ProgressChanged(this, EventArgs.Empty);
+        }
+
+        [Description("Occurs when progress reaches 100%")]
+        public event EventHandler ProgressCompleted;
+        /// <summary>
+        /// Raises the ProgressCompleted event
+        /// </summary>
+        protected virtual void OnProgressCompleted() {
+            if (ProgressCompleted != null)
+                ProgressCompleted(this, EventArgs.Empty);
+        }
+
+        protected override void OnEnabledChanged(EventArgs e) {
+            base.OnEnabledChanged(e);
+            UpdateLgBrushes();
+            Invalidate();
+        }
+
+        protected override void OnTextChanged(EventArgs e) {
+            base.OnTextChanged(e);
+            Invalidate();
+        }
+
+        protected override void OnResize(EventArgs e) {
+            base.OnResize(e);
+            if (_autoSetOrientation) AutoSetIsVertical();
+            // Update back buffer
+            _bufContext.MaximumBuffer = new Size(Width + 1, Height + 1);
+            _bufGraphics = _bufContext.Allocate(CreateGraphics(), ClientRectangle);
+            UpdateLgBrushes();
         }
 
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
+            //Draw grey backdrop
+            _bufGraphics.Graphics.FillRectangle(_backLgb, ClientRectangle);
+
+            if (_useMarquee) DrawMarquee();
+            else if (_vertical) DrawVerticalProgress();
+            else DrawHorizProgress();
+
+            // Draw border
+            if (ThemeManager.Current.ButtonColorsNormalBorderColor != Color.Transparent) {
+                Rectangle rect = ClientRectangle;
+                _bufGraphics.Graphics.DrawRectangle(new Pen(ThemeManager.Current.ButtonColorsNormalBorderColor, 1f), rect.X,
+                    rect.Y, rect.Width - 1, rect.Height - 1);
+            }
+
+            DrawCenterElement();
+            _bufGraphics.Render(e.Graphics);
+        }
+        #endregion
+
+        private void AutoSetIsVertical() {
+            Vertical = (Width < Height);
+        }
+
+        private void _tmrMarquee_Tick(object sender, EventArgs e) {
+            if (Visible && Enabled) {
+                if ((_vertical && _marqueePos < Height) ||
+                    (!_vertical && _marqueePos < Width)) {
+                    _marqueePos += 2;
+                } else _marqueePos = 0;
                 Invalidate();
             }
         }
 
-        protected virtual void OnPaintForeground(PaintEventArgs e) {
-            if (_progressBarStyle == ProgressBarStyle.Continuous) {
-                if (!DesignMode) StopTimer();
+        private void UpdateLgBrushes() {
+            Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, false, false, false, Enabled);
 
-                DrawProgressContinuous(e.Graphics);
-            } else if (_progressBarStyle == ProgressBarStyle.Blocks) {
-                if (!DesignMode) StopTimer();
+            if (Width <= 0 || Height <= 0) return;
 
-                DrawProgressContinuous(e.Graphics);
-            } else if (_progressBarStyle == ProgressBarStyle.Marquee) {
-                if (!DesignMode && Enabled) StartTimer();
-                if (!Enabled) StopTimer();
+            int angle = (_vertical) ? 0 : 90;
+            Color darkColor;
+            Color darkColor2;
 
-                if (CurrentValue == Maximum) {
-                    StopTimer();
-                    DrawProgressContinuous(e.Graphics);
-                } else {
-                    DrawProgressMarquee(e.Graphics);
-                }
+            if (Enabled) {
+                darkColor = ChangeColorBrightness(backColor, _gradientIntensity);
+                darkColor2 = ChangeColorBrightness(ThemeManager.AccentColor, _gradientIntensity);
+            } else {
+                darkColor = ChangeColorBrightness(Desaturate(backColor), _gradientIntensity);
+                darkColor2 = ChangeColorBrightness(Desaturate(ThemeManager.AccentColor), _gradientIntensity);
             }
 
-            DrawProgressText(e.Graphics);
+            Rectangle rect = (!_vertical) ? new Rectangle(0, 0, Width, Height / 2) :
+                                 new Rectangle(0, 0, Width / 2, Height);
 
-            using (Pen p = new Pen(ThemeManager.Current.ButtonColorsNormalBorderColor)) {
-                Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
-                e.Graphics.DrawRectangle(p, borderRect);
+            if (Enabled) {
+                _backLgb = new LinearGradientBrush(rect, backColor, darkColor, angle, true);
+                _foreLgb = new LinearGradientBrush(rect, ThemeManager.AccentColor, darkColor2, angle, true);
+            } else {
+                _backLgb = new LinearGradientBrush(rect, Desaturate(backColor), darkColor, angle, true);
+                _foreLgb = new LinearGradientBrush(rect, Desaturate(ThemeManager.AccentColor), darkColor2, angle, true);
+            }
+
+            _backLgb.WrapMode = WrapMode.TileFlipX;
+            _foreLgb.WrapMode = WrapMode.TileFlipX;
+        }
+
+        #region Drawing
+        private static Color ChangeColorBrightness(Color color, int factor) {
+            int r = (color.R + factor > 255) ? 255 : color.R + factor;
+            int g = (color.G + factor > 255) ? 255 : color.G + factor;
+            int b = (color.B + factor > 255) ? 255 : color.B + factor;
+            if (r < 0) r = 0;
+            if (g < 0) g = 0;
+            if (b < 0) b = 0;
+            return Color.FromArgb(r, g, b);
+        }
+
+        private static Color Desaturate(Color color) {
+            int b = (int)(255 * color.GetBrightness());
+            return Color.FromArgb(b, b, b);
+        }
+
+        private void DrawMarquee() {
+            if (_vertical) {
+                int smallSect = Height - _marqueePos;
+                int largeSect = MarqueeWidth - smallSect;
+
+                if (largeSect > 0)
+                    _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, Width, largeSect);
+
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, _marqueePos, Width, MarqueeWidth);
+            } else {
+                int smallSect = Width - _marqueePos;
+                int largeSect = MarqueeWidth - smallSect;
+
+                if (largeSect > 0)
+                    _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, largeSect, Height);
+
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, _marqueePos, 0, MarqueeWidth, Height);
             }
         }
 
-        private void DrawProgressContinuous(Graphics graphics) {
-            graphics.FillRectangle(new SolidBrush(ThemeManager.AccentColor), 0, 0, (int)ProgressBarWidth, ClientRectangle.Height);
+        private void DrawHorizProgress() {
+            if (Style == ProgressStyle.Normal) {
+                float width = Width * (_progress / 100f);
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, width, Height);
+            } else if (Style == ProgressStyle.Reversed) {
+                float pixelPercent = Width * (_progress / 100f);
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, Width - pixelPercent, 0, pixelPercent, Height);
+            } else if (Style == ProgressStyle.Inwards) {
+                float pixelPercent = Width * (_progress / 100f) / 2f;
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, Width - pixelPercent, 0, pixelPercent, Height);
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, pixelPercent, Height);
+            } else if (Style == ProgressStyle.Outwards) {
+                float pixelPercent = Width * (_progress / 100f);
+                float x = Width / 2f - pixelPercent / 2f;
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, x, 0, pixelPercent, Height);
+            }
         }
 
-        private int _marqueeX;
+        private void DrawCenterElement() {
+            if (_centerElement == CenterElement.None) return;
+            string text;
 
-        private void DrawProgressMarquee(Graphics graphics) {
-            graphics.FillRectangle(new SolidBrush(ThemeManager.AccentColor), _marqueeX, 0, ProgressBarMarqueeWidth, ClientRectangle.Height);
-        }
-
-        private void DrawProgressText(Graphics graphics) {
-            if (HideProgressText) return;
+            if (_centerElement == CenterElement.Percent)
+                text = ((int)(_progress + 0.5f)).ToString(CultureInfo.InvariantCulture) + '%';
+            else
+                text = Text;
 
             Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, false, false, false, false, Enabled);
+            Font font = FontManager.GetStandardFont();
 
-            TextRenderer.DrawText(graphics, ProgressPercentText, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            float strWidth = _bufGraphics.Graphics.MeasureString(text, font).Width;
+            float strHeight = _bufGraphics.Graphics.MeasureString(text, font).Height;
+            float xPos = Width / 2f - strWidth / 2f;
+            float yPos = Height / 2f - strHeight / 2f;
+            PointF p1 = new PointF(xPos, yPos);
+            _bufGraphics.Graphics.DrawString(text, font, new SolidBrush(foreColor), p1);
         }
 
+        private void DrawVerticalProgress() {
+            float pixelPercent = Height * (_progress / 100f);
+
+            if (Style == ProgressStyle.Normal) {
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, Width, pixelPercent);
+            } else if (Style == ProgressStyle.Reversed) {
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, Height - pixelPercent, Width, pixelPercent);
+            } else if (Style == ProgressStyle.Inwards) {
+                float temp = pixelPercent / 2f;
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, Height - temp, Width, temp);
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, 0, Width, temp);
+            } else if (Style == ProgressStyle.Outwards) {
+                float y = Height / 2f - pixelPercent / 2f;
+                _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, y, Width, pixelPercent);
+            }
+        }
         #endregion
+    }
 
-        #region Overridden Methods
+    public enum CenterElement {
+        /// <summary>
+        /// Draw nothing in the center
+        /// </summary>
+        None,
+        /// <summary>
+        /// Draw the value of the Text property in the center
+        /// </summary>
+        Text,
+        /// <summary>
+        /// Draw the value of the Percent property in the center
+        /// </summary>
+        Percent
+    }
 
-        public override Size GetPreferredSize(Size proposedSize) {
-            Size preferredSize;
-            base.GetPreferredSize(proposedSize);
-
-            using (var g = CreateGraphics()) {
-                proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, ProgressPercentText, FontManager.GetStandardFont(), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
-            }
-
-            return preferredSize;
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private Timer _marqueeTimer;
-        private bool MarqueeTimerEnabled {
-            get {
-                return _marqueeTimer != null && _marqueeTimer.Enabled;
-            }
-        }
-
-        private void StartTimer() {
-            if (MarqueeTimerEnabled) return;
-
-            if (_marqueeTimer == null) {
-                _marqueeTimer = new Timer { Interval = 10 };
-                _marqueeTimer.Tick += marqueeTimer_Tick;
-            }
-
-            _marqueeX = -ProgressBarMarqueeWidth;
-
-            _marqueeTimer.Stop();
-            _marqueeTimer.Start();
-
-            _marqueeTimer.Enabled = true;
-
-            Invalidate();
-        }
-        private void StopTimer() {
-            if (_marqueeTimer == null) return;
-
-            _marqueeTimer.Stop();
-
-            Invalidate();
-        }
-
-        private void marqueeTimer_Tick(object sender, EventArgs e) {
-            _marqueeX++;
-
-            if (_marqueeX > ClientRectangle.Width) {
-                _marqueeX = -ProgressBarMarqueeWidth;
-            }
-
-            Invalidate();
-        }
-
-        #endregion
+    /// <summary>
+    /// Specifies what style to use for a SuperProgressBar
+    /// </summary>
+    public enum ProgressStyle {
+        /// <summary>
+        /// The control will animate from left to right or top to bottom
+        /// </summary>
+        Normal = 0,
+        /// <summary>
+        /// The control will animate from right to left or bottom to top
+        /// </summary>
+        Reversed,
+        /// <summary>
+        /// The control will animate from the outer edges inward
+        /// </summary>
+        Inwards,
+        /// <summary>
+        /// The control will animate from the center to the edge of the control
+        /// </summary>
+        Outwards
     }
 
     internal class YamuiProgressBarDesigner : ControlDesigner {

@@ -6,6 +6,7 @@ using NppPlugin.DllExport;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Lexer;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
@@ -131,14 +132,25 @@ namespace _3PA
                         if (nc.linesAdded != 0) {
                             Plug.OnLineAddedOrRemoved();
                         }
+                        
                         // did the user supress 1 char?
                         if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
                             AutoComplete.ActivatedAutoCompleteIfNeeded();
                         }
+
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;
                         return;
 
                     case (uint) NppMsg.NPPN_FILEBEFOREOPEN:
                         // fire when a file is opened, can be used to clean up data on closed documents
+
+                        return;
+
+                    case (uint) SciMsg.SCN_STYLENEEDED:
+                        // if we use the container lexer, we will receive this notification and we will have to style the text
+                        Lexer.Colorize(nc.position);
 
                         return;
 

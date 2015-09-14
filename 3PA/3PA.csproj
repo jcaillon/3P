@@ -176,6 +176,7 @@
     <Compile Include="MainFeatures\DockableExplorer\ExplorerContent.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\Keywords.cs" />
+    <Compile Include="MainFeatures\Lexer\Lexer.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">

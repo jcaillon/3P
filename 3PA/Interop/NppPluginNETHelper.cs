@@ -5,13 +5,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-namespace _3PA.Interop
-{
+namespace _3PA.Interop {
     #region " Notepad++ "
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct NppData
-    {
+    public struct NppData {
         public IntPtr _nppHandle;
         public IntPtr _scintillaMainHandle;
         public IntPtr _scintillaSecondHandle;
@@ -20,10 +18,8 @@ namespace _3PA.Interop
     //public delegate void NppFuncItemDelegate();
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct ShortcutKey
-    {
-        public ShortcutKey(string data)
-        {
+    public struct ShortcutKey {
+        public ShortcutKey(string data) {
             //Ctrl+Shift+Alt+Key
             var parts = data.Split('+');
             _key = Convert.ToByte(Enum.Parse(typeof(Keys), parts.Last()));
@@ -33,8 +29,7 @@ namespace _3PA.Interop
             _isAlt = Convert.ToByte(parts.Contains("Alt"));
         }
 
-        public ShortcutKey(bool isCtrl, bool isAlt, bool isShift, Keys key)
-        {
+        public ShortcutKey(bool isCtrl, bool isAlt, bool isShift, Keys key) {
             // the types 'bool' and 'char' have a size of 1 byte only!
             _isCtrl = Convert.ToByte(isCtrl);
             _isAlt = Convert.ToByte(isAlt);
@@ -50,15 +45,13 @@ namespace _3PA.Interop
         public bool IsShift { get { return _isShift != 0; } }
         public bool IsAlt { get { return _isAlt != 0; } }
 
-        public bool IsSet
-        {
+        public bool IsSet {
             get { return _key != 0; }
         }
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct FuncItem
-    {
+    public struct FuncItem {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
         public string _itemName;
 
@@ -68,16 +61,14 @@ namespace _3PA.Interop
         public ShortcutKey _pShKey;
     }
 
-    public class FuncItems : IDisposable
-    {
+    public class FuncItems : IDisposable {
         List<FuncItem> _funcItems;
         int _sizeFuncItem;
         List<IntPtr> _shortCutKeys;
         IntPtr _nativePointer;
         bool _disposed = false;
 
-        public FuncItems()
-        {
+        public FuncItems() {
             _funcItems = new List<FuncItem>();
             _sizeFuncItem = Marshal.SizeOf(typeof(FuncItem));
             _shortCutKeys = new List<IntPtr>();
@@ -85,15 +76,13 @@ namespace _3PA.Interop
 
         [DllImport("kernel32")]
         static extern void RtlMoveMemory(IntPtr Destination, IntPtr Source, int Length);
-        public void Add(FuncItem funcItem)
-        {
+        public void Add(FuncItem funcItem) {
             int oldSize = _funcItems.Count * _sizeFuncItem;
             _funcItems.Add(funcItem);
             int newSize = _funcItems.Count * _sizeFuncItem;
             IntPtr newPointer = Marshal.AllocHGlobal(newSize);
 
-            if (_nativePointer != IntPtr.Zero)
-            {
+            if (_nativePointer != IntPtr.Zero) {
                 RtlMoveMemory(newPointer, _nativePointer, oldSize);
                 Marshal.FreeHGlobal(_nativePointer);
             }
@@ -108,22 +97,18 @@ namespace _3PA.Interop
             ptrPosNewItem = (IntPtr)((int)ptrPosNewItem + 4);
             Marshal.WriteInt32(ptrPosNewItem, Convert.ToInt32(funcItem._init2Check));
             ptrPosNewItem = (IntPtr)((int)ptrPosNewItem + 4);
-            if (funcItem._pShKey._key != 0)
-            {
+            if (funcItem._pShKey._key != 0) {
                 IntPtr newShortCutKey = Marshal.AllocHGlobal(4);
                 Marshal.StructureToPtr(funcItem._pShKey, newShortCutKey, false);
                 Marshal.WriteIntPtr(ptrPosNewItem, newShortCutKey);
-            }
-            else Marshal.WriteIntPtr(ptrPosNewItem, IntPtr.Zero);
+            } else Marshal.WriteIntPtr(ptrPosNewItem, IntPtr.Zero);
 
             _nativePointer = newPointer;
         }
 
-        public void RefreshItems()
-        {
+        public void RefreshItems() {
             IntPtr ptrPosItem = _nativePointer;
-            for (int i = 0; i < _funcItems.Count; i++)
-            {
+            for (int i = 0; i < _funcItems.Count; i++) {
                 FuncItem updatedItem = new FuncItem();
                 updatedItem._itemName = _funcItems[i]._itemName;
                 ptrPosItem = (IntPtr)((int)ptrPosItem + 128);
@@ -143,26 +128,21 @@ namespace _3PA.Interop
         public IntPtr NativePointer { get { return _nativePointer; } }
         public List<FuncItem> Items { get { return _funcItems; } }
 
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
+        public void Dispose() {
+            if (!_disposed) {
                 foreach (IntPtr ptr in _shortCutKeys) Marshal.FreeHGlobal(ptr);
                 if (_nativePointer != IntPtr.Zero) Marshal.FreeHGlobal(_nativePointer);
                 _disposed = true;
             }
         }
-        ~FuncItems()
-        {
+        ~FuncItems() {
             Dispose();
         }
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct RECT
-    {
-        public RECT(int left, int top, int right, int bottom)
-        {
+    public struct RECT {
+        public RECT(int left, int top, int right, int bottom) {
             Left = left; Top = top; Right = right; Bottom = bottom;
         }
         public int Left;
@@ -172,8 +152,7 @@ namespace _3PA.Interop
     }
 
     [Flags]
-    public enum NppTbMsg : uint
-    {
+    public enum NppTbMsg : uint {
         // styles for containers
         //CAPTION_TOP                = 1,
         //CAPTION_BOTTOM            = 0,
@@ -203,8 +182,7 @@ namespace _3PA.Interop
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct NppTbData
-    {
+    public struct NppTbData {
         public IntPtr hClient;            // HWND: client Window Handle
         public string pszName;            // TCHAR*: name of plugin (shown in window)
         public int dlgID;                // int: a funcItem provides the function pointer to start a dialog. Please parse here these ID
@@ -222,8 +200,7 @@ namespace _3PA.Interop
         public string pszModuleName;    // const TCHAR*: it's the plugin file name. It's used to identify the plugin
     }
 
-    public enum LangType
-    {
+    public enum LangType {
         L_TEXT, L_PHP, L_C, L_CPP, L_CS, L_OBJC, L_JAVA, L_RC,
         L_HTML, L_XML, L_MAKEFILE, L_PASCAL, L_BATCH, L_INI, L_ASCII, L_USER,
         L_ASP, L_SQL, L_VB, L_JS, L_CSS, L_PERL, L_PYTHON, L_LUA,
@@ -237,14 +214,12 @@ namespace _3PA.Interop
     }
 
     [Flags]
-    public enum WinMsg : int
-    {
+    public enum WinMsg : int {
         WM_COMMAND = 0x111
     }
 
     [Flags]
-    public enum NppMsg : uint
-    {
+    public enum NppMsg : uint {
         //Here you can find how to use these messages : http://notepad-plus.sourceforge.net/uk/plugins-HOWTO.php
         NPPMSG = (0x400/*WM_USER*/ + 1000),
 
@@ -674,8 +649,1150 @@ namespace _3PA.Interop
         //scnNotification->nmhdr.idFrom = BufferID;
     }
 
-    public enum NppMenuCmd : uint
-    {
+    internal class Idm {
+        public const int Base = 40000;
+        public const int File = Base + 1000;
+        public const int Edit = Base + 2000;
+        public const int Search = Base + 3000;
+        public const int View = Base + 4000;
+        public const int ViewFold = View + 50;
+        public const int ViewUnfold = View + 60;
+        public const int Format = Base + 5000;
+        public const int Lang = Base + 6000;
+        public const int About = Base + 7000;
+        public const int Setting = Base + 8000;
+        public const int Execute = Base + 9000;
+    }
+
+    /// <summary>
+    /// A built-in Notepad++ menu command.
+    /// </summary>
+    public enum NppMenuCmd {
+        #region File
+        /// <summary>
+        /// </summary>
+        FileNew = (Idm.File + 1),
+
+        /// <summary>
+        /// </summary>
+        FileOpen = (Idm.File + 2),
+
+        /// <summary>
+        /// </summary>
+        FileClose = (Idm.File + 3),
+
+        /// <summary>
+        /// </summary>
+        FileCloseAll = (Idm.File + 4),
+
+        /// <summary>
+        /// </summary>
+        FileCloseAllButCurrent = (Idm.File + 5),
+
+        /// <summary>
+        /// </summary>
+        FileSave = (Idm.File + 6),
+
+        /// <summary>
+        /// </summary>
+        FileSaveAll = (Idm.File + 7),
+
+        /// <summary>
+        /// </summary>
+        FileSaveAs = (Idm.File + 8),
+
+        /// <summary>
+        /// </summary>
+        FileAsianLang = (Idm.File + 9),
+
+        /// <summary>
+        /// </summary>
+        FilePrint = (Idm.File + 10),
+
+        /// <summary>
+        /// </summary>
+        FilePrintNow = 1001,
+
+        /// <summary>
+        /// </summary>
+        FileExit = (Idm.File + 11),
+
+        /// <summary>
+        /// </summary>
+        FileLoadSession = (Idm.File + 12),
+
+        /// <summary>
+        /// </summary>
+        FileSaveSession = (Idm.File + 13),
+
+        /// <summary>
+        /// </summary>
+        FileReload = (Idm.File + 14),
+
+        /// <summary>
+        /// </summary>
+        FileSaveCopyAs = (Idm.File + 15),
+
+        /// <summary>
+        /// </summary>
+        FileDelete = (Idm.File + 16),
+
+        /// <summary>
+        /// </summary>
+        FileRename = (Idm.File + 17),
+
+        /// <summary>
+        /// </summary>
+        FileOpenAllRecentFiles = (Idm.Edit + 40),
+
+        /// <summary>
+        /// </summary>
+        FileCleanRecentFileList = (Idm.Edit + 41),
+        #endregion
+
+        #region Edit
+        /// <summary>
+        /// </summary>
+        EditCut = (Idm.Edit + 1),
+
+        /// <summary>
+        /// </summary>
+        EditCopy = (Idm.Edit + 2),
+
+        /// <summary>
+        /// </summary>
+        EditUndo = (Idm.Edit + 3),
+
+        /// <summary>
+        /// </summary>
+        EditRedo = (Idm.Edit + 4),
+
+        /// <summary>
+        /// </summary>
+        EditPaste = (Idm.Edit + 5),
+
+        /// <summary>
+        /// </summary>
+        EditDelete = (Idm.Edit + 6),
+
+        /// <summary>
+        /// </summary>
+        EditSelectAll = (Idm.Edit + 7),
+
+        /// <summary>
+        /// </summary>
+        EditInsertTab = (Idm.Edit + 8),
+
+        /// <summary>
+        /// </summary>
+        EditRemoveTab = (Idm.Edit + 9),
+
+        /// <summary>
+        /// </summary>
+        EditDuplicateLine = (Idm.Edit + 10),
+
+        /// <summary>
+        /// </summary>
+        EditTransposeLine = (Idm.Edit + 11),
+
+        /// <summary>
+        /// </summary>
+        EditSplitLines = (Idm.Edit + 12),
+
+        /// <summary>
+        /// </summary>
+        EditJoinLines = (Idm.Edit + 13),
+
+        /// <summary>
+        /// </summary>
+        EditLineUp = (Idm.Edit + 14),
+
+        /// <summary>
+        /// </summary>
+        EditLineDown = (Idm.Edit + 15),
+
+        /// <summary>
+        /// </summary>
+        EditUppercase = (Idm.Edit + 16),
+
+        /// <summary>
+        /// </summary>
+        EditLowercase = (Idm.Edit + 17),
+
+        /// <summary>
+        /// </summary>
+        EditBlockComment = (Idm.Edit + 22),
+
+        /// <summary>
+        /// </summary>
+        EditStreamComment = (Idm.Edit + 23),
+
+        /// <summary>
+        /// </summary>
+        EditTrimTrailing = (Idm.Edit + 24),
+
+        /// <summary>
+        /// </summary>
+        EditRtl = (Idm.Edit + 26),
+
+        /// <summary>
+        /// </summary>
+        EditLtr = (Idm.Edit + 27),
+
+        /// <summary>
+        /// </summary>
+        EditSetReadOnly = (Idm.Edit + 28),
+
+        /// <summary>
+        /// </summary>
+        EditFullPathToClipboard = (Idm.Edit + 29),
+
+        /// <summary>
+        /// </summary>
+        EditFileNameToClipboard = (Idm.Edit + 30),
+
+        /// <summary>
+        /// </summary>
+        EditCurrentDirToClipboard = (Idm.Edit + 31),
+
+        /// <summary>
+        /// </summary>
+        EditClearReadOnly = (Idm.Edit + 33),
+
+        /// <summary>
+        /// </summary>
+        EditColumnMode = (Idm.Edit + 34),
+
+        /// <summary>
+        /// </summary>
+        EditBlockCommentSet = (Idm.Edit + 35),
+
+        /// <summary>
+        /// </summary>
+        EditBlockUncomment = (Idm.Edit + 36),
+
+        /// <summary>
+        /// </summary>
+        EditAutoComplete = (50000 + 0),
+
+        /// <summary>
+        /// </summary>
+        EditAutoCompleteCurrentFile = (50000 + 1),
+
+        /// <summary>
+        /// </summary>
+        EditFuncionCallTip = (50000 + 2),
+        #endregion
+
+        #region Search
+        /// <summary>
+        /// </summary>
+        SearchFind = (Idm.Search + 1),
+
+        /// <summary>
+        /// </summary>
+        SearchFindNext = (Idm.Search + 2),
+
+        /// <summary>
+        /// </summary>
+        SearchReplace = (Idm.Search + 3),
+
+        /// <summary>
+        /// </summary>
+        SearchGoToLine = (Idm.Search + 4),
+
+        /// <summary>
+        /// </summary>
+        SearchToggleBookmark = (Idm.Search + 5),
+
+        /// <summary>
+        /// </summary>
+        SearchNextBookmark = (Idm.Search + 6),
+
+        /// <summary>
+        /// </summary>
+        SearchPrevBookmark = (Idm.Search + 7),
+
+        /// <summary>
+        /// </summary>
+        SearchClearBookmarks = (Idm.Search + 8),
+
+        /// <summary>
+        /// </summary>
+        SearchCutMarkedLines = (Idm.Search + 18),
+
+        /// <summary>
+        /// </summary>
+        SearchCopyMarkedLines = (Idm.Search + 19),
+
+        /// <summary>
+        /// </summary>
+        SearchPasteMarkedLines = (Idm.Search + 20),
+
+        /// <summary>
+        /// </summary>
+        SearchDeleteMarkedLines = (Idm.Search + 21),
+
+        /// <summary>
+        /// </summary>
+        SearchGoToMatchingBrace = (Idm.Search + 9),
+
+        /// <summary>
+        /// </summary>
+        SearchFindPrev = (Idm.Search + 10),
+
+        /// <summary>
+        /// </summary>
+        SearchFindIncrement = (Idm.Search + 11),
+
+        /// <summary>
+        /// </summary>
+        SearchFindInFiles = (Idm.Search + 13),
+
+        /// <summary>
+        /// </summary>
+        SearchVolatileFindNext = (Idm.Search + 14),
+
+        /// <summary>
+        /// </summary>
+        SearchVolatileFindPrev = (Idm.Search + 15),
+
+        /// <summary>
+        /// </summary>
+        SearchMarkAllExt1 = (Idm.Search + 22),
+
+        /// <summary>
+        /// </summary>
+        SearchUnmarkAllExt1 = (Idm.Search + 23),
+
+        /// <summary>
+        /// </summary>
+        SearchMarkAllExt2 = (Idm.Search + 24),
+
+        /// <summary>
+        /// </summary>
+        SearchUnmarkAllExt2 = (Idm.Search + 25),
+
+        /// <summary>
+        /// </summary>
+        SearchMarkAllExt3 = (Idm.Search + 26),
+
+        /// <summary>
+        /// </summary>
+        SearchUnmarkAllExt3 = (Idm.Search + 27),
+
+        /// <summary>
+        /// </summary>
+        SearchMarkAllExt4 = (Idm.Search + 28),
+
+        /// <summary>
+        /// </summary>
+        SearchUnmarkAllExt4 = (Idm.Search + 29),
+
+        /// <summary>
+        /// </summary>
+        SearchMarkAllExt5 = (Idm.Search + 30),
+
+        /// <summary>
+        /// </summary>
+        SearchUnmarkAllExt5 = (Idm.Search + 31),
+
+        /// <summary>
+        /// </summary>
+        SearchClearAllMarks = (Idm.Search + 32),
+        #endregion
+
+        #region View
+        //IDM.ViewToolbarHide = (IDM.View + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewToolbarReduce = (Idm.View + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewToolbarEnlarge = (Idm.View + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewToolbarStandard = (Idm.View + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewReduceTabBar = (Idm.View + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewLockTabBar = (Idm.View + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarTopBar = (Idm.View + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarInactiveTab = (Idm.View + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewPostIt = (Idm.View + 9),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewToggleFoldAll = (Idm.View + 10),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUserDialog = (Idm.View + 11),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewLineNumber = (Idm.View + 12),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewSymbolMargin = (Idm.View + 13),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFolderMargin = (Idm.View + 14),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFolderMarginSimple = (Idm.View + 15),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFolderMarginArrow = (Idm.View + 16),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFolderMarginCircle = (Idm.View + 17),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFolderMarginBox = (Idm.View + 18),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewAllChars = (Idm.View + 19),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewIndentGuide = (Idm.View + 20),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewCurLineHilighting = (Idm.View + 21),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewWrap = (Idm.View + 22),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewZoomIn = (Idm.View + 23),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewZoomOut = (Idm.View + 24),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewTabSpace = (Idm.View + 25),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewEol = (Idm.View + 26),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewEdgeLine = (Idm.View + 27),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewEdgeBackground = (Idm.View + 28),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewToggleUnfoldAll = (Idm.View + 29),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFoldCurrent = (Idm.View + 30),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfoldCurrent = (Idm.View + 31),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFullScreenToggle = (Idm.View + 32),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewZoomRestore = (Idm.View + 33),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewAlwaysOnTop = (Idm.View + 34),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewSyncScrollV = (Idm.View + 35),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewSyncScrollH = (Idm.View + 36),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewEdgeNone = (Idm.View + 37),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarCloseBottUn = (Idm.View + 38),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarDblClkToClose = (Idm.View + 39),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewRefreshTabBar = (Idm.View + 40),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewWrapSymbol = (Idm.View + 41),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewHideLines = (Idm.View + 42),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarVertical = (Idm.View + 43),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDrawTabBarMultiLine = (Idm.View + 44),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewDocChangeMargin = (Idm.View + 45),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold1 = (Idm.ViewFold + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold2 = (Idm.ViewFold + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold3 = (Idm.ViewFold + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold4 = (Idm.ViewFold + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold5 = (Idm.ViewFold + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold6 = (Idm.ViewFold + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold7 = (Idm.ViewFold + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewFold8 = (Idm.ViewFold + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold1 = (Idm.ViewUnfold + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold2 = (Idm.ViewUnfold + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold3 = (Idm.ViewUnfold + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold4 = (Idm.ViewUnfold + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold5 = (Idm.ViewUnfold + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold6 = (Idm.ViewUnfold + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold7 = (Idm.ViewUnfold + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewUnfold8 = (Idm.ViewUnfold + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewGoToAnotherView = 10001,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewCloneToAnotherView = 10002,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewGoToNewInstance = 10003,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewLoadInNewInstance = 10004,
+
+        /// <summary>
+        /// 
+        /// </summary>
+        ViewSwitchToOtherView = (Idm.View + 72),
+        #endregion
+
+        #region Format
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatToDos = (Idm.Format + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatToUnix = (Idm.Format + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatToMac = (Idm.Format + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatAnsi = (Idm.Format + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatUtf8 = (Idm.Format + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatUnicodeBigEndian = (Idm.Format + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatUnicodeLittleEndian = (Idm.Format + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatAsUtf8 = (Idm.Format + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatConvertAnsi = (Idm.Format + 9),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatConvertAsUtf8 = (Idm.Format + 10),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatConvertUtf8 = (Idm.Format + 11),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatConvertUnicodeBigEndian = (Idm.Format + 12),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        FormatConvertUnicodeLittleEndian = (Idm.Format + 13),
+        #endregion
+
+        #region Language
+        /// <summary>
+        /// 
+        /// </summary>
+        LangStyleConfigDialog = (Idm.Lang + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangC = (Idm.Lang + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangCpp = (Idm.Lang + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangJava = (Idm.Lang + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangHtml = (Idm.Lang + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangXml = (Idm.Lang + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangJs = (Idm.Lang + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangPhp = (Idm.Lang + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangAsp = (Idm.Lang + 9),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangCss = (Idm.Lang + 10),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangPascal = (Idm.Lang + 11),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangPython = (Idm.Lang + 12),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangPerl = (Idm.Lang + 13),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangObjC = (Idm.Lang + 14),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangAscii = (Idm.Lang + 15),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangText = (Idm.Lang + 16),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangRc = (Idm.Lang + 17),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangMakeFile = (Idm.Lang + 18),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangIni = (Idm.Lang + 19),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangSql = (Idm.Lang + 20),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangVb = (Idm.Lang + 21),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangBatch = (Idm.Lang + 22),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangCs = (Idm.Lang + 23),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangLua = (Idm.Lang + 24),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangTex = (Idm.Lang + 25),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangFortran = (Idm.Lang + 26),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangSh = (Idm.Lang + 27),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangFlash = (Idm.Lang + 28),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangNsis = (Idm.Lang + 29),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangTcl = (Idm.Lang + 30),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangList = (Idm.Lang + 31),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangScheme = (Idm.Lang + 32),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangAsm = (Idm.Lang + 33),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangDiff = (Idm.Lang + 34),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangProps = (Idm.Lang + 35),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangPs = (Idm.Lang + 36),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangRuby = (Idm.Lang + 37),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangSmallTalk = (Idm.Lang + 38),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangVhdl = (Idm.Lang + 39),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangCaml = (Idm.Lang + 40),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangKix = (Idm.Lang + 41),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangAda = (Idm.Lang + 42),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangVerilog = (Idm.Lang + 43),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangAu3 = (Idm.Lang + 44),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangMatlab = (Idm.Lang + 45),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangHaskell = (Idm.Lang + 46),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangInno = (Idm.Lang + 47),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangCMake = (Idm.Lang + 48),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangYaml = (Idm.Lang + 49),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangExternal = (Idm.Lang + 50),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangExternalLimit = (Idm.Lang + 79),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangUser = (Idm.Lang + 80),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        LangUserLimit = (Idm.Lang + 110),
+        #endregion
+
+        #region About
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutHomePage = (Idm.About + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutProjectPage = (Idm.About + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutOnlineHelp = (Idm.About + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutForum = (Idm.About + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutPluginsHome = (Idm.About + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutUpdateNpp = (Idm.About + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutWikiFaq = (Idm.About + 7),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        AboutHelp = (Idm.About + 8),
+        #endregion
+
+        #region Settings
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingTabSize = (Idm.Setting + 1),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingTabReplaceSpace = (Idm.Setting + 2),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingHistorySize = (Idm.Setting + 3),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingEdgeSize = (Idm.Setting + 4),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingImportPlugin = (Idm.Setting + 5),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingImportStyleThemes = (Idm.Setting + 6),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingTrayIcon = (Idm.Setting + 8),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingShortcutMapper = (Idm.Setting + 9),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingRememberLastSession = (Idm.Setting + 10),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingPreferences = (Idm.Setting + 11),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        SettingAutoCnbChar = (Idm.Setting + 15),
+        #endregion
+
+        #region Macro
+        /// <summary>
+        /// 
+        /// </summary>
+        MacroStartRecording = (Idm.Edit + 18),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        MacroStopRecording = (Idm.Edit + 19),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        MacroPLaybackRecorded = (Idm.Edit + 21),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        MacroSaveCurrent = (Idm.Edit + 25),
+
+        /// <summary>
+        /// 
+        /// </summary>
+        MacroRunMultiDialog = (Idm.Edit + 32),
+        #endregion
+    }
+    /*
+    public enum NppMenuCmd : uint {
         IDM = 40000,
 
         IDM_FILE = (IDM + 1000),
@@ -1072,10 +2189,10 @@ namespace _3PA.Interop
         IDM_SYSTRAYPOPUP_OPENFILE = (IDM_SYSTRAYPOPUP + 4),
         IDM_SYSTRAYPOPUP_CLOSE = (IDM_SYSTRAYPOPUP + 5)
     }
+     */
 
     [Flags]
-    public enum DockMgrMsg : uint
-    {
+    public enum DockMgrMsg : uint {
         IDB_CLOSE_DOWN = 137,
         IDB_CLOSE_UP = 138,
         IDD_CONTAINER_DLG = 139,
@@ -1113,8 +2230,7 @@ namespace _3PA.Interop
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct toolbarIcons
-    {
+    public struct toolbarIcons {
         public IntPtr hToolbarBmp;
         public IntPtr hToolbarIcon;
     }
@@ -1124,8 +2240,7 @@ namespace _3PA.Interop
     #region " Scintilla "
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Sci_NotifyHeader
-    {
+    public struct Sci_NotifyHeader {
         /* Compatible with Windows NMHDR.
          * hwndFrom is really an environment specific window handle or pointer
          * but most clients of Scintilla.h do not have this type visible. */
@@ -1135,8 +2250,7 @@ namespace _3PA.Interop
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct SCNotification
-    {
+    public struct SCNotification {
         public Sci_NotifyHeader nmhdr;
         public int position;            /* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
         public int ch;                    /* SCN_CHARADDED, SCN_KEY */
@@ -1162,8 +2276,7 @@ namespace _3PA.Interop
     }
 
     [Flags]
-    public enum SciMsg : uint
-    {
+    public enum SciMsg : uint {
         SCN_FOCUSIN = 2028,
         SCN_FOCUSOUT = 2029,
         SCI_CALLTIPSETPOSSTART = 2214,
@@ -1990,37 +3103,31 @@ namespace _3PA.Interop
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct Sci_CharacterRange
-    {
-        public Sci_CharacterRange(int cpmin, int cpmax)
-        {
+    public struct Sci_CharacterRange {
+        public Sci_CharacterRange(int cpmin, int cpmax) {
             cpMin = cpmin; cpMax = cpmax;
         }
         public int cpMin;
         public int cpMax;
     }
 
-    public class Sci_TextRange : IDisposable
-    {
+    public class Sci_TextRange : IDisposable {
         _Sci_TextRange _sciTextRange;
         IntPtr _ptrSciTextRange;
         bool _disposed = false;
 
-        public Sci_TextRange(Sci_CharacterRange chrRange, int stringCapacity)
-        {
+        public Sci_TextRange(Sci_CharacterRange chrRange, int stringCapacity) {
             _sciTextRange.chrg = chrRange;
             _sciTextRange.lpstrText = Marshal.AllocHGlobal(stringCapacity);
         }
-        public Sci_TextRange(int cpmin, int cpmax, int stringCapacity)
-        {
+        public Sci_TextRange(int cpmin, int cpmax, int stringCapacity) {
             _sciTextRange.chrg.cpMin = cpmin;
             _sciTextRange.chrg.cpMax = cpmax;
             _sciTextRange.lpstrText = Marshal.AllocHGlobal(stringCapacity);
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct _Sci_TextRange
-        {
+        struct _Sci_TextRange {
             public Sci_CharacterRange chrg;
             public IntPtr lpstrText;
         }
@@ -2028,17 +3135,14 @@ namespace _3PA.Interop
         public IntPtr NativePointer { get { _initNativeStruct(); return _ptrSciTextRange; } }
         public string lpstrAnsiText { get { _readNativeStruct(); return Marshal.PtrToStringAnsi(_sciTextRange.lpstrText); } }
 
-        public string lpstrText
-        {
-            get
-            {
+        public string lpstrText {
+            get {
                 _readNativeStruct();
                 return Utf8PtrToString(_sciTextRange.lpstrText);
             }
         }
 
-        public static string Utf8PtrToString(IntPtr pChar)
-        {
+        public static string Utf8PtrToString(IntPtr pChar) {
             int len = MultiByteToWideChar(65001, 0, pChar, -1, null, 0);
             if (len == 0) throw new System.ComponentModel.Win32Exception();
             var buf = new StringBuilder(len);
@@ -2050,54 +3154,45 @@ namespace _3PA.Interop
         private static extern int MultiByteToWideChar(int codepage, int flags, IntPtr utf8, int utf8len, StringBuilder buffer, int buflen);
 
         public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextRange.chrg; } set { _sciTextRange.chrg = value; _initNativeStruct(); } }
-        void _initNativeStruct()
-        {
+        void _initNativeStruct() {
             if (_ptrSciTextRange == IntPtr.Zero)
                 _ptrSciTextRange = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextRange));
             Marshal.StructureToPtr(_sciTextRange, _ptrSciTextRange, false);
         }
-        void _readNativeStruct()
-        {
+        void _readNativeStruct() {
             if (_ptrSciTextRange != IntPtr.Zero)
                 _sciTextRange = (_Sci_TextRange)Marshal.PtrToStructure(_ptrSciTextRange, typeof(_Sci_TextRange));
         }
 
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
+        public void Dispose() {
+            if (!_disposed) {
                 if (_sciTextRange.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextRange.lpstrText);
                 if (_ptrSciTextRange != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextRange);
                 _disposed = true;
             }
         }
-        ~Sci_TextRange()
-        {
+        ~Sci_TextRange() {
             Dispose();
         }
     }
 
-    public class Sci_TextToFind : IDisposable
-    {
+    public class Sci_TextToFind : IDisposable {
         _Sci_TextToFind _sciTextToFind;
         IntPtr _ptrSciTextToFind;
         bool _disposed = false;
 
-        public Sci_TextToFind(Sci_CharacterRange chrRange, string searchText)
-        {
+        public Sci_TextToFind(Sci_CharacterRange chrRange, string searchText) {
             _sciTextToFind.chrg = chrRange;
             _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
         }
-        public Sci_TextToFind(int cpmin, int cpmax, string searchText)
-        {
+        public Sci_TextToFind(int cpmin, int cpmax, string searchText) {
             _sciTextToFind.chrg.cpMin = cpmin;
             _sciTextToFind.chrg.cpMax = cpmax;
             _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
         }
 
         [StructLayout(LayoutKind.Sequential)]
-        struct _Sci_TextToFind
-        {
+        struct _Sci_TextToFind {
             public Sci_CharacterRange chrg;
             public IntPtr lpstrText;
             public Sci_CharacterRange chrgText;
@@ -2107,33 +3202,27 @@ namespace _3PA.Interop
         public string lpstrText { set { _freeNativeString(); _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(value); } }
         public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextToFind.chrg; } set { _sciTextToFind.chrg = value; _initNativeStruct(); } }
         public Sci_CharacterRange chrgText { get { _readNativeStruct(); return _sciTextToFind.chrgText; } }
-        void _initNativeStruct()
-        {
+        void _initNativeStruct() {
             if (_ptrSciTextToFind == IntPtr.Zero)
                 _ptrSciTextToFind = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextToFind));
             Marshal.StructureToPtr(_sciTextToFind, _ptrSciTextToFind, false);
         }
-        void _readNativeStruct()
-        {
+        void _readNativeStruct() {
             if (_ptrSciTextToFind != IntPtr.Zero)
                 _sciTextToFind = (_Sci_TextToFind)Marshal.PtrToStructure(_ptrSciTextToFind, typeof(_Sci_TextToFind));
         }
-        void _freeNativeString()
-        {
+        void _freeNativeString() {
             if (_sciTextToFind.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextToFind.lpstrText);
         }
 
-        public void Dispose()
-        {
-            if (!_disposed)
-            {
+        public void Dispose() {
+            if (!_disposed) {
                 _freeNativeString();
                 if (_ptrSciTextToFind != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextToFind);
                 _disposed = true;
             }
         }
-        ~Sci_TextToFind()
-        {
+        ~Sci_TextToFind() {
             Dispose();
         }
     }

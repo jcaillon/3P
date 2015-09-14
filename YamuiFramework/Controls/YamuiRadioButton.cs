@@ -8,6 +8,8 @@ using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
+// Credits to : http://sourceforge.net/projects/bsfccontrollibr/
+
 namespace YamuiFramework.Controls
 {
     [Designer("YamuiFramework.Controls.YamuiRadioButtonDesigner")]

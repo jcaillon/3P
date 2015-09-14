@@ -249,7 +249,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void SelectFirstItem() {
             try {
                 fastOLV.SelectedIndex = 0;
-            } catch (Exception e) {
+            } catch (Exception) {
                 // ignored
             }
         }

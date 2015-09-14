@@ -28,9 +28,6 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
-            this.yamuiProgressSpinner3 = new YamuiFramework.Controls.YamuiProgressSpinner();
-            this.yamuiProgressSpinner2 = new YamuiFramework.Controls.YamuiProgressSpinner();
-            this.yamuiProgressSpinner1 = new YamuiFramework.Controls.YamuiProgressSpinner();
             this.yamuiLabel9 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiScrollBar1 = new YamuiFramework.Controls.YamuiScrollBar();
             this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
@@ -43,9 +40,6 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
             // 
             // yamuiPanel1
             // 
-            this.yamuiPanel1.Controls.Add(this.yamuiProgressSpinner3);
-            this.yamuiPanel1.Controls.Add(this.yamuiProgressSpinner1);
-            this.yamuiPanel1.Controls.Add(this.yamuiProgressSpinner2);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel4);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel9);
             this.yamuiPanel1.Controls.Add(this.yamuiProgressBar1);
@@ -62,35 +56,6 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
             this.yamuiPanel1.TabIndex = 0;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
-            // 
-            // yamuiProgressSpinner3
-            // 
-            this.yamuiProgressSpinner3.Location = new System.Drawing.Point(172, 207);
-            this.yamuiProgressSpinner3.Maximum = 100;
-            this.yamuiProgressSpinner3.Name = "yamuiProgressSpinner3";
-            this.yamuiProgressSpinner3.Size = new System.Drawing.Size(80, 80);
-            this.yamuiProgressSpinner3.Speed = 2F;
-            this.yamuiProgressSpinner3.TabIndex = 21;
-            this.yamuiProgressSpinner3.Value = 50;
-            // 
-            // yamuiProgressSpinner2
-            // 
-            this.yamuiProgressSpinner2.Backwards = true;
-            this.yamuiProgressSpinner2.Location = new System.Drawing.Point(86, 207);
-            this.yamuiProgressSpinner2.Maximum = 75;
-            this.yamuiProgressSpinner2.Minimum = 25;
-            this.yamuiProgressSpinner2.Name = "yamuiProgressSpinner2";
-            this.yamuiProgressSpinner2.Size = new System.Drawing.Size(80, 80);
-            this.yamuiProgressSpinner2.TabIndex = 20;
-            this.yamuiProgressSpinner2.Value = 25;
-            // 
-            // yamuiProgressSpinner1
-            // 
-            this.yamuiProgressSpinner1.Location = new System.Drawing.Point(0, 207);
-            this.yamuiProgressSpinner1.Maximum = 100;
-            this.yamuiProgressSpinner1.Name = "yamuiProgressSpinner1";
-            this.yamuiProgressSpinner1.Size = new System.Drawing.Size(80, 80);
-            this.yamuiProgressSpinner1.TabIndex = 19;
             // 
             // yamuiLabel9
             // 
@@ -127,10 +92,8 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
             // 
             // yamuiProgressBar3
             // 
-            this.yamuiProgressBar3.HideProgressText = false;
             this.yamuiProgressBar3.Location = new System.Drawing.Point(0, 80);
             this.yamuiProgressBar3.Name = "yamuiProgressBar3";
-            this.yamuiProgressBar3.ProgressBarStyle = System.Windows.Forms.ProgressBarStyle.Blocks;
             this.yamuiProgressBar3.Size = new System.Drawing.Size(540, 23);
             this.yamuiProgressBar3.TabIndex = 15;
             // 
@@ -138,7 +101,6 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
             // 
             this.yamuiProgressBar2.Location = new System.Drawing.Point(0, 51);
             this.yamuiProgressBar2.Name = "yamuiProgressBar2";
-            this.yamuiProgressBar2.ProgressBarStyle = System.Windows.Forms.ProgressBarStyle.Blocks;
             this.yamuiProgressBar2.Size = new System.Drawing.Size(540, 23);
             this.yamuiProgressBar2.TabIndex = 14;
             // 
@@ -175,9 +137,6 @@ namespace _3PA.MainFeatures.Appli.Pages.control {
         #endregion
 
         private YamuiPanel yamuiPanel1;
-        private YamuiProgressSpinner yamuiProgressSpinner3;
-        private YamuiProgressSpinner yamuiProgressSpinner1;
-        private YamuiProgressSpinner yamuiProgressSpinner2;
         private YamuiLabel yamuiLabel4;
         private YamuiLabel yamuiLabel9;
         private YamuiProgressBar yamuiProgressBar1;

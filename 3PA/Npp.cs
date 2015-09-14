@@ -89,6 +89,63 @@ namespace _3PA {
             get { return new WindowWrapper(HandleNpp); }
         }
 
+        #region Lexer stuff
+
+        /// <summary>
+        /// returns a boolean to know if we are currently using the container lexer
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsUsingContainerLexer() {
+            int x = Call(SciMsg.SCI_GETLEXER);
+            return (x == 0);
+        }
+
+        /// <summary>
+        /// Sets the current lexer to container lexer
+        /// </summary>
+        public static void SetLexerToContainerLexer() {
+            SetStatusbarLabel("current lexer container? : " + IsUsingContainerLexer() + " + " + (Call(SciMsg.SCI_GETLEXER)).ToString());
+            Call(SciMsg.SCI_SETLEXER, 0);
+            Colourize();
+        }
+
+        /// <summary>
+        /// returns the position at which we need to start the styling
+        /// </summary>
+        /// <returns></returns>
+        public static int GetLastStyledPosition() {
+            return Call(SciMsg.SCI_GETENDSTYLED);
+        }
+
+        /// <summary>
+        /// Position of the starting line we need to style
+        /// </summary>
+        /// <returns></returns>
+        public static int GetSylingNeededStartPos() {
+            return PositionFromLine(LineFromPosition(GetLastStyledPosition()));
+        }
+
+        public static void SetStyle(int id, Color bg, Color fg) {
+            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new COLORREF(bg)).ColorDWORD);
+            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new COLORREF(fg)).ColorDWORD);
+        }
+
+        public static void SetDefaultStyle(Color bg, Color fg) {
+            SetStyle((int)SciMsg.STYLE_DEFAULT, bg, fg);
+            Call(SciMsg.SCI_STYLECLEARALL);
+        }
+
+        public static void StyleText(int styleId, int startPos, int endPos) {
+            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
+            Call(SciMsg.SCI_SETSTYLING, endPos - startPos, styleId);
+        }
+
+        public static void Colourize() {
+            Call(SciMsg.SCI_COLOURISE, 0, -1);
+        }
+        #endregion
+
+
         /// <summary>
         /// Is the caret not in : an include, a string, a comment
         /// </summary>
@@ -551,7 +608,7 @@ namespace _3PA {
         }
 
         public static void DisplayInNewDocument(string text) {
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, NppMenuCmd.IDM_FILE_NEW);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, NppMenuCmd.FileNew);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_ADDTEXT, text);
         }
@@ -676,7 +733,7 @@ namespace _3PA {
 
         public static void Exit() {
             const int wmCommand = 0x111;
-            Win32.SendMessage(HandleNpp, (NppMsg) wmCommand, (int) NppMenuCmd.IDM_FILE_EXIT, 0);
+            Win32.SendMessage(HandleNpp, (NppMsg) wmCommand, (int) NppMenuCmd.FileExit, 0);
         }
 
         public static string GetTextBetween(Point point) {

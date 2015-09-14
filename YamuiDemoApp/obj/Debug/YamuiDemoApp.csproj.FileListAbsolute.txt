@@ -34,8 +34,10 @@ C:\Work\3PA\Plugin\YamuiDemoApp\obj\Debug\YamuiDemoApp.exe
 C:\Work\3PA\Plugin\YamuiDemoApp\obj\Debug\YamuiDemoApp.pdb
 C:\Work\3PA\YamuiDemoApp\bin\Debug\YamuiDemoApp.exe
 C:\Work\3PA\YamuiDemoApp\bin\Debug\YamuiDemoApp.pdb
+C:\Work\3PA\YamuiDemoApp\bin\Debug\2P2B.dll
 C:\Work\3PA\YamuiDemoApp\bin\Debug\ObjectListView.dll
 C:\Work\3PA\YamuiDemoApp\bin\Debug\YamuiFramework.dll
+C:\Work\3PA\YamuiDemoApp\bin\Debug\2P2B.pdb
 C:\Work\3PA\YamuiDemoApp\bin\Debug\ObjectListView.pdb
 C:\Work\3PA\YamuiDemoApp\bin\Debug\ObjectListView.xml
 C:\Work\3PA\YamuiDemoApp\bin\Debug\YamuiFramework.pdb
@@ -53,5 +55,3 @@ C:\Work\3PA\YamuiDemoApp\obj\Debug\YamuiDemoApp.Properties.Resources.resources
 C:\Work\3PA\YamuiDemoApp\obj\Debug\YamuiDemoApp.csproj.GenerateResource.Cache
 C:\Work\3PA\YamuiDemoApp\obj\Debug\YamuiDemoApp.exe
 C:\Work\3PA\YamuiDemoApp\obj\Debug\YamuiDemoApp.pdb
-C:\Work\3PA\YamuiDemoApp\bin\Debug\2P2B.dll
-C:\Work\3PA\YamuiDemoApp\bin\Debug\2P2B.pdb

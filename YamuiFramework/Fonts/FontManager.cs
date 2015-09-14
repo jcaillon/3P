@@ -162,9 +162,6 @@ namespace YamuiFramework.Fonts {
                 if (familyFont != null)
                     fontTester = new Font(familyFont, emSize, fontStyle, unit);
                 return fontTester;
-                fontTester.Dispose();
-                //FontFamily fontFamily = GetFontFamily(familyName);
-                return new Font("Times New Roman", emSize, fontStyle, unit);
             }
 
             private PrivateFontCollection _pfc = new PrivateFontCollection();

@@ -74,7 +74,6 @@ namespace YamuiFramework.Forms {
 
         private List<int[]> _formHistory = new List<int[]>();
         private YamuiGoBackButton _goBackButton;
-        private bool _tabAnimatedAllowed;
         #endregion
 
         #region Constructor

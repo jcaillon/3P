@@ -6,8 +6,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using YamuiFramework.Animations.Transitions;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -405,6 +403,10 @@ namespace _3PA {
         public static void OnDocumentSwitched() {
             ApplyPluginSpecificOptions(false);
             ClosePopups();
+
+            //// set the lexer to use
+            //if (Npp.IsCurrentProgressFile() && !Npp.IsUsingContainerLexer())
+            //    Npp.SetLexerToContainerLexer();
         }
 
         /// <summary>

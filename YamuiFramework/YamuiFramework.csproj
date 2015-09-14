@@ -96,7 +96,7 @@
     <Compile Include="Controls\YamuiProgressBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiProgressSpinner.cs">
+    <Compile Include="Controls\YamuiProgressIndicator.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiColorRadioButton.cs">

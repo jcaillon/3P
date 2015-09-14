@@ -121,17 +121,13 @@ namespace YamuiFramework.Controls {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                if (!UseCustomBackColor && !DontUseTransparentBackGround)
-                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
+            if (!UseCustomBackColor && !DontUseTransparentBackGround)
+                PaintTransparentBackground(e.Graphics, DisplayRectangle);
+            else
+                if (!UseCustomBackColor)
+                    e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
                 else
-                    if (!UseCustomBackColor)
-                        e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
-                    else
-                        e.Graphics.Clear(BackColor);
-            } catch {
-                Invalidate();
-            }
+                    e.Graphics.Clear(BackColor);
         }
 
         protected override void OnPaint(PaintEventArgs e) {
