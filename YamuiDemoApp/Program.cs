@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
+using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.DockableExplorer;
@@ -19,6 +21,9 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
+            Keywords.Init();
+            Keywords.Save();
+            return;
             /*
             Application.EnableVisualStyles();
            

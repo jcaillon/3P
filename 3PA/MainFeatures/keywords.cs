@@ -2,69 +2,70 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
 
+    /// <summary>
+    /// this class handles the static keywords of progress
+    /// </summary>
     public class Keywords {
-        public static SpecialDictionary<int> Map = new SpecialDictionary<int>(StringComparer.OrdinalIgnoreCase);
-        private const string FileName = "keywords.data";
 
-        public static List<string> Keys {
-            get {
-                lock (Map) {
-                    var lst = Map.ToList();
-                    lst.Sort(
-                        (firstPair, nextPair) => {
-                            if (nextPair.Value != firstPair.Value)
-                                return nextPair.Value.CompareTo(firstPair.Value);
-                            return String.Compare(firstPair.Key, nextPair.Key, StringComparison.Ordinal);
-                        }
-                        );
-                    return lst.Select(x => x.Key).ToList();
-                }
-            }
-        }
-
-        public static bool Contains(string keyword) {
-            lock (Map) {
-                return (!string.IsNullOrWhiteSpace(keyword)) && Map.ContainsKey(keyword.ToUpper());
-            }
-        }
-
-        public static void RemberUseOf(string keyword) {
-            if (Contains(keyword))
-                lock (Map) {
-                    Map[keyword]++;
-                }
-        }
-
-        private static string ConfigFile {
-            get { return Path.Combine(Npp.GetConfigDir(), FileName); }
-        }
+        private static List<CompletionData> _keywords = new List<CompletionData>();
+        private static string _filePath;
+        private static string _location = Npp.GetConfigDir();
+        private static string _fileName = "keywords.data";
 
         public static void Init() {
-            lock (Map) {
-                if (!File.Exists(ConfigFile))
-                    File.WriteAllBytes(ConfigFile, DataResources.keywords);
-                Map.Clear();
-                try {
-                    Map.Load(ConfigFile);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while loading keywords!", ConfigFile);
-                }
+            _filePath = Path.Combine(_location, _fileName);
+            if (!File.Exists(_filePath))
+                File.WriteAllBytes(_filePath, DataResources.keywords);
+            _keywords.Clear();
+            try {
+                Load();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while loading keywords!", _filePath);
+            }
+        }
+
+        private static void Load() {
+            foreach (var items in File.ReadAllLines(_filePath).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
+                _keywords.Add(new CompletionData {
+                    DisplayText = items[0],
+                    Type = CompletionType.Keyword,
+                    Ranking = int.Parse(items[3]),
+                    SubType = items[1],
+                    Flag = new List<CompletionFlag> {
+                        (items[2] == "1") ? CompletionFlag.Reserved : CompletionFlag.None
+                    }
+                });
             }
         }
 
         public static void Save() {
-            lock (Map) {
-                try {
-                    Map.Save(ConfigFile);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while saving keywords!");
-                }
+            var strBuilder = new StringBuilder();
+            foreach (var keyword in _keywords) {
+                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubType + "\t" + ((keyword.Flag != null && keyword.Flag[0] == CompletionFlag.Reserved) ? "1" : "0") + "\t" + keyword.Ranking);
             }
+            File.WriteAllText(_filePath, strBuilder.ToString());
         }
+
+        public static List<CompletionData> Get {
+            get { return _keywords; }
+        }
+
+        public static bool Contains(string keyword) {
+            var x = _keywords.Find(data => data.DisplayText == keyword);
+            return x != null;
+        }
+
+        public static void RemberUseOf(string keyword) {
+            var x = _keywords.Find(data => data.DisplayText == keyword);
+            if (x != null) x.Ranking++;
+        }
+
     }
 }

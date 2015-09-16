@@ -27,7 +27,7 @@ namespace _3PA.Lib {
         /// <param name="instance"></param>
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
-        public static void SaveToFile(T instance, string filename, bool valueInAttribute) {
+        public static void SaveToFile(T instance, string filename, bool valueInAttribute = false) {
             var x = new List<T> { instance };
             SaveToFile(x, filename, valueInAttribute);
         }
@@ -117,7 +117,7 @@ namespace _3PA.Lib {
         /// <param name="instance"></param>
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
-        public static void LoadFromFile(T instance, string filename, bool valueInAttribute) {
+        public static void LoadFromFile(T instance, string filename, bool valueInAttribute = false) {
             var root = XDocument.Load(filename).Root;
             if (root != null)
                 LoadFromXElement(instance, root.Descendants(InstanceListItemString).First(), valueInAttribute);
@@ -130,7 +130,7 @@ namespace _3PA.Lib {
         /// <param name="instance"></param>
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
-        public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute) {
+        public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute = false) {
             LoadFromXDocument(instance, XDocument.Load(filename), valueInAttribute);
         }
 
@@ -141,7 +141,7 @@ namespace _3PA.Lib {
         /// <param name="instance"></param>
         /// <param name="document"></param>
         /// <param name="valueInAttribute"></param>
-        public static void LoadFromXDocument(List<T> instance, XDocument document, bool valueInAttribute) {
+        public static void LoadFromXDocument(List<T> instance, XDocument document, bool valueInAttribute = false) {
             XElement rootElement = document.Root;
             if (rootElement == null) return;
 
@@ -162,19 +162,22 @@ namespace _3PA.Lib {
         /// <param name="item"></param>
         /// <param name="itemElement"></param>
         /// <param name="valueInAttribute"></param>
-        private static void LoadFromXElement(T item, XElement itemElement, bool valueInAttribute) {
+        private static void LoadFromXElement(T item, XElement itemElement, bool valueInAttribute = false) {
             var properties = typeof(T).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) continue;
-                XElement elm = itemElement.Element(property.Name);
-                if (elm == null) continue;
 
                 /* dico */
                 if (property.FieldType == typeof(Dictionary<string, string>)) {
+                    XElement elm = itemElement.Element(PrefixToParentOfDico + property.Name);
+                    if (elm == null) continue;
+
                     property.SetValue(item, XmlToDictionary(elm, valueInAttribute));
                 } else {
+                    XElement elm = itemElement.Element(property.Name);
+                    if (elm == null) continue;
 
                     /* color > to hex */
                     if (property.FieldType == typeof(Color)) {
@@ -190,7 +193,7 @@ namespace _3PA.Lib {
             }
         }
 
-        private static Dictionary<string, string> XmlToDictionary(XElement baseElm, bool valueInAttribute) {
+        private static Dictionary<string, string> XmlToDictionary(XElement baseElm, bool valueInAttribute = false) {
             Dictionary<string, string> dict = new Dictionary<string, string>();
             foreach (XElement elm in baseElm.Elements()) {
                 string dictKey = "";
@@ -202,17 +205,18 @@ namespace _3PA.Lib {
                     XElement subElement = elm.Element(KeyString);
                     if (subElement != null)
                         dictKey = subElement.Value;
-                    subElement = elm.Element(KeyString);
+                    subElement = elm.Element(ValueString);
                     if (subElement != null)
-                        dictVal = elm.Attribute(ValueString).Value;
+                        dictVal = subElement.Value;
                 }
-                if (!string.IsNullOrEmpty(dictKey))
+                // if a key is not unique we will only take the first found!
+                if (!string.IsNullOrEmpty(dictKey) && !dict.ContainsKey(dictKey))
                     dict.Add(dictKey, dictVal);
             }
             return dict;
         }
 
-        private static XElement DictToXml(Dictionary<string, string> inputDict, string elmName, string subElmName, bool valueInAttribute) {
+        private static XElement DictToXml(Dictionary<string, string> inputDict, string elmName, string subElmName, bool valueInAttribute = false) {
             XElement outElm = new XElement(elmName);
             Dictionary<string, string>.KeyCollection keys = inputDict.Keys;
             foreach (string key in keys) {

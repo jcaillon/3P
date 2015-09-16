@@ -44,6 +44,10 @@ namespace _3PA.Lib {
         public double ToolTipUnfocusedOpacity = 0.9;
         public bool ToolTipDeactivate = false;
 
+        public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
+        public int GlobalCurrentEnvironnement = 0;
+        public bool GlobalUseContainedLexer = true;
+
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
 
@@ -72,8 +76,6 @@ namespace _3PA.Lib {
         private static ConfigObject Init() {
             _instance = new ConfigObject();
             _filePath = Path.Combine(_location, _fileName);
-            if (!Directory.Exists(_location))
-                Directory.CreateDirectory(_location);
             if (File.Exists(_filePath)) {
                 try {
                     Object2Xml<ConfigObject>.LoadFromFile(_instance, _filePath, false);

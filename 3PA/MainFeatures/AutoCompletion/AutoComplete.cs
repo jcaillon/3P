@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static List<CompletionData> GetListOf(CompletionType compType, string tableName = "") {
             switch (compType) {
                 case CompletionType.Keyword:
-                    return Keywords.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Keyword }).ToList();
+                    return Keywords.Get;
                 case CompletionType.Table:
                     return DataBaseInfo.KeysTable.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Table }).ToList();
                 case CompletionType.Field:

@@ -71,6 +71,28 @@ namespace _3PA.Data {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot;?&gt;
+        ///&lt;Root xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;&gt;
+        ///  &lt;Item&gt;
+        ///    &lt;Label&gt;Environnement de dév BOI&lt;/Label&gt;
+        ///    &lt;Appli&gt;BOI&lt;/Appli&gt;
+        ///    &lt;EnvLetter&gt;A&lt;/EnvLetter&gt;
+        ///    &lt;IniPath&gt;o:\appli\boia\boidevv1110.ini&lt;/IniPath&gt;
+        ///    &lt;PfPath&gt;o:\appli\boia\boidev.pf&lt;/PfPath&gt;
+        ///    &lt;ProPath/&gt;
+        ///    &lt;DataBaseConnection/&gt;
+        ///    &lt;CmdLineParameters/&gt;
+        ///    &lt;BaseLocalPath&gt;D:\Cnaf\boi-a-dev\boi\&lt;/BaseLocalPath&gt;
+        ///    &lt;BaseCompilationPath&gt;O:\appli\boia\sopra\exec\&lt;/BaseCompilationPath&gt;
+        ///    &lt;LogFilePath&gt;O:\appli\boi [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string ProgressEnvironnement {
+            get {
+                return ResourceManager.GetString("ProgressEnvironnement", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] snippets {

@@ -83,27 +83,27 @@ namespace _3PA.MainFeatures.Appli.Pages {
         /// force all the html panel/label to refresh and try to refresh the main window
         /// </summary>
         private void PlsRefresh() {
-            // Refresh panels and labels (html)
-            try {
-                var x = ControlHelper.GetAll(FindForm(), typeof (HtmlLabel));
-                if (x != null)
-                    foreach (var y in x) {
-                        y.Text = y.Text;
-                    }
-                x = ControlHelper.GetAll(FindForm(), typeof(HtmlPanel));
-                if (x != null)
-                    foreach (var y in x) {
-                        y.Text = y.Text;
-                    }
-            } catch (Exception) {
-                throw;
-            }
-            // force the autocomplete to redraw
-            AutoComplete.ForceClose();
-            // force the dockable to redraw
-            DockableExplorer.DockableExplorer.Redraw();
             var thisForm = FindForm();
             if (thisForm != null) {
+                // Refresh panels and labels (html)
+                try {
+                    var x = ControlHelper.GetAll(FindForm(), typeof (HtmlLabel));
+                    if (x != null)
+                        foreach (var y in x) {
+                            y.Text = y.Text;
+                        }
+                    x = ControlHelper.GetAll(FindForm(), typeof(HtmlPanel));
+                    if (x != null)
+                        foreach (var y in x) {
+                            y.Text = y.Text;
+                        }
+                } catch (Exception) {
+                    //ignored
+                }
+                // force the autocomplete to redraw
+                AutoComplete.ForceClose();
+                // force the dockable to redraw
+                DockableExplorer.DockableExplorer.Redraw();
                 Application.DoEvents();
                 thisForm.Invalidate();
                 Application.DoEvents();

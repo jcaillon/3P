@@ -8,7 +8,7 @@ namespace YamuiFramework.Themes {
     /// <summary>
     /// A class to read and write an object instance
     /// </summary>
-    public class Class2Xml<T> {
+    internal class Class2Xml<T> {
 
         private const string KeyString = "Key";
         private const string ValueString = "Value";
@@ -22,7 +22,7 @@ namespace YamuiFramework.Themes {
         /// <param name="instance"></param>
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
-        public static void SaveToFile(T instance, string filename, bool valueInAttribute) {
+        public static void SaveToFile(T instance, string filename, bool valueInAttribute = false) {
             var x = new List<T> { instance };
             SaveToFile(x, filename, valueInAttribute);
         }
@@ -88,17 +88,17 @@ namespace YamuiFramework.Themes {
         /// <param name="instance"></param>
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
-        public static void LoadFromFile(T instance, string filename, bool valueInAttribute) {
+        public static void LoadFromFile(T instance, string filename, bool valueInAttribute = false) {
             var x = new List<T> {instance};
             LoadFromFile(x, filename, valueInAttribute);
             instance = x[0];
         }
 
-        public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute) {
+        public static void LoadFromFile(List<T> instance, string filename, bool valueInAttribute = false) {
             Load(instance, XDocument.Load(filename), valueInAttribute);
         }
 
-        private static void Load(List<T> instance, XDocument document, bool valueInAttribute) {
+        private static void Load(List<T> instance, XDocument document, bool valueInAttribute = false) {
             XElement rootElement = document.Root;
             if (rootElement == null) return;
 
@@ -136,7 +136,7 @@ namespace YamuiFramework.Themes {
             }
         }
 
-        private static Dictionary<string, string> XmlToDictionary(XElement baseElm, bool valueInAttribute) {
+        private static Dictionary<string, string> XmlToDictionary(XElement baseElm, bool valueInAttribute = false) {
             Dictionary<string, string> dict = new Dictionary<string, string>();
             foreach (XElement elm in baseElm.Elements()) {
                 string dictKey = "";
@@ -158,7 +158,7 @@ namespace YamuiFramework.Themes {
             return dict;
         }
 
-        private static XElement DictToXml(Dictionary<string, string> inputDict, string elmName, string subElmName, bool valueInAttribute) {
+        private static XElement DictToXml(Dictionary<string, string> inputDict, string elmName, string subElmName, bool valueInAttribute = false) {
             XElement outElm = new XElement(elmName);
             Dictionary<string, string>.KeyCollection keys = inputDict.Keys;
             foreach (string key in keys) {

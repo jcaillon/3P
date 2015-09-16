@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Html\RegisterCssAndImages.cs" />
+    <Compile Include="MainFeatures\ProgressEnv.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +178,7 @@
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\Keywords.cs" />
     <Compile Include="MainFeatures\Lexer\Lexer.cs" />
+    <Compile Include="MainFeatures\Lexer\LexerStyles.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
@@ -193,6 +195,7 @@
       <DependentUpon>InfoToolTipForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Npp.cs" />
+    <Compile Include="Scintilla.cs" />
     <Compile Include="Plug.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -264,6 +267,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\dbout.txt" />
+    <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />

@@ -3,11 +3,17 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Xml.Serialization;
+using _3PA.Interop;
 
 namespace _3PA.Lib {
     /// <summary>
     /// </summary>
     public static class Utils {
+
+        public static bool IsCurrentProgressFile() {
+            var ext = Npp.GetCurrentFileExtension();
+            return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);
+        }
 
         public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original
@@ -66,27 +72,6 @@ namespace _3PA.Lib {
             var obj = deserializer.Deserialize(reader);
             reader.Close();
             return (T) obj;
-        }
-
-        /// <summary>
-        ///     Converts 16x16 bitmap into icon compatible with the Notepad++ toolbar buttons.
-        ///     <para><c>Color.Fuchsia</c> is used as a 'transparency' color. </para>
-        /// </summary>
-        /// <param name="bitmap">The bitmap.</param>
-        /// <returns></returns>
-        public static Icon NppBitmapToIcon(Bitmap bitmap) {
-            using (var newBmp = new Bitmap(16, 16)) {
-                var g = Graphics.FromImage(newBmp);
-                var colorMap = new ColorMap[1];
-                colorMap[0] = new ColorMap();
-                colorMap[0].OldColor = Color.Fuchsia;
-                colorMap[0].NewColor = Color.FromKnownColor(KnownColor.ButtonFace);
-                var attr = new ImageAttributes();
-                attr.SetRemapTable(colorMap);
-                //g.DrawImage(new Bitmap(@"E:\Dev\Notepad++.Plugins\NppScripts\css_logo_16x16.png"), new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
-                g.DrawImage(bitmap, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
-                return Icon.FromHandle(newBmp.GetHicon());
-            }
         }
     }
 }

@@ -54,7 +54,7 @@ namespace _3PA {
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Test", OnDwellStart, "_Test:Ctrl+D", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "_Test:Ctrl+D", false, uniqueKeys);
             /*
             SetCommand(cmdIndex++, "---", null);
 
@@ -157,8 +157,7 @@ namespace _3PA {
 
             Dispatcher.Init();
 
-            // Simulates a OnDocumentSwitched when we start this dll
-            OnDocumentSwitched();
+            ApplyPluginSpecificOptions(false);
 
             // initialize autocompletion (asynchrone)
             Task.Factory.StartNew(() => {
@@ -186,6 +185,9 @@ namespace _3PA {
                     // Set a mask for notifications received
                     Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMODEVENTMASK,
                         SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER, 0);
+
+                    // Simulates a OnDocumentSwitched when we start this dll
+                    OnDocumentSwitched();
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -300,7 +302,7 @@ namespace _3PA {
             handled = false; 
 
             // only do stuff if we are in a progress file
-            if (!Npp.IsCurrentProgressFile()) return;
+            if (!Utils.IsCurrentProgressFile()) return;
 
             try {
                 // Close interfacePopups
@@ -391,7 +393,7 @@ namespace _3PA {
         /// Called when a line is removed or added in the current doc
         /// </summary>
         public static void OnLineAddedOrRemoved() {
-            if (!Npp.GetCurrentFile().Equals(CurrentFile) && Npp.IsCurrentProgressFile()) {
+            if (!Npp.GetCurrentFile().Equals(CurrentFile) && Utils.IsCurrentProgressFile()) {
                 CurrentFile = Npp.GetCurrentFile();
                 //MessageBox.Show("time to parse this file");
             }
@@ -404,9 +406,9 @@ namespace _3PA {
             ApplyPluginSpecificOptions(false);
             ClosePopups();
 
-            //// set the lexer to use
-            //if (Npp.IsCurrentProgressFile() && !Npp.IsUsingContainerLexer())
-            //    Npp.SetLexerToContainerLexer();
+            // set the lexer to use
+            if (Config.Instance.GlobalUseContainedLexer && Utils.IsCurrentProgressFile())
+                Npp.SetLexerToContainerLexer();
         }
 
         /// <summary>
@@ -415,14 +417,16 @@ namespace _3PA {
         /// </summary>
         /// <param name="forceToDefault"></param>
         public static void ApplyPluginSpecificOptions(bool forceToDefault) {
-            if (!Npp.IsCurrentProgressFile() || forceToDefault) {
+            if (_indentWidth == 0) {
+                _indentWidth = Npp.GetIndent();
+                _indentWithTabs = Npp.GetUseTabs();
+            }
+            if (!Utils.IsCurrentProgressFile() || forceToDefault) {
                 Npp.ResetDefaultAutoCompletion();
                 Npp.SetIndent(_indentWidth);
                 Npp.SetUseTabs(_indentWithTabs);
             } else {
                 Npp.HideDefaultAutoCompletion();
-                _indentWidth = Npp.GetIndent();
-                _indentWithTabs = Npp.GetUseTabs();
                 Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
                 Npp.SetUseTabs(false);
             }
@@ -453,6 +457,9 @@ namespace _3PA {
 
         #region tests
         static void Test() {
+            // progress env
+            ProgressEnv.GetList();
+            ProgressEnv.Save();
         }
         #endregion
     }

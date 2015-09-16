@@ -1,5 +1,4 @@
 ﻿using System;
-using YamuiFramework.Helper;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.InfoToolTip {

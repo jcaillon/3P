@@ -86,7 +86,7 @@ namespace _3PA
                 }
 
                 // only do extra stuff if we are in a progress file
-                if (!Npp.IsCurrentProgressFile()) return;
+                if (!Utils.IsCurrentProgressFile()) return;
 
                 #region extra
                 switch (nc.nmhdr.code) {
@@ -149,9 +149,8 @@ namespace _3PA
                         return;
 
                     case (uint) SciMsg.SCN_STYLENEEDED:
-                        // if we use the container lexer, we will receive this notification and we will have to style the text
+                        // if we use the contained lexer, we will receive this notification and we will have to style the text
                         Lexer.Colorize(nc.position);
-
                         return;
 
                     case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:

@@ -8,10 +8,13 @@ using _3PA.Interop;
 
 namespace _3PA.MainFeatures.Lexer {
     class Lexer {
+        public static int derp = 0;
         public static void Colorize(int endPos) {
-            Npp.SetStatusbarLabel("styling...");
             int startPos = Npp.GetSylingNeededStartPos();
+
+            // redefine the styles
             SetCustomStyles();
+
             //            SCNotification* notify = (SCNotification*)nmhdr;
             //const int line_number = SendEditor(SCI_LINEFROMPOSITION, SendEditor(SCI_GETENDSTYLED));
             //const int start_pos = SendEditor(SCI_POSITIONFROMLINE, (WPARAM)line_number);
@@ -20,7 +23,7 @@ namespace _3PA.MainFeatures.Lexer {
         }
 
         public static void SetCustomStyles() {
-            Npp.SetDefaultStyle(Color.BlueViolet, Color.Crimson);
+            Npp.SetDefaultStyle(Color.White, Color.Crimson);
         }
 
     }

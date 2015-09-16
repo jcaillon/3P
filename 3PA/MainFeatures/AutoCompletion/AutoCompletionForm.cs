@@ -144,7 +144,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            var type = ((CompletionData) args.Model).Flag;
+            var flagList = ((CompletionData) args.Model).Flag;
+            if (flagList == null) return;
+            if (flagList.Count < 1) return;
+            var type = ((CompletionData) args.Model).Flag[0];
             if (type != CompletionFlag.None) {
                 TextDecoration decoration = new TextDecoration(Enum.GetName(typeof (CompletionFlag), type), 100);
                 decoration.Alignment = ContentAlignment.MiddleRight;
@@ -423,7 +426,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public int Compare(CompletionData x, CompletionData y) {
             int compare = x.Type.CompareTo(y.Type);
             if (compare == 0) {
-                return x.Ranking.CompareTo(y.Ranking);
+                return y.Ranking.CompareTo(x.Ranking);
             }
             return compare;
         }
