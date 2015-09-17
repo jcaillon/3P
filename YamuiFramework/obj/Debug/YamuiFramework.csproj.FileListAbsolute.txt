@@ -29,3 +29,5 @@ C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cach
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.pdb
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
+C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiSmokeScreen.resources
+C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiTabAnimation.resources

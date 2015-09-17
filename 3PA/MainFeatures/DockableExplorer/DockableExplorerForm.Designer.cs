@@ -175,6 +175,8 @@
             this.Controls.Add(this.textBoxFilter);
             this.Name = "DockableExplorerForm";
             this.Padding = new System.Windows.Forms.Padding(1);
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "DockableExplorerForm";
             ((System.ComponentModel.ISupportInitialize)(this.ovlTree)).EndInit();
             this.ResumeLayout(false);

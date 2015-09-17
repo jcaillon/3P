@@ -377,6 +377,8 @@ namespace _3PA {
         /// called when the user changes its selection in npp (the carret moves)
         /// </summary>
         public static void OnUpdateSelection() {
+            Npp.UpdateScintilla();
+
             // close suggestions
             ClosePopups();
             Snippets.FinalizeCurrent();
@@ -403,9 +405,10 @@ namespace _3PA {
         /// Called when the user switches tab document
         /// </summary>
         public static void OnDocumentSwitched() {
+            Npp.UpdateScintilla();
             ApplyPluginSpecificOptions(false);
             ClosePopups();
-
+            
             // set the lexer to use
             if (Config.Instance.GlobalUseContainedLexer && Utils.IsCurrentProgressFile())
                 Npp.SetLexerToContainerLexer();

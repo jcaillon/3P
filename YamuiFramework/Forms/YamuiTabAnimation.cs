@@ -106,5 +106,18 @@ namespace YamuiFramework.Forms {
         }
         #endregion
 
+        private void InitializeComponent() {
+            this.SuspendLayout();
+            // 
+            // YamuiTabAnimation
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Name = "YamuiTabAnimation";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.ResumeLayout(false);
+
+        }
+
     }
 }

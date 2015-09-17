@@ -6,7 +6,7 @@ using NppPlugin.DllExport;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.Lexer;
+using _3PA.MainFeatures.Colorisation;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
@@ -53,6 +53,10 @@ namespace _3PA
         #endregion
 
         #region BeNotified
+        /// <summary>
+        /// handles the notifications send by npp and scintilla to the plugin
+        /// </summary>
+        /// <param name="notifyCode"></param>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void beNotified(IntPtr notifyCode) {
             try {
@@ -90,9 +94,24 @@ namespace _3PA
 
                 #region extra
                 switch (nc.nmhdr.code) {
+                    case (uint)NppMsg.NPPN_FILEBEFOREOPEN:
+                        // fire when a file is opened, can be used to clean up data on closed documents
+
+                        return;
+
+                    case (uint)NppMsg.NPPN_SHORTCUTREMAPPED:
+                        // notify plugins that plugin command shortcut is remapped
+                        Interop.Plug.ShortcutsUpdated((int)nc.nmhdr.idFrom, (ShortcutKey)Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof(ShortcutKey)));
+                        return;
+
                     case (uint) SciMsg.SCN_CHARADDED:
                         // called each time the user add a char in the current scintilla
                         Plug.OnCharTyped((char) nc.ch);
+                        return;
+
+                    case (uint)SciMsg.SCN_STYLENEEDED:
+                        // if we use the contained lexer, we will receive this notification and we will have to style the text
+                        Colorisation.Colorize(nc.position);
                         return;
 
                     case (uint) SciMsg.SCN_UPDATEUI:
@@ -141,21 +160,6 @@ namespace _3PA
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;
-                        return;
-
-                    case (uint) NppMsg.NPPN_FILEBEFOREOPEN:
-                        // fire when a file is opened, can be used to clean up data on closed documents
-
-                        return;
-
-                    case (uint) SciMsg.SCN_STYLENEEDED:
-                        // if we use the contained lexer, we will receive this notification and we will have to style the text
-                        Lexer.Colorize(nc.position);
-                        return;
-
-                    case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:
-                        // notify plugins that plugin command shortcut is remapped
-                        Interop.Plug.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
                         return;
                 }
                 #endregion

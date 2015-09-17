@@ -144,12 +144,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            var flagList = ((CompletionData) args.Model).Flag;
-            if (flagList == null) return;
-            if (flagList.Count < 1) return;
-            var type = ((CompletionData) args.Model).Flag[0];
-            if (type != CompletionFlag.None) {
-                TextDecoration decoration = new TextDecoration(Enum.GetName(typeof (CompletionFlag), type), 100);
+            if (((CompletionData)args.Model).Flag.HasFlag(CompletionFlag.None)) {
+                TextDecoration decoration = new TextDecoration("R", 100);
                 decoration.Alignment = ContentAlignment.MiddleRight;
                 decoration.Offset = new Size(-5, 0);
                 decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);

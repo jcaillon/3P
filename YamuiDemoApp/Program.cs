@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
-using _3PA.Data;
-using _3PA.Lib;
-using _3PA.MainFeatures;
-using _3PA.MainFeatures.DockableExplorer;
+using _3PA;
+using _3PA.Interop;
+using _3PA.MainFeatures.Colorisation;
+using _3PA.MainFeatures.Parser;
 
 namespace YamuiDemoApp {
     static class Program {
@@ -21,8 +22,54 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
-            Keywords.Init();
-            Keywords.Save();
+            //Keywords.Init();
+
+            //------------
+            var watch = Stopwatch.StartNew();
+            //------------
+
+            List<Token> fu = new List<Token>();
+
+            Lexer tok = new Lexer(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
+
+
+            Token token;
+            do {
+                token = tok.GetNext();
+                fu.Add(token);
+            } while (token.Type != TokenType.Eof);
+
+
+            // output : 
+            StringBuilder output = new StringBuilder();
+            foreach (var item in fu) {
+                int thisStyle;
+                switch (item.Type) {
+                    case TokenType.Comment:
+                        output.AppendLine(item.Type + " :" + item.StartPosition + "," + item.EndPosition + " : " + item.Value);
+                        break;
+                    case TokenType.Word:
+                        output.AppendLine(item.Type + " :" + item.StartPosition + "," + item.EndPosition + " : " + item.Value);
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            // output :
+            //StringBuilder output = new StringBuilder();
+            //foreach (var item in fu) {
+            //    output.AppendLine(item.Type + " :" + item.Value);
+            //}
+
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", output.ToString());
+
+            //--------------
+            watch.Stop();
+            MessageBox.Show(fu.Count + "\ndone in " + watch.ElapsedMilliseconds + " ms");
+            //------------
+
+
             return;
             /*
             Application.EnableVisualStyles();

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -15,7 +16,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// When Type is UserVariable, is used to know if the var is shared, local global..
         /// When Type is Keyword, is used to know if the keyword is reserved
         /// </summary>
-        public List<CompletionFlag> Flag { get; set; }
+        public CompletionFlag Flag { get; set; }
 
         public string SubType { get; set; }
     }
@@ -34,12 +35,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Preprocessed
     }
 
+    [Flags]
     public enum CompletionFlag {
-        None,
-        Scope,
-        Global,
-        Parameter,
-        Reserved,
-        Abbreviation
+        None = 1,
+        Scope = 2,
+        Global = 4,
+        Parameter = 8,
+        Reserved = 16,
+        Abbreviation = 32
     }
 }

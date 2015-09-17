@@ -70,5 +70,18 @@ namespace YamuiFramework.Forms {
             BeginInvoke(new Action(() => Owner.Activate()));
         }
         #endregion
+
+        private void InitializeComponent() {
+            this.SuspendLayout();
+            // 
+            // YamuiSmokeScreen
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Name = "YamuiSmokeScreen";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
+            this.ResumeLayout(false);
+
+        }
     }
 }

@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.Colorisation;
 
 namespace _3PA {
     /// <summary>
@@ -56,16 +57,22 @@ namespace _3PA {
         public static IntPtr HandleScintilla {
             get {
                 if (_curScintilla == IntPtr.Zero) {
-                    int curScintilla;
-                    Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                    _curScintilla = (curScintilla == 0)
-                        ? Plug.NppData._scintillaMainHandle
-                        : Plug.NppData._scintillaSecondHandle;
+                    UpdateScintilla();
                 }
                 return _curScintilla;
             }
         }
 
+        /// <summary>
+        /// Updates the current scintilla handle for Npp's functions
+        /// </summary>
+        public static void UpdateScintilla() {
+            int curScintilla;
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+            _curScintilla = (curScintilla == 0)
+                ? Plug.NppData._scintillaMainHandle
+                : Plug.NppData._scintillaSecondHandle;
+        }
 
         #region Lexer stuff
 
@@ -141,9 +148,15 @@ namespace _3PA {
         public static void Colourize() {
             Call(SciMsg.SCI_COLOURISE, 0, -1);
         }
+
+        /// <summary>
+        /// returns the style of the caret position
+        /// </summary>
+        /// <returns></returns>
+        public static int GetStyleAt(int caretPos) {
+            return Call(SciMsg.SCI_GETSTYLEAT, caretPos, 0);
+        }
         #endregion
-
-
 
         /// <summary>
         /// Is the caret not in : an include, a string, a comment

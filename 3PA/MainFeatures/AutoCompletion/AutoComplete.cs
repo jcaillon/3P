@@ -38,7 +38,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void FillItems() {
             if (_persistentItems == null) _persistentItems = new List<CompletionData>();
             _persistentItems.Clear();
-            _persistentItems = GetListOf(CompletionType.Keyword);
+            // dont forget to copy the first list!! with a .ToLIst()!
+            _persistentItems = GetListOf(CompletionType.Keyword).ToList();
             _persistentItems.AddRange(GetListOf(CompletionType.Snippet));
             _persistentItems.AddRange(GetListOf(CompletionType.Table));
             _currentItems = _persistentItems;
