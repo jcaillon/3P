@@ -96,9 +96,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
             // Decorate and configure hot item
             ovlTree.UseHotItem = true;
-            ovlTree.HotItemStyle = new HotItemStyle();
-            ovlTree.HotItemStyle.BackColor = ThemeManager.Current.AutoCompletionHoverBackColor;
-            ovlTree.HotItemStyle.ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor;
+            ovlTree.HotItemStyle = new HotItemStyle {
+                BackColor = ThemeManager.Current.AutoCompletionHoverBackColor,
+                ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor
+            };
 
             // overlay of empty list :
             ovlTree.EmptyListMsg = "Nothing to display!";

@@ -63,7 +63,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Html\RegisterCssAndImages.cs" />
+    <Compile Include="MainFeatures\SynthaxHighlighting\SynthaxHighlightVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
+    <Compile Include="MainFeatures\Parser\ParsedDocuments.cs" />
+    <Compile Include="MainFeatures\Parser\Token.cs" />
     <Compile Include="MainFeatures\ProgressEnv.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
@@ -178,7 +182,7 @@
     <Compile Include="MainFeatures\DockableExplorer\ExplorerContent.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\Keywords.cs" />
-    <Compile Include="MainFeatures\Colorisation\Colorisation.cs" />
+    <Compile Include="MainFeatures\SynthaxHighlighting\Highlight.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">

@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Themes;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -13,96 +12,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// This renderer highlights substrings that match a given text filter. 
     /// </summary>
     public class CustomHighlightTextRenderer : BaseRenderer {
-        #region Life and death
 
         /// <summary>
         /// Create a HighlightTextRenderer
         /// </summary>
-        public CustomHighlightTextRenderer() {
-            FillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
-            FramePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
+        public CustomHighlightTextRenderer(string filterStr) {
+            _fillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
+            _framePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
+            _filterStr = filterStr;
         }
-
-        /// <summary>
-        /// Create a HighlightTextRenderer
-        /// </summary>
-        public CustomHighlightTextRenderer(ObjectListView fastOvl, string filterStr)
-            : this() {
-            Filter = new TextMatchFilter(fastOvl, filterStr, StringComparison.OrdinalIgnoreCase);
-        }
-        #endregion
 
         #region Configuration properties
-
-        /// <summary>
-        /// Gets or set how rounded will be the corners of the text match frame
-        /// </summary>
-        [Category("Appearance"),
-         DefaultValue(3.0f),
-         Description("How rounded will be the corners of the text match frame?")]
-        public float CornerRoundness {
-            get { return _cornerRoundness; }
-            set { _cornerRoundness = value; }
-        }
-
-        private float _cornerRoundness = 4.0f;
-
-        /// <summary>
-        /// Gets or set the brush will be used to paint behind the matched substrings.
-        /// Set this to null to not fill the frame.
-        /// </summary>
-        [Browsable(false),
-         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Brush FillBrush {
-            get { return _fillBrush; }
-            set { _fillBrush = value; }
-        }
-
+        private string _filterStr;
         private Brush _fillBrush;
-
-        /// <summary>
-        /// Gets or sets the filter that is filtering the ObjectListView and for
-        /// which this renderer should highlight text
-        /// </summary>
-        [Browsable(false),
-         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public TextMatchFilter Filter {
-            get { return _filter; }
-            set { _filter = value; }
-        }
-
-        private TextMatchFilter _filter;
-
-        /// <summary>
-        /// Gets or set the pen will be used to frame the matched substrings.
-        /// Set this to null to not draw a frame.
-        /// </summary>
-        [Browsable(false),
-         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Pen FramePen {
-            get { return _framePen; }
-            set { _framePen = value; }
-        }
-
         private Pen _framePen;
-
-        /// <summary>
-        /// Gets or sets whether the frame around a text match will have rounded corners
-        /// </summary>
-        [Category("Appearance"),
-         DefaultValue(true),
-         Description("Will the frame around a text match will have rounded corners?")]
-        public bool UseRoundedRectangle {
-            get { return _useRoundedRectangle; }
-            set { _useRoundedRectangle = value; }
-        }
-
-        private bool _useRoundedRectangle = true;
-
+        private bool _useRoundedRectangle = false;
         #endregion
 
         #region IRenderer interface overrides
-
         /// <summary>
         /// Handle a HitTest request after all state information has been initialized
         /// </summary>
@@ -115,11 +42,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override Rectangle HandleGetEditRectangle(Graphics g, Rectangle cellBounds, OLVListItem item, int subItemIndex, Size preferredSize) {
             return StandardGetEditRectangle(g, cellBounds, preferredSize);
         }
-
         #endregion
 
         #region Rendering
-
         // This class has two implement two highlighting schemes: one for GDI, another for GDI+.
         // Naturally, GDI+ makes the task easier, but we have to provide something for GDI
         // since that it is what is normally used.
@@ -133,7 +58,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void DrawTextGdi(Graphics g, Rectangle r, string txt) {
             if (ShouldDrawHighlighting)
                 DrawGdiTextHighlighting(g, r, txt);
-
             base.DrawTextGdi(g, r, txt);
         }
 
@@ -154,7 +78,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Cache the font
             Font f = Font;
 
-            foreach (CharacterRange range in Filter.FindAllMatchedRanges(txt)) {
+            foreach (CharacterRange range in txt.ToLower().FindAllMatchedRanges(_filterStr)) {
                 // Measure the text that comes before our substring
                 Size precedingTextSize = Size.Empty;
                 if (range.First > 0) {
@@ -185,18 +109,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="width"></param>
         /// <param name="height"></param>
         protected virtual void DrawSubstringFrame(Graphics g, float x, float y, float width, float height) {
-            if (UseRoundedRectangle) {
+            if (_useRoundedRectangle) {
                 using (GraphicsPath path = GetRoundedRect(x, y, width, height, 3.0f)) {
-                    if (FillBrush != null)
-                        g.FillPath(FillBrush, path);
-                    if (FramePen != null)
-                        g.DrawPath(FramePen, path);
+                    if (_fillBrush != null)
+                        g.FillPath(_fillBrush, path);
+                    if (_framePen != null)
+                        g.DrawPath(_framePen, path);
                 }
             } else {
-                if (FillBrush != null)
-                    g.FillRectangle(FillBrush, x, y, width, height);
-                if (FramePen != null)
-                    g.DrawRectangle(FramePen, x, y, width, height);
+                if (_fillBrush != null)
+                    g.FillRectangle(_fillBrush, x, y, width, height);
+                if (_framePen != null)
+                    g.DrawRectangle(_framePen, x, y, width, height);
             }
         }
 
@@ -209,7 +133,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void DrawTextGdiPlus(Graphics g, Rectangle r, string txt) {
             if (ShouldDrawHighlighting)
                 DrawGdiPlusTextHighlighting(g, r, txt);
-
             base.DrawTextGdiPlus(g, r, txt);
         }
 
@@ -221,7 +144,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="txt"></param>
         protected virtual void DrawGdiPlusTextHighlighting(Graphics g, Rectangle r, string txt) {
             // Find the substrings we want to highlight
-            List<CharacterRange> ranges = new List<CharacterRange>(Filter.FindAllMatchedRanges(txt));
+            List<CharacterRange> ranges = new List<CharacterRange>(txt.ToLower().FindAllMatchedRanges(_filterStr));
 
             if (ranges.Count == 0)
                 return;
@@ -237,11 +160,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
             }
         }
-
         #endregion
 
         #region Utilities
-
         /// <summary>
         /// Gets whether the renderer should actually draw highlighting
         /// </summary>

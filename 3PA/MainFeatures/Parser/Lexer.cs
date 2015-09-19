@@ -1,55 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace _3PA.MainFeatures.Parser {
 
     /// <summary>
-    /// Token object
-    /// </summary>
-    public class Token {
-        public string Value { get; private set; }
-        public int Line { get; private set; }
-        public int Column { get; private set; }
-        public int StartPosition { get; private set; }
-        public int EndPosition { get; private set; }
-        public TokenType Type { get; private set; }
-        public Token(TokenType type, string value, int line, int column, int startPosition, int endPosition) {
-            Type = type;
-            Value = value;
-            Line = line;
-            Column = column;
-            StartPosition = startPosition;
-            EndPosition = endPosition;
-        }
-    }
-
-    /// <summary>
-    /// Token types...
-    /// Eos is end of statement (a .)
-    /// Eof is end of file
-    /// Eol is end of line (\r\n or \n)
-    /// QuotedString is either a simple or double quote string (handles ~ escape char)
-    /// Symbol is a single char
-    /// </summary>
-    public enum TokenType {
-        Comment,
-        Eos,
-        Unknown,
-        Word,
-        Number,
-        QuotedString,
-        WhiteSpace,
-        Symbol,
-        Eol,
-        Eof,
-    }
-
-    /// <summary>
-    /// This class "tokenize" the input data into tokens of various types
+    /// This class "tokenize" the input data into tokens of various types,
+    /// it implements a visitor pattern (good article here : http://www.codeproject.com/Articles/588882/TheplusVisitorplusPatternplusExplained)
     /// </summary>
     public class Lexer {
-        private const char Eof = (char) 0;
+        private const char Eof = (char)0;
         private int _commentDepth;
+        private int _includeDepth;
         private int _column;
         private string _data;
         private int _line;
@@ -58,10 +20,11 @@ namespace _3PA.MainFeatures.Parser {
         private int _startLine;
         private int _startPos;
         private char[] _symbolChars;
+        private List<Token> _tokenList = new List<Token>();
 
         /// <summary>
         /// constructor, data is the input string to tokenize
-        /// use GetNext() to get the next token, stop when token.type == Eof
+        /// call Tokenize() to do the work
         /// </summary>
         /// <param name="data"></param>
         public Lexer(string data) {
@@ -69,36 +32,61 @@ namespace _3PA.MainFeatures.Parser {
                 throw new ArgumentNullException("data");
             _data = data;
             _symbolChars = new[] { '=', '+', '-', '/', ',', '.', '*', '~', '!', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', '|', '\\', '`', '’' };
+            _pos = 0;
             _line = 1;
             _column = 1;
-            _pos = 0;
         }
 
         /// <summary>
         /// Use this when you wish to tokenize only a partial string in a longer string
         /// Allows you to start with a comment depth different of 0
         /// </summary>
+        /// <param name="data"></param>
+        /// <param name="pos"></param>
         /// <param name="line"></param>
         /// <param name="column"></param>
         /// <param name="commentDepth"></param>
-        public void SettingInitialStatus(int line, int column, int commentDepth) {
+        /// <param name="includeDepth"></param>
+        public Lexer(string data, int pos, int line, int column, int commentDepth, int includeDepth) : this(data) {
+            _pos = pos;
             _line = line;
             _column = column;
             _commentDepth = commentDepth;
+            _includeDepth = includeDepth;
         }
 
         /// <summary>
-        /// Peek forward
+        /// Call this method to actually tokenize the string
         /// </summary>
-        private char PeekAt(int count) {
-            return _pos + count >= _data.Length ? Eof : _data[_pos + count];
+        public void Tokenize() {
+            Token token;
+            do {
+                token = GetNext();
+                _tokenList.Add(token);
+            } while (!(token is TokenEof));
+        }
+
+        /// <summary>
+        /// Feed this method with a visitor implementing ILexerVisitor to visit all the tokens of the input string
+        /// </summary>
+        /// <param name="visitor"></param>
+        public void Accept(ILexerVisitor visitor) {
+            foreach (Token token in _tokenList) {
+                token.Accept(visitor);
+            }
+        }
+        
+        /// <summary>
+        /// Peek forward x chars
+        /// </summary>
+        private char PeekAt(int x) {
+            return _pos + x >= _data.Length ? Eof : _data[_pos + x];
         }
 
         /// <summary>
         /// Read to the next char,
         /// indirectly adding the current char (_data[_pos]) to the current token
         /// </summary>
-        /// <returns></returns>
         private void Read() {
             _pos++;
             _column++;
@@ -117,20 +105,18 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// instanciate token object
+        /// Returns the current value of the token
         /// </summary>
-        /// <param name="type"></param>
         /// <returns></returns>
-        private Token CreateToken(TokenType type) {
-            var tokenData = _data.Substring(_startPos, _pos - _startPos);
-            return new Token(type, tokenData, _startLine, _startCol, _startPos, _pos);
+        private string GetTokenValue() {
+            return _data.Substring(_startPos, _pos - _startPos);
         }
 
         /// <summary>
         /// returns the next token of the string
         /// </summary>
         /// <returns></returns>
-        public Token GetNext() {
+        private Token GetNext() {
             _startLine = _line;
             _startCol = _column;
             _startPos = _pos;
@@ -138,28 +124,34 @@ namespace _3PA.MainFeatures.Parser {
             // if we started in a comment, read this token as a comment
             if (_commentDepth > 0) return CreateCommentToken();
 
+            // if we started in a comment, read this token as a comment
+            if (_includeDepth > 0) return CreateIncludeToken();
+
             var ch = PeekAt(0);
             switch (ch) {
                 case Eof:
-                    return CreateToken(TokenType.Eof);
+                    return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
                 // comment
                 case '/':
                     return PeekAt(1) == '*' ? CreateCommentToken() : CreateSymbolToken();
+                // include file or preproc variable
+                case '{':
+                    return CreateIncludeToken();
                 // whitespaces or tab
                 case ' ':
                 case '\t':
                     return CreateWhitespaceToken();
                 // number
                 case '-': {
-                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                    Read();
-                    return CreateNumberToken();
-                }
+                        if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
+                        Read();
+                        return CreateNumberToken();
+                    }
                 case '+': {
-                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                    Read();
-                    return CreateNumberToken();
-                }
+                        if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
+                        Read();
+                        return CreateNumberToken();
+                    }
                 case '0':
                 case '1':
                 case '2':
@@ -169,7 +161,7 @@ namespace _3PA.MainFeatures.Parser {
                 case '6':
                 case '7':
                 case '8':
-                case '9': 
+                case '9':
                     return CreateNumberToken();
                 // end of line
                 case '\r':
@@ -183,32 +175,60 @@ namespace _3PA.MainFeatures.Parser {
                 case '.':
                     return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
                 default: {
-                    // keyword = [a-Z_&]+[\w_-]*
-                    if (char.IsLetter(ch) || ch == '_' || ch == '&')
-                        return CreateWordToken();
-                    // symbol
-                    if (_symbolChars.Any(t => t == ch))
-                        return CreateSymbolToken();
-                    // unknown char
-                    Read();
-                    return CreateToken(TokenType.Unknown);
-                }
+                        // keyword = [a-Z_&]+[\w_-]*
+                        if (char.IsLetter(ch) || ch == '_' || ch == '&')
+                            return CreateWordToken();
+                        // symbol
+                        if (_symbolChars.Any(t => t == ch))
+                            return CreateSymbolToken();
+                        // unknown char
+                        Read();
+                        return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                    }
             }
         }
 
         private Token CreateEolToken(char ch) {
             ReadEol(ch);
-            return CreateToken(TokenType.Eol);
+            return new TokenEol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         private Token CreateEosToken() {
             Read();
-            return CreateToken(TokenType.Eos);
+            return new TokenEos(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         private Token CreateSymbolToken() {
             Read();
-            return CreateToken(TokenType.Symbol);
+            return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
+
+
+        /// <summary>
+        /// reads an include declaration
+        /// </summary>
+        private Token CreateIncludeToken() {
+            while (true) {
+                var ch = PeekAt(0);
+                if (ch == Eof)
+                    break;
+                // start of include
+                if (ch == '{') {
+                    Read();
+                    _includeDepth++;
+                }
+                // end of include
+                else if (ch == '}') {
+                    Read();
+                    _includeDepth--;
+                    // we finished reading
+                    if (_includeDepth == 0)
+                        break;
+                }
+                else 
+                    Read();
+            }
+            return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -235,19 +255,14 @@ namespace _3PA.MainFeatures.Parser {
                     // we finished reading the comment, leave
                     if (_commentDepth == 0)
                         break;
-                } else switch (ch) {
-                    // read eol
-                    case '\r':
-                    case '\n':
-                        ReadEol(ch);
-                        break;
-                    // continue reading
-                    default:
-                        Read();
-                        break;
-                }
+                // read eol
+                } else if (ch == '\r' || ch == '\n') {
+                    ReadEol(ch);
+                // continue reading
+                } else
+                    Read();
             }
-            return CreateToken(TokenType.Comment);
+            return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -263,7 +278,7 @@ namespace _3PA.MainFeatures.Parser {
                 else
                     break;
             }
-            return CreateToken(TokenType.WhiteSpace);
+            return new TokenWhiteSpace(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -283,7 +298,7 @@ namespace _3PA.MainFeatures.Parser {
                 } else
                     break;
             }
-            return CreateToken(TokenType.Number);
+            return new TokenNumber(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -298,7 +313,7 @@ namespace _3PA.MainFeatures.Parser {
                 else
                     break;
             }
-            return CreateToken(TokenType.Word);
+            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
@@ -314,21 +329,18 @@ namespace _3PA.MainFeatures.Parser {
                 // break on new line (this means the code is not compilable anyway...)
                 if (ch == '\r' || ch == '\n')
                     break;
-                // escape char
-                if (ch == '~') {
-                    Read();
-                    // if the following char is a quote, it was escaped so read it
-                    if (PeekAt(0) == strChar)
-                        Read();
                 // quote char
-                } else if (ch == strChar) {
+                if (ch == strChar) {
                     Read();
                     break; // done reading
-                // keep on reading
-                } else
+                    // keep on reading
+                }
+                // escape char (read anything as part of the string after that)
+                if (ch == '~')
                     Read();
+                Read();
             }
-            return CreateToken(TokenType.QuotedString);
+            return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
     }
 }

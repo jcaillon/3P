@@ -16,6 +16,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.InfoToolTip;
+using _3PA.MainFeatures.SynthaxHighlighting;
 using _3PA.Properties;
 
 #pragma warning disable 1591
@@ -409,9 +410,11 @@ namespace _3PA {
             ApplyPluginSpecificOptions(false);
             ClosePopups();
             
-            // set the lexer to use
-            if (Config.Instance.GlobalUseContainedLexer && Utils.IsCurrentProgressFile())
-                Npp.SetLexerToContainerLexer();
+            // TODO: FIX COLOR HIGHLIGHTING.?
+            //// set the lexer to use
+            //if (Config.Instance.GlobalUseContainedLexer && Utils.IsCurrentProgressFile())
+            //    Highlight.Colorize(0, Npp.GetTextLenght());
+            //    //Npp.SetLexerToContainerLexer();
         }
 
         /// <summary>
@@ -460,9 +463,8 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            // progress env
-            ProgressEnv.GetList();
-            ProgressEnv.Save();
+            Highlight.SetCustomStyles();
+            Npp.SetStatusbarLabel(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
         }
         #endregion
     }

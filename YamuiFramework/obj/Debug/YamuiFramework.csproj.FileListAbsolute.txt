@@ -24,10 +24,9 @@ C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Fonts.ResourceFont.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiForm.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiFormMessageBox.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiNotifications.resources
+C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiSmokeScreen.resources
+C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiTabAnimation.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resources
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.pdb
-C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
-C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiSmokeScreen.resources
-C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiTabAnimation.resources

@@ -25,7 +25,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public CustomTreeRenderer() {
             LinePen = new Pen(ThemeManager.AccentColor, 1.0f);
             LinePen.DashStyle = DashStyle.Dot;
-
             FillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
             FramePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
         }

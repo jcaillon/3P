@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public string FilterByText {
             get { return _filterString; }
-            set { _filterString = value; ApplyFilter(); }
+            set { _filterString = value.ToLower(); ApplyFilter(); }
         }
 
         public bool UseAlternateBackColor {
@@ -126,7 +126,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.KeyDown += FastOlvOnKeyDown;
 
             fastOLV.UseTabAsInput = true;
-            _filterString = initialFilter;
+            _filterString = initialFilter.ToLower();
 
             // handles mouse leave/mouse enter
             MouseLeave += CustomOnMouseLeave;
@@ -267,6 +267,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             Location = position;
         }
 
+        /// <summary>
+        /// autocomplete with the currently selected item
+        /// </summary>
+        public void AcceptCurrentSuggestion() {
+            var obj = (CompletionData) fastOLV.SelectedItem.RowObject;
+            if (obj != null)
+                OnTabCompleted(new TabCompletedEventArgs(obj));
+        }
         #endregion
 
 
@@ -277,7 +285,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
         private void FastOlvOnDoubleClick(object sender, EventArgs eventArgs) {
-            OnTabCompleted(new TabCompletedEventArgs(((CompletionData)fastOLV.SelectedItem.RowObject)));
+            AcceptCurrentSuggestion();
         }
 
         /// <summary>
@@ -368,7 +376,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // enter and tab accept the current selection
             } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept) || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
-                OnTabCompleted(new TabCompletedEventArgs(((CompletionData)fastOLV.SelectedItem.RowObject)));
+                AcceptCurrentSuggestion();
 
                 // else, any other key needs to be analysed by Npp
             } else {
@@ -394,8 +402,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     return 1;
             }).ToList());
 
-            fastOLV.ModelFilter = new ModelFilter((o => ((CompletionData) o).DisplayText.Contains(_filterString, StringComparison.InvariantCultureIgnoreCase) && _activeTypes[((CompletionData) o).Type].Activated));
-            fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(fastOLV, _filterString);
+            fastOLV.ModelFilter = new ModelFilter((o => ((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activated));
+            fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterString);
 
             // update total items
             TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;

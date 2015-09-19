@@ -6,7 +6,7 @@ using NppPlugin.DllExport;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.Colorisation;
+using _3PA.MainFeatures.SynthaxHighlighting;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
@@ -111,7 +111,7 @@ namespace _3PA
 
                     case (uint)SciMsg.SCN_STYLENEEDED:
                         // if we use the contained lexer, we will receive this notification and we will have to style the text
-                        Colorisation.Colorize(nc.position);
+                        Highlight.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
                         return;
 
                     case (uint) SciMsg.SCN_UPDATEUI:

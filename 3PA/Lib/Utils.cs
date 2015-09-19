@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -10,6 +11,10 @@ namespace _3PA.Lib {
     /// </summary>
     public static class Utils {
 
+        /// <summary>
+        /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
+        /// </summary>
+        /// <returns></returns>
         public static bool IsCurrentProgressFile() {
             var ext = Npp.GetCurrentFileExtension();
             return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);

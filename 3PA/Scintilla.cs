@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.Colorisation;
 
 namespace _3PA {
     /// <summary>
@@ -46,6 +45,33 @@ namespace _3PA {
             Include = 18,
             Nothing = 24,
             Unknown = 666
+        }
+
+        public enum UdlStyles {
+            Default = 0,
+            Comment = 1,
+            CommentLine = 2,
+            Number = 3,
+            KeyWordsList1 = 4,
+            KeyWordsList2 = 5,
+            KeyWordsList3 = 6,
+            KeyWordsList4 = 7,
+            KeyWordsList5 = 8,
+            KeyWordsList6 = 9,
+            KeyWordsList7 = 10,
+            KeyWordsList8 = 11,
+            FolderInCode1 = 13,
+            FolderInCode2 = 14,
+            FolderInComment = 15,
+            Delimiter1 = 16,
+            Delimiter2 = 17,
+            Delimiter3 = 18,
+            Delimiter4 = 19,
+            Delimiter5 = 20,
+            Delimiter6 = 21,
+            Delimiter7 = 22,
+            Delimiter8 = 23,
+            Operators = 24,
         }
 
         /// <summary>
@@ -90,7 +116,7 @@ namespace _3PA {
         /// </summary>
         public static void SetLexerToContainerLexer() {
             Call(SciMsg.SCI_SETLEXER, 0, 2);
-            Colourize();
+            //Call(SciMsg.SCI_COLOURISE, 0, -1);
         }
 
         /// <summary>
@@ -143,13 +169,6 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Asks for scintilla to refresh the colorisation on the whole document
-        /// </summary>
-        public static void Colourize() {
-            Call(SciMsg.SCI_COLOURISE, 0, -1);
-        }
-
-        /// <summary>
         /// returns the style of the caret position
         /// </summary>
         /// <returns></returns>
@@ -164,36 +183,11 @@ namespace _3PA {
         /// <param name="caretPos"></param>
         /// <returns></returns>
         public static bool IsNormalContext(int caretPos) {
-            CaretContext curCntext = GetCurrentCaretContext();
-            return (curCntext != CaretContext.Comment
-                    && curCntext != CaretContext.DoubleQuote
-                    && curCntext != CaretContext.SimpleQuote
-                    && curCntext != CaretContext.Include);
-        }
-
-        /// <summary>
-        /// returns the context of the current caret position (see CaretContext enum)
-        /// </summary>
-        /// <returns></returns>
-        public static CaretContext GetCurrentCaretContext() {
-            return GetCurrentCaretContext(GetCaretPosition());
-        }
-
-        /// <summary>
-        /// returns the context of the caret position (see CaretContext enum)
-        /// </summary>
-        /// <returns></returns>
-        public static CaretContext GetCurrentCaretContext(int caretPos) {
-            CaretContext output;
-            try {
-                output = (CaretContext) Call(SciMsg.SCI_GETSTYLEAT, caretPos, 0);
-            } catch(Exception e) {
-                output = CaretContext.Unknown;
-#if DEBUG
-                MessageBox.Show(e.Message + "\nnew style : " + Call(SciMsg.SCI_GETSTYLEAT, caretPos, 0));
-#endif
-            }
-            return output;
+            UdlStyles curCntext = (UdlStyles) GetStyleAt(caretPos);
+            return (curCntext != UdlStyles.Comment
+                    && curCntext != UdlStyles.Delimiter1
+                    && curCntext != UdlStyles.Delimiter2
+                    && curCntext != UdlStyles.Delimiter3);
         }
 
         /// <summary>
@@ -423,6 +417,14 @@ namespace _3PA {
         public static bool GetUseTabs() {
             var retval = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETUSETABS, 0, 0);
             return (retval == 1);
+        }
+
+        /// <summary>
+        /// returns the text lenght in bytes
+        /// </summary>
+        /// <returns></returns>
+        public static int GetTextLenght() {
+            return Call(SciMsg.SCI_GETTEXTLENGTH);
         }
 
         /// <summary>
