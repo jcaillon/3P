@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
-
+    /// <summary>
+    /// class used in the auto completion feature
+    /// </summary>
     public class CompletionData {
         public string DisplayText { get; set; }
         public CompletionType Type { get; set; }
@@ -16,7 +17,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// When Type is UserVariable, is used to know if the var is shared, local global..
         /// When Type is Keyword, is used to know if the keyword is reserved
         /// </summary>
-        public CompletionFlag Flag { get; set; }
+        public ParseFlag Flag { get; set; }
 
         public string SubType { get; set; }
     }
@@ -33,15 +34,5 @@ namespace _3PA.MainFeatures.AutoCompletion {
         UserVariablePrimitive,
         UserVariableOther,
         Preprocessed
-    }
-
-    [Flags]
-    public enum CompletionFlag {
-        None = 1,
-        Scope = 2,
-        Global = 4,
-        Parameter = 8,
-        Reserved = 16,
-        Abbreviation = 32
     }
 }

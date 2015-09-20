@@ -37,15 +37,13 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 ControlStyles.AllPaintingInWmPaint, true);
 
             // Can the given object be expanded?
-            ovlTree.CanExpandGetter = delegate(Object x) {
-                return (x is ExplorerCategories) && ((ExplorerCategories)x).HasChildren;
-            };
+            ovlTree.CanExpandGetter = x => (x is ExplorerCategories) && ((ExplorerCategories) x).HasChildren;
 
             // What objects should belong underneath the given model object?
-            ovlTree.ChildrenGetter = delegate(Object x) {
+            ovlTree.ChildrenGetter = delegate(object x) {
                 if (x is ExplorerCategories)
                     return ((ExplorerCategories)x).Items;
-                throw new ArgumentException("??");
+                return null;
             };
 
             // set the image list to use for the keywords
@@ -58,7 +56,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 var y = (ExplorerItems)rowObject;
                 return (int)y.MyIcon;
             };
-
 
             // Style the control
             StyleOvlTree();
@@ -193,7 +190,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         private void CleanTextRenderer() {
             DisplayText.Renderer = null;
-            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(ovlTree, "");
+            ovlTree.TreeColumnRenderer = new CustomTreeRenderer("");
         }
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
@@ -204,8 +201,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 return;
             }
             // filter the tree..
-            ovlTree.ModelFilter = new ModelFilter((o => (o is ExplorerItems && ((ExplorerItems)o).DisplayText.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase)) || (o is ExplorerCategories && !((ExplorerCategories)o).HasChildren && ((ExplorerCategories)o).DisplayText.Contains(textBoxFilter.Text, StringComparison.InvariantCultureIgnoreCase))));
-            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(ovlTree, textBoxFilter.Text);
+            ovlTree.ModelFilter = new ModelFilter((o => (o is ExplorerItems && ((ExplorerItems)o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)) || (o is ExplorerCategories && !((ExplorerCategories)o).HasChildren && ((ExplorerCategories)o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text))));
+            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(textBoxFilter.Text);
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {

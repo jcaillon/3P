@@ -53,8 +53,7 @@ namespace YamuiFramework.Forms {
             ClientSize = Owner.ClientSize;
         }
 
-        protected override void OnFormClosing(FormClosingEventArgs e) {
-            // Restore owner
+        protected override void Dispose(bool disposing) {
             Owner.LocationChanged -= Cover_LocationChanged;
             Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
             Owner.VisibleChanged -= Cover_OnVisibleChanged;
@@ -62,7 +61,7 @@ namespace YamuiFramework.Forms {
                 int value = 0;
                 DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
-            base.OnFormClosing(e);
+            base.Dispose(disposing);
         }
 
         protected override void OnActivated(EventArgs e) {
@@ -70,18 +69,5 @@ namespace YamuiFramework.Forms {
             BeginInvoke(new Action(() => Owner.Activate()));
         }
         #endregion
-
-        private void InitializeComponent() {
-            this.SuspendLayout();
-            // 
-            // YamuiSmokeScreen
-            // 
-            this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Name = "YamuiSmokeScreen";
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.ResumeLayout(false);
-
-        }
     }
 }

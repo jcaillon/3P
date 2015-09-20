@@ -63,5 +63,9 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
             if (tok.Line < FromLine || tok.Line > ToLine) return;
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
+
+        public void Visit(TokenPreProcessed tok) {
+            
+        }
     }
 }

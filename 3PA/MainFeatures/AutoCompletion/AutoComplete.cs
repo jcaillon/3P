@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -199,7 +200,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // instanciate the form if needed
             if (_form == null) {
                 _form = new AutoCompletionForm(keyword) {
-                    UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity
+                    UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity,
+                    FocusedOpacity = Config.Instance.AutoCompleteFocusedOpacity
                 };
                 _form.TabCompleted += OnTabCompleted;
                 _form.Show(Npp.Win32WindowNpp);

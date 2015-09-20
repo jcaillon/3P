@@ -6,6 +6,7 @@ using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures {
 
@@ -20,7 +21,7 @@ namespace _3PA.MainFeatures {
         private static string _fileName = "keywords.data";
 
         /// <summary>
-        /// To call in order to read all the keywords to the private List<CompletionData>
+        /// To call in order to read all the keywords to the private List CompletionData
         /// </summary>
         public static void Init() {
             _filePath = Path.Combine(_location, _fileName);
@@ -34,7 +35,7 @@ namespace _3PA.MainFeatures {
                         Type = CompletionType.Keyword,
                         Ranking = int.Parse(items[3]),
                         SubType = items[1],
-                        Flag = (items[2] == "1") ? CompletionFlag.Reserved : CompletionFlag.None
+                        Flag = (items[2] == "1") ? ParseFlag.Reserved : ParseFlag.None
                     });
                 }
             } catch (Exception e) {
@@ -48,7 +49,7 @@ namespace _3PA.MainFeatures {
         public static void Save() {
             var strBuilder = new StringBuilder();
             foreach (var keyword in _keywords) {
-                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubType + "\t" + ((keyword.Flag.HasFlag(CompletionFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
+                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubType + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
             }
             File.WriteAllText(_filePath, strBuilder.ToString());
         }

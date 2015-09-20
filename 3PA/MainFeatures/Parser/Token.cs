@@ -32,6 +32,13 @@
         }
     }
 
+    public class TokenPreProcessed : Token {
+        public TokenPreProcessed(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public override void Accept(ILexerVisitor visitor) {
+            visitor.Visit(this);
+        }
+    }
+
     public class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {

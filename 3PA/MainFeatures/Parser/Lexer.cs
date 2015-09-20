@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser {
 
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
-    /// it implements a visitor pattern (good article here : http://www.codeproject.com/Articles/588882/TheplusVisitorplusPatternplusExplained)
+    /// it implements a visitor pattern
     /// </summary>
     public class Lexer {
         private const char Eof = (char)0;
@@ -20,6 +21,7 @@ namespace _3PA.MainFeatures.Parser {
         private int _startLine;
         private int _startPos;
         private char[] _symbolChars;
+        private int _tokenPos;
         private List<Token> _tokenList = new List<Token>();
 
         /// <summary>
@@ -32,9 +34,7 @@ namespace _3PA.MainFeatures.Parser {
                 throw new ArgumentNullException("data");
             _data = data;
             _symbolChars = new[] { '=', '+', '-', '/', ',', '.', '*', '~', '!', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', '|', '\\', '`', '’' };
-            _pos = 0;
-            _line = 1;
-            _column = 1;
+            Reset();
         }
 
         /// <summary>
@@ -63,17 +63,52 @@ namespace _3PA.MainFeatures.Parser {
             do {
                 token = GetNext();
                 _tokenList.Add(token);
+
+                // in case of preproc definition, we want to add an extra end of statement token!
+                if (token is TokenPreProcessed)
+                    _tokenList.Add(new TokenEos(string.Empty, _startLine, _startCol, _startPos, _pos));
             } while (!(token is TokenEof));
         }
 
         /// <summary>
         /// Feed this method with a visitor implementing ILexerVisitor to visit all the tokens of the input string
+        /// (you must call the Tokenize() methode before that!)
         /// </summary>
         /// <param name="visitor"></param>
         public void Accept(ILexerVisitor visitor) {
             foreach (Token token in _tokenList) {
                 token.Accept(visitor);
             }
+        }
+
+        /// <summary>
+        /// To use this lexer as an enumerator,
+        /// Move to the next token, return true if it can
+        /// </summary>
+        /// <returns></returns>
+        public bool MoveNextToken() {
+            return ++_tokenPos < _tokenList.Count;
+        }
+
+        /// <summary>
+        /// To use this lexer as an enumerator,
+        /// peek at the current pos + x token of the list, returns a new TokenEof if can't find
+        /// </summary>
+        /// <returns></returns>
+        public Token PeekAtToken(int x) {
+            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", 0, 0, 0, 0) : _tokenList[_tokenPos + x];
+        }
+
+        /// <summary>
+        /// Resets the cursors position
+        /// </summary>
+        public void Reset() {
+            _pos = 0;
+            _line = 1;
+            _column = 1;
+            _commentDepth = 0;
+            _includeDepth = 0;
+            _tokenPos = -1;
         }
         
         /// <summary>
@@ -137,6 +172,16 @@ namespace _3PA.MainFeatures.Parser {
                 // include file or preproc variable
                 case '{':
                     return CreateIncludeToken();
+                // pre-processed &define, &analyse-suspend, &message
+                case '&':
+                    // Read the word, try to match it with define statement
+                    ReadWord();
+                    var word = GetTokenValue();
+                    if (word.EqualsCi("&ENDIF") || word.EqualsCi("&THEN") || word.EqualsCi("&ELSE") || word.EqualsCi("&ELSEIF") || word.EqualsCi("&ANALYZE-RESUME"))
+                        return new TokenPreProcessed(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                    if (word.EqualsCi("&ANALYZE-SUSPEND") || word.EqualsCi("&GLOBAL-DEFINE") || word.EqualsCi("&SCOPED-DEFINE") || word.EqualsCi("&SCOPED") || word.EqualsCi("&GLOB") || word.EqualsCi("&GLOBAL") || word.EqualsCi("&MESSAGE") || word.EqualsCi("&UNDEFINE"))
+                        return CreatePreProcessedStatement();
+                    return new TokenWord(word, _startLine, _startCol, _startPos, _pos);
                 // whitespaces or tab
                 case ' ':
                 case '\t':
@@ -171,7 +216,9 @@ namespace _3PA.MainFeatures.Parser {
                 case '"':
                 case '\'':
                     return CreateStringToken(ch);
-                // end of statement
+                // end of statement (: or . followed by any space/new line char)
+                case ':':
+                    return (char.IsWhiteSpace(PeekAt(1))) ? CreateEosToken() : CreateSymbolToken();
                 case '.':
                     return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
                 default: {
@@ -203,6 +250,31 @@ namespace _3PA.MainFeatures.Parser {
             return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
+        /// <summary>
+        /// reads a preproc definition
+        /// </summary>
+        /// <returns></returns>
+        private Token CreatePreProcessedStatement() {
+            Read();
+            while (true) {
+                var ch = PeekAt(0);
+                if (ch == Eof)
+                    break;
+                // escape char (read anything as part of the string after that)
+                if (ch == '~') {
+                    Read();
+                    ch = PeekAt(0);
+                    if (ch == '\r' || ch == '\n')
+                        ReadEol(ch);
+                    continue;
+                }
+                // break on new line (this means the code is not compilable anyway...)
+                if (ch == '\r' || ch == '\n')
+                    break;
+                Read();
+            }
+            return new TokenPreProcessed(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
 
         /// <summary>
         /// reads an include declaration
@@ -224,7 +296,10 @@ namespace _3PA.MainFeatures.Parser {
                     // we finished reading
                     if (_includeDepth == 0)
                         break;
-                }
+                } 
+                // new line
+                else if (ch == '\r' || ch == '\n')
+                    ReadEol(ch);
                 else 
                     Read();
             }
@@ -302,9 +377,17 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// reads a word with this format : [a-Z_&]+[\w_-]*
+        /// reads a word then create a token
         /// </summary>
         private Token CreateWordToken() {
+            ReadWord();
+            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
+
+        /// <summary>
+        /// reads a word with this format : [a-Z_&]+[\w_-]*
+        /// </summary>
+        private void ReadWord() {
             Read();
             while (true) {
                 var ch = PeekAt(0);
@@ -313,9 +396,38 @@ namespace _3PA.MainFeatures.Parser {
                 else
                     break;
             }
-            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
+        /// <summary>
+        /// reads a quotes string (either simple of double quote), takes into account escape char ~
+        /// </summary>
+        /// <returns></returns>
+        private Token CreateStringToken(char strChar) {
+            Read();
+            while (true) {
+                var ch = PeekAt(0);
+                if (ch == Eof)
+                    break;
+                // new line
+                if (ch == '\r' || ch == '\n') {
+                    ReadEol(ch);
+                    continue;
+                }
+                // quote char
+                if (ch == strChar) {
+                    Read();
+                    break; // done reading
+                    // keep on reading
+                }
+                // escape char (read anything as part of the string after that)
+                if (ch == '~')
+                    Read();
+                Read();
+            }
+            return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
+
+        /*
         /// <summary>
         /// reads a quotes string (either simple of double quote), takes into account escape char ~
         /// </summary>
@@ -342,5 +454,6 @@ namespace _3PA.MainFeatures.Parser {
             }
             return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
+         * */
     }
 }

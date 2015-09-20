@@ -11,6 +11,7 @@ using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -144,7 +145,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            if (((CompletionData)args.Model).Flag.HasFlag(CompletionFlag.None)) {
+            if (((CompletionData)args.Model).Flag.HasFlag(ParseFlag.None)) {
                 TextDecoration decoration = new TextDecoration("R", 100);
                 decoration.Alignment = ContentAlignment.MiddleRight;
                 decoration.Offset = new Size(-5, 0);
@@ -392,15 +393,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            fastOLV.SetObjects(_initialObjectsList.OrderBy(
+            // order the list
+            fastOLV.SetObjects(string.IsNullOrEmpty(_filterString) ? 
+                _initialObjectsList : 
+                _initialObjectsList.OrderBy(
                 x => {
-                    if (!x.DisplayText.StartsWith(_filterString, StringComparison.OrdinalIgnoreCase))
-                        return 2;
-                    if (x.DisplayText.Equals(_filterString, StringComparison.OrdinalIgnoreCase)) {
-                        return 0;
-                    }   
-                    return 1;
-            }).ToList());
+                    if (x.DisplayText.IndexOf(_filterString[0]) > 0) return 2;
+                    return x.DisplayText.Equals(_filterString, StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+                }).ToList());
 
             fastOLV.ModelFilter = new ModelFilter((o => ((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activated));
             fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterString);

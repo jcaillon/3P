@@ -464,7 +464,6 @@ namespace _3PA {
         #region tests
         static void Test() {
             Highlight.SetCustomStyles();
-            Npp.SetStatusbarLabel(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
         }
         #endregion
     }

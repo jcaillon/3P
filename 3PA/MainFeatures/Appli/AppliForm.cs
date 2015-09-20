@@ -1,11 +1,8 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Drawing;
-using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
-using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -33,7 +30,6 @@ namespace _3PA.MainFeatures.Appli {
             Opacity = 0;
             Visible = false;
             Tag = false;
-            Closing += OnClosing;
         }
 
         #endregion
@@ -61,17 +57,6 @@ namespace _3PA.MainFeatures.Appli {
         public void ForceClose() {
             Tag = true;
             Close();
-        }
-
-        /// <summary>
-        /// instead of closing, cloak this form (invisible)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="cancelEventArgs"></param>
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            if ((bool) Tag) return;
-            cancelEventArgs.Cancel = true;
-            Cloack();
         }
 
         /// <summary>
@@ -114,6 +99,13 @@ namespace _3PA.MainFeatures.Appli {
             Visible = true;
             Opacity = 0;
             Transition.run(this, "Opacity", 1d, new TransitionType_Acceleration(200));
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            if (((bool) Tag)) return;
+            e.Cancel = true;
+            Cloack();
+            base.OnClosing(e);
         }
         #endregion
 

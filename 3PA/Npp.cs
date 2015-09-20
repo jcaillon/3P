@@ -167,8 +167,9 @@ namespace _3PA {
 
 
         /// <summary>
-        ///     Sets the label in the status of npp (bottom right)
+        /// Sets the label in the status of npp (bottom right)
         /// </summary>
+        /// <remarks>WARNING : THIS METHOD IS HIGHLY UNSTABLE, USE ONLY FOR DEBUG!</remarks>
         /// <param name="labelText"></param>
         /// <returns></returns>
         public static string SetStatusbarLabel(string labelText) {

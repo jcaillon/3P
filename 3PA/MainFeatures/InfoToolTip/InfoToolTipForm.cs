@@ -53,6 +53,5 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
         #endregion
 
-
     }
 }

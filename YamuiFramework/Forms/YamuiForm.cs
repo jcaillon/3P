@@ -3,17 +3,12 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Text;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Web.UI.Design.WebControls;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Helper;
-using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
@@ -370,9 +365,9 @@ namespace YamuiFramework.Forms {
                         YamuiFormButton btn;
                         _windowButtonList.TryGetValue(WindowButtons.Maximize, out btn);
                         if (WindowState == FormWindowState.Normal && btn != null) {
-                            btn.Text = "1";
+                            btn.Text = @"1";
                         }
-                        if (WindowState == FormWindowState.Maximized && btn != null) btn.Text = "2";
+                        if (WindowState == FormWindowState.Maximized && btn != null) btn.Text = @"2";
                     }
                     break;
             }
@@ -421,7 +416,6 @@ namespace YamuiFramework.Forms {
             WinApi.ReleaseCapture();
             WinApi.SendMessage(Handle, (int)WinApi.Messages.WM_NCLBUTTONDOWN, (int)WinApi.HitTest.HTCAPTION, 0);
         }
-
         #endregion
 
         #region go back button
@@ -467,15 +461,16 @@ namespace YamuiFramework.Forms {
 
             var newButton = new YamuiFormButton();
 
-            if (button == WindowButtons.Close) {
-                newButton.Text = "r";
-            } else if (button == WindowButtons.Minimize) {
-                newButton.Text = "0";
-            } else if (button == WindowButtons.Maximize) {
-                if (WindowState == FormWindowState.Normal)
-                    newButton.Text = "1";
-                else
-                    newButton.Text = "2";
+            switch (button) {
+                case WindowButtons.Close:
+                    newButton.Text = @"r";
+                    break;
+                case WindowButtons.Minimize:
+                    newButton.Text = @"0";
+                    break;
+                case WindowButtons.Maximize:
+                    newButton.Text = WindowState == FormWindowState.Normal ? @"1" : @"2";
+                    break;
             }
 
             newButton.Tag = button;
@@ -490,21 +485,24 @@ namespace YamuiFramework.Forms {
 
         private void WindowButton_Click(object sender, EventArgs e) {
             var btn = sender as YamuiFormButton;
-            if (btn != null) {
-                var btnFlag = (WindowButtons)btn.Tag;
-                if (btnFlag == WindowButtons.Close) {
+            if (btn == null) return;
+            var btnFlag = (WindowButtons)btn.Tag;
+            switch (btnFlag) {
+                case WindowButtons.Close:
                     Close();
-                } else if (btnFlag == WindowButtons.Minimize) {
+                    break;
+                case WindowButtons.Minimize:
                     WindowState = FormWindowState.Minimized;
-                } else if (btnFlag == WindowButtons.Maximize) {
+                    break;
+                case WindowButtons.Maximize:
                     if (WindowState == FormWindowState.Normal) {
                         WindowState = FormWindowState.Maximized;
-                        btn.Text = "2";
+                        btn.Text = @"2";
                     } else {
                         WindowState = FormWindowState.Normal;
-                        btn.Text = "1";
+                        btn.Text = @"1";
                     }
-                }
+                    break;
             }
         }
 
@@ -555,24 +553,6 @@ namespace YamuiFramework.Forms {
             #endregion
 
             #region Paint Methods
-            protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
-                graphics.Clear(Color.Transparent);
-                if ((Parent != null)) {
-                    clipRect.Offset(Location);
-                    PaintEventArgs e = new PaintEventArgs(graphics, clipRect);
-                    GraphicsState state = graphics.Save();
-                    graphics.SmoothingMode = SmoothingMode.HighSpeed;
-                    try {
-                        graphics.TranslateTransform(-Location.X, -Location.Y);
-                        InvokePaintBackground(Parent, e);
-                        InvokePaint(Parent, e);
-                    } finally {
-                        graphics.Restore(state);
-                        clipRect.Offset(-Location.X, -Location.Y);
-                    }
-                }
-            }
-
             protected override void OnPaint(PaintEventArgs e) {
                 if (_isPressed)
                     e.Graphics.Clear(ThemeManager.AccentColor);
@@ -678,13 +658,6 @@ namespace YamuiFramework.Forms {
             WinApi.RemoveMenu(hMenu, (uint)(n - 2), WinApi.MfByposition | WinApi.MfRemove);
             WinApi.DrawMenuBar(Handle);
         }
-
-        private Rectangle MeasureText(Graphics g, Rectangle clientRectangle, Font font, string text, TextFormatFlags flags) {
-            var proposedSize = new Size(int.MaxValue, int.MinValue);
-            var actualSize = TextRenderer.MeasureText(g, text, font, proposedSize, flags);
-            return new Rectangle(clientRectangle.X, clientRectangle.Y, actualSize.Width, actualSize.Height);
-        }
-
         #endregion
     }
 

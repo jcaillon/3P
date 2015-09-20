@@ -303,8 +303,8 @@ COLUMN-READ-ONLY	attribute	0	0
 COLUMN-RESIZABLE	attribute	0	1
 COLUMN-SCROLLING	attribute	0	0
 COLUMNS	option	1	1
-COM	type	0	0
-COM-HANDLE	attribute	0	1
+COM	property	0	0
+COM-HANDLE	type	0	1
 COM-SELF	handle	0	0
 COMBO-BOX	widget	0	5
 COMMAND	option	0	0
@@ -407,7 +407,7 @@ DataTypeName	property	0	0
 DATE	type	0	48
 DATE-FORMAT	attribute	0	1
 DATETIME	type	0	0
-DATETIME-TZ	function	0	0
+DATETIME-TZ	type	0	0
 DAY	function	0	2
 DB-AWARE	preprocessor	0	0
 DB-CONTEXT	attribute	0	0

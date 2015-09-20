@@ -11,7 +11,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// This renderer highlights substrings that match a given text filter. 
     /// </summary>
-    public class CustomHighlightTextRenderer : BaseRenderer {
+    public class CustomHighlightTextRenderer : HighlightTextRenderer {
 
         /// <summary>
         /// Create a HighlightTextRenderer
@@ -26,25 +26,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private string _filterStr;
         private Brush _fillBrush;
         private Pen _framePen;
-        private bool _useRoundedRectangle = false;
+        private bool _useRoundedRectangle = true;
         #endregion
 
-        #region IRenderer interface overrides
-        /// <summary>
-        /// Handle a HitTest request after all state information has been initialized
-        /// </summary>
-        /// <param name="g"></param>
-        /// <param name="cellBounds"></param>
-        /// <param name="item"></param>
-        /// <param name="subItemIndex"></param>
-        /// <param name="preferredSize"> </param>
-        /// <returns></returns>
-        protected override Rectangle HandleGetEditRectangle(Graphics g, Rectangle cellBounds, OLVListItem item, int subItemIndex, Size preferredSize) {
-            return StandardGetEditRectangle(g, cellBounds, preferredSize);
-        }
-        #endregion
-
-        #region Rendering
+        #region Text Rendering
         // This class has two implement two highlighting schemes: one for GDI, another for GDI+.
         // Naturally, GDI+ makes the task easier, but we have to provide something for GDI
         // since that it is what is normally used.
@@ -67,13 +52,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="g"></param>
         /// <param name="r"></param>
         /// <param name="txt"></param>
-        protected virtual void DrawGdiTextHighlighting(Graphics g, Rectangle r, string txt) {
-            TextFormatFlags flags = TextFormatFlags.NoPrefix |
-                                    TextFormatFlags.VerticalCenter | TextFormatFlags.PreserveGraphicsTranslateTransform;
+        protected override void DrawGdiTextHighlighting(Graphics g, Rectangle r, string txt) {
+            const TextFormatFlags flags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.PreserveGraphicsTranslateTransform;
 
             // TextRenderer puts horizontal padding around the strings, so we need to take
             // that into account when measuring strings
-            int paddingAdjustment = 6;
+            const int paddingAdjustment = 6;
 
             // Cache the font
             Font f = Font;
@@ -108,7 +92,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="y"></param>
         /// <param name="width"></param>
         /// <param name="height"></param>
-        protected virtual void DrawSubstringFrame(Graphics g, float x, float y, float width, float height) {
+        protected override void DrawSubstringFrame(Graphics g, float x, float y, float width, float height) {
             if (_useRoundedRectangle) {
                 using (GraphicsPath path = GetRoundedRect(x, y, width, height, 3.0f)) {
                     if (_fillBrush != null)
@@ -142,9 +126,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="g"></param>
         /// <param name="r"></param>
         /// <param name="txt"></param>
-        protected virtual void DrawGdiPlusTextHighlighting(Graphics g, Rectangle r, string txt) {
+        protected override void DrawGdiPlusTextHighlighting(Graphics g, Rectangle r, string txt) {
             // Find the substrings we want to highlight
-            List<CharacterRange> ranges = new List<CharacterRange>(txt.ToLower().FindAllMatchedRanges(_filterStr));
+            var ranges = new List<CharacterRange>(txt.ToLower().FindAllMatchedRanges(_filterStr));
 
             if (ranges.Count == 0)
                 return;
@@ -166,53 +150,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Gets whether the renderer should actually draw highlighting
         /// </summary>
-        protected bool ShouldDrawHighlighting {
+        protected new bool ShouldDrawHighlighting {
             get { return Column == null || (Column.Searchable); }
         }
-
-        /// <summary>
-        /// Return a GraphicPath that is a round cornered rectangle
-        /// </summary>
-        /// <returns>A round cornered rectagle path</returns>
-        /// <remarks>If I could rely on people using C# 3.0+, this should be
-        /// an extension method of GraphicsPath.</remarks>        
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="diameter"></param>
-        protected GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
-            return GetRoundedRect(new RectangleF(x, y, width, height), diameter);
-        }
-
-        /// <summary>
-        /// Return a GraphicPath that is a round cornered rectangle
-        /// </summary>
-        /// <param name="rect">The rectangle</param>
-        /// <param name="diameter">The diameter of the corners</param>
-        /// <returns>A round cornered rectagle path</returns>
-        /// <remarks>If I could rely on people using C# 3.0+, this should be
-        /// an extension method of GraphicsPath.</remarks>
-        protected GraphicsPath GetRoundedRect(RectangleF rect, float diameter) {
-            GraphicsPath path = new GraphicsPath();
-
-            if (diameter > 0) {
-                RectangleF arc = new RectangleF(rect.X, rect.Y, diameter, diameter);
-                path.AddArc(arc, 180, 90);
-                arc.X = rect.Right - diameter;
-                path.AddArc(arc, 270, 90);
-                arc.Y = rect.Bottom - diameter;
-                path.AddArc(arc, 0, 90);
-                arc.X = rect.Left;
-                path.AddArc(arc, 90, 90);
-                path.CloseFigure();
-            } else {
-                path.AddRectangle(rect);
-            }
-
-            return path;
-        }
-
         #endregion
     }
 }

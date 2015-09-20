@@ -19,7 +19,6 @@ namespace _3PA.MainFeatures.Appli {
             if (disposing && (components != null)) {
                 components.Dispose();
             }
-            Closing -= OnClosing;
             base.Dispose(disposing);
         }
 

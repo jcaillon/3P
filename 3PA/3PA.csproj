@@ -62,7 +62,12 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Abl.cs" />
     <Compile Include="Html\RegisterCssAndImages.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\Parser.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\SynthaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
@@ -147,7 +152,7 @@
     <Compile Include="Lib\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
     <Compile Include="MainFeatures\Appli\Appli.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\Parser\ParsedItem.cs" />
     <Compile Include="Lib\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
     <Compile Include="Lib\IniFile.cs" />

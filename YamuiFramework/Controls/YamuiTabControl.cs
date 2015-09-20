@@ -172,8 +172,7 @@ namespace YamuiFramework.Controls {
             try {
                 if (_referenceSmokeScreen == null) {
                     // this means we just loaded the main form, no need to do another anim
-                    _referenceSmokeScreen = new YamuiTabAnimation(FindForm(), _referencePage);
-                    _referenceSmokeScreen.Opacity = 0d;
+                    _referenceSmokeScreen = new YamuiTabAnimation(FindForm(), _referencePage) {Opacity = 0d};
                     return;
                 }
                 var t = new Transition(new TransitionType_Acceleration(500));

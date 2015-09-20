@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Interop;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
@@ -20,10 +19,24 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
         /// </summary>
         public IntPtr CurrentForegroundWindow;
+
+        /// <summary>
+        /// Set to true if scintilla should get the focus back, false if you want
+        /// to use CurrentForegroundWindow
+        /// </summary>
+        public bool GiveFocusBackToScintilla = true;
+
         /// <summary>
         /// Sets the Opacity to give to the window when it's not focused
         /// </summary>
         public double UnfocusedOpacity;
+
+        /// <summary>
+        /// Sets the Opacity to give to the window when it's focused
+        /// </summary>
+        public double FocusedOpacity;
+
+        private bool _allowInitialdisplay;
         private bool _focusAllowed;
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private Rectangle? _nppRect;
@@ -32,7 +45,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Use this to know if the form is currently activated
         /// </summary>
         public bool IsActivated;
-        private bool _allowshowdisplay;
         #endregion
 
         #region constructor
@@ -52,9 +64,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             FormIntegration.RegisterToNpp(Handle);
 
             // timer to check if the npp window changed
-            _timerCheckNppRect = new Timer();
-            _timerCheckNppRect.Enabled = true;
-            _timerCheckNppRect.Interval = 500;
+            _timerCheckNppRect = new Timer {
+                Enabled = true,
+                Interval = 500
+            };
             _timerCheckNppRect.Tick += TimerCheckNppRectTick;
 
             Opacity = 0;
@@ -69,6 +82,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public void Cloack() {
             Visible = false;
+
+            // move this to an invisible part of the screen, otherwise we can see this window
+            // if another window with Opacity <1 is in front Oo
+            var pt = Screen.PrimaryScreen.WorkingArea.Location;
+            pt.Offset(new Point(-Width, -Height));
+            Location = pt;
             GiveFocusBack();
         }
 
@@ -76,8 +95,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// show the form
         /// </summary>
         public void UnCloack() {
-            _allowshowdisplay = true;
-            Opacity = Config.Instance.AutoCompleteUnfocusedOpacity;
+            _allowInitialdisplay = true;
+            Opacity = UnfocusedOpacity;
             Visible = true;
             GiveFocusBack();
         }
@@ -105,20 +124,24 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Gives focus back to the owner window
         /// </summary>
         public void GiveFocusBack() {
-            //WinApi.SetForegroundWindow(CurrentForegroundWindow);
-            Npp.GrabFocus();
+            if (GiveFocusBackToScintilla)
+                Npp.GrabFocus();
+            else
+                WinApi.SetForegroundWindow(CurrentForegroundWindow);
             IsActivated = !IsActivated;
-            Opacity = Config.Instance.AutoCompleteUnfocusedOpacity;
+            Opacity = UnfocusedOpacity;
         }
 
         protected override void OnActivated(EventArgs e) {
             // Activate the window that previously had focus
             if (!_focusAllowed)
-                //WinApi.SetForegroundWindow(CurrentForegroundWindow);
-                Npp.GrabFocus();
+                if (GiveFocusBackToScintilla)
+                    Npp.GrabFocus();
+                else
+                    WinApi.SetForegroundWindow(CurrentForegroundWindow);
             else {
                 IsActivated = true;
-                Opacity = 1;
+                Opacity = FocusedOpacity;
             }
             base.OnActivated(e);
         }
@@ -144,9 +167,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         /// <param name="value"></param>
         protected override void SetVisibleCore(bool value) {
-            base.SetVisibleCore(_allowshowdisplay ? value : _allowshowdisplay);
+            base.SetVisibleCore(_allowInitialdisplay ? value : _allowInitialdisplay);
         }
-
         #region Paint Methods
 
         protected override void OnPaintBackground(PaintEventArgs e) { }

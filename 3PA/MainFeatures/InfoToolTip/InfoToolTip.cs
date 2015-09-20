@@ -1,4 +1,5 @@
 ﻿using System;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.InfoToolTip {
@@ -20,7 +21,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // instanciate the form
             if (_form == null) {
                 _form = new InfoToolTipForm {
-                    UnfocusedOpacity = Config.Instance.ToolTipUnfocusedOpacity
+                    UnfocusedOpacity = Config.Instance.ToolTipUnfocusedOpacity,
+                    FocusedOpacity = Config.Instance.ToolTipFocusedOpacity
                 };
                 _form.Show(Npp.Win32WindowNpp);
             }

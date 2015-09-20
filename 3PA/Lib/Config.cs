@@ -29,6 +29,7 @@ namespace _3PA.Lib {
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
         public double AutoCompleteUnfocusedOpacity = 0.92d;
+        public double AutoCompleteFocusedOpacity = 0.92d;
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
         public bool AutoCompleteAlternateBackColor = false;
 
@@ -42,6 +43,7 @@ namespace _3PA.Lib {
 
         public int ToolTipmsBeforeShowing = 1000;
         public double ToolTipUnfocusedOpacity = 0.9;
+        public double ToolTipFocusedOpacity = 0.9;
         public bool ToolTipDeactivate = false;
 
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
