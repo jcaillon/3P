@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser {
 
@@ -23,6 +22,7 @@ namespace _3PA.MainFeatures.Parser {
         private char[] _symbolChars;
         private int _tokenPos;
         private List<Token> _tokenList = new List<Token>();
+        private bool _forceCreateEos;
 
         /// <summary>
         /// constructor, data is the input string to tokenize
@@ -64,8 +64,8 @@ namespace _3PA.MainFeatures.Parser {
                 token = GetNext();
                 _tokenList.Add(token);
 
-                // in case of preproc definition, we want to add an extra end of statement token!
-                if (token is TokenPreProcessed)
+                // in certain cases, we want to add an extra end of statement token!
+                if (_forceCreateEos)
                     _tokenList.Add(new TokenEos(string.Empty, _startLine, _startCol, _startPos, _pos));
             } while (!(token is TokenEof));
         }
@@ -80,6 +80,11 @@ namespace _3PA.MainFeatures.Parser {
                 token.Accept(visitor);
             }
         }
+
+        /// <summary>
+        /// returns the last line number found, must be called after Tokenize() method
+        /// </summary>
+        public int MaxLine { get { return _line; } }
 
         /// <summary>
         /// To use this lexer as an enumerator,
@@ -152,6 +157,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         private Token GetNext() {
+            _forceCreateEos = false;
             _startLine = _line;
             _startCol = _column;
             _startPos = _pos;
@@ -176,12 +182,28 @@ namespace _3PA.MainFeatures.Parser {
                 case '&':
                     // Read the word, try to match it with define statement
                     ReadWord();
-                    var word = GetTokenValue();
-                    if (word.EqualsCi("&ENDIF") || word.EqualsCi("&THEN") || word.EqualsCi("&ELSE") || word.EqualsCi("&ELSEIF") || word.EqualsCi("&ANALYZE-RESUME"))
-                        return new TokenPreProcessed(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-                    if (word.EqualsCi("&ANALYZE-SUSPEND") || word.EqualsCi("&GLOBAL-DEFINE") || word.EqualsCi("&SCOPED-DEFINE") || word.EqualsCi("&SCOPED") || word.EqualsCi("&GLOB") || word.EqualsCi("&GLOBAL") || word.EqualsCi("&MESSAGE") || word.EqualsCi("&UNDEFINE"))
-                        return CreatePreProcessedStatement();
-                    return new TokenWord(word, _startLine, _startCol, _startPos, _pos);
+                    var word = GetTokenValue().ToUpper();
+                    switch (word) {
+                        case "&ENDIF":
+                        case "&THEN":
+                        case "&ELSE":
+                        case "&ANALYZE-RESUME":
+                            _forceCreateEos = true;
+                            break;
+                    }
+                    switch (word) {
+                        case "&ANALYZE-SUSPEND":
+                        case "&GLOBAL-DEFINE":
+                        case "&SCOPED-DEFINE":
+                        case "&SCOPED":
+                        case "&GLOB":
+                        case "&GLOBAL":
+                        case "&MESSAGE":
+                        case "&UNDEFINE":
+                            _forceCreateEos = true;
+                            return CreatePreProcessedStatement();
+                    }
+                    return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
                 // whitespaces or tab
                 case ' ':
                 case '\t':
@@ -222,16 +244,25 @@ namespace _3PA.MainFeatures.Parser {
                 case '.':
                     return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
                 default: {
-                        // keyword = [a-Z_&]+[\w_-]*
-                        if (char.IsLetter(ch) || ch == '_' || ch == '&')
-                            return CreateWordToken();
-                        // symbol
-                        if (_symbolChars.Any(t => t == ch))
-                            return CreateSymbolToken();
-                        // unknown char
-                        Read();
-                        return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                    // keyword = [a-Z_&]+[\w_-]*
+                    if (char.IsLetter(ch) || ch == '_' || ch == '&') {
+                        ReadWord();
+                        var word2 = GetTokenValue().ToLower();
+                        switch (word2) {
+                            case "then":
+                            case "else":
+                                _forceCreateEos = true;
+                                break;
+                        }
+                        return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
                     }
+                    // symbol
+                    if (_symbolChars.Any(t => t == ch))
+                        return CreateSymbolToken();
+                    // unknown char
+                    Read();
+                    return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                }
             }
         }
 
@@ -273,13 +304,17 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 Read();
             }
-            return new TokenPreProcessed(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenPreProcStatement(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
         /// reads an include declaration
         /// </summary>
         private Token CreateIncludeToken() {
+            //TODO: handle this case better?
+            // if this is a file include, we assume there will be an end of statement in it
+            // so we force one, otherwise we might not read the next line correctly
+            if (PeekAt(1) != '&' && !char.IsDigit(PeekAt(1))) _forceCreateEos = true;
             while (true) {
                 var ch = PeekAt(0);
                 if (ch == Eof)
@@ -374,14 +409,6 @@ namespace _3PA.MainFeatures.Parser {
                     break;
             }
             return new TokenNumber(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-        }
-
-        /// <summary>
-        /// reads a word then create a token
-        /// </summary>
-        private Token CreateWordToken() {
-            ReadWord();
-            return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>

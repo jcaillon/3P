@@ -187,7 +187,9 @@ namespace _3PA {
             return (curCntext != UdlStyles.Comment
                     && curCntext != UdlStyles.Delimiter1
                     && curCntext != UdlStyles.Delimiter2
-                    && curCntext != UdlStyles.Delimiter3);
+                    && curCntext != UdlStyles.Delimiter3
+                    && curCntext != UdlStyles.CommentLine
+                    && curCntext != UdlStyles.Delimiter8);
         }
 
         /// <summary>
@@ -399,6 +401,8 @@ namespace _3PA {
         ///  barbarian method to force the default autocompletion window to hide
         /// </summary>
         public static void HideDefaultAutoCompletion() {
+            //TODO: find a better technique to hide the autocompletion!!! this slows npp down
+            //Call(SciMsg.SCI_AUTOCSETIGNORECASE, 1);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, @"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
         }
 

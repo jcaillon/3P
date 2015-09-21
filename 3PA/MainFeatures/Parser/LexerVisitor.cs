@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.Parser {
 
         }
 
-        public void Visit(TokenPreProcessed tok) {
+        public void Visit(TokenPreProcStatement tok) {
             
         }
     }

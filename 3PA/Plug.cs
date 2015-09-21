@@ -156,8 +156,6 @@ namespace _3PA {
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
             Registry.SetValue(Resources.RegistryPath, "notepadPath", Path.Combine(pathNotepadFolder, "notepad++.exe"), RegistryValueKind.String);
 
-            Dispatcher.Init();
-
             ApplyPluginSpecificOptions(false);
 
             // initialize autocompletion (asynchrone)
@@ -214,24 +212,23 @@ namespace _3PA {
                 // we finished entering a keyword
                 } else {
                     AutoComplete.Close();
-                    return;
 
                     int offset = (newStr.Equals("\n") && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
                     int curPos = Npp.GetCaretPosition();
                     bool isNormalContext = Npp.IsNormalContext(curPos);
 
+                    // only do more stuff if we are not in a string/comment/include definition 
+                    if (!isNormalContext) return;
+
                     // show suggestions on fields
                     if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
                         AutoComplete.ShowFieldsSuggestions(true);
 
-                    // only do more stuff if we are not in a string/comment/include definition 
-                    if (!isNormalContext) return;
-
                     keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
                     bool lastWordInDico = AutoComplete.IsWordInSuggestionsList(keyword, curPos, offset);
-
+                    Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
                     // trigger snippet insertion on space if the setting is activated (and the leave)
-                    Npp.SetStatusbarLabel(keyword + " " + Snippets.Contains(keyword));
+                    /*
                     if (c == ' ' && Config.Instance.AutoCompleteUseSpaceToInsertSnippet &&
                         Snippets.Contains(keyword)) {
                         Npp.BeginUndoAction();
@@ -241,11 +238,14 @@ namespace _3PA {
                         Npp.EndUndoAction();
                         Npp.SetStatusbarLabel("trigger"); //TODO
                         return;
-                    }                    
+                    }
+                    */
 
                     // replace the last keyword by the correct case, check the context of the caret
                     if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && lastWordInDico)
                         Npp.WrappedKeywordReplace(Npp.AutoCaseToUserLiking(keyword), keywordPos, curPos);
+
+                    return;
 
                     // replace semicolon by a point
                     if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && lastWordInDico)

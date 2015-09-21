@@ -46,6 +46,19 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
+    /// just to have a container for the global scope
+    /// </summary>
+    public class ParsedGlobal : ParsedScope {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedGlobal(string name, ParseFlag flag = ParseFlag.Global, int line = 0, int column = 0)
+            : base(name, flag, line, column) {
+        }
+    }
+
+    /// <summary>
     /// Function parsed item
     /// Flag : private
     /// </summary>
@@ -91,14 +104,12 @@ namespace _3PA.MainFeatures.Parser {
     /// Pre-processed var parsed item
     /// </summary>
     public class ParsedPreProc : ParsedItem {
-        public string Definition { get; private set; }
-        public int UndefinedLine { get; private set; }
+        public int UndefinedLine { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedPreProc(string name, ParseFlag flag, int line, int column, string definition, int undefinedLine) : base(name, flag, line, column) {
-            Definition = definition;
+        public ParsedPreProc(string name, ParseFlag flag, int line, int column, int undefinedLine) : base(name, flag, line, column) {
             UndefinedLine = undefinedLine;
         }
     }

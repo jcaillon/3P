@@ -67,7 +67,7 @@ namespace _3PA.MainFeatures {
         /// <param name="keyword"></param>
         /// <returns></returns>
         public static bool Contains(string keyword) {
-            var x = _keywords.Find(data => data.DisplayText == keyword);
+            var x = _keywords.Find(data => data.DisplayText.EqualsCi(keyword));
             return x != null;
         }
 

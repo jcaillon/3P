@@ -1,5 +1,5 @@
-&ANALYZE-RESUME	preprocessor	0	0
-&ANALYZE-SUSPEND	preprocessor	0	0
+&ANALYZE-RESUME	appbuilder	0	0
+&ANALYZE-SUSPEND	appbuilder	0	0
 &BROWSE-NAME	preprocessor	0	0
 &ELSE	preprocessor	1	1
 &ELSEIF	preprocessor	1	1
@@ -278,7 +278,6 @@ CLOB	type	0	0
 Clone	method	0	0
 CLONE-NODE	method	0	0
 CLOSE	option	0	19
-CLOSE STORED-PROCEDURE	statement	0	0
 CLOSE-LOG	method	0	0
 CODE	attribute	0	25
 CODEBASE-LOCATOR	handle	1	0
@@ -303,7 +302,7 @@ COLUMN-READ-ONLY	attribute	0	0
 COLUMN-RESIZABLE	attribute	0	1
 COLUMN-SCROLLING	attribute	0	0
 COLUMNS	option	1	1
-COM	property	0	0
+COM	attribute	0	0
 COM-HANDLE	type	0	1
 COM-SELF	handle	0	0
 COMBO-BOX	widget	0	5
@@ -351,18 +350,6 @@ CPSTREAM	attribute	0	0
 CPTERM	attribute	0	0
 CRC-VALUE	attribute	0	1
 CREATE	statement	1	45
-CREATE CLIENT-PRINCIPAL	statement	0	0
-CREATE DATA-SOURCE	statement	0	0
-CREATE SAX-ATTRIBUTES	statement	0	0
-CREATE SAX-READER	statement	0	0
-CREATE SAX-WRITER	statement	0	0
-CREATE SERVER-SOCKET	statement	0	0
-CREATE SOAP-HEADER	statement	0	0
-CREATE SOAP-HEADER-ENTRYREF	statement	0	0
-CREATE TEMP-TABLE	statement	0	0
-CREATE WIDGET-POOL	statement	0	0
-CREATE X-DOCUMENT	statement	0	0
-CREATE X-NODEREF	statement	0	0
 CREATE-LIKE	method	0	0
 CREATE-LIKE-SEQUENTIAL	method	0	0
 CREATE-NODE	method	0	0
@@ -452,15 +439,10 @@ DEFAULT-STRING	attribute	0	0
 DEFAULT-VALUE	attribute	0	1
 DEFAULT-WINDOW	handle	1	0
 DEFINE	statement	1	259
-DEFINE DATA-SOURCE	statement	0	0
-DEFINE SUB-MENU	statement	0	0
-DEFINE TEMP-TABLE	statement	0	0
-DEFINE WORK-TABLE	statement	0	0
 DEFINE-USER-EVENT-MANAGER	option	0	0
 DEFINED	preprocessor	0	40
 DELEGATE	option	0	0
 DELETE	statement	1	17
-DELETE WIDGET-POOL	statement	0	0
 DELETE-CHAR	method	0	0
 DELETE-CURRENT-ROW	method	0	0
 DELETE-HEADER-ENTRY	method	0	0
@@ -540,7 +522,6 @@ EDITOR	widget	0	1
 ELSE	option	1	99
 EmbeddedWindow	property	0	0
 EMPTY	attribute	0	12
-EMPTY TEMP-TABLE	statement	0	0
 EMPTY-DATASET	method	0	0
 EMPTY-SELECTION	unknow	0	0
 EMPTY-TEMP-TABLE	method	0	0
@@ -571,8 +552,7 @@ END_OF_ARRAY	property	0	0
 ENTERED	function	0	0
 ENTRY	statement	1	21
 ENTRY-TYPES-LIST	attribute	0	0
-EQ	option	0	1
-EQ or =	operator	0	0
+EQ	operator	0	0
 Equals	method	0	0
 ERROR	function	0	117
 ERROR-COLUMN	attribute	0	0
@@ -1593,7 +1573,6 @@ RowModified	property	0	0
 RowsAdded	property	0	0
 RULE	option	0	1
 RUN	statement	1	182
-RUN STORED-PROCEDURE	statement	0	0
 RUN-PROC	option	0	0
 RUN-PROCEDURE	option	0	1
 SAVE	statement	1	1
@@ -1836,9 +1815,6 @@ SYMMETRIC-SUPPORT	attribute	0	0
 SYNCHRONIZE	method	0	0
 SYSTEM-ALERT-BOXES	attribute	0	0
 SYSTEM-DIALOG	statement	1	1
-SYSTEM-DIALOG GET-DIR	statement	0	0
-SYSTEM-DIALOG GET-FILE	statement	0	0
-SYSTEM-DIALOG PRINTER-SETUP	statement	0	0
 SYSTEM-HELP	statement	0	1
 SYSTEM-ID	attribute	0	0
 T	option	0	0
@@ -2093,3 +2069,78 @@ _UIB-CODE-BLOCK	appbuilder	0	0
 _UIB-PREPROCESSOR-BLOCK	appbuilder	0	0
 _VERSION-NUMBER	appbuilder	0	0
 _XFTR	appbuilder	0	0
+CLOSE QUERY  	statement	0	0
+CLOSE STORED-PROCEDURE  	statement	0	0
+CREATE ALIAS  	statement	0	0
+CREATE BROWSE  	statement	0	0
+CREATE BUFFER  	statement	0	0
+CREATE CALL  	statement	0	0
+CREATE CLIENT-PRINCIPAL  	statement	0	0
+CREATE DATABASE  	statement	0	0
+CREATE DATASET  	statement	0	0
+CREATE DATA-SOURCE  	statement	0	0
+CREATE QUERY  	statement	0	0
+CREATE SAX-ATTRIBUTES  	statement	0	0
+CREATE SAX-READER  	statement	0	0
+CREATE SAX-WRITER  	statement	0	0
+CREATE SERVER  	statement	0	0
+CREATE SERVER-SOCKET  	statement	0	0
+CREATE SOAP-HEADER  	statement	0	0
+CREATE SOAP-HEADER-ENTRYREF  	statement	0	0
+CREATE SOCKET  	statement	0	0
+CREATE TEMP-TABLE  	statement	0	0
+CREATE WIDGET-POOL  	statement	0	0
+CREATE X-DOCUMENT  	statement	0	0
+CREATE X-NODEREF  	statement	0	0
+DDE ADVISE  	statement	0	0
+DDE EXECUTE  	statement	0	0
+DDE GET  	statement	0	0
+DDE INITIATE  	statement	0	0
+DDE REQUEST  	statement	0	0
+DDE SEND  	statement	0	0
+DDE TERMINATE  	statement	0	0
+DEFINE BROWSE  	statement	0	0
+DEFINE BUFFER  	statement	0	0
+DEFINE BUTTON  	statement	0	0
+DEFINE DATASET  	statement	0	0
+DEFINE DATA-SOURCE  	statement	0	0
+DEFINE EVENT  	statement	0	0
+DEFINE FRAME  	statement	0	0
+DEFINE IMAGE  	statement	0	0
+DEFINE MENU  	statement	0	0
+DEFINE PARAMETER  	statement	0	0
+DEFINE PROPERTY  	statement	0	0
+DEFINE QUERY  	statement	0	0
+DEFINE RECTANGLE  	statement	0	0
+DEFINE STREAM  	statement	0	0
+DEFINE SUB-MENU  	statement	0	0
+DEFINE TEMP-TABLE  	statement	0	0
+DEFINE VARIABLE  	statement	0	0
+DEFINE WORK-TABLE  	statement	0	0
+DEFINE WORKFILE  	statement	0	0
+DELETE OBJECT  	statement	0	0
+DELETE PROCEDURE  	statement	0	0
+DELETE WIDGET  	statement	0	0
+DELETE WIDGET-POOL  	statement	0	0
+EMPTY TEMP-TABLE  	statement	0	0
+INPUT CLOSE  	statement	0	0
+INPUT FROM  	statement	0	0
+INPUT THROUGH  	statement	0	0
+INPUT-OUTPUT CLOSE  	statement	0	0
+INPUT-OUTPUT THROUGH  	statement	0	0
+NOT ENTERED  	function	0	0
+ON ERROR  	option	0	0
+ON QUIT  	option	0	0
+OPEN QUERY  	statement	0	0
+OUTPUT THROUGH  	statement	0	0
+OUTPUT TO  	statement	0	0
+PROCESS EVENTS  	statement	0	0
+PUT SCREEN  	statement	0	0
+RELEASE OBJECT  	statement	0	0
+RUN SUPER  	statement	0	0
+SAVE CACHE  	statement	0	0
+SYSTEM-DIALOG COLOR  	statement	0	0
+SYSTEM-DIALOG FONT  	statement	0	0
+SYSTEM-DIALOG GET-DIR  	statement	0	0
+SYSTEM-DIALOG GET-FILE  	statement	0	0
+SYSTEM-DIALOG PRINTER-SETUP  	statement	0	0

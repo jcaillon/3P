@@ -22,20 +22,17 @@ namespace YamuiDemoApp {
             watch.Stop();
             //------------
 
-            StringBuilder x = new StringBuilder();
-            foreach (var item in tok.LineIndent) {
-                x.AppendLine(item.Key.ToString() + " > " + item.Value.ToString());
+            // OUTPUT INFO ON EACH LINE
+            if (true) {
+                StringBuilder x = new StringBuilder();
+                foreach (var item in tok.GetLineInfo) {
+                    x.AppendLine(item.Key + " > " + item.Value.ScopeDefinition + " , " + item.Value.CurrentScopeName);
+                    //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
+                }
+                File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
             }
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
-            //File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
 
             return;
-
-
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
 
             //------------
             var watch2 = Stopwatch.StartNew();
@@ -79,6 +76,10 @@ namespace YamuiDemoApp {
         public void Visit(ParsedTable pars) {
 
         }
+
+        public void Visit(ParsedGlobal pars) {
+            
+        }
     }
 
     public class OutputLexer : ILexerVisitor {
@@ -94,11 +95,11 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenEos tok) {
-            
+            output.AppendLine("EOS");
         }
 
         public void Visit(TokenInclude tok) {
-            //output.AppendLine(tok.Value);
+            output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenNumber tok) {
@@ -106,7 +107,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenQuotedString tok) {
-            output.AppendLine(tok.Value);
+            //output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenSymbol tok) {
@@ -118,7 +119,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenWord tok) {
-            //output.AppendLine(tok.Value);
+            output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenEof tok) {
@@ -129,8 +130,8 @@ namespace YamuiDemoApp {
             
         }
 
-        public void Visit(TokenPreProcessed tok) {
-            
+        public void Visit(TokenPreProcStatement tok) {
+            output.AppendLine(tok.Value);
         }
     }
 }

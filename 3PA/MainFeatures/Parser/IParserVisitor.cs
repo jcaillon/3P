@@ -7,5 +7,6 @@
         void Visit(ParsedPreProc pars);
         void Visit(ParsedDefine pars);
         void Visit(ParsedTable pars);
+        void Visit(ParsedGlobal pars);
     }
 }

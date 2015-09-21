@@ -12,6 +12,6 @@
         void Visit(TokenWord tok);
         void Visit(TokenEof tok);
         void Visit(TokenUnknown tok);
-        void Visit(TokenPreProcessed tok);
+        void Visit(TokenPreProcStatement tok);
     }
 }

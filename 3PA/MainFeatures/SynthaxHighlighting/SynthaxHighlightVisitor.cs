@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
-        public void Visit(TokenPreProcessed tok) {
+        public void Visit(TokenPreProcStatement tok) {
             
         }
     }

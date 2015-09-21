@@ -133,12 +133,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Interop\Dispatcher.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Interop\Dispatcher.Designer.cs">
-      <DependentUpon>Dispatcher.cs</DependentUpon>
-    </Compile>
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
     <Compile Include="Interop\LocalWindowsHook.cs" />
     <Compile Include="Interop\NppPluginNETHelper.cs" />
@@ -269,7 +263,6 @@
   <ItemGroup>
     <None Include="Data\abbreviations.data" />
     <None Include="Data\keywords.data" />
-    <None Include="Data\keywords_final.data" />
     <None Include="Data\nppTool.p" />
     <None Include="Data\snippets.data" />
     <None Include="Interop\DllExport\NppPlugin.DllExport.targets" />
