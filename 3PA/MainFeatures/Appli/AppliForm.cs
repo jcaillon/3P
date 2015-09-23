@@ -39,8 +39,8 @@ namespace _3PA.MainFeatures.Appli {
         /// hides the form
         /// </summary>
         public void Cloack() {
-            Visible = false;
             GiveFocusBack();
+            Visible = false;
         }
 
         /// <summary>
@@ -104,8 +104,8 @@ namespace _3PA.MainFeatures.Appli {
         protected override void OnClosing(CancelEventArgs e) {
             if (((bool) Tag)) return;
             e.Cancel = true;
-            Cloack();
             base.OnClosing(e);
+            Cloack();
         }
         #endregion
 

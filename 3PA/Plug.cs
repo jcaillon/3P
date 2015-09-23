@@ -206,15 +206,23 @@ namespace _3PA {
                 string keyword;
 
                 // we are currently entering a keyword
-                if (new Regex(@"^[\w-&\{\}]$").Match(newStr).Success) {
+                if (Abl.IsCharAllowedInVariables(c)) {
                     AutoComplete.ActivatedAutoCompleteIfNeeded();
 
                 // we finished entering a keyword
                 } else {
                     AutoComplete.Close();
 
-                    int offset = (newStr.Equals("\n") && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
+                    int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
                     int curPos = Npp.GetCaretPosition();
+                    keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
+
+                    // replace the last keyword by the correct case, check the context of the caret
+                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && AutoComplete.IsWordInSuggestionsList(keyword))
+                        Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking(keyword), keywordPos, curPos);
+
+                    return;
+
                     bool isNormalContext = Npp.IsNormalContext(curPos);
 
                     // only do more stuff if we are not in a string/comment/include definition 
@@ -224,8 +232,8 @@ namespace _3PA {
                     if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
                         AutoComplete.ShowFieldsSuggestions(true);
 
-                    keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
-                    bool lastWordInDico = AutoComplete.IsWordInSuggestionsList(keyword, curPos, offset);
+                    
+                    bool lastWordInDico = AutoComplete.IsWordInSuggestionsList(keyword);
                     Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
                     // trigger snippet insertion on space if the setting is activated (and the leave)
                     /*
@@ -243,7 +251,7 @@ namespace _3PA {
 
                     // replace the last keyword by the correct case, check the context of the caret
                     if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && lastWordInDico)
-                        Npp.WrappedKeywordReplace(Npp.AutoCaseToUserLiking(keyword), keywordPos, curPos);
+                        Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking(keyword), keywordPos, curPos);
 
                     return;
 
@@ -255,7 +263,7 @@ namespace _3PA {
                     if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
                         int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
                         string repStr = new String(' ', nbPrevInd);
-                        repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Npp.AutoCaseToUserLiking("END.");
+                        repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
                         Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
                     }
 
@@ -269,7 +277,7 @@ namespace _3PA {
 
                         // add dot atfer an end
                         if (keyword.EqualsCi("end")) {
-                            Npp.WrappedKeywordReplace(Npp.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
+                            Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
                             Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
                             ActionAfterUpdateUi = () => {
                                 Npp.SetCurrentLineRelativeIndent(0);

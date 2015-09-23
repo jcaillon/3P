@@ -81,6 +81,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// hides the form
         /// </summary>
         public void Cloack() {
+            GiveFocusBack();
+
             Visible = false;
 
             // move this to an invisible part of the screen, otherwise we can see this window
@@ -88,7 +90,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             var pt = Screen.PrimaryScreen.WorkingArea.Location;
             pt.Offset(new Point(-Width, -Height));
             Location = pt;
-            GiveFocusBack();
         }
 
         /// <summary>
@@ -98,6 +99,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _allowInitialdisplay = true;
             Opacity = UnfocusedOpacity;
             Visible = true;
+
             GiveFocusBack();
         }
 

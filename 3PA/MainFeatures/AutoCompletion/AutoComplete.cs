@@ -98,14 +98,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Check if the keyword is known from the autocompletion
         /// </summary>
         /// <param name="keyword"></param>
-        /// <param name="curPos"></param>
-        /// <param name="offset"></param>
         /// <returns></returns>
-        public static bool IsWordInSuggestionsList(string keyword, int curPos, int offset) {
-            bool itIs = Keywords.Contains(keyword);
-            itIs = itIs || DataBaseInfo.ContainsTable(keyword);
-            itIs = itIs || (Npp.WeAreEnteringAField(curPos - offset) && DataBaseInfo.ContainsField(Npp.GetCurrentTable(curPos - offset), keyword));
-            return itIs;
+        public static bool IsWordInSuggestionsList(string keyword) {
+            return (_currentItems != null && _currentItems.Find(data => data.DisplayText.EqualsCi(keyword)) != null);
+            //bool itIs = Keywords.Contains(keyword);
+            //itIs = itIs || DataBaseInfo.ContainsTable(keyword);
+            //itIs = itIs || (Npp.WeAreEnteringAField(curPos - offset) && DataBaseInfo.ContainsField(Npp.GetCurrentTable(curPos - offset), keyword));
+            //return itIs;
         }
 
 

@@ -1,12 +1,17 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
+using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace YamuiDemoApp {
     class Tests {
 
         public static void Run() {
+
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            // PARSER
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             //------------
             var watch = Stopwatch.StartNew();
@@ -22,17 +27,27 @@ namespace YamuiDemoApp {
             watch.Stop();
             //------------
 
+            // OUPUT OF VISITOR
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+
             // OUTPUT INFO ON EACH LINE
-            if (true) {
+            if (false) {
                 StringBuilder x = new StringBuilder();
-                foreach (var item in tok.GetLineInfo) {
-                    x.AppendLine(item.Key + " > " + item.Value.ScopeDefinition + " , " + item.Value.CurrentScopeName);
+                var i = 1;
+                var dic = tok.GetLineInfo;
+                while (dic.ContainsKey(i)) {
+                    x.AppendLine(i + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
+                    i++;
                 }
                 File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
             }
 
             return;
+
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            // LEXER
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
             //------------
             var watch2 = Stopwatch.StartNew();
@@ -46,45 +61,47 @@ namespace YamuiDemoApp {
             //--------------
             watch2.Stop();
 
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis2.output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
             
         }
     }
 
     public class OutputVis : IParserVisitor {
-        public StringBuilder output = new StringBuilder();
+        public StringBuilder Output = new StringBuilder();
         public void Visit(ParsedFunction pars) {
-            output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ReturnType + "," + pars.Parameters + "," + (pars.Flag.HasFlag(ParseFlag.Private)));
+            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ReturnType + "," + pars.Parameters + "," + (pars.Flag.HasFlag(ParseFlag.Private)));
         }
 
         public void Visit(ParsedProcedure pars) {
-            output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
+            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedPreProc pars) {
-
+            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
         }
 
         public void Visit(ParsedDefine pars) {
-
+            if (pars.Type == ParseDefineType.Parameter)
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
         }
 
         public void Visit(ParsedTable pars) {
-
+            Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.AsLike + "," + pars.LcOwnerName + "," + pars.AsLike + ",");
+            foreach (var field in pars.Fields) {
+                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+            }
         }
 
-        public void Visit(ParsedGlobal pars) {
-            
-        }
+        public void Visit(ParsedGlobal pars) {}
     }
 
     public class OutputLexer : ILexerVisitor {
 
-        public StringBuilder output = new StringBuilder();
+        public StringBuilder Output = new StringBuilder();
 
         public void Visit(TokenComment tok) {
             //output.AppendLine(tok.Value);
@@ -95,11 +112,11 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenEos tok) {
-            output.AppendLine("EOS");
+            Output.AppendLine("EOS");
         }
 
         public void Visit(TokenInclude tok) {
-            output.AppendLine(tok.Value);
+            Output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenNumber tok) {
@@ -119,7 +136,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenWord tok) {
-            output.AppendLine(tok.Value);
+            Output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenEof tok) {
@@ -131,7 +148,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenPreProcStatement tok) {
-            output.AppendLine(tok.Value);
+            Output.AppendLine(tok.Value);
         }
     }
 }

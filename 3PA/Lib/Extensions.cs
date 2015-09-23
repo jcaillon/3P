@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -14,7 +15,7 @@ namespace _3PA.Lib {
             return obj == null ? new List<T>() : obj.ToList();
         }
 
-        #region " misc "
+        #region misc
         public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate) {
             if (predicate == null) throw new ArgumentNullException("predicate");
 
@@ -37,7 +38,30 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region " string extensions "
+
+        #region Enum extensions
+
+        /// <summary>
+        /// Allows to describe a field of an enum like this :
+        /// [DescriptionAttribute(Value = "DATA-SOURCE")]
+        /// and use the value "Value"
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Field)]
+        public class EnumAttr : Attribute {
+            public EnumAttr() {}
+        }
+
+        public static EnumAttr GetAttributes(this Enum value) {
+            Type type = value.GetType();
+            FieldInfo fieldInfo = type.GetField(value.ToString());
+            var atts = (EnumAttr[]) fieldInfo.GetCustomAttributes(typeof (EnumAttr), false);
+            return atts.Length > 0 ? atts[0] : null;
+        }
+
+        #endregion
+
+
+        #region string extensions
         /// <summary>
         /// returns a list of CharacterRange representing the matches found with the given filter
         /// applied to the string
@@ -113,7 +137,8 @@ namespace _3PA.Lib {
         /// <param name="comp"></param>
         /// <returns></returns>
         public static bool EqualsCi(this string s, string comp) {
-            return s.Equals(comp, StringComparison.OrdinalIgnoreCase); 
+            //string.Equals(a, b, StringComparison.CurrentCultureIgnoreCase);
+            return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase); 
         }
          
 

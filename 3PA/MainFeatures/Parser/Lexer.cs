@@ -170,16 +170,20 @@ namespace _3PA.MainFeatures.Parser {
 
             var ch = PeekAt(0);
             switch (ch) {
+
                 case Eof:
                     return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-                // comment
+
                 case '/':
+                    // comment
                     return PeekAt(1) == '*' ? CreateCommentToken() : CreateSymbolToken();
-                // include file or preproc variable
+               
                 case '{':
+                    // include file or preproc variable
                     return CreateIncludeToken();
-                // pre-processed &define, &analyse-suspend, &message
+                
                 case '&':
+                    // pre-processed &define, &analyse-suspend, &message
                     // Read the word, try to match it with define statement
                     ReadWord();
                     var word = GetTokenValue().ToUpper();
@@ -204,21 +208,23 @@ namespace _3PA.MainFeatures.Parser {
                             return CreatePreProcessedStatement();
                     }
                     return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-                // whitespaces or tab
+                
                 case ' ':
                 case '\t':
+                    // whitespaces or tab
                     return CreateWhitespaceToken();
-                // number
-                case '-': {
-                        if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                        Read();
-                        return CreateNumberToken();
-                    }
-                case '+': {
-                        if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                        Read();
-                        return CreateNumberToken();
-                    }
+                
+                case '-':
+                    // number
+                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
+                    Read();
+                    return CreateNumberToken();
+                case '+':
+                    // number
+                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
+                    Read();
+                    return CreateNumberToken();
+                    
                 case '0':
                 case '1':
                 case '2':
@@ -229,21 +235,26 @@ namespace _3PA.MainFeatures.Parser {
                 case '7':
                 case '8':
                 case '9':
+                    // number
                     return CreateNumberToken();
-                // end of line
+                
                 case '\r':
                 case '\n':
+                    // end of line
                     return CreateEolToken(ch);
-                // quoted string (read until unescaped ' or ")
+                
                 case '"':
                 case '\'':
+                    // quoted string (read until unescaped ' or ")
                     return CreateStringToken(ch);
-                // end of statement (: or . followed by any space/new line char)
+                
                 case ':':
+                    // end of statement (: or . followed by any space/new line char)
                     return (char.IsWhiteSpace(PeekAt(1))) ? CreateEosToken() : CreateSymbolToken();
                 case '.':
                     return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
-                default: {
+
+                default:
                     // keyword = [a-Z_&]+[\w_-]*
                     if (char.IsLetter(ch) || ch == '_' || ch == '&') {
                         ReadWord();
@@ -262,7 +273,6 @@ namespace _3PA.MainFeatures.Parser {
                     // unknown char
                     Read();
                     return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-                }
             }
         }
 
@@ -412,16 +422,26 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// reads a word with this format : [a-Z_&]+[\w_-]*
+        /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
         /// </summary>
         private void ReadWord() {
             Read();
             while (true) {
                 var ch = PeekAt(0);
+                // normal word
                 if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-')
                     Read();
-                else
+                else {
+                    // reads a base.table.field as a single word
+                    if (ch == '.') {
+                        var car = PeekAt(1);
+                        if (char.IsLetterOrDigit(car) || car == '_' || car == '-') {
+                            Read();
+                            continue;
+                        }
+                    }
                     break;
+                }
             }
         }
 
@@ -453,34 +473,5 @@ namespace _3PA.MainFeatures.Parser {
             }
             return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
-
-        /*
-        /// <summary>
-        /// reads a quotes string (either simple of double quote), takes into account escape char ~
-        /// </summary>
-        /// <returns></returns>
-        private Token CreateStringToken(char strChar) {
-            Read();
-            while (true) {
-                var ch = PeekAt(0);
-                if (ch == Eof)
-                    break;
-                // break on new line (this means the code is not compilable anyway...)
-                if (ch == '\r' || ch == '\n')
-                    break;
-                // quote char
-                if (ch == strChar) {
-                    Read();
-                    break; // done reading
-                    // keep on reading
-                }
-                // escape char (read anything as part of the string after that)
-                if (ch == '~')
-                    Read();
-                Read();
-            }
-            return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-        }
-         * */
     }
 }

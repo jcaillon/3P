@@ -14,8 +14,8 @@ namespace _3PA.MainFeatures.Parser {
         private List<ParsedItem> _parsedItemList = new List<ParsedItem>();
         private Lexer _lexer;
         private ParseContext _context = new ParseContext();
-        private Dictionary<int, LineInfo> _outputLineInfo = new Dictionary<int, LineInfo>();
-        private Dictionary<int, TempLineInfo> _lineInfo = new Dictionary<int, TempLineInfo>();
+        private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
+
         /// <summary>
         /// When we match a word that make us enter a block, we need to increase the blockDepth but only
         /// at the next statement, this bool allows to do just that
@@ -30,14 +30,16 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// dictionnay of *line, line info*
         /// </summary>
-        public Dictionary<int, LineInfo> GetLineInfo { get { return _outputLineInfo; } }
-        //public Dictionary<int, TempLineInfo> GetLineInfo { get { return _lineInfo; } }
+        public Dictionary<int, LineInfo> GetLineInfo { get { return _lineInfo; } }
 
         /// <summary>
-        /// 
+        /// Parses a text into a list of parsedItems
         /// </summary>
         /// <param name="data"></param>
-        public Parser(string data) {
+        /// <param name="defaultLcOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
+        public Parser(string data, string defaultLcOwnerName = "") {
+            _context.LcOwnerName = defaultLcOwnerName;
+
             // parse
             _lexer = new Lexer(data);
             _lexer.Tokenize();
@@ -45,31 +47,13 @@ namespace _3PA.MainFeatures.Parser {
                 Analyze();
             }
 
-            // create a better line info dictionnary
-            int currentBlockDepth = 0;
-            int outerCount = 1;
-            List<int> scopeDefinition = new List<int>() { 1 };
-            string currentScopeName = "";
+            // add missing values to the line dictionnary
+            var current = new LineInfo(0, ParseScope.Global, "");
             for (int i = 0; i < _lexer.MaxLine; i++) {
-                if (_lineInfo.ContainsKey(i)) {
-                    while (_lineInfo[i].BlockDepth != currentBlockDepth) {
-                        // scoping (we need to update info of this line only for the next line!)
-                        if (_lineInfo[i].BlockDepth > currentBlockDepth) {
-                            scopeDefinition.Add(outerCount);
-                            outerCount = 1;
-                            currentBlockDepth++;
-                        } else {
-                            // unscoping
-                            var x = scopeDefinition.Count - 1;
-                            outerCount = scopeDefinition[x];
-                            outerCount++;
-                            scopeDefinition.RemoveAt(x);
-                            currentBlockDepth--;
-                        }
-                    }
-                    currentScopeName = _lineInfo[i].CurrentScopeName;
-                }
-                _outputLineInfo.Add(i, new LineInfo(string.Concat(scopeDefinition.Select(i1 => i1.ToString() + ",")), currentScopeName));
+                if (_lineInfo.ContainsKey(i))
+                    current = _lineInfo[i];
+                else
+                    _lineInfo.Add(i, current);
             }
         }
 
@@ -123,6 +107,7 @@ namespace _3PA.MainFeatures.Parser {
                     // matches a definition statement at the beggining of a statement
                     switch (lowerTok) {
                         case "function":
+                            // parse a function definition
 #warning for debug!
                             if (CreateParsedFunction(token)) {
                                 if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
@@ -131,16 +116,17 @@ namespace _3PA.MainFeatures.Parser {
                             }
                             break;
                         case "procedure":
+                            // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
                                 if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
                                 _context.BlockDepth = 0;
                                 _increaseDepthAtNextStatement = true;
                             }
                             break;
-                    }
-
-                    // matches start of block at the beggining of a statement
-                    switch (lowerTok) {
+                        case "define":
+                            // add a one time indent after a then or else
+                            CreateParsedDefine(token);
+                            break;
                         case "case":
                         case "catch":
                         case "class":
@@ -152,14 +138,15 @@ namespace _3PA.MainFeatures.Parser {
                         case "for":
                         case "do":
                         case "repeat":
+                            // increase block depth
                             _increaseDepthAtNextStatement = true;
                             break;
                         case "end":
                             _context.BlockDepth--;
                             if (_context.BlockDepth == 0) {
+                                if (_context.Scope != ParseScope.Global)
+                                    _context.LcOwnerName = "";
                                 _context.Scope = ParseScope.Global;
-                                if (!(_context.OwnerIfNotGlobal is ParsedGlobal))
-                                    _context.OwnerIfNotGlobal = new ParsedGlobal("");
                             }
                             break;
                         case "else":
@@ -203,12 +190,12 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Flushes the current statement into the list, clear the statement
+        /// called when a Eos token is found, store information on the statement's line
         /// </summary>
         private void NewStatement() {
             // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
             if (!_lineInfo.ContainsKey(_context.StatementStartLine))
-                _lineInfo.Add(_context.StatementStartLine, new TempLineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, (_context.OwnerIfNotGlobal != null) ? _context.OwnerIfNotGlobal.Name : ""));
+                _lineInfo.Add(_context.StatementStartLine, new LineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, _context.Scope, _context.LcOwnerName));
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
 
@@ -225,6 +212,189 @@ namespace _3PA.MainFeatures.Parser {
             _increaseDepthAtNextStatement = false;
         }
 
+        /// <summary>
+        /// Matches a function definition (not the FORWARD prototype)
+        /// </summary>
+        private void CreateParsedDefine(Token functionToken) {
+            // info we will extract from the current statement :
+            string name = "";
+            string asLike = "";
+            ParseDefineType type = ParseDefineType.None;
+            string primitiveType = "";
+            StringBuilder left = new StringBuilder();
+            StringBuilder strFlags = new StringBuilder();
+
+            bool isTempTable = false;
+            var fields = new List<ParsedField>();
+            ParsedField currentField = new ParsedField("", "", "", 0, ParseFieldFlag.None, "", "", "", 0);
+
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                string lowerToken;
+                bool matchedLikeTable = false;
+                bool isPrimary = false;
+                switch (state) {
+
+                    case 0:
+                        // matching until type of define is found
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        switch (lowerToken) {
+                            case "buffer":
+                            case "browse":
+                            case "stream":
+                            case "button":
+                            case "dataset":
+                            case "frame":
+                            case "query":
+                            case "event":
+                            case "image":
+                            case "menu":
+                            case "rectangle":
+                            case "property":
+                            case "sub-menu":
+                            case "parameter":
+                                var token1 = lowerToken;
+                                foreach (var typ in Enum.GetNames(typeof(ParseDefineType)).Where(typ => token1.Equals(typ.ToLower()))) {
+                                    type = (ParseDefineType)Enum.Parse(typeof(ParseDefineType), typ, true);
+                                    break;
+                                }
+                                state++;
+                                break;
+                            case "data-source":
+                                type = ParseDefineType.DataSource;
+                                state++;
+                                break;
+                            case "var":
+                            case "variable":
+                                type = ParseDefineType.Variable;
+                                state++;
+                                break;
+                            case "temp-table":
+                            case "work-table":
+                            case "workfile":
+                                isTempTable = true;
+                                state++;
+                                break;
+                            case "new":
+                            case "global":
+                            case "shared":
+                            case "private":
+                            case "protected":
+                            case "public":
+                            case "static":
+                            case "abstract":
+                            case "override":
+                                // flags found before the type
+                                if (strFlags.Length > 0)
+                                    strFlags.Append(" ");
+                                strFlags.Append(lowerToken);
+                                break;
+                            case "input":
+                            case "output":
+                            case "input-output":
+                            case "return":
+                                // flags found before the type in case of a define parameter
+                                strFlags.Append(lowerToken);
+                                break;
+                        }
+                        break;
+
+                    case 1:
+                        // matching the name
+                        if (!(token is TokenWord)) break;
+                        name = token.Value;
+                        if (type == ParseDefineType.Variable || type == ParseDefineType.Parameter) state = 10;
+                        if (isTempTable) state = 20;
+                        if (state != 1) break;
+                        state = 99;
+                        break;
+
+
+                    case 10:
+                        // define variable : match as or like
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("as") || lowerToken.Equals("like")) state = 11;
+                        if (state != 10) asLike = lowerToken;
+                        break;
+                    case 11:
+                        // define variable : match a primitive type or a field in db
+                        if (!(token is TokenWord)) break;
+                        primitiveType = token.Value;
+                        state = 99;
+                        break;
+
+
+                    case 20:
+                        // define temp-table
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        // matches a LIKE table
+                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse, resharper doesn't get this one
+                        if (lowerToken.Equals("like") && !matchedLikeTable) state = 21;
+                        // matches FIELD
+                        if (lowerToken.Equals("field")) state = 22;
+                        // matches INDEX
+                        if (lowerToken.Equals("index")) state = 25;
+                        break;
+                    case 21:
+                        // define temp-table : match a LIKE table, get the table name in asLike
+                        // ReSharper disable once RedundantAssignment
+                        matchedLikeTable = true;
+                        if (!(token is TokenWord)) break;
+                        asLike = token.Value;
+                        state = 20;
+                        break;
+                    case 22:
+                        // define temp-table : matches a FIELD name
+                        if (!(token is TokenWord)) break;
+                        currentField = new ParsedField(token.Value, "", "", 0, ParseFieldFlag.None, "", "", "", 0);
+                        state = 23;
+                        break;
+                    case 23:
+                        // define temp-table : matches a FIELD AS or LIKE
+                        if (!(token is TokenWord)) break;
+                        currentField.AsLike = token.Value;
+                        state = 24;
+                        break;
+                    case 24:
+                        // define temp-table : match a primitive type or a field in db
+                        if (!(token is TokenWord)) break;
+                        currentField.Type = token.Value;
+                        // push the field to the fields list
+                        fields.Add(currentField);
+                        state = 20;
+                        break;
+                    case 25:
+                        // define temp-table : match an index definition
+                        if (token is TokenWord) break;
+                        lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("primary")) isPrimary = true;
+                        var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
+                        if (found != null)
+                            found.Flag = isPrimary ? ParseFieldFlag.Primary : ParseFieldFlag.None;
+                        if (lowerToken.Equals("index"))
+                            // ReSharper disable once RedundantAssignment
+                            isPrimary = false;
+                        break;
+
+
+                    case 99:
+                        // matching the rest of the define
+                        left.Append((token is TokenEol || token is TokenWhiteSpace) ? " " : token.Value);
+                        break;
+                }
+            } while (MoveNext());
+            if (state <= 1) return;
+            if (isTempTable)
+                _parsedItemList.Add(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", _context.Scope, _context.LcOwnerName, asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>()));
+            else
+                _parsedItemList.Add(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType, _context.Scope, _context.LcOwnerName));
+        }
 
         /// <summary>
         /// Analyze a preprocessed statement
@@ -252,20 +422,20 @@ namespace _3PA.MainFeatures.Parser {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    _parsedItemList.Add(new ParsedPreProc(name, ParseFlag.Global, token.Line, token.Column, 0));
+                    _parsedItemList.Add(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global));
                     break;
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    _parsedItemList.Add(new ParsedPreProc(name, ParseFlag.Scope, token.Line, token.Column, 0));
+                    _parsedItemList.Add(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
                     break;
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParseScope.Global;
                     if (toParse.Contains("_DEFINITIONS", StringComparison.OrdinalIgnoreCase))
-                        _context.OwnerIfNotGlobal = new ParsedGlobal("definitions");
+                        _context.LcOwnerName = "definitions";
                     else if (toParse.Contains("_UIB-PREPROCESSOR-BLOCK", StringComparison.OrdinalIgnoreCase))
-                        _context.OwnerIfNotGlobal = new ParsedGlobal("preprocessor");
+                        _context.LcOwnerName = "preprocessor";
                     else if (toParse.Contains("_MAIN-BLOCK", StringComparison.OrdinalIgnoreCase))
-                        _context.OwnerIfNotGlobal = new ParsedGlobal("mainblock");
+                        _context.LcOwnerName = "mainblock";
                     break;
                 case "&UNDEFINE":
                     var found = (ParsedPreProc)_parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
@@ -302,10 +472,9 @@ namespace _3PA.MainFeatures.Parser {
                 leftStr.Append(token.Value);
             } while (MoveNext());
             if (state != 1) return false;
-            var x = new ParsedProcedure(name, ParseFlag.None, procToken.Line, procToken.Column, leftStr.ToString());
             _context.Scope = ParseScope.Procedure;
-            _context.OwnerIfNotGlobal = x;
-            _parsedItemList.Add(x);
+            _context.LcOwnerName = name.ToLower();
+            _parsedItemList.Add(new ParsedProcedure(name, procToken.Line, procToken.Column, name.ToLower(), leftStr.ToString()));
             return true;
         }
 
@@ -362,10 +531,9 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
             if (state != 4) return false;
-            var x = new ParsedFunction(name, isPrivate ? ParseFlag.Private : ParseFlag.None, functionToken.Line, functionToken.Column, returnType, parameters.ToString());
             _context.Scope = ParseScope.Function;
-            _context.OwnerIfNotGlobal = x;
-            _parsedItemList.Add(x);
+            _context.LcOwnerName = name.ToLower();
+            _parsedItemList.Add(new ParsedFunction(name, functionToken.Line, functionToken.Column, name.ToLower(), returnType, parameters.ToString(), isPrivate));
             return true;
         }
 
@@ -383,8 +551,9 @@ namespace _3PA.MainFeatures.Parser {
             toParse = toParse.Substring(1, pos - 1);
             // we matched the include file name
 
-            _parsedItemList.Add(new ParsedIncludeFile(toParse, ParseFlag.None, token.Line, token.Column));
+            _parsedItemList.Add(new ParsedIncludeFile(toParse, token.Line, token.Column, _context.Scope, _context.LcOwnerName));
         }
+
     }
 
     /// <summary>
@@ -397,29 +566,24 @@ namespace _3PA.MainFeatures.Parser {
         public int StatementWordCount;
         public int BlockDepth;
         public ParseScope Scope = ParseScope.Global;
-        public ParsedScope OwnerIfNotGlobal;
+        public string LcOwnerName = "";
     }
 
     /// <summary>
     /// Contains the info of a specific line number (built during the parsing)
     /// </summary>
-    public class TempLineInfo {
-        public int BlockDepth;
-        public string CurrentScopeName;
-        public TempLineInfo(int blockDepth, string currentScopeName) {
-            BlockDepth = blockDepth;
-            CurrentScopeName = currentScopeName;
-        }
-    }
-
-    /// <summary>
-    /// Contains the info of a specific line number (built AFTER the parsing)
-    /// </summary>
     public class LineInfo {
-        public string ScopeDefinition;
+        public int BlockDepth;
+        public ParseScope Scope;
+        /// <summary>
+        /// Name of the current procedure/part of main, definitions, preproc
+        /// all in lower case
+        /// </summary>
         public string CurrentScopeName;
-        public LineInfo(string scopeDefinition, string currentScopeName) {
-            ScopeDefinition = scopeDefinition;
+
+        public LineInfo(int blockDepth, ParseScope scope, string currentScopeName) {
+            BlockDepth = blockDepth;
+            Scope = scope;
             CurrentScopeName = currentScopeName;
         }
     }
