@@ -8,8 +8,11 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public abstract class ParsedItem {
         public string Name { get; private set; }
+        public string FilePath { get; set; }
         public int Line { get; private set; }
         public int Column { get; private set; }
+        public ParseScope Scope { get; set; }
+        public string LcOwnerName { get; set; }
         public abstract void Accept(IParserVisitor visitor);
         protected ParsedItem(string name, int line, int column) {
             Name = name;
@@ -29,60 +32,61 @@ namespace _3PA.MainFeatures.Parser {
         Parameter = 8,
         Reserved = 16,
         Abbreviation = 32,
-        TempTable = 64
-    }
-
-    /// <summary>
-    /// Mother of ParsedFunction and ParsedProcedure
-    /// </summary>
-    public abstract class ParsedScope : ParsedItem {
-        public string LcName { get; private set; }
-        protected ParsedScope(string name, int line, int column, string lcName) : base(name, line, column) {
-            LcName = lcName;
-        }
-    }
-
-    /// <summary>
-    /// just to have a container for the global scope
-    /// </summary>
-    public class ParsedGlobal : ParsedScope {
-        public override void Accept(IParserVisitor visitor) {
-            visitor.Visit(this);
-        }
-
-        public ParsedGlobal(string name, int line, int column, string lcName) : base(name, line, column, lcName) {}
+        TempTable = 64,
+        IsParsedItem = 128
     }
 
     /// <summary>
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    public class ParsedFunction : ParsedScope {
+    public class ParsedFunction : ParsedItem {
         public string ReturnType { get; private set; }
         public string Parameters { get; private set; }
         public bool IsPrivate { get; private set; }
+        public string LcName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, int line, int column, string lcName, string returnType, string parameters, bool isPrivate) : base(name, line, column, lcName) {
+        public ParsedFunction(string name, int line, int column, string returnType, string parameters, bool isPrivate, string lcName) : base(name, line, column) {
             ReturnType = returnType;
             Parameters = parameters;
             IsPrivate = isPrivate;
+            LcName = lcName;
         }
     }
 
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    public class ParsedProcedure : ParsedScope {
-        public string Left { get; private set; }
+    public class ParsedOnEvent : ParsedItem {
+        public string On { get; private set; }
+        public string LcName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string lcName, string left) : base(name, line, column, lcName) {
+        public ParsedOnEvent(string name, int line, int column, string @on, string lcName)
+            : base(name, line, column) {
+            On = @on;
+            LcName = lcName;
+        }
+    }
+
+    /// <summary>
+    /// Procedure parsed item
+    /// </summary>
+    public class ParsedProcedure : ParsedItem {
+        public string Left { get; private set; }
+        public string LcName { get; private set; }
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedProcedure(string name, int line, int column, string left, string lcName) : base(name, line, column) {
             Left = left;
+            LcName = lcName;
         }
     }
 
@@ -90,17 +94,12 @@ namespace _3PA.MainFeatures.Parser {
     /// include file parsed item
     /// </summary>
     public class ParsedIncludeFile : ParsedItem {
-        public ParseScope Scope { get; private set; }
-        public string LcOwnerName { get; private set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, int line, int column, ParseScope scope, string lcOwnerName) : base(name, line, column) {
-            Scope = scope;
-            LcOwnerName = lcOwnerName;
-        }
+        public ParsedIncludeFile(string name, int line, int column) : base(name, line, column) {}
     }
 
     /// <summary>
@@ -134,27 +133,24 @@ namespace _3PA.MainFeatures.Parser {
         public string Left { get; private set; }
         public ParseDefineType Type { get; private set; }
         public string PrimitiveType { get; private set; }
-        public ParseScope Scope { get; private set; }
-        public string LcOwnerName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, int line, int column, string flagsStr, string asLike, string left, ParseDefineType type, string primitiveType, ParseScope scope, string lcOwnerName) : base(name, line, column) {
+        public ParsedDefine(string name, int line, int column, string flagsStr, string asLike, string left, ParseDefineType type, string primitiveType) : base(name, line, column) {
             FlagsStr = flagsStr;
             AsLike = asLike;
             Left = left;
             Type = type;
             PrimitiveType = primitiveType;
-            Scope = scope;
-            LcOwnerName = lcOwnerName;
         }
     }
 
     public enum ParseScope {
         Global,
         Procedure,
-        Function
+        Function,
+        Trigger
     }
 
     public class ParseDefineTypeAttr : Extensions.EnumAttr {
@@ -210,8 +206,6 @@ namespace _3PA.MainFeatures.Parser {
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
         public string Description { get; private set; }
-        public ParseScope Scope { get; private set; }
-        public string LcOwnerName { get; private set; }
         public string AsLike { get; private set; }
         public int Ranking { get; set; }
         public bool IsTempTable { get; private set; }
@@ -222,13 +216,11 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, ParseScope scope, string lcOwnerName, string asLike, int ranking, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers) : base(name, line, column) {
+        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string asLike, int ranking, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers) : base(name, line, column) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
             Description = description;
-            Scope = scope;
-            LcOwnerName = lcOwnerName;
             AsLike = asLike;
             Ranking = ranking;
             IsTempTable = isTempTable;

@@ -14,7 +14,7 @@ namespace _3PA.Lib {
         public void Load(string configFile) {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             foreach (var line in File.ReadAllLines(configFile)) {
-                var index = line.IndexOf("\t", StringComparison.Ordinal);
+                var index = line.IndexOf("\t", StringComparison.CurrentCultureIgnoreCase);
                 var key = line.Substring(0, index).Trim();
                 if (!ContainsKey(key))
                     Add(line.Substring(0, index).Trim(), serializer.Deserialize<T>(line.Substring(index + 1)));

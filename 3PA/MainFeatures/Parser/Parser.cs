@@ -11,9 +11,24 @@ namespace _3PA.MainFeatures.Parser {
     /// from the tokens created by the lexer
     /// </summary>
     public class Parser {
+        /// <summary>
+        /// List of the parsed items (output)
+        /// </summary>
         private List<ParsedItem> _parsedItemList = new List<ParsedItem>();
+
+        /// <summary>
+        /// current lexer
+        /// </summary>
         private Lexer _lexer;
+
+        /// <summary>
+        /// Contains the current information of the statement's context (in which proc it is, which scope...)
+        /// </summary>
         private ParseContext _context = new ParseContext();
+
+        /// <summary>
+        /// Contains the information of each line parsed
+        /// </summary>
         private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
 
         /// <summary>
@@ -28,6 +43,11 @@ namespace _3PA.MainFeatures.Parser {
         private bool _lastStatementOneTimeIncrease;
 
         /// <summary>
+        /// Path to the file being parsed (is added to the parseItem info)
+        /// </summary>
+        private string _filePathBeingParsed;
+
+        /// <summary>
         /// dictionnay of *line, line info*
         /// </summary>
         public Dictionary<int, LineInfo> GetLineInfo { get { return _lineInfo; } }
@@ -36,9 +56,11 @@ namespace _3PA.MainFeatures.Parser {
         /// Parses a text into a list of parsedItems
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="filePathBeingParsed"></param>
         /// <param name="defaultLcOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
-        public Parser(string data, string defaultLcOwnerName = "") {
+        public Parser(string data, string filePathBeingParsed, string defaultLcOwnerName = "") {
             _context.LcOwnerName = defaultLcOwnerName;
+            _filePathBeingParsed = filePathBeingParsed;
 
             // parse
             _lexer = new Lexer(data);
@@ -108,9 +130,8 @@ namespace _3PA.MainFeatures.Parser {
                     switch (lowerTok) {
                         case "function":
                             // parse a function definition
-#warning for debug!
                             if (CreateParsedFunction(token)) {
-                                if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
+                                //if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
                                 _context.BlockDepth = 0;
                                 _increaseDepthAtNextStatement = true;
                             }
@@ -118,7 +139,13 @@ namespace _3PA.MainFeatures.Parser {
                         case "procedure":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
-                                if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
+                                _context.BlockDepth = 0;
+                                _increaseDepthAtNextStatement = true;
+                            }
+                            break;
+                        case "on":
+                            // add a one time indent after a then or else
+                            if (CreateParsedOnEvent(token)) {
                                 _context.BlockDepth = 0;
                                 _increaseDepthAtNextStatement = true;
                             }
@@ -210,6 +237,75 @@ namespace _3PA.MainFeatures.Parser {
             if (_increaseDepthAtNextStatement)
                 _context.BlockDepth++;
             _increaseDepthAtNextStatement = false;
+        }
+
+        /// <summary>
+        /// Call this method instead adding the items directly in the list,
+        /// updates the scope and file name
+        /// </summary>
+        private void AddParsedItem(ParsedItem item) {
+            item.FilePath = _filePathBeingParsed;
+            item.Scope = _context.Scope;
+            item.LcOwnerName = _context.LcOwnerName;
+            _parsedItemList.Add(item);
+        }
+
+        /// <summary>
+        /// Creates parsed item for ON CHOOSE OF XXX events
+        /// (choose or anything else)
+        /// </summary>
+        /// <param name="onToken"></param>
+        /// <returns></returns>
+        private bool CreateParsedOnEvent(Token onToken) {
+            // info we will extract from the current statement :
+            string name = "";
+            string onType = "";
+
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                switch (state) {
+                    case 0:
+                        // matching event type
+                        if (!(token is TokenWord)) break;
+                        onType = token.Value;
+                        state++;
+                        break;
+                    case 1:
+                        // matching "of"
+                        if (!(token is TokenWord)) break;
+                        if (token.Value.EqualsCi("anywhere")) {
+                            name = "anywhere";
+                            _context.Scope = ParseScope.Trigger;
+                            _context.LcOwnerName = onType.ToLower() + name;
+                            AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                            return true;
+                        }
+                        if (!token.Value.EqualsCi("of")) return false;
+                        state++;
+                        break;
+                    case 2:
+                        // matching widget name
+                        if (!(token is TokenWord)) break;
+                        name = token.Value;
+                        state++;
+                        break;
+                    case 3:
+                        // matching "or"
+                        if (!(token is TokenWord)) break;
+                        _context.Scope = ParseScope.Trigger;
+                        _context.LcOwnerName = onType.ToLower() + name.ToLower();
+                        AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                        if (token.Value.EqualsCi("or"))
+                            state = 0;
+                        else
+                            return true;
+                        break;
+                }
+            } while (MoveNext());
+            return false;
         }
 
         /// <summary>
@@ -391,9 +487,9 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             if (state <= 1) return;
             if (isTempTable)
-                _parsedItemList.Add(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", _context.Scope, _context.LcOwnerName, asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>()));
+                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>()));
             else
-                _parsedItemList.Add(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType, _context.Scope, _context.LcOwnerName));
+                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType));
         }
 
         /// <summary>
@@ -422,19 +518,19 @@ namespace _3PA.MainFeatures.Parser {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    _parsedItemList.Add(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global));
+                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global));
                     break;
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    _parsedItemList.Add(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
+                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
                     break;
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParseScope.Global;
-                    if (toParse.Contains("_DEFINITIONS", StringComparison.OrdinalIgnoreCase))
+                    if (toParse.ContainsFast("_DEFINITIONS"))
                         _context.LcOwnerName = "definitions";
-                    else if (toParse.Contains("_UIB-PREPROCESSOR-BLOCK", StringComparison.OrdinalIgnoreCase))
+                    else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK"))
                         _context.LcOwnerName = "preprocessor";
-                    else if (toParse.Contains("_MAIN-BLOCK", StringComparison.OrdinalIgnoreCase))
+                    else if (toParse.ContainsFast("_MAIN-BLOCK"))
                         _context.LcOwnerName = "mainblock";
                     break;
                 case "&UNDEFINE":
@@ -474,7 +570,7 @@ namespace _3PA.MainFeatures.Parser {
             if (state != 1) return false;
             _context.Scope = ParseScope.Procedure;
             _context.LcOwnerName = name.ToLower();
-            _parsedItemList.Add(new ParsedProcedure(name, procToken.Line, procToken.Column, name.ToLower(), leftStr.ToString()));
+            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, name.ToLower(), leftStr.ToString()));
             return true;
         }
 
@@ -533,7 +629,7 @@ namespace _3PA.MainFeatures.Parser {
             if (state != 4) return false;
             _context.Scope = ParseScope.Function;
             _context.LcOwnerName = name.ToLower();
-            _parsedItemList.Add(new ParsedFunction(name, functionToken.Line, functionToken.Column, name.ToLower(), returnType, parameters.ToString(), isPrivate));
+            AddParsedItem(new ParsedFunction(name, functionToken.Line, functionToken.Column, name.ToLower(), returnType, isPrivate, parameters.ToString()));
             return true;
         }
 
@@ -551,7 +647,7 @@ namespace _3PA.MainFeatures.Parser {
             toParse = toParse.Substring(1, pos - 1);
             // we matched the include file name
 
-            _parsedItemList.Add(new ParsedIncludeFile(toParse, token.Line, token.Column, _context.Scope, _context.LcOwnerName));
+            AddParsedItem(new ParsedIncludeFile(toParse, token.Line, token.Column));
         }
 
     }

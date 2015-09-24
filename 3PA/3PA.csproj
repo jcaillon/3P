@@ -64,7 +64,9 @@
   <ItemGroup>
     <Compile Include="Abl.cs" />
     <Compile Include="Html\RegisterCssAndImages.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\AutoCompParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />

@@ -214,7 +214,7 @@ namespace _3PA.Lib {
             // Parse each line of text
             for (pos = 0; pos < text.Length; pos = next) {
                 // Find end of line
-                int eol = text.IndexOf(Environment.NewLine, pos, StringComparison.Ordinal);
+                int eol = text.IndexOf(Environment.NewLine, pos, StringComparison.CurrentCultureIgnoreCase);
                 if (eol == -1)
                     next = eol = text.Length;
                 else
@@ -259,8 +259,8 @@ namespace _3PA.Lib {
             return i + 1;
         }
 
-        public static bool Contains(this string source, string toCheck, StringComparison comp) {
-            return source.IndexOf(toCheck, comp) >= 0;
+        public static bool ContainsFast(this string source, string toCheck) {
+            return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }
 
         public static bool IsScriptFile(this string file) {
@@ -287,7 +287,7 @@ namespace _3PA.Lib {
                     startPos = 0;
 
                 if ((endPos - startPos) == pattern.Length)
-                    return (text.IndexOf(pattern, startPos, StringComparison.Ordinal) == startPos);
+                    return (text.IndexOf(pattern, startPos, StringComparison.CurrentCultureIgnoreCase) == startPos);
             }
             return false;
         }
@@ -303,7 +303,7 @@ namespace _3PA.Lib {
             if (startPos < text.Length)
                 for (int i = startPos; i < text.Length; i++) {
                     if (!char.IsWhiteSpace(text[i]))
-                        return (text.IndexOf(pattern, i, StringComparison.Ordinal) == i);
+                        return (text.IndexOf(pattern, i, StringComparison.CurrentCultureIgnoreCase) == i);
                 }
             return false;
         }

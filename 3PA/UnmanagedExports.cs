@@ -90,7 +90,7 @@ namespace _3PA
                 }
 
                 // only do extra stuff if we are in a progress file
-                if (!Utils.IsCurrentProgressFile()) return;
+                if (!Abl.IsCurrentProgressFile()) return;
 
                 #region extra
                 switch (nc.nmhdr.code) {

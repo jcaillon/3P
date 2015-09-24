@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -19,42 +18,81 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static bool _openedFromShortCut;
         private static AutoCompletionForm _form;
 
-        // true if we are using the _persistentItems in _currentItems, false otherwise (= we are showing fields)
-        private static bool _showingPersistentItems;
+        // true if we are using the _savedAllItems in _currentItems, false otherwise (= we are showing fields)
+        private static bool _showingAllItems;
 
         // contains the list of items currently display in the form
         private static List<CompletionData> _currentItems;
 
         // contains the whole list of items (minus the fields) to show, can be updated through FillItems() method
-        private static List<CompletionData> _persistentItems;
+        private static List<CompletionData> _savedAllItems;
+
+        // contains the list of items that do not depend on the current file (keywords, database, snippets)
+        private static List<CompletionData> _staticItems;
 
         // bool that indicates to the method showing the popup if the _currentItems have changed
         // and therefore as to be reloaded into the list
         private static bool _needToUpdateItemsInTheList;
 
         /// <summary>
-        /// this method should be called by the parser to update the completion form according to the data
-        /// of each features
+        /// this method should be called to refresh the Items list with all the static items
+        /// as well as the dynamic items found by the parser
         /// </summary>
         public static void FillItems() {
-            if (_persistentItems == null) _persistentItems = new List<CompletionData>();
-            _persistentItems.Clear();
-            // dont forget to copy the first list!! with a .ToLIst()!
-            _persistentItems = GetListOf(CompletionType.Keyword).ToList();
-            _persistentItems.AddRange(GetListOf(CompletionType.Snippet));
-            _persistentItems.AddRange(GetListOf(CompletionType.Table));
-            _currentItems = _persistentItems;
-            if (_form != null)
+            if (_savedAllItems == null) _savedAllItems = new List<CompletionData>();
+
+            // init with static items
+            _savedAllItems.Clear();
+            _savedAllItems = _staticItems.ToList();
+
+            // we launch the parser, that will fill the DynamicItems
+            ParserHandler.RefreshParser();
+
+            // we had the dynamic items to the list
+            _savedAllItems.AddRange(ParserHandler.DynamicItems);
+
+            // we do the sorting (by type and then by ranking)
+            _savedAllItems.Sort(new CompletionDataSortingClass());
+
+            // update autocompletion
+            _currentItems = _savedAllItems;
+            if (_form != null && _showingAllItems)
                 _form.SetItems(_currentItems);
+
             _needToUpdateItemsInTheList = true;
         }
+
+        /// <summary>
+        /// this method should be called at the plugin's start and when we change the current database
+        /// of each features
+        /// </summary>
+        public static void FillStaticItems() {
+            // creates the static items list
+            if (_staticItems == null) _staticItems = new List<CompletionData>();
+            _staticItems.Clear();
+            _staticItems = GetListOf(CompletionType.Keyword).ToList();
+            _staticItems.AddRange(GetListOf(CompletionType.Snippet));
+            _staticItems.AddRange(GetListOf(CompletionType.Table));
+            _currentItems = _staticItems;
+
+            // we do the sorting (by type and then by ranking)
+            _staticItems.Sort(new CompletionDataSortingClass());
+
+            if (_savedAllItems == null) {
+                _savedAllItems = new List<CompletionData>();
+                _savedAllItems = _staticItems.ToList();
+            }
+
+            _needToUpdateItemsInTheList = true;
+        }
+
 
         /// <summary>
         /// This method is called to switch temporarly the items of the completino form, from
         /// a complete list to only the fields of the current table
         /// </summary>
         private static void SwapToFieldsItems() {
-            _showingPersistentItems = false;
+            _showingAllItems = false;
             var fieldsItems = GetListOf(CompletionType.Field, Npp.GetCurrentTable());
             _currentItems = fieldsItems;
             if (_form != null)
@@ -67,8 +105,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// after showing only fields
         /// </summary>
         private static void ResetToCompleteItems() {
-            _showingPersistentItems = true;
-            _currentItems = _persistentItems;
+            _showingAllItems = true;
+            _currentItems = _savedAllItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
             _needToUpdateItemsInTheList = true;
@@ -95,16 +133,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Check if the keyword is known from the autocompletion
+        /// Returns a keyword from the autocompletion list with the correct case
         /// </summary>
         /// <param name="keyword"></param>
         /// <returns></returns>
-        public static bool IsWordInSuggestionsList(string keyword) {
-            return (_currentItems != null && _currentItems.Find(data => data.DisplayText.EqualsCi(keyword)) != null);
-            //bool itIs = Keywords.Contains(keyword);
-            //itIs = itIs || DataBaseInfo.ContainsTable(keyword);
-            //itIs = itIs || (Npp.WeAreEnteringAField(curPos - offset) && DataBaseInfo.ContainsField(Npp.GetCurrentTable(curPos - offset), keyword));
-            //return itIs;
+        public static string CorrectKeywordCase(string keyword) {
+            if (_currentItems == null) return null;
+            CompletionData found = _currentItems.Find(data => data.DisplayText.EqualsCi(keyword));
+            if (found == null) return null;
+            if (found.Type == CompletionType.Keyword ||
+                found.Type == CompletionType.Field ||
+                found.Type == CompletionType.FieldPk ||
+                found.Type == CompletionType.Table)
+                return Abl.AutoCaseToUserLiking(keyword);
+            return found.DisplayText;
         }
 
 
@@ -114,6 +156,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void ActivatedAutoCompleteIfNeeded() {
             string keyword = Npp.GetKeyword();
+
+            //TODO: Dont show autocompletion if SCI_GETSELECTIONS multiple selections!
 
             // can we even show it?
             if (keyword.Length >= Config.Instance.AutoCompleteStartShowingListAfterXChar || IsVisible) {
@@ -152,7 +196,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (Npp.WeAreEnteringAField() && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
                     ShowFieldsSuggestions(displayFromShortCut);
                 else {
-                    if (!_showingPersistentItems) ResetToCompleteItems();
+                    if (!_showingAllItems) ResetToCompleteItems();
                     ShowSuggestionList(displayFromShortCut);
                 }
             } catch (Exception e) {
@@ -162,7 +206,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         public static void ShowSnippetsList() {
             try {
-                if (!_showingPersistentItems) ResetToCompleteItems();
+                if (!_showingAllItems) ResetToCompleteItems();
                 ShowSuggestionList(true, new List<CompletionType> { CompletionType.Snippet });
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowSnippetsList");
@@ -317,4 +361,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return IsVisible && _form.OnKeyDown(key);
         }
     }
+
+    #region sorting
+
+    /// <summary>
+    /// Class used in objectlist.Sort method
+    /// </summary>
+    public class CompletionDataSortingClass : IComparer<CompletionData> {
+        public int Compare(CompletionData x, CompletionData y) {
+            int compare = x.Type.CompareTo(y.Type);
+            if (compare == 0) {
+                return y.Ranking.CompareTo(x.Ranking);
+            }
+            return compare;
+        }
+    }
+    #endregion
 }

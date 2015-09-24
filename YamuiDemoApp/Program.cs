@@ -24,7 +24,7 @@ namespace YamuiDemoApp {
 
             //Keywords.Init();
 
-            Tests.Run();
+            ParserLexerTests.Run();
 
             return;
             /*

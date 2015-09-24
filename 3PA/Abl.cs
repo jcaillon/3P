@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using _3PA.Lib;
+﻿using _3PA.Lib;
 
 namespace _3PA {
     class Abl {
@@ -35,6 +31,15 @@ namespace _3PA {
         /// <returns></returns>
         public static bool IsCharAllowedInVariables(char c) {
             return char.IsLetterOrDigit(c) || c == '-' || c == '_' || c == '&';
+        }
+
+        /// <summary>
+        /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsCurrentProgressFile() {
+            var ext = Npp.GetCurrentFileExtension();
+            return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);
         }
     }
 }

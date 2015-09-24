@@ -1,11 +1,10 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
-using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace YamuiDemoApp {
-    class Tests {
+    class ParserLexerTests {
 
         public static void Run() {
 
@@ -17,7 +16,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"), @"C:\Users\Julien\Desktop\in.p");
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -31,7 +30,7 @@ namespace YamuiDemoApp {
             File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
             // OUTPUT INFO ON EACH LINE
-            if (false) {
+            if (true) {
                 StringBuilder x = new StringBuilder();
                 var i = 1;
                 var dic = tok.GetLineInfo;
@@ -68,35 +67,37 @@ namespace YamuiDemoApp {
 
     public class OutputVis : IParserVisitor {
         public StringBuilder Output = new StringBuilder();
+        public void Visit(ParsedOnEvent pars) {
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+        }
+
         public void Visit(ParsedFunction pars) {
-            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ReturnType + "," + pars.Parameters + "," + (pars.Flag.HasFlag(ParseFlag.Private)));
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ReturnType + "," + pars.Parameters + "," + (pars.Flag.HasFlag(ParseFlag.Private)));
         }
 
         public void Visit(ParsedProcedure pars) {
-            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedPreProc pars) {
-            //output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
         }
 
         public void Visit(ParsedDefine pars) {
-            if (pars.Type == ParseDefineType.Parameter)
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
         }
 
         public void Visit(ParsedTable pars) {
+            return;
             Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.AsLike + "," + pars.LcOwnerName + "," + pars.AsLike + ",");
             foreach (var field in pars.Fields) {
                 Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
             }
         }
-
-        public void Visit(ParsedGlobal pars) {}
     }
 
     public class OutputLexer : ILexerVisitor {

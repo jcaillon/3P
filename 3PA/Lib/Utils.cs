@@ -11,15 +11,6 @@ namespace _3PA.Lib {
     /// </summary>
     public static class Utils {
 
-        /// <summary>
-        /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsCurrentProgressFile() {
-            var ext = Npp.GetCurrentFileExtension();
-            return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);
-        }
-
         public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);

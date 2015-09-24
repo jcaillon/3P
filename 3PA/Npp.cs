@@ -85,13 +85,13 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     Gets the name of the current document.
+        /// Gets the path of the current document.
         /// </summary>
         /// <returns></returns>
-        public static string GetCurrentDocument() {
-            string path;
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, out path);
-            return path;
+        public static string GetCurrentFilePath() {
+            var path = new StringBuilder(Win32.MAX_PATH);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
+            return path.ToString();
         }
 
         /// <summary>
@@ -101,23 +101,23 @@ namespace _3PA {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
         }
 
+        /// <summary>
+        /// Returns the current file base name (uses GetFileName)
+        /// </summary>
+        /// <returns></returns>
         public static string GetCurrentFileName() {
-            return Path.GetFileName(GetCurrentFile());
+            return Path.GetFileName(GetCurrentFilePath());
         }
 
-        public static string GetCurrentFile() {
-            var path = new StringBuilder(Win32.MAX_PATH);
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
-            return path.ToString();
-        }
-
+        /// <summary>
+        /// displays the input text into a new document
+        /// </summary>
+        /// <param name="text"></param>
         public static void DisplayInNewDocument(string text) {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, NppMenuCmd.FileNew);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_ADDTEXT, text);
         }
-
-
 
         /// <summary>
         ///     Determines whether the current file has the specified extension (e.g. ".cs").
@@ -129,7 +129,7 @@ namespace _3PA {
             var path = new StringBuilder(Win32.MAX_PATH);
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             var file = path.ToString();
-            return !string.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.OrdinalIgnoreCase);
+            return !string.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase);
         }
 
         /// <summary>
@@ -142,17 +142,32 @@ namespace _3PA {
             return currentFileExtension;
         }
 
-
+        /// <summary>
+        /// returns npp's folder path
+        /// </summary>
+        /// <returns></returns>
+        public static string GetNppDirectory() {
+            string pathNotepadFolder;
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
+            return pathNotepadFolder;
+        }
+            
+        /// <summary>
+        /// Returns the configuration directory path
+        /// </summary>
+        /// <returns></returns>
         public static string GetConfigDir() {
-            var buffer = new StringBuilder(260);
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, 260, buffer);
+            var buffer = new StringBuilder(Win32.MAX_PATH);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MAX_PATH, buffer);
             var configDir = Path.Combine(buffer.ToString(), Resources.PluginFolderName);
             if (!Directory.Exists(configDir))
                 Directory.CreateDirectory(configDir);
             return configDir;
         }
 
-
+        /// <summary>
+        /// Leaves npp
+        /// </summary>
         public static void Exit() {
             const int wmCommand = 0x111;
             Win32.SendMessage(HandleNpp, (NppMsg)wmCommand, (int)NppMenuCmd.FileExit, 0);

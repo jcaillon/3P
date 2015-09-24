@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures {
     }
 
     public class DataBaseInfo {
-        public static Dictionary<string, TableInfo> MapTables = new Dictionary<string, TableInfo>(StringComparer.OrdinalIgnoreCase);
+        public static Dictionary<string, TableInfo> MapTables = new Dictionary<string, TableInfo>(StringComparer.CurrentCultureIgnoreCase);
 
         private const string FileName = "db_out.data";
         private static int _lastIndexTable;

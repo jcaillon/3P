@@ -8,25 +8,25 @@ namespace _3PA.Interop {
     public class Win32 {
 
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, NppMenuCmd lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, int lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, out int lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, IntPtr wParam, int lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, ref LangType lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, ref LangType lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
         [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
         [DllImport("user32")]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg Msg, SciMsg wParam, string lParam);
         [DllImport("user32")]
@@ -43,14 +43,14 @@ namespace _3PA.Interop {
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg Msg, string text) {
             byte[] bites = Encoding.UTF8.GetBytes(text);
             IntPtr ip = ToUnmanagedArray(bites);
-            var result = Win32.SendMessage(hWnd, Msg, bites.Length, ip);
+            var result = SendMessage(hWnd, Msg, bites.Length, ip);
             Marshal.FreeHGlobal(ip);
             return result;
         }
 
-        public static IntPtr SendMessage(IntPtr hWnd, NppMsg Msg, int wParam, out string lParam) {
-            var text = new StringBuilder(Win32.MAX_PATH);
-            IntPtr retval = Win32.SendMessage(hWnd, Msg, 0, text);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out string lParam) {
+            var text = new StringBuilder(MAX_PATH);
+            IntPtr retval = SendMessage(hWnd, msg, 0, text);
             lParam = text.ToString();
             return retval;
         }

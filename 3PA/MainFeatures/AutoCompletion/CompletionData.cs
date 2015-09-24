@@ -5,13 +5,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// class used in the auto completion feature
     /// </summary>
     public class CompletionData {
+        /// <summary>
+        /// The piece of text displayed in the completion list
+        /// </summary>
         public string DisplayText { get; set; }
+
+        /// <summary>
+        /// Type of completion
+        /// </summary>
         public CompletionType Type { get; set; }
 
         /// <summary>
-        /// Used for sorting the autocompletion list
+        /// A free to use string, can contain :
+        /// - keyword = type of keyword
         /// </summary>
-        public int Ranking { get; set; }
+        public string SubType { get; set; }
 
         /// <summary>
         /// When Type is UserVariable, is used to know if the var is shared, local global..
@@ -19,20 +27,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public ParseFlag Flag { get; set; }
 
-        public string SubType { get; set; }
+        /// <summary>
+        /// Used for sorting the autocompletion list
+        /// </summary>
+        public int Ranking { get; set; }
+
+        public ParsedItem ParsedItem { get; set; }
     }
 
     public enum CompletionType {
-        Keyword,
-        Table,
-        TempTable,
-        Field,
         FieldPk,
+        Field,
         Snippet,
-        Function,
-        Procedure,
+        TempTable,
         UserVariablePrimitive,
         UserVariableOther,
-        Preprocessed
+        Table,
+        Function,
+        Procedure,
+        Preprocessed,
+        Keyword
     }
 }

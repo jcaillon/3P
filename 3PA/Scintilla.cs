@@ -415,20 +415,20 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string[] GetAllLines() {
-            return GetAllText().Split(new[] {Environment.NewLine}, StringSplitOptions.None);
+            return GetDocumentText().Split(new[] {Environment.NewLine}, StringSplitOptions.None);
         }
 
-        /// <summary>
-        ///     Gets all text of the current document.
-        /// </summary>
-        /// <returns></returns>
-        public static string GetAllText() {
-            var fullLength = GetDocumentLength();
-            using (var tr = new Sci_TextRange(0, fullLength, fullLength + 1)) {
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                return tr.lpstrText;
-            }
-        }
+        ///// <summary>
+        /////     Gets all text of the current document.
+        ///// </summary>
+        ///// <returns></returns>
+        //public static string GetAllText() {
+        //    var fullLength = GetDocumentLength();
+        //    using (var tr = new Sci_TextRange(0, fullLength, fullLength + 1)) {
+        //        Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
+        //        return tr.lpstrText;
+        //    }
+        //}
 
         /// <summary>
         ///     Gets the current screen location of the caret.

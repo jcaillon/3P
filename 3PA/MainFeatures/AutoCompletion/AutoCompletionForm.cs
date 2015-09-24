@@ -45,6 +45,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
         private string _filterString;
+        private string _currentLcOwnerName = "";
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private int _normalWidth;
         private List<CompletionData> _initialObjectsList;
@@ -79,9 +80,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // Decorate and configure hot item
             fastOLV.UseHotItem = true;
-            fastOLV.HotItemStyle = new HotItemStyle();
-            fastOLV.HotItemStyle.BackColor = ThemeManager.Current.AutoCompletionHoverBackColor;
-            fastOLV.HotItemStyle.ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor;
+            fastOLV.HotItemStyle = new HotItemStyle {
+                BackColor = ThemeManager.Current.AutoCompletionHoverBackColor,
+                ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor
+            };
 
             // set the image list to use for the keywords
             _imageListOfTypes = new ImageList {
@@ -89,17 +91,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ColorDepth = ColorDepth.Depth32Bit,
                 ImageSize = new Size(20, 20)
             };
-            ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Table, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.TempTable, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Field, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.FieldPk, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Field, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Snippet, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Function, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Procedure, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.TempTable, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.UserVariablePrimitive, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Table, _imageListOfTypes);            
+            ImagelistAdd.AddFromImage(ImageResources.Function, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Procedure, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Preprocessed, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
             fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData) rowObject;
@@ -169,8 +171,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="objectsList"></param>
         public void SetItems(List<CompletionData> objectsList) {
-            // we do the sorting (by type and then by ranking)
-            objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
 
             // set the default height / width
@@ -277,7 +277,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 OnTabCompleted(new TabCompletedEventArgs(obj));
         }
         #endregion
-
 
         #region events
         /// <summary>
@@ -388,21 +387,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-        #region private methods
+        #region Filter
         /// <summary>
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            // order the list
+            // order the list, first the ones that are equals to the filter, then the
+            // ones that start with the filter, then the rest
             fastOLV.SetObjects(string.IsNullOrEmpty(_filterString) ? 
                 _initialObjectsList : 
                 _initialObjectsList.OrderBy(
                 x => {
                     if (x.DisplayText.IndexOf(_filterString[0]) > 0) return 2;
-                    return x.DisplayText.Equals(_filterString, StringComparison.OrdinalIgnoreCase) ? 0 : 1;
+                    return x.DisplayText.Equals(_filterString, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
                 }).ToList());
 
-            fastOLV.ModelFilter = new ModelFilter((o => ((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activated));
+            // apply the filter, need to match the filter + need to be an active type (Selector button activated)
+            // + need to be in the right scope for variables
+            _currentLcOwnerName = ParserHandler.GetCarretLineLcOwnerName;
+            fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
+            //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
+
             fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterString);
 
             // update total items
@@ -418,24 +423,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // ignored
             }
         }
+
+        /// <summary>
+        /// if true, the item isn't filtered
+        /// </summary>
+        /// <param name="o"></param>
+        /// <returns></returns>
+        private bool FilterPredicate(object o) {
+            var compData = (CompletionData) o;
+            return compData.DisplayText.ToLower().FullyMatchFilter(_filterString) && 
+                _activeTypes[compData.Type].Activated &&
+                (!compData.Flag.HasFlag(ParseFlag.IsParsedItem) || compData.ParsedItem.Scope == ParseScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
+        }
         #endregion
     }
-
-    #region sorting
-
-    /// <summary>
-    /// Class used in objectlist.Sort method
-    /// </summary>
-    public class CompletionDataSortingClass : IComparer<CompletionData> {
-        public int Compare(CompletionData x, CompletionData y) {
-            int compare = x.Type.CompareTo(y.Type);
-            if (compare == 0) {
-                return y.Ranking.CompareTo(x.Ranking);
-            }
-            return compare;
-        }
-    }
-    #endregion
 
     #region SelectorButtons
     public class SelectorButton : YamuiButton {

@@ -22,11 +22,11 @@ namespace _3PA.Lib {
 
                 if (line.StartsWith("[") && line.EndsWith("]")) {
                     currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
-                    _ini[line.Substring(1, line.LastIndexOf("]", StringComparison.Ordinal) - 1)] = currentSection;
+                    _ini[line.Substring(1, line.LastIndexOf("]", StringComparison.CurrentCultureIgnoreCase) - 1)] = currentSection;
                     continue;
                 }
 
-                var idx = line.IndexOf("=", StringComparison.Ordinal);
+                var idx = line.IndexOf("=", StringComparison.CurrentCultureIgnoreCase);
                 if (idx == -1)
                     currentSection[line] = "";
                 else

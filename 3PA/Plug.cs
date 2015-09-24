@@ -34,7 +34,7 @@ namespace _3PA {
 
         private static bool _indentWithTabs;
         private static int _indentWidth;
-        public static string CurrentFile { get; set; }
+        public static string CurrentFilePath { get; set; }
 
         public static Action ActionAfterUpdateUi { get; set; } // this is a delegate to defined actions that must be taken after updating the ui (example is indentation)
         #endregion
@@ -169,7 +169,7 @@ namespace _3PA {
                     RegisterCssAndImages.Init();
 
                     // initialize the list of objects of the autocompletion form
-                    AutoComplete.FillItems();
+                    AutoComplete.FillStaticItems();
 
                     // themes
                     ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
@@ -187,6 +187,8 @@ namespace _3PA {
 
                     // Simulates a OnDocumentSwitched when we start this dll
                     OnDocumentSwitched();
+
+                    //TODO: notification qui demande à l'utilisateur de désactiver l'autocompletion de base de npp
                 } finally {
                     PluginIsFullyLoaded = true;
                 }
@@ -218,9 +220,11 @@ namespace _3PA {
                     keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
 
                     // replace the last keyword by the correct case, check the context of the caret
-                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && AutoComplete.IsWordInSuggestionsList(keyword))
-                        Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking(keyword), keywordPos, curPos);
-
+                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword)) {
+                        var casedKeyword = AutoComplete.CorrectKeywordCase(keyword);
+                        if (casedKeyword != null)
+                            Npp.WrappedKeywordReplace(casedKeyword, keywordPos, curPos);
+                    }
                     return;
 
                     bool isNormalContext = Npp.IsNormalContext(curPos);
@@ -233,7 +237,7 @@ namespace _3PA {
                         AutoComplete.ShowFieldsSuggestions(true);
 
                     
-                    bool lastWordInDico = AutoComplete.IsWordInSuggestionsList(keyword);
+                    bool lastWordInDico = true;
                     Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
                     // trigger snippet insertion on space if the setting is activated (and the leave)
                     /*
@@ -311,7 +315,7 @@ namespace _3PA {
             handled = false; 
 
             // only do stuff if we are in a progress file
-            if (!Utils.IsCurrentProgressFile()) return;
+            if (!Abl.IsCurrentProgressFile()) return;
 
             try {
                 // Close interfacePopups
@@ -404,8 +408,8 @@ namespace _3PA {
         /// Called when a line is removed or added in the current doc
         /// </summary>
         public static void OnLineAddedOrRemoved() {
-            if (!Npp.GetCurrentFile().Equals(CurrentFile) && Utils.IsCurrentProgressFile()) {
-                CurrentFile = Npp.GetCurrentFile();
+            if (!Npp.GetCurrentFilePath().Equals(CurrentFilePath) && Abl.IsCurrentProgressFile()) {
+                CurrentFilePath = Npp.GetCurrentFilePath();
                 //MessageBox.Show("time to parse this file");
             }
         }
@@ -435,7 +439,7 @@ namespace _3PA {
                 _indentWidth = Npp.GetIndent();
                 _indentWithTabs = Npp.GetUseTabs();
             }
-            if (!Utils.IsCurrentProgressFile() || forceToDefault) {
+            if (!Abl.IsCurrentProgressFile() || forceToDefault) {
                 Npp.ResetDefaultAutoCompletion();
                 Npp.SetIndent(_indentWidth);
                 Npp.SetUseTabs(_indentWithTabs);
@@ -471,7 +475,8 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            Highlight.SetCustomStyles();
+            AutoComplete.FillItems();
+            //Highlight.SetCustomStyles();
         }
         #endregion
     }
