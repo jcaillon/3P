@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
+using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace YamuiDemoApp {
@@ -30,7 +31,7 @@ namespace YamuiDemoApp {
             File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
             // OUTPUT INFO ON EACH LINE
-            if (true) {
+            if (false) {
                 StringBuilder x = new StringBuilder();
                 var i = 1;
                 var dic = tok.GetLineInfo;
@@ -68,7 +69,7 @@ namespace YamuiDemoApp {
     public class OutputVis : IParserVisitor {
         public StringBuilder Output = new StringBuilder();
         public void Visit(ParsedOnEvent pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
         }
 
         public void Visit(ParsedFunction pars) {
@@ -88,7 +89,8 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedDefine pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
+            if (pars.Type == ParseDefineType.Parameter)
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
         }
 
         public void Visit(ParsedTable pars) {

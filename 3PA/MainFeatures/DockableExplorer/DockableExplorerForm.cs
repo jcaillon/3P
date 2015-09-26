@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Fonts;
@@ -10,6 +12,8 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.DockableExplorer {
     public partial class DockableExplorerForm : Form {
+
+        #region fields
 
         /// <summary>
         /// Tracks toggle state of the expand/collapse
@@ -25,7 +29,14 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <summary>
         /// Use alternative back color... or not
         /// </summary>
-        public bool UseAlternativeBackColor { set { ovlTree.UseAlternatingBackColors = value; } }
+        public bool UseAlternativeBackColor {
+            set { ovlTree.UseAlternatingBackColors = value; }
+        }
+
+        private List<object> _beforeFilterExpandedItems;
+        #endregion
+
+        #region constructor
 
         public DockableExplorerForm() {
             InitializeComponent();
@@ -42,7 +53,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             // What objects should belong underneath the given model object?
             ovlTree.ChildrenGetter = delegate(object x) {
                 if (x is ExplorerCategories)
-                    return ((ExplorerCategories)x).Items;
+                    return ((ExplorerCategories) x).Items;
                 return null;
             };
 
@@ -50,11 +61,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
             ovlTree.SmallImageList = ExplorerContent.GetImageList();
             DisplayText.ImageGetter += rowObject => {
                 if (rowObject is ExplorerCategories) {
-                    var x = (ExplorerCategories)rowObject;
+                    var x = (ExplorerCategories) rowObject;
                     return (int) x.MyIcon;
                 }
-                var y = (ExplorerItems)rowObject;
-                return (int)y.MyIcon;
+                var y = (ExplorerItems) rowObject;
+                return (int) y.MyIcon;
             };
 
             // Style the control
@@ -66,6 +77,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
             buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
             _isExpanded = true;
         }
+
+        #endregion
 
         #region Paint Methods
         protected override void OnPaintBackground(PaintEventArgs e) { }
@@ -189,8 +202,16 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// Update the renderer (the filter)
         /// </summary>
         private void CleanTextRenderer() {
-            DisplayText.Renderer = null;
             ovlTree.TreeColumnRenderer = new CustomTreeRenderer("");
+            try {
+                if (_beforeFilterExpandedItems != null) {
+                    ovlTree.ExpandedObjects = _beforeFilterExpandedItems;
+                    _beforeFilterExpandedItems = null;
+                }
+            } catch (Exception) {
+                // ignored
+            }
+            ForceRebuildAll();
         }
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
@@ -200,9 +221,21 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 ovlTree.ModelFilter = null;
                 return;
             }
+
+            // first char input? we remember the expanded/retracted branches
+            if (_beforeFilterExpandedItems == null) {
+                _beforeFilterExpandedItems = ovlTree.ExpandedObjectsList.ToList();
+                ExpandAll();
+            }
+
             // filter the tree..
-            ovlTree.ModelFilter = new ModelFilter((o => (o is ExplorerItems && ((ExplorerItems)o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)) || (o is ExplorerCategories && !((ExplorerCategories)o).HasChildren && ((ExplorerCategories)o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text))));
+            ovlTree.ModelFilter = new ModelFilter(FilterPredicate);
             ovlTree.TreeColumnRenderer = new CustomTreeRenderer(textBoxFilter.Text);
+        }
+
+        private bool FilterPredicate(object o) {
+            return ((o is ExplorerItems && ((ExplorerItems) o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)) || 
+                (o is ExplorerCategories && !((ExplorerCategories) o).HasChildren && ((ExplorerCategories) o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)));
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {

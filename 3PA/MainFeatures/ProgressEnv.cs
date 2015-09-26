@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using YamuiFramework.Themes;
 using _3PA.Data;
 using _3PA.Lib;
 
@@ -13,6 +12,7 @@ namespace _3PA.MainFeatures {
         private static string _fileName = "ProgressEnvironnement.xml";
         private static ProgressEnvironnement _currentEnv;
         private static List<ProgressEnvironnement> _listOfEnv = new List<ProgressEnvironnement>();
+        private static string _currentProPath;
 
         /// <summary>
         /// Returns the list of all the progress envrionnements configured
@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures {
                     try {
                         Object2Xml<ProgressEnvironnement>.LoadFromString(_listOfEnv, DataResources.ProgressEnvironnement);
                     } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error when loading ProgressEnvironnement.xls", _filePath);
+                        ErrorHandler.ShowErrors(e, "Error when loading ProgressEnvironnement.xml", _filePath);
                     }
                 } else
                     Object2Xml<ProgressEnvironnement>.LoadFromFile(_listOfEnv, _filePath);
@@ -41,7 +41,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Object2Xml<ProgressEnvironnement>.SaveToFile(_listOfEnv, _filePath);
                 } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xls", _filePath);
+                    ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml", _filePath);
                 }
         }
 
@@ -58,10 +58,48 @@ namespace _3PA.MainFeatures {
                 var list = GetList();
                 _currentEnv = null;
                 if (Config.Instance.GlobalCurrentEnvironnement + 1 > list.Count) {
-                    if (list.Count > 0) _currentEnv = list[0];
+                    _currentEnv = list.Count > 0 ? list[0] : new ProgressEnvironnement();
                 } else _currentEnv = list[Config.Instance.GlobalCurrentEnvironnement];
                 return _currentEnv;
             }
+        }
+
+        /// <summary>
+        /// returns the content of the .ini for the current env
+        /// </summary>
+        public string GetIniContent {
+            get { return @"PROPATH=" + GetProPath; }
+        }
+
+        /// <summary>
+        /// returns the propath value for the current env
+        /// </summary>
+        public string GetProPath {
+            get {
+                if (_currentProPath != null) return _currentProPath;
+                IniReader ini = new IniReader(Current.IniPath);
+                _currentProPath = Current.ProPath + "," + ini.GetValue("PROPATH");
+                return _currentProPath;
+            }
+        }
+
+        /// <summary>
+        /// tries to find the specified file in the current propath
+        /// returns an empty string if nothing is found
+        /// </summary>
+        /// <param name="fileTofind"></param>
+        /// <returns></returns>
+        public string FindFileInPropath(string fileTofind) {
+            foreach (var item in GetProPath.Split(',')) {
+                string curPath = item;
+                // need to take into account relative paths
+                if (curPath.StartsWith("."))
+                    curPath = Path.GetFullPath(Path.Combine(Npp.GetCurrentFilePath(), curPath));
+                curPath = Path.GetFullPath(Path.Combine(curPath, fileTofind));
+                if (File.Exists(curPath))
+                    return curPath;
+            }
+            return "";
         }
     }
 

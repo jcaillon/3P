@@ -159,21 +159,5 @@ namespace _3PA.MainFeatures {
                 }
             }
         }
-
-        /*
-            public static List<FileTag> GetFileTagsList(string filename) {
-                lock (Map) {
-                    if (Map.ContainsKey(filename)) {
-                        return Map[filename];
-                    }
-                    else
-                        return new List<FileTag>();
-                }
-            }
-
-            public static FileTag GetFileTags(string filename, int nb) {
-                return GetFileTagsList(filename).Find(x => (x.nb == nb));
-            }
-        */
     }
 }

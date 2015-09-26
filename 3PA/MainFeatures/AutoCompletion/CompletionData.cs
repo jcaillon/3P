@@ -16,12 +16,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public CompletionType Type { get; set; }
 
         /// <summary>
-        /// A free to use string, can contain :
-        /// - keyword = type of keyword
-        /// </summary>
-        public string SubType { get; set; }
-
-        /// <summary>
         /// When Type is UserVariable, is used to know if the var is shared, local global..
         /// When Type is Keyword, is used to know if the keyword is reserved
         /// </summary>
@@ -32,20 +26,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public int Ranking { get; set; }
 
+        /// <summary>
+        /// A free to use string, can contain :
+        /// - keyword = type of keyword
+        /// </summary>
+        public string SubType { get; set; }
+
         public ParsedItem ParsedItem { get; set; }
     }
 
     public enum CompletionType {
-        FieldPk,
-        Field,
-        Snippet,
-        TempTable,
-        UserVariablePrimitive,
-        UserVariableOther,
-        Table,
-        Function,
-        Procedure,
-        Preprocessed,
-        Keyword
+        FieldPk = 0,
+        Field = 1,
+        Snippet = 2,
+        TempTable = 3,
+        UserVariablePrimitive = 4,
+        UserVariableOther = 5,
+        Table = 6,
+        Function = 7,
+        Procedure = 8,
+        Preprocessed = 9,
+        Keyword = 10,
+        Databases = 11,
     }
 }

@@ -102,6 +102,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ImagelistAdd.AddFromImage(ImageResources.Procedure, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Preprocessed, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Database, _imageListOfTypes);
             fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData) rowObject;
@@ -147,18 +148,44 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            if (((CompletionData)args.Model).Flag.HasFlag(ParseFlag.None)) {
-                TextDecoration decoration = new TextDecoration("R", 100);
-                decoration.Alignment = ContentAlignment.MiddleRight;
-                decoration.Offset = new Size(-5, 0);
-                decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
-                decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-                decoration.CornerRounding = 1f;
-                decoration.Rotation = 0;
-                decoration.BorderWidth = 1;
-                decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-                args.SubItem.Decoration = decoration; //NB. Sets Decoration
+            int offset = 0;
+            CompletionData data = (CompletionData) args.Model;
+            if (data.Flag.HasFlag(ParseFlag.Global)) {
+                ImageDecoration decoration = new ImageDecoration(ImageResources.global, 70, ContentAlignment.MiddleRight);
+                decoration.Offset = new Size(offset, 0);
+                args.SubItem.Decorations.Add(decoration);
+                offset -= 20;
             }
+            if (data.Flag.HasFlag(ParseFlag.Reserved)) {
+                ImageDecoration decoration = new ImageDecoration(ImageResources.Reserved, 70, ContentAlignment.MiddleRight);
+                decoration.Offset = new Size(offset, 0);
+                args.SubItem.Decorations.Add(decoration);
+                offset -= 20;
+            }
+            if (data.Flag.HasFlag(ParseFlag.Scope)) {
+                ImageDecoration decoration = new ImageDecoration(ImageResources.scope, 70, ContentAlignment.MiddleRight);
+                decoration.Offset = new Size(offset, 0);
+                args.SubItem.Decorations.Add(decoration);
+                offset -= 20;
+            }
+            if (data.Flag.HasFlag(ParseFlag.Parameter)) {
+                ImageDecoration decoration = new ImageDecoration(ImageResources.Parameter, 70, ContentAlignment.MiddleRight);
+                decoration.Offset = new Size(offset, 0);
+                args.SubItem.Decorations.Add(decoration);
+                offset -= 20;
+            }
+            //if (data.Flag.HasFlag(ParseFlag.None)) {
+            //    TextDecoration decoration = new TextDecoration("R", 100);
+            //    decoration.Alignment = ContentAlignment.MiddleRight;
+            //    decoration.Offset = new Size(-5, 0);
+            //    decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
+            //    decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+            //    decoration.CornerRounding = 1f;
+            //    decoration.Rotation = 0;
+            //    decoration.BorderWidth = 1;
+            //    decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+            //    args.SubItem.Decoration = decoration; //NB. Sets Decoration
+            //}
         }
 
         #endregion
@@ -431,9 +458,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         private bool FilterPredicate(object o) {
             var compData = (CompletionData) o;
+            // check for the filter match, the activated category,
+            // and for the current scope
             return compData.DisplayText.ToLower().FullyMatchFilter(_filterString) && 
                 _activeTypes[compData.Type].Activated &&
-                (!compData.Flag.HasFlag(ParseFlag.IsParsedItem) || compData.ParsedItem.Scope == ParseScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
+                (!compData.Flag.HasFlag(ParseFlag.IsParsedItem) || compData.ParsedItem.Scope == ParsedScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
         }
         #endregion
     }

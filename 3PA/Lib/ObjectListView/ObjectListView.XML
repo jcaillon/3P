@@ -4992,6 +4992,11 @@
             </para>
             </remarks>
         </member>
+        <member name="P:BrightIdeasSoftware.TreeListView.ExpandedObjectsList">
+            <summary>
+            Same as ExpandedObjects bu with List
+            </summary>
+        </member>
         <member name="P:BrightIdeasSoftware.TreeListView.ListFilter">
             <summary>
             Gets or  sets the filter that is applied to our whole list of objects.
@@ -9012,6 +9017,31 @@
             <summary>
               Overrides the current thread's CurrentUICulture property for all
               resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:BrightIdeasSoftware.Properties.Resources.ClearFiltering">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:BrightIdeasSoftware.Properties.Resources.ColumnFilterIndicator">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:BrightIdeasSoftware.Properties.Resources.Filtering">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:BrightIdeasSoftware.Properties.Resources.SortAscending">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
+            </summary>
+        </member>
+        <member name="P:BrightIdeasSoftware.Properties.Resources.SortDescending">
+            <summary>
+              Looks up a localized resource of type System.Drawing.Bitmap.
             </summary>
         </member>
         <member name="T:BrightIdeasSoftware.GraphicAdornment">

@@ -66,6 +66,7 @@
     <Compile Include="Html\RegisterCssAndImages.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoCompParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
@@ -182,7 +183,7 @@
     </Compile>
     <Compile Include="MainFeatures\DockableExplorer\ExplorerContent.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
-    <Compile Include="MainFeatures\Keywords.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\Highlight.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
@@ -270,14 +271,13 @@
     <None Include="Interop\DllExport\NppPlugin.DllExport.targets" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\dbout.txt" />
     <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Html\StyleSheet.css" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Reserved.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\scope.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\Database.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Field.png" />
     <Content Include="Images\AutoCompletion\CompletionType\FieldPk.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Function.png" />

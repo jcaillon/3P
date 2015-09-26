@@ -117,6 +117,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace BrightIdeasSoftware
@@ -296,6 +297,21 @@ namespace BrightIdeasSoftware
                     foreach (object x in value)
                         this.TreeModel.SetModelExpanded(x, true);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Same as ExpandedObjects bu with List
+        /// </summary>
+        public List<object> ExpandedObjectsList {
+            get {
+                return this.TreeModel.mapObjectToExpanded.Keys.ToList();
+            }
+            set {
+                this.TreeModel.mapObjectToExpanded.Clear();
+                if (value == null) return;
+                foreach (object x in value)
+                    this.TreeModel.SetModelExpanded(x, true);
             }
         }
 

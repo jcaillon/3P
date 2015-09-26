@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
-using System.Windows.Forms;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -35,6 +34,10 @@ namespace _3PA.Lib {
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = false;
+
+
+        [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
+        public string AutoCompletePriorityList = "9,11,0,1,2,3,4,5,6,7,8,9,10";
 
         public bool ExplorerUseAlternateColors = false;
 
@@ -80,7 +83,7 @@ namespace _3PA.Lib {
             _filePath = Path.Combine(_location, _fileName);
             if (File.Exists(_filePath)) {
                 try {
-                    Object2Xml<ConfigObject>.LoadFromFile(_instance, _filePath, false);
+                    Object2Xml<ConfigObject>.LoadFromFile(_instance, _filePath);
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when loading settings", _filePath);
                 }
@@ -92,7 +95,7 @@ namespace _3PA.Lib {
         public static void Save() {
             try  {
                 if (!string.IsNullOrWhiteSpace(_filePath))
-                    Object2Xml<ConfigObject>.SaveToFile(_instance, _filePath, false);
+                    Object2Xml<ConfigObject>.SaveToFile(_instance, _filePath);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when saving settings");
             }

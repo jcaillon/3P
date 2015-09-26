@@ -70,7 +70,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionnary
-            var current = new LineInfo(0, ParseScope.Global, "");
+            var current = new LineInfo(0, ParsedScope.Global, "");
             for (int i = 0; i < _lexer.MaxLine; i++) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
@@ -171,9 +171,9 @@ namespace _3PA.MainFeatures.Parser {
                         case "end":
                             _context.BlockDepth--;
                             if (_context.BlockDepth == 0) {
-                                if (_context.Scope != ParseScope.Global)
+                                if (_context.Scope != ParsedScope.Global)
                                     _context.LcOwnerName = "";
-                                _context.Scope = ParseScope.Global;
+                                _context.Scope = ParsedScope.Global;
                             }
                             break;
                         case "else":
@@ -278,9 +278,9 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         if (token.Value.EqualsCi("anywhere")) {
                             name = "anywhere";
-                            _context.Scope = ParseScope.Trigger;
-                            _context.LcOwnerName = onType.ToLower() + name;
                             AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                            _context.Scope = ParsedScope.Trigger;
+                            _context.LcOwnerName = onType.ToLower() + name;
                             return true;
                         }
                         if (!token.Value.EqualsCi("of")) return false;
@@ -295,9 +295,9 @@ namespace _3PA.MainFeatures.Parser {
                     case 3:
                         // matching "or"
                         if (!(token is TokenWord)) break;
-                        _context.Scope = ParseScope.Trigger;
-                        _context.LcOwnerName = onType.ToLower() + name.ToLower();
                         AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                        _context.Scope = ParsedScope.Trigger;
+                        _context.LcOwnerName = onType.ToLower() + name.ToLower();
                         if (token.Value.EqualsCi("or"))
                             state = 0;
                         else
@@ -322,7 +322,7 @@ namespace _3PA.MainFeatures.Parser {
 
             bool isTempTable = false;
             var fields = new List<ParsedField>();
-            ParsedField currentField = new ParsedField("", "", "", 0, ParseFieldFlag.None, "", "", "", 0);
+            ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", "", 0);
 
             int state = 0;
             do {
@@ -403,7 +403,23 @@ namespace _3PA.MainFeatures.Parser {
                         // matching the name
                         if (!(token is TokenWord)) break;
                         name = token.Value;
-                        if (type == ParseDefineType.Variable || type == ParseDefineType.Parameter) state = 10;
+                        if (type == ParseDefineType.Variable) state = 10;
+                        if (type == ParseDefineType.Parameter) {
+                            lowerToken = token.Value.ToLower();
+                            switch (lowerToken) {
+                                case "buffer":
+                                case "table":
+                                case "table-handle":
+                                case "dataset":
+                                case "dataset-handle":
+                                    primitiveType = name;
+                                    state = 30;
+                                    break;
+                                default:
+                                    state = 10;
+                                    break;
+                            }
+                        }
                         if (isTempTable) state = 20;
                         if (state != 1) break;
                         state = 99;
@@ -448,7 +464,7 @@ namespace _3PA.MainFeatures.Parser {
                     case 22:
                         // define temp-table : matches a FIELD name
                         if (!(token is TokenWord)) break;
-                        currentField = new ParsedField(token.Value, "", "", 0, ParseFieldFlag.None, "", "", "", 0);
+                        currentField = new ParsedField(token.Value, "", "", 0, ParsedFieldFlag.None, "", "", "", 0);
                         state = 23;
                         break;
                     case 23:
@@ -472,10 +488,19 @@ namespace _3PA.MainFeatures.Parser {
                         if (lowerToken.Equals("primary")) isPrimary = true;
                         var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
                         if (found != null)
-                            found.Flag = isPrimary ? ParseFieldFlag.Primary : ParseFieldFlag.None;
+                            found.Flag = isPrimary ? ParsedFieldFlag.Primary : ParsedFieldFlag.None;
                         if (lowerToken.Equals("index"))
                             // ReSharper disable once RedundantAssignment
                             isPrimary = false;
+                        break;
+
+
+                    case 30:
+                        // define parameter : match a temptable, table, dataset or buffer name
+                        if (!(token is TokenWord)) break;
+                        if (token.Value.ToLower().Equals("for")) break;
+                        name = token.Value;
+                        state = 99;
                         break;
 
 
@@ -525,7 +550,7 @@ namespace _3PA.MainFeatures.Parser {
                     AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
                     break;
                 case "&ANALYZE-SUSPEND":
-                    _context.Scope = ParseScope.Global;
+                    _context.Scope = ParsedScope.Global;
                     if (toParse.ContainsFast("_DEFINITIONS"))
                         _context.LcOwnerName = "definitions";
                     else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK"))
@@ -568,9 +593,9 @@ namespace _3PA.MainFeatures.Parser {
                 leftStr.Append(token.Value);
             } while (MoveNext());
             if (state != 1) return false;
-            _context.Scope = ParseScope.Procedure;
-            _context.LcOwnerName = name.ToLower();
             AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, name.ToLower(), leftStr.ToString()));
+            _context.Scope = ParsedScope.Procedure;
+            _context.LcOwnerName = name.ToLower();
             return true;
         }
 
@@ -627,9 +652,9 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
             if (state != 4) return false;
-            _context.Scope = ParseScope.Function;
-            _context.LcOwnerName = name.ToLower();
             AddParsedItem(new ParsedFunction(name, functionToken.Line, functionToken.Column, name.ToLower(), returnType, isPrivate, parameters.ToString()));
+            _context.Scope = ParsedScope.Function;
+            _context.LcOwnerName = name.ToLower();
             return true;
         }
 
@@ -661,7 +686,7 @@ namespace _3PA.MainFeatures.Parser {
         public List<Token> StatementTokenList = new List<Token>();
         public int StatementWordCount;
         public int BlockDepth;
-        public ParseScope Scope = ParseScope.Global;
+        public ParsedScope Scope = ParsedScope.Global;
         public string LcOwnerName = "";
     }
 
@@ -670,14 +695,14 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class LineInfo {
         public int BlockDepth;
-        public ParseScope Scope;
+        public ParsedScope Scope;
         /// <summary>
         /// Name of the current procedure/part of main, definitions, preproc
         /// all in lower case
         /// </summary>
         public string CurrentScopeName;
 
-        public LineInfo(int blockDepth, ParseScope scope, string currentScopeName) {
+        public LineInfo(int blockDepth, ParsedScope scope, string currentScopeName) {
             BlockDepth = blockDepth;
             Scope = scope;
             CurrentScopeName = currentScopeName;

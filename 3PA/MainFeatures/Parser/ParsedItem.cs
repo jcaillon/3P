@@ -11,7 +11,7 @@ namespace _3PA.MainFeatures.Parser {
         public string FilePath { get; set; }
         public int Line { get; private set; }
         public int Column { get; private set; }
-        public ParseScope Scope { get; set; }
+        public ParsedScope Scope { get; set; }
         public string LcOwnerName { get; set; }
         public abstract void Accept(IParserVisitor visitor);
         protected ParsedItem(string name, int line, int column) {
@@ -19,6 +19,13 @@ namespace _3PA.MainFeatures.Parser {
             Line = line;
             Column = column;
         }
+    }
+
+    public enum ParsedScope {
+        Global,
+        Procedure,
+        Function,
+        Trigger
     }
 
     /// <summary>
@@ -73,6 +80,7 @@ namespace _3PA.MainFeatures.Parser {
             LcName = lcName;
         }
     }
+
 
     /// <summary>
     /// Procedure parsed item
@@ -146,13 +154,6 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public enum ParseScope {
-        Global,
-        Procedure,
-        Function,
-        Trigger
-    }
-
     public class ParseDefineTypeAttr : Extensions.EnumAttr {
         public string Value { get; set; }
     }
@@ -199,6 +200,23 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
+    /// data base parsed item
+    /// </summary>
+    public class ParsedDataBase {
+        public string LogicalName { get; private set; }
+        public string PhysicalName { get; private set; }
+        public string ProgressVersion { get; private set; }
+        public List<ParsedTable> Tables { get; private set; }
+
+        public ParsedDataBase(string logicalName, string physicalName, string progressVersion, List<ParsedTable> tables) {
+            LogicalName = logicalName;
+            PhysicalName = physicalName;
+            ProgressVersion = progressVersion;
+            Tables = tables;
+        }
+    }
+
+    /// <summary>
     /// Table or temp table parsed item
     /// </summary>
     public class ParsedTable : ParsedItem {
@@ -238,12 +256,12 @@ namespace _3PA.MainFeatures.Parser {
         public string Type { get;  set; }    
         public string Format { get;  set; }
         public int Order { get;  set; }
-        public ParseFieldFlag Flag { get;  set; }
+        public ParsedFieldFlag Flag { get;  set; }
         public string InitialValue { get;  set; }
         public string Description { get;  set; }
         public string AsLike { get;  set; }
         public int Ranking { get;  set; }
-        public ParsedField(string name, string type, string format, int order, ParseFieldFlag flag, string initialValue, string description, string asLike, int ranking) {
+        public ParsedField(string name, string type, string format, int order, ParsedFieldFlag flag, string initialValue, string description, string asLike, int ranking) {
             Name = name;
             Type = type;
             Format = format;
@@ -257,12 +275,12 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     [Flags]
-    public enum ParseFieldFlag {
-        Mandatory = 1,
+    public enum ParsedFieldFlag {
+        None = 1,
         Extent = 2,
         Index = 4,
         Primary = 8,
-        None = 16
+        Mandatory = 16
     }
 
     /// <summary>
@@ -270,9 +288,9 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class ParsedIndex {
         public string Name { get; private set; }
-        public ParseIndexFlag Flag { get; private set; }
+        public ParsedIndexFlag Flag { get; private set; }
         public List<string> FieldsList { get; private set; }
-        public ParsedIndex(string name, ParseIndexFlag flag, List<string> fieldsList) {
+        public ParsedIndex(string name, ParsedIndexFlag flag, List<string> fieldsList) {
             Name = name;
             Flag = flag;
             FieldsList = fieldsList;
@@ -280,9 +298,10 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     [Flags]
-    public enum ParseIndexFlag {
-        Primary = 1,
+    public enum ParsedIndexFlag {
+        None = 1,
         Unique = 2,
+        Primary = 4,
     }
 
     /// <summary>

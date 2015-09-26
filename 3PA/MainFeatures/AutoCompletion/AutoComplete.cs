@@ -34,6 +34,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // and therefore as to be reloaded into the list
         private static bool _needToUpdateItemsInTheList;
 
+        // holds the display order of the CompletionType
+        private static List<int> _completionTypePriority;
+
+        /// <summary>
+        /// returns the ranking of each CompletionType, helps sorting them as we wish
+        /// </summary>
+        public static List<int> GetPriorityList  {
+            get {
+                if (_completionTypePriority != null) return _completionTypePriority;
+                _completionTypePriority = new List<int>();
+                var temp = Config.Instance.AutoCompletePriorityList.Split(',').Select(int.Parse).ToList();
+                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++) {
+                    _completionTypePriority.Add(temp.IndexOf(i));
+                }
+                return _completionTypePriority;
+            }
+        }
+        
+
         /// <summary>
         /// this method should be called to refresh the Items list with all the static items
         /// as well as the dynamic items found by the parser
@@ -363,17 +382,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
     }
 
     #region sorting
-
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
     public class CompletionDataSortingClass : IComparer<CompletionData> {
         public int Compare(CompletionData x, CompletionData y) {
-            int compare = x.Type.CompareTo(y.Type);
-            if (compare == 0) {
-                return y.Ranking.CompareTo(x.Ranking);
-            }
-            return compare;
+            int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
+            return compare == 0 ? y.Ranking.CompareTo(x.Ranking) : compare;
         }
     }
     #endregion

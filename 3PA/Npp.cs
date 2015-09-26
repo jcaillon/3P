@@ -110,6 +110,14 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns the current file folder (uses GetDirectoryName)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentFileFolder() {
+            return Path.GetDirectoryName(GetCurrentFilePath());
+        }
+
+        /// <summary>
         /// displays the input text into a new document
         /// </summary>
         /// <param name="text"></param>

@@ -1,4 +1,5 @@
-﻿using _3PA.MainFeatures.Parser;
+﻿using System.Windows.Forms.VisualStyles;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -36,22 +37,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         public void Visit(ParsedPreProc pars) {
+            var flag = ParseFlag.IsParsedItem;
+            flag = flag | (pars.Scope == ParsedScope.Global ? ParseFlag.Global : ParseFlag.Scope);
             ParserHandler.DynamicItems.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubType = "",
-                Flag = ParseFlag.IsParsedItem,
+                Flag = flag,
                 Ranking = 0,
                 ParsedItem = pars
             });
         }
 
         public void Visit(ParsedDefine pars) {
+            var flag = ParseFlag.IsParsedItem;
+            flag = flag | (pars.Scope == ParsedScope.Global ? ParseFlag.Global : ParseFlag.Scope);
+            if (pars.Type == ParseDefineType.Parameter) flag = flag & ParseFlag.Parameter;
             ParserHandler.DynamicItems.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.UserVariablePrimitive,
                 SubType = "",
-                Flag = ParseFlag.IsParsedItem,
+                Flag = flag,
                 Ranking = 0,
                 ParsedItem = pars
             });
