@@ -33,6 +33,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public string SubType { get; set; }
 
         public ParsedItem ParsedItem { get; set; }
+
+        /// <summary>
+        /// Indicates whether or not this completionData is created by the parser Visitor
+        /// </summary>
+        public bool FromParser { get; set; }
     }
 
     public enum CompletionType {
@@ -48,5 +53,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Preprocessed = 9,
         Keyword = 10,
         Databases = 11,
+        Widget = 12
     }
 }

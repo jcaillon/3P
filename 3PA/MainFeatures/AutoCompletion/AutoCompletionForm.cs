@@ -21,6 +21,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
     public partial class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
+        private const string StrEmptyList = "No suggestions!";
+        private const string StrItems = " items";
+
         /// <summary>
         /// The filter to apply to the autocompletion form
         /// </summary>
@@ -103,6 +106,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ImagelistAdd.AddFromImage(ImageResources.Preprocessed, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Database, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Widget, _imageListOfTypes);
             fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData) rowObject;
@@ -110,7 +114,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             };
 
             // overlay of empty list :
-            fastOLV.EmptyListMsg = "No suggestions!";
+            fastOLV.EmptyListMsg = StrEmptyList;
             TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
             if (textOverlay != null) {
                 textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalForeColor;
@@ -148,44 +152,36 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            int offset = 0;
-            CompletionData data = (CompletionData) args.Model;
-            if (data.Flag.HasFlag(ParseFlag.Global)) {
-                ImageDecoration decoration = new ImageDecoration(ImageResources.global, 70, ContentAlignment.MiddleRight);
-                decoration.Offset = new Size(offset, 0);
-                args.SubItem.Decorations.Add(decoration);
-                offset -= 20;
+            CompletionData data = (CompletionData)args.Model;
+            int offset = -5;
+            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                if (flag == ParseFlag.None) continue;
+                if (data.Flag.HasFlag(flag)) {
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    if (tryImg == null) continue;
+                    ImageDecoration decoration = new ImageDecoration(tryImg, ContentAlignment.MiddleRight);
+                    decoration.Offset = new Size(offset, 0);
+                    if (args.SubItem.Decoration == null)
+                        args.SubItem.Decoration = decoration;
+                    else
+                        args.SubItem.Decorations.Add(decoration);
+                    offset -= 20;
+                }
             }
-            if (data.Flag.HasFlag(ParseFlag.Reserved)) {
-                ImageDecoration decoration = new ImageDecoration(ImageResources.Reserved, 70, ContentAlignment.MiddleRight);
+            if (offset < -5) offset -= 5; 
+            if (!string.IsNullOrEmpty(data.SubType)) {
+                TextDecoration decoration = new TextDecoration(data.SubType, 95);
+                decoration.Alignment = ContentAlignment.MiddleRight;
                 decoration.Offset = new Size(offset, 0);
+                decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
+                decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                decoration.CornerRounding = 1f;
+                decoration.Rotation = 0;
+                decoration.BorderWidth = 1;
+                decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
                 args.SubItem.Decorations.Add(decoration);
-                offset -= 20;
             }
-            if (data.Flag.HasFlag(ParseFlag.Scope)) {
-                ImageDecoration decoration = new ImageDecoration(ImageResources.scope, 70, ContentAlignment.MiddleRight);
-                decoration.Offset = new Size(offset, 0);
-                args.SubItem.Decorations.Add(decoration);
-                offset -= 20;
-            }
-            if (data.Flag.HasFlag(ParseFlag.Parameter)) {
-                ImageDecoration decoration = new ImageDecoration(ImageResources.Parameter, 70, ContentAlignment.MiddleRight);
-                decoration.Offset = new Size(offset, 0);
-                args.SubItem.Decorations.Add(decoration);
-                offset -= 20;
-            }
-            //if (data.Flag.HasFlag(ParseFlag.None)) {
-            //    TextDecoration decoration = new TextDecoration("R", 100);
-            //    decoration.Alignment = ContentAlignment.MiddleRight;
-            //    decoration.Offset = new Size(-5, 0);
-            //    decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
-            //    decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-            //    decoration.CornerRounding = 1f;
-            //    decoration.Rotation = 0;
-            //    decoration.BorderWidth = 1;
-            //    decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-            //    args.SubItem.Decoration = decoration; //NB. Sets Decoration
-            //}
         }
 
         #endregion
@@ -198,6 +194,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="objectsList"></param>
         public void SetItems(List<CompletionData> objectsList) {
+            objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
 
             // set the default height / width
@@ -240,9 +237,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // label for the number of items
             TotalItems = objectsList.Count;
-            nbitems.Text = TotalItems + " items";
+            nbitems.Text = TotalItems + StrItems;
 
             fastOLV.SetObjects(objectsList);
+        }
+
+        /// <summary>
+        /// Call this method before showing the list when you don't use SetItems to sort the
+        /// items (it is already called by SetItems())
+        /// </summary>
+        public void SortItems() {
+            _initialObjectsList.Sort(new CompletionDataSortingClass());
+            fastOLV.SetObjects(_initialObjectsList);
         }
 
         /// <summary>
@@ -439,7 +445,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // update total items
             TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
-            nbitems.Text = TotalItems + " items";
+            nbitems.Text = TotalItems + StrItems;
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
@@ -462,10 +468,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // and for the current scope
             return compData.DisplayText.ToLower().FullyMatchFilter(_filterString) && 
                 _activeTypes[compData.Type].Activated &&
-                (!compData.Flag.HasFlag(ParseFlag.IsParsedItem) || compData.ParsedItem.Scope == ParsedScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
+                (!compData.FromParser || compData.ParsedItem.Scope == ParsedScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
         }
         #endregion
     }
+
+    #region sorting
+    /// <summary>
+    /// Class used in objectlist.Sort method
+    /// </summary>
+    public class CompletionDataSortingClass : IComparer<CompletionData> {
+        public int Compare(CompletionData x, CompletionData y) {
+            int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
+            return compare == 0 ? y.Ranking.CompareTo(x.Ranking) : compare;
+        }
+    }
+    #endregion
 
     #region SelectorButtons
     public class SelectorButton : YamuiButton {

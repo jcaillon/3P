@@ -31,12 +31,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _keywords.Clear();
             try {
                 foreach (var items in File.ReadAllLines(_filePath).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
+                    var flag = (items[2] == "1") ? ParseFlag.Reserved : ParseFlag.None;
+                    if (items[1].Equals("abbreviation")) flag = flag | ParseFlag.Abbreviation;
                     _keywords.Add(new CompletionData {
                         DisplayText = items[0],
                         Type = CompletionType.Keyword,
                         Ranking = int.Parse(items[3]),
                         SubType = items[1],
-                        Flag = (items[2] == "1") ? ParseFlag.Reserved : ParseFlag.None
+                        Flag = flag
                     });
                 }
             } catch (Exception e) {
@@ -49,7 +51,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 foreach (var items in File.ReadAllLines(filePathAbb).Select(line => line.Split('\t')).Where(items => items.Count() == 2)) {
                     _abbreviations.Add(new KeywordsAbbreviations() {
-                        DisplayText = items[1],
+                        CompleteText = items[1],
                         ShortText = items[0]
                     });
                 }
@@ -72,8 +74,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// returns the list of keywords
         /// </summary>
-        public static List<CompletionData> Get {
-            get { return _keywords; }
+        public static List<CompletionData> GetList() {
+            return _keywords;
         }
 
         /// <summary>
@@ -95,10 +97,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (x != null) x.Ranking++;
         }
 
+        /// <summary>
+        /// returns the complete keyword for the given abbreviation
+        /// </summary>
+        /// <param name="abbreviation"></param>
+        /// <returns></returns>
+        public static string GetFullKeyword(string abbreviation) {
+            var found = _abbreviations.Find(abbreviations => 
+                abbreviations.CompleteText.ContainsFast(abbreviation) &&
+                abbreviation.ContainsFast(abbreviations.ShortText)
+                );
+            return found != null ? found.CompleteText : abbreviation;
+        }
     }
 
     public class KeywordsAbbreviations {
-        public string DisplayText;
+        public string CompleteText;
         public string ShortText;
     }
 }

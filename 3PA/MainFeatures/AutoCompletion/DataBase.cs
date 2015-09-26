@@ -13,7 +13,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static string _location = Npp.GetConfigDir();
         private static string _fileName = "database_out.txt";
 
+        /// <summary>
+        /// Should be called to extract the database info from the current environnement database_out file
+        /// if the database_out file doesn't exists, start a progress program to extract it
+        /// </summary>
         public static void FetchCurrentDbInfo() {
+            //TODO
             //_filePath = Path.Combine(_location, _fileName);
             Read();
         }
@@ -56,7 +61,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 "", 0, false,
                                 new List<ParsedField>(),
                                 new List<ParsedIndex>(),
-                                new List<ParsedTrigger>());
+                                new List<ParsedTrigger>()
+                                , "");
                             currentDb.Tables.Add(currentTable);
                             break;
                         case 'X':
@@ -86,7 +92,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
                             if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
                             if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
-                            currentTable.Fields.Add(new ParsedField(
+                            var curField = new ParsedField(
                                 splitted[2],
                                 splitted[3],
                                 splitted[4],
@@ -94,7 +100,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 flag2,
                                 splitted[10],
                                 splitted[11],
-                                "", 0));
+                                "", 0);
+                            curField.Type = AutoCompParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempType, false);
+                            currentTable.Fields.Add(curField);
                             break;
                     }
                 }
@@ -104,41 +112,84 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// returns the list of keywords
+        /// Exposes the databases info
+        /// </summary>
+        /// <returns></returns>
+        public static List<ParsedDataBase> Get() {
+            return _dataBases;
+        }
+
+        /// <summary>
+        /// returns the list of databases
         /// </summary>
         public static List<CompletionData> GetDbList() {
+            if (_dataBases.Count <= 0) return new List<CompletionData>();
             return _dataBases.Select(@base => new CompletionData() {
-                DisplayText = @base.LogicalName
+                DisplayText = @base.LogicalName,
+                Type = CompletionType.Databases,
+                FromParser = false,
+                Ranking = ParserHandler.FindRankingOfStatic(@base.LogicalName),
+                Flag = ParseFlag.None
             }).ToList();
         }
 
-        /*
-
         /// <summary>
-        /// returns the list of keywords
+        /// returns the list tables of each database
         /// </summary>
-        public static List<CompletionData> Get {
-            get { return _keywords; }
-        }
-
-        /// <summary>
-        /// Is the keyword known to the plugin?
-        /// </summary>
-        /// <param name="keyword"></param>
         /// <returns></returns>
-        public static bool Contains(string keyword) {
-            var x = _keywords.Find(data => data.DisplayText.EqualsCi(keyword));
-            return x != null;
+        public static List<CompletionData> GetTablesList() {
+            var output = new List<CompletionData>();
+            foreach (var dataBase in _dataBases.Where(dataBase => dataBase.Tables != null && dataBase.Tables.Count > 0)) {
+                output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
+                    DisplayText = table.Name,
+                    Type = CompletionType.Table,
+                    FromParser = false,
+                    Ranking = ParserHandler.FindRankingOfStatic(table.Name),
+                    Flag = ParseFlag.None
+                }).ToList());
+            }
+            return output;
         }
 
         /// <summary>
-        /// increase ranking of input keyword
+        /// Returns the list of fields for a given table
         /// </summary>
-        /// <param name="keyword"></param>
-        public static void RemberUseOf(string keyword) {
-            var x = _keywords.Find(data => data.DisplayText == keyword);
-            if (x != null) x.Ranking++;
+        /// <param name="table"></param>
+        /// <returns></returns>
+        public static List<CompletionData> GetFieldsList(ParsedTable table) {
+            var output = new List<CompletionData>();
+            if (table == null) return output;
+            output.AddRange(table.Fields.Select(field => new CompletionData() {
+                DisplayText = field.Name,
+                Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field, 
+                FromParser = false,
+                SubType = field.Type.ToString(),
+                Ranking = ParserHandler.FindRankingOfStatic(field.Name),
+                Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : ParseFlag.None) |
+                    (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : ParseFlag.None) |
+                    (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : ParseFlag.None)
+            }));
+            return output;
         }
-         * */
+
+        public static ParsedDataBase FindDatabaseByName(string name) {
+            return _dataBases.Find(@base => @base.LogicalName.EqualsCi(name));
+        }
+
+        public static ParsedTable FindTableByName(string name, ParsedDataBase db) {
+            return db.Tables.Find(table => table.Name.EqualsCi(name));
+        }
+
+        public static ParsedTable FindTableByName(string name) {
+            return _dataBases.Select(dataBase => FindTableByName(name, dataBase)).FirstOrDefault(found => found != null);
+        }
+
+        public static ParsedField FindFieldByName(string name, ParsedTable table) {
+            return table.Fields.Find(field => field.Name.EqualsCi(name));
+        }
+
+        public static ParsedField FindFieldByName(string name) {
+            return (from dataBase in _dataBases where dataBase.Tables != null from table in dataBase.Tables select FindFieldByName(name, table)).FirstOrDefault(found => found != null);
+        }
     }
 }

@@ -2069,78 +2069,325 @@ _UIB-CODE-BLOCK	appbuilder	0	0
 _UIB-PREPROCESSOR-BLOCK	appbuilder	0	0
 _VERSION-NUMBER	appbuilder	0	0
 _XFTR	appbuilder	0	0
-CLOSE QUERY  	statement	0	0
-CLOSE STORED-PROCEDURE  	statement	0	0
-CREATE ALIAS  	statement	0	0
-CREATE BROWSE  	statement	0	0
-CREATE BUFFER  	statement	0	0
-CREATE CALL  	statement	0	0
-CREATE CLIENT-PRINCIPAL  	statement	0	0
-CREATE DATABASE  	statement	0	0
-CREATE DATASET  	statement	0	0
-CREATE DATA-SOURCE  	statement	0	0
-CREATE QUERY  	statement	0	0
-CREATE SAX-ATTRIBUTES  	statement	0	0
-CREATE SAX-READER  	statement	0	0
-CREATE SAX-WRITER  	statement	0	0
-CREATE SERVER  	statement	0	0
-CREATE SERVER-SOCKET  	statement	0	0
-CREATE SOAP-HEADER  	statement	0	0
-CREATE SOAP-HEADER-ENTRYREF  	statement	0	0
-CREATE SOCKET  	statement	0	0
-CREATE TEMP-TABLE  	statement	0	0
-CREATE WIDGET-POOL  	statement	0	0
-CREATE X-DOCUMENT  	statement	0	0
-CREATE X-NODEREF  	statement	0	0
-DDE ADVISE  	statement	0	0
-DDE EXECUTE  	statement	0	0
-DDE GET  	statement	0	0
-DDE INITIATE  	statement	0	0
-DDE REQUEST  	statement	0	0
-DDE SEND  	statement	0	0
-DDE TERMINATE  	statement	0	0
-DEFINE BROWSE  	statement	0	0
-DEFINE BUFFER  	statement	0	0
-DEFINE BUTTON  	statement	0	0
-DEFINE DATASET  	statement	0	0
-DEFINE DATA-SOURCE  	statement	0	0
-DEFINE EVENT  	statement	0	0
-DEFINE FRAME  	statement	0	0
-DEFINE IMAGE  	statement	0	0
-DEFINE MENU  	statement	0	0
-DEFINE PARAMETER  	statement	0	0
-DEFINE PROPERTY  	statement	0	0
-DEFINE QUERY  	statement	0	0
-DEFINE RECTANGLE  	statement	0	0
-DEFINE STREAM  	statement	0	0
-DEFINE SUB-MENU  	statement	0	0
-DEFINE TEMP-TABLE  	statement	0	0
-DEFINE VARIABLE  	statement	0	0
-DEFINE WORK-TABLE  	statement	0	0
-DEFINE WORKFILE  	statement	0	0
-DELETE OBJECT  	statement	0	0
-DELETE PROCEDURE  	statement	0	0
-DELETE WIDGET  	statement	0	0
-DELETE WIDGET-POOL  	statement	0	0
-EMPTY TEMP-TABLE  	statement	0	0
-INPUT CLOSE  	statement	0	0
-INPUT FROM  	statement	0	0
-INPUT THROUGH  	statement	0	0
-INPUT-OUTPUT CLOSE  	statement	0	0
-INPUT-OUTPUT THROUGH  	statement	0	0
-NOT ENTERED  	function	0	0
-ON ERROR  	option	0	0
-ON QUIT  	option	0	0
-OPEN QUERY  	statement	0	0
-OUTPUT THROUGH  	statement	0	0
-OUTPUT TO  	statement	0	0
-PROCESS EVENTS  	statement	0	0
-PUT SCREEN  	statement	0	0
-RELEASE OBJECT  	statement	0	0
-RUN SUPER  	statement	0	0
-SAVE CACHE  	statement	0	0
-SYSTEM-DIALOG COLOR  	statement	0	0
-SYSTEM-DIALOG FONT  	statement	0	0
-SYSTEM-DIALOG GET-DIR  	statement	0	0
-SYSTEM-DIALOG GET-FILE  	statement	0	0
-SYSTEM-DIALOG PRINTER-SETUP  	statement	0	0
+CLOSE QUERY	statement	0	0
+CLOSE STORED-PROCEDURE	statement	0	0
+CREATE ALIAS	statement	0	0
+CREATE BROWSE	statement	0	0
+CREATE BUFFER	statement	0	0
+CREATE CALL	statement	0	0
+CREATE CLIENT-PRINCIPAL	statement	0	0
+CREATE DATABASE	statement	0	0
+CREATE DATASET	statement	0	0
+CREATE DATA-SOURCE	statement	0	0
+CREATE QUERY	statement	0	0
+CREATE SAX-ATTRIBUTES	statement	0	0
+CREATE SAX-READER	statement	0	0
+CREATE SAX-WRITER	statement	0	0
+CREATE SERVER	statement	0	0
+CREATE SERVER-SOCKET	statement	0	0
+CREATE SOAP-HEADER	statement	0	0
+CREATE SOAP-HEADER-ENTRYREF	statement	0	0
+CREATE SOCKET	statement	0	0
+CREATE TEMP-TABLE	statement	0	0
+CREATE WIDGET-POOL	statement	0	0
+CREATE X-DOCUMENT	statement	0	0
+CREATE X-NODEREF	statement	0	0
+DDE ADVISE	statement	0	0
+DDE EXECUTE	statement	0	0
+DDE GET	statement	0	0
+DDE INITIATE	statement	0	0
+DDE REQUEST	statement	0	0
+DDE SEND	statement	0	0
+DDE TERMINATE	statement	0	0
+DEFINE BROWSE	statement	0	0
+DEFINE BUFFER	statement	0	150
+DEFINE BUTTON	statement	0	0
+DEFINE DATASET	statement	0	0
+DEFINE DATA-SOURCE	statement	0	0
+DEFINE EVENT	statement	0	0
+DEFINE FRAME	statement	0	0
+DEFINE IMAGE	statement	0	0
+DEFINE MENU	statement	0	0
+DEFINE PARAMETER	statement	0	50
+DEFINE PROPERTY	statement	0	0
+DEFINE QUERY	statement	0	0
+DEFINE RECTANGLE	statement	0	0
+DEFINE STREAM	statement	0	0
+DEFINE SUB-MENU	statement	0	0
+DEFINE TEMP-TABLE	statement	0	50
+DEFINE VARIABLE	statement	0	200
+DEFINE WORK-TABLE	statement	0	0
+DEFINE WORKFILE	statement	0	0
+DELETE OBJECT	statement	0	0
+DELETE PROCEDURE	statement	0	0
+DELETE WIDGET	statement	0	0
+DELETE WIDGET-POOL	statement	0	0
+EMPTY TEMP-TABLE	statement	0	0
+INPUT CLOSE	statement	0	0
+INPUT FROM	statement	0	0
+INPUT THROUGH	statement	0	0
+INPUT-OUTPUT CLOSE	statement	0	0
+INPUT-OUTPUT THROUGH	statement	0	0
+NOT ENTERED	function	0	0
+ON ERROR	option	0	0
+ON QUIT	option	0	0
+OPEN QUERY	statement	0	0
+OUTPUT THROUGH	statement	0	0
+OUTPUT TO	statement	0	0
+PROCESS EVENTS	statement	0	0
+PUT SCREEN	statement	0	0
+RELEASE OBJECT	statement	0	0
+RUN SUPER	statement	0	0
+SAVE CACHE	statement	0	0
+SYSTEM-DIALOG COLOR	statement	0	0
+SYSTEM-DIALOG FONT	statement	0	0
+SYSTEM-DIALOG GET-DIR	statement	0	0
+SYSTEM-DIALOG GET-FILE	statement	0	0
+SYSTEM-DIALOG PRINTER-SETUP	statement	0	0
+BYTE	type	0	0
+UNSIGNEDSHORT	type	0	0
+UNSIGNEDLONG	type	0	0
+ABS	abbreviation	0	0
+AMBIG	abbreviation	0	0
+ANALYZ	abbreviation	0	0
+APPL-ALERT	abbreviation	0	0
+ATTR	abbreviation	0	0
+AUTO-COMP	abbreviation	0	0
+AUTO-IND	abbreviation	0	0
+AUTO-RET	abbreviation	0	0
+AUTO-Z	abbreviation	0	0
+AVAIL	abbreviation	0	0
+AVE	abbreviation	0	0
+BACK	abbreviation	0	0
+BACKWARD	abbreviation	0	0
+BATCH	abbreviation	0	0
+BEFORE-H	abbreviation	0	0
+BGC	abbreviation	0	0
+BORDER-B	abbreviation	0	0
+BORDER-BOTTOM-P	abbreviation	0	0
+BORDER-L	abbreviation	0	0
+BORDER-LEFT-P	abbreviation	0	0
+BORDER-R	abbreviation	0	0
+BORDER-RIGHT-P	abbreviation	0	0
+BORDER-T	abbreviation	0	0
+BORDER-TOP-P	abbreviation	0	0
+BOX-SELECT	abbreviation	0	0
+CASE-SEN	abbreviation	0	0
+CENTER	abbreviation	0	0
+CHAR	abbreviation	0	0
+CLEAR-SELECT	abbreviation	0	0
+CLEAR-SORT-ARROW	abbreviation	0	0
+COLON-ALIGN	abbreviation	0	0
+COL	abbreviation	0	0
+COLUMN-LAB	abbreviation	0	0
+CONVERT-TO-OFFS	abbreviation	0	0
+CURRENT-ENV	abbreviation	0	0
+CURRENT-LANG	abbreviation	0	0
+CURS	abbreviation	0	0
+DATA-ENTRY-RET	abbreviation	0	0
+DATA-REL	abbreviation	0	0
+DATA-T	abbreviation	0	0
+DATE-F	abbreviation	0	0
+DBREST	abbreviation	0	0
+DBVERS	abbreviation	0	0
+DDE-I	abbreviation	0	0
+DEBU	abbreviation	0	0
+DEC	abbreviation	0	0
+DEFAUT-B	abbreviation	0	0
+DEFAULT-EX	abbreviation	0	0
+DEFAULT-NOXL	abbreviation	0	0
+DEF	abbreviation	0	0
+DEL	abbreviation	0	0
+DICT	abbreviation	0	0
+DISCON	abbreviation	0	0
+DISPLAY-T	abbreviation	0	0
+EDGE	abbreviation	0	0
+EDGE-P	abbreviation	0	0
+ERROR-COL	abbreviation	0	0
+ERROR-STAT	abbreviation	0	0
+EVENT-T	abbreviation	0	0
+EXCLUSIVE	abbreviation	0	0
+FGC	abbreviation	0	0
+FILE-OFF	abbreviation	0	0
+FIRST-PROC	abbreviation	0	0
+FIRST-TAB-I	abbreviation	0	0
+FORE	abbreviation	0	0
+FORMATTE	abbreviation	0	0
+FRAGMEN	abbreviation	0	0
+FRAM	abbreviation	0	0
+FRAME-INDE	abbreviation	0	0
+FRAME-SPA	abbreviation	0	0
+FRAME-VAL	abbreviation	0	0
+FROM-C	abbreviation	0	0
+FROM-CUR	abbreviation	0	0
+FROM-P	abbreviation	0	0
+FULL-HEIGHT	abbreviation	0	0
+FULL-HEIGHT-P	abbreviation	0	0
+FULL-PATHN	abbreviation	0	0
+FULL-WIDTH	abbreviation	0	0
+FULL-WIDTH-P	abbreviation	0	0
+GATEWAY	abbreviation	0	0
+GET-BLUE	abbreviation	0	0
+GET-FILE-OFFSE	abbreviation	0	0
+GET-GREEN	abbreviation	0	0
+GET-KEY-VAL	abbreviation	0	0
+GET-RED	abbreviation	0	0
+GET-SELECTED	abbreviation	0	0
+GET-TEXT-HEIGHT	abbreviation	0	0
+GET-TEXT-HEIGHT-P	abbreviation	0	0
+GET-TEXT-WIDTH	abbreviation	0	0
+GET-TEXT-WIDTH-P	abbreviation	0	0
+GO-PEND	abbreviation	0	0
+GRAPHIC-E	abbreviation	0	0
+GRID-FACTOR-H	abbreviation	0	0
+GRID-FACTOR-V	abbreviation	0	0
+GRID-UNIT-HEIGHT	abbreviation	0	0
+GRID-UNIT-HEIGHT-P	abbreviation	0	0
+GRID-UNIT-WIDTH	abbreviation	0	0
+GRID-UNIT-WIDTH-P	abbreviation	0	0
+HEIGHT-P	abbreviation	0	0
+HORI	abbreviation	0	0
+IMAGE-SIZE-C	abbreviation	0	0
+IMAGE-SIZE-P	abbreviation	0	0
+INFO	abbreviation	0	0
+INHERIT-BGC	abbreviation	0	0
+INHERIT-FGC	abbreviation	0	0
+INIT	abbreviation	0	0
+INPUT-O	abbreviation	0	0
+INSERT-B	abbreviation	0	0
+INSERT-T	abbreviation	0	0
+IS-ATTR	abbreviation	0	0
+IS-CLAS	abbreviation	0	0
+KEEP-FRAME-Z	abbreviation	0	0
+KEYFUNC	abbreviation	0	0
+KEY-FUNC	abbreviation	0	0
+LABEL-BGC	abbreviation	0	0
+LABEL-DC	abbreviation	0	0
+LABEL-FGC	abbreviation	0	0
+LABEL-PFC	abbreviation	0	0
+LANGUAGE	abbreviation	0	0
+LAST-EVEN	abbreviation	0	0
+LAST-PROCE	abbreviation	0	0
+LAST-TAB-I	abbreviation	0	0
+LEFT-ALIGN	abbreviation	0	0
+LINE-COUNT	abbreviation	0	0
+LISTI	abbreviation	0	0
+LOAD-MOUSE-P	abbreviation	0	0
+MARGIN-HEIGHT	abbreviation	0	0
+MARGIN-HEIGHT-P	abbreviation	0	0
+MARGIN-WIDTH	abbreviation	0	0
+MARGIN-WIDTH-P	abbreviation	0	0
+MAX-HEIGHT-C	abbreviation	0	0
+MAX-HEIGHT-P	abbreviation	0	0
+MAX-VAL	abbreviation	0	0
+MAX-WIDTH-P	abbreviation	0	0
+MENU-K	abbreviation	0	0
+MENU-M	abbreviation	0	0
+MIN-COLUMN-WIDTH-C	abbreviation	0	0
+MIN-COLUMN-WIDTH-P	abbreviation	0	0
+MIN-HEIGHT	abbreviation	0	0
+MIN-HEIGHT-P	abbreviation	0	0
+MIN-VAL	abbreviation	0	0
+MIN-WIDTH	abbreviation	0	0
+MIN-WIDTH-P	abbreviation	0	0
+MOD	abbreviation	0	0
+MOUSE-P	abbreviation	0	0
+MOVE-AFTER	abbreviation	0	0
+MOVE-BEFOR	abbreviation	0	0
+MOVE-COL	abbreviation	0	0
+MOVE-TO-B	abbreviation	0	0
+MOVE-TO-T	abbreviation	0	0
+NEXT-TAB-I	abbreviation	0	0
+NO-ATTR	abbreviation	0	0
+NO-F	abbreviation	0	0
+NO-INHERIT-BGC	abbreviation	0	0
+NO-INHERIT-FGC	abbreviation	0	0
+NO-LABEL	abbreviation	0	0
+NO-MES	abbreviation	0	0
+NO-PREFE	abbreviation	0	0
+NO-UND	abbreviation	0	0
+NO-VAL	abbreviation	0	0
+NUM-ALI	abbreviation	0	0
+NUM-BUT	abbreviation	0	0
+NUM-COL	abbreviation	0	0
+NUMERIC-F	abbreviation	0	0
+NUM-LOCKED-COL	abbreviation	0	0
+NUM-SELECTED	abbreviation	0	0
+ON-FRAME	abbreviation	0	0
+OS-DRIVE	abbreviation	0	0
+PAGE-BOT	abbreviation	0	0
+PAGE-NUM	abbreviation	0	0
+PAGE-WID	abbreviation	0	0
+PARAM	abbreviation	0	0
+PBE-HASH-ALG	abbreviation	0	0
+PERSIST	abbreviation	0	0
+PFC	abbreviation	0	0
+PIXELS-PER-COL	abbreviation	0	0
+POPUP-M	abbreviation	0	0
+POPUP-O	abbreviation	0	0
+PREPROC	abbreviation	0	0
+PRESEL	abbreviation	0	0
+PREV-TAB-I	abbreviation	0	0
+PRIVATE-D	abbreviation	0	0
+PROCE	abbreviation	0	0
+PROC-HA	abbreviation	0	0
+PROC-ST	abbreviation	0	0
+PROGRESS-S	abbreviation	0	0
+PROMPT-F	abbreviation	0	0
+PROVERS	abbreviation	0	0
+PUT-KEY-VAL	abbreviation	0	0
+RECT	abbreviation	0	0
+RESIZA	abbreviation	0	0
+RETURN-INS	abbreviation	0	0
+RETURN-TO-START-DI	abbreviation	0	0
+RETURN-VAL	abbreviation	0	0
+RETURN-ALIGN	abbreviation	0	0
+SAX-COMPLE	abbreviation	0	0
+SCREEN-VAL	abbreviation	0	0
+SCROLLBAR-H	abbreviation	0	0
+SCROLLBAR-V	abbreviation	0	0
+SCROLLED-ROW-POS	abbreviation	0	0
+SCROLL-TO-I	abbreviation	0	0
+send-sql	abbreviation	0	0
+SET-BLUE	abbreviation	0	0
+SET-GREEN	abbreviation	0	0
+SET-RED	abbreviation	0	0
+SETUSER	abbreviation	0	0
+SHARE	abbreviation	0	0
+SHOW-STAT	abbreviation	0	0
+SIDE-LABEL-H	abbreviation	0	0
+SIDE-LAB	abbreviation	0	0
+SIZE-C	abbreviation	0	0
+SIZE-P	abbreviation	0	0
+STOPPE	abbreviation	0	0
+STORED-PROC	abbreviation	0	0
+SUB-AVE	abbreviation	0	0
+SUM-MAX	abbreviation	0	0
+SUB-	abbreviation	0	0
+SUB-MIN	abbreviation	0	0
+SUBST	abbreviation	0	0
+SUBSTR	abbreviation	0	0
+SUPPRESS-W	abbreviation	0	0
+SYSTEM-ALERT	abbreviation	0	0
+TEMP-DIR	abbreviation	0	0
+TITLE-BGC	abbreviation	0	0
+TITLE-DC	abbreviation	0	0
+TITLE-FGC	abbreviation	0	0
+TITLE-FO	abbreviation	0	0
+TRUNC	abbreviation	0	0
+UNBUFF	abbreviation	0	0
+UNDERL	abbreviation	0	0
+UNFORM	abbreviation	0	0
+VAR	abbreviation	0	0
+VERT	abbreviation	0	0
+VIRTUAL-HEIGHT	abbreviation	0	0
+VIRTUAL-HEIGHT-P	abbreviation	0	0
+VIRTUAL-WIDTH	abbreviation	0	0
+VIRTUAL-WIDTH-P	abbreviation	0	0
+WIDGET-E	abbreviation	0	0
+WIDGET-L	abbreviation	0	0
+WIDTH-P	abbreviation	0	0
+WINDOW-MAXIM	abbreviation	0	0
+WINDOW-MINIM	abbreviation	0	0
+WINDOW-STA	abbreviation	0	0
+WORK-TAB	abbreviation	0	0

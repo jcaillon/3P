@@ -1,9 +1,19 @@
 ﻿using System.Collections.Generic;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
     class ParserHandler {
+        /// <summary>
+        /// This dictionnary is what is used to remember the ranking of each word for the current session
+        /// (otherwise this info is lost since we clear the DynamicList each time we parse!)
+        /// </summary>
+        public static Dictionary<string, int> DisplayTextRankingDynamic = new Dictionary<string, int>();
+
+        /// <summary>
+        /// Same as above but for static stuff (= database)
+        /// </summary>
+        public static Dictionary<string, int> DisplayTextRankingStatic = new Dictionary<string, int>();
+
         /// <summary>
         /// contains the list of items that depend on the current file, that list
         /// is updated by the parser's visitor class
@@ -46,6 +56,48 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _ablParser.Accept(new AutoCompParserVisitor());
             }
 
+        }
+
+        /// <summary>
+        /// Find ranking of a dynamic item
+        /// </summary>
+        /// <param name="displayText"></param>
+        /// <returns></returns>
+        public static int FindRankingOfDynamic(string displayText) {
+            return DisplayTextRankingDynamic.ContainsKey(displayText) ? DisplayTextRankingDynamic[displayText] : 0;
+        }
+
+        /// <summary>
+        /// Find ranking of a static item
+        /// </summary>
+        /// <param name="displayText"></param>
+        /// <returns></returns>
+        public static int FindRankingOfStatic(string displayText) {
+            return DisplayTextRankingStatic.ContainsKey(displayText) ? DisplayTextRankingStatic[displayText] : 0;
+        }
+
+        /// <summary>
+        /// remember the use of a particular item in the completion list
+        /// (for dynamic items = parsed items)
+        /// </summary>
+        /// <param name="displayText"></param>
+        public static void RememberUseOfDynamic(string displayText) {
+            if (!DisplayTextRankingDynamic.ContainsKey(displayText))
+                DisplayTextRankingDynamic.Add(displayText, 1);
+            else
+                DisplayTextRankingDynamic[displayText]++;
+        }
+
+        /// <summary>
+        /// remember the use of a particular item in the completion list
+        /// (for database items!)
+        /// </summary>
+        /// <param name="displayText"></param>
+        public static void RememberUseOfStatic(string displayText) {
+            if (!DisplayTextRankingStatic.ContainsKey(displayText))
+                DisplayTextRankingStatic.Add(displayText, 1);
+            else
+                DisplayTextRankingStatic[displayText]++;
         }
 
     }

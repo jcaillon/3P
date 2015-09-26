@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -70,9 +71,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // we had the dynamic items to the list
             _savedAllItems.AddRange(ParserHandler.DynamicItems);
 
-            // we do the sorting (by type and then by ranking)
-            _savedAllItems.Sort(new CompletionDataSortingClass());
-
             // update autocompletion
             _currentItems = _savedAllItems;
             if (_form != null && _showingAllItems)
@@ -89,13 +87,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // creates the static items list
             if (_staticItems == null) _staticItems = new List<CompletionData>();
             _staticItems.Clear();
-            _staticItems = GetListOf(CompletionType.Keyword).ToList();
-            _staticItems.AddRange(GetListOf(CompletionType.Snippet));
-            _staticItems.AddRange(GetListOf(CompletionType.Table));
-            _currentItems = _staticItems;
+            _staticItems =Keywords.GetList().ToList();
+            _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
+                DisplayText = x, 
+                Type = CompletionType.Snippet,
+                Ranking = 0,
+                FromParser = false,
+                Flag = ParseFlag.None
+            }).ToList());
+            _staticItems.AddRange(DataBase.GetDbList());
+            _staticItems.AddRange(DataBase.GetTablesList());
 
-            // we do the sorting (by type and then by ranking)
+            // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(new CompletionDataSortingClass());
+            _currentItems = _staticItems;
 
             if (_savedAllItems == null) {
                 _savedAllItems = new List<CompletionData>();
@@ -112,7 +117,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static void SwapToFieldsItems() {
             _showingAllItems = false;
-            var fieldsItems = GetListOf(CompletionType.Field, Npp.GetCurrentTable());
+            var fieldsItems = DataBase.GetFieldsList(DataBase.FindTableByName(Npp.GetCurrentTable()));
             _currentItems = fieldsItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
@@ -129,26 +134,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_form != null)
                 _form.SetItems(_currentItems);
             _needToUpdateItemsInTheList = true;
-        }
-
-        /// <summary>
-        /// return a list of CompletionData object to be used in the autocompletion list
-        /// </summary>
-        /// <param name="compType"></param>
-        /// <param name="tableName">Used only when compType is Field</param>
-        /// <returns></returns>
-        private static List<CompletionData> GetListOf(CompletionType compType, string tableName = "") {
-            switch (compType) {
-                case CompletionType.Keyword:
-                    return Keywords.Get;
-                case CompletionType.Table:
-                    return DataBaseInfo.KeysTable.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Table }).ToList();
-                case CompletionType.Field:
-                    return DataBaseInfo.KeysField(tableName).Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Field }).ToList();
-                case CompletionType.Snippet:
-                    return Snippets.Keys.Select(x => new CompletionData { DisplayText = x, Type = CompletionType.Snippet }).ToList();
-            }
-            return null;
         }
 
         /// <summary>
@@ -193,31 +178,38 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             Close();
                     }
                 } else {
-                    if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition())) {
-                        // are we entering a field or a normal keyword?
-                        if (Npp.WeAreEnteringAField() && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
-                            ShowFieldsSuggestions(false);
-                        else
-                            ShowCompleteSuggestionList(false);
-                    }
+                    if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition()))
+                        ShowCompleteSuggestionList(false);
                 }
             } else {
                 Close();
             }
         }
 
+        /// <summary>
+        /// Called from CTRL + Space shortcut
+        /// </summary>
         public static void ShowCompleteSuggestionList() {
             ShowCompleteSuggestionList(true);
         }
 
         public static void ShowCompleteSuggestionList(bool displayFromShortCut) {
             try {
-                if (Npp.WeAreEnteringAField() && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
-                    ShowFieldsSuggestions(displayFromShortCut);
-                else {
-                    if (!_showingAllItems) ResetToCompleteItems();
-                    ShowSuggestionList(displayFromShortCut);
+                //TODO: look if we are entering a table SAC.?
+                if (Npp.WeAreEnteringAField()) {
+                    var foundTable = DataBase.FindTableByName(Npp.GetCurrentTable());
+                    if (foundTable != null) {
+                        SwapToFieldsItems();
+                        // show the list but only activate fields by default
+                        ShowSuggestionList(displayFromShortCut, new List<CompletionType> {
+                            CompletionType.FieldPk, 
+                            CompletionType.Field
+                        });
+                        return;
+                    }
                 }
+                if (!_showingAllItems) ResetToCompleteItems();
+                ShowSuggestionList(displayFromShortCut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
             }
@@ -235,7 +227,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void ShowFieldsSuggestions(bool displayFromShortCut) {
             try {
                 SwapToFieldsItems();
-                ShowSuggestionList(displayFromShortCut, new List<CompletionType> { CompletionType.FieldPk, CompletionType.Field });
+                // show the list but only activate field by default
+                ShowSuggestionList(displayFromShortCut, new List<CompletionType> {
+                    CompletionType.FieldPk, 
+                    CompletionType.Field
+                });
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowFieldsSuggestions");
             }
@@ -269,8 +265,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetItems(_currentItems);
             } else if (_needToUpdateItemsInTheList) {
+                // Otherwise, if needed set the new list of items
                 _form.SetItems(_currentItems);
                 _needToUpdateItemsInTheList = false;
+            } else {
+                // else, just sort the items, to reflect the latest ranking
+                _form.SortItems();
             }
 
             // update position (and alternate color config)
@@ -317,18 +317,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         keywordPos.Y = curPos;
                     }
 
+                    //TODO config to replace all abbrev by complete word
+
                     Npp.BeginUndoAction();
                     Npp.ReplaceKeyword(data.DisplayText, keywordPos);
                     Npp.EndUndoAction();
 
-                    if (data.Type == CompletionType.Keyword)
-                        Keywords.RemberUseOf(data.DisplayText);
-
-                    if (data.Type == CompletionType.Table)
-                        DataBaseInfo.RememberUseOfTable(data.DisplayText);
-
-                    if (data.Type == CompletionType.Field)
-                        DataBaseInfo.RememberUseOfField(Npp.GetCurrentTable(), data.DisplayText);
+                    // Remember this item to show it higher in the list later
+                    data.Ranking++;
+                    if (data.FromParser)
+                        ParserHandler.RememberUseOfDynamic(data.DisplayText);
+                    else
+                        ParserHandler.RememberUseOfStatic(data.DisplayText);
 
                     if (data.Type == CompletionType.Snippet)
                         Snippets.TriggerCodeSnippetInsertion();
@@ -380,16 +380,4 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return IsVisible && _form.OnKeyDown(key);
         }
     }
-
-    #region sorting
-    /// <summary>
-    /// Class used in objectlist.Sort method
-    /// </summary>
-    public class CompletionDataSortingClass : IComparer<CompletionData> {
-        public int Compare(CompletionData x, CompletionData y) {
-            int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
-            return compare == 0 ? y.Ranking.CompareTo(x.Ranking) : compare;
-        }
-    }
-    #endregion
 }

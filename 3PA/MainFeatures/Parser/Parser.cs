@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
@@ -51,6 +52,13 @@ namespace _3PA.MainFeatures.Parser {
         /// dictionnay of *line, line info*
         /// </summary>
         public Dictionary<int, LineInfo> GetLineInfo { get { return _lineInfo; } }
+
+        private bool _lastTokenWasSpace;
+
+        /// <summary>
+        /// Useful to remember where the function prototype was defined (Point is line, column)
+        /// </summary>
+        private Dictionary<string, Point> _functionPrototype = new Dictionary<string, Point>();
 
         /// <summary>
         /// Parses a text into a list of parsedItems
@@ -150,6 +158,7 @@ namespace _3PA.MainFeatures.Parser {
                                 _increaseDepthAtNextStatement = true;
                             }
                             break;
+                        case "def":
                         case "define":
                             // add a one time indent after a then or else
                             CreateParsedDefine(token);
@@ -251,6 +260,23 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
+        /// Append a token value to the StringBuilder, avoid adding too much spaces and new lines
+        /// </summary>
+        /// <param name="strBuilder"></param>
+        /// <param name="token"></param>
+        private void AddTokenToStringBuilder(StringBuilder strBuilder, Token token) {
+            if ((token is TokenEol || token is TokenWhiteSpace)) {
+                if (!_lastTokenWasSpace) {
+                    _lastTokenWasSpace = true;
+                    strBuilder.Append(" ");
+                }
+            } else {
+                _lastTokenWasSpace = false;
+                strBuilder.Append(token.Value);
+            }
+        }
+
+        /// <summary>
         /// Creates parsed item for ON CHOOSE OF XXX events
         /// (choose or anything else)
         /// </summary>
@@ -317,6 +343,8 @@ namespace _3PA.MainFeatures.Parser {
             string asLike = "";
             ParseDefineType type = ParseDefineType.None;
             string primitiveType = "";
+            string viewAs = "";
+            _lastTokenWasSpace = true;
             StringBuilder left = new StringBuilder();
             StringBuilder strFlags = new StringBuilder();
 
@@ -412,7 +440,7 @@ namespace _3PA.MainFeatures.Parser {
                                 case "table-handle":
                                 case "dataset":
                                 case "dataset-handle":
-                                    primitiveType = name;
+                                    primitiveType = lowerToken;
                                     state = 30;
                                     break;
                                 default:
@@ -437,6 +465,19 @@ namespace _3PA.MainFeatures.Parser {
                         // define variable : match a primitive type or a field in db
                         if (!(token is TokenWord)) break;
                         primitiveType = token.Value;
+                        state = 12;
+                        break;
+                    case 12:
+                        // define variable : match a view-as
+                        AddTokenToStringBuilder(left, token);
+                        if (!(token is TokenWord)) break;
+                        if (token.Value.ToLower().Equals("view-as")) state = 13;
+                        break;
+                    case 13:
+                        // define variable : match a view-as
+                        AddTokenToStringBuilder(left, token);
+                        if (!(token is TokenWord)) break;
+                        viewAs = token.Value;
                         state = 99;
                         break;
 
@@ -458,7 +499,7 @@ namespace _3PA.MainFeatures.Parser {
                         // ReSharper disable once RedundantAssignment
                         matchedLikeTable = true;
                         if (!(token is TokenWord)) break;
-                        asLike = token.Value;
+                        asLike = token.Value.ToLower();
                         state = 20;
                         break;
                     case 22:
@@ -470,13 +511,13 @@ namespace _3PA.MainFeatures.Parser {
                     case 23:
                         // define temp-table : matches a FIELD AS or LIKE
                         if (!(token is TokenWord)) break;
-                        currentField.AsLike = token.Value;
+                        currentField.LcAsLike = token.Value.ToLower();
                         state = 24;
                         break;
                     case 24:
                         // define temp-table : match a primitive type or a field in db
                         if (!(token is TokenWord)) break;
-                        currentField.Type = token.Value;
+                        currentField.TempType = token.Value;
                         // push the field to the fields list
                         fields.Add(currentField);
                         state = 20;
@@ -506,15 +547,15 @@ namespace _3PA.MainFeatures.Parser {
 
                     case 99:
                         // matching the rest of the define
-                        left.Append((token is TokenEol || token is TokenWhiteSpace) ? " " : token.Value);
+                        AddTokenToStringBuilder(left, token);
                         break;
                 }
             } while (MoveNext());
             if (state <= 1) return;
             if (isTempTable)
-                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>()));
+                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString()));
             else
-                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType));
+                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType, viewAs));
         }
 
         /// <summary>
@@ -573,6 +614,7 @@ namespace _3PA.MainFeatures.Parser {
         private bool CreateParsedProcedure(Token procToken) {
             // info we will extract from the current statement :
             string name = "";
+            _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
 
             int state = 0;
@@ -590,10 +632,10 @@ namespace _3PA.MainFeatures.Parser {
                     state++;
                     continue;
                 }
-                leftStr.Append(token.Value);
+                AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
             if (state != 1) return false;
-            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, name.ToLower(), leftStr.ToString()));
+            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), name.ToLower()));
             _context.Scope = ParsedScope.Procedure;
             _context.LcOwnerName = name.ToLower();
             return true;
@@ -605,9 +647,17 @@ namespace _3PA.MainFeatures.Parser {
         private bool CreateParsedFunction(Token functionToken) {
             // info we will extract from the current statement :
             string name = "";
-            string returnType = "";
+            _lastTokenWasSpace = true;
             StringBuilder parameters = new StringBuilder();
             bool isPrivate = false;
+            ParsedFunction createdFunc = null;
+
+            // info the parameters
+            string paramName = "";
+            string paramAsLike = "";
+            string paramPrimitiveType = "";
+            string strFlags = "";
+            List<ParsedItem> parametersList = new List<ParsedItem>();
 
             int state = 0;
             do {
@@ -625,7 +675,16 @@ namespace _3PA.MainFeatures.Parser {
                         // matching return type
                         if (!(token is TokenWord)) break;
                         if (token.Value.EqualsCi("returns")) continue;
-                        returnType = token.Value;
+
+                        // create the function (returnType = token.Value)
+                        createdFunc = new ParsedFunction(name, functionToken.Line, functionToken.Column, token.Value, name.ToLower()) {
+                            FilePath = _filePathBeingParsed,
+                            Scope = _context.Scope,
+                            LcOwnerName = _context.LcOwnerName
+                        };
+                        _context.Scope = ParsedScope.Function;
+                        _context.LcOwnerName = name.ToLower();
+
                         state++;
                         break;
                     case 2:
@@ -638,25 +697,107 @@ namespace _3PA.MainFeatures.Parser {
                         if (token.Value.Equals("(")) state++;
                         break;
                     case 3:
-                        // matching parameters (content)
+                        // matching parameters type
                         if (token is TokenSymbol && token.Value.Equals(")")) {
-                            state++;
+                            state = 99;
                             break;
                         }
-                        parameters.Append(token.Value);
+                        AddTokenToStringBuilder(parameters, token);
+
+                        var lwToken = token.Value.ToLower();
+                        switch (lwToken) {
+                            case "input":
+                            case "output":
+                            case "input-output":
+                                // flags found before the type in case of a define parameter
+                                strFlags = lwToken;
+                                state++;
+                                break;
+                        }
                         break;
                     case 4:
+                        // matching parameters name
+                        if (token is TokenSymbol && token.Value.Equals(")")) {
+                            state = 99;
+                            break;
+                        }
+                        AddTokenToStringBuilder(parameters, token);
+
+                        if (!(token is TokenWord)) break;
+                        paramName = token.Value;
+                        state++;
+                        break;
+                    case 5:
+                        // matching parameters as or like
+                        if (token is TokenSymbol && token.Value.Equals(")")) {
+                            state = 99;
+                            break;
+                        }
+                        AddTokenToStringBuilder(parameters, token);
+
+                        if (!(token is TokenWord)) break;
+                        var lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("as") || lowerToken.Equals("like")) state++;
+                        if (state != 5) paramAsLike = lowerToken;
+                        break;
+                    case 6:
+                        // matching parameters primitive type or a field in db
+                        if (token is TokenSymbol && token.Value.Equals(")")) {
+                            state = 99;
+                            break;
+                        }
+                        AddTokenToStringBuilder(parameters, token);
+
+                        if (!(token is TokenWord)) break;
+                        paramPrimitiveType = token.Value;
+                        state++;
+                        break;
+                    case 7:
+                        // matching parameters "," that indicates a next param
+                        if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
+                            // create a variable for this function scope
+                            parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "") {
+                                FilePath = _filePathBeingParsed,
+                                Scope = _context.Scope,
+                                LcOwnerName = _context.LcOwnerName
+                            });
+                            if (token.Value.Equals(","))
+                                state = 3;
+                            else {
+                                state = 99;
+                                break;
+                            }
+                        }
+                        AddTokenToStringBuilder(parameters, token);
+                        break;
+                    case 99:
                         // matching prototype, we dont want to create a ParsedItem for prototype
-                        if (token is TokenWord && token.Value.EqualsCi("forward")) state = 0;
+                        if (token is TokenWord && token.Value.EqualsCi("forward")) {
+                            if (!_functionPrototype.ContainsKey(name))
+                                _functionPrototype.Add(name, new Point(functionToken.Line, functionToken.Column));
+                            createdFunc = null;
+                        }
                         break;
                 }
             } while (MoveNext());
-            if (state != 4) return false;
-            AddParsedItem(new ParsedFunction(name, functionToken.Line, functionToken.Column, name.ToLower(), returnType, isPrivate, parameters.ToString()));
-            _context.Scope = ParsedScope.Function;
-            _context.LcOwnerName = name.ToLower();
+            if (createdFunc == null) return false;
+
+            // complete the info on the function and add it to the parsed list
+            createdFunc.IsPrivate = isPrivate;
+            createdFunc.Parameters = parameters.ToString();
+            if (_functionPrototype.ContainsKey(name)) {
+                createdFunc.PrototypeLine = _functionPrototype[name].X;
+                createdFunc.PrototypeColumn = _functionPrototype[name].Y;
+            }
+            _parsedItemList.Add(createdFunc);
+
+            // add the parameters to the list
+            if (parametersList.Count > 0)
+                _parsedItemList.AddRange(parametersList);
             return true;
         }
+
+        
 
         /// <summary>
         /// matches a include file

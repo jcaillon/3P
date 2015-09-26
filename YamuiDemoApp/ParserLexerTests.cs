@@ -1,7 +1,9 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
 
 namespace YamuiDemoApp {
@@ -73,7 +75,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunction pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ReturnType + "," + pars.Parameters + "," + (pars.Flag.HasFlag(ParseFlag.Private)));
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn);
         }
 
         public void Visit(ParsedProcedure pars) {
@@ -89,15 +91,16 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedDefine pars) {
-            if (pars.Type == ParseDefineType.Parameter)
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.FlagsStr + "," + pars.Name + "," + pars.AsLike + "," + pars.PrimitiveType + "," + pars.LcOwnerName + "," + pars.Left);
+            //if (pars.Type == ParseDefineType.Parameter)
+            //if (string.IsNullOrEmpty(pars.ViewAs))
+                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.LcAsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.ViewAs + "," + pars.Left);
         }
 
         public void Visit(ParsedTable pars) {
             return;
-            Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.AsLike + "," + pars.LcOwnerName + "," + pars.AsLike + ",");
+            Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.LcOwnerName);
             foreach (var field in pars.Fields) {
-                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+                Output.Append(field.Name + "|" + field.LcAsLike + "|" + field.Type + ",");
             }
         }
     }

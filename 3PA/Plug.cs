@@ -164,7 +164,6 @@ namespace _3PA {
                     Snippets.Init();
                     Keywords.Init();
                     FileTags.Init();
-                    DataBaseInfo.Init();
                     Config.Save();
                     RegisterCssAndImages.Init();
 
@@ -232,9 +231,9 @@ namespace _3PA {
                     // only do more stuff if we are not in a string/comment/include definition 
                     if (!isNormalContext) return;
 
-                    // show suggestions on fields
-                    if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
-                        AutoComplete.ShowFieldsSuggestions(true);
+                    // show suggestions on fields (also show suggestions on table if databse!)
+                    //if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
+                    //    AutoComplete.ShowFieldsSuggestions(true);
 
                     
                     bool lastWordInDico = true;
@@ -475,6 +474,8 @@ namespace _3PA {
 
         #region tests
         static void Test() {
+            DataBase.FetchCurrentDbInfo();
+            AutoComplete.FillStaticItems();
             AutoComplete.FillItems();
             //Highlight.SetCustomStyles();
         }

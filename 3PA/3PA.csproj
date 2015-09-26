@@ -64,6 +64,11 @@
   <ItemGroup>
     <Compile Include="Abl.cs" />
     <Compile Include="Html\RegisterCssAndImages.cs" />
+    <Compile Include="Images\ImageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ImageResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\AutoCompletion\AutoCompParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
@@ -74,7 +79,6 @@
     <Compile Include="MainFeatures\SynthaxHighlighting\SynthaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
-    <Compile Include="MainFeatures\Parser\ParsedDocuments.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
     <Compile Include="MainFeatures\ProgressEnv.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
@@ -131,11 +135,6 @@
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\ShowFileTags.cs" />
-    <Compile Include="Images\ImageResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ImageResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
     <Compile Include="Interop\LocalWindowsHook.cs" />
     <Compile Include="Interop\NppPluginNETHelper.cs" />
@@ -170,7 +169,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeFormatter.cs" />
-    <Compile Include="MainFeatures\DataBaseInfo.cs" />
     <Compile Include="MainFeatures\DockableExplorer\CustomTreeRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -273,10 +271,17 @@
   <ItemGroup>
     <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Html\StyleSheet.css" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Extent.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\FileScope.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Index.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\LocalScope.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Mandatory.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Private.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Reserved.png" />
-    <Content Include="Images\AutoCompletion\CompletionFlag\scope.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Shared.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Database.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Field.png" />
     <Content Include="Images\AutoCompletion\CompletionType\FieldPk.png" />
@@ -289,6 +294,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\TempTable.png" />
     <Content Include="Images\AutoCompletion\CompletionType\UserVariableOther.png" />
     <Content Include="Images\AutoCompletion\CompletionType\UserVariablePrimitive.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\3PA.png" />
     <Content Include="Images\DockableExplorer\clear_filters.png" />
     <Content Include="Images\DockableExplorer\code.png" />

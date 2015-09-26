@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -62,6 +63,16 @@ namespace _3PA.Lib {
 
 
         #region string extensions
+        /// <summary>
+        /// Count the nb of occurrences...
+        /// </summary>
+        /// <param name="haystack"></param>
+        /// <param name="needle"></param>
+        /// <returns></returns>
+        public static int CountOccurences(this string haystack, string needle) {
+            return (haystack.Length - haystack.Replace(needle, "").Length) / needle.Length;
+        }
+
         /// <summary>
         /// returns a list of CharacterRange representing the matches found with the given filter
         /// applied to the string

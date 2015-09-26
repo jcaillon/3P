@@ -37,7 +37,7 @@ namespace _3PA.Lib {
 
 
         [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
-        public string AutoCompletePriorityList = "9,11,0,1,2,3,4,5,6,7,8,9,10";
+        public string AutoCompletePriorityList = "9,11,0,1,2,3,4,5,6,7,8,12,9,10";
 
         public bool ExplorerUseAlternateColors = false;
 
