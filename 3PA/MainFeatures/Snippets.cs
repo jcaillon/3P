@@ -134,7 +134,7 @@ namespace _3PA.MainFeatures {
         }
 
         static public void ReplaceTextAtIndicator(string text, Point indicatorRange) {
-            Npp.SetTextBetween(text, indicatorRange);
+            Npp.SetTextByRange(indicatorRange.X, indicatorRange.Y, text);
 
             //restore the indicator
             Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures {
                 string currentParamOriginalText = LocSnippetContext.CurrentParameterValue;
 
                 Npp.SetSelection(currentParam.X, currentParam.X);
-                string currentParamDetectedText = Npp.GetWordAtCursor("\t\n\r ,;'\"".ToCharArray());
+                string currentParamDetectedText = Npp.GetWordAtCursor();
 
 
                 if (currentParamOriginalText != currentParamDetectedText) {
@@ -221,7 +221,7 @@ namespace _3PA.MainFeatures {
                 .FirstOrDefault();
 
             if (caretPoint.X != caretPoint.Y) {
-                Npp.SetTextBetween("", caretPoint);
+                Npp.SetTextByRange(caretPoint.X, caretPoint.Y, "");
                 Npp.SetSelection(caretPoint.X, caretPoint.X);
             }
 

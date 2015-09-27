@@ -4,7 +4,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -69,7 +68,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParserHandler.RefreshParser();
 
             // we had the dynamic items to the list
-            _savedAllItems.AddRange(ParserHandler.DynamicItems);
+            _savedAllItems.AddRange(ParserHandler.ParsedItemsList);
 
             // update autocompletion
             _currentItems = _savedAllItems;
@@ -93,7 +92,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Type = CompletionType.Snippet,
                 Ranking = 0,
                 FromParser = false,
-                Flag = ParseFlag.None
+                Flag = 0
             }).ToList());
             _staticItems.AddRange(DataBase.GetDbList());
             _staticItems.AddRange(DataBase.GetTablesList());
@@ -112,12 +111,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
 
         /// <summary>
-        /// This method is called to switch temporarly the items of the completino form, from
+        /// This method is called to switch temporarly the items of the completion form, from
         /// a complete list to only the fields of the current table
         /// </summary>
         private static void SwapToFieldsItems() {
             _showingAllItems = false;
-            var fieldsItems = DataBase.GetFieldsList(DataBase.FindTableByName(Npp.GetCurrentTable()));
+            var fieldsItems = DataBase.GetFieldsList(ParserHandler.FindAnyTableOrBufferByName(Npp.GetCurrentTable()));
             _currentItems = fieldsItems;
             if (_form != null)
                 _form.SetItems(_currentItems);
@@ -145,11 +144,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_currentItems == null) return null;
             CompletionData found = _currentItems.Find(data => data.DisplayText.EqualsCi(keyword));
             if (found == null) return null;
-            if (found.Type == CompletionType.Keyword ||
-                found.Type == CompletionType.Field ||
-                found.Type == CompletionType.FieldPk ||
-                found.Type == CompletionType.Table)
-                return Abl.AutoCaseToUserLiking(keyword);
+            if (!found.FromParser) return Abl.AutoCaseToUserLiking(keyword);
             return found.DisplayText;
         }
 
@@ -197,7 +192,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 //TODO: look if we are entering a table SAC.?
                 if (Npp.WeAreEnteringAField()) {
-                    var foundTable = DataBase.FindTableByName(Npp.GetCurrentTable());
+                    var foundTable = ParserHandler.FindAnyTableOrBufferByName((Npp.GetCurrentTable()));
                     if (foundTable != null) {
                         SwapToFieldsItems();
                         // show the list but only activate fields by default
@@ -326,9 +321,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     // Remember this item to show it higher in the list later
                     data.Ranking++;
                     if (data.FromParser)
-                        ParserHandler.RememberUseOfDynamic(data.DisplayText);
-                    else
-                        ParserHandler.RememberUseOfStatic(data.DisplayText);
+                        ParserHandler.RememberUseOfParsedItem(data.DisplayText);
+                    else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
+                        ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
 
                     if (data.Type == CompletionType.Snippet)
                         Snippets.TriggerCodeSnippetInsertion();

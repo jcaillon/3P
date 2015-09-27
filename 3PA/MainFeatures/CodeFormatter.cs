@@ -68,9 +68,9 @@ namespace _3PA.MainFeatures
             int currentPos = Npp.GetCaretPosition();
             int currentLineNum = Npp.GetLineNumber(currentPos);
             string currLineText = Npp.GetLine(currentLineNum);
-            string prevText = Npp.TextBeforeCursor(500); //do not load all all "top" document but its substantial part
+            //string prevText = Npp.TextBeforeCursor(500); //do not load all all "top" document but its substantial part
 
-            if (currLineText.Trim() == "}" && IsBracketOpened(prevText))
+            //if (currLineText.Trim() == "}" && IsBracketOpened(prevText))
                 Perform(RemoveIndent);
         }
 

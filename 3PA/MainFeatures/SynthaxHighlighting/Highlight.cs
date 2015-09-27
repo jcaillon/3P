@@ -22,8 +22,7 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
             // redefine the styles
             SetCustomStyles();
 
-            //Npp.StyleText((int)TextStyle.Default, startPos, endPos);
-            //Npp.StyleText(thisStyle, item.StartPosition, item.EndPosition);
+            Npp.StyleText((int)TextStyle.Default, startPos, endPos);
 
             Lexer tok = new Lexer(Npp.GetDocumentText());
             tok.Tokenize();
@@ -41,13 +40,15 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
         }
 
         public static void SetCustomStyles() {
-            //Npp.SetDefaultStyle(Color.White, Color.Crimson);
+            Npp.SetDefaultStyle(Color.White, Color.Crimson);
             Npp.SetStyle((int)Npp.UdlStyles.Default, Color.AntiqueWhite, Color.MidnightBlue);
             Npp.SetStyle((int)Npp.UdlStyles.Comment, Color.GreenYellow, Color.Green);
             Npp.SetStyle((int)Npp.UdlStyles.CommentLine, Color.Black, Color.Aquamarine);
             Npp.SetStyle((int)Npp.UdlStyles.Delimiter1, Color.White, Color.Crimson);
             Npp.SetStyle((int)Npp.UdlStyles.Delimiter2, Color.White, Color.Brown);
             Npp.SetStyle((int)Npp.UdlStyles.KeyWordsList1, Color.White, Color.DarkViolet);
+
+            Npp.SetStyle((int)TextStyle.Comment, Color.BlueViolet, Color.Green);
         }
 
     }

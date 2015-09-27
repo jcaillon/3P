@@ -33,7 +33,8 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     [Flags]
     public enum ParseFlag {
-        None = 1,
+        // indicates that the parsed item is not coming from the originally parsed source (= from .i)
+        External = 1,
         // Local/File define the scope of a defined variable...
         LocalScope = 2,
         FileScope = 4,
@@ -49,7 +50,9 @@ namespace _3PA.MainFeatures.Parser {
         // flags for fields
         Mandatory = 1024,
         Extent = 2048,
-        Index = 4096
+        Index = 4096,
+        // others
+        Buffer = 8192,
     }
 
     /// <summary>
@@ -87,6 +90,21 @@ namespace _3PA.MainFeatures.Parser {
             : base(name, line, column) {
             On = @on;
             LcName = lcName;
+        }
+    }
+
+
+    /// <summary>
+    /// Procedure parsed item
+    /// </summary>
+    public class ParsedRun : ParsedItem {
+        public string Left { get; private set; }
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedRun(string name, int line, int column, string left) : base(name, line, column) {
+            Left = left;
         }
     }
 
@@ -148,6 +166,7 @@ namespace _3PA.MainFeatures.Parser {
         public string LcFlagString { get; private set; }
         /// <summary>
         /// contains as or like in lowercase
+        /// (for buffers, it contains the table it buffs)
         /// </summary>
         public string LcAsLike { get; private set; }
         public string Left { get; private set; }
@@ -286,12 +305,15 @@ namespace _3PA.MainFeatures.Parser {
         public string Id { get; private set; }
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
+        /// <summary>
+        /// From database, represents the description of the table,
+        /// if temptable, contains the USE-INDEX 
+        /// </summary>
         public string Description { get; private set; }
         /// <summary>
         /// contains the table "LIKE TABLE" name in lowercase
         /// </summary>
         public string LcLikeTable { get; private set; }
-        public int Ranking { get; set; }
         /// <summary>
         /// To know if the table is a temptable
         /// </summary>
@@ -301,20 +323,19 @@ namespace _3PA.MainFeatures.Parser {
         /// NEW [ GLOBAL ] ] SHARED ] | [ PRIVATE | PROTECTED ] [ STATIC ] flags
         /// </summary>
         public string LcFlagString { get; private set; }
-        public List<ParsedField> Fields { get; private set; }
-        public List<ParsedIndex> Indexes { get; private set; }
-        public List<ParsedTrigger> Triggers { get; private set; }
+        public List<ParsedField> Fields { get; set; }
+        public List<ParsedIndex> Indexes { get; set; }
+        public List<ParsedTrigger> Triggers { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, int ranking, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString) : base(name, line, column) {
+        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString) : base(name, line, column) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
             Description = description;
             LcLikeTable = lcLikeTable;
-            Ranking = ranking;
             IsTempTable = isTempTable;
             Fields = fields;
             Indexes = indexes;
@@ -343,8 +364,7 @@ namespace _3PA.MainFeatures.Parser {
         /// contains as or like in lowercase
         /// </summary>
         public string LcAsLike { get;  set; }
-        public int Ranking { get;  set; }
-        public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, string lcAsLike, int ranking) {
+        public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, string lcAsLike) {
             Name = name;
             TempType = lcTempType;
             Format = format;
@@ -353,7 +373,6 @@ namespace _3PA.MainFeatures.Parser {
             InitialValue = initialValue;
             Description = description;
             LcAsLike = lcAsLike;
-            Ranking = ranking;
         }
     }
 

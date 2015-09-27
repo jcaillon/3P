@@ -31,13 +31,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _keywords.Clear();
             try {
                 foreach (var items in File.ReadAllLines(_filePath).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
-                    var flag = (items[2] == "1") ? ParseFlag.Reserved : ParseFlag.None;
+                    var flag = (items[2] == "1") ? ParseFlag.Reserved : 0;
                     if (items[1].Equals("abbreviation")) flag = flag | ParseFlag.Abbreviation;
                     _keywords.Add(new CompletionData {
                         DisplayText = items[0],
                         Type = CompletionType.Keyword,
                         Ranking = int.Parse(items[3]),
-                        SubType = items[1],
+                        SubString = items[1],
                         Flag = flag
                     });
                 }
@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void Save() {
             var strBuilder = new StringBuilder();
             foreach (var keyword in _keywords) {
-                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubType + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
+                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubString + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
             }
             File.WriteAllText(_filePath, strBuilder.ToString());
         }
@@ -76,25 +76,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static List<CompletionData> GetList() {
             return _keywords;
-        }
-
-        /// <summary>
-        /// Is the keyword known to the plugin?
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static bool Contains(string keyword) {
-            var x = _keywords.Find(data => data.DisplayText.EqualsCi(keyword));
-            return x != null;
-        }
-
-        /// <summary>
-        /// increase ranking of input keyword
-        /// </summary>
-        /// <param name="keyword"></param>
-        public static void RemberUseOf(string keyword) {
-            var x = _keywords.Find(data => data.DisplayText == keyword);
-            if (x != null) x.Ranking++;
         }
 
         /// <summary>

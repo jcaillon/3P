@@ -272,7 +272,9 @@
     <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Extent.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\External.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\FileScope.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Index.png" />

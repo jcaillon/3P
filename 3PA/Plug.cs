@@ -422,10 +422,10 @@ namespace _3PA {
             ClosePopups();
             
             // TODO: FIX COLOR HIGHLIGHTING.?
-            //// set the lexer to use
-            //if (Config.Instance.GlobalUseContainedLexer && Utils.IsCurrentProgressFile())
+            // set the lexer to use
+            //if (Config.Instance.GlobalUseContainedLexer && Abl.IsCurrentProgressFile())
             //    Highlight.Colorize(0, Npp.GetTextLenght());
-            //    //Npp.SetLexerToContainerLexer();
+            //Npp.SetLexerToContainerLexer();
         }
 
         /// <summary>
@@ -477,6 +477,7 @@ namespace _3PA {
             DataBase.FetchCurrentDbInfo();
             AutoComplete.FillStaticItems();
             AutoComplete.FillItems();
+            //Highlight.Colorize(0, Npp.GetTextLenght());
             //Highlight.SetCustomStyles();
         }
         #endregion

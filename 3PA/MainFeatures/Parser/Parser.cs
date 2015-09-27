@@ -152,15 +152,19 @@ namespace _3PA.MainFeatures.Parser {
                             }
                             break;
                         case "on":
-                            // add a one time indent after a then or else
+                            // parse a ON statement
                             if (CreateParsedOnEvent(token)) {
                                 _context.BlockDepth = 0;
                                 _increaseDepthAtNextStatement = true;
                             }
                             break;
+                        case "run":
+                            // Parse a run statement
+                            CreateParsedRun(token);
+                            break;
                         case "def":
                         case "define":
-                            // add a one time indent after a then or else
+                            // Parse a define statement
                             CreateParsedDefine(token);
                             break;
                         case "case":
@@ -277,6 +281,41 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
+        /// Creates a parsed item for RUN statements
+        /// </summary>
+        /// <param name="runToken"></param>
+        private void CreateParsedRun(Token runToken) {
+            // info we will extract from the current statement :
+            string name = "";
+            _lastTokenWasSpace = true;
+            StringBuilder leftStr = new StringBuilder();
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                switch (state) {
+                    case 0:
+                        // matching proc name (or VALUE)
+                        if (token is TokenWord && string.IsNullOrEmpty(name)) {
+                            name = token.Value;
+                            if (!name.ToLower().Equals("value"))
+                                state++;
+                        } else if (token is TokenSymbol && token.Value.Equals(")"))
+                            state++;
+                        break;
+                    case 1:
+                        // matching the rest of run
+                        AddTokenToStringBuilder(leftStr, token);
+                        break;
+                }
+            } while (MoveNext());
+
+            if (state == 0) return;
+            AddParsedItem(new ParsedRun(name, runToken.Line, runToken.Column, leftStr.ToString()));
+        }
+
+        /// <summary>
         /// Creates parsed item for ON CHOOSE OF XXX events
         /// (choose or anything else)
         /// </summary>
@@ -350,7 +389,9 @@ namespace _3PA.MainFeatures.Parser {
 
             bool isTempTable = false;
             var fields = new List<ParsedField>();
-            ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", "", 0);
+            ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", "");
+            StringBuilder description = new StringBuilder();
+            bool isPrimary = false;
 
             int state = 0;
             do {
@@ -359,7 +400,6 @@ namespace _3PA.MainFeatures.Parser {
                 if (token is TokenComment) continue;
                 string lowerToken;
                 bool matchedLikeTable = false;
-                bool isPrimary = false;
                 switch (state) {
 
                     case 0:
@@ -432,6 +472,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         name = token.Value;
                         if (type == ParseDefineType.Variable) state = 10;
+                        if (type == ParseDefineType.Buffer) state = 31;
                         if (type == ParseDefineType.Parameter) {
                             lowerToken = token.Value.ToLower();
                             switch (lowerToken) {
@@ -486,13 +527,29 @@ namespace _3PA.MainFeatures.Parser {
                         // define temp-table
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
-                        // matches a LIKE table
-                        // ReSharper disable once ConditionIsAlwaysTrueOrFalse, resharper doesn't get this one
-                        if (lowerToken.Equals("like") && !matchedLikeTable) state = 21;
-                        // matches FIELD
-                        if (lowerToken.Equals("field")) state = 22;
-                        // matches INDEX
-                        if (lowerToken.Equals("index")) state = 25;
+                        switch (lowerToken) {
+                            case "field":
+                                // matches FIELD
+                                state = 22;
+                                break;
+                            case "index":
+                                // matches INDEX
+                                state = 25;
+                                break;
+                            case "use-index":
+                                // matches USE-INDEX (after a like/like-sequential, we can have this keyword)
+                                state = 26;
+                                break;
+                            default:
+                                // matches a LIKE table
+                                // ReSharper disable once ConditionIsAlwaysTrueOrFalse, resharper doesn't get this one
+                                if ((lowerToken.Equals("like") || lowerToken.Equals("like-sequential")) && !matchedLikeTable) 
+                                    state = 21;
+                                // After a USE-UNDEX and the index name, we can match a AS PRIMARY for the previously defined index
+                                if (lowerToken.Equals("primary") && description.Length > 0) 
+                                    description.Append("!");
+                                break;
+                        }
                         break;
                     case 21:
                         // define temp-table : match a LIKE table, get the table name in asLike
@@ -505,7 +562,7 @@ namespace _3PA.MainFeatures.Parser {
                     case 22:
                         // define temp-table : matches a FIELD name
                         if (!(token is TokenWord)) break;
-                        currentField = new ParsedField(token.Value, "", "", 0, ParsedFieldFlag.None, "", "", "", 0);
+                        currentField = new ParsedField(token.Value, "", "", 0, ParsedFieldFlag.None, "", "", "");
                         state = 23;
                         break;
                     case 23:
@@ -524,9 +581,13 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 25:
                         // define temp-table : match an index definition
-                        if (token is TokenWord) break;
+                        if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
-                        if (lowerToken.Equals("primary")) isPrimary = true;
+                        if (lowerToken.Equals("primary")) {
+                            // ReSharper disable once RedundantAssignment
+                            isPrimary = true;
+                            break;
+                        }
                         var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
                         if (found != null)
                             found.Flag = isPrimary ? ParsedFieldFlag.Primary : ParsedFieldFlag.None;
@@ -534,13 +595,27 @@ namespace _3PA.MainFeatures.Parser {
                             // ReSharper disable once RedundantAssignment
                             isPrimary = false;
                         break;
+                    case 26:
+                        // define temp-table : match a USE-INDEX name
+                        if (!(token is TokenWord)) break;
+                        description.Append(",");
+                        description.Append(token.Value);
+                        state = 20;
+                        break;
 
 
                     case 30:
                         // define parameter : match a temptable, table, dataset or buffer name
                         if (!(token is TokenWord)) break;
-                        if (token.Value.ToLower().Equals("for")) break;
                         name = token.Value;
+                        state++;
+                        break;
+                    case 31:
+                        // define parameter : match the table/dataset name that the buffer or handle is FOR
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("for") || lowerToken.Equals("temp-table")) break;
+                        asLike = lowerToken;
                         state = 99;
                         break;
 
@@ -553,7 +628,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             if (state <= 1) return;
             if (isTempTable)
-                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", asLike, 0, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString()));
+                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, description.ToString(), asLike, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString()));
             else
                 AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType, viewAs));
         }
@@ -657,7 +732,7 @@ namespace _3PA.MainFeatures.Parser {
             string paramAsLike = "";
             string paramPrimitiveType = "";
             string strFlags = "";
-            List<ParsedItem> parametersList = new List<ParsedItem>();
+            var parametersList = new List<ParsedItem>();
 
             int state = 0;
             do {
@@ -682,9 +757,6 @@ namespace _3PA.MainFeatures.Parser {
                             Scope = _context.Scope,
                             LcOwnerName = _context.LcOwnerName
                         };
-                        _context.Scope = ParsedScope.Function;
-                        _context.LcOwnerName = name.ToLower();
-
                         state++;
                         break;
                     case 2:
@@ -758,8 +830,8 @@ namespace _3PA.MainFeatures.Parser {
                             // create a variable for this function scope
                             parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "") {
                                 FilePath = _filePathBeingParsed,
-                                Scope = _context.Scope,
-                                LcOwnerName = _context.LcOwnerName
+                                Scope = ParsedScope.Function,
+                                LcOwnerName = name.ToLower()
                             });
                             if (token.Value.Equals(","))
                                 state = 3;
@@ -781,6 +853,10 @@ namespace _3PA.MainFeatures.Parser {
                 }
             } while (MoveNext());
             if (createdFunc == null) return false;
+
+            // modify context
+            _context.Scope = ParsedScope.Function;
+            _context.LcOwnerName = name.ToLower();
 
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;

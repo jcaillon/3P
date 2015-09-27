@@ -9,7 +9,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     public class DataBase {
 
         private static List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
-        private static string _filePath = @"C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\Config\3PA\more\database_out.txt";
+        private static string _filePath;
         private static string _location = Npp.GetConfigDir();
         private static string _fileName = "database_out.txt";
 
@@ -19,7 +19,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void FetchCurrentDbInfo() {
             //TODO
-            //_filePath = Path.Combine(_location, _fileName);
+            _filePath = Path.Combine(_location, _fileName);
             Read();
         }
 
@@ -58,7 +58,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 splitted[3],
                                 splitted[4],
                                 splitted[5],
-                                "", 0, false,
+                                "", false,
                                 new List<ParsedField>(),
                                 new List<ParsedIndex>(),
                                 new List<ParsedTrigger>()
@@ -100,8 +100,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 flag2,
                                 splitted[10],
                                 splitted[11],
-                                "", 0);
-                            curField.Type = AutoCompParserVisitor.ConvertStringToParsedPrimitiveType(curField.TempType, false);
+                                "");
+                            curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
                             currentTable.Fields.Add(curField);
                             break;
                     }
@@ -128,8 +128,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Databases,
                 FromParser = false,
-                Ranking = ParserHandler.FindRankingOfStatic(@base.LogicalName),
-                Flag = ParseFlag.None
+                Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
+                Flag = 0
             }).ToList();
         }
 
@@ -139,20 +139,32 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static List<CompletionData> GetTablesList() {
             var output = new List<CompletionData>();
-            foreach (var dataBase in _dataBases.Where(dataBase => dataBase.Tables != null && dataBase.Tables.Count > 0)) {
-                output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
-                    DisplayText = table.Name,
-                    Type = CompletionType.Table,
-                    FromParser = false,
-                    Ranking = ParserHandler.FindRankingOfStatic(table.Name),
-                    Flag = ParseFlag.None
-                }).ToList());
-            }
+            foreach (var dataBase in _dataBases)
+                output.AddRange(GetTablesList(dataBase));
             return output;
         }
 
         /// <summary>
-        /// Returns the list of fields for a given table
+        /// Returns the list of tables for a given database
+        /// </summary>
+        /// <param name="dataBase"></param>
+        /// <returns></returns>
+        public static List<CompletionData> GetTablesList(ParsedDataBase dataBase) {
+            var output = new List<CompletionData>();
+            if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
+            output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
+                DisplayText = table.Name,
+                SubString = Abl.AutoCaseToUserLiking(dataBase.LogicalName),
+                Type = CompletionType.Table,
+                FromParser = false,
+                Ranking = ParserHandler.FindRankingOfDatabaseItem(table.Name),
+                Flag = 0
+            }).ToList());
+            return output;
+        }
+
+        /// <summary>
+        /// Returns the list of fields for a given table (it can also be a temp table!)
         /// </summary>
         /// <param name="table"></param>
         /// <returns></returns>
@@ -163,11 +175,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = field.Name,
                 Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field, 
                 FromParser = false,
-                SubType = field.Type.ToString(),
-                Ranking = ParserHandler.FindRankingOfStatic(field.Name),
-                Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : ParseFlag.None) |
-                    (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : ParseFlag.None) |
-                    (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : ParseFlag.None)
+                SubString = field.Type.ToString(),
+                Ranking = ParserHandler.FindRankingOfDatabaseItem(field.Name),
+                Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
+                    (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
+                    (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0)
             }));
             return output;
         }

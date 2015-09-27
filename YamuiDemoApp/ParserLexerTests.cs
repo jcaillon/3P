@@ -2,6 +2,8 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using System.Windows.Forms;
+using _3PA;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -75,7 +77,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunction pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn);
         }
 
         public void Visit(ParsedProcedure pars) {
@@ -91,6 +93,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedDefine pars) {
+            //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
                 //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.LcAsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.ViewAs + "," + pars.Left);
@@ -102,6 +105,10 @@ namespace YamuiDemoApp {
             foreach (var field in pars.Fields) {
                 Output.Append(field.Name + "|" + field.LcAsLike + "|" + field.Type + ",");
             }
+        }
+
+        public void Visit(ParsedRun pars) {
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
         }
     }
 

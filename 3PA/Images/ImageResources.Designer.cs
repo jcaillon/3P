@@ -83,6 +83,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Buffer {
+            get {
+                object obj = ResourceManager.GetObject("Buffer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap clear_filters {
             get {
                 object obj = ResourceManager.GetObject("clear_filters", resourceCulture);
@@ -156,6 +166,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap exterior {
             get {
                 object obj = ResourceManager.GetObject("exterior", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap External {
+            get {
+                object obj = ResourceManager.GetObject("External", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

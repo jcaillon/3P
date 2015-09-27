@@ -29,8 +29,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// A free to use string, can contain :
         /// - keyword = type of keyword
+        /// - table = name of the owner database
+        /// - field = type
         /// </summary>
-        public string SubType { get; set; }
+        public string SubString { get; set; }
 
         public ParsedItem ParsedItem { get; set; }
 

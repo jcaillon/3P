@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using _3PA.Lib;
+﻿using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -12,18 +10,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
     class AutoCompParserVisitor : IParserVisitor{
 
         /// <summary>
+        /// Run statement
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedRun pars) {
+            // we only want the RUN that point to external procedures
+        }
+
+        /// <summary>
         /// Functions
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
-            var flag = ParseFlag.None;
-            if (pars.IsPrivate) flag = flag | ParseFlag.Private;
-            ParserHandler.DynamicItems.Add(new CompletionData() {
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
-                SubType = "",
-                Flag = flag,
-                Ranking = ParserHandler.FindRankingOfDynamic(pars.Name),
+                SubString = "",
+                Flag = pars.IsPrivate ? ParseFlag.Private : 0,
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -34,12 +38,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
-            ParserHandler.DynamicItems.Add(new CompletionData() {
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
-                SubType = "",
-                Flag = ParseFlag.None,
-                Ranking = ParserHandler.FindRankingOfDynamic(pars.Name),
+                SubString = "",
+                Flag = 0,
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -60,7 +64,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void Visit(ParsedIncludeFile pars) {
            // To code explorer
 
-            // Parse the include file
+            // Parse the include file, dont forget to flag the items as External
+
         }
 
         /// <summary>
@@ -68,14 +73,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
-            var flag = ParseFlag.None;
-            flag = flag | (pars.Scope == ParsedScope.Global ? ParseFlag.FileScope : ParseFlag.LocalScope);
-            ParserHandler.DynamicItems.Add(new CompletionData() {
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Preprocessed,
-                SubType = "",
-                Flag = flag,
-                Ranking = ParserHandler.FindRankingOfDynamic(pars.Name),
+                SubString = "",
+                Flag = pars.Scope == ParsedScope.Global ? ParseFlag.FileScope : ParseFlag.LocalScope,
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -87,45 +90,66 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedDefine pars) {
             // set flags
-            var flag = ParseFlag.None;
-            if (pars.Scope == ParsedScope.Global) flag = flag | ParseFlag.FileScope;
-            else flag = flag | ParseFlag.LocalScope;
+            var flag = pars.Scope == ParsedScope.Global ? ParseFlag.FileScope : ParseFlag.LocalScope;
             if (pars.Type == ParseDefineType.Parameter) flag = flag | ParseFlag.Parameter;
 
             // find primitive type
             var hasPrimitive = !string.IsNullOrEmpty(pars.TempPrimitiveType);
             if (hasPrimitive)
-                pars.PrimitiveType = ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, !pars.LcAsLike.Equals("as"));
+                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, !pars.LcAsLike.Equals("as"));
 
             // which completionData type is it?
             CompletionType type;
-            if (pars.Type == ParseDefineType.Parameter)
-                type = CompletionType.UserVariablePrimitive;
-            else if (pars.Type == ParseDefineType.Variable) {
-                if ((int)pars.PrimitiveType < 30)
-                    type = CompletionType.UserVariablePrimitive;
-                else if (!string.IsNullOrEmpty(pars.ViewAs))
-                    type = CompletionType.Widget;
-                else
-                    type = CompletionType.UserVariableOther;
-            }
-            else if (pars.Type == ParseDefineType.Button ||
-                pars.Type == ParseDefineType.Browse ||
-                pars.Type == ParseDefineType.Frame ||
-                pars.Type == ParseDefineType.Image ||
-                pars.Type == ParseDefineType.SubMenu ||
-                pars.Type == ParseDefineType.Menu ||
-                pars.Type == ParseDefineType.Rectangle)
-                type = CompletionType.Widget;
-            else
-                type = CompletionType.UserVariableOther;
+            string subString;
+            // special case for buffers, they go into the temptable or table section
+            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer) {
+                flag = flag | ParseFlag.Buffer;
+                subString = "?";
+                type = CompletionType.TempTable;
 
-            ParserHandler.DynamicItems.Add(new CompletionData() {
+                // find the table or temp table that the buffer is FOR
+                var foundTable = ParserHandler.FindAnyTableByName(pars.LcAsLike);
+                if (foundTable != null) {
+                    subString = Abl.AutoCaseToUserLiking(foundTable.Name);
+                    type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
+                }
+                
+            } else {
+                // match type for everything else
+                subString = hasPrimitive ? pars.PrimitiveType.ToString() : pars.Type.ToString();
+                switch (pars.Type) {
+                    case ParseDefineType.Parameter:
+                        type = CompletionType.UserVariablePrimitive;
+                        break;
+                    case ParseDefineType.Variable:
+                        if (!string.IsNullOrEmpty(pars.ViewAs))
+                            type = CompletionType.Widget;
+                        else if ((int) pars.PrimitiveType < 30)
+                            type = CompletionType.UserVariablePrimitive;
+                        else
+                            type = CompletionType.UserVariableOther;
+                        break;
+                    case ParseDefineType.Button:
+                    case ParseDefineType.Browse:
+                    case ParseDefineType.Frame:
+                    case ParseDefineType.Image:
+                    case ParseDefineType.SubMenu:
+                    case ParseDefineType.Menu:
+                    case ParseDefineType.Rectangle:
+                        type = CompletionType.Widget;
+                        break;
+                    default:
+                        type = CompletionType.UserVariableOther;
+                        break;
+                }
+            }
+
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = type,
-                SubType = hasPrimitive ? pars.PrimitiveType.ToString() : pars.Type.ToString(),
+                SubString = subString,
                 Flag = SetFlags(flag, pars.LcFlagString),
-                Ranking = ParserHandler.FindRankingOfDynamic(pars.Name),
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -136,17 +160,47 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedTable pars) {
+            string subStr = "";
 
             // find all primitive types
             foreach (var parsedField in pars.Fields)
-                parsedField.Type = ConvertStringToParsedPrimitiveType(parsedField.TempType, !parsedField.LcAsLike.Equals("as"));
+                parsedField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(parsedField.TempType, !parsedField.LcAsLike.Equals("as"));
 
-            ParserHandler.DynamicItems.Add(new CompletionData() {
+            // temp table is LIKE another table? copy fields, minus the isPrimary,
+            if (!string.IsNullOrEmpty(pars.LcLikeTable)) {
+                var foundTable = ParserHandler.FindAnyTableByName(pars.LcLikeTable);
+                if (foundTable != null) {
+                    // add the fields of the found table
+                    subStr = @"Like " + foundTable.Name;
+                    foreach (var field in foundTable.Fields) {
+                        pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.LcAsLike) {
+                            Type = field.Type
+                        });
+                    }
+                    // handles the use-index, for now only add the isPrimary flag to the field...
+                    if (!string.IsNullOrEmpty(pars.Description)) {
+                        foreach (var index in pars.Description.Split(',')) {
+                            if (index.ContainsFast("!")) {
+                                // we found a primary index
+                                var foundIndex = foundTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
+                                if (foundIndex != null)
+                                    foreach (var fieldName in foundIndex.FieldsList) {
+                                        // then the field is primary
+                                        var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Replace("+", "").Replace("-", "")));
+                                        if (foundfield != null) foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
+                                    }
+                            }
+                        }
+                    }
+                }
+            }
+
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.TempTable,
-                SubType = "",
-                Flag = SetFlags(ParseFlag.None, pars.LcFlagString),
-                Ranking = ParserHandler.FindRankingOfDynamic(pars.Name),
+                SubString = subStr,
+                Flag = SetFlags(0, pars.LcFlagString),
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -158,107 +212,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="flag"></param>
         /// <param name="lcFlagString"></param>
         /// <returns></returns>
-        private ParseFlag SetFlags(ParseFlag flag, string lcFlagString) {
+        private static ParseFlag SetFlags(ParseFlag flag, string lcFlagString) {
             if (lcFlagString.Contains("global")) flag = flag | ParseFlag.Global;
             if (lcFlagString.Contains("shared")) flag = flag | ParseFlag.Shared;
             if (lcFlagString.Contains("private")) flag = flag | ParseFlag.Private;
             if (lcFlagString.Contains("new")) flag = flag | ParseFlag.Private;
             return flag;
-        }
-
-        /// <summary>
-        /// convertion
-        /// </summary>
-        /// <param name="str"></param>
-        /// <param name="analyseLike"></param>
-        /// <returns></returns>
-        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            str = str.ToLower();
-            // LIKE
-            if (analyseLike) {
-                return FindPrimitiveTypeOfLike(str);
-            }
-
-            // AS
-            switch (str) {
-                case "com-handle":
-                    return ParsedPrimitiveType.Comhandle;
-                case "datetime-tz":
-                    return ParsedPrimitiveType.Comhandle;
-                case "unsigned-short":
-                    return ParsedPrimitiveType.UnsignedShort;
-                case "unsigned-long":
-                    return ParsedPrimitiveType.UnsignedLong;
-                case "table-handle":
-                    return ParsedPrimitiveType.TableHandle;
-                case "dataset-handle":
-                    return ParsedPrimitiveType.DatasetHandle;
-                default:
-                    var token1 = str;
-                    foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                        return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
-                    }
-                    break;
-            }
-            // try to find the complete word in abbreviations list
-            var completeStr = Keywords.GetFullKeyword(str).ToLower();
-            if (completeStr != str)
-                foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.Equals(typ.ToLower()))) {
-                    return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
-                }
-            return ParsedPrimitiveType.Unknow;
-        }
-
-        /// <summary>
-        /// Search through the available completionData to find the primitive type of a 
-        /// "like xx" phrase
-        /// </summary>
-        /// <param name="likeStr"></param>
-        /// <returns></returns>
-        public static ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
-            // determines the format
-            var nbPoints = likeStr.CountOccurences(".");
-            var splitted = likeStr.Split('.');
-
-            // if it's another var
-            if (nbPoints == 0) {
-                var foundVar = ParserHandler.DynamicItems.Find(data =>
-                    (data.Type == CompletionType.UserVariablePrimitive ||
-                     data.Type == CompletionType.UserVariableOther) && data.DisplayText.EqualsCi(likeStr));
-                return foundVar != null ? ((ParsedDefine)foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
-            }
-
-            var tableName = splitted[nbPoints == 2 ? 1 : 0];
-            var fieldName = splitted[nbPoints == 2 ? 2 : 1];
-
-            // Search through database
-            if (DataBase.Get().Count > 0) {
-                ParsedDataBase foundDb = DataBase.Get().First();
-                if (nbPoints == 2)
-                    // find database
-                    foundDb = DataBase.FindDatabaseByName(splitted[0]) ?? DataBase.Get().First();
-                if (foundDb == null) return ParsedPrimitiveType.Unknow;
-
-                // find table
-                var foundTable = DataBase.FindTableByName(tableName, foundDb);
-                if (foundTable == null) return ParsedPrimitiveType.Unknow;
-
-                // find field
-                var foundField = DataBase.FindFieldByName(fieldName, foundTable);
-                return foundField == null ? ParsedPrimitiveType.Unknow : foundField.Type;
-            } 
-
-            // Search in temp tables
-            if (nbPoints == 1) {
-                var foundTtable = ParserHandler.DynamicItems.Find(data =>
-                    (data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(likeStr));
-                if (foundTtable == null) return ParsedPrimitiveType.Unknow;
-
-                var foundTtField = ((ParsedTable)foundTtable.ParsedItem).Fields.Find(field => field.Name.EqualsCi(fieldName));
-                return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
-            }
-
-            return ParsedPrimitiveType.Unknow;
         }
     }
 }

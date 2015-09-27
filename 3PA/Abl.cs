@@ -1,8 +1,7 @@
 ﻿using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA {
-    class Abl {
+    public class Abl {
 
         /// <summary>
         /// autocase the keyword in input according to the user config
@@ -41,6 +40,27 @@ namespace _3PA {
         public static bool IsCurrentProgressFile() {
             var ext = Npp.GetCurrentFileExtension();
             return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);
+        }
+
+        /// <summary>
+        /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
+        /// </summary>
+        public static string ReadAblWord(string input, bool stopAtPoint, out int nbPoints, bool readRightToLeft = true) {
+            nbPoints = 0;
+            var max = input.Length - 1;
+            int count = 0;
+            while (count <= max) {
+                var pos = readRightToLeft ? max - count : count;
+                var ch = input[pos];
+                // normal word
+                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-' || ch =='&')
+                    count++;
+                else if (ch == '.' && !stopAtPoint) {
+                    count++;
+                    nbPoints++;
+                } else break;
+            }
+            return count == 0 ? string.Empty : input.Substring(readRightToLeft ? input.Length - count : 0, count);
         }
     }
 }

@@ -17,7 +17,9 @@ namespace _3PA.Lib {
         public static void Init() {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
-            _rootDir = Path.Combine(Npp.GetThisAssemblyPath(), Resources.PluginFolderName);
+            var assPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (assPath == null) return; //TODO throw an error
+            _rootDir = Path.Combine(assPath, Resources.PluginFolderName);
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
             _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");  
           

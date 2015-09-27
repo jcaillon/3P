@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -14,7 +12,7 @@ namespace _3PA {
     ///     This class contains very generic wrappers for basic Notepad++ functionality.
     /// </summary>
     public partial class Npp {
-        public const int KeywordMaxLength = 20;
+        public const int KeywordMaxLength = 30;
         private const int IndicatorMatch = 31;
         private const int BookmarkMarker = 24;
         private const int SwShownoactivate = 4;
@@ -30,22 +28,6 @@ namespace _3PA {
         public static char[] Delimiters = "\\\t\n\r .,:;'\"[]{}()/!?@$%^&*«»><#|~`".ToCharArray();
         private static readonly char[] StatementDelimiters = " ,:;'\"[]{}()".ToCharArray();
         private static IntPtr _curScintilla;
-
-        public enum CaretContext {
-            Normal = 0,
-            Comment = 1,
-            PreProcessedLine = 2,
-            KeywordReserved = 4,
-            KeywordUnReserved = 5,
-            PreProcessed = 6,
-            RunFourthGroup = 7,
-            FoldingStyleTwo = 14,
-            SimpleQuote = 17,
-            DoubleQuote = 16,
-            Include = 18,
-            Nothing = 24,
-            Unknown = 666
-        }
 
         public enum UdlStyles {
             Default = 0,
@@ -316,31 +298,14 @@ namespace _3PA {
 
             // get the text on the left of the carret
             if (curPos - startPos > 0) {
-                string leftText;
-                using (var tr = new Sci_TextRange(startPos, curPos, KeywordMaxLength)) {
-                    Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                    leftText = tr.lpstrText;
-                }
-
-                // if we found text on the left
-                if (leftText != null) {
-                    //@".*[^\w-&\{\}]([\w-&\{\}]{1,})[^\w-&\{\}\r\n]*$"
-                    var regma = Regex.Match(leftText, @".*[^\w-&\{\}]([\w-&\{\}]{1,})$",
-                        RegexOptions.IgnoreCase | RegexOptions.RightToLeft);
-                    if (regma.Success) {
-                        word = regma.Groups[1].Value;
-                        locPoint.X = startPos + regma.Groups[1].Index;
-                        locPoint.Y = locPoint.X + regma.Groups[1].Length;
-                    } else if (new Regex(@"^[\w-&\{\}]+$").Match(leftText).Success) {
-                        word = leftText;
-                        locPoint.X = startPos;
-                        locPoint.Y = locPoint.X + leftText.Length;
-                    }
-                }
+                string leftText = GetTextByRange(startPos, curPos);
+                int nbPts;
+                word = Abl.ReadAblWord(leftText, true, out nbPts);
+                locPoint.X = curPos - word.Length;
+                locPoint.Y = curPos;
             }
 
             point = locPoint;
-
             return word;
         }
 
@@ -361,12 +326,6 @@ namespace _3PA {
             var textOnLeft = TextBeforePosition(curpos, KeywordMaxLength*2);
             return Regex.IsMatch(textOnLeft, @".*[\w-]{2,}\.[\w-]*$", RegexOptions.IgnoreCase);
         }
-
-        public static string GetThisAssemblyPath() {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        }
-
-
 
         public static string GetIndentString() {
             if (GetUseTabs()) {
@@ -445,64 +404,12 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     Gets the text between two text positions.
-        /// </summary>
-        /// <param name="start">The start position.</param>
-        /// <param name="end">The end position.</param>
-        /// <returns></returns>
-        public static string GetTextBetween(int start, int end = -1) {
-            if (end == -1)
-                end = GetDocumentLength();
-
-            using (var tr = new Sci_TextRange(start, end, end - start + 1)) //+1 for null termination
-            {
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                return tr.lpstrText;
-            }
-        }
-
-        /// <summary>
         ///     Get text before caret.
         /// </summary>
         /// <param name="maxLength">The maximum length.</param>
         /// <returns></returns>
         public static string TextBeforeCaret(int maxLength = 512) {
-            var bufCapacity = maxLength + 1;
-            var hCurrentEditView = HandleScintilla;
-            var currentPos = (int) Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            var beginPos = currentPos - maxLength;
-            var startPos = (beginPos > 0) ? beginPos : 0;
-            var size = currentPos - startPos;
-
-            if (size > 0) {
-                using (var tr = new Sci_TextRange(startPos, currentPos, bufCapacity)) {
-                    Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                    return tr.lpstrText;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        ///     Replaces the word at cursor.
-        /// </summary>
-        /// <param name="replacement">The replacement.</param>
-        public static void ReplaceWordAtCursor(string replacement) {
-            Point p;
-            var word = GetWordAtCursor(out p);
-
-            if (!string.IsNullOrWhiteSpace(word))
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTION, p.X, p.Y);
-
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_REPLACESEL, 0, replacement);
-        }
-
-        /// <summary>
-        ///     Sets the all text of the current document.
-        /// </summary>
-        /// <param name="text">The text.</param>
-        public static void SetAllText(string text) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETTEXT, 0, text);
+            return TextBeforePosition(GetCaretPosition(), maxLength);
         }
 
         /// <summary>
@@ -620,140 +527,30 @@ namespace _3PA {
 
 
         public static string GetTextBetween(Point point) {
-            return GetTextBetween(point.X, point.Y);
-        }
-
-        public static void SetTextBetween(string text, Point point) {
-            SetTextBetween(text, point.X, point.Y);
+            return GetTextByRange(point.X, point.Y);
         }
 
         public static void AddTextAtCaret(string text) {
             var curPos = GetCaretPosition();
-            SetTextBetween(text, curPos, curPos);
+            SetTextByRange(curPos, curPos, text);
             SetCaretPosition(curPos + text.Length);
         }
 
-        public static void SetTextAtCaret(string text) {
-            var curPos = GetCaretPosition();
-            SetTextBetween(text, curPos, curPos);
-        }
-
-        public static void SetTextBetween(string text, int start, int end = -1) {
-            //supposed not to scroll
-
-            if (end == -1)
-                end = GetDocumentLength();
-
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETTARGETSTART, start, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETTARGETEND, end, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_REPLACETARGET, text);
-        }
-
-        public static string TextAfterCursor(int maxLength) {
-            var hCurrentEditView = HandleScintilla;
-            var currentPos = (int) Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            return TextAfterPosition(currentPos, maxLength);
-        }
-
         public static string TextAfterPosition(int position, int maxLength) {
-            var bufCapacity = maxLength + 1;
-            var hCurrentEditView = HandleScintilla;
-            var currentPos = position;
-            var fullLength = GetDocumentLength();
-            var startPos = currentPos;
-            var endPos = Math.Min(currentPos + bufCapacity, fullLength);
-            var size = endPos - startPos;
-
-            if (size > 0) {
-                using (var tr = new Sci_TextRange(startPos, endPos, bufCapacity)) {
-                    Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                    return tr.lpstrText;
-                }
-            }
-            return null;
+            return GetTextByRange(position, position + maxLength - 1);
         }
 
-        public static void ReplaceWordAtCaret(string text) {
-            Point p;
-            GetWordAtCursor(out p, Delimiters);
-
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTION, p.X, p.Y);
-            //Win32.SendMessage(HandleScintilla, SciMsg.SCI_REPLACESEL, 0, text);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_REPLACESEL, text);
+        public static string GetWordAtCursor() {
+            return GetWordAtPosition(GetCaretPosition());
         }
 
-        public static string GetWordAtCursor(char[] wordDelimiters = null) {
-            Point point;
-            return GetWordAtCursor(out point, wordDelimiters);
-        }
-
-        /// <summary>
-        ///     Gets the word at cursor.
-        /// </summary>
-        /// <param name="point">The point - start and end position of the word.</param>
-        /// <returns></returns>
-        public static string GetWordAtCursos(out Point point) {
-            return GetWordAtCursor(out point, Delimiters);
-        }
-
-        public static string GetWordAtCursor(out Point point, char[] wordDelimiters = null) {
-            var currentPos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            return GetWordAtPosition(currentPos, out point, wordDelimiters);
-        }
-
-        public static string GetWordAtPosition(int position, char[] wordDelimiters = null) {
-            Point point;
-            return GetWordAtPosition(position, out point, wordDelimiters);
-        }
-
-        public static string GetStatementAtPosition(int position = -1) {
-            Point point;
-            if (position == -1)
-                position = GetCaretPosition();
-
-            var retval = GetWordAtPosition(position, out point, StatementDelimiters);
-
-            return retval;
-        }
-
-        public static string GetWordAtPosition(int position, out Point point, char[] wordDelimiters = null) {
-            var currentPos = position;
-            var fullLength = GetDocumentLength();
-
-            var leftText = TextBeforePosition(currentPos, 512);
-            var rightText = TextAfterPosition(currentPos, 512);
-
-            var delimiters = Delimiters;
-
-            if (wordDelimiters != null)
-                delimiters = wordDelimiters;
-
-            var wordLeftPart = "";
-            var startPos = currentPos;
-
-            if (leftText != null) {
-                var startOfDoc = leftText.Length == currentPos;
-                startPos = leftText.LastIndexOfAny(delimiters);
-                wordLeftPart = (startPos != -1) ? leftText.Substring(startPos + 1) : (startOfDoc ? leftText : "");
-                var relativeStartPos = leftText.Length - startPos;
-                startPos = (startPos != -1) ? (currentPos - relativeStartPos) + 1 : 0;
-            }
-
-            var wordRightPart = "";
-            var endPos = currentPos;
-            if (rightText != null) {
-                endPos = rightText.IndexOfAny(delimiters);
-                wordRightPart = (endPos != -1) ? rightText.Substring(0, endPos) : "";
-                endPos = (endPos != -1) ? currentPos + endPos : fullLength;
-            }
-
-            point = new Point(startPos, endPos);
-            return wordLeftPart + wordRightPart;
+        public static string GetWordAtPosition(int position) {
+            // TODO:
+            return "";
         }
 
         public static int GetCaretPosition() {
-            var currentPos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            return currentPos;
+            return (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
         }
 
         public static int GetCaretLineNumber() {
@@ -777,6 +574,20 @@ namespace _3PA {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONEND, end, 0);
         }
 
+        public static string TextBeforePosition(int position, int maxLength) {
+            return GetTextByRange(position - maxLength + 1, position);
+        }
+
+        public static void ScrollToCaret() {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SCROLLCARET, 0, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESCROLL, 0, 1); //bottom scrollbar can hide the line
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SCROLLCARET, 0, 0);
+        }
+
+        /// <summary>
+        /// allows scintilla to grab focus
+        /// </summary>
+        /// <returns></returns>
         public static int GrabFocus() {
             var currentPos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
             return currentPos;
@@ -789,17 +600,6 @@ namespace _3PA {
         public static bool IsNppFocused() {
             return Call(SciMsg.SCI_GETFOCUS, 0, 0) == 1;
         }
-        
-
-        public static void ScrollToCaret() {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SCROLLCARET, 0, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESCROLL, 0, 1); //bottom scrollbar can hide the line
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SCROLLCARET, 0, 0);
-        }
-
-        public static void OpenFile(string file) {
-            Win32.SendMessage(HandleScintilla, NppMsg.NPPM_DOOPEN, 0, file);
-        }
 
         /// <summary>
         /// Move the caret and the view to the specified line (lines starts at 1 not 0)
@@ -810,30 +610,6 @@ namespace _3PA {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESONSCREEN, 0, 0), 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line - 1, 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
-        }
-
-        public static string TextBeforePosition(int position, int maxLength) {
-            var bufCapacity = maxLength + 1;
-            var hCurrentEditView = HandleScintilla;
-            var currentPos = position;
-            var beginPos = currentPos - maxLength;
-            var startPos = (beginPos > 0) ? beginPos : 0;
-            var size = currentPos - startPos;
-
-            if (size > 0) {
-                using (var tr = new Sci_TextRange(startPos, currentPos, bufCapacity)) {
-                    Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETTEXTRANGE, 0, tr.NativePointer);
-                    return tr.lpstrText;
-                }
-            }
-            return string.Empty;
-        }
-
-        public static string TextBeforeCursor(int maxLength) {
-            var hCurrentEditView = HandleScintilla;
-            var currentPos = (int) Win32.SendMessage(hCurrentEditView, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-
-            return TextBeforePosition(currentPos, maxLength);
         }
 
         /// <summary>
@@ -890,7 +666,7 @@ namespace _3PA {
             using (var textRange = new Sci_TextRange(start, end, bufCapacity)) {
                 Call(SciMsg.SCI_GETTEXTRANGE, 0, textRange.NativePointer);
                 //return textRange.lpstrText;
-                return IsUnicode() ? textRange.lpstrText.AnsiToUnicode() : textRange.lpstrText;
+                return IsUtf8() ? textRange.lpstrText.AnsiToUtf8() : textRange.lpstrText;
             }
         }
 
@@ -901,8 +677,8 @@ namespace _3PA {
         /// <param name="useRegularExpression">If true, uses a regular expressions replacement.</param>
         /// <returns> The length of the replacement string.</returns>
         public static int ReplaceText(string text, bool useRegularExpression) {
-            if (IsUnicode())
-                text = text.UnicodeToAnsi();
+            if (IsUtf8())
+                text = text.Utf8ToAnsi();
             return Call(useRegularExpression ? SciMsg.SCI_REPLACETARGETRE : SciMsg.SCI_REPLACETARGET, text.Length, text);
         }
 
@@ -912,10 +688,10 @@ namespace _3PA {
         ///     perform a replace target with an empty string.
         /// </summary>
         /// <returns> The length of the replacement string.</returns>
-        public static int ReplaceText(int start, int end, string text) {
+        public static int SetTextByRange(int start, int end, string text) {
             SetTargetRange(start, end);
-            if (IsUnicode())
-                text = text.UnicodeToAnsi();
+            if (IsUtf8())
+                text = text.Utf8ToAnsi();
             // If length is -1, text is a zero terminated string, otherwise length sets the number of character to replace 
             // the target with. After replacement, the target range refers to the replacement text. The return value is the 
             // length of the replacement string.
@@ -927,7 +703,7 @@ namespace _3PA {
         ///     Note that all strings marshaled to and from Scintilla come in ANSI format so need to
         ///     be converted if using Unicode.
         /// </summary>
-        public static bool IsUnicode() {
+        public static bool IsUtf8() {
             var result = Call(SciMsg.SCI_GETCODEPAGE);
             return result == (int) SciMsg.SC_CP_UTF8;
         }
@@ -950,7 +726,7 @@ namespace _3PA {
             if (selLength > 0)
                 Call(SciMsg.SCI_GETSELTEXT, 0, selectedText);
             var ret = selectedText.ToString();
-            return IsUnicode() ? ret.AnsiToUnicode() : ret;
+            return IsUtf8() ? ret.AnsiToUtf8() : ret;
         }
 
         /// <summary>
@@ -968,8 +744,8 @@ namespace _3PA {
         /// </summary>
         /// <param name="text">The document text to set.</param>
         public static void SetSelectedText(string text) {
-            if (IsUnicode())
-                text = text.UnicodeToAnsi();
+            if (IsUtf8())
+                text = text.Utf8ToAnsi();
             Call(SciMsg.SCI_REPLACESEL, 0, text);
         }
 
@@ -978,8 +754,8 @@ namespace _3PA {
         /// </summary>
         /// <param name="text">The document text to set.</param>
         public static void SetDocumentText(string text) {
-            if (IsUnicode())
-                text = text.UnicodeToAnsi();
+            if (IsUtf8())
+                text = text.Utf8ToAnsi();
             Call(SciMsg.SCI_SETTEXT, 0, text);
         }
 
@@ -992,7 +768,7 @@ namespace _3PA {
             if (length > 0)
                 Call(SciMsg.SCI_GETTEXT, length + 1, text);
             var ret = text.ToString();
-            return IsUnicode() ? ret.AnsiToUnicode() : ret;
+            return IsUtf8() ? ret.AnsiToUtf8() : ret;
         }
 
         /// <summary>
@@ -1121,8 +897,8 @@ namespace _3PA {
         /// <returns>-1 if no match is found, otherwise the position (relative to start) of the first match.</returns>
         public static int FindInTarget(string findText, int startPosition, int endPosition) {
             SetTargetRange(startPosition, endPosition);
-            if (IsUnicode())
-                findText = findText.UnicodeToAnsi();
+            if (IsUtf8())
+                findText = findText.Utf8ToAnsi();
             return Call(SciMsg.SCI_SEARCHINTARGET, findText.Length, findText);
         }
 
@@ -1252,7 +1028,7 @@ namespace _3PA {
             for (var i = pos; i < end; i++) {
                 bytes.Add((byte) Call(SciMsg.SCI_GETCHARAT, i));
             }
-            return IsUnicode()
+            return IsUtf8()
                 ? Encoding.UTF8.GetChars(bytes.ToArray())[0]
                 : Encoding.Default.GetChars(bytes.ToArray())[0];
         }

@@ -101,6 +101,10 @@ namespace _3PA {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
         }
 
+        public static void OpenFile(string file) {
+            Win32.SendMessage(HandleScintilla, NppMsg.NPPM_DOOPEN, 0, file);
+        }
+
         /// <summary>
         /// Returns the current file base name (uses GetFileName)
         /// </summary>

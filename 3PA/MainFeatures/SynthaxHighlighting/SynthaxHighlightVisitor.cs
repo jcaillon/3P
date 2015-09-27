@@ -1,4 +1,5 @@
-﻿using _3PA.MainFeatures.Parser;
+﻿using System.Windows.Forms;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.SynthaxHighlighting {
     internal class SynthaxHighlightVisitor : ILexerVisitor {
@@ -10,7 +11,8 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
         public int ToLine { get; set; }
 
         public void Visit(TokenComment tok) {
-            if (tok.Line < FromLine || tok.Line > ToLine) return;
+            //if (tok.Line < FromLine || tok.Line > ToLine) return;
+            Npp.AddFindMark(tok.StartPosition, tok.EndPosition);
             Npp.StyleText((int)TextStyle.Comment, tok.StartPosition, tok.EndPosition);
         }
 
@@ -36,7 +38,7 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
 
         public void Visit(TokenQuotedString tok) {
             if (tok.Line < FromLine || tok.Line > ToLine) return;
-            //Npp.StyleText((int)TextStyle.String, tok.StartPosition, tok.EndPosition);
+            Npp.StyleText((int)TextStyle.String, tok.StartPosition, tok.EndPosition);
         }
 
         public void Visit(TokenSymbol tok) {

@@ -156,22 +156,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             int offset = -5;
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                 ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                if (flag == ParseFlag.None) continue;
-                if (data.Flag.HasFlag(flag)) {
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
-                    if (tryImg == null) continue;
-                    ImageDecoration decoration = new ImageDecoration(tryImg, ContentAlignment.MiddleRight);
-                    decoration.Offset = new Size(offset, 0);
-                    if (args.SubItem.Decoration == null)
-                        args.SubItem.Decoration = decoration;
-                    else
-                        args.SubItem.Decorations.Add(decoration);
-                    offset -= 20;
-                }
+                if (flag == 0) continue;
+                if (!data.Flag.HasFlag(flag)) continue;
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                if (tryImg == null) continue;
+                ImageDecoration decoration = new ImageDecoration(tryImg, ContentAlignment.MiddleRight) {
+                    Offset = new Size(offset, 0)
+                };
+                if (args.SubItem.Decoration == null)
+                    args.SubItem.Decoration = decoration;
+                else
+                    args.SubItem.Decorations.Add(decoration);
+                offset -= 20;
             }
             if (offset < -5) offset -= 5; 
-            if (!string.IsNullOrEmpty(data.SubType)) {
-                TextDecoration decoration = new TextDecoration(data.SubType, 95);
+            if (!string.IsNullOrEmpty(data.SubString)) {
+                TextDecoration decoration = new TextDecoration(data.SubString, 95);
                 decoration.Alignment = ContentAlignment.MiddleRight;
                 decoration.Offset = new Size(offset, 0);
                 decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
@@ -479,8 +479,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// </summary>
     public class CompletionDataSortingClass : IComparer<CompletionData> {
         public int Compare(CompletionData x, CompletionData y) {
+            // compare first by CompletionType
             int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
-            return compare == 0 ? y.Ranking.CompareTo(x.Ranking) : compare;
+            if (compare != 0) return compare;
+            // then by ranking
+            compare = y.Ranking.CompareTo(x.Ranking);
+            if (compare != 0) return compare;
+            // then sort by parsed items first
+            if (x.Type == CompletionType.Table) {
+                compare = y.FromParser.CompareTo(x.FromParser);
+                if (compare != 0) return compare;
+            }
+            // then sort by scope
+            if (x.ParsedItem != null && y.ParsedItem != null) {
+                compare = ((int)y.ParsedItem.Scope).CompareTo(((int)x.ParsedItem.Scope));
+                if (compare != 0) return compare;
+            }
+            // sort by display text in last resort
+            return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }
     }
     #endregion
