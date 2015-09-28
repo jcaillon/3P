@@ -289,6 +289,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\FieldPk.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Function.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Keyword.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\KeywordObject.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Preprocessed.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Procedure.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Snippet.png" />

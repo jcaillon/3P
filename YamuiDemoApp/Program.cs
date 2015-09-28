@@ -23,6 +23,8 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
             
+            TextTests.Run();
+
             //Keywords.Init();
 
             ParserLexerTests.Run();

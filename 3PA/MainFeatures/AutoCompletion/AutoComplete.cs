@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using YamuiFramework.HtmlRenderer.Core.Core;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -16,7 +18,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Was the autocompletion opened naturally or from the user shortkey?
         /// </summary>
         private static bool _openedFromShortCut;
+
         private static AutoCompletionForm _form;
+
+        /// <summary>
+        /// The enum and fields below allow to know what type of list must be displayed to the user
+        /// </summary>
+        private enum TypeOfList {
+            Complete,
+            Fields,
+            Tables,
+            ObjectKeywords
+        }
+        private static TypeOfList _currentTypeOfList;
+        private static ParsedDataBase _currentDataBase;
+        private static ParsedTable _currentTable;
 
         // true if we are using the _savedAllItems in _currentItems, false otherwise (= we are showing fields)
         private static bool _showingAllItems;
@@ -29,10 +45,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         // contains the list of items that do not depend on the current file (keywords, database, snippets)
         private static List<CompletionData> _staticItems;
-
-        // bool that indicates to the method showing the popup if the _currentItems have changed
-        // and therefore as to be reloaded into the list
-        private static bool _needToUpdateItemsInTheList;
 
         // holds the display order of the CompletionType
         private static List<int> _completionTypePriority;
@@ -52,7 +64,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
         }
         
-
         /// <summary>
         /// this method should be called to refresh the Items list with all the static items
         /// as well as the dynamic items found by the parser
@@ -72,10 +83,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // update autocompletion
             _currentItems = _savedAllItems;
-            if (_form != null && _showingAllItems)
-                _form.SetItems(_currentItems);
-
-            _needToUpdateItemsInTheList = true;
+            if (_showingAllItems)
+                UpdateFormWithCurrentItemList();
         }
 
         /// <summary>
@@ -106,33 +115,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _savedAllItems = _staticItems.ToList();
             }
 
-            _needToUpdateItemsInTheList = true;
-        }
-
-
-        /// <summary>
-        /// This method is called to switch temporarly the items of the completion form, from
-        /// a complete list to only the fields of the current table
-        /// </summary>
-        private static void SwapToFieldsItems() {
-            _showingAllItems = false;
-            var fieldsItems = DataBase.GetFieldsList(ParserHandler.FindAnyTableOrBufferByName(Npp.GetCurrentTable()));
-            _currentItems = fieldsItems;
-            if (_form != null)
-                _form.SetItems(_currentItems);
-            _needToUpdateItemsInTheList = true;
-        }
-
-        /// <summary>
-        /// this method is called to switch back to the persistentItem of the completion form,
-        /// after showing only fields
-        /// </summary>
-        private static void ResetToCompleteItems() {
-            _showingAllItems = true;
-            _currentItems = _savedAllItems;
-            if (_form != null)
-                _form.SetItems(_currentItems);
-            _needToUpdateItemsInTheList = true;
+            if (_showingAllItems)
+                UpdateFormWithCurrentItemList();
         }
 
         /// <summary>
@@ -151,96 +135,195 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         /// <summary>
         /// handles the opening or the closing of the autocompletion form on key input, 
-        /// filter by the current input and so on..
+        /// it is only called when the user adds or delete a char
         /// </summary>
-        public static void ActivatedAutoCompleteIfNeeded() {
-            string keyword = Npp.GetKeyword();
+        public static void UpdateAutocompletion() {
+            try {
+                string keyword = Npp.GetKeyword();
 
-            //TODO: Dont show autocompletion if SCI_GETSELECTIONS multiple selections!
+                //TODO: Dont show autocompletion if SCI_GETSELECTIONS multiple selections! No better, autocomplete on each line..
 
-            // can we even show it?
-            if (keyword.Length >= Config.Instance.AutoCompleteStartShowingListAfterXChar || IsVisible) {
-                // the form is already visible
-                if (IsVisible) {
-                    if (!_openedFromShortCut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)
-                        Close();
-                    else {
-                        // if opened with fields only, show complete if the user deleted the . char
+                // overwrite for . and : we need to show the list
+                var lastChar = Npp.GetCharBeforeWord(Npp.GetCaretPosition());
+                if ((lastChar.Equals(".") || lastChar.Equals(":")) && IsNeedToUpdateTypeOfList()) {
+                    if (IsVisible) {
+                        // update the filter
+                        _form.FilterByText = keyword;
+                        UpdateTypeOfList(true);
+                    } else
+                        ShowSuggestionList(UpdateTypeOfList(true));
+                    return;
+                }
+
+                // can we even show it?
+                if (keyword.Length >= Config.Instance.AutoCompleteStartShowingListAfterXChar || IsVisible) {
+                    // the form is already visible
+                    if (IsVisible) {
+                        // close if the current keyword isn't long enough
+                        if (!_openedFromShortCut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
+                            Close();
+                            return;
+                        }
+                        
+                        // update the filter
                         _form.FilterByText = keyword;
 
                         // close it if the list is empty and we the user selected the option to close it
                         if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0)
-                            Close();
+                            Close();                       
+                    } else {
+                        // show it
+                        if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition()))
+                            ShowSuggestionList(UpdateTypeOfList());
                     }
                 } else {
-                    if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition()))
-                        ShowCompleteSuggestionList(false);
+                    Close();
                 }
-            } else {
-                Close();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
             }
         }
 
         /// <summary>
         /// Called from CTRL + Space shortcut
         /// </summary>
-        public static void ShowCompleteSuggestionList() {
-            ShowCompleteSuggestionList(true);
-        }
-
-        public static void ShowCompleteSuggestionList(bool displayFromShortCut) {
+        public static void OnShowCompleteSuggestionList() {
+            _openedFromShortCut = true;
+            _currentTypeOfList = TypeOfList.Complete;
             try {
-                //TODO: look if we are entering a table SAC.?
-                if (Npp.WeAreEnteringAField()) {
-                    var foundTable = ParserHandler.FindAnyTableOrBufferByName((Npp.GetCurrentTable()));
-                    if (foundTable != null) {
-                        SwapToFieldsItems();
-                        // show the list but only activate fields by default
-                        ShowSuggestionList(displayFromShortCut, new List<CompletionType> {
-                            CompletionType.FieldPk, 
-                            CompletionType.Field
-                        });
-                        return;
-                    }
-                }
-                if (!_showingAllItems) ResetToCompleteItems();
-                ShowSuggestionList(displayFromShortCut);
+                ShowSuggestionList(UpdateTypeOfList());
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
             }
         }
 
-        public static void ShowSnippetsList() {
-            try {
-                if (!_showingAllItems) ResetToCompleteItems();
-                ShowSuggestionList(true, new List<CompletionType> { CompletionType.Snippet });
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowSnippetsList");
-            }
-        }
+        /// <summary>
+        /// Display the autocomp list, uses the TypeOfList _currentTypeOfList,
+        /// can be called even if the List is already visible! will just update it!
+        /// </summary>
+        public static List<CompletionType> UpdateTypeOfList(bool updateTypeOfList) {
+            // activated completionType
+            List<CompletionType> activateTypesList = null;
 
-        public static void ShowFieldsSuggestions(bool displayFromShortCut) {
-            try {
-                SwapToFieldsItems();
-                // show the list but only activate field by default
-                ShowSuggestionList(displayFromShortCut, new List<CompletionType> {
-                    CompletionType.FieldPk, 
-                    CompletionType.Field
-                });
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowFieldsSuggestions");
+            // Do we need to change the current type of list? then update item list
+            if (updateTypeOfList) {
+                switch (_currentTypeOfList) {
+                    case TypeOfList.Complete:
+                        ResetToCompleteItems();
+                        // filterList = 
+                        break;
+                    case TypeOfList.Fields:
+                        SwapToFieldsItems(_currentTable);
+                        break;
+                    case TypeOfList.ObjectKeywords:
+                        ResetToCompleteItems();
+                        activateTypesList = new List<CompletionType> {
+                            CompletionType.KeywordObject,
+                        };
+                        break;
+                    case TypeOfList.Tables:
+                        SwapToTablesItems(_currentDataBase);
+                        break;
+                }
             }
+            return activateTypesList;
         }
 
         /// <summary>
-        /// This function handles the display of the autocomplete form
+        /// Display the autocomp list, uses the TypeOfList _currentTypeOfList,
+        /// can be called even if the List is already visible! will just update it!
         /// </summary>
-        /// <param name="displayFromShortCut"></param>
-        /// <param name="allowedType"></param>
-        private static void ShowSuggestionList(bool displayFromShortCut, List<CompletionType> allowedType = null) {
-            _openedFromShortCut = displayFromShortCut;
+        public static List<CompletionType> UpdateTypeOfList() {
+            return UpdateTypeOfList(IsNeedToUpdateTypeOfList());
+        }
 
-            if (_currentItems == null || !_currentItems.Any()) {
+        /// <summary>
+        /// is there a need to update the type of list?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsNeedToUpdateTypeOfList() {
+            var currentTypeOfList = _currentTypeOfList;
+            _currentTypeOfList = GetListToShow();
+            return currentTypeOfList != _currentTypeOfList;
+        }
+
+        /// <summary>
+        /// Output the type of list we need to display to the user, also store the found dataBase or 
+        /// foundTable for later use (avoid calculating it twice)
+        /// </summary>
+        /// <returns></returns>
+        private static TypeOfList GetListToShow() {
+            var curPos = Npp.GetCaretPosition();
+            var previousWord = Npp.GetFirstWordRightAfterPoint(curPos);
+
+            if (!string.IsNullOrEmpty(previousWord)) {
+                // are we entering a field from a known table?
+                var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+                if (foundTable != null) {
+                    _currentTable = foundTable;
+                    return TypeOfList.Fields;
+                }
+
+                // are we entering a table from a connected database?
+                var foundDatabase = DataBase.FindDatabaseByName(previousWord);
+                if (foundDatabase != null) {
+                    _currentDataBase = foundDatabase;
+                    return TypeOfList.Tables;
+                }
+            }
+
+            // We want to access the methods/properties/attributes keywords?
+            if (Npp.GetCharBeforeWord(curPos).Equals(":"))
+                return TypeOfList.ObjectKeywords;
+
+            return TypeOfList.Complete;
+        }
+
+        /// <summary>
+        /// This method is called to switch temporarly the items of the completion form, from
+        /// a complete list to only the fields of the current table
+        /// </summary>
+        private static void SwapToFieldsItems(ParsedTable currentTable) {
+            _showingAllItems = false;
+            _currentItems = DataBase.GetFieldsList(currentTable).ToList();
+            UpdateFormWithCurrentItemList();
+        }
+
+        /// <summary>
+        /// This method is called to switch temporarly the items of the completion form, from
+        /// a complete list to only the tables of the current database
+        /// </summary>
+        private static void SwapToTablesItems(ParsedDataBase currentDataBase) {
+            _showingAllItems = false;
+            _currentItems = DataBase.GetTablesList(currentDataBase).ToList();
+            UpdateFormWithCurrentItemList();
+        }
+
+        /// <summary>
+        /// this method is called to switch back to the persistentItem of the completion form,
+        /// after showing only fields
+        /// </summary>
+        private static void ResetToCompleteItems() {
+            if (_showingAllItems) return;
+            _showingAllItems = true;
+            _currentItems = _savedAllItems;
+            UpdateFormWithCurrentItemList();
+        }
+
+        /// <summary>
+        /// updates the form with the _currentItem List
+        /// </summary>
+        private static void UpdateFormWithCurrentItemList() {
+            if (_form != null)
+                _form.SetItems(_currentItems);
+        }
+
+        /// <summary>
+        /// This function handles the display of the autocomplete form, create or update it
+        /// </summary>
+        /// <param name="allowedType"></param>
+        private static void ShowSuggestionList(List<CompletionType> allowedType = null) {
+            if (_currentItems == null) {
                 Close();
                 return;
             }
@@ -259,10 +342,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _form.TabCompleted += OnTabCompleted;
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetItems(_currentItems);
-            } else if (_needToUpdateItemsInTheList) {
-                // Otherwise, if needed set the new list of items
-                _form.SetItems(_currentItems);
-                _needToUpdateItemsInTheList = false;
             } else {
                 // else, just sort the items, to reflect the latest ranking
                 _form.SortItems();
@@ -289,7 +368,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 _form.UnCloack();
             }
-
         }
 
         /// <summary>

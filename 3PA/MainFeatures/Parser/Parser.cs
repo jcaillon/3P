@@ -78,7 +78,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionnary
-            var current = new LineInfo(0, ParsedScope.Global, "");
+            var current = new LineInfo(0, ParsedScope.File, "");
             for (int i = 0; i < _lexer.MaxLine; i++) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
@@ -184,9 +184,9 @@ namespace _3PA.MainFeatures.Parser {
                         case "end":
                             _context.BlockDepth--;
                             if (_context.BlockDepth == 0) {
-                                if (_context.Scope != ParsedScope.Global)
+                                if (_context.Scope != ParsedScope.File)
                                     _context.LcOwnerName = "";
-                                _context.Scope = ParsedScope.Global;
+                                _context.Scope = ParsedScope.File;
                             }
                             break;
                         case "else":
@@ -666,7 +666,7 @@ namespace _3PA.MainFeatures.Parser {
                     AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
                     break;
                 case "&ANALYZE-SUSPEND":
-                    _context.Scope = ParsedScope.Global;
+                    _context.Scope = ParsedScope.File;
                     if (toParse.ContainsFast("_DEFINITIONS"))
                         _context.LcOwnerName = "definitions";
                     else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK"))
@@ -903,7 +903,7 @@ namespace _3PA.MainFeatures.Parser {
         public List<Token> StatementTokenList = new List<Token>();
         public int StatementWordCount;
         public int BlockDepth;
-        public ParsedScope Scope = ParsedScope.Global;
+        public ParsedScope Scope = ParsedScope.File;
         public string LcOwnerName = "";
     }
 

@@ -22,7 +22,7 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     public enum ParsedScope {
-        Global,
+        File,
         Procedure,
         Function,
         Trigger
@@ -265,8 +265,9 @@ namespace _3PA.MainFeatures.Parser {
         TableHandle,
         Dataset,
         DatasetHandle,
-        // below are the types that are not considered as primitive
+        // below are the types that are not considered as primitive (they will appear in the VariableComplex category)
         Clob = 30,
+        WidgetHandle,
         Blob,
         Widget,
         Unknow,

@@ -115,9 +115,15 @@ namespace _3PA.MainFeatures {
         public string EnvLetter = "";
         public string IniPath = "";
         public string PfPath = "";
+        /// <summary>
+        /// Propath for compilation time, we can find the .i there
+        /// </summary>
         public string ProPath = "";
         public string DataBaseConnection = "";
         public string CmdLineParameters = "";
+        /// <summary>
+        /// Path to the workarea, we can find the .p, .t, .w there
+        /// </summary>
         public string BaseLocalPath = "";
         public string BaseCompilationPath = "";
         public string LogFilePath = "";

@@ -24,7 +24,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// contains the list of items that depend on the current file, that list
         /// is updated by the parser's visitor class
         /// </summary>
-        public static List<CompletionData> ParsedItemsList;
+        public static List<CompletionData> ParsedItemsList = new List<CompletionData>();
 
         private static Parser.Parser _ablParser;
 
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 case "com-handle":
                     return ParsedPrimitiveType.Comhandle;
                 case "datetime-tz":
-                    return ParsedPrimitiveType.Comhandle;
+                    return ParsedPrimitiveType.Datetimetz;
                 case "unsigned-short":
                     return ParsedPrimitiveType.UnsignedShort;
                 case "unsigned-long":
@@ -144,6 +144,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     return ParsedPrimitiveType.TableHandle;
                 case "dataset-handle":
                     return ParsedPrimitiveType.DatasetHandle;
+                case "widget-handle":
+                    return ParsedPrimitiveType.WidgetHandle;
                 default:
                     var token1 = str;
                     foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
@@ -207,8 +209,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // if it's another var
             if (nbPoints == 0) {
                 var foundVar = ParsedItemsList.Find(data =>
-                    (data.Type == CompletionType.UserVariablePrimitive ||
-                     data.Type == CompletionType.UserVariableOther) && data.DisplayText.EqualsCi(likeStr));
+                    (data.Type == CompletionType.VariablePrimitive ||
+                     data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
                 return foundVar != null ? ((ParsedDefine)foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
             }
 

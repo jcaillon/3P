@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = "",
-                Flag = pars.Scope == ParsedScope.Global ? ParseFlag.FileScope : ParseFlag.LocalScope,
+                Flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope,
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedDefine pars) {
             // set flags
-            var flag = pars.Scope == ParsedScope.Global ? ParseFlag.FileScope : ParseFlag.LocalScope;
+            var flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope;
             if (pars.Type == ParseDefineType.Parameter) flag = flag | ParseFlag.Parameter;
 
             // find primitive type
@@ -119,15 +119,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 subString = hasPrimitive ? pars.PrimitiveType.ToString() : pars.Type.ToString();
                 switch (pars.Type) {
                     case ParseDefineType.Parameter:
-                        type = CompletionType.UserVariablePrimitive;
+                        type = CompletionType.VariablePrimitive;
                         break;
                     case ParseDefineType.Variable:
                         if (!string.IsNullOrEmpty(pars.ViewAs))
                             type = CompletionType.Widget;
                         else if ((int) pars.PrimitiveType < 30)
-                            type = CompletionType.UserVariablePrimitive;
+                            type = CompletionType.VariablePrimitive;
                         else
-                            type = CompletionType.UserVariableOther;
+                            type = CompletionType.VariableComplex;
                         break;
                     case ParseDefineType.Button:
                     case ParseDefineType.Browse:
@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         type = CompletionType.Widget;
                         break;
                     default:
-                        type = CompletionType.UserVariableOther;
+                        type = CompletionType.VariableComplex;
                         break;
                 }
             }

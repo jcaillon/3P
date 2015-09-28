@@ -154,7 +154,7 @@ namespace _3PA
                         
                         // did the user supress 1 char?
                         if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
-                            AutoComplete.ActivatedAutoCompleteIfNeeded();
+                            AutoComplete.UpdateAutocompletion();
                         }
 
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;

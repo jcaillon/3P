@@ -24,7 +24,7 @@ namespace _3PA.Lib {
         public bool AutoCompleteUseSpaceToInsertSnippet = true;
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
-        public bool AutoCompleteShowInCommentsAndStrings = true;
+        public bool AutoCompleteShowInCommentsAndStrings = false;
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
         public double AutoCompleteUnfocusedOpacity = 0.92d;
@@ -37,7 +37,7 @@ namespace _3PA.Lib {
 
 
         [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
-        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,9,12,0,1";
+        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,0,1";
 
         public bool ExplorerUseAlternateColors = false;
 

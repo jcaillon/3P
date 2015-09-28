@@ -9,6 +9,9 @@ using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
+    //TODO: pour gérer les HANDLE attribute, ajouter une colonne aux keywords qui peut soit être vide soit contenir une liste de nombres qui correspondent à un id de handle:
+    // par exemple, on a le Buffer object handle qui a l'id 1, et ben quand on affiche les propriétés d'un keyword qu'on identifie en tant que Buffer object handle, on filtre les propriétés/méthodes qui ont se flag 1 dans la 5eme colonne
+
     /// <summary>
     /// this class handles the static keywords of progress
     /// </summary>
@@ -31,14 +34,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _keywords.Clear();
             try {
                 foreach (var items in File.ReadAllLines(_filePath).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
+ 
+                    // find the KeywordType from items[1]
+                    KeywordType keywordType = KeywordType.Unknow;
+                    var keywordTypeStr = items[1];
+                    foreach (var typ in Enum.GetNames(typeof(KeywordType)).Where(typ => keywordTypeStr.EqualsCi(typ)))
+                        keywordType = (KeywordType)Enum.Parse(typeof(KeywordType), typ, true);
+
+                    // set flags
                     var flag = (items[2] == "1") ? ParseFlag.Reserved : 0;
-                    if (items[1].Equals("abbreviation")) flag = flag | ParseFlag.Abbreviation;
+                    if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
+
                     _keywords.Add(new CompletionData {
                         DisplayText = items[0],
-                        Type = CompletionType.Keyword,
+                        Type = ((int)keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                         Ranking = int.Parse(items[3]),
-                        SubString = items[1],
-                        Flag = flag
+                        SubString = keywordType.ToString(),
+                        Flag = flag,
+                        KeywordType = keywordType
                     });
                 }
             } catch (Exception e) {
@@ -90,6 +103,30 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 );
             return found != null ? found.CompleteText : abbreviation;
         }
+    }
+
+    /// <summary>
+    /// Keyword types enumeration
+    /// </summary>
+    public enum KeywordType {
+        // below are the types that go to the Keyword category
+        Statement,
+        Function,
+        Operator,
+        Option,
+        Type,
+        Widget,
+        Preprocessor,
+        Handle,
+        Event,
+        Keyboard,
+        Abbreviation,
+        Appbuilder,
+        Unknow,
+        // below are the types that go into the KeywordObject category
+        Attribute = 30,
+        Property,
+        Method,
     }
 
     public class KeywordsAbbreviations {

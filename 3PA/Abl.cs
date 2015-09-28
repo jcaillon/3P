@@ -43,8 +43,14 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
+        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
+        /// stopAtPoint or not, if not, output the nbPoints found
         /// </summary>
+        /// <param name="input"></param>
+        /// <param name="stopAtPoint"></param>
+        /// <param name="nbPoints"></param>
+        /// <param name="readRightToLeft"></param>
+        /// <returns></returns>
         public static string ReadAblWord(string input, bool stopAtPoint, out int nbPoints, bool readRightToLeft = true) {
             nbPoints = 0;
             var max = input.Length - 1;
@@ -61,6 +67,20 @@ namespace _3PA {
                 } else break;
             }
             return count == 0 ? string.Empty : input.Substring(readRightToLeft ? input.Length - count : 0, count);
+        }
+
+        /// <summary>
+        /// Overload,
+        /// Reads a a word, either starting from the end (readRightToLeft = true) of the start of the input string 
+        /// stopAtPoint or not
+        /// </summary>
+        /// <param name="input"></param>
+        /// <param name="stopAtPoint"></param>
+        /// <param name="readRightToLeft"></param>
+        /// <returns></returns>
+        public static string ReadAblWord(string input, bool stopAtPoint, bool readRightToLeft = true) {
+            int nb;
+            return ReadAblWord(input, stopAtPoint, out nb, readRightToLeft);
         }
     }
 }

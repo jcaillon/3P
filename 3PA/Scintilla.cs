@@ -165,7 +165,12 @@ namespace _3PA {
         /// <param name="caretPos"></param>
         /// <returns></returns>
         public static bool IsNormalContext(int caretPos) {
-            UdlStyles curCntext = (UdlStyles) GetStyleAt(caretPos);
+            UdlStyles curCntext;
+            try {
+                curCntext = (UdlStyles) GetStyleAt(caretPos);
+            } catch (Exception) {
+                curCntext = UdlStyles.Default;
+            }
             return (curCntext != UdlStyles.Comment
                     && curCntext != UdlStyles.Delimiter1
                     && curCntext != UdlStyles.Delimiter2
@@ -180,9 +185,7 @@ namespace _3PA {
         /// <param name="line"></param>
         /// <param name="text"></param>
         public static void ReplaceLine(int line, string text) {
-            Call(SciMsg.SCI_GOTOLINE, line);
-            SetSelection(GetCaretPosition(), Call(SciMsg.SCI_GETLINEENDPOSITION, line));
-            SetSelectedText(text);
+            SetTextByRange(Call(SciMsg.SCI_POSITIONFROMLINE, line), Call(SciMsg.SCI_GETLINEENDPOSITION, line), text);
         }
 
         /// <summary>
@@ -203,14 +206,6 @@ namespace _3PA {
         public static void SetPreviousLineRelativeIndent(int indent) {
             int line = GetCaretLineNumber();
             Call(SciMsg.SCI_SETLINEINDENTATION, line - 1, GetLineIndent(line - 1) + indent);
-        }
-
-        /// <summary>
-        /// get current line indent
-        /// </summary>
-        /// <returns></returns>
-        public static int GetLineIndent() {
-            return Call(SciMsg.SCI_GETLINEINDENTATION, GetLineNumber(GetCaretPosition()), 0);
         }
 
         /// <summary>
@@ -279,64 +274,74 @@ namespace _3PA {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSEL, curPos, curPos);
         }
 
+        public static string GetKeywordOnLeftOfPosition(int curPos, out Point point) {
+            var word = Abl.ReadAblWord(GetTextOnLeftOfPos(curPos), true);
+            point = new Point(curPos - word.Length, curPos);
+            return word;
+        }
+
         public static string GetKeyword() {
             Point pt;
             return GetKeywordOnLeftOfPosition(GetCaretPosition(), out pt);
         }
 
-        public static string GetKeyword(int curPos) {
-            Point pt;
-            return GetKeywordOnLeftOfPosition(curPos, out pt);
+        /// <summary>
+        /// Returns the first "char" (actually a string of lenght 1) found before the word at curPos
+        /// </summary>
+        /// <param name="curPos"></param>
+        /// <returns></returns>
+        public static string GetCharBeforeWord(int curPos) {
+            var strOnLeft = GetTextOnLeftOfPos(curPos);
+            var lastWord = Abl.ReadAblWord(strOnLeft, true);
+            int startPos = strOnLeft.Length - 1 - lastWord.Length;
+            return startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
         }
 
-        public static string GetKeywordOnLeftOfPosition(int curPos, out Point point) {
-            var word = "";
-            var locPoint = new Point();
+        /// <summary>
+        /// returns the first keyword right after the point (reading from right to left)
+        /// it is useful to get a table name when we enter a field, or a database name when we enter a table name,
+        /// also, if you analyse DATABASE.TABLE.CURFIELD, if returns TABLE and not DATABASE!
+        /// </summary>
+        /// <param name="curPos"></param>
+        /// <returns></returns>
+        public static string GetFirstWordRightAfterPoint(int curPos) {
+            int nbPoints;
+            var wholeWord = Abl.ReadAblWord(GetTextOnLeftOfPos(curPos), false, out nbPoints);
+            switch (nbPoints) {
+                case 1:
+                    return wholeWord.Split('.')[0];
+                case 2:
+                    return wholeWord.Split('.')[1];
+            }
+            return string.Empty;
+        }
 
+        /// <summary>
+        /// returns the text on the left of the position... it will always return empty string at minima
+        /// </summary>
+        /// <param name="curPos"></param>
+        /// <param name="maxLenght"></param>
+        /// <returns></returns>
+        public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
             var startPos = curPos - KeywordMaxLength;
             startPos = (startPos > 0) ? startPos : 0;
 
             // get the text on the left of the carret
-            if (curPos - startPos > 0) {
-                string leftText = GetTextByRange(startPos, curPos);
-                int nbPts;
-                word = Abl.ReadAblWord(leftText, true, out nbPts);
-                locPoint.X = curPos - word.Length;
-                locPoint.Y = curPos;
-            }
-
-            point = locPoint;
-            return word;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
         }
 
-        public static string GetCurrentTable() {
-            return GetCurrentTable(GetCaretPosition());
-        }
-
-        public static string GetCurrentTable(int curpos) {
-            var textOnLeft = TextBeforePosition(curpos, KeywordMaxLength*2);
-            return Regex.Match(textOnLeft, @".*[^\w-&]([\w-]{2,})\.[\w-]*$", RegexOptions.IgnoreCase).Groups[1].Value;
-        }
-
-        public static bool WeAreEnteringAField() {
-            return WeAreEnteringAField(GetCaretPosition());
-        }
-
-        public static bool WeAreEnteringAField(int curpos) {
-            var textOnLeft = TextBeforePosition(curpos, KeywordMaxLength*2);
-            return Regex.IsMatch(textOnLeft, @".*[\w-]{2,}\.[\w-]*$", RegexOptions.IgnoreCase);
-        }
-
+        /// <summary>
+        /// returns the indent value as a string, can be either a \t or a number of ' '
+        /// </summary>
+        /// <returns></returns>
         public static string GetIndentString() {
-            if (GetUseTabs()) {
-                return "\t";
-            }
-            var widthInChars = GetTabWidth();
-            return new string(' ', widthInChars);
+            return GetUseTabs() ? "\t" : new string(' ', GetTabWidth());
         }
 
         /// <summary>
         ///  barbarian method to force the default autocompletion window to hide
+        /// <remarks>This is a very bad technique, it makes npp slows down when there is too much text!
+        /// I need to find something else but... meh i can't deactivate the default autocomplete</remarks>
         /// </summary>
         public static void HideDefaultAutoCompletion() {
             //TODO: find a better technique to hide the autocompletion!!! this slows npp down
@@ -549,14 +554,20 @@ namespace _3PA {
             return "";
         }
 
+        /// <summary>
+        /// Returns the current carret position
+        /// </summary>
+        /// <returns></returns>
         public static int GetCaretPosition() {
             return (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
         }
 
+        /// <summary>
+        /// Returns the current line number
+        /// </summary>
+        /// <returns></returns>
         public static int GetCaretLineNumber() {
-            var currentPos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-
-            return (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINEFROMPOSITION, currentPos, 0);
+            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINEFROMPOSITION, GetCaretPosition(), 0);
         }
 
         public static void SetCaretPosition(int pos) {

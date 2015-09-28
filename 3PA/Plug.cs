@@ -49,8 +49,8 @@ namespace _3PA {
             var uniqueKeys = new Dictionary<Keys, int>();
             
             //                                                                      " name of the shortcut in config file : keys "
-            Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.ShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Show code snippet list", AutoComplete.ShowSnippetsList, "Show_SnippetsList:Ctrl+Shift+Space", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
+            //Interop.Plug.SetCommand(cmdIndex++, "Show code snippet list", AutoComplete.ShowSnippetsList, "Show_SnippetsList:Ctrl+Shift+Space", false, uniqueKeys);
             Interop.Plug.SetCommand(cmdIndex++, "Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false, uniqueKeys);
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
@@ -208,11 +208,15 @@ namespace _3PA {
 
                 // we are currently entering a keyword
                 if (Abl.IsCharAllowedInVariables(c)) {
-                    AutoComplete.ActivatedAutoCompleteIfNeeded();
+                    AutoComplete.UpdateAutocompletion();
 
                 // we finished entering a keyword
                 } else {
-                    AutoComplete.Close();
+                    // close the suggestions if we dont enter a table/field or object methods/prop
+                    if (c == '.' || c == ':')
+                        AutoComplete.UpdateAutocompletion();
+                    else
+                        AutoComplete.Close();
 
                     int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
                     int curPos = Npp.GetCaretPosition();
@@ -263,12 +267,12 @@ namespace _3PA {
                         Npp.WrappedKeywordReplace(".", new Point(curPos - 1, curPos), curPos);
 
                     // on DO: add an END
-                    if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
-                        int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
-                        string repStr = new String(' ', nbPrevInd);
-                        repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
-                        Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
-                    }
+                    //if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
+                    //    int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
+                    //    string repStr = new String(' ', nbPrevInd);
+                    //    repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
+                    //    Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
+                    //}
 
                     // handle indentation
                     if (newStr.Equals("\n")) {
@@ -478,7 +482,6 @@ namespace _3PA {
             AutoComplete.FillStaticItems();
             AutoComplete.FillItems();
             //Highlight.Colorize(0, Npp.GetTextLenght());
-            //Highlight.SetCustomStyles();
         }
         #endregion
     }

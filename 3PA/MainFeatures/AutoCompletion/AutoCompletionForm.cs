@@ -46,12 +46,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
+        // the private fields below are used for the filter function
         private Dictionary<CompletionType, SelectorButton> _activeTypes;
         private string _filterString;
         private string _currentLcOwnerName = "";
+        private int _currentLineNumber;
+
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private int _normalWidth;
+
+        // remember the list that was passed to the autocomplete form when we set the items, we need this
+        // because we reorder the list each time the user filters stuff, but we need the original order
         private List<CompletionData> _initialObjectsList;
+        
+        // contains the list of images, one for each type of completionType
         private ImageList _imageListOfTypes;
         #endregion
 
@@ -107,6 +115,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Database, _imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Widget, _imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.KeywordObject, _imageListOfTypes);
             fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData) rowObject;
@@ -438,6 +447,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
             _currentLcOwnerName = ParserHandler.GetCarretLineLcOwnerName;
+            _currentLineNumber = Npp.GetCurrentLineNumber();
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
             //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
 
@@ -463,12 +473,31 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="o"></param>
         /// <returns></returns>
         private bool FilterPredicate(object o) {
-            var compData = (CompletionData) o;
+            var compData = (CompletionData)o;
             // check for the filter match, the activated category,
-            // and for the current scope
-            return compData.DisplayText.ToLower().FullyMatchFilter(_filterString) && 
-                _activeTypes[compData.Type].Activated &&
-                (!compData.FromParser || compData.ParsedItem.Scope == ParsedScope.Global || compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName));
+            bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString) &&
+                _activeTypes[compData.Type].Activated;
+
+            // if the item isn't a parsed item, it is avaiable no matter where we are in the code
+            if (!compData.FromParser) return output;
+
+            // case of Parsed define or temp table define
+            if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable) {
+                // check for scope
+                if (compData.ParsedItem.Scope != ParsedScope.File)
+                    output = output && compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName);
+                // check for the definition line
+                output = output && _currentLineNumber >= compData.ParsedItem.Line;
+
+            } else if (compData.ParsedItem is ParsedPreProc) {
+                // if preproc, check line of definition and undefine
+                var parsedItem = (ParsedPreProc)compData.ParsedItem;
+                output = output && _currentLineNumber >= parsedItem.Line;
+                if (parsedItem.UndefinedLine > 0)
+                    output = output && _currentLineNumber <= parsedItem.UndefinedLine;
+            }
+
+            return output;
         }
         #endregion
     }
@@ -493,6 +522,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // then sort by scope
             if (x.ParsedItem != null && y.ParsedItem != null) {
                 compare = ((int)y.ParsedItem.Scope).CompareTo(((int)x.ParsedItem.Scope));
+                if (compare != 0) return compare;
+            }
+            // if keyword
+            if (x.Type == CompletionType.Keyword || x.Type == CompletionType.KeywordObject) {
+                compare = ((int)x.KeywordType).CompareTo(((int)y.KeywordType));
                 if (compare != 0) return compare;
             }
             // sort by display text in last resort
