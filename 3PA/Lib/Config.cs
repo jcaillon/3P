@@ -21,7 +21,7 @@ namespace _3PA.Lib {
         public bool AutoCompleteUseTabToAccept = true;
         public bool AutoCompleteUseEnterToAccept = false;
         
-        public bool AutoCompleteUseSpaceToInsertSnippet = true;
+        public bool AutoCompleteUseSpaceToInsertSnippet = true; //TODO
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
         public bool AutoCompleteShowInCommentsAndStrings = false;

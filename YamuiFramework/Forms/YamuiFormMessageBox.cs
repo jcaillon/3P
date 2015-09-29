@@ -66,7 +66,7 @@ namespace YamuiFramework.Forms {
                 };
                 yamuiButton1.Location = new Point(Width - 12 - ButtonWidth - (ButtonWidth + 5) * i, Height - 12 - yamuiButton1.Height);
                 yamuiButton1.ButtonPressed += (sender, args) => {
-                    _dialogResult = (int) args.ButtonTag;
+                    _dialogResult = (int) args.OriginalEventArgs;
                     Close();
                 };
                 Controls.Add(yamuiButton1);

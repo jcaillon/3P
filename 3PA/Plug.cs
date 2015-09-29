@@ -206,39 +206,30 @@ namespace _3PA {
                 Point keywordPos;
                 string keyword;
 
-                // we are currently entering a keyword
-                if (Abl.IsCharAllowedInVariables(c)) {
-                    AutoComplete.UpdateAutocompletion();
+                // handles the autocompletion
+                AutoComplete.UpdateAutocompletion();
 
                 // we finished entering a keyword
-                } else {
-                    // close the suggestions if we dont enter a table/field or object methods/prop
-                    if (c == '.' || c == ':')
-                        AutoComplete.UpdateAutocompletion();
-                    else
-                        AutoComplete.Close();
+                if (!Abl.IsCharAllowedInVariables(c)) {
 
                     int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1; 
                     int curPos = Npp.GetCaretPosition();
                     keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
 
+                    //TODO: if multiselection, replace everywhere!
+
                     // replace the last keyword by the correct case, check the context of the caret
-                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword)) {
+                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Highlight.IsNormalContext()) {
                         var casedKeyword = AutoComplete.CorrectKeywordCase(keyword);
                         if (casedKeyword != null)
                             Npp.WrappedKeywordReplace(casedKeyword, keywordPos, curPos);
                     }
                     return;
 
-                    bool isNormalContext = Npp.IsNormalContext(curPos);
+                    bool isNormalContext = Highlight.IsNormalContext();
 
                     // only do more stuff if we are not in a string/comment/include definition 
                     if (!isNormalContext) return;
-
-                    // show suggestions on fields (also show suggestions on table if databse!)
-                    //if (c == '.' && Config.Instance.AutoCompleteOnKeyInputShowSuggestions && DataBaseInfo.ContainsTable(Npp.GetCurrentTable()))
-                    //    AutoComplete.ShowFieldsSuggestions(true);
-
                     
                     bool lastWordInDico = true;
                     Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
@@ -255,11 +246,6 @@ namespace _3PA {
                         return;
                     }
                     */
-
-                    // replace the last keyword by the correct case, check the context of the caret
-                    if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && lastWordInDico)
-                        Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking(keyword), keywordPos, curPos);
-
                     return;
 
                     // replace semicolon by a point

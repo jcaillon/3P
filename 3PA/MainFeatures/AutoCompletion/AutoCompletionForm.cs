@@ -162,6 +162,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
             CompletionData data = (CompletionData)args.Model;
+            // display the flags
             int offset = -5;
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
                 ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
@@ -178,6 +179,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     args.SubItem.Decorations.Add(decoration);
                 offset -= 20;
             }
+            // display the sub string
             if (offset < -5) offset -= 5; 
             if (!string.IsNullOrEmpty(data.SubString)) {
                 TextDecoration decoration = new TextDecoration(data.SubString, 95);
@@ -232,6 +234,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 but.TabStop = false;
                 but.Location = new Point(xPos, Height - 28);
                 but.Type = type;
+                but.AcceptsRightClick = true;
                 but.ButtonPressed += HandleTypeClick;
                 _activeTypes.Add(type, but);
                 Controls.Add(but);
@@ -267,10 +270,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void SetActiveType(List<CompletionType> allowedType) {
             if (_activeTypes == null) return;
             foreach (var selectorButton in _activeTypes) {
-                if (allowedType.IndexOf(selectorButton.Value.Type) < 0) {
-                    selectorButton.Value.Activated = false;
-                    selectorButton.Value.Invalidate();
-                }
+                selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
+                selectorButton.Value.Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// use this to programmatically check any type that is not in the given list
+        /// </summary>
+        /// <param name="allowedType"></param>
+        public void SetUnActiveType(List<CompletionType> allowedType) {
+            if (_activeTypes == null) return;
+            foreach (var selectorButton in _activeTypes) {
+                selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
+                selectorButton.Value.Invalidate();
             }
         }
 
@@ -290,7 +303,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public void SelectFirstItem() {
             try {
-                fastOLV.SelectedIndex = 0;
+                if (TotalItems > 0)
+                    fastOLV.SelectedIndex = 0;
             } catch (Exception) {
                 // ignored
             }
@@ -353,25 +367,31 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void HandleTypeClick(object sender, EventArgs args) {
+        private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
+            var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
             CompletionType clickedType = ((SelectorButton) sender).Type;
-            if (_activeTypes[clickedType].Activated) {
-                // if everything is active, what we want to do is make everything but this one inactive
-                if (_activeTypes.Count(b => !b.Value.Activated) == 0) {
+
+            // on right click
+            if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
+                // everything is unactive but this one
+                if (_activeTypes.Count(b => b.Value.Activated) == 1 && _activeTypes.First(b => b.Value.Activated).Key == clickedType) {
+                    // activate all
+                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
+                        _activeTypes[key].Activated = true;
+                        _activeTypes[key].Invalidate();
+                    }
+                } else {
+                    // else deactivate all but this one
                     foreach (CompletionType key in _activeTypes.Keys.ToList()) {
                         _activeTypes[key].Activated = false;
                         _activeTypes[key].Invalidate();
                     }
                     _activeTypes[clickedType].Activated = true;
-                } else if (_activeTypes.Count(b => b.Value.Activated) == 1) {
-                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
-                        _activeTypes[key].Activated = true;
-                        _activeTypes[key].Invalidate();
-                    }
-                } else
-                    _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
+                }
             } else
+                // left click is only a toggle
                 _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
+
             _activeTypes[clickedType].Invalidate();
             ApplyFilter();
             // give focus back

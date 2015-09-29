@@ -29,33 +29,6 @@ namespace _3PA {
         private static readonly char[] StatementDelimiters = " ,:;'\"[]{}()".ToCharArray();
         private static IntPtr _curScintilla;
 
-        public enum UdlStyles {
-            Default = 0,
-            Comment = 1,
-            CommentLine = 2,
-            Number = 3,
-            KeyWordsList1 = 4,
-            KeyWordsList2 = 5,
-            KeyWordsList3 = 6,
-            KeyWordsList4 = 7,
-            KeyWordsList5 = 8,
-            KeyWordsList6 = 9,
-            KeyWordsList7 = 10,
-            KeyWordsList8 = 11,
-            FolderInCode1 = 13,
-            FolderInCode2 = 14,
-            FolderInComment = 15,
-            Delimiter1 = 16,
-            Delimiter2 = 17,
-            Delimiter3 = 18,
-            Delimiter4 = 19,
-            Delimiter5 = 20,
-            Delimiter6 = 21,
-            Delimiter7 = 22,
-            Delimiter8 = 23,
-            Operators = 24,
-        }
-
         /// <summary>
         ///     Gets the window handle to current Scintilla.
         /// </summary>
@@ -80,103 +53,6 @@ namespace _3PA {
             _curScintilla = (curScintilla == 0)
                 ? Plug.NppData._scintillaMainHandle
                 : Plug.NppData._scintillaSecondHandle;
-        }
-
-        #region Lexer stuff
-
-        /// <summary>
-        /// returns a boolean to know if we are currently using the container lexer
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsUsingContainerLexer() {
-            int x = Call(SciMsg.SCI_GETLEXER);
-            return (x == 0);
-        }
-
-        /// <summary>
-        /// Sets the current lexer to container lexer
-        /// </summary>
-        public static void SetLexerToContainerLexer() {
-            Call(SciMsg.SCI_SETLEXER, 0, 2);
-            //Call(SciMsg.SCI_COLOURISE, 0, -1);
-        }
-
-        /// <summary>
-        /// returns the position at which we need to start the styling
-        /// </summary>
-        /// <returns></returns>
-        public static int GetLastStyledPosition() {
-            return Call(SciMsg.SCI_GETENDSTYLED);
-        }
-
-        /// <summary>
-        /// Position of the starting line we need to style
-        /// </summary>
-        /// <returns></returns>
-        public static int GetSylingNeededStartPos() {
-            return PositionFromLine(LineFromPosition(GetLastStyledPosition()));
-        }
-
-        /// <summary>
-        /// Defines a style
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="bg"></param>
-        /// <param name="fg"></param>
-        public static void SetStyle(int id, Color bg, Color fg) {
-            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new COLORREF(bg)).ColorDWORD);
-            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new COLORREF(fg)).ColorDWORD);
-        }
-
-        /// <summary>
-        /// Sets the SciMsg.STYLE_DEFAULT style and then
-        /// sets all styles to have the same attributes as STYLE_DEFAULT
-        /// </summary>
-        /// <param name="bg"></param>
-        /// <param name="fg"></param>
-        public static void SetDefaultStyle(Color bg, Color fg) {
-            SetStyle((int)SciMsg.STYLE_DEFAULT, bg, fg);
-            Call(SciMsg.SCI_STYLECLEARALL);
-        }
-
-        /// <summary>
-        /// Style the text between startPos and endPos with the styleId
-        /// </summary>
-        /// <param name="styleId"></param>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        public static void StyleText(int styleId, int startPos, int endPos) {
-            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
-            Call(SciMsg.SCI_SETSTYLING, endPos - startPos, styleId);
-        }
-
-        /// <summary>
-        /// returns the style of the caret position
-        /// </summary>
-        /// <returns></returns>
-        public static int GetStyleAt(int caretPos) {
-            return Call(SciMsg.SCI_GETSTYLEAT, caretPos, 0);
-        }
-        #endregion
-
-        /// <summary>
-        /// Is the caret not in : an include, a string, a comment
-        /// </summary>
-        /// <param name="caretPos"></param>
-        /// <returns></returns>
-        public static bool IsNormalContext(int caretPos) {
-            UdlStyles curCntext;
-            try {
-                curCntext = (UdlStyles) GetStyleAt(caretPos);
-            } catch (Exception) {
-                curCntext = UdlStyles.Default;
-            }
-            return (curCntext != UdlStyles.Comment
-                    && curCntext != UdlStyles.Delimiter1
-                    && curCntext != UdlStyles.Delimiter2
-                    && curCntext != UdlStyles.Delimiter3
-                    && curCntext != UdlStyles.CommentLine
-                    && curCntext != UdlStyles.Delimiter8);
         }
 
         /// <summary>
@@ -281,20 +157,7 @@ namespace _3PA {
         }
 
         public static string GetKeyword() {
-            Point pt;
-            return GetKeywordOnLeftOfPosition(GetCaretPosition(), out pt);
-        }
-
-        /// <summary>
-        /// Returns the first "char" (actually a string of lenght 1) found before the word at curPos
-        /// </summary>
-        /// <param name="curPos"></param>
-        /// <returns></returns>
-        public static string GetCharBeforeWord(int curPos) {
-            var strOnLeft = GetTextOnLeftOfPos(curPos);
-            var lastWord = Abl.ReadAblWord(strOnLeft, true);
-            int startPos = strOnLeft.Length - 1 - lastWord.Length;
-            return startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
+            return Abl.ReadAblWord(GetTextOnLeftOfPos(GetCaretPosition()), true);
         }
 
         /// <summary>
@@ -834,6 +697,83 @@ namespace _3PA {
         public static void AddFindMark(int pos, int length) {
             Call(SciMsg.SCI_INDICATORFILLRANGE, pos, length);
         }
+
+        #region Lexer stuff
+
+        /// <summary>
+        /// returns a boolean to know if we are currently using the container lexer
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsUsingContainerLexer() {
+            int x = Call(SciMsg.SCI_GETLEXER);
+            return (x == 0);
+        }
+
+        /// <summary>
+        /// Sets the current lexer to container lexer
+        /// </summary>
+        public static void SetLexerToContainerLexer() {
+            Call(SciMsg.SCI_SETLEXER, 0, 2);
+            //Call(SciMsg.SCI_COLOURISE, 0, -1);
+        }
+
+        /// <summary>
+        /// returns the position at which we need to start the styling
+        /// </summary>
+        /// <returns></returns>
+        public static int GetLastStyledPosition() {
+            return Call(SciMsg.SCI_GETENDSTYLED);
+        }
+
+        /// <summary>
+        /// Position of the starting line we need to style
+        /// </summary>
+        /// <returns></returns>
+        public static int GetSylingNeededStartPos() {
+            return PositionFromLine(LineFromPosition(GetLastStyledPosition()));
+        }
+
+        /// <summary>
+        /// Defines a style
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="bg"></param>
+        /// <param name="fg"></param>
+        public static void SetStyle(int id, Color bg, Color fg) {
+            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new COLORREF(bg)).ColorDWORD);
+            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new COLORREF(fg)).ColorDWORD);
+        }
+
+        /// <summary>
+        /// Sets the SciMsg.STYLE_DEFAULT style and then
+        /// sets all styles to have the same attributes as STYLE_DEFAULT
+        /// </summary>
+        /// <param name="bg"></param>
+        /// <param name="fg"></param>
+        public static void SetDefaultStyle(Color bg, Color fg) {
+            SetStyle((int)SciMsg.STYLE_DEFAULT, bg, fg);
+            Call(SciMsg.SCI_STYLECLEARALL);
+        }
+
+        /// <summary>
+        /// Style the text between startPos and endPos with the styleId
+        /// </summary>
+        /// <param name="styleId"></param>
+        /// <param name="startPos"></param>
+        /// <param name="endPos"></param>
+        public static void StyleText(int styleId, int startPos, int endPos) {
+            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
+            Call(SciMsg.SCI_SETSTYLING, endPos - startPos, styleId);
+        }
+
+        /// <summary>
+        /// returns the style of the caret position
+        /// </summary>
+        /// <returns></returns>
+        public static int GetStyleAt(int caretPos) {
+            return Call(SciMsg.SCI_GETSTYLEAT, caretPos, 0);
+        }
+        #endregion
 
         /// <summary>
         ///     Returns the start and end of the selection without regard to which end is the current position and which is the

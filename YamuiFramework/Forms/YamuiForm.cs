@@ -486,6 +486,7 @@ namespace YamuiFramework.Forms {
         private void WindowButton_Click(object sender, EventArgs e) {
             var btn = sender as YamuiFormButton;
             if (btn == null) return;
+            if (((MouseEventArgs)e).Button != MouseButtons.Left) return;
             var btnFlag = (WindowButtons)btn.Tag;
             switch (btnFlag) {
                 case WindowButtons.Close:
@@ -582,7 +583,6 @@ namespace YamuiFramework.Forms {
                     _isPressed = true;
                     Invalidate();
                 }
-
                 base.OnMouseDown(e);
             }
 

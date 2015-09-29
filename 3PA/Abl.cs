@@ -59,7 +59,7 @@ namespace _3PA {
                 var pos = readRightToLeft ? max - count : count;
                 var ch = input[pos];
                 // normal word
-                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-' || ch =='&')
+                if (IsCharAllowedInVariables(ch))
                     count++;
                 else if (ch == '.' && !stopAtPoint) {
                     count++;

@@ -61,7 +61,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParsedItemsList.Clear();
                 _ablParser.Accept(new AutoCompParserVisitor());
             }
+        }
 
+        /// <summary>
+        /// List of parsed items
+        /// </summary>
+        /// <returns></returns>
+        public static List<CompletionData> GetParsedItemList() {
+            lock (_thisLock) {
+                return ParsedItemsList.ToList();
+            }
         }
 
         /// <summary>

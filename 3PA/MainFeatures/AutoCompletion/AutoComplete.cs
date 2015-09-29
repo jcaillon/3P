@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using YamuiFramework.HtmlRenderer.Core.Core;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -25,17 +23,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// The enum and fields below allow to know what type of list must be displayed to the user
         /// </summary>
         private enum TypeOfList {
+            Reset,
             Complete,
             Fields,
             Tables,
-            ObjectKeywords
+            KeywordObject
+        }
+
+        /// <summary>
+        /// stores the current value of the type of list displayed
+        /// </summary>
+        private static TypeOfList CurrentTypeOfList {
+            get { return _currentTypeOfList; }
+            set { 
+                _needToSetItems = true;
+                _currentTypeOfList = value;
+            }
         }
         private static TypeOfList _currentTypeOfList;
-        private static ParsedDataBase _currentDataBase;
-        private static ParsedTable _currentTable;
-
-        // true if we are using the _savedAllItems in _currentItems, false otherwise (= we are showing fields)
-        private static bool _showingAllItems;
+        private static bool _needToSetItems;
 
         // contains the list of items currently display in the form
         private static List<CompletionData> _currentItems;
@@ -57,9 +63,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (_completionTypePriority != null) return _completionTypePriority;
                 _completionTypePriority = new List<int>();
                 var temp = Config.Instance.AutoCompletePriorityList.Split(',').Select(int.Parse).ToList();
-                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++) {
+                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++)
                     _completionTypePriority.Add(temp.IndexOf(i));
-                }
                 return _completionTypePriority;
             }
         }
@@ -69,7 +74,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// as well as the dynamic items found by the parser
         /// </summary>
         public static void FillItems() {
-            if (_savedAllItems == null) _savedAllItems = new List<CompletionData>();
+            if (_savedAllItems == null) 
+                _savedAllItems = new List<CompletionData>();
 
             // init with static items
             _savedAllItems.Clear();
@@ -79,12 +85,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParserHandler.RefreshParser();
 
             // we had the dynamic items to the list
-            _savedAllItems.AddRange(ParserHandler.ParsedItemsList);
+            _savedAllItems.AddRange(ParserHandler.GetParsedItemList());
 
             // update autocompletion
-            _currentItems = _savedAllItems;
-            if (_showingAllItems)
-                UpdateFormWithCurrentItemList();
+            CurrentTypeOfList = TypeOfList.Reset;
+            if (IsVisible)
+                UpdateAutocompletion();
         }
 
         /// <summary>
@@ -92,10 +98,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// of each features
         /// </summary>
         public static void FillStaticItems() {
+            if (_savedAllItems == null)
+                _savedAllItems = new List<CompletionData>();
+
             // creates the static items list
-            if (_staticItems == null) _staticItems = new List<CompletionData>();
+            if (_staticItems == null) 
+                _staticItems = new List<CompletionData>();
             _staticItems.Clear();
             _staticItems =Keywords.GetList().ToList();
+            _staticItems.AddRange(DataBase.GetDbList());
+            _staticItems.AddRange(DataBase.GetTablesList());
             _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
                 DisplayText = x, 
                 Type = CompletionType.Snippet,
@@ -103,20 +115,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 FromParser = false,
                 Flag = 0
             }).ToList());
-            _staticItems.AddRange(DataBase.GetDbList());
-            _staticItems.AddRange(DataBase.GetTablesList());
 
             // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(new CompletionDataSortingClass());
-            _currentItems = _staticItems;
+            _savedAllItems = _staticItems.ToList();
 
-            if (_savedAllItems == null) {
-                _savedAllItems = new List<CompletionData>();
-                _savedAllItems = _staticItems.ToList();
-            }
-
-            if (_showingAllItems)
-                UpdateFormWithCurrentItemList();
+            CurrentTypeOfList = TypeOfList.Reset;
+            if (IsVisible)
+                UpdateAutocompletion();
         }
 
         /// <summary>
@@ -125,63 +131,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="keyword"></param>
         /// <returns></returns>
         public static string CorrectKeywordCase(string keyword) {
-            if (_currentItems == null) return null;
-            CompletionData found = _currentItems.Find(data => data.DisplayText.EqualsCi(keyword));
-            if (found == null) return null;
-            if (!found.FromParser) return Abl.AutoCaseToUserLiking(keyword);
-            return found.DisplayText;
-        }
-
-
-        /// <summary>
-        /// handles the opening or the closing of the autocompletion form on key input, 
-        /// it is only called when the user adds or delete a char
-        /// </summary>
-        public static void UpdateAutocompletion() {
-            try {
-                string keyword = Npp.GetKeyword();
-
-                //TODO: Dont show autocompletion if SCI_GETSELECTIONS multiple selections! No better, autocomplete on each line..
-
-                // overwrite for . and : we need to show the list
-                var lastChar = Npp.GetCharBeforeWord(Npp.GetCaretPosition());
-                if ((lastChar.Equals(".") || lastChar.Equals(":")) && IsNeedToUpdateTypeOfList()) {
-                    if (IsVisible) {
-                        // update the filter
-                        _form.FilterByText = keyword;
-                        UpdateTypeOfList(true);
-                    } else
-                        ShowSuggestionList(UpdateTypeOfList(true));
-                    return;
-                }
-
-                // can we even show it?
-                if (keyword.Length >= Config.Instance.AutoCompleteStartShowingListAfterXChar || IsVisible) {
-                    // the form is already visible
-                    if (IsVisible) {
-                        // close if the current keyword isn't long enough
-                        if (!_openedFromShortCut && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar) {
-                            Close();
-                            return;
-                        }
-                        
-                        // update the filter
-                        _form.FilterByText = keyword;
-
-                        // close it if the list is empty and we the user selected the option to close it
-                        if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0)
-                            Close();                       
-                    } else {
-                        // show it
-                        if (Config.Instance.AutoCompleteShowInCommentsAndStrings || Npp.IsNormalContext(Npp.GetCaretPosition()))
-                            ShowSuggestionList(UpdateTypeOfList());
-                    }
-                } else {
-                    Close();
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
-            }
+            if (_savedAllItems == null) return null;
+            CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
+            if (found != null)
+                return !found.FromParser ? Abl.AutoCaseToUserLiking(keyword) : found.DisplayText;
+            // search in tables' fields
+            var previousWord = Npp.GetFirstWordRightAfterPoint(Npp.GetCaretPosition());
+            if (!string.IsNullOrEmpty(previousWord) && ParserHandler.FindAnyTableOrBufferByName(previousWord) != null)
+                return Abl.AutoCaseToUserLiking(keyword);
+            return null;
         }
 
         /// <summary>
@@ -189,149 +147,110 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
             _openedFromShortCut = true;
-            _currentTypeOfList = TypeOfList.Complete;
             try {
-                ShowSuggestionList(UpdateTypeOfList());
+                UpdateAutocompletion();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
             }
         }
 
         /// <summary>
-        /// Display the autocomp list, uses the TypeOfList _currentTypeOfList,
-        /// can be called even if the List is already visible! will just update it!
+        /// handles the opening or the closing of the autocompletion form on key input, 
+        /// it is only called when the user adds or delete a char
         /// </summary>
-        public static List<CompletionType> UpdateTypeOfList(bool updateTypeOfList) {
-            // activated completionType
-            List<CompletionType> activateTypesList = null;
+        public static void UpdateAutocompletion() {
+            try {
+                if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut) 
+                    return;
 
-            // Do we need to change the current type of list? then update item list
-            if (updateTypeOfList) {
-                switch (_currentTypeOfList) {
-                    case TypeOfList.Complete:
-                        ResetToCompleteItems();
-                        // filterList = 
+                // get current word, current previous word (table or database name)
+                int nbPoints;
+                string previousWord = "";
+                var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.GetCaretPosition());
+                var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
+                var splitted = keyword.Split('.');
+                string lastCharBeforeWord = "";
+                switch (nbPoints) {
+                    case 0:
+                        int startPos = strOnLeft.Length - 1 - keyword.Length;
+                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
                         break;
-                    case TypeOfList.Fields:
-                        SwapToFieldsItems(_currentTable);
+                    case 1:
+                        previousWord = splitted[0];
+                        keyword = splitted[1];
                         break;
-                    case TypeOfList.ObjectKeywords:
-                        ResetToCompleteItems();
-                        activateTypesList = new List<CompletionType> {
-                            CompletionType.KeywordObject,
-                        };
+                    case 2:
+                        previousWord = splitted[1];
+                        keyword = splitted[2];
                         break;
-                    case TypeOfList.Tables:
-                        SwapToTablesItems(_currentDataBase);
+                    default:
+                        keyword = splitted[nbPoints];
                         break;
                 }
+
+                // list of fields or tables
+                if (!string.IsNullOrEmpty(previousWord)) {
+                    // are we entering a field from a known table?
+                    var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+                    if (foundTable != null) {
+                        if (CurrentTypeOfList != TypeOfList.Fields) {
+                            CurrentTypeOfList = TypeOfList.Fields;
+                            _currentItems = DataBase.GetFieldsList(foundTable).ToList();
+                        }
+                        ShowSuggestionList(keyword);
+                        return;
+                    }
+
+                    // are we entering a table from a connected database?
+                    var foundDatabase = DataBase.FindDatabaseByName(previousWord);
+                    if (foundDatabase != null) {
+                        if (CurrentTypeOfList != TypeOfList.Tables) {
+                            CurrentTypeOfList = TypeOfList.Tables;
+                            _currentItems = DataBase.GetTablesList(foundDatabase).ToList();
+                        }
+                        ShowSuggestionList(keyword);
+                        return;
+                    }
+                }
+
+                // if the current is directly preceded by a :, we are entering an object field/method
+                if (lastCharBeforeWord.Equals(":")) {
+                    if (CurrentTypeOfList != TypeOfList.KeywordObject) {
+                        CurrentTypeOfList = TypeOfList.KeywordObject;
+                        _currentItems = _savedAllItems;
+                    }
+                    ShowSuggestionList(keyword);
+                    return;
+                }
+
+                // close if there is nothing to suggest
+                if (!_openedFromShortCut && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                    Close();
+                    return;
+                }
+
+                // show normal complete list
+                if (CurrentTypeOfList != TypeOfList.Complete) {
+                    CurrentTypeOfList = TypeOfList.Complete;
+                    _currentItems = _savedAllItems;
+                }
+                ShowSuggestionList(keyword);
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
             }
-            return activateTypesList;
-        }
-
-        /// <summary>
-        /// Display the autocomp list, uses the TypeOfList _currentTypeOfList,
-        /// can be called even if the List is already visible! will just update it!
-        /// </summary>
-        public static List<CompletionType> UpdateTypeOfList() {
-            return UpdateTypeOfList(IsNeedToUpdateTypeOfList());
-        }
-
-        /// <summary>
-        /// is there a need to update the type of list?
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsNeedToUpdateTypeOfList() {
-            var currentTypeOfList = _currentTypeOfList;
-            _currentTypeOfList = GetListToShow();
-            return currentTypeOfList != _currentTypeOfList;
-        }
-
-        /// <summary>
-        /// Output the type of list we need to display to the user, also store the found dataBase or 
-        /// foundTable for later use (avoid calculating it twice)
-        /// </summary>
-        /// <returns></returns>
-        private static TypeOfList GetListToShow() {
-            var curPos = Npp.GetCaretPosition();
-            var previousWord = Npp.GetFirstWordRightAfterPoint(curPos);
-
-            if (!string.IsNullOrEmpty(previousWord)) {
-                // are we entering a field from a known table?
-                var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-                if (foundTable != null) {
-                    _currentTable = foundTable;
-                    return TypeOfList.Fields;
-                }
-
-                // are we entering a table from a connected database?
-                var foundDatabase = DataBase.FindDatabaseByName(previousWord);
-                if (foundDatabase != null) {
-                    _currentDataBase = foundDatabase;
-                    return TypeOfList.Tables;
-                }
-            }
-
-            // We want to access the methods/properties/attributes keywords?
-            if (Npp.GetCharBeforeWord(curPos).Equals(":"))
-                return TypeOfList.ObjectKeywords;
-
-            return TypeOfList.Complete;
-        }
-
-        /// <summary>
-        /// This method is called to switch temporarly the items of the completion form, from
-        /// a complete list to only the fields of the current table
-        /// </summary>
-        private static void SwapToFieldsItems(ParsedTable currentTable) {
-            _showingAllItems = false;
-            _currentItems = DataBase.GetFieldsList(currentTable).ToList();
-            UpdateFormWithCurrentItemList();
-        }
-
-        /// <summary>
-        /// This method is called to switch temporarly the items of the completion form, from
-        /// a complete list to only the tables of the current database
-        /// </summary>
-        private static void SwapToTablesItems(ParsedDataBase currentDataBase) {
-            _showingAllItems = false;
-            _currentItems = DataBase.GetTablesList(currentDataBase).ToList();
-            UpdateFormWithCurrentItemList();
-        }
-
-        /// <summary>
-        /// this method is called to switch back to the persistentItem of the completion form,
-        /// after showing only fields
-        /// </summary>
-        private static void ResetToCompleteItems() {
-            if (_showingAllItems) return;
-            _showingAllItems = true;
-            _currentItems = _savedAllItems;
-            UpdateFormWithCurrentItemList();
-        }
-
-        /// <summary>
-        /// updates the form with the _currentItem List
-        /// </summary>
-        private static void UpdateFormWithCurrentItemList() {
-            if (_form != null)
-                _form.SetItems(_currentItems);
         }
 
         /// <summary>
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
+        /// <param name="keyword"></param>
         /// <param name="allowedType"></param>
-        private static void ShowSuggestionList(List<CompletionType> allowedType = null) {
+        private static void ShowSuggestionList(string keyword) {
             if (_currentItems == null) {
                 Close();
                 return;
             }
-
-            string keyword = Npp.GetKeyword();
-            var point = Npp.GetCaretScreenLocation();
-            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
-            point.Y += lineHeight;
 
             // instanciate the form if needed
             if (_form == null) {
@@ -342,32 +261,52 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _form.TabCompleted += OnTabCompleted;
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetItems(_currentItems);
-            } else {
-                // else, just sort the items, to reflect the latest ranking
-                _form.SortItems();
+            } else if (_needToSetItems) {
+                // we changed the mode, we need to Set the items of the autocompletion
+                _form.SetItems(_currentItems);
             }
 
-            // update position (and alternate color config)
-            _form.UseAlternateBackColor = Config.Instance.AutoCompleteAlternateBackColor;
-            _form.SetPosition(point, lineHeight + 2);
-
             // only activate certain types
-            if (allowedType != null)
-                _form.SetActiveType(allowedType);
-            else
-                _form.ResetActiveType();
+            if (_needToSetItems || !_form.Visible) { 
+                // only activate certain types
+                switch (CurrentTypeOfList) {
+                    case TypeOfList.Complete:
+                        _form.SetUnActiveType(new List<CompletionType> {
+                            CompletionType.KeywordObject,
+                        });
+                        break;
+                    case TypeOfList.KeywordObject:
+                        _form.SetActiveType(new List<CompletionType> {
+                            CompletionType.KeywordObject,
+                        });
+                        break;
+                }
+                // we just Set the items so we don't need to reset the active types
+                _needToSetItems = false;
+            }
 
             // filter with keyword (keyword can be empty)
             _form.FilterByText = keyword;
             _form.SelectFirstItem();
 
-            if (!_form.Visible) {
-                // we uncloak conditionnally
-                if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) 
-                    return;
-
-                _form.UnCloack();
+            // close?
+            if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) {
+                Close();
+                return;
             }
+
+
+            // if the form was already visible, don't go further
+            if (_form.Visible) return;
+
+            // update position (and alternate color config)
+            var point = Npp.GetCaretScreenLocation();
+            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+            point.Y += lineHeight;
+            _form.UseAlternateBackColor = Config.Instance.AutoCompleteAlternateBackColor;
+            _form.SetPosition(point, lineHeight + 2);
+
+            _form.UnCloack();
         }
 
         /// <summary>
@@ -402,6 +341,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         ParserHandler.RememberUseOfParsedItem(data.DisplayText);
                     else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
                         ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
+
+                    // sort the items, to reflect the latest ranking
+                    _form.SortItems();
 
                     if (data.Type == CompletionType.Snippet)
                         Snippets.TriggerCodeSnippetInsertion();

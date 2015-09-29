@@ -28,6 +28,10 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool Highlight { get; set; }
 
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public bool AcceptsRightClick { get; set; }
+
         private event EventHandler<ButtonPressedEventArgs> OnButtonPressed;
 
         /// <summary>
@@ -143,11 +147,10 @@ namespace YamuiFramework.Controls {
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
         }
 
-        private void HandlePressedButton() {
-            if (OnButtonPressed != null) {
-                var args = new ButtonPressedEventArgs(Tag);
-                OnButtonPressed(this, args);
-            }
+        private void HandlePressedButton(EventArgs e) {
+            if (OnButtonPressed == null) return;
+            var args = new ButtonPressedEventArgs(e);
+            OnButtonPressed(this, args);
         }
 
         #endregion
@@ -197,7 +200,7 @@ namespace YamuiFramework.Controls {
         protected override void OnKeyDown(KeyEventArgs e) {
             e.Handled = true;
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
-                HandlePressedButton();
+                HandlePressedButton(e);
                 IsPressed = true;
                 Invalidate();
             }
@@ -222,8 +225,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            if (e.Button == MouseButtons.Left) {
-                HandlePressedButton();
+            if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
+                HandlePressedButton(e);
                 IsPressed = true;
                 Invalidate();
             }
@@ -249,10 +252,10 @@ namespace YamuiFramework.Controls {
     }
 
     public sealed class ButtonPressedEventArgs : EventArgs {
-        public readonly object ButtonTag;
+        public readonly object OriginalEventArgs;
 
-        public ButtonPressedEventArgs(object buttonTag) {
-            ButtonTag = buttonTag;
+        public ButtonPressedEventArgs(object originalEventArgs) {
+            OriginalEventArgs = originalEventArgs;
         }
     }
 
