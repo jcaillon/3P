@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
@@ -251,6 +252,5 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
             return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
         }
-
     }
 }

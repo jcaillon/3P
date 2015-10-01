@@ -41,6 +41,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.Type = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.htmlToolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).BeginInit();
             this.SuspendLayout();
             // 
@@ -132,23 +133,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.yamuiLabel1.Text = "Showing";
             this.yamuiLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // htmlToolTip
+            // 
+            this.htmlToolTip.AllowLinksHandling = true;
+            this.htmlToolTip.BaseStylesheet = null;
+            this.htmlToolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this.htmlToolTip.OwnerDraw = true;
+            this.htmlToolTip.TooltipCssClass = "htmltooltip";
+            // 
             // AutoCompletionForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(394, 449);
-            this.ControlBox = false;
             this.Controls.Add(this.yamuiLabel1);
             this.Controls.Add(this.nbitems);
             this.Controls.Add(this.fastOLV);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
+            this.Location = new System.Drawing.Point(0, 0);
             this.Name = "AutoCompletionForm";
             this.Padding = new System.Windows.Forms.Padding(1);
-            this.ShowIcon = false;
-            this.ShowInTaskbar = false;
-            this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "AutoCompletionForm";
             ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).EndInit();
@@ -163,5 +166,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private BrightIdeasSoftware.OLVColumn Type;
         private YamuiFramework.Controls.YamuiLabel nbitems;
         private YamuiFramework.Controls.YamuiLabel yamuiLabel1;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip;
     }
 }

@@ -18,9 +18,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// if the database_out file doesn't exists, start a progress program to extract it
         /// </summary>
         public static void FetchCurrentDbInfo() {
-            //TODO
+            //TODO: read the .txt that matchs with the current db connected
             _filePath = Path.Combine(_location, _fileName);
             Read();
+
+            // Update autocompletion
+            AutoComplete.FillStaticItems(false);
         }
 
         /// <summary>

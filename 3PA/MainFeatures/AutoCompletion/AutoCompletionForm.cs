@@ -47,10 +47,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
         // the private fields below are used for the filter function
-        private Dictionary<CompletionType, SelectorButton> _activeTypes;
+        private Dictionary<CompletionType, SelectorButton> _displayedTypes;
         private string _filterString;
         private string _currentLcOwnerName = "";
         private int _currentLineNumber;
+
+        private int _currentType;
 
         // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
         private int _normalWidth;
@@ -209,13 +211,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _initialObjectsList = objectsList;
 
             // set the default height / width
-            fastOLV.Height = 21*Config.Instance.AutoCompleteShowListOfXSuggestions;
+            fastOLV.Height = 21 * Config.Instance.AutoCompleteShowListOfXSuggestions;
             Height = fastOLV.Height + 32;
-            Width = 280;
+            //Width = 280;
 
             // delete any existing buttons
-            if (_activeTypes != null) {
-                foreach (var selectorButton in _activeTypes) {
+            if (_displayedTypes != null) {
+                foreach (var selectorButton in _displayedTypes) {
                     selectorButton.Value.ButtonPressed -= HandleTypeClick;
                     if (Controls.Contains(selectorButton.Value))
                         Controls.Remove(selectorButton.Value);
@@ -225,7 +227,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // get distinct types, create a button for each
             int xPos = 4;
-            _activeTypes = new Dictionary<CompletionType, SelectorButton>();
+            _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
             foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
                 var but = new SelectorButton();
                 but.BackGrndImage = _imageListOfTypes.Images[(int) type];
@@ -236,16 +238,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 but.Type = type;
                 but.AcceptsRightClick = true;
                 but.ButtonPressed += HandleTypeClick;
-                _activeTypes.Add(type, but);
+                htmlToolTip.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                _displayedTypes.Add(type, but);
                 Controls.Add(but);
                 xPos += but.Width;
             }
             xPos += 65;
 
             // correct width
-            Width = Math.Max(Width, xPos);
-            _normalWidth = Width - 2;
-            Keyword.Width = _normalWidth - 17;
+            var neededWidth = Math.Max(280, xPos);
+            if (neededWidth != Width) {
+                Width = Math.Max(280, xPos);
+                _normalWidth = Width - 2;
+                Keyword.Width = _normalWidth - 17;
+            }
 
             // label for the number of items
             TotalItems = objectsList.Count;
@@ -268,8 +274,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="allowedType"></param>
         public void SetActiveType(List<CompletionType> allowedType) {
-            if (_activeTypes == null) return;
-            foreach (var selectorButton in _activeTypes) {
+            if (_displayedTypes == null) return;
+            foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
                 selectorButton.Value.Invalidate();
             }
@@ -280,8 +286,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="allowedType"></param>
         public void SetUnActiveType(List<CompletionType> allowedType) {
-            if (_activeTypes == null) return;
-            foreach (var selectorButton in _activeTypes) {
+            if (_displayedTypes == null) return;
+            foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
                 selectorButton.Value.Invalidate();
             }
@@ -291,8 +297,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// reset all the button Types to activated
         /// </summary>
         public void ResetActiveType() {
-            if (_activeTypes == null) return;
-            foreach (var selectorButton in _activeTypes) {
+            if (_displayedTypes == null) return;
+            foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = true;
                 selectorButton.Value.Invalidate();
             }
@@ -374,25 +380,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // on right click
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
                 // everything is unactive but this one
-                if (_activeTypes.Count(b => b.Value.Activated) == 1 && _activeTypes.First(b => b.Value.Activated).Key == clickedType) {
-                    // activate all
-                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
-                        _activeTypes[key].Activated = true;
-                        _activeTypes[key].Invalidate();
-                    }
+                if (_displayedTypes.Count(b => b.Value.Activated) == 1 && _displayedTypes.First(b => b.Value.Activated).Key == clickedType) {
+                    SetUnActiveType(null);
                 } else {
-                    // else deactivate all but this one
-                    foreach (CompletionType key in _activeTypes.Keys.ToList()) {
-                        _activeTypes[key].Activated = false;
-                        _activeTypes[key].Invalidate();
-                    }
-                    _activeTypes[clickedType].Activated = true;
+                    SetActiveType(new List<CompletionType> { clickedType });
                 }
             } else
                 // left click is only a toggle
-                _activeTypes[clickedType].Activated = !_activeTypes[clickedType].Activated;
+                _displayedTypes[clickedType].Activated = !_displayedTypes[clickedType].Activated;
 
-            _activeTypes[clickedType].Invalidate();
+            _displayedTypes[clickedType].Invalidate();
             ApplyFilter();
             // give focus back
             GiveFocusBack();
@@ -436,6 +433,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             } else if (key == Keys.Escape) {
                 Close();
 
+                // left and right keys
+            } else if (key == Keys.Left) {
+                LeftRight(true);
+
+            } else if (key == Keys.Right) {
+                LeftRight(false);
+
                 // enter and tab accept the current selection
             } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept) || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
                 AcceptCurrentSuggestion();
@@ -447,6 +451,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return handled;
         }
 
+        private void LeftRight(bool isLeft) {
+            // only 1 type is active
+            if (_displayedTypes.Count(b => b.Value.Activated) == 1)
+                _currentType = _currentType + (isLeft ? -1 : 1);
+            if (_currentType > _displayedTypes.Count - 1) _currentType = 0;
+            if (_currentType < 0) _currentType = _displayedTypes.Count - 1;
+            SetActiveType(new List<CompletionType> { _displayedTypes.ElementAt(_currentType).Key });
+            ApplyFilter();
+        }
         #endregion
 
         #region Filter
@@ -456,13 +469,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private void ApplyFilter() {
             // order the list, first the ones that are equals to the filter, then the
             // ones that start with the filter, then the rest
-            fastOLV.SetObjects(string.IsNullOrEmpty(_filterString) ? 
-                _initialObjectsList : 
-                _initialObjectsList.OrderBy(
+            if (string.IsNullOrEmpty(_filterString)) {
+                fastOLV.SetObjects(_initialObjectsList);
+            } else {
+                char firstChar = char.ToUpperInvariant(_filterString[0]);
+                fastOLV.SetObjects(_initialObjectsList.OrderBy(
                 x => {
-                    if (x.DisplayText.IndexOf(_filterString[0]) > 0) return 2;
+                    if (x.DisplayText.Length < 1 || char.ToUpperInvariant(x.DisplayText[0]) != firstChar) return 2;
                     return x.DisplayText.Equals(_filterString, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
                 }).ToList());
+            }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
@@ -496,7 +512,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var compData = (CompletionData)o;
             // check for the filter match, the activated category,
             bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString) &&
-                _activeTypes[compData.Type].Activated;
+                _displayedTypes[compData.Type].Activated;
 
             // if the item isn't a parsed item, it is avaiable no matter where we are in the code
             if (!compData.FromParser) return output;

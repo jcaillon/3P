@@ -3166,8 +3166,12 @@ namespace _3PA.Interop {
 
         public void Dispose() {
             if (!_disposed) {
-                if (_sciTextRange.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextRange.lpstrText);
-                if (_ptrSciTextRange != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextRange);
+                try {
+                    if (_sciTextRange.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextRange.lpstrText);
+                    if (_ptrSciTextRange != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextRange);
+                } catch (Exception) {
+                    // ignored
+                }
                 _disposed = true;
             }
         }

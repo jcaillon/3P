@@ -10,7 +10,8 @@ namespace YamuiDemoApp {
     class TextTests {
 
         public static void Run() {
-
+            return;
+            
             var str = "(database.table";
             int nb;
             var tt = Abl.ReadAblWord(str, false, out nb);

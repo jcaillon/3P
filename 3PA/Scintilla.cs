@@ -527,7 +527,7 @@ namespace _3PA {
         ///     you wish to read. The return value is the length of the returned text not including the terminating 0.
         /// </summary>
         public static string GetTextByRange(int start, int end) {
-            return GetTextByRange(start, end, end - start);
+            return GetTextByRange(start, end, end - start + 1);
         }
 
         /// <summary>

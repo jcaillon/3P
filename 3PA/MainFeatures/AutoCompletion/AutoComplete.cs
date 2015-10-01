@@ -56,19 +56,90 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static List<int> _completionTypePriority;
 
         /// <summary>
+        /// is used to make sure that 2 different threads dont try to access
+        /// the same resource (_parserTimer) at the same time, which would be problematic
+        /// </summary>
+        private static object _thisLock = new object();
+        private static Timer _parserTimer;
+
+        #region public misc.
+
+        /// <summary>
         /// returns the ranking of each CompletionType, helps sorting them as we wish
         /// </summary>
-        public static List<int> GetPriorityList  {
+        public static List<int> GetPriorityList {
             get {
                 if (_completionTypePriority != null) return _completionTypePriority;
                 _completionTypePriority = new List<int>();
-                var temp = Config.Instance.AutoCompletePriorityList.Split(',').Select(int.Parse).ToList();
-                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++)
+                var temp = Config.Instance.AutoCompletePriorityList.Split(',').Select(Int32.Parse).ToList();
+                for (int i = 0; i < Enum.GetNames(typeof (CompletionType)).Length; i++)
                     _completionTypePriority.Add(temp.IndexOf(i));
                 return _completionTypePriority;
             }
         }
-        
+
+        /// <summary>
+        /// Returns a keyword from the autocompletion list with the correct case
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static string CorrectKeywordCase(string keyword) {
+            if (_savedAllItems == null) return null;
+            CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
+            if (found != null)
+                return !found.FromParser ? Abl.AutoCaseToUserLiking(keyword) : found.DisplayText;
+            // search in tables' fields
+            var previousWord = Npp.GetFirstWordRightAfterPoint(Npp.GetCaretPosition());
+            if (!String.IsNullOrEmpty(previousWord) && ParserHandler.FindAnyTableOrBufferByName(previousWord) != null)
+                return Abl.AutoCaseToUserLiking(keyword);
+            return null;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Call this method to asynchronously parse the current document 
+        /// (or set doNow = true to do it synchonously)
+        /// </summary>
+        /// <param name="doNow"></param>
+        public static void ParseCurrentDocument(bool doNow = false) {
+            // parse immediatly
+            if (doNow) {
+                ParseCurrentDocumentTick();
+                return;
+            }
+
+            lock (_thisLock) {
+                // parse in 1s, if nothing delays the timer
+                if (_parserTimer == null) {
+                    _parserTimer = new Timer { Interval = 1000 };
+                    _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
+                    _parserTimer.Start();
+                } else {
+                    // reset timer
+                    _parserTimer.Stop();
+                    _parserTimer.Start();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when the _parserTimer ticks
+        /// </summary>
+        private static void ParseCurrentDocumentTick() {
+            lock (_thisLock) {
+                try {
+                    if (_parserTimer != null) {
+                        _parserTimer.Dispose();
+                        _parserTimer = null;
+                    }
+                    FillItems();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                }
+            }
+        }
+
         /// <summary>
         /// this method should be called to refresh the Items list with all the static items
         /// as well as the dynamic items found by the parser
@@ -97,7 +168,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this method should be called at the plugin's start and when we change the current database
         /// of each features
         /// </summary>
-        public static void FillStaticItems() {
+        public static void FillStaticItems(bool initializing) {
             if (_savedAllItems == null)
                 _savedAllItems = new List<CompletionData>();
 
@@ -106,46 +177,37 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _staticItems = new List<CompletionData>();
             _staticItems.Clear();
             _staticItems =Keywords.GetList().ToList();
-            _staticItems.AddRange(DataBase.GetDbList());
-            _staticItems.AddRange(DataBase.GetTablesList());
             _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
-                DisplayText = x, 
+                DisplayText = x,
                 Type = CompletionType.Snippet,
                 Ranking = 0,
                 FromParser = false,
                 Flag = 0
             }).ToList());
 
+            // add database info?
+            if (!initializing) {
+                _staticItems.AddRange(DataBase.GetDbList());
+                _staticItems.AddRange(DataBase.GetTablesList());
+            }
+
             // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(new CompletionDataSortingClass());
             _savedAllItems = _staticItems.ToList();
 
-            CurrentTypeOfList = TypeOfList.Reset;
-            if (IsVisible)
-                UpdateAutocompletion();
-        }
-
-        /// <summary>
-        /// Returns a keyword from the autocompletion list with the correct case
-        /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static string CorrectKeywordCase(string keyword) {
-            if (_savedAllItems == null) return null;
-            CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
-            if (found != null)
-                return !found.FromParser ? Abl.AutoCaseToUserLiking(keyword) : found.DisplayText;
-            // search in tables' fields
-            var previousWord = Npp.GetFirstWordRightAfterPoint(Npp.GetCaretPosition());
-            if (!string.IsNullOrEmpty(previousWord) && ParserHandler.FindAnyTableOrBufferByName(previousWord) != null)
-                return Abl.AutoCaseToUserLiking(keyword);
-            return null;
+            // Update the form?
+            if (!initializing) {
+                CurrentTypeOfList = TypeOfList.Reset;
+                if (IsVisible)
+                    UpdateAutocompletion();
+            }
         }
 
         /// <summary>
         /// Called from CTRL + Space shortcut
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
+            ParseCurrentDocument();
             _openedFromShortCut = true;
             try {
                 UpdateAutocompletion();
@@ -173,7 +235,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 switch (nbPoints) {
                     case 0:
                         int startPos = strOnLeft.Length - 1 - keyword.Length;
-                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
+                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : String.Empty;
                         break;
                     case 1:
                         previousWord = splitted[0];
@@ -189,7 +251,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // list of fields or tables
-                if (!string.IsNullOrEmpty(previousWord)) {
+                if (!String.IsNullOrEmpty(previousWord)) {
                     // are we entering a field from a known table?
                     var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
                     if (foundTable != null) {
@@ -224,7 +286,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // close if there is nothing to suggest
-                if (!_openedFromShortCut && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                if (!_openedFromShortCut && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                     Close();
                     return;
                 }
@@ -245,7 +307,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
         /// <param name="keyword"></param>
-        /// <param name="allowedType"></param>
         private static void ShowSuggestionList(string keyword) {
             if (_currentItems == null) {
                 Close();
@@ -323,7 +384,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                     // if the "hint" is empty, don't replace the current hint, just add text at the carret position
                     if ((data.Type == CompletionType.Field && Npp.TextBeforeCaret(2).EndsWith(".")) ||
-                        string.IsNullOrWhiteSpace(keywordToRep)) {
+                        String.IsNullOrWhiteSpace(keywordToRep)) {
                         var curPos = Npp.GetCaretPosition();
                         keywordPos.X = curPos;
                         keywordPos.Y = curPos;
@@ -354,6 +415,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ErrorHandler.ShowErrors(e, "Error during AutoCompletionAccepted");
             }
         }
+
+        #region _form handler
 
         /// <summary>
         /// Is the autocompletion currently visible?
@@ -394,5 +457,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static bool OnKeyDown(Keys key) {
             return IsVisible && _form.OnKeyDown(key);
         }
+
+        #endregion
+
     }
 }

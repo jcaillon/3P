@@ -22,10 +22,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
+            pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
-                SubString = "",
+                SubString = pars.ReturnType.ToString(),
                 Flag = pars.IsPrivate ? ParseFlag.Private : 0,
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
@@ -74,7 +75,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
-                DisplayText = pars.Name,
+                DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = "",
                 Flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope,
@@ -96,7 +97,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // find primitive type
             var hasPrimitive = !string.IsNullOrEmpty(pars.TempPrimitiveType);
             if (hasPrimitive)
-                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, !pars.LcAsLike.Equals("as"));
+                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.LcAsLike.Equals("like"));
 
             // which completionData type is it?
             CompletionType type;

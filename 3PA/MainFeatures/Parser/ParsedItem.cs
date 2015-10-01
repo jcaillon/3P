@@ -9,7 +9,13 @@ namespace _3PA.MainFeatures.Parser {
     public abstract class ParsedItem {
         public string Name { get; private set; }
         public string FilePath { get; set; }
+        /// <summary>
+        /// Line of the first keyword of the statement where the item is found
+        /// </summary>
         public int Line { get; private set; }
+        /// <summary>
+        /// Column of the first keyword of the statement where the item is found
+        /// </summary>
         public int Column { get; private set; }
         public ParsedScope Scope { get; set; }
         public string LcOwnerName { get; set; }
@@ -56,11 +62,43 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
+    /// Parent class for procedure, function and OnEvent Items
+    /// </summary>
+    public abstract class ParsedScopeItem : ParsedItem {
+        /// <summary>
+        /// line of the "end" keyword that ends the block
+        /// </summary>
+        public int EndLine { get; set; }
+        protected ParsedScopeItem(string name, int line, int column) : base(name, line, column) {}
+    }
+
+    /// <summary>
+    /// Procedure parsed item
+    /// </summary>
+    public class ParsedProcedure : ParsedScopeItem {
+        public string Left { get; private set; }
+        public string LcName { get; private set; }
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedProcedure(string name, int line, int column, string left, string lcName)
+            : base(name, line, column) {
+            Left = left;
+            LcName = lcName;
+        }
+    }
+
+    /// <summary>
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    public class ParsedFunction : ParsedItem {
-        public string ReturnType { get; private set; }
+    public class ParsedFunction : ParsedScopeItem {
+        public ParsedPrimitiveType ReturnType { get; set; }
+        /// <summary>
+        /// Parsed string for the return type, use ReturnType instead!
+        /// </summary>
+        public string ParsedReturnType { get; private set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
         public string LcName { get; private set; }
@@ -70,8 +108,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, int line, int column, string returnType, string lcName) : base(name, line, column) {
-            ReturnType = returnType;
+        public ParsedFunction(string name, int line, int column, string parsedReturnType, string lcName) : base(name, line, column) {
+            ParsedReturnType = parsedReturnType;
             LcName = lcName;
         }
     }
@@ -79,7 +117,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    public class ParsedOnEvent : ParsedItem {
+    public class ParsedOnEvent : ParsedScopeItem {
         public string On { get; private set; }
         public string LcName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
@@ -105,23 +143,6 @@ namespace _3PA.MainFeatures.Parser {
 
         public ParsedRun(string name, int line, int column, string left) : base(name, line, column) {
             Left = left;
-        }
-    }
-
-
-    /// <summary>
-    /// Procedure parsed item
-    /// </summary>
-    public class ParsedProcedure : ParsedItem {
-        public string Left { get; private set; }
-        public string LcName { get; private set; }
-        public override void Accept(IParserVisitor visitor) {
-            visitor.Visit(this);
-        }
-
-        public ParsedProcedure(string name, int line, int column, string left, string lcName) : base(name, line, column) {
-            Left = left;
-            LcName = lcName;
         }
     }
 
@@ -177,7 +198,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string TempPrimitiveType { get; private set; } 
         /// <summary>
-        /// Used only for variables, contains the primitive type (for "as x") or the field name (for "like x")
+        /// (Used for variables) contains the primitive type ("as x") or the field name ("like x")
         /// </summary>
         public ParsedPrimitiveType PrimitiveType { get; set; }
         /// <summary>

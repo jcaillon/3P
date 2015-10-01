@@ -163,6 +163,14 @@ namespace _3PA {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
             return pathNotepadFolder;
         }
+
+        /// <summary>
+        /// returns npp.exe path
+        /// </summary>
+        /// <returns></returns>
+        public static string GetNppExePath() {
+            return Path.Combine(GetNppDirectory(), "notepad++.exe");
+        }
             
         /// <summary>
         /// Returns the configuration directory path

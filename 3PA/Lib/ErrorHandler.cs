@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace _3PA.Lib {
@@ -23,6 +25,18 @@ namespace _3PA.Lib {
             MessageBox.Show("Custom error : " + message + "\n" + e.ToString());
 #else
 #endif
+        }
+
+        public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
+            ShowErrors((Exception) args.ExceptionObject, "Unhandled error!");
+        }
+
+        public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {
+            ShowErrors(e.Exception, "Thread error!");
+        }
+
+        public static void UnobservedErrorHandler(object sender, UnobservedTaskExceptionEventArgs e) {
+            ShowErrors(e.Exception, "Unobserved task error!");
         }
     }
 }

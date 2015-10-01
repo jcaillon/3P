@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using _3PA.Interop;
@@ -90,7 +91,7 @@ namespace _3PA
                 }
 
                 // only do extra stuff if we are in a progress file
-                if (!Abl.IsCurrentProgressFile()) return;
+                if (!Plug.IsCurrentFileProgress) return;
 
                 #region extra
                 switch (nc.nmhdr.code) {
@@ -148,9 +149,10 @@ namespace _3PA
 
                     case (uint) SciMsg.SCN_MODIFIED:
                         // if at least 1 line has been added or removed
-                        if (nc.linesAdded != 0) {
-                            Plug.OnLineAddedOrRemoved();
-                        }
+                        if (nc.linesAdded != 0)
+                            AutoComplete.ParseCurrentDocument(true);
+                        else
+                            AutoComplete.ParseCurrentDocument();
                         
                         // did the user supress 1 char?
                         if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {

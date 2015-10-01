@@ -81,7 +81,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedProcedure pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
@@ -108,7 +108,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedRun pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left);
         }
     }
 
