@@ -2558,3 +2558,4 @@ FONT	statement	0	0
 GET-DIR	statement	0	0
 GET-FILE	statement	0	0
 PRINTER-SETUP	statement	0	0
+INNER-JOIN	Option	0	1
