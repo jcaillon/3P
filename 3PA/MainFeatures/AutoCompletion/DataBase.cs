@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 new List<ParsedField>(),
                                 new List<ParsedIndex>(),
                                 new List<ParsedTrigger>()
-                                , "");
+                                , "", "");
                             currentDb.Tables.Add(currentTable);
                             break;
                         case 'X':
@@ -103,7 +103,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 flag2,
                                 splitted[10],
                                 splitted[11],
-                                "");
+                                ParsedAsLike.None);
                             curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
                             currentTable.Fields.Add(curField);
                             break;
@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<CompletionData> GetDbList() {
             if (_dataBases.Count <= 0) return new List<CompletionData>();
             return _dataBases.Select(@base => new CompletionData() {
-                DisplayText = @base.LogicalName,
+                DisplayText = @base.LogicalName.ToUpper(),
                 Type = CompletionType.Databases,
                 FromParser = false,
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
@@ -156,8 +156,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var output = new List<CompletionData>();
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
             output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
-                DisplayText = table.Name,
-                SubString = Abl.AutoCaseToUserLiking(dataBase.LogicalName),
+                DisplayText = table.Name.ToUpper(),
+                SubString = dataBase.LogicalName.AutoCaseToUserLiking(),
                 Type = CompletionType.Table,
                 FromParser = false,
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(table.Name),
@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var output = new List<CompletionData>();
             if (table == null) return output;
             output.AddRange(table.Fields.Select(field => new CompletionData() {
-                DisplayText = field.Name,
+                DisplayText = field.Name.ToUpper(),
                 Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field, 
                 FromParser = false,
                 SubString = field.Type.ToString(),

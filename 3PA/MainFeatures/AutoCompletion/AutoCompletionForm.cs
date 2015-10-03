@@ -275,6 +275,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="allowedType"></param>
         public void SetActiveType(List<CompletionType> allowedType) {
             if (_displayedTypes == null) return;
+            if (allowedType == null) allowedType = new List<CompletionType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
                 selectorButton.Value.Invalidate();
@@ -287,6 +288,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="allowedType"></param>
         public void SetUnActiveType(List<CompletionType> allowedType) {
             if (_displayedTypes == null) return;
+            if (allowedType == null) allowedType = new List<CompletionType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
                 selectorButton.Value.Invalidate();
@@ -483,7 +485,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
             _currentLcOwnerName = ParserHandler.GetCarretLineLcOwnerName;
-            _currentLineNumber = Npp.GetCurrentLineNumber();
+            _currentLineNumber = Npp.GetCaretLineNumber();
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
             //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
 

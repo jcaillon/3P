@@ -27,7 +27,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
-                Flag = pars.IsPrivate ? ParseFlag.Private : 0,
+                Flag = (pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -93,25 +93,26 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // set flags
             var flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope;
             if (pars.Type == ParseDefineType.Parameter) flag = flag | ParseFlag.Parameter;
+            if (pars.IsExtended) flag = flag | ParseFlag.Extent;
 
             // find primitive type
             var hasPrimitive = !string.IsNullOrEmpty(pars.TempPrimitiveType);
             if (hasPrimitive)
-                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.LcAsLike.Equals("like"));
+                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like);
 
             // which completionData type is it?
             CompletionType type;
             string subString;
             // special case for buffers, they go into the temptable or table section
-            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer) {
+            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer) {
                 flag = flag | ParseFlag.Buffer;
                 subString = "?";
                 type = CompletionType.TempTable;
 
                 // find the table or temp table that the buffer is FOR
-                var foundTable = ParserHandler.FindAnyTableByName(pars.LcAsLike);
+                var foundTable = ParserHandler.FindAnyTableByName(pars.BufferFor);
                 if (foundTable != null) {
-                    subString = Abl.AutoCaseToUserLiking(foundTable.Name);
+                    subString = foundTable.Name.AutoCaseToUserLiking();
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
                 }
                 
@@ -165,7 +166,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // find all primitive types
             foreach (var parsedField in pars.Fields)
-                parsedField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(parsedField.TempType, !parsedField.LcAsLike.Equals("as"));
+                parsedField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(parsedField.TempType, parsedField.AsLike == ParsedAsLike.Like);
 
             // temp table is LIKE another table? copy fields, minus the isPrimary,
             if (!string.IsNullOrEmpty(pars.LcLikeTable)) {
@@ -174,13 +175,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     // add the fields of the found table
                     subStr = @"Like " + foundTable.Name;
                     foreach (var field in foundTable.Fields) {
-                        pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.LcAsLike) {
+                        pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.AsLike) {
                             Type = field.Type
                         });
                     }
                     // handles the use-index, for now only add the isPrimary flag to the field...
-                    if (!string.IsNullOrEmpty(pars.Description)) {
-                        foreach (var index in pars.Description.Split(',')) {
+                    if (!string.IsNullOrEmpty(pars.UseIndex)) {
+                        foreach (var index in pars.UseIndex.Split(',')) {
                             if (index.ContainsFast("!")) {
                                 // we found a primary index
                                 var foundIndex = foundTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));

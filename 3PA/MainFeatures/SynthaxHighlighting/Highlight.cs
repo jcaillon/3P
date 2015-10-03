@@ -26,8 +26,8 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
             Lexer tok = new Lexer(Npp.GetDocumentText());
             tok.Tokenize();
             SynthaxHighlightVisitor vis = new SynthaxHighlightVisitor {
-                FromLine = Npp.LineFromPosition(startPos),
-                ToLine = Npp.LineFromPosition(endPos)
+                FromLine = Npp.GetLineFromPosition(startPos),
+                ToLine = Npp.GetLineFromPosition(endPos)
             };
             tok.Accept(vis);
 

@@ -165,7 +165,11 @@ namespace _3PA.MainFeatures.Parser {
                         case "def":
                         case "define":
                             // Parse a define statement
-                            CreateParsedDefine(token);
+                            CreateParsedDefine(token, false);
+                            break;
+                        case "create":
+                            // Parse a create statement
+                            CreateParsedDefine(token, true);
                             break;
                         case "case":
                         case "catch":
@@ -380,21 +384,25 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Matches a function definition (not the FORWARD prototype)
         /// </summary>
-        private void CreateParsedDefine(Token functionToken) {
+        private void CreateParsedDefine(Token functionToken, bool isDynamic) {
             // info we will extract from the current statement :
             string name = "";
-            string asLike = "";
+            ParsedAsLike asLike = ParsedAsLike.None;
             ParseDefineType type = ParseDefineType.None;
-            string primitiveType = "";
+            string tempPrimitiveType = "";
             string viewAs = "";
+            string bufferFor = "";
+            bool isExtended = false;
             _lastTokenWasSpace = true;
             StringBuilder left = new StringBuilder();
             StringBuilder strFlags = new StringBuilder();
 
+            // for temp tables:
+            string likeTable = "";
             bool isTempTable = false;
             var fields = new List<ParsedField>();
-            ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", "");
-            StringBuilder description = new StringBuilder();
+            ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", ParsedAsLike.None);
+            StringBuilder useIndex = new StringBuilder();
             bool isPrimary = false;
 
             int state = 0;
@@ -476,7 +484,10 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         name = token.Value;
                         if (type == ParseDefineType.Variable) state = 10;
-                        if (type == ParseDefineType.Buffer) state = 31;
+                        if (type == ParseDefineType.Buffer) {
+                            tempPrimitiveType = "buffer";
+                            state = 31;
+                        }
                         if (type == ParseDefineType.Parameter) {
                             lowerToken = token.Value.ToLower();
                             switch (lowerToken) {
@@ -485,7 +496,7 @@ namespace _3PA.MainFeatures.Parser {
                                 case "table-handle":
                                 case "dataset":
                                 case "dataset-handle":
-                                    primitiveType = lowerToken;
+                                    tempPrimitiveType = lowerToken;
                                     state = 30;
                                     break;
                                 default:
@@ -503,20 +514,23 @@ namespace _3PA.MainFeatures.Parser {
                         // define variable : match as or like
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
-                        if (lowerToken.Equals("as") || lowerToken.Equals("like")) state = 11;
-                        if (state != 10) asLike = lowerToken;
+                        if (lowerToken.Equals("as")) asLike = ParsedAsLike.As;
+                        else if (lowerToken.Equals("like")) asLike = ParsedAsLike.Like;
+                        if (asLike != ParsedAsLike.None) state = 11;
                         break;
                     case 11:
                         // define variable : match a primitive type or a field in db
                         if (!(token is TokenWord)) break;
-                        primitiveType = token.Value;
+                        tempPrimitiveType = token.Value;
                         state = 12;
                         break;
                     case 12:
-                        // define variable : match a view-as
+                        // define variable : match a view-as (or extent)
                         AddTokenToStringBuilder(left, token);
                         if (!(token is TokenWord)) break;
-                        if (token.Value.ToLower().Equals("view-as")) state = 13;
+                        lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("view-as")) state = 13;
+                        if (lowerToken.Equals("extent")) isExtended = true;
                         break;
                     case 13:
                         // define variable : match a view-as
@@ -525,7 +539,6 @@ namespace _3PA.MainFeatures.Parser {
                         viewAs = token.Value;
                         state = 99;
                         break;
-
 
                     case 20:
                         // define temp-table
@@ -544,14 +557,18 @@ namespace _3PA.MainFeatures.Parser {
                                 // matches USE-INDEX (after a like/like-sequential, we can have this keyword)
                                 state = 26;
                                 break;
+                            case "extent":
+                                // a field is extent:
+                                currentField.Flag = currentField.Flag | ParsedFieldFlag.Extent;
+                                break;
                             default:
                                 // matches a LIKE table
                                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse, resharper doesn't get this one
                                 if ((lowerToken.Equals("like") || lowerToken.Equals("like-sequential")) && !matchedLikeTable) 
                                     state = 21;
                                 // After a USE-UNDEX and the index name, we can match a AS PRIMARY for the previously defined index
-                                if (lowerToken.Equals("primary") && description.Length > 0) 
-                                    description.Append("!");
+                                if (lowerToken.Equals("primary") && useIndex.Length > 0) 
+                                    useIndex.Append("!");
                                 break;
                         }
                         break;
@@ -560,19 +577,19 @@ namespace _3PA.MainFeatures.Parser {
                         // ReSharper disable once RedundantAssignment
                         matchedLikeTable = true;
                         if (!(token is TokenWord)) break;
-                        asLike = token.Value.ToLower();
+                        likeTable = token.Value.ToLower();
                         state = 20;
                         break;
                     case 22:
                         // define temp-table : matches a FIELD name
                         if (!(token is TokenWord)) break;
-                        currentField = new ParsedField(token.Value, "", "", 0, ParsedFieldFlag.None, "", "", "");
+                        currentField = new ParsedField(token.Value, "", "", 0, ParsedFieldFlag.None, "", "", ParsedAsLike.None);
                         state = 23;
                         break;
                     case 23:
                         // define temp-table : matches a FIELD AS or LIKE
                         if (!(token is TokenWord)) break;
-                        currentField.LcAsLike = token.Value.ToLower();
+                        currentField.AsLike = token.Value.EqualsCi("like") ? ParsedAsLike.Like : ParsedAsLike.As;
                         state = 24;
                         break;
                     case 24:
@@ -583,6 +600,7 @@ namespace _3PA.MainFeatures.Parser {
                         fields.Add(currentField);
                         state = 20;
                         break;
+
                     case 25:
                         // define temp-table : match an index definition
                         if (!(token is TokenWord)) break;
@@ -599,11 +617,12 @@ namespace _3PA.MainFeatures.Parser {
                             // ReSharper disable once RedundantAssignment
                             isPrimary = false;
                         break;
+
                     case 26:
                         // define temp-table : match a USE-INDEX name
                         if (!(token is TokenWord)) break;
-                        description.Append(",");
-                        description.Append(token.Value);
+                        useIndex.Append(",");
+                        useIndex.Append(token.Value);
                         state = 20;
                         break;
 
@@ -611,18 +630,18 @@ namespace _3PA.MainFeatures.Parser {
                     case 30:
                         // define parameter : match a temptable, table, dataset or buffer name
                         if (!(token is TokenWord)) break;
+                        if (token.Value.ToLower().Equals("for")) break;
                         name = token.Value;
                         state++;
                         break;
                     case 31:
-                        // define parameter : match the table/dataset name that the buffer or handle is FOR
+                        // match the table/dataset name that the buffer or handle is FOR
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
                         if (lowerToken.Equals("for") || lowerToken.Equals("temp-table")) break;
-                        asLike = lowerToken;
+                        bufferFor = lowerToken;
                         state = 99;
                         break;
-
 
                     case 99:
                         // matching the rest of the define
@@ -632,9 +651,9 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             if (state <= 1) return;
             if (isTempTable)
-                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, description.ToString(), asLike, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString()));
+                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", likeTable, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()));
             else
-                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, primitiveType, viewAs));
+                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, isExtended, isDynamic));
         }
 
         /// <summary>
@@ -730,12 +749,6 @@ namespace _3PA.MainFeatures.Parser {
             StringBuilder parameters = new StringBuilder();
             bool isPrivate = false;
             ParsedFunction createdFunc = null;
-
-            // info the parameters
-            string paramName = "";
-            string paramAsLike = "";
-            string paramPrimitiveType = "";
-            string strFlags = "";
             var parametersList = new List<ParsedItem>();
 
             int state = 0;
@@ -765,86 +778,17 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 2:
                         // matching parameters (start)
-                        if (token is TokenWord && token.Value.EqualsCi("private")) {
-                            isPrivate = true;
-                            break;
+                        if (token is TokenWord) {
+                            if (token.Value.EqualsCi("private")) isPrivate = true;
+                            if (token.Value.EqualsCi("extent")) createdFunc.IsExtended = true;
                         }
-                        if (!(token is TokenSymbol)) break;
-                        if (token.Value.Equals("(")) state++;
+                        else if (!(token is TokenSymbol)) break;
+                        if (token.Value.Equals("(")) state = 3;
                         break;
                     case 3:
-                        // matching parameters type
-                        if (token is TokenSymbol && token.Value.Equals(")")) {
-                            state = 99;
-                            break;
-                        }
-                        AddTokenToStringBuilder(parameters, token);
-
-                        var lwToken = token.Value.ToLower();
-                        switch (lwToken) {
-                            case "input":
-                            case "output":
-                            case "input-output":
-                                // flags found before the type in case of a define parameter
-                                strFlags = lwToken;
-                                state++;
-                                break;
-                        }
-                        break;
-                    case 4:
-                        // matching parameters name
-                        if (token is TokenSymbol && token.Value.Equals(")")) {
-                            state = 99;
-                            break;
-                        }
-                        AddTokenToStringBuilder(parameters, token);
-
-                        if (!(token is TokenWord)) break;
-                        paramName = token.Value;
-                        state++;
-                        break;
-                    case 5:
-                        // matching parameters as or like
-                        if (token is TokenSymbol && token.Value.Equals(")")) {
-                            state = 99;
-                            break;
-                        }
-                        AddTokenToStringBuilder(parameters, token);
-
-                        if (!(token is TokenWord)) break;
-                        var lowerToken = token.Value.ToLower();
-                        if (lowerToken.Equals("as") || lowerToken.Equals("like")) state++;
-                        if (state != 5) paramAsLike = lowerToken;
-                        break;
-                    case 6:
-                        // matching parameters primitive type or a field in db
-                        if (token is TokenSymbol && token.Value.Equals(")")) {
-                            state = 99;
-                            break;
-                        }
-                        AddTokenToStringBuilder(parameters, token);
-
-                        if (!(token is TokenWord)) break;
-                        paramPrimitiveType = token.Value;
-                        state++;
-                        break;
-                    case 7:
-                        // matching parameters "," that indicates a next param
-                        if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
-                            // create a variable for this function scope
-                            parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "") {
-                                FilePath = _filePathBeingParsed,
-                                Scope = ParsedScope.Function,
-                                LcOwnerName = name.ToLower()
-                            });
-                            if (token.Value.Equals(","))
-                                state = 3;
-                            else {
-                                state = 99;
-                                break;
-                            }
-                        }
-                        AddTokenToStringBuilder(parameters, token);
+                        // read parameters, define a ParsedDefineItem for each
+                        parametersList = GetParsedParameters(functionToken, parameters, name);
+                        state = 99;
                         break;
                     case 99:
                         // matching prototype, we dont want to create a ParsedItem for prototype
@@ -877,7 +821,116 @@ namespace _3PA.MainFeatures.Parser {
             return true;
         }
 
-        
+        private List<ParsedItem> GetParsedParameters(Token functionToken, StringBuilder parameters, string ownerName) {
+            // info the parameters
+            string paramName = "";
+            ParsedAsLike paramAsLike = ParsedAsLike.None;
+            string paramPrimitiveType = "";
+            string strFlags = "";
+            string parameterFor = "";
+            bool isExtended = false;
+            var parametersList = new List<ParsedItem>();
+
+            int state = 0;
+            do {
+                var token = PeekAt(1); // next token
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                switch (state) {
+                    case 0:
+                        // matching parameters type
+                        if (!(token is TokenWord)) break;
+                        var lwToken = token.Value.ToLower();
+                        switch (lwToken) {
+                            case "buffer":
+                                paramPrimitiveType = lwToken;
+                                state = 10;
+                                break;
+                            case "table":
+                            case "table-handle":
+                            case "dataset":
+                            case "dataset-handle":
+                                paramPrimitiveType = lwToken;
+                                state = 20;
+                                break;
+                            case "input":
+                            case "output":
+                            case "input-output":
+                                // flags found before the type in case of a define parameter
+                                strFlags = lwToken;
+                                break;
+                            default:
+                                paramName = token.Value;
+                                state = 2;
+                                break;
+                        }
+                        break;
+                    case 2:
+                        // matching parameters as or like
+                        if (!(token is TokenWord)) break;
+                        var lowerToken = token.Value.ToLower();
+                        if (lowerToken.Equals("as")) paramAsLike = ParsedAsLike.As;
+                        else if (lowerToken.Equals("like")) paramAsLike = ParsedAsLike.Like;
+                        if (paramAsLike != ParsedAsLike.None) state++;
+                        break;
+                    case 3:
+                        // matching parameters primitive type or a field in db
+                        if (!(token is TokenWord)) break;
+                        paramPrimitiveType = token.Value;
+                        state = 99;
+                        break;
+
+                    case 10:
+                        // match a buffer name
+                        if (!(token is TokenWord)) break;
+                        paramName = token.Value;
+                        state++;
+                        break;
+                    case 11:
+                        // match the table/dataset name that the buffer is FOR
+                        if (!(token is TokenWord)) break;
+                        lowerToken = token.Value.ToLower();
+                        if (token.Value.EqualsCi("for")) break;
+                        parameterFor = lowerToken;
+                        state = 99;
+                        break;
+
+                    case 20:
+                        // match a table/dataset name
+                        if (!(token is TokenWord)) break;
+                        paramName = token.Value;
+                        state = 99;
+                        break;
+
+                    case 99:
+                        // matching parameters "," that indicates a next param
+                        if (token is TokenWord && token.Value.EqualsCi("extent")) isExtended = true;
+                        else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
+                            // create a variable for this function scope
+                            parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
+                                FilePath = _filePathBeingParsed,
+                                Scope = ParsedScope.Function,
+                                LcOwnerName = ownerName.ToLower()
+                            });
+                            paramName = "";
+                            paramAsLike = ParsedAsLike.None;
+                            paramPrimitiveType = "";
+                            strFlags = "";
+                            parameterFor = "";
+                            isExtended = false;
+
+                            if (token.Value.Equals(","))
+                                state = 0;
+                            else
+                                return parametersList;
+                        }
+                        break;
+                }
+                AddTokenToStringBuilder(parameters, token);
+            } while (MoveNext());
+            return parametersList;
+        }
+
 
         /// <summary>
         /// matches a include file

@@ -59,6 +59,7 @@ namespace _3PA.MainFeatures.Parser {
         Index = 4096,
         // others
         Buffer = 8192,
+        Dynamic = 16384
     }
 
     /// <summary>
@@ -99,6 +100,10 @@ namespace _3PA.MainFeatures.Parser {
         /// Parsed string for the return type, use ReturnType instead!
         /// </summary>
         public string ParsedReturnType { get; private set; }
+        /// <summary>
+        /// is the return-type "EXTENT [x]"
+        /// </summary>
+        public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
         public string LcName { get; private set; }
@@ -184,12 +189,28 @@ namespace _3PA.MainFeatures.Parser {
     /// Define parsed item
     /// </summary>
     public class ParsedDefine : ParsedItem {
+        /// <summary>
+        /// can contains (separated by 1 space) :
+        /// global, shared, private, new
+        /// </summary>
         public string LcFlagString { get; private set; }
         /// <summary>
         /// contains as or like in lowercase
         /// (for buffers, it contains the table it buffs)
         /// </summary>
-        public string LcAsLike { get; private set; }
+        public ParsedAsLike AsLike { get; private set; }
+        /// <summary>
+        /// In case of a buffer, contains the references table (BUFFER name FOR xxx)
+        /// </summary>
+        public string BufferFor { get; private set; }
+        /// <summary>
+        /// if the variable is "EXTENT [x]"
+        /// </summary>
+        public bool IsExtended { get; private set; }
+        /// <summary>
+        /// if the variable was CREATE'd instead of DEFINE'd
+        /// </summary>
+        public bool IsDynamic { get; private set; }
         public string Left { get; private set; }
         public ParseDefineType Type { get; private set; }
         /// <summary>
@@ -198,7 +219,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string TempPrimitiveType { get; private set; } 
         /// <summary>
-        /// (Used for variables) contains the primitive type ("as x") or the field name ("like x")
+        /// (Used for variables) contains the raw (string) primitive type, will be converted to ParseDefineType
+        /// in the ParserVisitor
         /// </summary>
         public ParsedPrimitiveType PrimitiveType { get; set; }
         /// <summary>
@@ -209,14 +231,24 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, int line, int column, string lcFlagString, string lcAsLike, string left, ParseDefineType type, string lcTempPrimitivePrimitiveType, string viewAs) : base(name, line, column) {
+        public ParsedDefine(string name, int line, int column, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
+            : base(name, line, column) {
             LcFlagString = lcFlagString;
-            LcAsLike = lcAsLike;
+            AsLike = asLike;
             Left = left;
             Type = type;
-            TempPrimitiveType = lcTempPrimitivePrimitiveType;
+            TempPrimitiveType = tempPrimitiveType;
             ViewAs = viewAs;
+            BufferFor = bufferFor;
+            IsExtended = isExtended;
+            IsDynamic = isDynamic;
         }
+    }
+
+    public enum ParsedAsLike {
+        None,
+        As,
+        Like
     }
 
     public class ParseDefineTypeAttr : Extensions.EnumAttr {
@@ -328,8 +360,11 @@ namespace _3PA.MainFeatures.Parser {
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
         /// <summary>
-        /// From database, represents the description of the table,
-        /// if temptable, contains the USE-INDEX 
+        /// To know if the table is a temptable
+        /// </summary>
+        public bool IsTempTable { get; private set; }
+        /// <summary>
+        /// From database, represents the description of the table
         /// </summary>
         public string Description { get; private set; }
         /// <summary>
@@ -337,9 +372,9 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string LcLikeTable { get; private set; }
         /// <summary>
-        /// To know if the table is a temptable
+        /// if temptable and temptable is "like" another table, contains the USE-INDEX 
         /// </summary>
-        public bool IsTempTable { get; private set; }
+        public string UseIndex { get; private set; }
         /// <summary>
         /// In case of a temp table, can contains the eventuals :
         /// NEW [ GLOBAL ] ] SHARED ] | [ PRIVATE | PROTECTED ] [ STATIC ] flags
@@ -352,7 +387,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString) : base(name, line, column) {
+        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, line, column) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;
@@ -363,6 +398,7 @@ namespace _3PA.MainFeatures.Parser {
             Indexes = indexes;
             Triggers = triggers;
             LcFlagString = lcFlagString;
+            UseIndex = useIndex;
         }
     }
 
@@ -385,8 +421,8 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// contains as or like in lowercase
         /// </summary>
-        public string LcAsLike { get;  set; }
-        public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, string lcAsLike) {
+        public ParsedAsLike AsLike { get; set; }
+        public ParsedField(string name, string lcTempType, string format, int order, ParsedFieldFlag flag, string initialValue, string description, ParsedAsLike asLike) {
             Name = name;
             TempType = lcTempType;
             Format = format;
@@ -394,7 +430,7 @@ namespace _3PA.MainFeatures.Parser {
             Flag = flag;
             InitialValue = initialValue;
             Description = description;
-            LcAsLike = lcAsLike;
+            AsLike = asLike;
         }
     }
 

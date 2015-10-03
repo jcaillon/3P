@@ -7,6 +7,8 @@ namespace _3PA.MainFeatures.Parser {
     //TODO: the class doesn't correctly handle text that is not encoded on 8 bits because we just do pos++, need to fix this 
     // GetByteCount();
     /*
+     * Encoding.UTF8.GetByteCount(text);
+     * 
      * byte[] bytes = Encoding.Default.GetBytes(myString);
         myString = Encoding.UTF8.GetString(bytes);
      * 
@@ -177,18 +179,19 @@ namespace _3PA.MainFeatures.Parser {
             _startCol = _column;
             _startPos = _pos;
 
+            var ch = PeekAt(0);
+
+            // END OF FILE reached
+            if (ch == Eof)
+                return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+
             // if we started in a comment, read this token as a comment
             if (_commentDepth > 0) return CreateCommentToken();
 
             // if we started in a comment, read this token as a comment
             if (_includeDepth > 0) return CreateIncludeToken();
 
-            var ch = PeekAt(0);
             switch (ch) {
-
-                case Eof:
-                    return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-
                 case '/':
                     // comment
                     return PeekAt(1) == '*' ? CreateCommentToken() : CreateSymbolToken();

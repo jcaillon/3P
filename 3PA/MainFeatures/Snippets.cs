@@ -95,8 +95,10 @@ namespace _3PA.MainFeatures {
 
             if (InsertionActive) return false; // do no insert a snippet within a snippet!
 
-            Point tokenPoints;
-            string token = Npp.GetKeywordOnLeftOfPosition(Npp.GetCaretPosition(), out tokenPoints);
+            
+            string token = Npp.GetKeyword(Npp.GetCaretPosition());
+            var curPos = Npp.GetCaretPosition();
+            Point tokenPoints = new Point(curPos - token.Length, curPos);
 
             if (Contains(token)) {
 
@@ -104,7 +106,7 @@ namespace _3PA.MainFeatures {
 
                 if (replacement != null) {
                     int line = Npp.GetCaretLineNumber();
-                    int lineStartPos = Npp.GetLineStart(line);
+                    int lineStartPos = Npp.GetPositionFromLine(line);
 
                     int horizontalOffset = tokenPoints.X - lineStartPos;
 
@@ -262,7 +264,7 @@ namespace _3PA.MainFeatures {
                 startPos = LocSnippetContext.ReplacementString.IndexOf("$", endPos + 1, StringComparison.Ordinal);
             }
 
-            Npp.ReplaceKeyword(LocSnippetContext.ReplacementString);
+            Npp.SetKeyword(LocSnippetContext.ReplacementString);
 
             if (LocSnippetContext.Parameters.Any())
                 LocSnippetContext.CurrentParameter = LocSnippetContext.Parameters.FirstOrDefault();

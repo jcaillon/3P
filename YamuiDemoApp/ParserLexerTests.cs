@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"), @"C:\Users\Julien\Desktop\in.p");
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\in.p");
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -77,11 +77,11 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunction pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended);
         }
 
         public void Visit(ParsedProcedure pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
@@ -96,14 +96,14 @@ namespace YamuiDemoApp {
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.LcAsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.ViewAs + "," + pars.Left);
+                Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.LcOwnerName + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended);
         }
 
         public void Visit(ParsedTable pars) {
             return;
             Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.LcOwnerName);
             foreach (var field in pars.Fields) {
-                Output.Append(field.Name + "|" + field.LcAsLike + "|" + field.Type + ",");
+                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
             }
         }
 

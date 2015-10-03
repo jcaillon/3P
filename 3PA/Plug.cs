@@ -216,21 +216,21 @@ namespace _3PA {
                 // handles the autocompletion
                 AutoComplete.UpdateAutocompletion();
 
+                // we are still entering a keyword, return
                 if (Abl.IsCharAllowedInVariables(c)) return;
 
                 // we finished entering a keyword
                 int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
-                int curPos = Npp.GetCaretPosition();
-                Point keywordPos;
-                var keyword = Npp.GetKeywordOnLeftOfPosition(curPos - offset, out keywordPos);
+                var searchWordAt = Npp.GetCaretPosition() - offset;
+                var keyword = Npp.GetKeyword(searchWordAt);
 
                 //TODO: if multiselection, replace everywhere!
 
                 // replace the last keyword by the correct case, check the context of the caret
                 if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Highlight.IsNormalContext()) {
-                    var casedKeyword = AutoComplete.CorrectKeywordCase(keyword);
+                    var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                     if (casedKeyword != null)
-                        Npp.WrappedKeywordReplace(casedKeyword, keywordPos, curPos);
+                        Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
                 }
 
                 /*
@@ -475,7 +475,7 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            AutoComplete.ParseCurrentDocument();
+            MessageBox.Show(Npp.GetWordAtPosition(Npp.GetCaretPosition()));
             //Highlight.Colorize(0, Npp.GetTextLenght());
         }
         #endregion

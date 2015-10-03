@@ -55,7 +55,7 @@ namespace _3PA.MainFeatures
         static void OnOpenBracket()
         {
             int currentPos = Npp.GetCaretPosition();
-            int currentLineNum = Npp.GetLineNumber(currentPos);
+            int currentLineNum = Npp.GetLineFromPosition(currentPos);
             string currLineText = Npp.GetLine(currentLineNum);
             string prevLineText = Npp.GetLine(currentLineNum - 1);
 
@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures
         static void OnCloseBracket()
         {
             int currentPos = Npp.GetCaretPosition();
-            int currentLineNum = Npp.GetLineNumber(currentPos);
+            int currentLineNum = Npp.GetLineFromPosition(currentPos);
             string currLineText = Npp.GetLine(currentLineNum);
             //string prevText = Npp.TextBeforeCursor(500); //do not load all all "top" document but its substantial part
 

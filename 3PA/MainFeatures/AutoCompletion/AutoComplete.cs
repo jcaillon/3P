@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using _3PA.Lib;
@@ -82,17 +81,30 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Returns a keyword from the autocompletion list with the correct case
         /// </summary>
         /// <param name="keyword"></param>
+        /// <param name="lastWordPos"></param>
         /// <returns></returns>
-        public static string CorrectKeywordCase(string keyword) {
+        public static string CorrectKeywordCase(string keyword, int lastWordPos) {
             if (_savedAllItems == null) return null;
             CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
-            if (found != null)
-                return !found.FromParser ? Abl.AutoCaseToUserLiking(keyword) : found.DisplayText;
+            if (found != null) {
+
+                return !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
+            }
+
             // search in tables' fields
-            var previousWord = Npp.GetFirstWordRightAfterPoint(Npp.GetCaretPosition());
-            if (!String.IsNullOrEmpty(previousWord) && ParserHandler.FindAnyTableOrBufferByName(previousWord) != null)
-                return Abl.AutoCaseToUserLiking(keyword);
-            return null;
+            var previousWord = Npp.GetFirstWordRightAfterPoint(lastWordPos);
+            if (string.IsNullOrEmpty(previousWord)) return null;
+            var tableFound = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+            if (tableFound == null) return null;
+            var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
+            if (fieldFound == null) return null;
+            /*
+             *  if (data.FromParser)
+                    ParserHandler.RememberUseOfParsedItem(data.DisplayText);
+                else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
+                    ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
+             */
+            return keyword.AutoCaseToUserLiking();
         }
 
         #endregion
@@ -228,6 +240,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // get current word, current previous word (table or database name)
                 int nbPoints;
                 string previousWord = "";
+                //TODO: for multiselection, when we erase a char, the last char is a " " idk why
                 var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.GetCaretPosition());
                 var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
                 var splitted = keyword.Split('.');
@@ -378,37 +391,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static void OnTabCompleted(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
             try {
                 var data = tabCompletedEventArgs.CompletionItem;
-                if (data.DisplayText != "" && data.DisplayText != "<empty>") {
-                    Point keywordPos;
-                    var keywordToRep = Npp.GetKeywordOnLeftOfPosition(Npp.GetCaretPosition(), out keywordPos);
 
-                    // if the "hint" is empty, don't replace the current hint, just add text at the carret position
-                    if ((data.Type == CompletionType.Field && Npp.TextBeforeCaret(2).EndsWith(".")) ||
-                        String.IsNullOrWhiteSpace(keywordToRep)) {
-                        var curPos = Npp.GetCaretPosition();
-                        keywordPos.X = curPos;
-                        keywordPos.Y = curPos;
-                    }
+                //TODO config to replace all abbrev by complete word
+                Npp.ReplaceKeywordWrapped(data.DisplayText, 0);
 
-                    //TODO config to replace all abbrev by complete word
+                // Remember this item to show it higher in the list later
+                data.Ranking++;
+                if (data.FromParser)
+                    ParserHandler.RememberUseOfParsedItem(data.DisplayText);
+                else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
+                    ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
 
-                    Npp.BeginUndoAction();
-                    Npp.ReplaceKeyword(data.DisplayText, keywordPos);
-                    Npp.EndUndoAction();
+                // sort the items, to reflect the latest ranking
+                _form.SortItems();
 
-                    // Remember this item to show it higher in the list later
-                    data.Ranking++;
-                    if (data.FromParser)
-                        ParserHandler.RememberUseOfParsedItem(data.DisplayText);
-                    else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
-                        ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
-
-                    // sort the items, to reflect the latest ranking
-                    _form.SortItems();
-
-                    if (data.Type == CompletionType.Snippet)
-                        Snippets.TriggerCodeSnippetInsertion();
-                }
+                if (data.Type == CompletionType.Snippet)
+                    Snippets.TriggerCodeSnippetInsertion();
 
                 Close();
             } catch (Exception e) {

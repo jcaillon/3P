@@ -64,6 +64,24 @@ namespace _3PA.Lib {
 
         #region string extensions
         /// <summary>
+        /// autocase the keyword in input according to the user config
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static string AutoCaseToUserLiking(this string keyword) {
+            switch (Config.Instance.AutoCompleteChangeCaseMode) {
+                case 1:
+                    return keyword.ToUpper();
+                case 2:
+                    return keyword.ToLower();
+                case 3:
+                    return keyword.ToTitleCase();
+                default:
+                    return keyword;
+            }
+        }
+
+        /// <summary>
         /// Count the nb of occurrences...
         /// </summary>
         /// <param name="haystack"></param>
@@ -176,6 +194,15 @@ namespace _3PA.Lib {
             return Encoding.Default.GetString(Encoding.UTF8.GetBytes(str));
         }
 
+        public static bool ContainsFast(this string source, string toCheck) {
+            return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
+        }
+
+        #endregion
+
+
+        #region region string misc
+
         private static readonly string[] LineDelimiters = new string[] { "\r\n", "\n" };
 
         /// <summary>
@@ -268,10 +295,6 @@ namespace _3PA.Lib {
                 i--;
             // Return length of text before whitespace
             return i + 1;
-        }
-
-        public static bool ContainsFast(this string source, string toCheck) {
-            return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }
 
         public static bool IsScriptFile(this string file) {
