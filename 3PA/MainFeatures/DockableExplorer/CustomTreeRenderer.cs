@@ -16,7 +16,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         ///     Create a TreeRenderer
         /// </summary>
         public CustomTreeRenderer(string filterStr) {
-            _linePen = new Pen(ThemeManager.AccentColor, 2.0f) {
+            _linePen = new Pen(ThemeManager.AccentColor, 1.5f) {
                 DashStyle = DashStyle.Solid
             };
             _fillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
@@ -79,10 +79,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <param name="r"></param>
         /// <param name="isExpanded"></param>
         protected new virtual void DrawExpansionGlyph(Graphics g, Rectangle r, bool isExpanded) {
-            var h = 8;
-            var w = 8;
-            var x = r.X + 4;
-            var y = r.Y + (r.Height/2) - 4;
+            var h = 12;
+            var w = 12;
+            var x = r.X + (r.Width / 2) - w / 2;
+            var y = r.Y + (r.Height / 2) - h / 2;
 
             using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverBorderColor)) {
                 g.DrawRectangle(p, new Rectangle(x, y, w, h));
@@ -90,11 +90,15 @@ namespace _3PA.MainFeatures.DockableExplorer {
             using (var p = new SolidBrush(ThemeManager.Current.ButtonColorsHoverBackColor)) {
                 g.FillRectangle(p, new Rectangle(x + 1, y + 1, w - 1, h - 1));
             }
-            using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverForeColor)) {
-                g.DrawLine(p, x + 2, y + 4, x + w - 2, y + 4);
-                if (!isExpanded)
-                    g.DrawLine(p, x + 4, y + 2, x + 4, y + h - 2);
-            }
+            if (isExpanded)
+                using (var b = new SolidBrush(ThemeManager.AccentColor)) {
+                    g.FillRectangle(b, new Rectangle(x + 2, y + 2, w - 4, h - 4));
+                }
+            //using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverForeColor)) {
+            //    g.DrawLine(p, x + 2, y + 4, x + w - 2, y + 4);
+            //    if (!isExpanded)
+            //        g.DrawLine(p, x + 4, y + 2, x + 4, y + h - 2);
+            //}
         }
 
         /// <summary>
@@ -112,8 +116,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
             // Vertical lines have to start on even points, otherwise the dotted line looks wrong.
             // This is only needed if pen is dotted.
             int top = r2.Top;
-            //if (p.DashStyle == DashStyle.Dot && (top & 1) == 0)
-            //    top += 1;
 
             // Draw lines for ancestors
             int midX;

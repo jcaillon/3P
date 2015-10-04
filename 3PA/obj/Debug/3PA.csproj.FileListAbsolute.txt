@@ -61,3 +61,4 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
 C:\Work\3PA\3PA\obj\Debug\2P2B.dll
 C:\Work\3PA\3PA\obj\Debug\2P2B.pdb
+C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.DockableExplorer.CodeExplorer.resources

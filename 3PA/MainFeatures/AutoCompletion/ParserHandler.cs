@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
+using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
     class ParserHandler {
+
+        #region fields
+
         /// <summary>
         /// This dictionnary is what is used to remember the ranking of each word for the current session
         /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
@@ -27,13 +31,23 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static List<CompletionData> ParsedItemsList = new List<CompletionData>();
 
+        /// <summary>
+        /// Contains the list of explorer items for the current file, updated by the parser's visitor class
+        /// </summary>
+        public static List<ExplorerItems> ParsedExplorerItemsList = new List<ExplorerItems>();
+        public static List<ExplorerCategories> ParsedCategoriesList = new List<ExplorerCategories>();
+
         private static Parser.Parser _ablParser;
 
         /// <summary>
         /// is used to make sure that 2 different threads dont try to access
         /// the same resource (_ablParser) at the same time, which would be problematic
         /// </summary>
-        private static object _thisLock = new object();
+        private static object _parserLock = new object();
+
+        #endregion
+
+        #region misc
 
         /// <summary>
         /// Returns the owner name (currentScopeName) of the caret line
@@ -43,11 +57,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             get {
                 var line = Npp.GetCaretLineNumber();
                 if (_ablParser == null) return "";
-                lock (_thisLock) {
-                    return !_ablParser.GetLineInfo.ContainsKey(line) ? "" : _ablParser.GetLineInfo[line].CurrentScopeName;
+                bool lockTaken = false;
+                try {
+                    Monitor.TryEnter(_parserLock, 500, ref lockTaken);
+                    if (lockTaken) {
+                        return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
+                    }
+                } finally {
+                    if (lockTaken) Monitor.Exit(_parserLock);
                 }
+                return string.Empty;
             }
         }
+
+        #endregion
+
+        #region do the parsing and get the results
 
         /// <summary>
         /// this method should be called to refresh the Items list with all the static items
@@ -57,10 +82,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (ParsedItemsList == null) ParsedItemsList = new List<CompletionData>();
 
             // we launch the parser, that will fill the DynamicItems
-            lock (_thisLock) {
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
+                if (!lockTaken) return;
+
                 _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath());
                 ParsedItemsList.Clear();
-                _ablParser.Accept(new AutoCompParserVisitor());
+                ParsedExplorerItemsList.Clear();
+                ParsedCategoriesList.Clear();
+                _ablParser.Accept(new ParserVisitor());
+
+                // for the code explorer we update it from here
+                DockableExplorer.DockableExplorer.UpdateCodeExplorer();
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in RefreshParser");
+            } finally {
+                if (lockTaken) Monitor.Exit(_parserLock);
             }
         }
 
@@ -68,22 +107,42 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// List of parsed items
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> GetParsedItemList() {
-            lock (_thisLock) {
-                return ParsedItemsList.ToList();
-            }
+        public static List<CompletionData> GetParsedItemsList() {
+            return ParsedItemsList.ToList();
         }
 
         /// <summary>
-        /// Find a temptable by name
+        /// List of parsed explorer items
         /// </summary>
-        /// <param name="name"></param>
         /// <returns></returns>
-        public static ParsedTable FindTempTableByName(string name) {
-            var foundTable = ParsedItemsList.Find(data => (data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
-            if (foundTable != null) return (ParsedTable)foundTable.ParsedItem;
-            return null;
+        public static List<ExplorerItems> GetParsedExplorerItemsList() {
+            return ParsedExplorerItemsList.ToList();
         }
+
+        /// <summary>
+        /// List of parsed explorer categories (main block, definitions...)
+        /// </summary>
+        /// <returns></returns>
+        public static List<ExplorerCategories> GetParsedCategoriesList() {
+            return ParsedCategoriesList.ToList();
+        }
+
+        /// <summary>
+        /// List of parsed explorer categories (main block, definitions...)
+        /// but returned as items
+        /// </summary>
+        /// <returns></returns>
+        public static List<ExplorerItems> GetParsedCategoriesAsItemsList() {
+            return ParsedCategoriesList.Select(categories => new ExplorerItems() {
+                DisplayText = categories.DisplayText,
+                IconType = categories.IconType,
+                GoToLine = categories.GoToLine
+            }).ToList();
+        }
+        #endregion
+
+
+        #region handling item ranking
 
         /// <summary>
         /// Find ranking of a parsed item
@@ -127,6 +186,58 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayTextRankingDatabase[displayText]++;
         }
 
+        #endregion
+
+        #region find table, buffer, temptable
+
+        /// <summary>
+        /// finds a ParsedTable for the input name, it can either be a database table,
+        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedTable FindAnyTableOrBufferByName(string name) {
+            // temptable or table
+            var foundTable = FindAnyTableByName(name);
+            if (foundTable != null)
+                return foundTable;
+            // for buffer, we return the referenced temptable/table (stored in CompletionData.SubString)
+            var foundParsedItem = ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
+        }
+
+        /// <summary>
+        /// Find the table referenced among database and defined temp tables; 
+        /// name is the table's name (can also be BASE.TABLE)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedTable FindAnyTableByName(string name) {
+            if (name.CountOccurences(".") > 0) {
+                var splitted = name.Split('.');
+                // find db then find table
+                var foundDb = DataBase.FindDatabaseByName(splitted[0]);
+                return foundDb == null ? null : DataBase.FindTableByName(splitted[1], foundDb);
+            }
+            // search in databse then in temp tables
+            var foundTable = DataBase.FindTableByName(name);
+            return foundTable ?? FindTempTableByName(name);
+        }
+
+        /// <summary>
+        /// Find a temptable by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedTable FindTempTableByName(string name) {
+            var foundTable = ParsedItemsList.Find(data => (data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            if (foundTable != null) return (ParsedTable) foundTable.ParsedItem;
+            return null;
+        }
+
+        #endregion
+
+        #region find primitive type
 
         /// <summary>
         /// convertion
@@ -158,8 +269,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     return ParsedPrimitiveType.WidgetHandle;
                 default:
                     var token1 = str;
-                    foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                        return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                    foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
+                        return (ParsedPrimitiveType) Enum.Parse(typeof (ParsedPrimitiveType), typ, true);
                     }
                     break;
             }
@@ -167,42 +278,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // try to find the complete word in abbreviations list
             var completeStr = Keywords.GetFullKeyword(str).ToLower();
             if (completeStr != str)
-                foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.Equals(typ.ToLower()))) {
-                    return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => completeStr.Equals(typ.ToLower()))) {
+                    return (ParsedPrimitiveType) Enum.Parse(typeof (ParsedPrimitiveType), typ, true);
                 }
             return ParsedPrimitiveType.Unknow;
-        }
-
-        /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedTable FindAnyTableByName(string name) {
-            if (name.CountOccurences(".") > 0) {
-                var splitted = name.Split('.');
-                // find db then find table
-                var foundDb = DataBase.FindDatabaseByName(splitted[0]);
-                return foundDb == null ? null : DataBase.FindTableByName(splitted[1], foundDb);
-            }
-            // search in databse then in temp tables
-            var foundTable = DataBase.FindTableByName(name);
-            return foundTable ?? FindTempTableByName(name);
-        }
-
-        /// <summary>
-        /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temptable, or a buffer name (in which case we return the associated table)
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedTable FindAnyTableOrBufferByName(string name) {
-            var foundTable = FindAnyTableByName(name);
-            if (foundTable != null)
-                return foundTable;
-            var foundParsedItem = ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
-            return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
         }
 
         /// <summary>
@@ -221,7 +300,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 var foundVar = ParsedItemsList.Find(data =>
                     (data.Type == CompletionType.VariablePrimitive ||
                      data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
-                return foundVar != null ? ((ParsedDefine)foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
+                return foundVar != null ? ((ParsedDefine) foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
             }
 
             var tableName = splitted[nbPoints == 2 ? 1 : 0];
@@ -252,5 +331,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
             return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
         }
+
+        #endregion
+
     }
 }

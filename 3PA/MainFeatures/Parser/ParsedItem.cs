@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using _3PA.Lib;
+using _3PA.MainFeatures.DockableExplorer;
 
 namespace _3PA.MainFeatures.Parser {
     /// <summary>
@@ -11,6 +12,7 @@ namespace _3PA.MainFeatures.Parser {
         public string FilePath { get; set; }
         /// <summary>
         /// Line of the first keyword of the statement where the item is found
+        /// <remarks>THE LINE COUNT START AT 0 NOT 1!!</remarks>
         /// </summary>
         public int Line { get; private set; }
         /// <summary>
@@ -71,6 +73,20 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public int EndLine { get; set; }
         protected ParsedScopeItem(string name, int line, int column) : base(name, line, column) {}
+    }
+
+    /// <summary>
+    /// Procedure parsed item
+    /// </summary>
+    public class ParsedBlock : ParsedScopeItem {
+        public IconType Type { get; set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+        public ParsedBlock(string name, int line, int column, IconType type) : base(name, line, column) {
+            Type = type;
+        }
     }
 
     /// <summary>

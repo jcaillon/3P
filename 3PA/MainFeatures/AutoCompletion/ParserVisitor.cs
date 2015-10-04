@@ -1,4 +1,5 @@
 ﻿using _3PA.Lib;
+using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -7,7 +8,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// This class sustains the autocompletion list AND the code explorer list
     /// by visiting the parser and creating new completionData
     /// </summary>
-    class AutoCompParserVisitor : IParserVisitor{
+    class ParserVisitor : IParserVisitor{
+        /// <summary>
+        /// Main block, definitions block...
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedBlock pars) {
+            ParserHandler.ParsedCategoriesList.Add(new ExplorerCategories() {
+                DisplayText = pars.Name,
+                IconType = pars.Type,
+                GoToLine = pars.Line
+            });
+        }
 
         /// <summary>
         /// Run statement
@@ -15,6 +27,40 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
             // we only want the RUN that point to external procedures
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+                DisplayText = pars.Name,
+                IconType = IconType.Run,
+                GoToLine = pars.Line
+            });
+        }
+
+        /// <summary>
+        /// ON events
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedOnEvent pars) {
+            // To code explorer
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+                DisplayText = pars.Name,
+                IconType = IconType.OnEvents,
+                GoToLine = pars.Line
+            });
+        }
+
+        /// <summary>
+        /// Include files
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedIncludeFile pars) {
+           // To code explorer
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+                DisplayText = pars.Name,
+                IconType = IconType.Includes,
+                GoToLine = pars.Line
+            });
+
+            // Parse the include file, dont forget to flag the items as External
+
         }
 
         /// <summary>
@@ -22,6 +68,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
+            // to code explorer
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+                DisplayText = pars.Name,
+                IconType = IconType.Functions,
+                GoToLine = pars.Line
+            });
+
+            // to completion data
             pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
@@ -39,6 +93,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
+            // to code explorer
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+                DisplayText = pars.Name,
+                IconType = IconType.Procedures,
+                GoToLine = pars.Line
+            });
+
+            // to completion data
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
@@ -48,25 +110,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParsedItem = pars,
                 FromParser = true
             });
-        }
-
-        /// <summary>
-        /// ON events
-        /// </summary>
-        /// <param name="pars"></param>
-        public void Visit(ParsedOnEvent pars) {
-            // To code explorer
-        }
-
-        /// <summary>
-        /// Include files
-        /// </summary>
-        /// <param name="pars"></param>
-        public void Visit(ParsedIncludeFile pars) {
-           // To code explorer
-
-            // Parse the include file, dont forget to flag the items as External
-
         }
 
         /// <summary>

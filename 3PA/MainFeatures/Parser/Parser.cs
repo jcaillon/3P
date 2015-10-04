@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
+using _3PA.MainFeatures.DockableExplorer;
 
 namespace _3PA.MainFeatures.Parser {
 
@@ -690,12 +691,16 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParsedScope.File;
-                    if (toParse.ContainsFast("_DEFINITIONS"))
-                        _context.LcOwnerName = "definitions";
-                    else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK"))
-                        _context.LcOwnerName = "preprocessor";
-                    else if (toParse.ContainsFast("_MAIN-BLOCK"))
-                        _context.LcOwnerName = "mainblock";
+                    if (toParse.ContainsFast("_DEFINITIONS")) {
+                        _context.LcOwnerName = "definition block";
+                        AddParsedItem(new ParsedBlock("Definition block", token.Line, token.Column, IconType.DefinitionsBlock));
+                    } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
+                        _context.LcOwnerName = "preprocessor block";
+                        AddParsedItem(new ParsedBlock("Preprocessor block", token.Line, token.Column, IconType.PreprocessorBlock));
+                    } else if (toParse.ContainsFast("_MAIN-BLOCK")) {
+                        _context.LcOwnerName = "main block";
+                        AddParsedItem(new ParsedBlock("Main block", token.Line, token.Column, IconType.MainBlock));
+                    }
                     break;
                 case "&UNDEFINE":
                     var found = (ParsedPreProc)_parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));

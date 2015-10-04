@@ -587,14 +587,18 @@ namespace _3PA {
 
 
         /// <summary>
-        /// Move the caret and the view to the specified line (lines starts at 1 not 0)
+        /// Move the caret and the view to the specified line (lines starts 0!)
         /// </summary>
         /// <param name="line"></param>
         public static void GoToLine(int line) {
             EnsureRangeVisible(line, line);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESONSCREEN, 0, 0), 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line - 1, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + GetNumberOfLinesOnScreen(), 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line, 0);
             GrabFocus();
+        }
+
+        public static int GetNumberOfLinesOnScreen() {
+            return (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESONSCREEN, 0, 0);
         }
 
         /// <summary>

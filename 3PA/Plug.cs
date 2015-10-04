@@ -395,6 +395,9 @@ namespace _3PA {
             // close suggestions
             ClosePopups();
             Snippets.FinalizeCurrent();
+
+            // update scope of code explorer (the selection img)
+            DockableExplorer.RedrawCodeExplorer();
         }
 
         /// <summary>
@@ -419,9 +422,9 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
-            if (PluginIsFullyLoaded) 
-                AutoComplete.ParseCurrentDocument();
-            
+            // Parse the document
+            AutoComplete.ParseCurrentDocument(true);
+
             // TODO: FIX COLOR HIGHLIGHTING.?
             // set the lexer to use
             //if (Config.Instance.GlobalUseContainedLexer && Abl.IsCurrentProgressFile())
@@ -475,7 +478,7 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            MessageBox.Show(Npp.GetWordAtPosition(Npp.GetCaretPosition()));
+            MessageBox.Show(Npp.GetCaretLineNumber().ToString());
             //Highlight.Colorize(0, Npp.GetTextLenght());
         }
         #endregion

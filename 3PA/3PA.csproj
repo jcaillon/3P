@@ -69,10 +69,16 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\AutoCompParserVisitor.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\ParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorer.Designer.cs">
+      <DependentUpon>CodeExplorer.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
@@ -179,7 +185,7 @@
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.Designer.cs">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\ExplorerContent.cs" />
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerObject.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\Highlight.cs" />
@@ -246,6 +252,9 @@
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\DockableExplorer\CodeExplorer.resx">
+      <DependentUpon>CodeExplorer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\DockableExplorer\DockableExplorerForm.resx">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -303,11 +312,14 @@
     <Content Include="Images\DockableExplorer\clear_filters.png" />
     <Content Include="Images\DockableExplorer\code.png" />
     <Content Include="Images\DockableExplorer\collapse.png" />
+    <Content Include="Images\DockableExplorer\onevents.png" />
     <Content Include="Images\DockableExplorer\eraser.png" />
     <Content Include="Images\DockableExplorer\expand.png" />
-    <Content Include="Images\DockableExplorer\exterior.png" />
+    <Content Include="Images\DockableExplorer\mainblock.png" />
     <Content Include="Images\DockableExplorer\numerical_sorting_12.png" />
     <Content Include="Images\DockableExplorer\refresh.png" />
+    <Content Include="Images\DockableExplorer\run.png" />
+    <Content Include="Images\DockableExplorer\selection.png" />
     <Content Include="Images\Html\wink.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />

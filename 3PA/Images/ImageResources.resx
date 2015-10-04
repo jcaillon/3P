@@ -142,9 +142,6 @@
   <data name="code" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\code.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="exterior" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\exterior.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="wink" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>html\wink.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -231,5 +228,17 @@
   </data>
   <data name="Dynamic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>autocompletion\completionflag\dynamic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mainblock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\mainblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="selection" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\selection.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="run" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\run.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="onevents" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\onevents.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

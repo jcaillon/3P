@@ -40,6 +40,7 @@ namespace _3PA.Lib {
         public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,0,1";
 
         public bool ExplorerUseAlternateColors = false;
+        public bool ExplorerVisible = true;
 
         public double AppliOpacityUnfocused = 0.5;
         public bool AppliAllowTabAnimation = true;

@@ -26,6 +26,8 @@ namespace _3PA.MainFeatures.Parser {
     /// it implements a visitor pattern
     /// </summary>
     public class Lexer {
+        private const int LineStartAt = 0;
+        private const int ColumnStartAt = 1;
         private const char Eof = (char)0;
         private int _commentDepth;
         private int _includeDepth;
@@ -126,8 +128,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public void Reset() {
             _pos = 0;
-            _line = 1;
-            _column = 1;
+            _line = LineStartAt;
+            _column = ColumnStartAt;
             _commentDepth = 0;
             _includeDepth = 0;
             _tokenPos = -1;
@@ -158,7 +160,7 @@ namespace _3PA.MainFeatures.Parser {
             if (eol == '\r' && PeekAt(0) == '\n')
                 Read();
             _line++;
-            _column = 1;
+            _column = ColumnStartAt;
         }
 
         /// <summary>

@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using _3PA.Lib;
+using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
     /// <summary>
-    /// This class manipulate the AutoCompletionForm
+    /// This class handles the AutoCompletionForm
     /// </summary>
     internal class AutoComplete {
+
+        #region field
 
         /// <summary>
         /// Was the autocompletion opened naturally or from the user shortkey?
@@ -34,11 +38,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static TypeOfList CurrentTypeOfList {
             get { return _currentTypeOfList; }
-            set { 
+            set {
                 _needToSetItems = true;
                 _currentTypeOfList = value;
             }
         }
+
         private static TypeOfList _currentTypeOfList;
         private static bool _needToSetItems;
 
@@ -59,7 +64,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// the same resource (_parserTimer) at the same time, which would be problematic
         /// </summary>
         private static object _thisLock = new object();
+
         private static Timer _parserTimer;
+
+        private static string _lastRememberedKeyword = "";
+
+        #endregion
 
         #region public misc.
 
@@ -84,27 +94,40 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="lastWordPos"></param>
         /// <returns></returns>
         public static string CorrectKeywordCase(string keyword, int lastWordPos) {
+            string output = null;
+            var found = FindCompletionData(keyword);
+            if (found != null) {
+                RememberUseOf(found);
+                output = !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
+            } else {
+                // search in tables fields
+                var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(lastWordPos));
+                if (tableFound != null) {
+                    var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
+                    if (fieldFound != null) {
+                        RememberUseOf(new CompletionData() {
+                            FromParser = false,
+                            DisplayText = fieldFound.Name,
+                            Type = CompletionType.Field,
+                            Ranking = 0
+                        });
+                        ParserHandler.RememberUseOfDatabaseItem(fieldFound.Name);
+                        output = keyword.AutoCaseToUserLiking();
+                    }
+                }
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// try to match the keyword with an item in the autocomplete list
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <returns></returns>
+        public static CompletionData FindCompletionData(string keyword) {
             if (_savedAllItems == null) return null;
             CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
-            if (found != null) {
-
-                return !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
-            }
-
-            // search in tables' fields
-            var previousWord = Npp.GetFirstWordRightAfterPoint(lastWordPos);
-            if (string.IsNullOrEmpty(previousWord)) return null;
-            var tableFound = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-            if (tableFound == null) return null;
-            var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
-            if (fieldFound == null) return null;
-            /*
-             *  if (data.FromParser)
-                    ParserHandler.RememberUseOfParsedItem(data.DisplayText);
-                else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
-                    ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
-             */
-            return keyword.AutoCaseToUserLiking();
+            return found;
         }
 
         #endregion
@@ -115,16 +138,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="doNow"></param>
         public static void ParseCurrentDocument(bool doNow = false) {
-            // parse immediatly
-            if (doNow) {
-                ParseCurrentDocumentTick();
-                return;
-            }
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_thisLock, 500, ref lockTaken);
+                if (!lockTaken) return;
 
-            lock (_thisLock) {
+                // parse immediatly
+                if (doNow) {
+                    ParseCurrentDocumentTick();
+                    return;
+                }
+
                 // parse in 1s, if nothing delays the timer
                 if (_parserTimer == null) {
-                    _parserTimer = new Timer { Interval = 1000 };
+                    _parserTimer = new Timer { Interval = 800 };
                     _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
                     _parserTimer.Start();
                 } else {
@@ -132,23 +159,30 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _parserTimer.Stop();
                     _parserTimer.Start();
                 }
-            }
+            } finally {
+                if (lockTaken) Monitor.Exit(_thisLock);
+            } 
         }
 
         /// <summary>
         /// Called when the _parserTimer ticks
         /// </summary>
         private static void ParseCurrentDocumentTick() {
-            lock (_thisLock) {
-                try {
-                    if (_parserTimer != null) {
-                        _parserTimer.Dispose();
-                        _parserTimer = null;
-                    }
-                    FillItems();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_thisLock, 500, ref lockTaken);
+                if (!lockTaken) return;
+
+                // delete timer
+                if (_parserTimer != null) {
+                    _parserTimer.Dispose();
+                    _parserTimer = null;
                 }
+                FillItems();
+            } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+            } finally {
+                if (lockTaken) Monitor.Exit(_thisLock);
             }
         }
 
@@ -168,7 +202,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParserHandler.RefreshParser();
 
             // we had the dynamic items to the list
-            _savedAllItems.AddRange(ParserHandler.GetParsedItemList());
+            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList());
 
             // update autocompletion
             CurrentTypeOfList = TypeOfList.Reset;
@@ -178,7 +212,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         /// <summary>
         /// this method should be called at the plugin's start and when we change the current database
-        /// of each features
         /// </summary>
         public static void FillStaticItems(bool initializing) {
             if (_savedAllItems == null)
@@ -248,7 +281,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 switch (nbPoints) {
                     case 0:
                         int startPos = strOnLeft.Length - 1 - keyword.Length;
-                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : String.Empty;
+                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
                         break;
                     case 1:
                         previousWord = splitted[0];
@@ -264,7 +297,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // list of fields or tables
-                if (!String.IsNullOrEmpty(previousWord)) {
+                if (!string.IsNullOrEmpty(previousWord)) {
                     // are we entering a field from a known table?
                     var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
                     if (foundTable != null) {
@@ -396,14 +429,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Npp.ReplaceKeywordWrapped(data.DisplayText, 0);
 
                 // Remember this item to show it higher in the list later
-                data.Ranking++;
-                if (data.FromParser)
-                    ParserHandler.RememberUseOfParsedItem(data.DisplayText);
-                else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
-                    ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
-
-                // sort the items, to reflect the latest ranking
-                _form.SortItems();
+                RememberUseOf(data);
 
                 if (data.Type == CompletionType.Snippet)
                     Snippets.TriggerCodeSnippetInsertion();
@@ -412,6 +438,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error during AutoCompletionAccepted");
             }
+        }
+
+        /// <summary>
+        /// Increase ranking of a given CompletionData
+        /// </summary>
+        /// <param name="data"></param>
+        private static void RememberUseOf(CompletionData data) {
+            // handles unwanted rank progression (when the user enter several times the same keyword)
+            if (data.DisplayText.Equals(_lastRememberedKeyword)) return;
+            _lastRememberedKeyword = data.DisplayText;
+
+            data.Ranking++;
+            if (data.FromParser)
+                ParserHandler.RememberUseOfParsedItem(data.DisplayText);
+            else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
+                ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
+
+            // sort the items, to reflect the latest ranking
+            _form.SortItems();
         }
 
         #region _form handler
@@ -457,6 +502,5 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         #endregion
-
     }
 }

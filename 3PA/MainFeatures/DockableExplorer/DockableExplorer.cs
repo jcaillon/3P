@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Reflection;
@@ -20,25 +19,24 @@ namespace _3PA.MainFeatures.DockableExplorer {
         }
 
         /// <summary>
-        /// Call this method to refresh the content of the code explorer
+        /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
-        public static void RefreshContent() {
-            if (ExplorerContent.Categories == null) {
-                ExplorerContent.Init();
-                ExplorerForm.InitSetObjects();
-            }
+        public static void UpdateCodeExplorer() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.CodeExplorer.RememberExpandedItems();
+            CodeExplorer.UpdateTreeData();
+            ExplorerForm.CodeExplorer.InitSetObjects();
+            ExplorerForm.CodeExplorer.SetRememberedExpandedItems();
+            ExplorerForm.CodeExplorer.ReapplyFilter();
+        }
 
-            // build the list of items of the tree (modify the categories in ExplorerContent!)
-            var items = new List<ExplorerItems> {
-                new ExplorerItems {DisplayText = "function 5", MyIcon = IconType.Functions},
-                new ExplorerItems {DisplayText = "function 1", MyIcon = IconType.Functions},
-                new ExplorerItems {DisplayText = "function 9", MyIcon = IconType.Functions},
-                new ExplorerItems {DisplayText = "function 2", MyIcon = IconType.Functions},
-                new ExplorerItems {DisplayText = "proc 1", MyIcon = IconType.Procedures}
-            };
-            ExplorerContent.SetItems(items);
-
-            ExplorerForm.ForceRebuildAll();
+        /// <summary>
+        /// Just redraw the code explorer, it is used to update the "selected" scope when
+        /// the user click in scintilla
+        /// </summary>
+        public static void RedrawCodeExplorer() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.CodeExplorer.Redraw();
         }
 
         /// <summary>
@@ -52,7 +50,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
             }
             if (ExplorerForm == null) return;
-            ExplorerForm.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
+            ExplorerForm.CodeExplorer.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
             UpdateMenuItemChecked();
         }
 
@@ -62,7 +60,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static void Redraw() {
             if (IsVisible) {
                 Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
-                ExplorerForm.StyleOvlTree();
+                ExplorerForm.CodeExplorer.StyleOvlTree();
                 ExplorerForm.Invalidate();
             }
         }
@@ -74,6 +72,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static void UpdateMenuItemChecked() {
             if (ExplorerForm == null) return;
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, ExplorerForm.Visible ? 1 : 0);
+            Config.Instance.ExplorerVisible = ExplorerForm.Visible;
         }
 
         /// <summary>
@@ -111,10 +110,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
 
-            RefreshContent();
-            ExplorerForm.ExpandAll();
+            UpdateCodeExplorer();
         }
-
-
     }
 }

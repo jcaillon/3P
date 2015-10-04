@@ -35,7 +35,7 @@ namespace YamuiDemoApp {
             File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
             // OUTPUT INFO ON EACH LINE
-            if (false) {
+            if (true) {
                 StringBuilder x = new StringBuilder();
                 var i = 1;
                 var dic = tok.GetLineInfo;
@@ -71,6 +71,10 @@ namespace YamuiDemoApp {
     }
 
     public class OutputVis : IParserVisitor {
+        public void Visit(ParsedBlock pars) {
+            
+        }
+
         public StringBuilder Output = new StringBuilder();
         public void Visit(ParsedOnEvent pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);

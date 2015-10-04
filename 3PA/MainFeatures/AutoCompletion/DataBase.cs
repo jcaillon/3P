@@ -24,6 +24,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // Update autocompletion
             AutoComplete.FillStaticItems(false);
+            AutoComplete.ParseCurrentDocument(true);
         }
 
         /// <summary>
@@ -44,7 +45,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
                             if (splitted.Count() != 6) continue;
                             currentDb = new ParsedDataBase(
-                                splitted[3],
+                                splitted[3].ToUpper(),
                                 splitted[4],
                                 splitted[5],
                                 new List<ParsedTable>());
@@ -55,7 +56,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
                             if (splitted.Count() != 6 || currentDb == null) continue;
                             currentTable = new ParsedTable(
-                                splitted[1],
+                                splitted[1].ToUpper(),
                                 0, 0,
                                 splitted[2],
                                 splitted[3],
@@ -96,7 +97,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
                             if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
                             var curField = new ParsedField(
-                                splitted[2],
+                                splitted[2].ToUpper(),
                                 splitted[3],
                                 splitted[4],
                                 int.Parse(splitted[5]),
@@ -114,6 +115,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
         }
 
+        #region get list
+
         /// <summary>
         /// Exposes the databases info
         /// </summary>
@@ -128,7 +131,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<CompletionData> GetDbList() {
             if (_dataBases.Count <= 0) return new List<CompletionData>();
             return _dataBases.Select(@base => new CompletionData() {
-                DisplayText = @base.LogicalName.ToUpper(),
+                DisplayText = @base.LogicalName,
                 Type = CompletionType.Databases,
                 FromParser = false,
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
@@ -156,7 +159,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var output = new List<CompletionData>();
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
             output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
-                DisplayText = table.Name.ToUpper(),
+                DisplayText = table.Name,
                 SubString = dataBase.LogicalName.AutoCaseToUserLiking(),
                 Type = CompletionType.Table,
                 FromParser = false,
@@ -175,17 +178,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var output = new List<CompletionData>();
             if (table == null) return output;
             output.AddRange(table.Fields.Select(field => new CompletionData() {
-                DisplayText = field.Name.ToUpper(),
-                Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field, 
+                DisplayText = field.Name,
+                Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(field.Name),
                 Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
-                    (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
-                    (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0)
+                       (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
+                       (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0)
             }));
             return output;
         }
+
+        #endregion
+
+
+        #region find item
 
         public static ParsedDataBase FindDatabaseByName(string name) {
             return _dataBases.Find(@base => @base.LogicalName.EqualsCi(name));
@@ -206,5 +214,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static ParsedField FindFieldByName(string name) {
             return (from dataBase in _dataBases where dataBase.Tables != null from table in dataBase.Tables select FindFieldByName(name, table)).FirstOrDefault(found => found != null);
         }
+
+        #endregion
+
     }
 }

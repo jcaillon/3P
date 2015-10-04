@@ -9,5 +9,6 @@
         void Visit(ParsedTable pars);
         void Visit(ParsedOnEvent pars);
         void Visit(ParsedRun pars);
+        void Visit(ParsedBlock pars);
     }
 }
