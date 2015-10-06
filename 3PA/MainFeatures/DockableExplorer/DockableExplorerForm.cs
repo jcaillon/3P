@@ -10,8 +10,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <summary>
         /// Access the codeExplorer component
         /// </summary>
-        public CodeExplorer CodeExplorer {
-            get { return codeExplorer; }
+        public CodeExplorerPage CodeExplorerPage {
+            get { return _codeExplorerPage; }
         }
 
         #endregion

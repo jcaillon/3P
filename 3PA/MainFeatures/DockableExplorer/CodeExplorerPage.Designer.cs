@@ -1,5 +1,5 @@
 ﻿namespace _3PA.MainFeatures.DockableExplorer {
-    partial class CodeExplorer {
+    partial class CodeExplorerPage {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -29,7 +29,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeExplorer));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CodeExplorerPage));
             this.buttonSort = new YamuiFramework.Controls.YamuiImageButton();
             this.buttonRefresh = new YamuiFramework.Controls.YamuiImageButton();
             this.buttonCleanText = new YamuiFramework.Controls.YamuiImageButton();
@@ -153,7 +153,7 @@
             this.Controls.Add(this.buttonExpandRetract);
             this.Controls.Add(this.ovlTree);
             this.Controls.Add(this.textBoxFilter);
-            this.Name = "CodeExplorer";
+            this.Name = "CodeExplorerPage";
             this.Size = new System.Drawing.Size(305, 206);
             ((System.ComponentModel.ISupportInitialize)(this.ovlTree)).EndInit();
             this.ResumeLayout(false);

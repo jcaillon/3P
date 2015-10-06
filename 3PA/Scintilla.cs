@@ -295,12 +295,10 @@ namespace _3PA {
                 var word = GetKeyword(curPos);
                 SetTextByRange(curPos - word.Length, curPos, keyword);
 
-                // reposition carret?
-                var moveCarretBy = keyword.Length - word.Length;
-                if (moveCarretBy != 0) {
-                    Call(SciMsg.SCI_SETSELECTIONNANCHOR, i, curPos + moveCarretBy);
-                    Call(SciMsg.SCI_SETSELECTIONNCARET, i, curPos + moveCarretBy);
-                }
+                // reposition carret
+                curPos = curPos - offset + keyword.Length - word.Length;
+                Call(SciMsg.SCI_SETSELECTIONNANCHOR, i, curPos);
+                Call(SciMsg.SCI_SETSELECTIONNCARET, i, curPos);
             }
             EndUndoAction();
         }

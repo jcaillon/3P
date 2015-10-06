@@ -1,4 +1,5 @@
-﻿using _3PA.Lib;
+﻿using System.Linq;
+using _3PA.Lib;
 using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.Parser;
 
@@ -14,10 +15,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedBlock pars) {
-            ParserHandler.ParsedCategoriesList.Add(new ExplorerCategories() {
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem {
                 DisplayText = pars.Name,
-                IconType = pars.Type,
-                GoToLine = pars.Line
+                Type = pars.Type,
+                GoToLine = pars.Line,
+                IsRoot = true
             });
         }
 
@@ -27,10 +29,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
             // we only want the RUN that point to external procedures
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                IconType = IconType.Run,
-                GoToLine = pars.Line
+                Type = ExplorerType.Run,
+                GoToLine = pars.Line,
+                IsNotBlock = true
             });
         }
 
@@ -40,10 +43,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedOnEvent pars) {
             // To code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
-                DisplayText = pars.Name,
-                IconType = IconType.OnEvents,
-                GoToLine = pars.Line
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
+                DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
+                Type = ExplorerType.OnEvents,
+                GoToLine = pars.Line,
             });
         }
 
@@ -53,10 +56,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedIncludeFile pars) {
            // To code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                IconType = IconType.Includes,
-                GoToLine = pars.Line
+                Type = ExplorerType.Includes,
+                GoToLine = pars.Line,
+                IsNotBlock = true
             });
 
             // Parse the include file, dont forget to flag the items as External
@@ -69,10 +73,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
             // to code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                IconType = IconType.Functions,
-                GoToLine = pars.Line
+                Type = ExplorerType.Functions,
+                GoToLine = pars.Line,
             });
 
             // to completion data
@@ -94,10 +98,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
             // to code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItems() {
+            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                IconType = IconType.Procedures,
-                GoToLine = pars.Line
+                Type = ExplorerType.Procedures,
+                GoToLine = pars.Line,
             });
 
             // to completion data
@@ -211,31 +215,33 @@ namespace _3PA.MainFeatures.AutoCompletion {
             foreach (var parsedField in pars.Fields)
                 parsedField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(parsedField.TempType, parsedField.AsLike == ParsedAsLike.Like);
 
-            // temp table is LIKE another table? copy fields, minus the isPrimary,
+            // temp table is LIKE another table? copy fields
             if (!string.IsNullOrEmpty(pars.LcLikeTable)) {
                 var foundTable = ParserHandler.FindAnyTableByName(pars.LcLikeTable);
                 if (foundTable != null) {
-                    // add the fields of the found table
-                    subStr = @"Like " + foundTable.Name;
-                    foreach (var field in foundTable.Fields) {
-                        pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.AsLike) {
-                            Type = field.Type
-                        });
-                    }
                     // handles the use-index, for now only add the isPrimary flag to the field...
                     if (!string.IsNullOrEmpty(pars.UseIndex)) {
-                        foreach (var index in pars.UseIndex.Split(',')) {
-                            if (index.ContainsFast("!")) {
-                                // we found a primary index
-                                var foundIndex = foundTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
-                                if (foundIndex != null)
-                                    foreach (var fieldName in foundIndex.FieldsList) {
-                                        // then the field is primary
-                                        var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Replace("+", "").Replace("-", "")));
-                                        if (foundfield != null) foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
-                                    }
-                            }
+                        // add the fields of the found table (minus the primary information)
+                        subStr = @"Like " + foundTable.Name;
+                        foreach (var field in foundTable.Fields) {
+                            pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.AsLike) {
+                                Type = field.Type
+                            });
                         }
+                        foreach (var index in pars.UseIndex.Split(',')) {
+                            // we found a primary index
+                            var foundIndex = foundTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
+                            // if the index is a primary
+                            if (foundIndex != null && (foundIndex.Flag.HasFlag(ParsedIndexFlag.Primary) || index.ContainsFast("!")))
+                                foreach (var fieldName in foundIndex.FieldsList) {
+                                    // then the field is primary
+                                    var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Replace("+", "").Replace("-", "")));
+                                    if (foundfield != null) foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
+                                }
+                        }
+                    } else {
+                        // if there is no "use index", the tt uses the same index as the original table
+                        pars.Fields = foundTable.Fields.ToList();
                     }
                 }
             }

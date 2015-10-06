@@ -24,7 +24,7 @@
         /// </summary>
         private void InitializeComponent() {
             this.panelBottom = new YamuiFramework.Controls.YamuiPanel();
-            this.codeExplorer = new _3PA.MainFeatures.DockableExplorer.CodeExplorer();
+            this._codeExplorerPage = new _3PA.MainFeatures.DockableExplorer.CodeExplorerPage();
             this.SuspendLayout();
             // 
             // panelBottom
@@ -44,20 +44,20 @@
             // 
             // codeExplorer
             // 
-            this.codeExplorer.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this._codeExplorerPage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.codeExplorer.Location = new System.Drawing.Point(5, 4);
-            this.codeExplorer.Name = "codeExplorer";
-            this.codeExplorer.Size = new System.Drawing.Size(368, 246);
-            this.codeExplorer.TabIndex = 5;
+            this._codeExplorerPage.Location = new System.Drawing.Point(5, 4);
+            this._codeExplorerPage.Name = "_codeExplorerPage";
+            this._codeExplorerPage.Size = new System.Drawing.Size(368, 246);
+            this._codeExplorerPage.TabIndex = 5;
             // 
             // DockableExplorerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(377, 304);
-            this.Controls.Add(this.codeExplorer);
+            this.Controls.Add(this._codeExplorerPage);
             this.Controls.Add(this.panelBottom);
             this.Name = "DockableExplorerForm";
             this.Padding = new System.Windows.Forms.Padding(1);
@@ -71,6 +71,6 @@
         #endregion
 
         private YamuiFramework.Controls.YamuiPanel panelBottom;
-        private CodeExplorer codeExplorer;
+        private CodeExplorerPage _codeExplorerPage;
     }
 }

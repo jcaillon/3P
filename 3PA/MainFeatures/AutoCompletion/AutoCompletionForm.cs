@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // the private fields below are used for the filter function
         private Dictionary<CompletionType, SelectorButton> _displayedTypes;
         private string _filterString;
-        private string _currentLcOwnerName = "";
+        private string _currentOwnerName = "";
         private int _currentLineNumber;
 
         private int _currentType;
@@ -484,7 +484,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
-            _currentLcOwnerName = ParserHandler.GetCarretLineLcOwnerName;
+            _currentOwnerName = ParserHandler.GetCarretLineOwnerName;
             _currentLineNumber = Npp.GetCaretLineNumber();
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
             //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
@@ -523,7 +523,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable) {
                 // check for scope
                 if (compData.ParsedItem.Scope != ParsedScope.File)
-                    output = output && compData.ParsedItem.LcOwnerName.Equals(_currentLcOwnerName);
+                    output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);
                 // check for the definition line
                 output = output && _currentLineNumber >= compData.ParsedItem.Line;
 

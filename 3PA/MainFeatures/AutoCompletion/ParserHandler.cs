@@ -34,8 +34,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
-        public static List<ExplorerItems> ParsedExplorerItemsList = new List<ExplorerItems>();
-        public static List<ExplorerCategories> ParsedCategoriesList = new List<ExplorerCategories>();
+        public static List<ExplorerItem> ParsedExplorerItemsList = new List<ExplorerItem>();
 
         private static Parser.Parser _ablParser;
 
@@ -53,7 +52,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Returns the owner name (currentScopeName) of the caret line
         /// </summary>
         /// <returns></returns>
-        public static string GetCarretLineLcOwnerName {
+        public static string GetCarretLineOwnerName {
             get {
                 var line = Npp.GetCaretLineNumber();
                 if (_ablParser == null) return "";
@@ -90,11 +89,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath());
                 ParsedItemsList.Clear();
                 ParsedExplorerItemsList.Clear();
-                ParsedCategoriesList.Clear();
                 _ablParser.Accept(new ParserVisitor());
-
-                // for the code explorer we update it from here
-                DockableExplorer.DockableExplorer.UpdateCodeExplorer();
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
@@ -115,29 +110,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// List of parsed explorer items
         /// </summary>
         /// <returns></returns>
-        public static List<ExplorerItems> GetParsedExplorerItemsList() {
+        public static List<ExplorerItem> GetParsedExplorerItemsList() {
             return ParsedExplorerItemsList.ToList();
-        }
-
-        /// <summary>
-        /// List of parsed explorer categories (main block, definitions...)
-        /// </summary>
-        /// <returns></returns>
-        public static List<ExplorerCategories> GetParsedCategoriesList() {
-            return ParsedCategoriesList.ToList();
-        }
-
-        /// <summary>
-        /// List of parsed explorer categories (main block, definitions...)
-        /// but returned as items
-        /// </summary>
-        /// <returns></returns>
-        public static List<ExplorerItems> GetParsedCategoriesAsItemsList() {
-            return ParsedCategoriesList.Select(categories => new ExplorerItems() {
-                DisplayText = categories.DisplayText,
-                IconType = categories.IconType,
-                GoToLine = categories.GoToLine
-            }).ToList();
         }
         #endregion
 

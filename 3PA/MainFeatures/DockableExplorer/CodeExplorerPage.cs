@@ -13,7 +13,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.DockableExplorer {
-    public partial class CodeExplorer : YamuiPage {
+    public partial class CodeExplorerPage : YamuiPage {
 
         #region fields
 
@@ -37,29 +37,27 @@ namespace _3PA.MainFeatures.DockableExplorer {
             set { ovlTree.UseAlternatingBackColors = value; }
         }
 
-        private Dictionary<string, bool> _expandedCategories = new Dictionary<string, bool>(); 
+        private Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>(); 
 
-        // list of items/categories to display in the tree
-        private static List<ExplorerCategories> _unsortedCategory = new List<ExplorerCategories>();
-        private static List<ExplorerItems> _unsortedItems = new List<ExplorerItems>();
-        private static List<ExplorerCategories> _categories = new List<ExplorerCategories>();
-        private static List<ExplorerItems> _items = new List<ExplorerItems>();
+        // list of items to display in the tree
+        private static List<ExplorerItem> _unsortedItems = new List<ExplorerItem>();
+        private static List<ExplorerItem> _rootItems = new List<ExplorerItem>();
+        private static List<ExplorerItem> _items = new List<ExplorerItem>();
 
         #endregion
 
         #region constructor
 
-        public CodeExplorer() {
+        public CodeExplorerPage() {
             InitializeComponent();
 
             // Can the given object be expanded?
-            ovlTree.CanExpandGetter = x => (x is ExplorerCategories) && ((ExplorerCategories) x).HasChildren;
+            ovlTree.CanExpandGetter = x => ((ExplorerItem)x).HasChildren;
 
             // What objects should belong underneath the given model object?
             ovlTree.ChildrenGetter = delegate(object x) {
-                if (x is ExplorerCategories)
-                    return ((ExplorerCategories) x).Items;
-                return null;
+                var obj = (ExplorerItem) x;
+                return (obj != null && obj.HasChildren) ? obj.Items : null;
             };
 
             // set the image list to use for the keywords (corresponds with IconType)
@@ -69,6 +67,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 ImageSize = new Size(20, 20)
             };
             ImagelistAdd.AddFromImage(ImageResources.code, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.root, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Preprocessed, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.mainblock, imageListOfTypes);
@@ -80,14 +79,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             ovlTree.SmallImageList = imageListOfTypes;
 
             // Image getter
-            DisplayText.ImageGetter += rowObject => {
-                if (rowObject is ExplorerCategories) {
-                    var x = (ExplorerCategories) rowObject;
-                    return (int) x.IconType;
-                }
-                var y = (ExplorerItems) rowObject;
-                return (int) y.IconType;
-            };
+            DisplayText.ImageGetter += rowObject => (int) ((ExplorerItem)rowObject).Type;
             
             // Style the control
             StyleOvlTree();
@@ -127,10 +119,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            ExplorerObject obj = (ExplorerObject) args.Model;
+            ExplorerItem obj = (ExplorerItem) args.Model;
             // display the flags
             int offset = -5;
-            if ((int)obj.IconType < 7 && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineLcOwnerName)) {
+            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName)) {
                 ImageDecoration decoration = new ImageDecoration(ImageResources.selection, ContentAlignment.MiddleRight) {
                     Offset = new Size(offset, 0)
                 };
@@ -151,82 +143,86 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void UpdateTreeData() {
             // Fetch items found by the parser
-            _unsortedItems = ParserHandler.GetParsedCategoriesAsItemsList();
-            _unsortedItems.AddRange(ParserHandler.GetParsedExplorerItemsList());
+            _unsortedItems = ParserHandler.GetParsedExplorerItemsList();
             _items = ParserHandler.GetParsedExplorerItemsList();
             _items.Sort(new ExplorerObjectSortingClass());
 
-            // unsorted category
-            _unsortedCategory = new List<ExplorerCategories>() {
-                new ExplorerCategories() {
-                    DisplayText = "Everything in code order", 
-                    IconType = IconType.EverythingInCodeOrder, 
-                    HasChildren = true
-                }
-            };
+            // init branches
+            _rootItems.Clear();
 
-            // init categories
-            _categories = ParserHandler.GetParsedCategoriesList();
+            // add root items first
+            foreach (var item in _items.Where(item => item.IsRoot)) {
+                _rootItems.Add(item);
+            }
 
-            // for each distinct type of items, create a category
-            foreach (var type in _items.Select(x => x.IconType).Distinct()) {
-                _categories.Add(new ExplorerCategories() {
+            // for each distinct type of items, create a branch
+            foreach (var type in _items.Select(x => x.Type).Distinct()) {
+                if (_rootItems.Find(item => item.Type == type) != null) continue;
+                _rootItems.Add(new ExplorerItem() {
                     DisplayText = type.ToString(),
-                    IconType = type,
-                    HasChildren = true
+                    Type = type,
+                    HasChildren = true,
+                    IsRoot = true
                 });
             }
         }
 
         /// <summary>
-        /// Call this before updating the list of items to remember which category is expanded
+        /// Call this before updating the list of items to remember which branch is expanded
         /// </summary>
         public void RememberExpandedItems() {
             foreach (var root in ovlTree.Roots) {
-                var categories = root as ExplorerCategories;
-                if (categories == null || !categories.HasChildren) continue;
-                if (!_expandedCategories.ContainsKey(categories.DisplayText))
-                    _expandedCategories.Add(categories.DisplayText, ovlTree.IsExpanded(root));
+                var branch = root as ExplorerItem;
+                if (branch == null || !branch.HasChildren) continue;
+                if (!_expandedBranches.ContainsKey(branch.DisplayText))
+                    _expandedBranches.Add(branch.DisplayText, ovlTree.IsExpanded(root));
                 else
-                    _expandedCategories[categories.DisplayText] = ovlTree.IsExpanded(root);
+                    _expandedBranches[branch.DisplayText] = ovlTree.IsExpanded(root);
             }
         }
 
         /// <summary>
-        /// Call this after updating the list of items to set the remembered expanded categories
+        /// Call this after updating the list of items to set the remembered expanded branches
         /// </summary>
         public void SetRememberedExpandedItems() {
             foreach (var root in ovlTree.Roots) {
-                var categories = root as ExplorerCategories;
-                if (categories == null || !categories.HasChildren) continue;
-                if (_expandedCategories.ContainsKey(categories.DisplayText)) {
-                    if (_expandedCategories[categories.DisplayText])
+                var branch = root as ExplorerItem;
+                if (branch == null || !branch.HasChildren) continue;
+                if (_expandedBranches.ContainsKey(branch.DisplayText)) {
+                    if (_expandedBranches[branch.DisplayText])
                         ovlTree.Expand(root);
                     else
                         ovlTree.Collapse(root);
                 } else {
-                    _expandedCategories.Add(categories.DisplayText, true);
+                    _expandedBranches.Add(branch.DisplayText, true);
                     ovlTree.Expand(root);
                 }
             }
         }
 
         /// <summary>
-        /// Static method used by ExplorerCategories to return the list of their children
+        /// Static method used by items to return the list of their children
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<ExplorerItems> GetItemsFor(IconType type) {
-            if (type == IconType.EverythingInCodeOrder)
+        public static List<ExplorerItem> GetItemsFor(ExplorerType type) {
+            if (type == ExplorerType.EverythingInCodeOrder)
                 return _unsortedItems;
-            return _items.Where(item => item.IconType == type).ToList();
+            return _items.Where(item => item.Type == type).ToList();
         }
 
         /// <summary>
         /// Call this method to initiate the content of the tree view
         /// </summary>
         public void InitSetObjects() {
-            ovlTree.SetObjects(_displayUnSorted ? _unsortedCategory : _categories);
+            var unsortedBranch = new List<ExplorerItem>() {
+                new ExplorerItem() {
+                    DisplayText = "Everything in code order", 
+                    Type = ExplorerType.EverythingInCodeOrder, 
+                    HasChildren = true
+                }
+            };
+            ovlTree.SetObjects(!_displayUnSorted ? _rootItems : unsortedBranch);
             DisplayText.Width = ovlTree.Width - 17;
         }
 
@@ -294,14 +290,15 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <param name="eventArgs"></param>
         private void OvlTreeOnClick(object sender, EventArgs eventArgs) {
             // find currently selected item
-            var selection = (ExplorerObject) ovlTree.SelectedObject;
+            var selection = (ExplorerItem) ovlTree.SelectedObject;
             if (selection == null) return;
-            // Category clicked : expand/retract
-            if (selection is ExplorerCategories && ((ExplorerCategories)selection).HasChildren) {
+            // Branch clicked : expand/retract
+            if (selection.HasChildren) {
                 if (ovlTree.IsExpanded(selection))
                     ovlTree.Collapse(selection);
                 else
                     ovlTree.Expand(selection);
+                Npp.GrabFocus();
                 return;
             }
             // Item clicked : go to line
@@ -379,8 +376,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <param name="o"></param>
         /// <returns></returns>
         private bool FilterPredicate(object o) {
-            return ((o is ExplorerItems && ((ExplorerItems) o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)) ||
-                    (o is ExplorerCategories && !((ExplorerCategories) o).HasChildren && ((ExplorerCategories) o).DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text)));
+            var obj = (ExplorerItem) o;
+            return (!obj.HasChildren && obj.DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text));
         }
 
         /// <summary>
@@ -400,10 +397,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    public class ExplorerObjectSortingClass : IComparer<ExplorerObject> {
-        public int Compare(ExplorerObject x, ExplorerObject y) {
+    public class ExplorerObjectSortingClass : IComparer<ExplorerItem> {
+        public int Compare(ExplorerItem x, ExplorerItem y) {
             // compare first by CompletionType
-            int compare = x.IconType.CompareTo(y.IconType);
+            int compare = x.Type.CompareTo(y.Type);
             if (compare != 0) return compare;
             // sort by display text in last resort
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);

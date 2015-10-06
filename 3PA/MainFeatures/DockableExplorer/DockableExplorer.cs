@@ -23,11 +23,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void UpdateCodeExplorer() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorer.RememberExpandedItems();
-            CodeExplorer.UpdateTreeData();
-            ExplorerForm.CodeExplorer.InitSetObjects();
-            ExplorerForm.CodeExplorer.SetRememberedExpandedItems();
-            ExplorerForm.CodeExplorer.ReapplyFilter();
+            ExplorerForm.CodeExplorerPage.RememberExpandedItems();
+            CodeExplorerPage.UpdateTreeData();
+            ExplorerForm.CodeExplorerPage.InitSetObjects();
+            ExplorerForm.CodeExplorerPage.SetRememberedExpandedItems();
+            ExplorerForm.CodeExplorerPage.ReapplyFilter();
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void RedrawCodeExplorer() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorer.Redraw();
+            ExplorerForm.CodeExplorerPage.Redraw();
         }
 
         /// <summary>
@@ -50,7 +50,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
             }
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorer.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
+            ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
             UpdateMenuItemChecked();
         }
 
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static void Redraw() {
             if (IsVisible) {
                 Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
-                ExplorerForm.CodeExplorer.StyleOvlTree();
+                ExplorerForm.CodeExplorerPage.StyleOvlTree();
                 ExplorerForm.Invalidate();
             }
         }

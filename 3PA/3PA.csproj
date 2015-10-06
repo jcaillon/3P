@@ -73,11 +73,11 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorer.cs">
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorer.Designer.cs">
-      <DependentUpon>CodeExplorer.cs</DependentUpon>
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerPage.Designer.cs">
+      <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
@@ -185,7 +185,7 @@
     <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.Designer.cs">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerObject.cs" />
+    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\Highlight.cs" />
@@ -252,8 +252,8 @@
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\DockableExplorer\CodeExplorer.resx">
-      <DependentUpon>CodeExplorer.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\DockableExplorer\CodeExplorerPage.resx">
+      <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\DockableExplorer\DockableExplorerForm.resx">
       <DependentUpon>DockableExplorerForm.cs</DependentUpon>
@@ -318,6 +318,7 @@
     <Content Include="Images\DockableExplorer\mainblock.png" />
     <Content Include="Images\DockableExplorer\numerical_sorting_12.png" />
     <Content Include="Images\DockableExplorer\refresh.png" />
+    <Content Include="Images\DockableExplorer\root.png" />
     <Content Include="Images\DockableExplorer\run.png" />
     <Content Include="Images\DockableExplorer\selection.png" />
     <Content Include="Images\Html\wink.png" />

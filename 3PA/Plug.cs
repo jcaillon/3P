@@ -211,8 +211,6 @@ namespace _3PA {
         /// <param name="c"></param>
         static public void OnCharTyped(char c) {
             try {
-                string newStr = c.ToString();
-
                 // handles the autocompletion
                 AutoComplete.UpdateAutocompletion();
 
@@ -223,11 +221,10 @@ namespace _3PA {
                 int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
                 var searchWordAt = Npp.GetCaretPosition() - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
-
                 //TODO: if multiselection, replace everywhere!
 
                 // replace the last keyword by the correct case, check the context of the caret
-                if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Highlight.IsNormalContext()) {
+                if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Highlight.IsCarretInNormalContext()) {
                     var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                     if (casedKeyword != null)
                         Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
@@ -478,8 +475,12 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            MessageBox.Show(Npp.GetCaretLineNumber().ToString());
+            MessageBox.Show(Highlight.IsCarretInNormalContext().ToString());
             //Highlight.Colorize(0, Npp.GetTextLenght());
+        }
+
+        public static void LogIntoTest(string str) {
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", str);
         }
         #endregion
     }

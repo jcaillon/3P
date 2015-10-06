@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 Monitor.TryEnter(_thisLock, 500, ref lockTaken);
                 if (!lockTaken) return;
-
+                
                 // parse immediatly
                 if (doNow) {
                     ParseCurrentDocumentTick();
@@ -208,6 +208,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             CurrentTypeOfList = TypeOfList.Reset;
             if (IsVisible)
                 UpdateAutocompletion();
+
+            // ## for the code explorer we update it from here ##
+            DockableExplorer.DockableExplorer.UpdateCodeExplorer();
         }
 
         /// <summary>
@@ -394,7 +397,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // filter with keyword (keyword can be empty)
             _form.FilterByText = keyword;
-            _form.SelectFirstItem();
 
             // close?
             if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) {
@@ -405,6 +407,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // if the form was already visible, don't go further
             if (_form.Visible) return;
+
+            _form.SelectFirstItem();
 
             // update position (and alternate color config)
             var point = Npp.GetCaretScreenLocation();

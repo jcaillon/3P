@@ -20,7 +20,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public int Column { get; private set; }
         public ParsedScope Scope { get; set; }
-        public string LcOwnerName { get; set; }
+        public string OwnerName { get; set; }
         public abstract void Accept(IParserVisitor visitor);
         protected ParsedItem(string name, int line, int column) {
             Name = name;
@@ -79,12 +79,12 @@ namespace _3PA.MainFeatures.Parser {
     /// Procedure parsed item
     /// </summary>
     public class ParsedBlock : ParsedScopeItem {
-        public IconType Type { get; set; }
+        public ExplorerType Type { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedBlock(string name, int line, int column, IconType type) : base(name, line, column) {
+        public ParsedBlock(string name, int line, int column, ExplorerType type) : base(name, line, column) {
             Type = type;
         }
     }
@@ -94,15 +94,13 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class ParsedProcedure : ParsedScopeItem {
         public string Left { get; private set; }
-        public string LcName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string left, string lcName)
+        public ParsedProcedure(string name, int line, int column, string left)
             : base(name, line, column) {
             Left = left;
-            LcName = lcName;
         }
     }
 
@@ -122,16 +120,14 @@ namespace _3PA.MainFeatures.Parser {
         public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
-        public string LcName { get; private set; }
         public int PrototypeLine { get; set; }
         public int PrototypeColumn { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, int line, int column, string parsedReturnType, string lcName) : base(name, line, column) {
+        public ParsedFunction(string name, int line, int column, string parsedReturnType) : base(name, line, column) {
             ParsedReturnType = parsedReturnType;
-            LcName = lcName;
         }
     }
 
@@ -140,15 +136,13 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class ParsedOnEvent : ParsedScopeItem {
         public string On { get; private set; }
-        public string LcName { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedOnEvent(string name, int line, int column, string @on, string lcName)
+        public ParsedOnEvent(string name, int line, int column, string @on)
             : base(name, line, column) {
             On = @on;
-            LcName = lcName;
         }
     }
 

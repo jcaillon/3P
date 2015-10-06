@@ -148,10 +148,9 @@ namespace _3PA
                         return;
 
                     case (uint) SciMsg.SCN_MODIFIED:
-                        // if at least 1 line has been added or removed
-                        if (nc.linesAdded != 0)
-                            AutoComplete.ParseCurrentDocument(true);
-                        else
+                        // if the text has changed, parse
+                        if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
+                            (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)
                             AutoComplete.ParseCurrentDocument();
                         
                         // did the user supress 1 char?
@@ -159,6 +158,7 @@ namespace _3PA
                             AutoComplete.UpdateAutocompletion();
                         }
 
+                        // if (nc.linesAdded != 0)
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
                         //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;

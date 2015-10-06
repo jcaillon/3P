@@ -52,28 +52,31 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
         /// Is the caret not in : an include, a string, a comment
         /// </summary>
         /// <returns></returns>
-        public static bool IsNormalContext() {
-            UdlStyles curCntext = GetContextAtCaret();
-            return (curCntext != UdlStyles.Comment
-                    && curCntext != UdlStyles.Delimiter1
-                    && curCntext != UdlStyles.Delimiter2
-                    && curCntext != UdlStyles.Delimiter3
-                    && curCntext != UdlStyles.CommentLine
-                    && curCntext != UdlStyles.Delimiter8);
+        public static bool IsCarretInNormalContext() {
+            try {
+                var curPos = Npp.GetCaretPosition();
+                var curContext = (UdlStyles)Npp.GetStyleAt(curPos);
+                if (curPos <= 0) return true;
+                if (IsNormalContext(curContext)) return true;
+                var prevContext = (UdlStyles) Npp.GetStyleAt(curPos - 1);
+                return IsNormalContext(prevContext);
+            } catch (Exception) {
+                // we can be here if the style ID isn't in the UdlStyles enum
+                return true;
+            }
         }
 
         /// <summary>
         /// Is the caret not in : an include, a string, a comment
         /// </summary>
         /// <returns></returns>
-        public static UdlStyles GetContextAtCaret() {
-            UdlStyles curCntext;
-            try {
-                curCntext = (UdlStyles)Npp.GetStyleAt(Npp.GetCaretPosition());
-            } catch (Exception) {
-                curCntext = UdlStyles.Default;
-            }
-            return curCntext;
+        public static bool IsNormalContext(UdlStyles context) {
+            return (context != UdlStyles.Comment
+                    && context != UdlStyles.Delimiter1
+                    && context != UdlStyles.Delimiter2
+                    && context != UdlStyles.Delimiter3
+                    && context != UdlStyles.CommentLine
+                    && context != UdlStyles.Delimiter8);
         }
     }
 

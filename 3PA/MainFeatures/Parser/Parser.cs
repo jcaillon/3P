@@ -13,6 +13,7 @@ namespace _3PA.MainFeatures.Parser {
     /// from the tokens created by the lexer
     /// </summary>
     public class Parser {
+        private const string RootScopeName = "Root";
         /// <summary>
         /// List of the parsed items (output)
         /// </summary>
@@ -66,10 +67,14 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="data"></param>
         /// <param name="filePathBeingParsed"></param>
-        /// <param name="defaultLcOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
-        public Parser(string data, string filePathBeingParsed, string defaultLcOwnerName = "") {
-            _context.LcOwnerName = defaultLcOwnerName;
+        /// <param name="defaultOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
+        public Parser(string data, string filePathBeingParsed, string defaultOwnerName = null) {
+            defaultOwnerName = string.IsNullOrEmpty(defaultOwnerName) ? RootScopeName : defaultOwnerName;
+            _context.OwnerName = defaultOwnerName;
             _filePathBeingParsed = filePathBeingParsed;
+
+            // create root item
+            AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, ExplorerType.Root));
 
             // parse
             _lexer = new Lexer(data);
@@ -79,7 +84,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionnary
-            var current = new LineInfo(0, ParsedScope.File, "");
+            var current = new LineInfo(0, ParsedScope.File, defaultOwnerName);
             for (int i = 0; i < _lexer.MaxLine; i++) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
@@ -193,7 +198,7 @@ namespace _3PA.MainFeatures.Parser {
                                 if (_context.Scope != ParsedScope.File) {
                                     var parsedScope = (ParsedScopeItem)_parsedItemList.FindLast(item => item is ParsedScopeItem);
                                     if (parsedScope != null) parsedScope.EndLine = token.Line;
-                                    _context.LcOwnerName = "";
+                                    _context.OwnerName = RootScopeName;
                                 }
                                 _context.Scope = ParsedScope.File;
                             }
@@ -244,7 +249,7 @@ namespace _3PA.MainFeatures.Parser {
         private void NewStatement() {
             // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
             if (!_lineInfo.ContainsKey(_context.StatementStartLine))
-                _lineInfo.Add(_context.StatementStartLine, new LineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, _context.Scope, _context.LcOwnerName));
+                _lineInfo.Add(_context.StatementStartLine, new LineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, _context.Scope, _context.OwnerName));
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
 
@@ -268,7 +273,7 @@ namespace _3PA.MainFeatures.Parser {
         private void AddParsedItem(ParsedItem item) {
             item.FilePath = _filePathBeingParsed;
             item.Scope = _context.Scope;
-            item.LcOwnerName = _context.LcOwnerName;
+            item.OwnerName = _context.OwnerName;
             _parsedItemList.Add(item);
         }
 
@@ -352,9 +357,9 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         if (token.Value.EqualsCi("anywhere")) {
                             name = "anywhere";
-                            AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                            AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
                             _context.Scope = ParsedScope.Trigger;
-                            _context.LcOwnerName = onType.ToLower() + name;
+                            _context.OwnerName = string.Join(" ", onType.ToUpper(), name);
                             return true;
                         }
                         if (!token.Value.EqualsCi("of")) return false;
@@ -369,9 +374,9 @@ namespace _3PA.MainFeatures.Parser {
                     case 3:
                         // matching "or"
                         if (!(token is TokenWord)) break;
-                        AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType, _context.LcOwnerName));
+                        AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
                         _context.Scope = ParsedScope.Trigger;
-                        _context.LcOwnerName = onType.ToLower() + name.ToLower();
+                        _context.OwnerName = string.Join(" ", onType.ToUpper(), name);
                         if (token.Value.EqualsCi("or"))
                             state = 0;
                         else
@@ -692,14 +697,14 @@ namespace _3PA.MainFeatures.Parser {
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParsedScope.File;
                     if (toParse.ContainsFast("_DEFINITIONS")) {
-                        _context.LcOwnerName = "definition block";
-                        AddParsedItem(new ParsedBlock("Definition block", token.Line, token.Column, IconType.DefinitionsBlock));
+                        _context.OwnerName = "Definition Block";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.DefinitionsBlock));
                     } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
-                        _context.LcOwnerName = "preprocessor block";
-                        AddParsedItem(new ParsedBlock("Preprocessor block", token.Line, token.Column, IconType.PreprocessorBlock));
+                        _context.OwnerName = "Preprocessor Block";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.PreprocessorBlock));
                     } else if (toParse.ContainsFast("_MAIN-BLOCK")) {
-                        _context.LcOwnerName = "main block";
-                        AddParsedItem(new ParsedBlock("Main block", token.Line, token.Column, IconType.MainBlock));
+                        _context.OwnerName = "Main Block";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.MainBlock));
                     }
                     break;
                 case "&UNDEFINE":
@@ -738,9 +743,9 @@ namespace _3PA.MainFeatures.Parser {
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
             if (state != 1) return false;
-            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), name.ToLower()));
+            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString()));
             _context.Scope = ParsedScope.Procedure;
-            _context.LcOwnerName = name.ToLower();
+            _context.OwnerName = name;
             return true;
         }
 
@@ -774,10 +779,10 @@ namespace _3PA.MainFeatures.Parser {
                         if (token.Value.EqualsCi("returns")) continue;
 
                         // create the function (returnType = token.Value)
-                        createdFunc = new ParsedFunction(name, functionToken.Line, functionToken.Column, token.Value, name.ToLower()) {
+                        createdFunc = new ParsedFunction(name, functionToken.Line, functionToken.Column, token.Value) {
                             FilePath = _filePathBeingParsed,
                             Scope = _context.Scope,
-                            LcOwnerName = _context.LcOwnerName
+                            OwnerName = _context.OwnerName
                         };
                         state++;
                         break;
@@ -785,7 +790,7 @@ namespace _3PA.MainFeatures.Parser {
                         // matching parameters (start)
                         if (token is TokenWord) {
                             if (token.Value.EqualsCi("private")) isPrivate = true;
-                            if (token.Value.EqualsCi("extent")) createdFunc.IsExtended = true;
+                            if (token.Value.EqualsCi("extent") && createdFunc != null) createdFunc.IsExtended = true;
                         }
                         else if (!(token is TokenSymbol)) break;
                         if (token.Value.Equals("(")) state = 3;
@@ -809,7 +814,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // modify context
             _context.Scope = ParsedScope.Function;
-            _context.LcOwnerName = name.ToLower();
+            _context.OwnerName = name;
 
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;
@@ -840,6 +845,7 @@ namespace _3PA.MainFeatures.Parser {
             do {
                 var token = PeekAt(1); // next token
                 if (token is TokenEos) break;
+                if (token is TokenSymbol && (token.Value.Equals(")"))) state = 99;
                 if (token is TokenComment) continue;
                 switch (state) {
                     case 0:
@@ -915,7 +921,7 @@ namespace _3PA.MainFeatures.Parser {
                             parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
                                 FilePath = _filePathBeingParsed,
                                 Scope = ParsedScope.Function,
-                                LcOwnerName = ownerName.ToLower()
+                                OwnerName = ownerName
                             });
                             paramName = "";
                             paramAsLike = ParsedAsLike.None;
@@ -966,7 +972,7 @@ namespace _3PA.MainFeatures.Parser {
         public int StatementWordCount;
         public int BlockDepth;
         public ParsedScope Scope = ParsedScope.File;
-        public string LcOwnerName = "";
+        public string OwnerName = "";
     }
 
     /// <summary>
