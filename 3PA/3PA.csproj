@@ -309,6 +309,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\UserVariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\3PA.png" />
+    <Content Include="Images\DockableExplorer\block.png" />
     <Content Include="Images\DockableExplorer\clear_filters.png" />
     <Content Include="Images\DockableExplorer\code.png" />
     <Content Include="Images\DockableExplorer\collapse.png" />

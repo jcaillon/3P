@@ -469,6 +469,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
+            Keyword.Width = _normalWidth - 17;
+
             // order the list, first the ones that are equals to the filter, then the
             // ones that start with the filter, then the rest
             if (string.IsNullOrEmpty(_filterString)) {
@@ -497,7 +499,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
-                Keyword.Width = _normalWidth - ((TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions) ? 0 : 17);
+                if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
+                    Keyword.Width = _normalWidth;
                 if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } catch (Exception) {

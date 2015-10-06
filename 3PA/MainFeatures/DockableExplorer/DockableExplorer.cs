@@ -43,15 +43,19 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// Toggle the docked form on and off, can be called first and will initialize the form
         /// </summary>
         public static void Toggle() {
-            // initialize if not done
-            if (ExplorerForm == null)
-                Init();
-            else {
-                Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
+            try {
+                // initialize if not done
+                if (ExplorerForm == null)
+                    Init();
+                else {
+                    Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
+                }
+                if (ExplorerForm == null) return;
+                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
+                UpdateMenuItemChecked();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
             }
-            if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
-            UpdateMenuItemChecked();
         }
 
         /// <summary>

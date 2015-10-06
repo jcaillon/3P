@@ -19,7 +19,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = pars.Type,
                 GoToLine = pars.Line,
-                IsRoot = true
+                IsRoot = pars.IsRoot
             });
         }
 

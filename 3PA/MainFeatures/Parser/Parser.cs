@@ -62,6 +62,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private Dictionary<string, Point> _functionPrototype = new Dictionary<string, Point>();
 
+        private bool _foundPrototypeBlock;
+
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
@@ -74,7 +76,7 @@ namespace _3PA.MainFeatures.Parser {
             _filePathBeingParsed = filePathBeingParsed;
 
             // create root item
-            AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, ExplorerType.Root));
+            AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, ExplorerType.Root) { IsRoot = true });
 
             // parse
             _lexer = new Lexer(data);
@@ -696,15 +698,39 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParsedScope.File;
-                    if (toParse.ContainsFast("_DEFINITIONS")) {
-                        _context.OwnerName = "Definition Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.DefinitionsBlock));
-                    } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
-                        _context.OwnerName = "Preprocessor Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.PreprocessorBlock));
-                    } else if (toParse.ContainsFast("_MAIN-BLOCK")) {
+                    // matching different intersting blocks
+                    if (toParse.ContainsFast("_MAIN-BLOCK")) {
                         _context.OwnerName = "Main Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.MainBlock));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.MainBlock) { IsRoot = true });
+                    } 
+                    else if (toParse.ContainsFast("_DEFINITIONS")) {
+                        _context.OwnerName = "Definition Block";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
+                        _context.OwnerName = "Preprocessor Block";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (toParse.ContainsFast("_XFTR")) {
+                        _context.OwnerName = "Xtfr";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
+                        _context.OwnerName = "Procedure settings";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (toParse.ContainsFast("_CREATE-WINDOW")) {
+                        _context.OwnerName = "Create window";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
+                        _context.OwnerName = "Run-time attributes";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                    } 
+                    else if (!_foundPrototypeBlock && toParse.ContainsFast("_FUNCTION-FORWARD")) {
+                        _foundPrototypeBlock = true;
+                        _context.OwnerName = "Function prototypes";
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
                     }
                     break;
                 case "&UNDEFINE":
@@ -941,7 +967,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             return parametersList;
         }
-
+        
 
         /// <summary>
         /// matches a include file

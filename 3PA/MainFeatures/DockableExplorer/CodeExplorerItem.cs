@@ -1,5 +1,6 @@
 ﻿
 using System.Collections.Generic;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.DockableExplorer {
 
@@ -50,19 +51,30 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
     /// <summary>
     /// Defines the different types of explorerItems (is related to the image display in the code explorer)
+    /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     public enum ExplorerType {
+        [ExplorerTypeAttr(DisplayText = "Everything in code order")]
         EverythingInCodeOrder,
+        [ExplorerTypeAttr(DisplayText = "Root")]
         Root,
-        DefinitionsBlock,
-        PreprocessorBlock,
+        [ExplorerTypeAttr(DisplayText = "Appbuilder blocks")]
+        Block,
+        [ExplorerTypeAttr(DisplayText = "Main block")]
         MainBlock,
+        [ExplorerTypeAttr(DisplayText = "Procedures")]
         Procedures,
+        [ExplorerTypeAttr(DisplayText = "Functions")]
         Functions,
+        [ExplorerTypeAttr(DisplayText = "ON events")]
         OnEvents,
+        [ExplorerTypeAttr(DisplayText = "Includes")]
         Includes,
+        [ExplorerTypeAttr(DisplayText = "Run statements")]
         Run
     }
 
-
+    public class ExplorerTypeAttr : Extensions.EnumAttr {
+        public string DisplayText { get; set; }
+    }
 }

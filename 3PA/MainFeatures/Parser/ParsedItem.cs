@@ -81,6 +81,8 @@ namespace _3PA.MainFeatures.Parser {
     public class ParsedBlock : ParsedScopeItem {
         public ExplorerType Type { get; set; }
 
+        public bool IsRoot { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }

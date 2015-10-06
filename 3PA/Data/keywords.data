@@ -1284,7 +1284,6 @@ INNER-LINES	Option	0	2
 INPUT	Function	1	79
 INPUT	Statement	1	79
 INPUT	Option	1	79
-input)	Option	0	0
 INPUT-O	Abbreviation	0	0
 INPUT-OUTPUT	Statement	1	6
 INPUT-OUTPUT	Option	1	6

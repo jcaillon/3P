@@ -37,7 +37,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
             set { ovlTree.UseAlternatingBackColors = value; }
         }
 
-        private Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>(); 
+        private Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>();
+        private int _topItemIndex;
 
         // list of items to display in the tree
         private static List<ExplorerItem> _unsortedItems = new List<ExplorerItem>();
@@ -68,8 +69,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             };
             ImagelistAdd.AddFromImage(ImageResources.code, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.root, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.block, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.mainblock, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Procedure, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.Function, imageListOfTypes);
@@ -107,6 +107,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             toolTipHtml.SetToolTip(buttonCleanText, "<b>Clean</b> the current text filter");
             toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
             toolTipHtml.SetToolTip(buttonSort, "Toggle <b>Categories/Code order sorting</b>");
+
         }
 
         #endregion
@@ -135,7 +136,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         #region public methods
 
         public void Redraw() {
-            ovlTree.Refresh();
+            DisplayText.Width = ovlTree.Width - 17;
+            ovlTree.RebuildAll(true);
         }
 
         /// <summary>
@@ -159,7 +161,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             foreach (var type in _items.Select(x => x.Type).Distinct()) {
                 if (_rootItems.Find(item => item.Type == type) != null) continue;
                 _rootItems.Add(new ExplorerItem() {
-                    DisplayText = type.ToString(),
+                    DisplayText = ((ExplorerTypeAttr)type.GetAttributes()).DisplayText,
                     Type = type,
                     HasChildren = true,
                     IsRoot = true
@@ -179,6 +181,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 else
                     _expandedBranches[branch.DisplayText] = ovlTree.IsExpanded(root);
             }
+
+            _topItemIndex = ovlTree.TopItemIndex;
         }
 
         /// <summary>
@@ -196,6 +200,18 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 } else {
                     _expandedBranches.Add(branch.DisplayText, true);
                     ovlTree.Expand(root);
+                }
+            }
+
+            if (_topItemIndex > 0 && _topItemIndex < ovlTree.GetItemCount()) {
+                ovlTree.TopItemIndex = _topItemIndex;
+                ovlTree.EnsureVisible(_topItemIndex);
+            } else {
+                ovlTree.TopItemIndex = 0;
+                try {
+                    ovlTree.EnsureVisible(0);
+                } catch (Exception) {
+                    // ignored
                 }
             }
         }
@@ -273,15 +289,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
         #endregion
 
         #region events
-
-        /// <summary>
-        /// Called on resize, to make the treeview match the whole width
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnResize(EventArgs e) {
-            DisplayText.Width = ovlTree.Width - 17;
-            base.OnResize(e);
-        }
 
         /// <summary>
         /// When the user double click an item on the list

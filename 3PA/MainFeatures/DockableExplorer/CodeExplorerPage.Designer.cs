@@ -63,8 +63,9 @@
             // 
             // buttonCleanText
             // 
+            this.buttonCleanText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCleanText.BackGrndImage = null;
-            this.buttonCleanText.Location = new System.Drawing.Point(78, 4);
+            this.buttonCleanText.Location = new System.Drawing.Point(277, 4);
             this.buttonCleanText.Name = "buttonCleanText";
             this.buttonCleanText.Size = new System.Drawing.Size(25, 25);
             this.buttonCleanText.TabIndex = 10;
@@ -124,13 +125,13 @@
             this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxFilter.Lines = new string[0];
-            this.textBoxFilter.Location = new System.Drawing.Point(109, 4);
+            this.textBoxFilter.Location = new System.Drawing.Point(84, 4);
             this.textBoxFilter.MaxLength = 32767;
             this.textBoxFilter.Name = "textBoxFilter";
             this.textBoxFilter.PasswordChar = '\0';
             this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textBoxFilter.SelectedText = "";
-            this.textBoxFilter.Size = new System.Drawing.Size(193, 25);
+            this.textBoxFilter.Size = new System.Drawing.Size(187, 25);
             this.textBoxFilter.TabIndex = 7;
             this.textBoxFilter.TabStop = false;
             this.textBoxFilter.WaterMark = "Filter here!";
@@ -143,7 +144,7 @@
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.TooltipCssClass = "htmltooltip";
             // 
-            // CodeExplorer
+            // CodeExplorerPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
