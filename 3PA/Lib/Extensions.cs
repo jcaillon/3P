@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
 using System.IO;
@@ -35,6 +36,27 @@ namespace _3PA.Lib {
                 retVal++;
             }
             return -1;
+        }
+        #endregion
+
+
+        #region ui thread safe invoke
+
+        /* http://www.codeproject.com/Articles/52752/Updating-Your-Form-from-Another-Thread-without-Cre */
+
+        public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) {
+                IAsyncResult result = isi.BeginInvoke(call, new object[] {isi});
+                object endResult = isi.EndInvoke(result);
+                return (TResult) endResult;
+            } else
+                return call(isi);
+        }
+
+        public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] {isi});
+            else
+                call(isi);
         }
 
         #endregion

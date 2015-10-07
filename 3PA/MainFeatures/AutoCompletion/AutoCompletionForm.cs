@@ -206,7 +206,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// create a button for each type of completion present in the list of items
         /// </summary>
         /// <param name="objectsList"></param>
-        public void SetItems(List<CompletionData> objectsList) {
+        /// <param name="resetSelectorButtons"></param>
+        public void SetItems(List<CompletionData> objectsList, bool resetSelectorButtons = true) {
             objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
 
@@ -215,42 +216,44 @@ namespace _3PA.MainFeatures.AutoCompletion {
             Height = fastOLV.Height + 32;
             //Width = 280;
 
-            // delete any existing buttons
-            if (_displayedTypes != null) {
-                foreach (var selectorButton in _displayedTypes) {
-                    selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                    if (Controls.Contains(selectorButton.Value))
-                        Controls.Remove(selectorButton.Value);
-                    selectorButton.Value.Dispose();
+            if (resetSelectorButtons) {
+                // delete any existing buttons
+                if (_displayedTypes != null) {
+                    foreach (var selectorButton in _displayedTypes) {
+                        selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                        if (Controls.Contains(selectorButton.Value))
+                            Controls.Remove(selectorButton.Value);
+                        selectorButton.Value.Dispose();
+                    }
                 }
-            }
 
-            // get distinct types, create a button for each
-            int xPos = 4;
-            _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
-            foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
-                var but = new SelectorButton();
-                but.BackGrndImage = _imageListOfTypes.Images[(int) type];
-                but.Activated = true;
-                but.Size = new Size(24, 24);
-                but.TabStop = false;
-                but.Location = new Point(xPos, Height - 28);
-                but.Type = type;
-                but.AcceptsRightClick = true;
-                but.ButtonPressed += HandleTypeClick;
-                htmlToolTip.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                _displayedTypes.Add(type, but);
-                Controls.Add(but);
-                xPos += but.Width;
-            }
-            xPos += 65;
+                // get distinct types, create a button for each
+                int xPos = 4;
+                _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
+                foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
+                    var but = new SelectorButton();
+                    but.BackGrndImage = _imageListOfTypes.Images[(int) type];
+                    but.Activated = true;
+                    but.Size = new Size(24, 24);
+                    but.TabStop = false;
+                    but.Location = new Point(xPos, Height - 28);
+                    but.Type = type;
+                    but.AcceptsRightClick = true;
+                    but.ButtonPressed += HandleTypeClick;
+                    htmlToolTip.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                    _displayedTypes.Add(type, but);
+                    Controls.Add(but);
+                    xPos += but.Width;
+                }
+                xPos += 65;
 
-            // correct width
-            var neededWidth = Math.Max(280, xPos);
-            if (neededWidth != Width) {
-                Width = Math.Max(280, xPos);
-                _normalWidth = Width - 2;
-                Keyword.Width = _normalWidth - 17;
+                // correct width
+                var neededWidth = Math.Max(280, xPos);
+                if (neededWidth != Width) {
+                    Width = Math.Max(310, xPos);
+                    _normalWidth = Width - 2;
+                    Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
+                }
             }
 
             // label for the number of items
@@ -310,12 +313,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// allows to programmatically select the first item of the list
         /// </summary>
         public void SelectFirstItem() {
-            try {
-                if (TotalItems > 0)
-                    fastOLV.SelectedIndex = 0;
-            } catch (Exception) {
-                // ignored
-            }
+            if (TotalItems > 0) fastOLV.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -469,7 +467,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            Keyword.Width = _normalWidth - 17;
+            Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
 
             // order the list, first the ones that are equals to the filter, then the
             // ones that start with the filter, then the rest
@@ -499,6 +497,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // if the selected row is > to number of items, then there will be a unselect
             try {
+                // # it creates a visual glitch and is not worth it afterall
                 if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
                     Keyword.Width = _normalWidth;
                 if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;

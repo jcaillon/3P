@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
@@ -163,8 +164,9 @@ namespace _3PA {
             }
             Registry.SetValue(Resources.RegistryPath, "tempPath", tempPath, RegistryValueKind.String);
 
-            // initialize plugin (asynchrone)
-            Task.Factory.StartNew(InitPlugin);
+            // initialize plugin
+            Dispatcher.Init();
+            Dispatcher.Shedule(50, InitPlugin);
         }
 
         static internal void InitPlugin() {
@@ -194,6 +196,10 @@ namespace _3PA {
 
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched();
+
+                // dockable explorer
+                if (Config.Instance.CodeExplorerVisible && !DockableExplorer.IsVisible)
+                    DockableExplorer.Toggle();
 
                 Task.Factory.StartNew(DataBase.FetchCurrentDbInfo);
 

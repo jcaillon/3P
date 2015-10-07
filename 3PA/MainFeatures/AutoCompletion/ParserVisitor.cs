@@ -17,6 +17,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void Visit(ParsedBlock pars) {
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem {
                 DisplayText = pars.Name,
+                BranchType = pars.BranchType,
                 Type = pars.Type,
                 GoToLine = pars.Line,
                 IsRoot = pars.IsRoot
@@ -31,7 +32,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // we only want the RUN that point to external procedures
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                Type = ExplorerType.Run,
+                BranchType = ExplorerType.Run,
                 GoToLine = pars.Line,
                 IsNotBlock = true
             });
@@ -45,7 +46,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // To code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
-                Type = ExplorerType.OnEvents,
+                BranchType = ExplorerType.OnEvents,
                 GoToLine = pars.Line,
             });
         }
@@ -58,7 +59,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
            // To code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                Type = ExplorerType.Includes,
+                BranchType = ExplorerType.Includes,
                 GoToLine = pars.Line,
                 IsNotBlock = true
             });
@@ -75,7 +76,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // to code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                Type = ExplorerType.Functions,
+                BranchType = ExplorerType.Functions,
                 GoToLine = pars.Line,
             });
 
@@ -100,7 +101,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // to code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                Type = ExplorerType.Procedures,
+                BranchType = ExplorerType.Procedures,
                 GoToLine = pars.Line,
             });
 

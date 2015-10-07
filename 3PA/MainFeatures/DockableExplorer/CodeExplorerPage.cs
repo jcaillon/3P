@@ -45,6 +45,23 @@ namespace _3PA.MainFeatures.DockableExplorer {
         private static List<ExplorerItem> _rootItems = new List<ExplorerItem>();
         private static List<ExplorerItem> _items = new List<ExplorerItem>();
 
+        // holds the display order of the ExplorerType
+        private static List<int> _explorerBranchTypePriority;
+
+        /// <summary>
+        /// returns the ranking of each ExplorerType, helps sorting them as we wish
+        /// </summary>
+        public static List<int> GetPriorityList {
+            get {
+                if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
+                _explorerBranchTypePriority = new List<int>();
+                var temp = Config.Instance.CodeExplorerPriorityList.Split(',').Select(Int32.Parse).ToList();
+                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++)
+                    _explorerBranchTypePriority.Add(temp.IndexOf(i));
+                return _explorerBranchTypePriority;
+            }
+        }
+
         #endregion
 
         #region constructor
@@ -76,10 +93,16 @@ namespace _3PA.MainFeatures.DockableExplorer {
             ImagelistAdd.AddFromImage(ImageResources.onevents, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.External, imageListOfTypes);
             ImagelistAdd.AddFromImage(ImageResources.run, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.block_runtime, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.block_settings, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.block_window, imageListOfTypes);
+            ImagelistAdd.AddFromImage(ImageResources.block_xtfr, imageListOfTypes);
             ovlTree.SmallImageList = imageListOfTypes;
 
             // Image getter
-            DisplayText.ImageGetter += rowObject => (int) ((ExplorerItem)rowObject).Type;
+            DisplayText.ImageGetter += ImageGetter;
             
             // Style the control
             StyleOvlTree();
@@ -108,11 +131,27 @@ namespace _3PA.MainFeatures.DockableExplorer {
             toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
             toolTipHtml.SetToolTip(buttonSort, "Toggle <b>Categories/Code order sorting</b>");
 
+            // problems with the width of the column, set here
+            DisplayText.Width = ovlTree.Width - 17;
+            ovlTree.SizeChanged += (sender, args) => {
+                DisplayText.Width = ovlTree.Width - 17;
+                ovlTree.Invalidate();
+            };
         }
 
         #endregion
 
         #region cell formatting
+        /// <summary>
+        /// Image getter for object rows
+        /// </summary>
+        /// <param name="rowObject"></param>
+        /// <returns></returns>
+        private object ImageGetter(object rowObject) {
+            var obj = (ExplorerItem)rowObject;
+            var typeInt = (int)obj.Type;
+            return (typeInt > 0) ? typeInt : (int)obj.BranchType;
+        }
 
         /// <summary>
         /// Event on format cell
@@ -130,20 +169,21 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 args.SubItem.Decoration = decoration;
             }
         }
-
         #endregion
 
         #region public methods
 
+        /// <summary>
+        /// Used when the user update the positon of the carret, to reflect the current location with the mouse
+        /// </summary>
         public void Redraw() {
-            DisplayText.Width = ovlTree.Width - 17;
-            ovlTree.RebuildAll(true);
+            ovlTree.Invalidate();
         }
 
         /// <summary>
         /// This method uses the items found by the parser to update the code explorer tree
         /// </summary>
-        public static void UpdateTreeData() {
+        public void UpdateTreeData() {
             // Fetch items found by the parser
             _unsortedItems = ParserHandler.GetParsedExplorerItemsList();
             _items = ParserHandler.GetParsedExplorerItemsList();
@@ -152,21 +192,40 @@ namespace _3PA.MainFeatures.DockableExplorer {
             // init branches
             _rootItems.Clear();
 
-            // add root items first
-            foreach (var item in _items.Where(item => item.IsRoot)) {
-                _rootItems.Add(item);
+            if (_displayUnSorted) {
+                _rootItems = new List<ExplorerItem>() {
+                    new ExplorerItem() {
+                        DisplayText = "Everything in code order",
+                        BranchType = ExplorerType.EverythingInCodeOrder,
+                        HasChildren = true
+                    }
+                };
+            } else {
+                // add root items first
+                foreach (var item in _items.Where(item => item.IsRoot)) {
+                    _rootItems.Add(item);
+                }
+
+                // for each distinct type of items, create a branch (if the branchType isn't already in the root list!)
+                foreach (var type in _items.Select(x => x.BranchType).Distinct()) {
+                    if (_rootItems.Find(item => item.BranchType == type) != null) continue;
+                    _rootItems.Add(new ExplorerItem() {
+                        DisplayText = ((ExplorerTypeAttr)type.GetAttributes()).DisplayText,
+                        BranchType = type,
+                        HasChildren = true,
+                        IsRoot = true
+                    });
+                }
+
+                // sort root items
+                _rootItems = _rootItems.OrderBy(item => GetPriorityList[(int)item.BranchType]).ToList();           
             }
 
-            // for each distinct type of items, create a branch
-            foreach (var type in _items.Select(x => x.Type).Distinct()) {
-                if (_rootItems.Find(item => item.Type == type) != null) continue;
-                _rootItems.Add(new ExplorerItem() {
-                    DisplayText = ((ExplorerTypeAttr)type.GetAttributes()).DisplayText,
-                    Type = type,
-                    HasChildren = true,
-                    IsRoot = true
-                });
-            }
+            RememberExpandedItems();
+            ovlTree.Roots = _rootItems;
+            ovlTree.RefreshObjects(_rootItems);
+            SetRememberedExpandedItems();
+            ReapplyFilter();
         }
 
         /// <summary>
@@ -224,22 +283,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static List<ExplorerItem> GetItemsFor(ExplorerType type) {
             if (type == ExplorerType.EverythingInCodeOrder)
                 return _unsortedItems;
-            return _items.Where(item => item.Type == type).ToList();
-        }
-
-        /// <summary>
-        /// Call this method to initiate the content of the tree view
-        /// </summary>
-        public void InitSetObjects() {
-            var unsortedBranch = new List<ExplorerItem>() {
-                new ExplorerItem() {
-                    DisplayText = "Everything in code order", 
-                    Type = ExplorerType.EverythingInCodeOrder, 
-                    HasChildren = true
-                }
-            };
-            ovlTree.SetObjects(!_displayUnSorted ? _rootItems : unsortedBranch);
-            DisplayText.Width = ovlTree.Width - 17;
+            return _items.Where(item => item.BranchType == type).ToList();
         }
 
         /// <summary>
@@ -306,11 +350,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 else
                     ovlTree.Expand(selection);
                 Npp.GrabFocus();
-                return;
+            } else {
+                // Item clicked : go to line
+                Npp.GoToLine(selection.GoToLine);
+                ovlTree.Invalidate();
             }
-            // Item clicked : go to line
-            Npp.GoToLine(selection.GoToLine);
-            Redraw();
         }
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
@@ -331,8 +375,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         private void buttonSort_Click(object sender, EventArgs e) {
             _displayUnSorted = !_displayUnSorted;
             CleanFilter();
-            InitSetObjects();
-            ExpandAll();
+            UpdateTreeData();
             buttonSort.BackGrndImage = _displayUnSorted ? ImageResources.clear_filters : ImageResources.numerical_sorting_12;
             buttonSort.Invalidate();
         }
@@ -352,6 +395,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             buttonExpandRetract.Invalidate();
         }
 
+        
         #endregion
 
         #region filter
@@ -397,8 +441,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
             SetRememberedExpandedItems();
         }
         #endregion
-
-
     }
 
     /// <summary>
@@ -407,7 +449,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
     public class ExplorerObjectSortingClass : IComparer<ExplorerItem> {
         public int Compare(ExplorerItem x, ExplorerItem y) {
             // compare first by CompletionType
-            int compare = x.Type.CompareTo(y.Type);
+            int compare = x.BranchType.CompareTo(y.BranchType);
             if (compare != 0) return compare;
             // sort by display text in last resort
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);

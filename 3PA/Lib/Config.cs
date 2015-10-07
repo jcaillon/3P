@@ -34,25 +34,33 @@ namespace _3PA.Lib {
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = false;
+        public bool AutoCompleteHideScrollBar = true;
 
 
         [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
         public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,0,1";
 
-        public bool ExplorerUseAlternateColors = false;
-        public bool ExplorerVisible = true;
+
+        public bool CodeExplorerUseAlternateColors = false;
+        public bool CodeExplorerVisible = true;
+        [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")]
+        public string CodeExplorerPriorityList = "0,1,2,6,3,4,5,7,8,9,10";
+
 
         public double AppliOpacityUnfocused = 0.5;
         public bool AppliAllowTabAnimation = true;
+
 
         public int ToolTipmsBeforeShowing = 1000;
         public double ToolTipUnfocusedOpacity = 0.9;
         public double ToolTipFocusedOpacity = 0.9;
         public bool ToolTipDeactivate = false;
 
+
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
         public int GlobalCurrentEnvironnement = 0;
         public bool GlobalUseContainedLexer = true;
+
 
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;

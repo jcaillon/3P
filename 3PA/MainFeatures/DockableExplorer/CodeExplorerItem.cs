@@ -11,9 +11,14 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public string DisplayText { get; set; }
 
         /// <summary>
-        /// 
+        /// the type of the item, also corresponds to the icon displayed next to DisplayText
         /// </summary>
         public ExplorerType Type { get; set; }
+        
+        /// <summary>
+        /// the branch to which this item belongs (if the item is not part of the "root")
+        /// </summary>
+        public ExplorerType BranchType { get; set; }
 
         /// <summary>
         /// if the item has no children, clicking on it will make the carret move to this line
@@ -42,7 +47,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public List<ExplorerItem> Items {
             get {
                 if (_items == null)
-                    _items = CodeExplorerPage.GetItemsFor(Type);
+                    _items = CodeExplorerPage.GetItemsFor(BranchType);
                 return _items;
             }
         }
@@ -71,7 +76,20 @@ namespace _3PA.MainFeatures.DockableExplorer {
         [ExplorerTypeAttr(DisplayText = "Includes")]
         Includes,
         [ExplorerTypeAttr(DisplayText = "Run statements")]
-        Run
+        Run,
+        [ExplorerTypeAttr(DisplayText = "")]
+        DefinitionBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        ProcessorBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        RuntimeBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        SettingsBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        CreateWindowBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        XtfrBlock,
+
     }
 
     public class ExplorerTypeAttr : Extensions.EnumAttr {

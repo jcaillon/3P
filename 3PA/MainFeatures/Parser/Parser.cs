@@ -62,8 +62,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private Dictionary<string, Point> _functionPrototype = new Dictionary<string, Point>();
 
-        private bool _foundPrototypeBlock;
-
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
@@ -705,32 +703,31 @@ namespace _3PA.MainFeatures.Parser {
                     } 
                     else if (toParse.ContainsFast("_DEFINITIONS")) {
                         _context.OwnerName = "Definition Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.DefinitionBlock });
                     } 
                     else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         _context.OwnerName = "Preprocessor Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.ProcessorBlock });
                     } 
                     else if (toParse.ContainsFast("_XFTR")) {
                         _context.OwnerName = "Xtfr";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.XtfrBlock });
                     } 
                     else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
                         _context.OwnerName = "Procedure settings";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.SettingsBlock });
                     } 
                     else if (toParse.ContainsFast("_CREATE-WINDOW")) {
                         _context.OwnerName = "Create window";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.CreateWindowBlock });
                     } 
                     else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
                         _context.OwnerName = "Run-time attributes";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.RuntimeBlock });
                     } 
-                    else if (!_foundPrototypeBlock && toParse.ContainsFast("_FUNCTION-FORWARD")) {
-                        _foundPrototypeBlock = true;
+                    else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block));
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.Functions });
                     }
                     break;
                 case "&UNDEFINE":

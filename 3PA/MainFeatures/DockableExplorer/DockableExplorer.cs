@@ -23,11 +23,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void UpdateCodeExplorer() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.RememberExpandedItems();
-            CodeExplorerPage.UpdateTreeData();
-            ExplorerForm.CodeExplorerPage.InitSetObjects();
-            ExplorerForm.CodeExplorerPage.SetRememberedExpandedItems();
-            ExplorerForm.CodeExplorerPage.ReapplyFilter();
+            ExplorerForm.CodeExplorerPage.UpdateTreeData();
         }
 
         /// <summary>
@@ -45,13 +41,14 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static void Toggle() {
             try {
                 // initialize if not done
-                if (ExplorerForm == null)
+                if (ExplorerForm == null) {
                     Init();
-                else {
+                    UpdateCodeExplorer();
+                } else {
                     Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
                 }
                 if (ExplorerForm == null) return;
-                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.ExplorerUseAlternateColors;
+                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.CodeExplorerUseAlternateColors;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -63,9 +60,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         public static void Redraw() {
             if (IsVisible) {
-                Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
+                //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
                 ExplorerForm.CodeExplorerPage.StyleOvlTree();
                 ExplorerForm.Invalidate();
+                ExplorerForm.Refresh();
             }
         }
 
@@ -76,7 +74,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public static void UpdateMenuItemChecked() {
             if (ExplorerForm == null) return;
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, ExplorerForm.Visible ? 1 : 0);
-            Config.Instance.ExplorerVisible = ExplorerForm.Visible;
+            Config.Instance.CodeExplorerVisible = ExplorerForm.Visible;
         }
 
         /// <summary>
@@ -113,8 +111,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
 
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
-
-            UpdateCodeExplorer();
         }
     }
 }

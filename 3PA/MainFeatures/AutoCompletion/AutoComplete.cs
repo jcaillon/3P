@@ -39,13 +39,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static TypeOfList CurrentTypeOfList {
             get { return _currentTypeOfList; }
             set {
+                _needToSetActiveTypes = _currentTypeOfList != TypeOfList.Reset;
                 _needToSetItems = true;
                 _currentTypeOfList = value;
             }
         }
-
         private static TypeOfList _currentTypeOfList;
         private static bool _needToSetItems;
+        private static bool _needToSetActiveTypes;
 
         // contains the list of items currently display in the form
         private static List<CompletionData> _currentItems;
@@ -335,7 +336,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // close if there is nothing to suggest
-                if (!_openedFromShortCut && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                if (!_openedFromShortCut && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                     Close();
                     return;
                 }
@@ -373,11 +374,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _form.SetItems(_currentItems);
             } else if (_needToSetItems) {
                 // we changed the mode, we need to Set the items of the autocompletion
-                _form.SetItems(_currentItems);
+                _form.SetItems(_currentItems, _needToSetActiveTypes || !_form.Visible);
+                _needToSetItems = false;
             }
 
             // only activate certain types
-            if (_needToSetItems || !_form.Visible) { 
+            if (_needToSetActiveTypes || !_form.Visible) { 
                 // only activate certain types
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
@@ -390,9 +392,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             CompletionType.KeywordObject,
                         });
                         break;
+                    default:
+                        _form.SetUnActiveType(null);
+                        break;
                 }
-                // we just Set the items so we don't need to reset the active types
-                _needToSetItems = false;
             }
 
             // filter with keyword (keyword can be empty)
@@ -403,7 +406,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Close();
                 return;
             }
-
 
             // if the form was already visible, don't go further
             if (_form.Visible) return;

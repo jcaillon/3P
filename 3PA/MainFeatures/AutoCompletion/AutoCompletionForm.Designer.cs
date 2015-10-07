@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.fastOLV = new BrightIdeasSoftware.FastObjectListView();
+            this.fastOLV = new FastObjectListViewWoScrolls();
             this.Keyword = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Type = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();
@@ -161,7 +161,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-        private BrightIdeasSoftware.FastObjectListView fastOLV;
+        private FastObjectListViewWoScrolls fastOLV;
         private BrightIdeasSoftware.OLVColumn Keyword;
         private BrightIdeasSoftware.OLVColumn Type;
         private YamuiFramework.Controls.YamuiLabel nbitems;

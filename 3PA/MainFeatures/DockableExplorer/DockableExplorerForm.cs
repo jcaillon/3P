@@ -40,16 +40,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
         }
         #endregion
 
-        protected override void OnResizeEnd(EventArgs e) {
-            _codeExplorerPage.Redraw();
-            base.OnResizeEnd(e);
-        }
-
-        protected override void OnResize(EventArgs e) {
-            _codeExplorerPage.Redraw();
-            base.OnResize(e);
-        }
-
         /// <summary>
         /// Check/uncheck the menu depending on this form visibility
         /// </summary>
