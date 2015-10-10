@@ -5,7 +5,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using BrightIdeasSoftware.Utilities;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
@@ -60,9 +59,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // remember the list that was passed to the autocomplete form when we set the items, we need this
         // because we reorder the list each time the user filters stuff, but we need the original order
         private List<CompletionData> _initialObjectsList;
-        
-        // contains the list of images, one for each type of completionType
-        private ImageList _imageListOfTypes;
         #endregion
 
         #region constructor
@@ -99,29 +95,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             };
 
             // set the image list to use for the keywords
-            _imageListOfTypes = new ImageList {
-                TransparentColor = Color.Transparent,
-                ColorDepth = ColorDepth.Depth32Bit,
-                ImageSize = new Size(20, 20)
-            };
-            ImagelistAdd.AddFromImage(ImageResources.FieldPk, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Field, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Snippet, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.TempTable, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariablePrimitive, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Table, _imageListOfTypes);            
-            ImagelistAdd.AddFromImage(ImageResources.Function, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Procedure, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Keyword, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Database, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Widget, _imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.KeywordObject, _imageListOfTypes);
-            fastOLV.SmallImageList = _imageListOfTypes;
             Keyword.ImageGetter += rowObject => {
-                var x = (CompletionData) rowObject;
-                return (int) x.Type;
+                var x = (CompletionData)rowObject;
+                return GetTypeImageFromStr(x.Type.ToString());
             };
 
             // overlay of empty list :
@@ -157,6 +133,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region cell formatting
 
+        private Image GetTypeImageFromStr(string typeStr) {
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
+            return tryImg ?? ImageResources.Error;
+        }
+
         /// <summary>
         /// Event on format cell
         /// </summary>
@@ -172,7 +153,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (!data.Flag.HasFlag(flag)) continue;
                 Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
                 if (tryImg == null) continue;
-                ImageDecoration decoration = new ImageDecoration(tryImg, ContentAlignment.MiddleRight) {
+                ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
                     Offset = new Size(offset, 0)
                 };
                 if (args.SubItem.Decoration == null)
@@ -184,15 +165,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // display the sub string
             if (offset < -5) offset -= 5; 
             if (!string.IsNullOrEmpty(data.SubString)) {
-                TextDecoration decoration = new TextDecoration(data.SubString, 95);
-                decoration.Alignment = ContentAlignment.MiddleRight;
-                decoration.Offset = new Size(offset, 0);
-                decoration.Font = FontManager.GetFont(FontStyle.Bold, 11);
-                decoration.TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
-                decoration.CornerRounding = 1f;
-                decoration.Rotation = 0;
-                decoration.BorderWidth = 1;
-                decoration.BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor;
+                TextDecoration decoration = new TextDecoration(data.SubString, 100) {
+                    Alignment = ContentAlignment.MiddleRight,
+                    Offset = new Size(offset, 0),
+                    Font = FontManager.GetFont(FontStyle.Bold, 11),
+                    TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor,
+                    CornerRounding = 1f,
+                    Rotation = 0,
+                    BorderWidth = 1,
+                    BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor
+                };
                 args.SubItem.Decorations.Add(decoration);
             }
         }
@@ -231,14 +213,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 int xPos = 4;
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
                 foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
-                    var but = new SelectorButton();
-                    but.BackGrndImage = _imageListOfTypes.Images[(int) type];
-                    but.Activated = true;
-                    but.Size = new Size(24, 24);
-                    but.TabStop = false;
-                    but.Location = new Point(xPos, Height - 28);
-                    but.Type = type;
-                    but.AcceptsRightClick = true;
+                    var but = new SelectorButton {
+                        BackGrndImage = GetTypeImageFromStr(type.ToString()),
+                        Activated = true,
+                        Size = new Size(24, 24),
+                        TabStop = false,
+                        Location = new Point(xPos, Height - 28),
+                        Type = type,
+                        AcceptsRightClick = true
+                    };
                     but.ButtonPressed += HandleTypeClick;
                     htmlToolTip.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
                     _displayedTypes.Add(type, but);
@@ -334,9 +317,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// autocomplete with the currently selected item
         /// </summary>
         public void AcceptCurrentSuggestion() {
-            var obj = (CompletionData) fastOLV.SelectedItem.RowObject;
+            var obj = GetCurrentSuggestion();
             if (obj != null)
                 OnTabCompleted(new TabCompletedEventArgs(obj));
+        }
+
+        /// <summary>
+        /// Get the current selected item
+        /// </summary>
+        /// <returns></returns>
+        public CompletionData GetCurrentSuggestion() {
+            try {
+                return (CompletionData)fastOLV.SelectedItem.RowObject;
+            } catch (Exception) {
+                //ignored
+            }
+            return null;
         }
         #endregion
 
@@ -522,7 +518,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (!compData.FromParser) return output;
 
             // case of Parsed define or temp table define
-            if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable) {
+            if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable || compData.ParsedItem is ParsedLabel) {
                 // check for scope
                 if (compData.ParsedItem.Scope != ParsedScope.File)
                     output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);

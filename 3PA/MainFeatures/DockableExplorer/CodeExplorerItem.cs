@@ -68,31 +68,35 @@ namespace _3PA.MainFeatures.DockableExplorer {
         [ExplorerTypeAttr(DisplayText = "Main block")]
         MainBlock,
         [ExplorerTypeAttr(DisplayText = "Procedures")]
-        Procedures,
+        Procedure,
         [ExplorerTypeAttr(DisplayText = "Functions")]
-        Functions,
+        Function,
         [ExplorerTypeAttr(DisplayText = "ON events")]
-        OnEvents,
+        OnEvent,
         [ExplorerTypeAttr(DisplayText = "Includes")]
-        Includes,
+        Include,
         [ExplorerTypeAttr(DisplayText = "Run statements")]
         Run,
+        [ExplorerTypeAttr(DisplayText = "Browse definitions")]
+        Browse,
         [ExplorerTypeAttr(DisplayText = "")]
         DefinitionBlock,
         [ExplorerTypeAttr(DisplayText = "")]
-        ProcessorBlock,
+        XtfrBlock,
         [ExplorerTypeAttr(DisplayText = "")]
-        RuntimeBlock,
+        PreprocessorBlock,
+        [ExplorerTypeAttr(DisplayText = "")]
+        Prototype,
         [ExplorerTypeAttr(DisplayText = "")]
         SettingsBlock,
         [ExplorerTypeAttr(DisplayText = "")]
         CreateWindowBlock,
         [ExplorerTypeAttr(DisplayText = "")]
-        XtfrBlock,
-
+        RuntimeBlock,
     }
 
     public class ExplorerTypeAttr : Extensions.EnumAttr {
         public string DisplayText { get; set; }
+        public int Order { get; set; }
     }
 }

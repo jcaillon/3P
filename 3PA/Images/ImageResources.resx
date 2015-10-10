@@ -139,9 +139,6 @@
   <data name="numerical_sorting_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\numerical_sorting_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="code" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\code.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="wink" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>html\wink.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -174,12 +171,6 @@
   </data>
   <data name="TempTable" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>autocompletion\completiontype\temptable.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UserVariableOther" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>autocompletion\completiontype\uservariableother.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="UserVariablePrimitive" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>autocompletion\completiontype\uservariableprimitive.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="Parameter" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>autocompletion\completionflag\parameter.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -229,34 +220,67 @@
   <data name="Dynamic" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>autocompletion\completionflag\dynamic.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="mainblock" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\mainblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="selection" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\selection.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="run" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\run.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Label" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>autocompletion\completiontype\label.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="onevents" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\onevents.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="ExternalProc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>autocompletion\completionflag\externalproc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="root" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\root.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>autocompletion\completiontype\error.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="block" type="System.Resources.ResXFileRef, System.Windows.Forms">
+  <data name="VariableComplex" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>autocompletion\completiontype\variablecomplex.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="VariablePrimitive" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>autocompletion\completiontype\variableprimitive.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Block" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\block.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="block_runtime" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\block_runtime.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="Browse" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\browse.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="block_settings" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\block_settings.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="CreateWindowBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\createwindowblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="block_window" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\block_window.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="EverythingInCodeOrder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\everythingincodeorder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="block_xtfr" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\block_xtfr.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  <data name="OnEvent" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\onevent.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Root" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\root.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Run" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\run.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RuntimeBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\runtimeblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SettingsBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\settingsblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="XtfrBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\xtfrblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Include" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\include.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MainBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\mainblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Prototype" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\prototype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DefinitionBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\definitionblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PreprocessorBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\preprocessorblock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

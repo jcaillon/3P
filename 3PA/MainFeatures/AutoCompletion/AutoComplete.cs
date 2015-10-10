@@ -74,6 +74,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region public misc.
 
+        public static string LastSelectItemDisplayText;
+
         /// <summary>
         /// returns the ranking of each CompletionType, helps sorting them as we wish
         /// </summary>
@@ -126,11 +128,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="keyword"></param>
         /// <returns></returns>
         public static CompletionData FindCompletionData(string keyword) {
+            var currentOwnerName = ParserHandler.GetCarretLineOwnerName;
             if (_savedAllItems == null) return null;
-            CompletionData found = _savedAllItems.Find(data => data.DisplayText.EqualsCi(keyword));
+            CompletionData found = _savedAllItems.Find(data =>
+                data.DisplayText.EqualsCi(keyword) && (!data.FromParser || data.ParsedItem.OwnerName.Equals(currentOwnerName)));
             return found;
         }
 
+        /// <summary>
+        /// returns the keyword currently selected in the completion list
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentSuggestion() {
+            var data = _form.GetCurrentSuggestion();
+            return data == null ? null : data.DisplayText;
+        }
         #endregion
 
         /// <summary>
@@ -271,8 +283,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void UpdateAutocompletion() {
             try {
+                LastSelectItemDisplayText = null;
+
                 if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut) 
                     return;
+
+                // we need to remember the currently selected word of the list
+                if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && IsVisible) {
+                    var data = _form.GetCurrentSuggestion();
+                    LastSelectItemDisplayText = data == null ? null : data.DisplayText;
+                }
 
                 // get current word, current previous word (table or database name)
                 int nbPoints;
@@ -402,7 +422,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _form.FilterByText = keyword;
 
             // close?
-            if (!_openedFromShortCut && !Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) {
+            if (!_openedFromShortCut && Config.Instance.AutoCompleteOnKeyInputHideIfEmpty && _form.TotalItems == 0) {
                 Close();
                 return;
             }

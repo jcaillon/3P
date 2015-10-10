@@ -43,7 +43,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// the same resource (_ablParser) at the same time, which would be problematic
         /// </summary>
         private static object _parserLock = new object();
-
         #endregion
 
         #region misc
@@ -89,7 +88,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath());
                 ParsedItemsList.Clear();
                 ParsedExplorerItemsList.Clear();
-                _ablParser.Accept(new ParserVisitor());
+                _ablParser.Accept(new ParserVisitor(true, Npp.GetCurrentFileName()));
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");

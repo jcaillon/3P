@@ -34,11 +34,12 @@ namespace _3PA.Lib {
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = false;
+        public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
         public bool AutoCompleteHideScrollBar = true;
 
 
         [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
-        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,0,1";
+        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
 
         public bool CodeExplorerUseAlternateColors = false;

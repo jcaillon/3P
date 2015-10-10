@@ -13,6 +13,20 @@ namespace _3PA {
     /// </summary>
     public partial class Npp {
 
+        #region fields
+
+        private const int SwShownoactivate = 4;
+        private const uint SwpNoactivate = 0x0010;
+        public const int SbSettext = 1035;
+        public const int SbSetparts = 1028;
+        public const int SbGetparts = 1030;
+        private const uint WmUser = 0x0400;
+        private const uint SbGettextlength = WmUser + 12;
+        private const uint SbGettext = WmUser + 13;
+
+        #endregion
+
+
         /// <summary>
         ///     Gets the Notepad++ main window handle.
         /// </summary>

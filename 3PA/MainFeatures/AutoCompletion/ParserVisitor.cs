@@ -9,7 +9,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// This class sustains the autocompletion list AND the code explorer list
     /// by visiting the parser and creating new completionData
     /// </summary>
-    class ParserVisitor : IParserVisitor{
+    class ParserVisitor : IParserVisitor {
+
+        /// <summary>
+        /// Are we currently visiting the current file opened in npp or
+        /// is it a include?
+        /// </summary>
+        private bool _isBaseFile;
+
+        private string _currentParsedFile;
+
+        public ParserVisitor(bool isBaseFile, string currentParsedFile) {
+            _isBaseFile = isBaseFile;
+            _currentParsedFile = currentParsedFile;
+        }
+
         /// <summary>
         /// Main block, definitions block...
         /// </summary>
@@ -46,7 +60,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // To code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
-                BranchType = ExplorerType.OnEvents,
+                BranchType = ExplorerType.OnEvent,
                 GoToLine = pars.Line,
             });
         }
@@ -59,7 +73,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
            // To code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                BranchType = ExplorerType.Includes,
+                BranchType = ExplorerType.Include,
                 GoToLine = pars.Line,
                 IsNotBlock = true
             });
@@ -76,7 +90,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // to code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                BranchType = ExplorerType.Functions,
+                BranchType = ExplorerType.Function,
                 GoToLine = pars.Line,
             });
 
@@ -101,7 +115,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // to code explorer
             ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
                 DisplayText = pars.Name,
-                BranchType = ExplorerType.Procedures,
+                BranchType = ExplorerType.Procedure,
                 GoToLine = pars.Line,
             });
 
@@ -109,8 +123,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
-                SubString = "",
-                Flag = 0,
+                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
+                Flag = pars.IsExternal ? ParseFlag.ExternalProc : 0,
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -125,8 +139,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
-                SubString = "",
+                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
                 Flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope,
+                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                ParsedItem = pars,
+                FromParser = true
+            });
+        }
+
+        /// <summary>
+        /// Labels
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedLabel pars) {
+            ParserHandler.ParsedItemsList.Add(new CompletionData() {
+                DisplayText = pars.Name,
+                Type = CompletionType.Label,
+                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
+                Flag = 0,
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -192,6 +222,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         type = CompletionType.VariableComplex;
                         break;
                 }
+            }
+
+            // To explorer code for browse
+            if (pars.Type == ParseDefineType.Browse) {
+                ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
+                    DisplayText = pars.Name,
+                    BranchType = ExplorerType.Browse,
+                    GoToLine = pars.Line,
+                });
             }
 
             ParserHandler.ParsedItemsList.Add(new CompletionData() {

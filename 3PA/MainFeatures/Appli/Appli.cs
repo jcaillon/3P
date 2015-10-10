@@ -3,24 +3,30 @@ using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.Appli {
     class Appli {
-
-        private static AppliForm _form;
+        public static AppliForm Form;
+        private static bool _hasBeenShownOnce;
 
         public static void ToggleView() {
             // create the form
-            if (_form == null) {
-                _form = new AppliForm();
-                _form.CurrentForegroundWindow = Npp.HandleNpp;
-                _form.Show(Npp.Win32WindowNpp);
-                _form.DoShow();
+            if (!_hasBeenShownOnce) {
+                _hasBeenShownOnce = true;
+                Form.Show(Npp.Win32WindowNpp);
+                Form.DoShow();
                 return;
             }
 
             // toggle visibility
-            if (_form.Visible && !_form.HasModalOpened)
-                _form.Cloack();
+            if (Form.Visible && !Form.HasModalOpened)
+                Form.Cloack();
             else
-                _form.UnCloack();
+                Form.UnCloack();
+        }
+
+        public static void Init() {
+            if (Form != null) ForceClose();
+            Form = new AppliForm {
+                CurrentForegroundWindow = Npp.HandleNpp
+            };
         }
 
         /// <summary>
@@ -28,8 +34,8 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ForceClose() {
             try {
-                _form.ForceClose();
-                _form = null;
+                Form.ForceClose();
+                Form = null;
             } catch (Exception) {
                 // ignored
             }

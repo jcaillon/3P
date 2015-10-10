@@ -59,9 +59,12 @@ namespace _3PA.MainFeatures.Parser {
         Mandatory = 1024,
         Extent = 2048,
         Index = 4096,
-        // others
+        // is a buffer
         Buffer = 8192,
-        Dynamic = 16384
+        // the variable was defined with a CREATE and not a DEFINE
+        Dynamic = 16384,
+        // the procedure is EXTERNAL
+        ExternalProc = 32768,
     }
 
     /// <summary>
@@ -96,13 +99,15 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class ParsedProcedure : ParsedScopeItem {
         public string Left { get; private set; }
+        public bool IsExternal { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string left)
+        public ParsedProcedure(string name, int line, int column, string left, bool isExternal)
             : base(name, line, column) {
             Left = left;
+            IsExternal = isExternal;
         }
     }
 
@@ -148,6 +153,17 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Procedure parsed item
+    /// </summary>
+    public class ParsedLabel : ParsedItem {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedLabel(string name, int line, int column) : base(name, line, column) {
+        }
+    }
 
     /// <summary>
     /// Procedure parsed item

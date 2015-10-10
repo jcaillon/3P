@@ -211,12 +211,12 @@ namespace _3PA.MainFeatures.Parser {
                         case "&ENDIF":
                         case "&THEN":
                         case "&ELSE":
-                        case "&ANALYZE-RESUME":
                             _forceCreateEos = true;
                             break;
                     }
                     switch (word) {
                         case "&ANALYZE-SUSPEND":
+                        case "&ANALYZE-RESUME":
                         case "&GLOBAL-DEFINE":
                         case "&SCOPED-DEFINE":
                         case "&SCOPED":

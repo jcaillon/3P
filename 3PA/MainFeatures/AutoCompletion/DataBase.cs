@@ -132,7 +132,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_dataBases.Count <= 0) return new List<CompletionData>();
             return _dataBases.Select(@base => new CompletionData() {
                 DisplayText = @base.LogicalName,
-                Type = CompletionType.Databases,
+                Type = CompletionType.Database,
                 FromParser = false,
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
                 Flag = 0

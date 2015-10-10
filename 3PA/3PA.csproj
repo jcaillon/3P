@@ -256,6 +256,7 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Images\ImageResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>ImageResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
@@ -294,6 +295,7 @@
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Extent.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\External.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\ExternalProc.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\FileScope.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\global.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Index.png" />
@@ -304,36 +306,43 @@
     <Content Include="Images\AutoCompletion\CompletionFlag\Reserved.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Shared.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Database.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\Error.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Field.png" />
     <Content Include="Images\AutoCompletion\CompletionType\FieldPk.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Function.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Keyword.png" />
     <Content Include="Images\AutoCompletion\CompletionType\KeywordObject.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\Label.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Preprocessed.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Procedure.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Snippet.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Table.png" />
     <Content Include="Images\AutoCompletion\CompletionType\TempTable.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\UserVariableOther.png" />
-    <Content Include="Images\AutoCompletion\CompletionType\UserVariablePrimitive.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\3PA.png" />
-    <Content Include="Images\DockableExplorer\block.png" />
-    <Content Include="Images\DockableExplorer\block_runtime.png" />
-    <Content Include="Images\DockableExplorer\block_settings.png" />
-    <Content Include="Images\DockableExplorer\block_window.png" />
-    <Content Include="Images\DockableExplorer\block_xtfr.png" />
+    <Content Include="Images\DockableExplorer\Block.png" />
+    <Content Include="Images\DockableExplorer\DefinitionBlock.png" />
+    <Content Include="Images\DockableExplorer\Include.png" />
+    <Content Include="Images\DockableExplorer\PreprocessorBlock.png" />
+    <Content Include="Images\DockableExplorer\Prototype.png" />
+    <Content Include="Images\DockableExplorer\RuntimeBlock.png" />
+    <Content Include="Images\DockableExplorer\SettingsBlock.png" />
+    <Content Include="Images\DockableExplorer\CreateWindowBlock.png" />
+    <Content Include="Images\DockableExplorer\XtfrBlock.png" />
+    <Content Include="Images\DockableExplorer\Browse.png" />
     <Content Include="Images\DockableExplorer\clear_filters.png" />
-    <Content Include="Images\DockableExplorer\code.png" />
+    <Content Include="Images\DockableExplorer\EverythingInCodeOrder.png" />
     <Content Include="Images\DockableExplorer\collapse.png" />
-    <Content Include="Images\DockableExplorer\onevents.png" />
+    <Content Include="Images\DockableExplorer\OnEvent.png" />
     <Content Include="Images\DockableExplorer\eraser.png" />
     <Content Include="Images\DockableExplorer\expand.png" />
-    <Content Include="Images\DockableExplorer\mainblock.png" />
+    <Content Include="Images\DockableExplorer\MainBlock.png" />
     <Content Include="Images\DockableExplorer\numerical_sorting_12.png" />
     <Content Include="Images\DockableExplorer\refresh.png" />
-    <Content Include="Images\DockableExplorer\root.png" />
-    <Content Include="Images\DockableExplorer\run.png" />
+    <Content Include="Images\DockableExplorer\Root.png" />
+    <Content Include="Images\DockableExplorer\Run.png" />
     <Content Include="Images\DockableExplorer\selection.png" />
     <Content Include="Images\Html\wink.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />

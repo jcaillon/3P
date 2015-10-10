@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -25,7 +26,7 @@ namespace _3PA {
 
     public class Plug {
 
-        #region " Properties "
+        #region Fields
         public static string tempPath;
 
         public static bool PluginIsFullyLoaded;
@@ -46,7 +47,7 @@ namespace _3PA {
         public static bool IsCurrentFileProgress { get; set; }
         #endregion
 
-        #region " Startup/CleanUp "
+        #region Init and clean up
         /// <summary>
         /// Called on notepad++ setinfo
         /// </summary>
@@ -115,7 +116,7 @@ namespace _3PA {
             KeyInterceptor.Instance.Add(Keys.PageUp);
             KeyInterceptor.Instance.Add(Keys.Next);
             KeyInterceptor.Instance.Add(Keys.Prior);
-            KeyInterceptor.Instance.KeyDown += Instance_KeyDown;
+            KeyInterceptor.Instance.KeyDown += OnKeyDown;
         }
         
         /// <summary>
@@ -157,20 +158,31 @@ namespace _3PA {
             Application.ThreadException += ErrorHandler.ThreadErrorHandler;
             TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
 
-            // registry : temp folder path
-            tempPath = Path.Combine(Path.GetTempPath(), Resources.PluginFolderName);
-            if (!Directory.Exists(tempPath)) {
-                Directory.CreateDirectory(tempPath);
-            }
-            Registry.SetValue(Resources.RegistryPath, "tempPath", tempPath, RegistryValueKind.String);
-
-            // initialize plugin
-            Dispatcher.Init();
-            Dispatcher.Shedule(50, InitPlugin);
+            // initialize plugin (why another method for this? because otherwise the LibLoader can't do his job...)
+            InitPlugin();
         }
 
         static internal void InitPlugin() {
-            try {
+            // themes
+            ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
+            ThemeManager.AccentColor = Config.Instance.AccentColor;
+            ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
+            // TODO: delete when releasing! (we dont want the user to access those themes!)
+            ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
+
+            // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
+            // from a back groundthread, use : Appli.Form.BeginInvoke() for this
+            Appli.Init();
+
+            Task.Factory.StartNew(() => {
+
+                //// registry : temp folder path
+                //tempPath = Path.Combine(Path.GetTempPath(), Resources.PluginFolderName);
+                //if (!Directory.Exists(tempPath)) {
+                //    Directory.CreateDirectory(tempPath);
+                //}
+                //Registry.SetValue(Resources.RegistryPath, "tempPath", tempPath, RegistryValueKind.String);
+
                 Snippets.Init();
                 Keywords.Init();
                 FileTags.Init();
@@ -180,13 +192,6 @@ namespace _3PA {
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);
 
-                // themes
-                ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
-                ThemeManager.AccentColor = Config.Instance.AccentColor;
-                ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-                // TODO: delete when releasing! (we dont want the user to access those themes!)
-                ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
-
                 // SCINTILLA
                 // set the timer of dwell time, if the user let the mouse inactive for this period of time, npp fires the dwellstart notif
                 Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMOUSEDWELLTIME, Config.Instance.ToolTipmsBeforeShowing, 0);
@@ -194,23 +199,23 @@ namespace _3PA {
                 Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMODEVENTMASK,
                     SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO, 0);
 
-                // Simulates a OnDocumentSwitched when we start this dll
-                OnDocumentSwitched();
-
                 // dockable explorer
                 if (Config.Instance.CodeExplorerVisible && !DockableExplorer.IsVisible)
-                    DockableExplorer.Toggle();
+                    Appli.Form.BeginInvoke((Action)DockableExplorer.Toggle);
+
+                // Simulates a OnDocumentSwitched when we start this dll
+                OnDocumentSwitched();
 
                 Task.Factory.StartNew(DataBase.FetchCurrentDbInfo);
 
                 //TODO: notification qui demande à l'utilisateur de désactiver l'autocompletion de base de npp
-            } finally {
+
                 PluginIsFullyLoaded = true;
-            }
+            });
         }
         #endregion
 
-        #region " events on CHARADD and INSTANCE.KEYDOWN "
+        #region OnEvents
         /// <summary>
         /// Called when the user enters any character in npp
         /// </summary>
@@ -223,80 +228,9 @@ namespace _3PA {
                 // we are still entering a keyword, return
                 if (Abl.IsCharAllowedInVariables(c)) return;
 
-                // we finished entering a keyword
-                int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
-                var searchWordAt = Npp.GetCaretPosition() - offset;
-                var keyword = Npp.GetKeyword(searchWordAt);
-                //TODO: if multiselection, replace everywhere!
-
-                // replace the last keyword by the correct case, check the context of the caret
-                if (Config.Instance.AutoCompleteChangeCaseMode != 0 && !string.IsNullOrWhiteSpace(keyword) && Highlight.IsCarretInNormalContext()) {
-                    var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
-                    if (casedKeyword != null)
-                        Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
-                }
-
-                /*
-                bool isNormalContext = Highlight.IsNormalContext();
-
-                // only do more stuff if we are not in a string/comment/include definition 
-                if (!isNormalContext) return;
-                    
-                bool lastWordInDico = true;
-                Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
-                // trigger snippet insertion on space if the setting is activated (and the leave)
-                    
-                if (c == ' ' && Config.Instance.AutoCompleteUseSpaceToInsertSnippet &&
-                    Snippets.Contains(keyword)) {
-                    Npp.BeginUndoAction();
-                    Npp.ReplaceText(curPos - offset, curPos, "");
-                    Npp.SetCaretPosition(curPos - offset);
-                    Snippets.TriggerCodeSnippetInsertion();
-                    Npp.EndUndoAction();
-                    Npp.SetStatusbarLabel("trigger"); //TODO
-                    return;
-                }
-                    
-                return;
-
-                // replace semicolon by a point
-                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && lastWordInDico)
-                    Npp.WrappedKeywordReplace(".", new Point(curPos - 1, curPos), curPos);
-
-                // on DO: add an END
-                //if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
-                //    int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
-                //    string repStr = new String(' ', nbPrevInd);
-                //    repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
-                //    Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
-                //}
-
-                // handle indentation
-                if (newStr.Equals("\n")) {
-                    // indent once after then
-                    if (keyword.EqualsCi("then"))
-                        ActionAfterUpdateUi = () => {
-                            Npp.SetCurrentLineRelativeIndent(Config.Instance.AutoCompleteIndentNbSpaces);
-                        };
-
-                    // add dot atfer an end
-                    if (keyword.EqualsCi("end")) {
-                        Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
-                        Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
-                        ActionAfterUpdateUi = () => {
-                            Npp.SetCurrentLineRelativeIndent(0);
-                        };
-                    }
-                }
-
-                if (c == '.' && (keyword.EqualsCi("end"))) {
-                    Npp.AddTextAtCaret("\r\n");
-                    Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
-                    ActionAfterUpdateUi = () => {
-                        Npp.SetCurrentLineRelativeIndent(0);
-                    };
-                }
-                */
+                ActionAfterUpdateUi = () => {
+                    OnCharAdded(c);
+                };
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharTyped");
             }
@@ -309,7 +243,7 @@ namespace _3PA {
         /// <param name="repeatCount"></param>
         /// <param name="handled"></param>
         // ReSharper disable once RedundantAssignment
-        static void Instance_KeyDown(Keys key, int repeatCount, ref bool handled) {
+        static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill do its stuff
             handled = false; 
 
@@ -376,6 +310,104 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Called after the UI has updated, allows to correctly read the text style, to correct 
+        /// the indentation w/o it being erased and so on...
+        /// </summary>
+        /// <param name="c"></param>
+        public static void OnCharAdded(char c) {
+            try {
+                // we finished entering a keyword
+                int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
+                var searchWordAt = Npp.GetCaretPosition() - offset;
+                var keyword = Npp.GetKeyword(searchWordAt);
+                var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
+                //TODO: if multiselection, replace everywhere!
+
+                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
+
+                    // insert selected keyword of the completion list
+                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && AutoComplete.LastSelectItemDisplayText != null) {
+                        var curSel = AutoComplete.GetCurrentSuggestion();
+                        if (curSel != null)
+                            Npp.ReplaceKeywordWrapped(AutoComplete.LastSelectItemDisplayText, -offset);
+                        AutoComplete.UpdateAutocompletion();
+                    }
+
+                    // replace the last keyword by the correct case, check the context of the caret
+                    else if (Config.Instance.AutoCompleteChangeCaseMode != 0) {
+                        var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
+                        if (casedKeyword != null)
+                            Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
+                    }
+                }
+                
+                /*
+            bool isNormalContext = Highlight.IsNormalContext();
+
+            // only do more stuff if we are not in a string/comment/include definition 
+            if (!isNormalContext) return;
+                    
+            bool lastWordInDico = true;
+            Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
+            // trigger snippet insertion on space if the setting is activated (and the leave)
+                    
+            if (c == ' ' && Config.Instance.AutoCompleteUseSpaceToInsertSnippet &&
+                Snippets.Contains(keyword)) {
+                Npp.BeginUndoAction();
+                Npp.ReplaceText(curPos - offset, curPos, "");
+                Npp.SetCaretPosition(curPos - offset);
+                Snippets.TriggerCodeSnippetInsertion();
+                Npp.EndUndoAction();
+                Npp.SetStatusbarLabel("trigger"); //TODO
+                return;
+            }
+                    
+            return;
+
+            // replace semicolon by a point
+            if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && lastWordInDico)
+                Npp.WrappedKeywordReplace(".", new Point(curPos - 1, curPos), curPos);
+
+            // on DO: add an END
+            //if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
+            //    int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
+            //    string repStr = new String(' ', nbPrevInd);
+            //    repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
+            //    Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
+            //}
+
+            // handle indentation
+            if (newStr.Equals("\n")) {
+                // indent once after then
+                if (keyword.EqualsCi("then"))
+                    ActionAfterUpdateUi = () => {
+                        Npp.SetCurrentLineRelativeIndent(Config.Instance.AutoCompleteIndentNbSpaces);
+                    };
+
+                // add dot atfer an end
+                if (keyword.EqualsCi("end")) {
+                    Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
+                    Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
+                    ActionAfterUpdateUi = () => {
+                        Npp.SetCurrentLineRelativeIndent(0);
+                    };
+                }
+            }
+
+            if (c == '.' && (keyword.EqualsCi("end"))) {
+                Npp.AddTextAtCaret("\r\n");
+                Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
+                ActionAfterUpdateUi = () => {
+                    Npp.SetCurrentLineRelativeIndent(0);
+                };
+            }
+            */
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnCharAdded");
+            }
+        }
+
+        /// <summary>
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnDwellStart() {
@@ -435,6 +467,10 @@ namespace _3PA {
             //Npp.SetLexerToContainerLexer();
         }
 
+        #endregion
+
+        #region public
+
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the defautl values
@@ -455,9 +491,6 @@ namespace _3PA {
                 Npp.SetUseTabs(false);
             }
         }
-        #endregion
-
-        #region public
 
         /// <summary>
         /// Call this method to close all popup/autocompletion form and alike
@@ -481,7 +514,12 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            MessageBox.Show(Highlight.IsCarretInNormalContext().ToString());
+            Task.Factory.StartNew(() => {
+                Appli.Form.BeginInvoke((Action)delegate {
+                    var toastNotification2 = new YamuiNotifications(Npp.GetCaretPosition() + " > " + Highlight.IsCarretInNormalContext(Npp.GetCaretPosition()).ToString(), 5);
+                    toastNotification2.Show();
+                });
+            });
             //Highlight.Colorize(0, Npp.GetTextLenght());
         }
 

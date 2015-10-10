@@ -27,7 +27,9 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Contains the current information of the statement's context (in which proc it is, which scope...)
         /// </summary>
-        private ParseContext _context = new ParseContext();
+        private ParseContext _context = new ParseContext() {
+            FirstWordToken = null
+        };
 
         /// <summary>
         /// Contains the information of each line parsed
@@ -207,6 +209,10 @@ namespace _3PA.MainFeatures.Parser {
                             // add a one time indent after a then or else
                             _context.OneTimeIndent = true;
                             break;
+                        default:
+                            // save first word of the statement (useful for labels)
+                            _context.FirstWordToken = token;
+                            break;
                     }
                     
                 } else {
@@ -239,8 +245,11 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // end of statement
-            else if (token is TokenEos) 
+            else if (token is TokenEos) {
+                if (_context.StatementWordCount == 1 && _context.FirstWordToken != null && token.Value.Equals(":"))
+                    CreateParsedLabel();
                 NewStatement();
+            }
         }
 
         /// <summary>
@@ -252,6 +261,7 @@ namespace _3PA.MainFeatures.Parser {
                 _lineInfo.Add(_context.StatementStartLine, new LineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, _context.Scope, _context.OwnerName));
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
+            _context.FirstWordToken = null;
 
             // basically, delay the value _context.OneTimeIndent = true of 1 call of NewStatement()
             if (_lastStatementOneTimeIncrease)
@@ -292,6 +302,13 @@ namespace _3PA.MainFeatures.Parser {
                 _lastTokenWasSpace = false;
                 strBuilder.Append(token.Value);
             }
+        }
+
+        /// <summary>
+        /// Creates a label parsed item
+        /// </summary>
+        private void CreateParsedLabel() {
+            AddParsedItem(new ParsedLabel(_context.FirstWordToken.Value, _context.FirstWordToken.Line, _context.FirstWordToken.Column));
         }
 
         /// <summary>
@@ -707,7 +724,7 @@ namespace _3PA.MainFeatures.Parser {
                     } 
                     else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         _context.OwnerName = "Preprocessor Block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.ProcessorBlock });
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.PreprocessorBlock });
                     } 
                     else if (toParse.ContainsFast("_XFTR")) {
                         _context.OwnerName = "Xtfr";
@@ -727,7 +744,7 @@ namespace _3PA.MainFeatures.Parser {
                     } 
                     else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.Functions });
+                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, ExplorerType.Block) { Type = ExplorerType.Prototype });
                     }
                     break;
                 case "&UNDEFINE":
@@ -745,6 +762,7 @@ namespace _3PA.MainFeatures.Parser {
         private bool CreateParsedProcedure(Token procToken) {
             // info we will extract from the current statement :
             string name = "";
+            bool isExternal = false;
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
 
@@ -756,17 +774,24 @@ namespace _3PA.MainFeatures.Parser {
                     break;
                 }
                 if (token is TokenComment) continue;
-                if (state == 0) {
-                    // matching name
-                    if (!(token is TokenWord)) continue;
-                    name = token.Value;
-                    state++;
-                    continue;
+                switch (state) {
+                    case 0:
+                        // matching name
+                        if (!(token is TokenWord)) continue;
+                        name = token.Value;
+                        state++;
+                        continue;
+                    case 1:
+                        // matching external
+                        if (!(token is TokenWord)) continue;
+                        if (token.Value.EqualsCi("external")) isExternal = true;
+                        state++;
+                        break;
                 }
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
-            if (state != 1) return false;
-            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString()));
+            if (state < 1) return false;
+            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), isExternal));
             _context.Scope = ParsedScope.Procedure;
             _context.OwnerName = name;
             return true;
@@ -996,6 +1021,7 @@ namespace _3PA.MainFeatures.Parser {
         public int BlockDepth;
         public ParsedScope Scope = ParsedScope.File;
         public string OwnerName = "";
+        public Token FirstWordToken;
     }
 
     /// <summary>

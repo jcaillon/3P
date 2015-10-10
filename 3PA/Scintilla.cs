@@ -11,22 +11,15 @@ namespace _3PA {
     ///     This class contains very generic wrappers for basic Notepad++ functionality.
     /// </summary>
     public partial class Npp {
+
+        #region fields
+
         public const int KeywordMaxLength = 30;
         private const int IndicatorMatch = 31;
         private const int BookmarkMarker = 24;
-        private const int SwShownoactivate = 4;
-        private const uint SwpNoactivate = 0x0010;
-        public const int SbSettext = 1035;
-        public const int SbSetparts = 1028;
-        public const int SbGetparts = 1030;
-        private const uint WmUser = 0x0400;
-        private const uint SbGettextlength = WmUser + 12;
-        private const uint SbGettext = WmUser + 13;
-        // "\\\t\n\r .,:;'\"[]{}()-/!?@$%^&*«»><#|~`"
-        // "\t .,:;'\"[]{}()@+<>=/*%^?"
-        public static char[] Delimiters = "\\\t\n\r .,:;'\"[]{}()/!?@$%^&*«»><#|~`".ToCharArray();
         private static IntPtr _curScintilla;
 
+        #endregion
 
 
         #region misc for npp/scintilla
@@ -103,7 +96,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
 
         #region indentation

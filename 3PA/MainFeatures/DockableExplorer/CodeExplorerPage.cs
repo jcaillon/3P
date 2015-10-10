@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using BrightIdeasSoftware;
-using BrightIdeasSoftware.Utilities;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
@@ -78,29 +76,6 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 return (obj != null && obj.HasChildren) ? obj.Items : null;
             };
 
-            // set the image list to use for the keywords (corresponds with IconType)
-            var imageListOfTypes = new ImageList {
-                TransparentColor = Color.Transparent,
-                ColorDepth = ColorDepth.Depth32Bit,
-                ImageSize = new Size(20, 20)
-            };
-            ImagelistAdd.AddFromImage(ImageResources.code, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.root, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.block, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.mainblock, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Procedure, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Function, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.onevents, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.External, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.run, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.UserVariableOther, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.Preprocessed, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.block_runtime, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.block_settings, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.block_window, imageListOfTypes);
-            ImagelistAdd.AddFromImage(ImageResources.block_xtfr, imageListOfTypes);
-            ovlTree.SmallImageList = imageListOfTypes;
-
             // Image getter
             DisplayText.ImageGetter += ImageGetter;
             
@@ -147,10 +122,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         /// <param name="rowObject"></param>
         /// <returns></returns>
-        private object ImageGetter(object rowObject) {
+        private static object ImageGetter(object rowObject) {
             var obj = (ExplorerItem)rowObject;
-            var typeInt = (int)obj.Type;
-            return (typeInt > 0) ? typeInt : (int)obj.BranchType;
+            if (obj == null) return ImageResources.Error;
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject((obj.Type > 0) ? obj.Type.ToString() : obj.BranchType.ToString());
+            return tryImg ?? ImageResources.Error;
         }
 
         /// <summary>
@@ -448,8 +424,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
     /// </summary>
     public class ExplorerObjectSortingClass : IComparer<ExplorerItem> {
         public int Compare(ExplorerItem x, ExplorerItem y) {
-            // compare first by CompletionType
+            // compare first by BranchType
             int compare = x.BranchType.CompareTo(y.BranchType);
+            if (compare != 0) return compare;
+            // compare by type
+            compare = x.Type.CompareTo(y.Type);
             if (compare != 0) return compare;
             // sort by display text in last resort
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);

@@ -52,9 +52,8 @@ namespace _3PA.MainFeatures.SynthaxHighlighting {
         /// Is the caret not in : an include, a string, a comment
         /// </summary>
         /// <returns></returns>
-        public static bool IsCarretInNormalContext() {
+        public static bool IsCarretInNormalContext(int curPos) {
             try {
-                var curPos = Npp.GetCaretPosition();
                 var curContext = (UdlStyles)Npp.GetStyleAt(curPos);
                 if (curPos <= 0) return true;
                 if (IsNormalContext(curContext)) return true;

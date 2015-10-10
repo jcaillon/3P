@@ -10,5 +10,6 @@
         void Visit(ParsedOnEvent pars);
         void Visit(ParsedRun pars);
         void Visit(ParsedBlock pars);
+        void Visit(ParsedLabel pars);
     }
 }

@@ -72,7 +72,11 @@ namespace YamuiDemoApp {
 
     public class OutputVis : IParserVisitor {
         public void Visit(ParsedBlock pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
+        }
+
+        public void Visit(ParsedLabel pars) {
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public StringBuilder Output = new StringBuilder();

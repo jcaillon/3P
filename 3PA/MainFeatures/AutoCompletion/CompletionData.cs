@@ -65,8 +65,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Procedure = 8,
         Preprocessed = 9,
         Keyword = 10,
-        Databases = 11,
+        Database = 11,
         Widget = 12,
-        KeywordObject = 13
+        KeywordObject = 13,
+        Label = 14,
     }
 }
