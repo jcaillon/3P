@@ -458,7 +458,8 @@ namespace _3PA {
             ClosePopups();
 
             // Parse the document
-            AutoComplete.ParseCurrentDocument(true);
+            if (PluginIsFullyLoaded)
+                AutoComplete.ParseCurrentDocument(true);
 
             // TODO: FIX COLOR HIGHLIGHTING.?
             // set the lexer to use
@@ -516,15 +517,12 @@ namespace _3PA {
         static void Test() {
             Task.Factory.StartNew(() => {
                 Appli.Form.BeginInvoke((Action)delegate {
-                    var toastNotification2 = new YamuiNotifications(Npp.GetCaretPosition() + " > " + Highlight.IsCarretInNormalContext(Npp.GetCaretPosition()).ToString(), 5);
+                    var x = Npp.GetPositionFromLine(3) - Npp.GetPositionFromLine(0);
+                    var toastNotification2 = new YamuiNotifications(x.ToString(), 5);
                     toastNotification2.Show();
                 });
             });
             //Highlight.Colorize(0, Npp.GetTextLenght());
-        }
-
-        public static void LogIntoTest(string str) {
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", str);
         }
         #endregion
     }

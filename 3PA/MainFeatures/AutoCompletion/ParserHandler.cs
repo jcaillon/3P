@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
@@ -34,7 +35,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
-        public static List<ExplorerItem> ParsedExplorerItemsList = new List<ExplorerItem>();
+        public static List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
 
         private static Parser.Parser _ablParser;
 
@@ -85,11 +86,28 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Monitor.TryEnter(_parserLock, 500, ref lockTaken);
                 if (!lockTaken) return;
 
+                //------------
+                // TODO: DELETE MEASURE
+                var watch = Stopwatch.StartNew();
+                //------------
+
                 _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath());
                 ParsedItemsList.Clear();
                 ParsedExplorerItemsList.Clear();
-                _ablParser.Accept(new ParserVisitor(true, Npp.GetCurrentFileName()));
+                var parserVisitor = new ParserVisitor(true, Npp.GetCurrentFileName());
+                _ablParser.Accept(parserVisitor);
 
+                // correct the internal/external type of run statements :
+                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                    if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
+                        item.IconType = CodeExplorerIconType.RunInternal;
+                }
+
+                //--------------
+                watch.Stop();
+                //UserCommunication.Notify("Parsed in " + watch.ElapsedMilliseconds + " ms", 2);
+                //------------
+            
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
             } finally {
@@ -109,11 +127,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// List of parsed explorer items
         /// </summary>
         /// <returns></returns>
-        public static List<ExplorerItem> GetParsedExplorerItemsList() {
+        public static List<CodeExplorerItem> GetParsedExplorerItemsList() {
             return ParsedExplorerItemsList.ToList();
         }
         #endregion
-
 
         #region handling item ranking
 

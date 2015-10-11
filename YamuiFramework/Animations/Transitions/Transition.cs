@@ -262,6 +262,7 @@ namespace YamuiFramework.Animations.Transitions
             }
 
             // c. 
+            bool propLeft = false;
             foreach (TransitionedPropertyInfo info in listTransitionedProperties)
             {
                 // We get the current value for this property...
@@ -270,7 +271,10 @@ namespace YamuiFramework.Animations.Transitions
                 // We set it...
                 PropertyUpdateArgs args = new PropertyUpdateArgs(info.target, info.propertyInfo, value);
                 setProperty(this, args);
+
+                propLeft = true;
             }
+            bCompleted = bCompleted && propLeft;
 
             // Has the transition completed?
             if (bCompleted)

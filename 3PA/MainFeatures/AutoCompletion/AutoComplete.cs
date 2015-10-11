@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -191,7 +192,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _parserTimer.Dispose();
                     _parserTimer = null;
                 }
+                //------------
+                // TODO: DELETE MEASURE
+                var watch = Stopwatch.StartNew();
                 FillItems();
+                watch.Stop();
+                //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 2);
+                //------------
             } catch (Exception e) {
                         ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
             } finally {

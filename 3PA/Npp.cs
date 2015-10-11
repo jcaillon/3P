@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -60,14 +61,14 @@ namespace _3PA {
         /// the files separated by a new line
         /// </summary>
         /// <returns></returns>
-        public static string GetOpenedFiles() {
-            var output = new StringBuilder();
+        public static List<string> GetOpenedFiles() {
+            var output = new List<string>();
             int nbFile = (int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, 0);
             using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
                 if (Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
-                    foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
+                    output.AddRange(cStrArray.ManagedStringsUnicode);
             }
-            return output.ToString();
+            return output;
         }
 
         /// <summary>
@@ -176,6 +177,14 @@ namespace _3PA {
             string pathNotepadFolder;
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPDIRECTORY, 0, out pathNotepadFolder);
             return pathNotepadFolder;
+        }
+
+        /// <summary>
+        /// Switch to given document
+        /// </summary>
+        /// <param name="doc"></param>
+        public static void SwitchToDocument(string doc) {
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_SWITCHTOFILE, 0, doc);
         }
 
         /// <summary>

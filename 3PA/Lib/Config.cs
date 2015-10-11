@@ -61,6 +61,7 @@ namespace _3PA.Lib {
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
         public int GlobalCurrentEnvironnement = 0;
         public bool GlobalUseContainedLexer = true;
+        public int GlobalMaxNbCharInBlock = 30000;
 
 
         public int ThemeId = 1;

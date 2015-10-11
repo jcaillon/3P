@@ -132,8 +132,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         #region cell formatting
-
-        private Image GetTypeImageFromStr(string typeStr) {
+        /// <summary>
+        /// Return the image that needs to be display on the left of an item
+        /// representing its type
+        /// </summary>
+        /// <param name="typeStr"></param>
+        /// <returns></returns>
+        private static Image GetTypeImageFromStr(string typeStr) {
             Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
             return tryImg ?? ImageResources.Error;
         }
@@ -407,7 +412,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
         #endregion
 
-        #region "on key events"
+        #region on key events
 
         public bool OnKeyDown(Keys key) {
             bool handled = true;

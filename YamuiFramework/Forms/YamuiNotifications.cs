@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
@@ -25,6 +26,7 @@ namespace YamuiFramework.Forms {
         private IntPtr _currentForegroundWindow;
         private int _duration;
         private YamuiPanel _progressPanel;
+        private Transition _closingTransition;
 
         //Very important to keep it. It prevents the form from stealing the focus
         protected override bool ShowWithoutActivation {
@@ -112,6 +114,11 @@ namespace YamuiFramework.Forms {
             if (!_allowFocus) {
                 // Activate the window that previously had focus
                 WinApi.SetForegroundWindow(_currentForegroundWindow);
+            } else {
+                if (_closingTransition != null) {
+                    _closingTransition.removeProperty(_closingTransition.TransitionedProperties.FirstOrDefault());
+                    _progressPanel.Width = 0;
+                }
             }
         }
 
@@ -136,10 +143,10 @@ namespace YamuiFramework.Forms {
             // Once the animation has completed the form can receive focus
             _allowFocus = true;
             if (_duration > 0) {
-                var t = new Transition(new TransitionType_Linear(_duration));
-                t.add(_progressPanel, "Width", 0);
-                t.TransitionCompletedEvent += (o, args) => { Close(); };
-                t.run();
+                _closingTransition = new Transition(new TransitionType_Linear(_duration));
+                _closingTransition.add(_progressPanel, "Width", 0);
+                _closingTransition.TransitionCompletedEvent += (o, args) => { Close(); };
+                _closingTransition.run();
             }
         }
 

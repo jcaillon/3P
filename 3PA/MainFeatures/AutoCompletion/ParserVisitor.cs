@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.Parser;
@@ -11,58 +13,81 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// </summary>
     class ParserVisitor : IParserVisitor {
 
+        #region Fields
+
+        private const string BlockTooLongString = "Too long!";
+
         /// <summary>
         /// Are we currently visiting the current file opened in npp or
         /// is it a include?
         /// </summary>
         private bool _isBaseFile;
 
+        /// <summary>
+        /// Stores the file name of the file currently visited/parsed
+        /// </summary>
         private string _currentParsedFile;
 
+        /// <summary>
+        /// Those two dictionnary are used to reference the procedures and functions defined
+        /// in the program we are parsing, dictionnary is faster that list when it comes to
+        /// test if a procedure/function exists in the program
+        /// </summary>
+        public Dictionary<string, bool> DefinedProcedures = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
+        #endregion
+
+
+        #region constructor
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="isBaseFile"></param>
+        /// <param name="currentParsedFile"></param>
         public ParserVisitor(bool isBaseFile, string currentParsedFile) {
             _isBaseFile = isBaseFile;
             _currentParsedFile = currentParsedFile;
         }
 
-        /// <summary>
-        /// Main block, definitions block...
-        /// </summary>
-        /// <param name="pars"></param>
-        public void Visit(ParsedBlock pars) {
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem {
-                DisplayText = pars.Name,
-                BranchType = pars.BranchType,
-                Type = pars.Type,
-                GoToLine = pars.Line,
-                IsRoot = pars.IsRoot
-            });
-        }
+        #endregion
+
+
+        #region visit implementation
 
         /// <summary>
-        /// Run statement
+        /// Run statement,
+        /// a second pass will be done after the visit is over to determine if a run is
+        /// internal or external (calling internal proc or programs)
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
-            // we only want the RUN that point to external procedures
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                DisplayText = pars.Name,
-                BranchType = ExplorerType.Run,
-                GoToLine = pars.Line,
-                IsNotBlock = true
-            });
+            // to code explorer
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.Run,
+                    IconType = CodeExplorerIconType.RunExternal,
+                    GoToLine = pars.Line,
+                    IsNotBlock = true,
+                    Flag = pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0
+                });
         }
 
         /// <summary>
-        /// ON events
+        /// Dynamic-function
         /// </summary>
         /// <param name="pars"></param>
-        public void Visit(ParsedOnEvent pars) {
+        public void Visit(ParsedFunctionCall pars) {
             // To code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
-                BranchType = ExplorerType.OnEvent,
-                GoToLine = pars.Line,
-            });
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.DynamicFunctionCall,
+                    IconType = pars.ExternalCall ? CodeExplorerIconType.FunctionCallExternal : CodeExplorerIconType.FunctionCallInternal,
+                    GoToLine = pars.Line,
+                    IsNotBlock = true
+                });
         }
 
         /// <summary>
@@ -70,16 +95,54 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedIncludeFile pars) {
-           // To code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                DisplayText = pars.Name,
-                BranchType = ExplorerType.Include,
-                GoToLine = pars.Line,
-                IsNotBlock = true
-            });
+            // To code explorer
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.Include,
+                    GoToLine = pars.Line,
+                    IsNotBlock = true
+                });
 
             // Parse the include file, dont forget to flag the items as External
+            // dont forget to fill DefinedProcedures
+        }
 
+
+
+        /// <summary>
+        /// Main block, definitions block...
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedBlock pars) {
+            // to code explorer
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                    DisplayText = pars.Name,
+                    Branch = pars.Branch,
+                    IconType = pars.IconIconType,
+                    GoToLine = pars.Line,
+                    Level = pars.IsRoot ? 0 : 1
+                });
+        }
+
+        /// <summary>
+        /// ON events
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedOnEvent pars) {
+            // check lenght of block
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+
+            // To code explorer
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
+                    Branch = CodeExplorerBranch.OnEvent,
+                    GoToLine = pars.Line,
+                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                });
         }
 
         /// <summary>
@@ -87,12 +150,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
+            // check lenght of block
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+
             // to code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                DisplayText = pars.Name,
-                BranchType = ExplorerType.Function,
-                GoToLine = pars.Line,
-            });
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.Function,
+                    GoToLine = pars.Line,
+                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                });
 
             // to completion data
             pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
@@ -112,12 +181,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
+            // check lenght of block
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+
+            // fill dictionnary containing the name of all procedures defined
+            if (!DefinedProcedures.ContainsKey(pars.Name))
+                DefinedProcedures.Add(pars.Name, false);
+
             // to code explorer
-            ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                DisplayText = pars.Name,
-                BranchType = ExplorerType.Procedure,
-                GoToLine = pars.Line,
-            });
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.Procedure,
+                    GoToLine = pars.Line,
+                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                });
 
             // to completion data
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
@@ -130,6 +209,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 FromParser = true
             });
         }
+
+
+
 
         /// <summary>
         /// Preprocessed variables
@@ -193,7 +275,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     subString = foundTable.Name.AutoCaseToUserLiking();
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
                 }
-                
+
             } else {
                 // match type for everything else
                 subString = hasPrimitive ? pars.PrimitiveType.ToString() : pars.Type.ToString();
@@ -226,11 +308,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // To explorer code for browse
             if (pars.Type == ParseDefineType.Browse) {
-                ParserHandler.ParsedExplorerItemsList.Add(new ExplorerItem() {
-                    DisplayText = pars.Name,
-                    BranchType = ExplorerType.Browse,
-                    GoToLine = pars.Line,
-                });
+                if (_isBaseFile)
+                    ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                        DisplayText = pars.Name,
+                        Branch = CodeExplorerBranch.Browse,
+                        GoToLine = pars.Line,
+                    });
             }
 
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
@@ -297,6 +380,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
         }
 
+        #endregion
+
+
+        #region helper
+
         /// <summary>
         /// Determines flags
         /// </summary>
@@ -310,5 +398,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (lcFlagString.Contains("new")) flag = flag | ParseFlag.Private;
             return flag;
         }
+
+        /// <summary>
+        /// To test if a proc or a function has too much char in it, because this would make the
+        /// appbuilder unable to open it correctly
+        /// </summary>
+        /// <param name="startLine"></param>
+        /// <param name="endLine"></param>
+        /// <returns></returns>
+        private bool HasTooMuchChar(int startLine, int endLine) {
+            if (!_isBaseFile) return false;
+            return (Npp.GetPositionFromLine(endLine) - Npp.GetPositionFromLine(startLine)) > Config.Instance.GlobalMaxNbCharInBlock;
+        }
+
+        #endregion
+
     }
 }

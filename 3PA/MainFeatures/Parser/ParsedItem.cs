@@ -75,6 +75,12 @@ namespace _3PA.MainFeatures.Parser {
         /// line of the "end" keyword that ends the block
         /// </summary>
         public int EndLine { get; set; }
+
+        /// <summary>
+        /// If true, the block contains too much characters and will not be openable in the
+        /// appbuilder
+        /// </summary>
+        public bool TooLongForAppbuilder { get; set; }
         protected ParsedScopeItem(string name, int line, int column) : base(name, line, column) {}
     }
 
@@ -82,15 +88,15 @@ namespace _3PA.MainFeatures.Parser {
     /// Procedure parsed item
     /// </summary>
     public class ParsedBlock : ParsedScopeItem {
-        public ExplorerType Type { get; set; }
-        public ExplorerType BranchType { get; set; }
+        public CodeExplorerIconType IconIconType { get; set; }
+        public CodeExplorerBranch Branch { get; set; }
         public bool IsRoot { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedBlock(string name, int line, int column, ExplorerType branchType) : base(name, line, column) {
-            BranchType = branchType;
+        public ParsedBlock(string name, int line, int column, CodeExplorerBranch branch) : base(name, line, column) {
+            Branch = branch;
         }
     }
 
@@ -99,6 +105,10 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     public class ParsedProcedure : ParsedScopeItem {
         public string Left { get; private set; }
+
+        /// <summary>
+        /// Has the external flag in its definition
+        /// </summary>
         public bool IsExternal { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -166,16 +176,40 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// Procedure parsed item
+    /// dynamic function calls parsed item
+    /// </summary>
+    public class ParsedFunctionCall : ParsedItem {
+        /// <summary>
+        /// true if the called function is not defined in the program
+        /// </summary>
+        public bool ExternalCall { get; private set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedFunctionCall(string name, int line, int column, bool externalCall)
+            : base(name, line, column) {
+            ExternalCall = externalCall;
+        }
+    }
+
+    /// <summary>
+    /// Run parsed item
     /// </summary>
     public class ParsedRun : ParsedItem {
+        /// <summary>
+        /// true if the Run statement is based on a evaluating a VALUE()
+        /// </summary>
+        public bool IsEvaluateValue { get; private set; }
         public string Left { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedRun(string name, int line, int column, string left) : base(name, line, column) {
+        public ParsedRun(string name, int line, int column, string left, bool isEvaluateValue) : base(name, line, column) {
             Left = left;
+            IsEvaluateValue = isEvaluateValue;
         }
     }
 

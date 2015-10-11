@@ -1,4 +1,5 @@
 ﻿
+using System;
 using System.Collections.Generic;
 using _3PA.Lib;
 
@@ -7,18 +8,19 @@ namespace _3PA.MainFeatures.DockableExplorer {
     /// <summary>
     /// base class
     /// </summary>
-    public class ExplorerItem {
+    public class CodeExplorerItem {
         public string DisplayText { get; set; }
-
-        /// <summary>
-        /// the type of the item, also corresponds to the icon displayed next to DisplayText
-        /// </summary>
-        public ExplorerType Type { get; set; }
-        
+       
         /// <summary>
         /// the branch to which this item belongs (if the item is not part of the "root")
         /// </summary>
-        public ExplorerType BranchType { get; set; }
+        public CodeExplorerBranch Branch { get; set; }
+
+        /// <summary>
+        /// corresponds to the icon displayed next to DisplayText, if set to 0 (=BranchIcon) then the icon
+        /// chosen for this item is the icon corresponding to the branch
+        /// </summary>
+        public CodeExplorerIconType IconType { get; set; }
 
         /// <summary>
         /// if the item has no children, clicking on it will make the carret move to this line
@@ -26,9 +28,23 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public int GoToLine { get; set; }
 
         /// <summary>
-        /// Set to true if the item should appear in the tree's root and not under a branch
+        /// The level of the item defines its place in the tree, level 0 is the root, 1 is deeper and so on...
         /// </summary>
-        public bool IsRoot { get; set; }
+        public int Level { 
+            get { return _level; }
+            set { _level = value; }
+        }
+        private int _level = 1;
+
+        /// <summary>
+        /// Flags for the item, is directly related to the images displayed on the right of the item
+        /// </summary>
+        public CodeExplorerFlag Flag { get; set; }
+
+        /// <summary>
+        /// The string to display right next to the Flags
+        /// </summary>
+        public string SubString { get; set; }
 
         /// <summary>
         /// Does it have children?
@@ -44,58 +60,72 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <summary>
         /// List of children items
         /// </summary>
-        public List<ExplorerItem> Items {
+        public List<CodeExplorerItem> Items {
             get {
                 if (_items == null)
-                    _items = CodeExplorerPage.GetItemsFor(BranchType);
+                    _items = CodeExplorerPage.GetItemsFor(this);
                 return _items;
             }
         }
-        private List<ExplorerItem> _items;
+        private List<CodeExplorerItem> _items;
     }
 
     /// <summary>
     /// Defines the different types of explorerItems (is related to the image display in the code explorer)
+    /// The attribute is used for the text displayed for the branch
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
-    public enum ExplorerType {
-        [ExplorerTypeAttr(DisplayText = "Everything in code order")]
+    public enum CodeExplorerBranch {
+        [CodeExplorerTypeAttr(DisplayText = "Everything in code order")]
         EverythingInCodeOrder,
-        [ExplorerTypeAttr(DisplayText = "Root")]
+        [CodeExplorerTypeAttr(DisplayText = "Root")]
         Root,
-        [ExplorerTypeAttr(DisplayText = "Appbuilder blocks")]
+        [CodeExplorerTypeAttr(DisplayText = "Appbuilder blocks")]
         Block,
-        [ExplorerTypeAttr(DisplayText = "Main block")]
+        [CodeExplorerTypeAttr(DisplayText = "Main block")]
         MainBlock,
-        [ExplorerTypeAttr(DisplayText = "Procedures")]
+        [CodeExplorerTypeAttr(DisplayText = "Procedures")]
         Procedure,
-        [ExplorerTypeAttr(DisplayText = "Functions")]
+        [CodeExplorerTypeAttr(DisplayText = "Functions")]
         Function,
-        [ExplorerTypeAttr(DisplayText = "ON events")]
+        [CodeExplorerTypeAttr(DisplayText = "ON events")]
         OnEvent,
-        [ExplorerTypeAttr(DisplayText = "Includes")]
+        [CodeExplorerTypeAttr(DisplayText = "Includes")]
         Include,
-        [ExplorerTypeAttr(DisplayText = "Run statements")]
+        [CodeExplorerTypeAttr(DisplayText = "Run statements")]
         Run,
-        [ExplorerTypeAttr(DisplayText = "Browse definitions")]
+        [CodeExplorerTypeAttr(DisplayText = "Dynamic function calls")]
+        DynamicFunctionCall,
+        [CodeExplorerTypeAttr(DisplayText = "Browse definitions")]
         Browse,
-        [ExplorerTypeAttr(DisplayText = "")]
-        DefinitionBlock,
-        [ExplorerTypeAttr(DisplayText = "")]
-        XtfrBlock,
-        [ExplorerTypeAttr(DisplayText = "")]
-        PreprocessorBlock,
-        [ExplorerTypeAttr(DisplayText = "")]
-        Prototype,
-        [ExplorerTypeAttr(DisplayText = "")]
-        SettingsBlock,
-        [ExplorerTypeAttr(DisplayText = "")]
-        CreateWindowBlock,
-        [ExplorerTypeAttr(DisplayText = "")]
-        RuntimeBlock,
     }
 
-    public class ExplorerTypeAttr : Extensions.EnumAttr {
+    /// <summary>
+    /// Corresponds to an image, displayed on the left of an item
+    /// </summary>
+    public enum CodeExplorerIconType {
+        BranchIcon,
+        DefinitionBlock,
+        XtfrBlock,
+        PreprocessorBlock,
+        Prototype,
+        SettingsBlock,
+        CreateWindowBlock,
+        RuntimeBlock,
+        FunctionCallInternal,
+        FunctionCallExternal,
+        RunInternal,
+        RunExternal,
+    }
+
+    [Flags]
+    public enum CodeExplorerFlag {
+        IsTooLong = 1,
+        HasChildren = 2,
+        Uncertain = 4,
+    }
+
+    public class CodeExplorerTypeAttr : Extensions.EnumAttr {
         public string DisplayText { get; set; }
         public int Order { get; set; }
     }

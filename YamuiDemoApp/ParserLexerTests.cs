@@ -34,6 +34,7 @@ namespace YamuiDemoApp {
             // OUPUT OF VISITOR
             File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
+
             // OUTPUT INFO ON EACH LINE
             if (false) {
                 StringBuilder x = new StringBuilder();
@@ -76,7 +77,11 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedLabel pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+        }
+
+        public void Visit(ParsedFunctionCall pars) {
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
         }
 
         public StringBuilder Output = new StringBuilder();

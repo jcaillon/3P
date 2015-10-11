@@ -17,6 +17,8 @@
                 textBoxFilter.TextChanged -= textBoxFilter_TextChanged;
                 buttonRefresh.ButtonPressed -= buttonRefresh_Click;
                 buttonSort.ButtonPressed -= buttonSort_Click;
+                ovlTree.Click -= OvlTreeOnClick;
+                ovlTree.KeyDown -= OvlTreeOnKeyDown;
             }
             base.Dispose(disposing);
         }
