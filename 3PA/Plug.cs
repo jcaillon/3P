@@ -1,12 +1,8 @@
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Win32;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -18,7 +14,6 @@ using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.DockableExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.SynthaxHighlighting;
-using _3PA.Properties;
 
 #pragma warning disable 1591
 
@@ -27,7 +22,7 @@ namespace _3PA {
     public class Plug {
 
         #region Fields
-        public static string tempPath;
+        public static string TempPath;
 
         public static bool PluginIsFullyLoaded;
         public static NppData NppData;
@@ -206,9 +201,14 @@ namespace _3PA {
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched();
 
+                // Fetch the info from the database, when its done, it will update the parser, if it needs
+                // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
                 Task.Factory.StartNew(DataBase.FetchCurrentDbInfo);
 
                 //TODO: notification qui demande à l'utilisateur de désactiver l'autocompletion de base de npp
+                // ask the user to deactivate the default autocompletion of npp
+                if (Config.Instance.GlobalShowNotifAboutDefaultAutoComp)
+                    UserCommunication.NotifyUserAboutNppDefaultAutoComp();
 
                 PluginIsFullyLoaded = true;
             });
@@ -216,26 +216,6 @@ namespace _3PA {
         #endregion
 
         #region OnEvents
-        /// <summary>
-        /// Called when the user enters any character in npp
-        /// </summary>
-        /// <param name="c"></param>
-        static public void OnCharTyped(char c) {
-            try {
-                // handles the autocompletion
-                AutoComplete.UpdateAutocompletion();
-
-                // we are still entering a keyword, return
-                if (Abl.IsCharAllowedInVariables(c)) return;
-
-                ActionAfterUpdateUi = () => {
-                    OnCharAdded(c);
-                };
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnCharTyped");
-            }
-        }
-
         /// <summary>
         /// Called when the user presses a key
         /// </summary>
@@ -310,12 +290,53 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Called when the user enters any character in npp
+        /// </summary>
+        /// <param name="c"></param>
+        static public void OnCharTyped(char c) {
+            // we are still entering a keyword
+            if (Abl.IsCharAllowedInVariables(c)) {
+                ActionAfterUpdateUi = () => {
+                    OnCharAddedWordContinue(c);
+                };
+            } else {
+                ActionAfterUpdateUi = () => {
+                    OnCharAddedWordEnd(c);
+                };
+            }
+        }
+
+        /// <summary>
+        /// Called when the user is still typing a word
         /// Called after the UI has updated, allows to correctly read the text style, to correct 
         /// the indentation w/o it being erased and so on...
         /// </summary>
         /// <param name="c"></param>
-        public static void OnCharAdded(char c) {
+        public static void OnCharAddedWordContinue(char c) {
             try {
+                // dont show in string/comments..?
+                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Highlight.IsCarretInNormalContext(Npp.GetCaretPosition())) {
+                    AutoComplete.Close();
+                } else {
+                    // handles the autocompletion
+                    AutoComplete.UpdateAutocompletion();
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordContinue");
+            }
+        }
+
+        /// <summary>
+        /// Called when the user has finished entering a word
+        /// Called after the UI has updated, allows to correctly read the text style, to correct 
+        /// the indentation w/o it being erased and so on...
+        /// </summary>
+        /// <param name="c"></param>
+        public static void OnCharAddedWordEnd(char c) {
+            try {
+                // handles the autocompletion
+                AutoComplete.UpdateAutocompletion();
+
                 // we finished entering a keyword
                 int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
                 var searchWordAt = Npp.GetCaretPosition() - offset;
@@ -403,7 +424,7 @@ namespace _3PA {
             }
             */
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnCharAdded");
+                ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
             }
         }
 
@@ -515,13 +536,14 @@ namespace _3PA {
 
         #region tests
         static void Test() {
+            ProgressCodeUtils.ToggleComment();
+            /*
             Task.Factory.StartNew(() => {
                 Appli.Form.BeginInvoke((Action)delegate {
-                    var x = Npp.GetPositionFromLine(3) - Npp.GetPositionFromLine(0);
-                    var toastNotification2 = new YamuiNotifications(x.ToString(), 5);
+                    var toastNotification2 = new YamuiNotifications(Npp.IsDocumentSaved().ToString(), 5);
                     toastNotification2.Show();
                 });
-            });
+            });*/
             //Highlight.Colorize(0, Npp.GetTextLenght());
         }
         #endregion

@@ -12,5 +12,6 @@
         void Visit(ParsedBlock pars);
         void Visit(ParsedLabel pars);
         void Visit(ParsedFunctionCall pars);
+        void Visit(ParsedFoundTableUse pars);
     }
 }

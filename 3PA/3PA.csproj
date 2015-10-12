@@ -91,6 +91,7 @@
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
+    <Compile Include="MainFeatures\ProgressCodeUtils.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\SynthaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
@@ -322,6 +323,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
+    <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
     <Content Include="Images\DockableExplorer\Type\3PA.png" />
     <Content Include="Images\DockableExplorer\Type\Block.png" />
@@ -337,6 +339,7 @@
     <Content Include="Images\DockableExplorer\Type\RuntimeBlock.png" />
     <Content Include="Images\DockableExplorer\Type\SettingsBlock.png" />
     <Content Include="Images\DockableExplorer\Type\CreateWindowBlock.png" />
+    <Content Include="Images\DockableExplorer\Type\TableUsed.png" />
     <Content Include="Images\DockableExplorer\Type\XtfrBlock.png" />
     <Content Include="Images\DockableExplorer\Type\Browse.png" />
     <Content Include="Images\DockableExplorer\buttons\clear_filters.png" />

@@ -413,6 +413,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap MissingDbName {
+            get {
+                object obj = ResourceManager.GetObject("MissingDbName", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap numerical_sorting_12 {
             get {
                 object obj = ResourceManager.GetObject("numerical_sorting_12", resourceCulture);
@@ -596,6 +606,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Table {
             get {
                 object obj = ResourceManager.GetObject("Table", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap TableUsed {
+            get {
+                object obj = ResourceManager.GetObject("TableUsed", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

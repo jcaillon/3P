@@ -8,7 +8,17 @@ using _3PA.MainFeatures.Parser;
 namespace _3PA.MainFeatures.AutoCompletion {
     public class DataBase {
 
+        /// <summary>
+        /// List of Databases (each of which contains list of tables > list of fields/indexes/triggers)
+        /// </summary>
         private static List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
+
+        /// <summary>
+        /// A simple dictionnary containing all the possible names for the tables defined in the database,
+        /// it is used by the parser to identify used tables in a program
+        /// </summary>
+        private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase); 
+
         private static string _filePath;
         private static string _location = Npp.GetConfigDir();
         private static string _fileName = "database_out.txt";
@@ -20,16 +30,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void FetchCurrentDbInfo() {
             //TODO: read the .txt that matchs with the current db connected
             _filePath = Path.Combine(_location, _fileName);
-            Read();
 
-            // Update autocompletion
-            AutoComplete.FillStaticItems(false);
-            AutoComplete.ParseCurrentDocument(true);
+            // if the file is already available, read it
+            if (true) {
+                Read();
+            } else {
+                // start a new thread with a progress program that export the db info, execute Read() asynchronously,
+                // meanwhile update the parser with the info we got
+                AutoComplete.ParseCurrentDocument(true);
+            }
         }
 
         /// <summary>
         /// This method parses the output of the .p procedure that exports the database info
-        /// and fills _dataBases
+        /// and fills _dataBases, _tablesDictionary
+        /// It then updates the parser with the new info
         /// </summary>
         private static void Read() {
             if (!File.Exists(_filePath)) return;
@@ -113,7 +128,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading database info!", _filePath);
             }
+
+            // fill dictionary
+            _tablesDictionary.Clear();
+            _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
+                if (!_tablesDictionary.ContainsKey(table.Name))
+                    _tablesDictionary.Add(table.Name, false);
+                if (!_tablesDictionary.ContainsKey(string.Join(".", @base.LogicalName, table.Name)))
+                    _tablesDictionary.Add(string.Join(".", @base.LogicalName, table.Name), false);
+            }));
+
+            // Update autocompletion
+            AutoComplete.FillStaticItems(false);
+            AutoComplete.ParseCurrentDocument(true);
         }
+
 
         #region get list
 
@@ -124,6 +153,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<ParsedDataBase> Get() {
             return _dataBases;
         }
+
+        /// <summary>
+        /// returns a dictionary containing all the table names of each database, 
+        /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<string, bool> GetTablesDictionary() {
+            return _tablesDictionary;
+        } 
 
         /// <summary>
         /// returns the list of databases

@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
-using _3PA.Interop;
 using NppPlugin.DllExport;
+using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.SynthaxHighlighting;
 
@@ -60,10 +57,13 @@ namespace _3PA
         /// <param name="notifyCode"></param>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void beNotified(IntPtr notifyCode) {
+            uint code = 0;
             try {
                 SCNotification nc = (SCNotification) Marshal.PtrToStructure(notifyCode, typeof (SCNotification));
+                code = nc.nmhdr.code;
+
                 #region must 
-                switch (nc.nmhdr.code) {
+                switch (code) {
                     case (uint) NppMsg.NPPN_TBMODIFICATION:
                         Plug.FuncItems.RefreshItems();
                         Plug.InitToolbarImages();
@@ -85,7 +85,7 @@ namespace _3PA
                 if (!Plug.PluginIsFullyLoaded) return;
 
                 // the user changed the current document
-                if (nc.nmhdr.code == (uint) NppMsg.NPPN_BUFFERACTIVATED) {
+                if (code == (uint) NppMsg.NPPN_BUFFERACTIVATED) {
                     Plug.OnDocumentSwitched();
                     return;
                 }
@@ -94,25 +94,10 @@ namespace _3PA
                 if (!Plug.IsCurrentFileProgress) return;
 
                 #region extra
-                switch (nc.nmhdr.code) {
-                    case (uint)NppMsg.NPPN_FILEBEFOREOPEN:
-                        // fire when a file is opened, can be used to clean up data on closed documents
-
-                        return;
-
-                    case (uint)NppMsg.NPPN_SHORTCUTREMAPPED:
-                        // notify plugins that plugin command shortcut is remapped
-                        Interop.Plug.ShortcutsUpdated((int)nc.nmhdr.idFrom, (ShortcutKey)Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof(ShortcutKey)));
-                        return;
-
+                switch (code) {
                     case (uint) SciMsg.SCN_CHARADDED:
                         // called each time the user add a char in the current scintilla
-                        Plug.OnCharTyped((char) nc.ch);
-                        return;
-
-                    case (uint)SciMsg.SCN_STYLENEEDED:
-                        // if we use the contained lexer, we will receive this notification and we will have to style the text
-                        Highlight.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
+                        Plug.OnCharTyped((char)nc.ch);
                         return;
 
                     case (uint) SciMsg.SCN_UPDATEUI:
@@ -122,14 +107,46 @@ namespace _3PA
                             Plug.ActionAfterUpdateUi = null;
                         }
 
-                        if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
-                            nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
+                        if (nc.updated == (int)SciMsg.SC_UPDATE_V_SCROLL ||
+                            nc.updated == (int)SciMsg.SC_UPDATE_H_SCROLL) {
                             // user scrolled
                             Plug.OnPageScrolled();
-                        } else if (nc.updated == (int) SciMsg.SC_UPDATE_SELECTION) {
+                        } else if (nc.updated == (int)SciMsg.SC_UPDATE_SELECTION) {
                             // the user changed its selection
                             Plug.OnUpdateSelection();
                         }
+                        return;
+
+                    case (uint) SciMsg.SCN_MODIFIED:
+                        // if the text has changed, parse
+                        if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
+                            (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)
+                            AutoComplete.ParseCurrentDocument();
+
+                        // did the user supress 1 char?
+                        if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
+                            AutoComplete.UpdateAutocompletion();
+                        }
+
+                        // if (nc.linesAdded != 0)
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
+                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;
+                        return;
+
+                    case (uint) SciMsg.SCN_STYLENEEDED:
+                        // if we use the contained lexer, we will receive this notification and we will have to style the text
+                        Highlight.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
+                        return;
+
+                    case (uint) NppMsg.NPPN_FILEBEFOREOPEN:
+                        // fire when a file is opened, can be used to clean up data on closed documents
+
+                        return;
+
+                    case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:
+                        // notify plugins that plugin command shortcut is remapped
+                        Interop.Plug.ShortcutsUpdated((int)nc.nmhdr.idFrom, (ShortcutKey)Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof(ShortcutKey)));
                         return;
 
                     case (uint) SciMsg.SCN_MODIFYATTEMPTRO:
@@ -147,27 +164,15 @@ namespace _3PA
                         Plug.OnDwellEnd();
                         return;
 
-                    case (uint) SciMsg.SCN_MODIFIED:
-                        // if the text has changed, parse
-                        if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
-                            (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)
-                            AutoComplete.ParseCurrentDocument();
-                        
-                        // did the user supress 1 char?
-                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
-                            AutoComplete.UpdateAutocompletion();
-                        }
+                    case (uint) NppMsg.NPPN_FILESAVED:
+                        throw new Exception("derp");
 
-                        // if (nc.linesAdded != 0)
-                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
-                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
-                        //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;
                         return;
                 }
                 #endregion
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in beNotified");
+                ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + code);
             }
         }
 

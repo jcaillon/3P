@@ -58,6 +58,11 @@ namespace _3PA.MainFeatures.DockableExplorer {
         public bool IsNotBlock { get; set; }
 
         /// <summary>
+        /// unique identifier for this item
+        /// </summary>
+        public int Index { get; set; }
+
+        /// <summary>
         /// List of children items
         /// </summary>
         public List<CodeExplorerItem> Items {
@@ -98,6 +103,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         DynamicFunctionCall,
         [CodeExplorerTypeAttr(DisplayText = "Browse definitions")]
         Browse,
+        [CodeExplorerTypeAttr(DisplayText = "Tables used")]
+        TableUsed,
     }
 
     /// <summary>
@@ -116,13 +123,18 @@ namespace _3PA.MainFeatures.DockableExplorer {
         FunctionCallExternal,
         RunInternal,
         RunExternal,
+        Table,
+        TempTable
     }
 
     [Flags]
     public enum CodeExplorerFlag {
+        // the block has too much characters and the program will not be openable in the appbuilder
         IsTooLong = 1,
-        HasChildren = 2,
-        Uncertain = 4,
+        // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is
+        Uncertain = 2,
+        // if a table found w/o the database name before it
+        MissingDbName = 4,
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {

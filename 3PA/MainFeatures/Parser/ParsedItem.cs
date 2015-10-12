@@ -164,7 +164,20 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// Procedure parsed item
+    /// found table in program
+    /// </summary>
+    public class ParsedFoundTableUse : ParsedItem {
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedFoundTableUse(string name, int line, int column)
+            : base(name, line, column) {
+        }
+    }
+
+    /// <summary>
+    /// Label
     /// </summary>
     public class ParsedLabel : ParsedItem {
         public override void Accept(IParserVisitor visitor) {

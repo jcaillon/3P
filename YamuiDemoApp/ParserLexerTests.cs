@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"), @"C:\Users\Julien\Desktop\in.p");
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"), @"C:\Users\Julien\Desktop\in.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -82,6 +82,10 @@ namespace YamuiDemoApp {
 
         public void Visit(ParsedFunctionCall pars) {
             Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+        }
+
+        public void Visit(ParsedFoundTableUse pars) {
+            
         }
 
         public StringBuilder Output = new StringBuilder();

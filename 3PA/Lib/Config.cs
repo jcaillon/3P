@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 
 namespace _3PA.Lib {
+
     /// <summary>
     /// The config object, should not be used
     /// </summary>
@@ -21,9 +22,9 @@ namespace _3PA.Lib {
         public bool AutoCompleteUseTabToAccept = true;
         public bool AutoCompleteUseEnterToAccept = false;
         
-        public bool AutoCompleteUseSpaceToInsertSnippet = true; //TODO
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
+
         public bool AutoCompleteShowInCommentsAndStrings = false;
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
@@ -33,8 +34,8 @@ namespace _3PA.Lib {
         public bool AutoCompleteAlternateBackColor = false;
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
-        public bool AutoCompleteOnKeyInputHideIfEmpty = false;
-        public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
+        public bool AutoCompleteOnKeyInputHideIfEmpty = true;
+        public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = false;
         public bool AutoCompleteHideScrollBar = true;
 
 
@@ -45,7 +46,7 @@ namespace _3PA.Lib {
         public bool CodeExplorerUseAlternateColors = false;
         public bool CodeExplorerVisible = true;
         [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")]
-        public string CodeExplorerPriorityList = "0,1,2,6,3,4,5,7,8,9,10";
+        public string CodeExplorerPriorityList = "0,1,2,6,3,4,5,7,8,9,10,11";
 
 
         public double AppliOpacityUnfocused = 0.5;
@@ -60,8 +61,8 @@ namespace _3PA.Lib {
 
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
         public int GlobalCurrentEnvironnement = 0;
-        public bool GlobalUseContainedLexer = true;
         public int GlobalMaxNbCharInBlock = 30000;
+        public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
 
         public int ThemeId = 1;

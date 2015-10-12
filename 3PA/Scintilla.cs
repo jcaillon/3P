@@ -542,6 +542,14 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns the current anchor position
+        /// </summary>
+        /// <returns></returns>
+        public static int GetAnchorPosition() {
+            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETANCHOR, 0, 0);
+        }
+
+        /// <summary>
         /// Returns the current line number
         /// </summary>
         /// <returns></returns>
@@ -582,11 +590,17 @@ namespace _3PA {
         /// <param name="line"></param>
         public static void GoToLine(int line) {
             EnsureRangeVisible(line, line);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + GetNumberOfLinesOnScreen(), 0);
+            var linesOnScreen = GetNumberOfLinesOnScreen();
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + linesOnScreen, 0);
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line, 0);
+            Call(SciMsg.SCI_SETFIRSTVISIBLELINE, Math.Max(line - 1, 0));
             GrabFocus();
         }
 
+        /// <summary>
+        /// Returns the number of lines displayed in the scintilla view
+        /// </summary>
+        /// <returns></returns>
         public static int GetNumberOfLinesOnScreen() {
             return (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINESONSCREEN, 0, 0);
         }
@@ -642,7 +656,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="start">The selection start (anchor) position.</param>
         /// <param name="end">The selection end (current) position.</param>
-        public static void SetSelection2(int start, int end) {
+        public static void SetSelectionOrdered(int start, int end) {
             Call(SciMsg.SCI_SETSEL, start, end);
         }
 
@@ -935,6 +949,13 @@ namespace _3PA {
 
 
         #region helper
+        /// <summary>
+        /// returns true if the document hasn't changed since the last save, false otherwise
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsDocumentSaved() {
+            return Call(SciMsg.SCI_GETMODIFY) == 0;
+        }
 
         /// <summary>
         ///     Mark the beginning of a set of operations that you want to undo all as one operation but that you have to generate

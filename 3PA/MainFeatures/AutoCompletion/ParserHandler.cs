@@ -91,7 +91,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 var watch = Stopwatch.StartNew();
                 //------------
 
-                _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath());
+                _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath(), null, DataBase.GetTablesDictionary());
                 ParsedItemsList.Clear();
                 ParsedExplorerItemsList.Clear();
                 var parserVisitor = new ParserVisitor(true, Npp.GetCurrentFileName());

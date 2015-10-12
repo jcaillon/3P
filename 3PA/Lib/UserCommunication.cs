@@ -19,5 +19,9 @@ namespace _3PA.Lib {
                 toastNotification.Show();
             });
         }
+
+        public static void NotifyUserAboutNppDefaultAutoComp() {
+            
+        }
     }
 }

@@ -55,6 +55,14 @@ namespace _3PA.MainFeatures.Parser {
         private bool _lastTokenWasSpace;
 
         /// <summary>
+        /// Is is possible to match (almost) every word found by the lexer against database's table names
+        /// to return a list of used table in the program
+        /// </summary>
+        private Dictionary<string, bool> _databaseTableDictionary;
+
+        private bool _matchDatabaseTables = true;
+
+        /// <summary>
         /// Useful to remember where the function prototype was defined (Point is line, column)
         /// </summary>
         private Dictionary<string, Point> _functionPrototype = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
@@ -70,13 +78,22 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="data"></param>
         /// <param name="filePathBeingParsed"></param>
         /// <param name="defaultOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
-        public Parser(string data, string filePathBeingParsed, string defaultOwnerName = null) {
-            defaultOwnerName = string.IsNullOrEmpty(defaultOwnerName) ? RootScopeName : defaultOwnerName;
+        /// <param name="tablesDictionary"></param>
+        public Parser(string data, string filePathBeingParsed, string defaultOwnerName, Dictionary<string, bool> tablesDictionary = null) {
+            // process inputs
+            bool isRootFile = string.IsNullOrEmpty(defaultOwnerName);
+            defaultOwnerName = isRootFile ? RootScopeName : defaultOwnerName;
             _context.OwnerName = defaultOwnerName;
             _filePathBeingParsed = filePathBeingParsed;
 
+            if (tablesDictionary == null)
+                _matchDatabaseTables = false;
+            else
+                _databaseTableDictionary = tablesDictionary;
+
             // create root item
-            AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, CodeExplorerBranch.Root) { IsRoot = true });
+            if (isRootFile)
+                AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, CodeExplorerBranch.Root) { IsRoot = true });
 
             // parse
             _lexer = new Lexer(data);
@@ -231,6 +248,8 @@ namespace _3PA.MainFeatures.Parser {
                     }
                     
                 } else {
+                    // not the first word of a statement
+
                     switch (lowerTok) {
                         case "dynamic-function":
                             CreateParsedDynamicFunction(token);
@@ -246,6 +265,13 @@ namespace _3PA.MainFeatures.Parser {
                         case "then":
                             // add a one time indent after a then or else
                             _context.OneTimeIndent = true;
+                            break;
+                        default:
+                            // try to match with a table's name
+                            if (_matchDatabaseTables) {
+                                if (_databaseTableDictionary.ContainsKey(lowerTok))
+                                    AddParsedItem(new ParsedFoundTableUse(token.Value.AutoCaseToUserLiking(), token.Line, token.Column));
+                            }
                             break;
                     }
                 }
@@ -935,7 +961,8 @@ namespace _3PA.MainFeatures.Parser {
             if (_functionPrototype.ContainsKey(name)) {
                 createdFunc.PrototypeLine = _functionPrototype[name].X;
                 createdFunc.PrototypeColumn = _functionPrototype[name].Y;
-            }
+            } else
+                _functionPrototype.Add(name, new Point());
             _parsedItemList.Add(createdFunc);
 
             // add the parameters to the list

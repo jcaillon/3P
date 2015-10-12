@@ -204,6 +204,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
             var prevUnsortedItems = _unsortedItems.ToList();
             _unsortedItems = ParserHandler.GetParsedExplorerItemsList();
 
+            // we set an index for each item, this will be useful to find the updated GoToLine when we click on an item
+            int iIndex = 0;
+            _unsortedItems.ForEach(item => item.Index = iIndex++);
+
             // dont update the tree if every item is stricly the same..
             if (!forceUpdate && prevUnsortedItems.Count == _unsortedItems.Count) {
                 bool allEquals = true;
@@ -249,12 +253,15 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 while (iItem < _items.Count) {
 
                     var iIdentical = iItem + 1;
+                    CodeExplorerFlag flags = 0;
+
                     // while we match identical items
                     while (iIdentical < _items.Count 
                         && _items[iItem].Branch == _items[iIdentical].Branch
                         && _items[iItem].IconType == _items[iIdentical].IconType
                         && _items[iItem].DisplayText.EqualsCi(_items[iIdentical].DisplayText)) {
                         _items[iIdentical].Level = 2;
+                        flags = flags | _items[iIdentical].Flag;
                         iIdentical++;
                     }
                     // if we found identical item, we create a branch for them
@@ -268,6 +275,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
                             SubString = "x" + (iIdentical - iItem),
                             Level = 1,
                             IsNotBlock = _items[iItem].IsNotBlock,
+                            Flag = flags
                         });
                         iItem = iIdentical + 1;
                     } else
@@ -437,7 +445,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 Npp.GrabFocus();
             } else {
                 // Item clicked : go to line
-                Npp.GoToLine(selection.GoToLine);
+                var realSelection = _unsortedItems.Find(item => item.Index == selection.Index);
+                Npp.GoToLine(realSelection.GoToLine);
                 ovlTree.Invalidate();
             }
         }
@@ -459,6 +468,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
             CleanFilter();
+            _unsortedItems.Clear();
             AutoComplete.ParseCurrentDocument(true);
             Npp.GrabFocus();
         }

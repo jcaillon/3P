@@ -91,6 +91,22 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
+        /// Tables used in the program
+        /// </summary>
+        /// <param name="pars"></param>
+        public void Visit(ParsedFoundTableUse pars) {
+            if (_isBaseFile)
+                ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    DisplayText = pars.Name,
+                    Branch = CodeExplorerBranch.TableUsed,
+                    IconType = CodeExplorerIconType.Table,
+                    GoToLine = pars.Line,
+                    Flag = pars.Name.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName,
+                    IsNotBlock = true
+                });
+        }
+
+        /// <summary>
         /// Include files
         /// </summary>
         /// <param name="pars"></param>
@@ -274,6 +290,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (foundTable != null) {
                     subString = foundTable.Name.AutoCaseToUserLiking();
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
+
+                    // To code explorer, list buffers and associated tables
+                    if (_isBaseFile)
+                        ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                            DisplayText = foundTable.Name,
+                            Branch = CodeExplorerBranch.TableUsed,
+                            IconType = CodeExplorerIconType.TempTable,
+                            Flag = pars.BufferFor.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName,
+                            GoToLine = pars.Line,
+                            IsNotBlock = true
+                        });
                 }
 
             } else {

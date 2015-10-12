@@ -316,7 +316,6 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         private Token CreatePreProcessedStatement() {
-            Read();
             while (true) {
                 var ch = PeekAt(0);
                 if (ch == Eof)
