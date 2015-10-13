@@ -140,7 +140,7 @@ namespace _3PA {
             int line = lineToIndent;
             do {
                 line = line - 1;
-                curLineText = GetLine(line);
+                curLineText = GetLineText(line);
                 nbindent = GetLineIndent(line);
                 //Call(SciMsg.SCI_SETLINEINDENTATION, lineToIndent, nbindent + 4);
             } while (line >= 0 && String.IsNullOrWhiteSpace(curLineText.Trim()) && (lineToIndent - line) < 50);
@@ -214,7 +214,6 @@ namespace _3PA {
         #endregion
 
 
-
         #region mouse
 
         /// <summary>
@@ -241,15 +240,128 @@ namespace _3PA {
         #endregion
 
 
-
         #region text
+        /// <summary>
+        /// Returns the text between the positions start and end
+        /// </summary>
+        public static string GetTextByRange(int start, int end) {
+            SetTargetRange(start, end);
+            if (end - start < 1) return string.Empty;
+            var text = new StringBuilder(end - start + 1);
+            Call(SciMsg.SCI_GETTARGETTEXT, 0, text);
+            text.Length = end - start;
+            return IsUtf8() ? text.ToString().AnsiToUtf8() : text.ToString();
+        }
+
+        /// <summary>
+        /// Replaces a range of text with new text.
+        /// Note that the recommended way to delete text in the document is to set the target to the text to be removed, and to
+        /// perform a replace target with an empty string.
+        /// </summary>
+        /// <returns> The length of the replacement string.</returns>
+        public static int SetTextByRange(int start, int end, string text) {
+            SetTargetRange(start, end);
+            if (IsUtf8()) text = text.Utf8ToAnsi();
+            // If length is -1, text is a zero terminated string, otherwise length sets the number of character to replace 
+            // the target with. After replacement, the target range refers to the replacement text. The return value is the 
+            // length of the replacement string.
+            return Call(SciMsg.SCI_REPLACETARGET, text.Length, text);
+        }
+
+        /// <summary>
+        /// Sets the text for the entire document (replacing any existing text).
+        /// </summary>
+        /// <param name="text">The document text to set.</param>
+        public static void SetDocumentText(string text) {
+            if (IsUtf8()) text = text.Utf8ToAnsi();
+            Call(SciMsg.SCI_SETTEXT, 0, text);
+        }
+
+        /// <summary>
+        /// Gets the entire document text
+        /// </summary>
+        public static string GetDocumentText() {
+            var length = GetDocumentLength();
+            var text = new StringBuilder(length + 1);
+            if (length > 0) Call(SciMsg.SCI_GETTEXT, length + 1, text);
+            return IsUtf8() ? text.ToString().AnsiToUtf8() : text.ToString();
+        }
+
+        /// <summary>
+        /// Gets all lines of the current document
+        /// </summary>
+        /// <returns></returns>
+        public static string[] GetAllLines() {
+            return GetDocumentText().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
+        }
+
+        /// <summary>
+        /// Returns the text currently selected (highlighted).
+        /// </summary>
+        /// <returns>Currently selected text.</returns>
+        public static string GetSelectedText() {
+            var selLength = Call(SciMsg.SCI_GETSELTEXT);
+            var selectedText = new StringBuilder(selLength);
+            if (selLength > 0) Call(SciMsg.SCI_GETSELTEXT, 0, selectedText);
+            var ret = selectedText.ToString();
+            return IsUtf8() ? ret.AnsiToUtf8() : ret;
+        }
+
+        /// <summary>
+        /// The currently selected text is replaced with text. If no text is selected the
+        /// text is inserted at current cursor postion.
+        /// </summary>
+        /// <param name="text">The document text to set.</param>
+        public static void SetSelectedText(string text) {
+            if (IsUtf8()) text = text.Utf8ToAnsi();
+            Call(SciMsg.SCI_REPLACESEL, 0, text);
+        }
+
+
+        /// <summary>
+        /// returns the text on the left of the position... it will always return empty string at minima
+        /// </summary>
+        /// <param name="curPos"></param>
+        /// <param name="maxLenght"></param>
+        /// <returns></returns>
+        public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
+            var startPos = curPos - maxLenght;
+            startPos = (startPos > 0) ? startPos : 0;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
+        }
+
+        /// <summary>
+        /// returns the text on the right of the position... it will always return empty string at minima
+        /// </summary>
+        /// <param name="curPos"></param>
+        /// <param name="maxLenght"></param>
+        /// <returns></returns>
+        public static string GetTextOnRightOfPos(int curPos, int maxLenght = KeywordMaxLength) {
+            var endPos = curPos + maxLenght;
+            var fullLength = GetDocumentLength();
+            endPos = (endPos < fullLength) ? endPos : fullLength;
+            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
+        }
+
+        /// <summary>
+        /// get the content of the line specified
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public static string GetLineText(int line) {
+            var length = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINELENGTH, line, 0);
+            var buffer = new StringBuilder(length + 1);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETLINE, line, buffer);
+            buffer.Length = length; //NPP may inject some rubbish at the end of the line
+            return IsUtf8() ? buffer.ToString().AnsiToUtf8() : buffer.ToString();
+        }
 
         /// <summary>
         /// replace the line specified by the text specified
         /// </summary>
         /// <param name="line"></param>
         /// <param name="text"></param>
-        public static void ReplaceLine(int line, string text) {
+        public static void SetLineText(int line, string text) {
             SetTextByRange(GetPositionFromLine(line), GetLineEndPosition(line), text);
         }
 
@@ -315,66 +427,11 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// returns the text on the left of the position... it will always return empty string at minima
+        /// At text at the given position
         /// </summary>
         /// <param name="curPos"></param>
-        /// <param name="maxLenght"></param>
-        /// <returns></returns>
-        public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
-            var startPos = curPos - maxLenght;
-            startPos = (startPos > 0) ? startPos : 0;
-            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
-        }
-
-        /// <summary>
-        /// returns the text on the right of the position... it will always return empty string at minima
-        /// </summary>
-        /// <param name="curPos"></param>
-        /// <param name="maxLenght"></param>
-        /// <returns></returns>
-        public static string GetTextOnRightOfPos(int curPos, int maxLenght = KeywordMaxLength) {
-            var endPos = curPos + maxLenght;
-            var fullLength = GetDocumentLength();
-            endPos = (endPos < fullLength) ? endPos : fullLength;
-            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
-        }
-
-        /// <summary>
-        ///     Gets all lines of the current document.
-        /// </summary>
-        /// <returns></returns>
-        public static string[] GetAllLines() {
-            return GetDocumentText().Split(new[] { Environment.NewLine }, StringSplitOptions.None);
-        }
-
-        /// <summary>
-        /// Get text before caret
-        /// </summary>
-        /// <param name="maxLength">The maximum length.</param>
-        /// <returns></returns>
-        public static string TextBeforeCaret(int maxLength = 512) {
-            return TextBeforePosition(GetCaretPosition(), maxLength);
-        }
-
-        public static string TextBeforePosition(int position, int maxLength) {
-            return GetTextByRange(position - maxLength, position);
-        }
-
-        /// <summary>
-        /// get the content of the line specified
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static string GetLine(int line) {
-            var length = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINELENGTH, line, 0);
-            var buffer = new StringBuilder(length + 1);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETLINE, line, buffer);
-            buffer.Length = length; //NPP may inject some rubbish at the end of the line
-            return buffer.ToString();
-        }
-
-        public static void AddTextAtCaret(string text) {
-            var curPos = GetCaretPosition();
+        /// <param name="text"></param>
+        public static void AddTextAt(int curPos, string text) {
             SetTextByRange(curPos, curPos, text);
             SetCaretPosition(curPos + text.Length);
         }
@@ -396,84 +453,12 @@ namespace _3PA {
             return Abl.ReadAblWord(GetTextOnLeftOfPos(position), false) + Abl.ReadAblWord(GetTextOnRightOfPos(position), false, false);
         }
 
-        /// <summary>
-        /// Returns the text between the positions start and end
-        /// </summary>
-        public static string GetTextByRange(int start, int end) {
-            start = (start > 0) ? start : 0;
-            var fullLength = GetDocumentLength();
-            end = (end < fullLength) ? end : fullLength;
-            using (var textRange = new Sci_TextRange(start, end, end - start + 1)) {
-                Call(SciMsg.SCI_GETTEXTRANGE, 0, textRange.NativePointer);
-                return IsUtf8() ? textRange.lpstrText.AnsiToUtf8() : textRange.lpstrText;
-            }
-        }
-
         public static string GetTextBetween(Point point) {
             return GetTextByRange(point.X, point.Y);
         }
 
         /// <summary>
-        ///     Replaces a range of text with new text.
-        ///     Note that the recommended way to delete text in the document is to set the target to the text to be removed, and to
-        ///     perform a replace target with an empty string.
-        /// </summary>
-        /// <returns> The length of the replacement string.</returns>
-        public static int SetTextByRange(int start, int end, string text) {
-            SetTargetRange(start, end);
-            if (IsUtf8()) text = text.Utf8ToAnsi();
-            // If length is -1, text is a zero terminated string, otherwise length sets the number of character to replace 
-            // the target with. After replacement, the target range refers to the replacement text. The return value is the 
-            // length of the replacement string.
-            return Call(SciMsg.SCI_REPLACETARGET, text.Length, text);
-        }
-
-        /// <summary>
-        ///     Returns the text currently selected (highlighted).
-        /// </summary>
-        /// <returns>Currently selected text.</returns>
-        public static string GetSelectedText() {
-            var selLength = Call(SciMsg.SCI_GETSELTEXT);
-            // Todo: Use a string / char array as stringbuilder can't handle null characters?
-            var selectedText = new StringBuilder(selLength);
-            if (selLength > 0)
-                Call(SciMsg.SCI_GETSELTEXT, 0, selectedText);
-            var ret = selectedText.ToString();
-            return IsUtf8() ? ret.AnsiToUtf8() : ret;
-        }
-
-        /// <summary>
-        ///     The currently selected text is replaced with text. If no text is selected the
-        ///     text is inserted at current cursor postion.
-        /// </summary>
-        /// <param name="text">The document text to set.</param>
-        public static void SetSelectedText(string text) {
-            if (IsUtf8()) text = text.Utf8ToAnsi();
-            Call(SciMsg.SCI_REPLACESEL, 0, text);
-        }
-
-        /// <summary>
-        ///     Sets the text for the entire document (replacing any existing text).
-        /// </summary>
-        /// <param name="text">The document text to set.</param>
-        public static void SetDocumentText(string text) {
-            if (IsUtf8())
-                text = text.Utf8ToAnsi();
-            Call(SciMsg.SCI_SETTEXT, 0, text);
-        }
-
-        /// <summary>
-        ///     Gets the entire document text.
-        /// </summary>
-        public static string GetDocumentText() {
-            var length = GetDocumentLength();
-            var text = new StringBuilder(length + 1);
-            if (length > 0) Call(SciMsg.SCI_GETTEXT, length + 1, text);
-            return IsUtf8() ? text.ToString().AnsiToUtf8() : text.ToString();
-        }
-
-        /// <summary>
-        ///     This returns the character at pos in the document or 0 if pos is negative or past the end of the document.
+        /// This returns the character at pos in the document or 0 if pos is negative or past the end of the document.
         /// </summary>
         public static char GetCharAt(int pos) {
             var bytes = new List<byte>();
@@ -490,39 +475,65 @@ namespace _3PA {
         #endregion
 
 
-
         #region selection and position
 
         /// <summary>
-        ///     Gets the current screen location of the caret.
+        ///     Sets the start and end positions for an upcoming operation.
         /// </summary>
-        /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
-        public static Point GetCaretScreenLocation() {
-            var pos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            var x = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTXFROMPOSITION, 0, pos);
-            var y = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTYFROMPOSITION, 0, pos);
-
-            var point = new Point(x, y);
-            Win32.ClientToScreen(HandleScintilla, ref point);
-            return point;
+        public static void SetTargetRange(int start, int end) {
+            Call(SciMsg.SCI_SETTARGETSTART, start);
+            Call(SciMsg.SCI_SETTARGETEND, end);
         }
-
 
         /// <summary>
-        /// return the line number according to the position
+        ///     Returns the current target start and end positions from a previous operation.
         /// </summary>
-        /// <param name="position"></param>
-        /// <returns></returns>
-        public static int GetLineNumber(int position) {
-            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_LINEFROMPOSITION, position, 0);
+        public static Sci_CharacterRange GetTargetRange() {
+            return new Sci_CharacterRange(
+                Call(SciMsg.SCI_GETTARGETSTART),
+                Call(SciMsg.SCI_GETTARGETEND));
         }
 
-        public static int GetFirstVisibleLine() {
-            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETFIRSTVISIBLELINE, 0, 0);
+        /// <summary>
+        /// Clears current selection
+        /// </summary>
+        public static void ClearSelection() {
+            var currentPos = GetCaretPosition();
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONSTART, currentPos, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONEND, currentPos, 0);
         }
 
-        public static void SetFirstVisibleLine(int line) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETFIRSTVISIBLELINE, line, 0);
+        /// <summary>
+        /// Sets both the anchor and the current position. If end is negative, it means the end of the document.
+        /// If start is negative, it means remove any selection (i.e. set the start to the same position as end).
+        /// The caret is scrolled into view after this operation.
+        /// </summary>
+        /// <param name="start">The selection start (anchor) position.</param>
+        /// <param name="end">The selection end (current) position.</param>
+        public static void SetSelectionOrdered(int start, int end) {
+            Call(SciMsg.SCI_SETSEL, start, end);
+        }
+
+        /// <summary>
+        /// Sets the selection
+        /// </summary>
+        /// <param name="start"></param>
+        /// <param name="end"></param>
+        public static void SetSelection(int start, int end) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONSTART, start, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONEND, end, 0);
+        }
+
+        /// <summary>
+        ///     Returns the start and end of the selection without regard to which end is the current position and which is the
+        ///     anchor.
+        ///     SCI_GETSELECTIONSTART returns the smaller of the current position or the anchor position.
+        /// </summary>
+        /// <returns>A character range.</returns>
+        public static Sci_CharacterRange GetSelectionRange() {
+            return new Sci_CharacterRange(
+                Call(SciMsg.SCI_GETSELECTIONSTART),
+                Call(SciMsg.SCI_GETSELECTIONEND));
         }
 
         /// <summary>
@@ -542,14 +553,6 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Returns the current anchor position
-        /// </summary>
-        /// <returns></returns>
-        public static int GetAnchorPosition() {
-            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETANCHOR, 0, 0);
-        }
-
-        /// <summary>
         /// Returns the current line number
         /// </summary>
         /// <returns></returns>
@@ -558,24 +561,70 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Clears current selection
+        /// Returns the current anchor position
         /// </summary>
-        public static void ClearSelection() {
-            var currentPos = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONSTART, currentPos, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONEND, currentPos, 0);
+        /// <returns></returns>
+        public static int GetAnchorPosition() {
+            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETANCHOR, 0, 0);
         }
 
         /// <summary>
-        /// Sets the selection
+        /// This returns the document position that corresponds with the start of the line. If line is negative,
+        /// the position of the line holding the start of the selection is returned. If line is greater than the
+        /// lines in the document, the return value is -1. If line is equal to the number of lines in the document
+        /// (i.e. 1 line past the last line), the return value is the end of the document.
         /// </summary>
-        /// <param name="start"></param>
-        /// <param name="end"></param>
-        public static void SetSelection(int start, int end) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONSTART, start, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSELECTIONEND, end, 0);
+        public static int GetPositionFromLine(int line) {
+            return Call(SciMsg.SCI_POSITIONFROMLINE, line);
         }
 
+        /// <summary>
+        /// returns the position at the end of the line x
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public static int GetLineEndPosition(int line) {
+            return Call(SciMsg.SCI_GETLINEENDPOSITION, line);
+        }
+
+
+        /// <summary>
+        ///     Returns the line that contains the position pos in the document. The return value is 0 if pos &lt;= 0.
+        ///     The return value is the last line if pos is beyond the end of the document.
+        /// </summary>
+        public static int GetLineFromPosition(int pos) {
+            return Call(SciMsg.SCI_LINEFROMPOSITION, pos);
+        }
+
+        /// <summary>
+        ///     Gets the current screen location of the caret.
+        /// </summary>
+        /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
+        public static Point GetCaretScreenLocation() {
+            var pos = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETCURRENTPOS, 0, 0);
+            var x = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTXFROMPOSITION, 0, pos);
+            var y = (int) Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTYFROMPOSITION, 0, pos);
+
+            var point = new Point(x, y);
+            Win32.ClientToScreen(HandleScintilla, ref point);
+            return point;
+        }
+
+        /// <summary>
+        /// Gets the first visible line
+        /// </summary>
+        /// <returns></returns>
+        public static int GetFirstVisibleLine() {
+            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETFIRSTVISIBLELINE, 0, 0);
+        }
+
+        /// <summary>
+        /// Sets the first visible line
+        /// </summary>
+        /// <param name="line"></param>
+        public static void SetFirstVisibleLine(int line) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETFIRSTVISIBLELINE, line, 0);
+        }
 
         public static void ScrollToCaret() {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_SCROLLCARET, 0, 0);
@@ -592,8 +641,8 @@ namespace _3PA {
             EnsureRangeVisible(line, line);
             var linesOnScreen = GetNumberOfLinesOnScreen();
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + linesOnScreen, 0);
+            SetFirstVisibleLine(Math.Max(line - 1, 0));
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line, 0);
-            Call(SciMsg.SCI_SETFIRSTVISIBLELINE, Math.Max(line - 1, 0));
             GrabFocus();
         }
 
@@ -612,52 +661,11 @@ namespace _3PA {
             return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_TEXTHEIGHT, line, 0);
         }
 
-
-        /// <summary>
-        ///     Returns the start and end of the selection without regard to which end is the current position and which is the
-        ///     anchor.
-        ///     SCI_GETSELECTIONSTART returns the smaller of the current position or the anchor position.
-        /// </summary>
-        /// <returns>A character range.</returns>
-        public static Sci_CharacterRange GetSelectionRange() {
-            return new Sci_CharacterRange(
-                Call(SciMsg.SCI_GETSELECTIONSTART),
-                Call(SciMsg.SCI_GETSELECTIONEND));
-        }
-
-        /// <summary>
-        ///     Returns the current target start and end positions from a previous operation.
-        /// </summary>
-        public static Sci_CharacterRange GetTargetRange() {
-            return new Sci_CharacterRange(
-                Call(SciMsg.SCI_GETTARGETSTART),
-                Call(SciMsg.SCI_GETTARGETEND));
-        }
-
-        /// <summary>
-        ///     Sets the start and end positions for an upcoming operation.
-        /// </summary>
-        public static void SetTargetRange(int start, int end) {
-            Call(SciMsg.SCI_SETTARGETSTART, start);
-            Call(SciMsg.SCI_SETTARGETEND, end);
-        }
-
         /// <summary>
         ///     Returns the length of the document in bytes.
         /// </summary>
         public static int GetDocumentLength() {
             return Call(SciMsg.SCI_GETLENGTH);
-        }
-
-        /// <summary>
-        ///     Sets both the anchor and the current position. If end is negative, it means the end of the document.
-        ///     If start is negative, it means remove any selection (i.e. set the start to the same position as end).
-        ///     The caret is scrolled into view after this operation.
-        /// </summary>
-        /// <param name="start">The selection start (anchor) position.</param>
-        /// <param name="end">The selection end (current) position.</param>
-        public static void SetSelectionOrdered(int start, int end) {
-            Call(SciMsg.SCI_SETSEL, start, end);
         }
 
         /// <summary>
@@ -674,11 +682,11 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     This searches for the first occurrence of a text string in the target defined by startPosition and endPosition.
-        ///     The text string is not zero terminated; the size is set by length.
-        ///     The search is modified by the search flags set by SCI_SETSEARCHFLAGS.
-        ///     If the search succeeds, the target is set to the found text and the return value is the position of the start
-        ///     of the matching text. If the search fails, the result is -1.
+        /// This searches for the first occurrence of a text string in the target defined by startPosition and endPosition.
+        /// The text string is not zero terminated; the size is set by length.
+        /// The search is modified by the search flags set by SCI_SETSEARCHFLAGS.
+        /// If the search succeeds, the target is set to the found text and the return value is the position of the start
+        /// of the matching text. If the search fails, the result is -1.
         /// </summary>
         /// <param name="findText">String to search for.</param>
         /// <param name="startPosition">Where to start searching from.</param>
@@ -692,39 +700,11 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     This returns the number of lines in the document. An empty document contains 1 line. A document holding only an
-        ///     end of line sequence has 2 lines.
+        /// This returns the number of lines in the document. An empty document contains 1 line. A document holding only an
+        /// end of line sequence has 2 lines.
         /// </summary>
         public static int GetLineCount() {
             return Call(SciMsg.SCI_GETLINECOUNT);
-        }
-
-        /// <summary>
-        ///     This returns the document position that corresponds with the start of the line. If line is negative,
-        ///     the position of the line holding the start of the selection is returned. If line is greater than the
-        ///     lines in the document, the return value is -1. If line is equal to the number of lines in the document
-        ///     (i.e. 1 line past the last line), the return value is the end of the document.
-        /// </summary>
-        public static int GetPositionFromLine(int line) {
-            return Call(SciMsg.SCI_POSITIONFROMLINE, line);
-        }
-
-        /// <summary>
-        /// returns the position at the end of the line x
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static int GetLineEndPosition(int line) {
-            return Call(SciMsg.SCI_GETLINEENDPOSITION, line);
-        }
-
-        
-        /// <summary>
-        ///     Returns the line that contains the position pos in the document. The return value is 0 if pos &lt;= 0.
-        ///     The return value is the last line if pos is beyond the end of the document.
-        /// </summary>
-        public static int GetLineFromPosition(int pos) {
-            return Call(SciMsg.SCI_LINEFROMPOSITION, pos);
         }
 
         /// <summary>
@@ -746,12 +726,66 @@ namespace _3PA {
         }
 
         /// <summary>
-        ///     return the position after another position in the document taking into account the current code page.
-        ///     The maximum is the last position in the document. If called with a position within a multi byte character will
-        ///     return the position of the end of that character.
+        /// return the position after another position in the document taking into account the current code page.
+        /// The maximum is the last position in the document. If called with a position within a multi byte character will
+        /// return the position of the end of that character.
         /// </summary>
         public static int PositionAfter(int pos) {
             return Call(SciMsg.SCI_POSITIONAFTER, pos);
+        }
+
+        /// <summary>
+        /// This message returns the position of a column on a line taking the width of tabs into account. 
+        /// It treats a multi-byte character as a single column. Column numbers, like lines start at 0.
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        /// <returns></returns>
+        public static int GetPosFromLineColumn(int line, int column) {
+            return Call(SciMsg.SCI_FINDCOLUMN, line, column);
+        }
+
+        #endregion
+
+
+
+        #region others
+
+        /// <summary>
+        ///  sets the scroll range so that maximum scroll position has the last line at the bottom of the view (default)
+        /// Setting this to false allows scrolling one page below the last line
+        /// </summary>
+        /// <param name="val"></param>
+        public static void SetEndAtLastLine(bool val) {
+            Call(SciMsg.SCI_SETENDATLASTLINE, val ? 1 : 0);
+        }
+
+        /// <summary>
+        /// White space characters are drawn as dots and arrows
+        /// SCWS_INVISIBLE	0	The normal display mode with white space displayed as an empty background colour.
+        /// SCWS_VISIBLEALWAYS	1	White space characters are drawn as dots and arrows,
+        /// SCWS_VISIBLEAFTERINDENT	2	White space used for indentation is displayed normally but after the first visible character, it is shown as dots and arrows.
+        /// SCWS_VISIBLEONLYININDENT	3	White space used for indentation is displayed as dots and arrows.
+        /// </summary>
+        public static void SetWhiteSpaceView() {
+            Call(SciMsg.SCI_SETVIEWWS, (int) SciMsg.SCWS_VISIBLEALWAYS);
+        }
+
+        /// <summary>
+        /// This message changes all the end of line characters in the document to match eolMode. 
+        /// Valid values are: SC_EOL_CRLF (0), SC_EOL_CR (1), or SC_EOL_LF (2).
+        /// </summary>
+        public static void ConvertEolMode() {
+            Call(SciMsg.SCI_CONVERTEOLS, (int)SciMsg.SC_EOL_CRLF);
+        }
+
+        /// <summary>
+        /// sets the characters that are added into the document when the user presses the Enter key. 
+        /// You can set eolMode to one of SC_EOL_CRLF (0), SC_EOL_CR (1), or SC_EOL_LF (2). 
+        /// The SCI_GETEOLMODE message retrieves the current state
+        /// </summary>
+        public static void SetEolMode() {
+            Call(SciMsg.SCI_SETEOLMODE, (int)SciMsg.SC_EOL_CRLF);
         }
 
         #endregion
@@ -927,6 +961,16 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// sets the fore/background color of the whitespaces, overriding the lexer's
+        /// </summary>
+        /// <param name="bg"></param>
+        /// <param name="fg"></param>
+        public static void SetWhiteSpaceStyle(Color bg, Color fg) {
+            Call(SciMsg.SCI_SETWHITESPACEFORE, 1, (int)(new COLORREF(fg)).ColorDWORD);
+            Call(SciMsg.SCI_SETWHITESPACEBACK, 1, (int)(new COLORREF(bg)).ColorDWORD);
+        }
+
+        /// <summary>
         /// Style the text between startPos and endPos with the styleId
         /// </summary>
         /// <param name="styleId"></param>
@@ -935,6 +979,18 @@ namespace _3PA {
         public static void StyleText(int styleId, int startPos, int endPos) {
             Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
             Call(SciMsg.SCI_SETSTYLING, endPos - startPos, styleId);
+        }
+
+        /// <summary>
+        /// TODO: THIS IS UNTESTED SO FAR!!!
+        /// set the style of a text from startPos to startPos + styleArray.Length,
+        /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte
+        /// </summary>
+        /// <param name="startPos"></param>
+        /// <param name="styleArray"></param>
+        public static void StyleTextEx(int startPos, byte[] styleArray) {
+            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
+            Win32.SendData(HandleScintilla, SciMsg.SCI_SETSTYLINGEX, styleArray);
         }
 
         /// <summary>

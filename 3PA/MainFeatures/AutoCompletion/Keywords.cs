@@ -33,7 +33,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 File.WriteAllBytes(_filePath, DataResources.keywords);
             _keywords.Clear();
             try {
-                foreach (var items in File.ReadAllLines(_filePath).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
+                foreach (var items in File.ReadAllLines(_filePath, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
  
                     // find the KeywordType from items[1]
                     KeywordType keywordType = KeywordType.Unknow;
@@ -62,7 +62,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 File.WriteAllBytes(filePathAbb, DataResources.abbreviations);
             _abbreviations.Clear();
             try {
-                foreach (var items in File.ReadAllLines(filePathAbb).Select(line => line.Split('\t')).Where(items => items.Count() == 2)) {
+                foreach (var items in File.ReadAllLines(filePathAbb, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 2)) {
                     _abbreviations.Add(new KeywordsAbbreviations() {
                         CompleteText = items[1],
                         ShortText = items[0]

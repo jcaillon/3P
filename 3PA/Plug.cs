@@ -58,6 +58,8 @@ namespace _3PA {
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
+            Interop.Plug.SetCommand(cmdIndex++, "Toggle comment", ProgressCodeUtils.ToggleComment, "_ToggleComment:Ctrl+Q", false, uniqueKeys);
+
             Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "_Test:Ctrl+D", false, uniqueKeys);
             /*
             SetCommand(cmdIndex++, "---", null);
@@ -193,6 +195,8 @@ namespace _3PA {
                 // Set a mask for notifications received
                 Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMODEVENTMASK,
                     SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO, 0);
+                Npp.SetEndAtLastLine(false);
+                Npp.SetWhiteSpaceView();
 
                 // dockable explorer
                 if (Config.Instance.CodeExplorerVisible && !DockableExplorer.IsVisible)
@@ -224,7 +228,7 @@ namespace _3PA {
         /// <param name="handled"></param>
         // ReSharper disable once RedundantAssignment
         static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
-            // if set to true, the keyinput is completly intercepted, otherwise npp sill do its stuff
+            // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false; 
 
             // only do stuff if we are in a progress file
@@ -338,8 +342,9 @@ namespace _3PA {
                 AutoComplete.UpdateAutocompletion();
 
                 // we finished entering a keyword
-                int offset = (c == '\n' && Npp.TextBeforeCaret(2).Equals("\r\n")) ? 2 : 1;
-                var searchWordAt = Npp.GetCaretPosition() - offset;
+                var curPos = Npp.GetCaretPosition();
+                int offset = (c == '\n' && Npp.GetTextOnRightOfPos(curPos, 2).Equals("\r\n")) ? 2 : 1;
+                var searchWordAt = curPos - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
                 //TODO: if multiselection, replace everywhere!
@@ -489,6 +494,13 @@ namespace _3PA {
             //Npp.SetLexerToContainerLexer();
         }
 
+        /// <summary>
+        /// Called when the user saves the current document
+        /// </summary>
+        public static void OnFileSaved() {
+            // check for block that are too long and display a warning
+        }
+
         #endregion
 
         #region public
@@ -536,7 +548,8 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            ProgressCodeUtils.ToggleComment();
+
+            //ProgressCodeUtils.ToggleComment();
             /*
             Task.Factory.StartNew(() => {
                 Appli.Form.BeginInvoke((Action)delegate {

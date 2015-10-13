@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures
         static void FormatCurrentLine()
         {
             int currentLineNum = Npp.GetCaretLineNumber();
-            string prevLineText = Npp.GetLine(currentLineNum - 1).TrimEnd();
+            string prevLineText = Npp.GetLineText(currentLineNum - 1).TrimEnd();
 
             if (prevLineText.EndsWith("{") || prevLineText.IsControlStatement())
                 Perform(InsertIndent);
@@ -56,8 +56,8 @@ namespace _3PA.MainFeatures
         {
             int currentPos = Npp.GetCaretPosition();
             int currentLineNum = Npp.GetLineFromPosition(currentPos);
-            string currLineText = Npp.GetLine(currentLineNum);
-            string prevLineText = Npp.GetLine(currentLineNum - 1);
+            string currLineText = Npp.GetLineText(currentLineNum);
+            string prevLineText = Npp.GetLineText(currentLineNum - 1);
 
             if (currLineText.Trim() == "{" && prevLineText.IsControlStatement())
                 Perform(RemoveIndent);
@@ -67,7 +67,7 @@ namespace _3PA.MainFeatures
         {
             int currentPos = Npp.GetCaretPosition();
             int currentLineNum = Npp.GetLineFromPosition(currentPos);
-            string currLineText = Npp.GetLine(currentLineNum);
+            string currLineText = Npp.GetLineText(currentLineNum);
             //string prevText = Npp.TextBeforeCursor(500); //do not load all all "top" document but its substantial part
 
             //if (currLineText.Trim() == "}" && IsBracketOpened(prevText))

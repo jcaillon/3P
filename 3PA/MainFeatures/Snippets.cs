@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures {
             var buffer = new StringBuilder();
             var currentTag = "";
 
-            foreach (var line in File.ReadAllLines(file)) {
+            foreach (var line in File.ReadAllLines(file, Encoding.Default)) {
                 if (line.StartsWith("#"))
                     continue; //comment line
 

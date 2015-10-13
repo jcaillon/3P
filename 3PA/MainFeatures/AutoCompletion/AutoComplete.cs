@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using _3PA.Lib;
-using _3PA.MainFeatures.SynthaxHighlighting;
 using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {

@@ -75,6 +75,7 @@
     <Compile Include="Interop\Dispatcher.Designer.cs">
       <DependentUpon>Dispatcher.cs</DependentUpon>
     </Compile>
+    <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="MainFeatures\AutoCompletion\FastObjectListViewWoScrolls.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -170,9 +171,9 @@
     <Compile Include="Lib\IniFile.cs" />
     <Compile Include="Lib\IniReader.cs" />
     <Compile Include="Lib\LibLoader.cs" />
-    <Compile Include="Lib\LocalEnv.cs" />
+    <Compile Include="MainFeatures\LocalEnv.cs" />
     <Compile Include="Lib\SpecialDictionary.cs" />
-    <Compile Include="Lib\UserCommunication.cs" />
+    <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoComplete.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.cs">

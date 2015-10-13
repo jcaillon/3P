@@ -4,30 +4,13 @@ using System.Linq;
 
 namespace _3PA.MainFeatures.Parser {
 
-    //TODO: the class doesn't correctly handle text that is not encoded on 8 bits because we just do pos++, need to fix this 
-    // GetByteCount();
-    /*
-     * Encoding.UTF8.GetByteCount(text);
-     * 
-     * byte[] bytes = Encoding.Default.GetBytes(myString);
-        myString = Encoding.UTF8.GetString(bytes);
-     * 
-     * Encoding iso = Encoding.GetEncoding("ISO-8859-1");
-        Encoding utf8 = Encoding.UTF8;
-        byte[] utfBytes = utf8.GetBytes(Message);
-        byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
-        string msg = iso.GetString(isoBytes);
-     * 
-     * File.ReadAllText(file, Encoding.GetEncoding(codePage));
-     */
-
     /// <summary>
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
     public class Lexer {
         private const int LineStartAt = 0;
-        private const int ColumnStartAt = 1;
+        private const int ColumnStartAt = 0;
         private const char Eof = (char)0;
         private int _commentDepth;
         private int _includeDepth;

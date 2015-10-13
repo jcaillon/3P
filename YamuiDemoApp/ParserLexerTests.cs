@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"), @"C:\Users\Julien\Desktop\in.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\tt.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -36,12 +36,12 @@ namespace YamuiDemoApp {
 
 
             // OUTPUT INFO ON EACH LINE
-            if (false) {
+            if (true) {
                 StringBuilder x = new StringBuilder();
-                var i = 1;
+                var i = 0;
                 var dic = tok.GetLineInfo;
                 while (dic.ContainsKey(i)) {
-                    x.AppendLine(i + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
+                    x.AppendLine((i+1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
                     i++;
                 }

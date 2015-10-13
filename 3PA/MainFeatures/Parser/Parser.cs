@@ -45,7 +45,8 @@ namespace _3PA.MainFeatures.Parser {
         /// when we match a else or a then, we need to increase the blockDepth but only for the one next 
         /// statement, this bool allows to do that
         /// </summary>
-        private bool _lastStatementOneTimeIncrease;
+        private bool _oneTimeIncreaseDepth;
+        private bool _endBlockDepthStack;
 
         /// <summary>
         /// Path to the file being parsed (is added to the parseItem info)
@@ -103,8 +104,8 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionnary
-            var current = new LineInfo(0, ParsedScope.File, defaultOwnerName);
-            for (int i = 0; i < _lexer.MaxLine; i++) {
+            var current = new LineInfo(_lexer.MaxLine - 1, ParsedScope.File, defaultOwnerName);
+            for (int i = _lexer.MaxLine - 1; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
                 else
@@ -220,6 +221,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "end":
                             _context.BlockDepth--;
+                            _endBlockDepthStack = true;
                             if (_context.BlockDepth == 0) {
                                 // end of a proc, func or on event block
                                 if (_context.Scope != ParsedScope.File) {
@@ -232,7 +234,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "else":
                             // add a one time indent after a then or else
-                            _context.OneTimeIndent = true;
+                            _oneTimeIncreaseDepth = true;
                             break;
                         case "run":
                             // Parse a run statement
@@ -264,7 +266,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "then":
                             // add a one time indent after a then or else
-                            _context.OneTimeIndent = true;
+                            _oneTimeIncreaseDepth = true;
                             break;
                         default:
                             // try to match with a table's name
@@ -300,39 +302,49 @@ namespace _3PA.MainFeatures.Parser {
 
             // end of statement
             else if (token is TokenEos) {
-                // match a label if there was only one word followed by : in the statement
+                // match a label i  f there was only one word followed by : in the statement
                 if (_context.StatementWordCount == 1 && _context.FirstWordToken != null && token.Value.Equals(":"))
                     CreateParsedLabel();
-                NewStatement();
+                NewStatement(token);
             }
         }
 
         /// <summary>
         /// called when a Eos token is found, store information on the statement's line
         /// </summary>
-        private void NewStatement() {
+        private void NewStatement(Token token) {
             // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
             if (!_lineInfo.ContainsKey(_context.StatementStartLine))
-                _lineInfo.Add(_context.StatementStartLine, new LineInfo((_lastStatementOneTimeIncrease ? 1 : 0) + _context.BlockDepth, _context.Scope, _context.OwnerName));
+                _lineInfo.Add(_context.StatementStartLine, new LineInfo(_context.BlockDepth + _context.BlockDepthStack, _context.Scope, _context.OwnerName));
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
             _context.FirstWordToken = null;
 
-            // basically, delay the value _context.OneTimeIndent = true of 1 call of NewStatement()
-            if (_lastStatementOneTimeIncrease)
-                _lastStatementOneTimeIncrease = false;
-            if (_context.OneTimeIndent)
-                _lastStatementOneTimeIncrease = true;
-            _context.OneTimeIndent = false;
+            // end depth stack
+            if (_endBlockDepthStack)
+                _context.BlockDepthStack = 0;
+            _endBlockDepthStack = false;
+
+            // stack for then/else
+            if (_oneTimeIncreaseDepth) {
+                _context.BlockDepthStack++;
+                if (_context.LineOfLastBlockDepthChange == token.Line)
+                    _context.BlockDepthStack--;
+                _context.LineOfLastBlockDepthChange = token.Line;
+            }
+            _oneTimeIncreaseDepth = false;
             
             // increase depth of next statement?
-            if (_increaseDepthAtNextStatement)
+            if (_increaseDepthAtNextStatement) {
                 _context.BlockDepth++;
+                if (_context.LineOfLastBlockDepthChange == token.Line)
+                    _context.BlockDepthStack--;
+            }
             _increaseDepthAtNextStatement = false;
         }
 
         /// <summary>
-        /// Call this method instead adding the items directly in the list,
+        /// Call this method instead of adding the items directly in the list,
         /// updates the scope and file name
         /// </summary>
         private void AddParsedItem(ParsedItem item) {
@@ -1106,7 +1118,6 @@ namespace _3PA.MainFeatures.Parser {
     /// contains the info on the current context (as we move through tokens)
     /// </summary>
     public class ParseContext {
-        public bool OneTimeIndent;
         public int StatementStartLine = -1;
         public List<Token> StatementTokenList = new List<Token>();
         public int StatementWordCount;
@@ -1114,19 +1125,27 @@ namespace _3PA.MainFeatures.Parser {
         public ParsedScope Scope = ParsedScope.File;
         public string OwnerName = "";
         public Token FirstWordToken;
+        public int BlockDepthStack;
+        public int LineOfLastBlockDepthChange = -1;
     }
 
     /// <summary>
     /// Contains the info of a specific line number (built during the parsing)
     /// </summary>
     public class LineInfo {
-        public int BlockDepth;
-        public ParsedScope Scope;
+        /// <summary>
+        /// Block depth for the current line (= number of indents)
+        /// </summary>
+        public int BlockDepth { get; set; }
+        /// <summary>
+        /// Scope for the current line, see ParsedScope Enum
+        /// </summary>
+        public ParsedScope Scope { get; set; }
         /// <summary>
         /// Name of the current procedure/part of main, definitions, preproc
         /// all in lower case
         /// </summary>
-        public string CurrentScopeName;
+        public string CurrentScopeName { get; set; }
 
         public LineInfo(int blockDepth, ParsedScope scope, string currentScopeName) {
             BlockDepth = blockDepth;

@@ -165,8 +165,8 @@ namespace _3PA
                         return;
 
                     case (uint) NppMsg.NPPN_FILESAVED:
-                        throw new Exception("derp");
-
+                        // on file saved
+                        Plug.OnFileSaved();
                         return;
                 }
                 #endregion

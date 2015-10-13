@@ -110,6 +110,21 @@ namespace _3PA.Interop {
 
         [DllImport("user32", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+
+
+        #region THIS IS HIGHLY UNSURE
+
+        // send DATA packet
+        //TODO: TEST THIS
+        public static void SendData(IntPtr hWnd, SciMsg msg, byte[] infos) {
+            IntPtr ip = ToUnmanagedArray(infos);
+            SendMessage(hWnd, msg, infos.Length, ip);
+            Marshal.FreeHGlobal(ip);
+        }
+
+        #endregion
+
+
     }
 
     public class ClikeStringArray : IDisposable {

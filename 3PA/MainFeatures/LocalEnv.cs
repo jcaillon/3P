@@ -1,8 +1,9 @@
 ﻿using System;
 using System.IO;
 using Microsoft.Win32;
+using _3PA.Lib;
 
-namespace _3PA.Lib {
+namespace _3PA.MainFeatures {
     public class LocalEnv {
 
         public static LocalEnv Instance { get { return _instance ?? (_instance = new LocalEnv()); } }

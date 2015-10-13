@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 ParsedDataBase currentDb = null;
                 ParsedTable currentTable = null;
-                foreach (var items in File.ReadAllLines(_filePath).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
+                foreach (var items in File.ReadAllLines(_filePath, TextEncodingDetect.GetFileEncoding(_filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
                     var splitted = items.Split('\t');
                     switch (items[0]) {
                         case 'H':

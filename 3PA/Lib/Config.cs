@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -61,7 +62,7 @@ namespace _3PA.Lib {
 
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
         public int GlobalCurrentEnvironnement = 0;
-        public int GlobalMaxNbCharInBlock = 30000;
+        public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
 
