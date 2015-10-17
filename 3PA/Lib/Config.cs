@@ -38,6 +38,7 @@ namespace _3PA.Lib {
         public bool AutoCompleteOnKeyInputHideIfEmpty = true;
         public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = false;
         public bool AutoCompleteHideScrollBar = true;
+        public bool AutocompleteReplaceAbbreviations = true;
 
 
         [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]

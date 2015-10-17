@@ -180,6 +180,8 @@ namespace _3PA.MainFeatures.Parser {
     /// Label
     /// </summary>
     public class ParsedLabel : ParsedItem {
+        public int UndefinedLine { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }

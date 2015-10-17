@@ -28,25 +28,17 @@ namespace _3PA.MainFeatures.Parser {
         /// Contains the current information of the statement's context (in which proc it is, which scope...)
         /// </summary>
         private ParseContext _context = new ParseContext() {
-            FirstWordToken = null
+            Scope = ParsedScope.File,
+            OwnerName = "",
+            FirstWordToken = null,
+            BlockStack = new Stack<BlockInfo>(),
+            StatementStartLine = -1
         };
 
         /// <summary>
         /// Contains the information of each line parsed
         /// </summary>
         private Dictionary<int, LineInfo> _lineInfo = new Dictionary<int, LineInfo>();
-
-        /// <summary>
-        /// When we match a word that make us enter a block, we need to increase the blockDepth but only
-        /// at the next statement, this bool allows to do just that
-        /// </summary>
-        private bool _increaseDepthAtNextStatement;
-        /// <summary>
-        /// when we match a else or a then, we need to increase the blockDepth but only for the one next 
-        /// statement, this bool allows to do that
-        /// </summary>
-        private bool _oneTimeIncreaseDepth;
-        private bool _endBlockDepthStack;
 
         /// <summary>
         /// Path to the file being parsed (is added to the parseItem info)
@@ -160,7 +152,6 @@ namespace _3PA.MainFeatures.Parser {
             if (_context.StatementStartLine == -1 && (
                 token is TokenWord || 
                 token is TokenPreProcStatement ||
-                token is TokenComment || 
                 token is TokenInclude))
                     _context.StatementStartLine = token.Line;
 
@@ -177,23 +168,23 @@ namespace _3PA.MainFeatures.Parser {
                         case "function":
                             // parse a function definition
                             if (CreateParsedFunction(token)) {
-                                //if (_context.BlockDepth != 0) throw new Exception("We should be at _context.BlockDepth == 0! and we are at _context.BlockDepth = " + _context.BlockDepth);
-                                _context.BlockDepth = 0;
-                                _increaseDepthAtNextStatement = true;
+                                //if (_context.BlockStack.Count != 0) UserCommunication.Notify("We should be at zero depth!!");
+                                _context.BlockStack.Clear();
+                                PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
                             break;
                         case "procedure":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
-                                _context.BlockDepth = 0;
-                                _increaseDepthAtNextStatement = true;
+                                _context.BlockStack.Clear();
+                                PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
                             break;
                         case "on":
                             // parse a ON statement
                             if (CreateParsedOnEvent(token)) {
-                                _context.BlockDepth = 0;
-                                _increaseDepthAtNextStatement = true;
+                                _context.BlockStack.Clear();
+                                PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
                             break;
                         case "def":
@@ -217,12 +208,18 @@ namespace _3PA.MainFeatures.Parser {
                         case "do":
                         case "repeat":
                             // increase block depth
-                            _increaseDepthAtNextStatement = true;
+                            PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "end":
-                            _context.BlockDepth--;
-                            _endBlockDepthStack = true;
-                            if (_context.BlockDepth == 0) {
+                            // decrease block depth
+                            var popped = _context.BlockStack.Pop();
+                            // in case of a then do: we have created 2 stacks for actually the same block, pop them both
+                            if (_context.BlockStack.Count > 0 && 
+                                _context.BlockStack.Peek().BlockType == BlockType.ThenElse &&
+                                popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
+                                _context.BlockStack.Pop();
+
+                            if (_context.BlockStack.Count == 0) {
                                 // end of a proc, func or on event block
                                 if (_context.Scope != ParsedScope.File) {
                                     var parsedScope = (ParsedScopeItem)_parsedItemList.FindLast(item => item is ParsedScopeItem);
@@ -234,7 +231,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "else":
                             // add a one time indent after a then or else
-                            _oneTimeIncreaseDepth = true;
+                            PushBlockInfoToStack(BlockType.ThenElse, token.Line);
                             break;
                         case "run":
                             // Parse a run statement
@@ -258,15 +255,15 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "do":
                             // matches a do in the middle of a statement (ex: ON CHOOSE OF xx DO:)
-                            _increaseDepthAtNextStatement = true;
+                            PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "triggers":
                             if (PeekAtNextNonSpace() is TokenEos)
-                                _increaseDepthAtNextStatement = true;
+                                PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "then":
                             // add a one time indent after a then or else
-                            _oneTimeIncreaseDepth = true;
+                            PushBlockInfoToStack(BlockType.ThenElse, token.Line);
                             break;
                         default:
                             // try to match with a table's name
@@ -302,45 +299,56 @@ namespace _3PA.MainFeatures.Parser {
 
             // end of statement
             else if (token is TokenEos) {
-                // match a label i  f there was only one word followed by : in the statement
+                // match a label if there was only one word followed by : in the statement
                 if (_context.StatementWordCount == 1 && _context.FirstWordToken != null && token.Value.Equals(":"))
                     CreateParsedLabel();
-                NewStatement(token);
+                NewStatement();
             }
         }
 
         /// <summary>
         /// called when a Eos token is found, store information on the statement's line
         /// </summary>
-        private void NewStatement(Token token) {
+        private void NewStatement() {
+
+            var depth = 0;
+            var lastLine = -1;
+            bool lastStackThenDo = false;
+            foreach (var blockInfo in _context.BlockStack) {
+                if (blockInfo.LineTriggerWord != lastLine) 
+                    depth++;
+                else if (depth == 1) 
+                    lastStackThenDo = true;
+                lastLine = blockInfo.LineTriggerWord;
+            }
+            if (depth > 0 && _context.BlockStack.Peek().LineStart == _context.StatementStartLine && !lastStackThenDo) 
+                depth--;
+
             // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
             if (!_lineInfo.ContainsKey(_context.StatementStartLine))
-                _lineInfo.Add(_context.StatementStartLine, new LineInfo(_context.BlockDepth + _context.BlockDepthStack, _context.Scope, _context.OwnerName));
+                _lineInfo.Add(_context.StatementStartLine, new LineInfo(depth, _context.Scope, _context.OwnerName));
+
+            // Pop all the then/else blocks that are on top
+            if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount)
+                while (_context.BlockStack.Peek().BlockType == BlockType.ThenElse) {
+                    _context.BlockStack.Pop();
+                    if (_context.BlockStack.Count == 0)
+                        break;
+                }
+
+            _context.StatementCount++;
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
             _context.FirstWordToken = null;
+        }
 
-            // end depth stack
-            if (_endBlockDepthStack)
-                _context.BlockDepthStack = 0;
-            _endBlockDepthStack = false;
-
-            // stack for then/else
-            if (_oneTimeIncreaseDepth) {
-                _context.BlockDepthStack++;
-                if (_context.LineOfLastBlockDepthChange == token.Line)
-                    _context.BlockDepthStack--;
-                _context.LineOfLastBlockDepthChange = token.Line;
-            }
-            _oneTimeIncreaseDepth = false;
-            
-            // increase depth of next statement?
-            if (_increaseDepthAtNextStatement) {
-                _context.BlockDepth++;
-                if (_context.LineOfLastBlockDepthChange == token.Line)
-                    _context.BlockDepthStack--;
-            }
-            _increaseDepthAtNextStatement = false;
+        /// <summary>
+        /// Add a block info on top of the block Stack
+        /// </summary>
+        /// <param name="blockType"></param>
+        /// <param name="currentLine"></param>
+        private void PushBlockInfoToStack(BlockType blockType, int currentLine) {
+            _context.BlockStack.Push(new BlockInfo(_context.StatementStartLine, currentLine, blockType, _context.StatementCount));
         }
 
         /// <summary>
@@ -1118,15 +1126,37 @@ namespace _3PA.MainFeatures.Parser {
     /// contains the info on the current context (as we move through tokens)
     /// </summary>
     public class ParseContext {
-        public int StatementStartLine = -1;
-        public List<Token> StatementTokenList = new List<Token>();
-        public int StatementWordCount;
-        public int BlockDepth;
-        public ParsedScope Scope = ParsedScope.File;
-        public string OwnerName = "";
-        public Token FirstWordToken;
-        public int BlockDepthStack;
-        public int LineOfLastBlockDepthChange = -1;
+        public ParsedScope Scope { get; set; }
+        public string OwnerName { get; set; }
+        /// <summary>
+        /// Number of words count in the current statement
+        /// </summary>
+        public int StatementWordCount { get; set; }
+        /// <summary>
+        /// the line at which the current statement starts
+        /// </summary>
+        public int StatementStartLine { get; set; }
+        public int StatementCount { get; set; }
+        public Token FirstWordToken { get; set; }
+        public Stack<BlockInfo> BlockStack { get; set; }
+    }
+
+    public struct BlockInfo {
+        public int LineStart { get; set; }
+        public int LineTriggerWord { get; set; }
+        public BlockType BlockType { get; set; }
+        public int StatementNumber { get; set; }
+        public BlockInfo(int lineStart, int lineTriggerWord, BlockType blockType, int statementNumber) : this() {
+            LineStart = lineStart;
+            LineTriggerWord = lineTriggerWord;
+            BlockType = blockType;
+            StatementNumber = statementNumber;
+        }
+    }
+
+    public enum BlockType {
+        DoEnd,
+        ThenElse,
     }
 
     /// <summary>

@@ -343,7 +343,7 @@ namespace _3PA {
 
                 // we finished entering a keyword
                 var curPos = Npp.GetCaretPosition();
-                int offset = (c == '\n' && Npp.GetTextOnRightOfPos(curPos, 2).Equals("\r\n")) ? 2 : 1;
+                int offset = (c == '\n' && Npp.GetTextOnLeftOfPos(curPos, 2).Equals("\r\n")) ? 2 : 1;
                 var searchWordAt = curPos - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
@@ -351,7 +351,7 @@ namespace _3PA {
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
 
-                    // insert selected keyword of the completion list
+                    // automaticcally insert selected keyword of the completion list
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && AutoComplete.LastSelectItemDisplayText != null) {
                         var curSel = AutoComplete.GetCurrentSuggestion();
                         if (curSel != null)
@@ -364,6 +364,13 @@ namespace _3PA {
                         var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                         if (casedKeyword != null)
                             Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
+                    }
+
+                    // replace abbreviation by completekeyword
+                    if (Config.Instance.AutocompleteReplaceAbbreviations) {
+                        var fullKeyword = Keywords.GetFullKeyword(keyword);
+                        if (fullKeyword != null)
+                            Npp.ReplaceKeywordWrapped(fullKeyword, -offset);
                     }
                 }
                 
@@ -548,7 +555,7 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-
+            MessageBox.Show("!" + Npp.GetSelectedText() + "!");
             //ProgressCodeUtils.ToggleComment();
             /*
             Task.Factory.StartNew(() => {

@@ -1,11 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
+using YamuiFramework.Controls;
+using YamuiFramework.Fonts;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli.Pages;
+using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli {
     public partial class AppliForm : YamuiForm {
@@ -23,6 +29,20 @@ namespace _3PA.MainFeatures.Appli {
 
         public AppliForm() {
             InitializeComponent();
+
+            // create the tabs / content
+            var content = new List<YamuiMainMenuTab> {
+                new YamuiMainMenuTab("Set", "set", false, new List<YamuiSecMenuTab>() {
+                    new YamuiSecMenuTab("Environment", "environment", new SetEnvironment())
+                }),
+                new YamuiMainMenuTab("Options", "options", true, new List<YamuiSecMenuTab>() {
+                    new YamuiSecMenuTab("Appearances", "appearances", new SettingAppearance())
+                }),
+            };
+            CreateContent(content);
+
+            // title
+            labelTitle.Text = @"<b>3</b>P : <b>P</b>rogress <b>P</b>rogrammers <b>P</b>al";
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -109,21 +129,8 @@ namespace _3PA.MainFeatures.Appli {
         }
         #endregion
 
-
-        private void yamuiTabControl1_SelectedIndexChanged(object sender, EventArgs e) {
-
-        }
-
-        private void yamuiTabPage9_Click(object sender, EventArgs e) {
-
-        }
-
-        private void Form1_Load(object sender, EventArgs e) {
-            //ApplyHideSettingGlobally(this);
-        }
-
         private void yamuiLink6_Click(object sender, EventArgs e) {
-            GoToPage("yamuiTabSecAppearance");
+            GoToPage("appearances");
         }
 
         private void yamuiLink7_Click(object sender, EventArgs e) {
@@ -134,14 +141,6 @@ namespace _3PA.MainFeatures.Appli {
                 MessageBox.Show(args.Link);
             };
             toastNotification2.Show();
-        }
-
-        private void classic1_Load(object sender, EventArgs e) {
-
-        }
-
-        private void text1_Load(object sender, EventArgs e) {
-
         }
 
         private static bool _lab = true;

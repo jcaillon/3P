@@ -29,12 +29,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private string _currentParsedFile;
 
         /// <summary>
-        /// Those two dictionnary are used to reference the procedures and functions defined
+        /// this dictionnary is used to reference the procedures defined
         /// in the program we are parsing, dictionnary is faster that list when it comes to
         /// test if a procedure/function exists in the program
         /// </summary>
         public Dictionary<string, bool> DefinedProcedures = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Line info from the parser
+        /// </summary>
+        private Dictionary<int, LineInfo> _lineInfo;
         #endregion
 
 
@@ -45,9 +49,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="isBaseFile"></param>
         /// <param name="currentParsedFile"></param>
-        public ParserVisitor(bool isBaseFile, string currentParsedFile) {
+        /// <param name="lineInfo"></param>
+        public ParserVisitor(bool isBaseFile, string currentParsedFile, Dictionary<int, LineInfo> lineInfo) {
             _isBaseFile = isBaseFile;
             _currentParsedFile = currentParsedFile;
+            _lineInfo = lineInfo;
         }
 
         #endregion
@@ -157,7 +163,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     Branch = CodeExplorerBranch.OnEvent,
                     GoToLine = pars.Line,
                     Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
                 });
         }
 
@@ -176,7 +182,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     Branch = CodeExplorerBranch.Function,
                     GoToLine = pars.Line,
                     Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
                 });
 
             // to completion data
@@ -211,7 +217,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     Branch = CodeExplorerBranch.Procedure,
                     GoToLine = pars.Line,
                     Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString : null
+                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
                 });
 
             // to completion data
@@ -250,6 +256,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedLabel pars) {
+            // find the end line of the labelled block
+            var line = pars.Line + 1;
+            var depth = (_lineInfo.ContainsKey(pars.Line)) ? _lineInfo[pars.Line].BlockDepth : 0;
+            bool wentIntoBlock = false;
+            while (_lineInfo.ContainsKey(line)) {
+                if (!wentIntoBlock && _lineInfo[line].BlockDepth > depth) {
+                    wentIntoBlock = true;
+                    depth = _lineInfo[line].BlockDepth;
+                } else if (wentIntoBlock && _lineInfo[line].BlockDepth < depth)
+                    break;
+                line++;
+            }
+            pars.UndefinedLine = line;
+
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
@@ -435,7 +455,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         private bool HasTooMuchChar(int startLine, int endLine) {
             if (!_isBaseFile) return false;
-            return (Npp.GetPositionFromLine(endLine) - Npp.GetPositionFromLine(startLine)) > Config.Instance.GlobalMaxNbCharInBlock;
+            return NbExtraCharBetweenLines(startLine, endLine) > 0;
+        }
+
+        /// <summary>
+        /// returns the number of chars between two lines in the current document
+        /// </summary>
+        /// <param name="startLine"></param>
+        /// <param name="endLine"></param>
+        /// <returns></returns>
+        private static int NbExtraCharBetweenLines(int startLine, int endLine) {
+            return (Npp.GetPositionFromLine(endLine) - Npp.GetPositionFromLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
         }
 
         #endregion

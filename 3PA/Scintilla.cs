@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
@@ -245,13 +246,16 @@ namespace _3PA {
         /// Returns the text between the positions start and end
         /// </summary>
         public static string GetTextByRange(int start, int end) {
-            SetTargetRange(start, end);
-            if (end - start < 1) return string.Empty;
-            var text = new StringBuilder(end - start + 1);
-            Call(SciMsg.SCI_GETTARGETTEXT, 0, text);
-            text.Length = end - start;
-            return IsUtf8() ? text.ToString().AnsiToUtf8() : text.ToString();
+            start = (start > 0) ? start : 0;
+            if ((end - start) < 1) return string.Empty;
+            using (var textRange = new Sci_TextRange(start, end, end - start + 1)) {
+                Call(SciMsg.SCI_GETTEXTRANGE, 0, textRange.NativePointer);
+                return IsUtf8() ? textRange.lpstrText.AnsiToUtf8() : textRange.lpstrText;
+            }
         }
+
+        [DllImport("user32")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
 
         /// <summary>
         /// Replaces a range of text with new text.
@@ -640,7 +644,7 @@ namespace _3PA {
         public static void GoToLine(int line) {
             EnsureRangeVisible(line, line);
             var linesOnScreen = GetNumberOfLinesOnScreen();
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line + linesOnScreen, 0);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, Math.Max(line + linesOnScreen, 0), 0);
             SetFirstVisibleLine(Math.Max(line - 1, 0));
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line, 0);
             GrabFocus();

@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\tt.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\sacmagicinterface_s.p"), @"C:\Users\Julien\Desktop\tt.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -36,7 +36,7 @@ namespace YamuiDemoApp {
 
 
             // OUTPUT INFO ON EACH LINE
-            if (true) {
+            if (false) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
                 var dic = tok.GetLineInfo;
@@ -81,7 +81,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunctionCall pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
         }
 
         public void Visit(ParsedFoundTableUse pars) {
@@ -98,7 +98,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedProcedure pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {

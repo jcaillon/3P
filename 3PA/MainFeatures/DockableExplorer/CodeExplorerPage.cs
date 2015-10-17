@@ -30,6 +30,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// </summary>
         private bool _displayUnSorted;
 
+        private string _filterText;
+
         /// <summary>
         /// Use alternative back color... or not
         /// </summary>
@@ -521,8 +523,9 @@ namespace _3PA.MainFeatures.DockableExplorer {
             }
 
             // filter the tree..
+            _filterText = textBoxFilter.Text.ToLower();
             ovlTree.ModelFilter = new ModelFilter(FilterPredicate);
-            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(textBoxFilter.Text);
+            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(_filterText);
         }
 
         /// <summary>
@@ -532,7 +535,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// <returns></returns>
         private bool FilterPredicate(object o) {
             var obj = (CodeExplorerItem) o;
-            return (!obj.HasChildren && obj.DisplayText.ToLower().FullyMatchFilter(textBoxFilter.Text));
+            return (!obj.HasChildren && obj.DisplayText.ToLower().FullyMatchFilter(_filterText));
         }
 
         /// <summary>
@@ -558,8 +561,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
             // compare by type
             compare = x.IconType.CompareTo(y.IconType);
             if (compare != 0) return compare;
-            // sort by display text in last resort
-            return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+            // sort by display text
+            compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+            if (compare != 0) return compare;
+            return x.GoToLine.CompareTo(y.GoToLine);
         }
     }
 }

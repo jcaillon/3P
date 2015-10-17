@@ -28,8 +28,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
         private void InitializeComponent() {
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
             this.comboTheme = new YamuiFramework.Controls.YamuiComboBox();
-            this.yamuiComboBox3 = new YamuiFramework.Controls.YamuiComboBox();
-            this.yamuiLabel22 = new YamuiFramework.Controls.YamuiLabel();
             this.PanelAccentColor = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel21 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
@@ -39,8 +37,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
             // yamuiPanel1
             // 
             this.yamuiPanel1.Controls.Add(this.comboTheme);
-            this.yamuiPanel1.Controls.Add(this.yamuiComboBox3);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel22);
             this.yamuiPanel1.Controls.Add(this.PanelAccentColor);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel21);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel20);
@@ -49,7 +45,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(715, 315);
+            this.yamuiPanel1.Size = new System.Drawing.Size(590, 417);
             this.yamuiPanel1.TabIndex = 0;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
@@ -62,25 +58,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.comboTheme.Size = new System.Drawing.Size(180, 25);
             this.comboTheme.TabIndex = 13;
             // 
-            // yamuiComboBox3
-            // 
-            this.yamuiComboBox3.ItemHeight = 19;
-            this.yamuiComboBox3.Location = new System.Drawing.Point(0, 256);
-            this.yamuiComboBox3.Name = "yamuiComboBox3";
-            this.yamuiComboBox3.Size = new System.Drawing.Size(121, 25);
-            this.yamuiComboBox3.TabIndex = 12;
-            // 
-            // yamuiLabel22
-            // 
-            this.yamuiLabel22.AutoSize = true;
-            this.yamuiLabel22.Function = YamuiFramework.Fonts.LabelFunction.Heading;
-            this.yamuiLabel22.Location = new System.Drawing.Point(0, 227);
-            this.yamuiLabel22.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
-            this.yamuiLabel22.Name = "yamuiLabel22";
-            this.yamuiLabel22.Size = new System.Drawing.Size(78, 19);
-            this.yamuiLabel22.TabIndex = 11;
-            this.yamuiLabel22.Text = "FONT SIZE";
-            // 
             // PanelAccentColor
             // 
             this.PanelAccentColor.HorizontalScrollbarHighlightOnWheel = false;
@@ -88,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.PanelAccentColor.Location = new System.Drawing.Point(0, 101);
             this.PanelAccentColor.Margin = new System.Windows.Forms.Padding(0);
             this.PanelAccentColor.Name = "PanelAccentColor";
-            this.PanelAccentColor.Size = new System.Drawing.Size(715, 108);
+            this.PanelAccentColor.Size = new System.Drawing.Size(584, 234);
             this.PanelAccentColor.TabIndex = 10;
             this.PanelAccentColor.VerticalScrollbarHighlightOnWheel = false;
             this.PanelAccentColor.VerticalScrollbarSize = 10;
@@ -121,7 +98,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel1);
             this.Name = "SettingAppearance";
-            this.Size = new System.Drawing.Size(715, 315);
+            this.Size = new System.Drawing.Size(590, 417);
             this.yamuiPanel1.ResumeLayout(false);
             this.yamuiPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -131,8 +108,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
         #endregion
 
         private YamuiPanel yamuiPanel1;
-        private YamuiComboBox yamuiComboBox3;
-        private YamuiLabel yamuiLabel22;
         private YamuiPanel PanelAccentColor;
         private YamuiLabel yamuiLabel21;
         private YamuiLabel yamuiLabel20;

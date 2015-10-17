@@ -89,12 +89,14 @@ namespace YamuiFramework.Forms {
         }
 
         protected override void Dispose(bool disposing) {
-            Owner.LocationChanged -= Cover_LocationChanged;
-            Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
-            Owner.VisibleChanged -= Cover_OnVisibleChanged;
-            if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
-                int value = 0;
-                DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+            if (Owner != null) {
+                Owner.LocationChanged -= Cover_LocationChanged;
+                Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
+                Owner.VisibleChanged -= Cover_OnVisibleChanged;
+                if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
+                    int value = 0;
+                    DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                }
             }
             base.Dispose(disposing);
         }

@@ -44,12 +44,6 @@ C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\2P2B.dll
 C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\2P2B.pdb
 C:\Work\3PA\3PA\obj\Debug\3PA.csprojResolveAssemblyReference.cache
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.AppliForm.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.Classic.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.ItemControl.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.Progress.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.control.Text.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Navigation.Other.resources
-C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.PageTemplate.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.SettingAppearance.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Data.DataResources.resources
 C:\Work\3PA\3PA\obj\Debug\_3PA.Images.ImageResources.resources
@@ -62,3 +56,5 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3PA\3PA\obj\Debug\3PA.csproj.GenerateResource.Cache
 C:\Work\3PA\3PA\obj\Debug\2P2B.dll
 C:\Work\3PA\3PA\obj\Debug\2P2B.pdb
+C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetEnvironment.resources
+C:\Work\3PA\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.template.resources

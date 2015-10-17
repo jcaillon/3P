@@ -458,8 +458,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 var data = tabCompletedEventArgs.CompletionItem;
 
-                //TODO config to replace all abbrev by complete word
-                Npp.ReplaceKeywordWrapped(data.DisplayText, 0);
+                // in case of keyword, replace abbreviation if needed
+                var replacementText = data.DisplayText;
+                if (Config.Instance.AutocompleteReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
+                    var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
+                    replacementText = fullKeyword ?? data.DisplayText;
+                }
+                Npp.ReplaceKeywordWrapped(replacementText, 0);
 
                 // Remember this item to show it higher in the list later
                 RememberUseOf(data);
@@ -489,7 +494,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
 
             // sort the items, to reflect the latest ranking
-            _form.SortItems();
+            if (_form != null)
+                _form.SortItems();
         }
 
         #region _form handler

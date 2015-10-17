@@ -8,6 +8,7 @@ using System.Security;
 using System.Web.UI.Design.WebControls;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
@@ -236,6 +237,56 @@ namespace YamuiFramework.Forms {
 
         private YamuiTabControl GetSelectSecondaryTabControl(YamuiTabControl mainControl) {
             return (YamuiTabControl)ControlHelper.GetFirst(mainControl.TabPages[mainControl.SelectedIndex], typeof(YamuiTabControl));
+        }
+
+        public void CreateContent(List<YamuiMainMenuTab> menuDescriber) {
+
+            var mainTabControl = new YamuiTabControl {
+                Dock = DockStyle.Fill,
+                Function = TabFunction.Main
+            };
+
+            foreach (var yamuiMainMenuTab in menuDescriber) {
+                CreateMainTab(yamuiMainMenuTab, mainTabControl);
+            }
+
+            Controls.Add(mainTabControl);
+        }
+
+        private void CreateMainTab(YamuiMainMenuTab mainTab, YamuiTabControl mainTabControl) {
+            var mainTabPage = new YamuiTabPage {
+                Text = mainTab.Name,
+                Dock = DockStyle.Fill,
+                Function = TabFunction.Main,
+                HiddenPage = mainTab.Hidden,
+                Name = mainTab.PageName,
+                TabStop = true
+            };
+
+            var secTabControl = new YamuiTabControl {
+                Dock = DockStyle.Fill,
+                Function = TabFunction.Secondary,
+                TabStop = true
+            };
+            
+            foreach (var yamuiSecMenuTab in mainTab.SecTabs) {
+                var secTabPage = new YamuiTabPage {
+                    Dock = DockStyle.Fill,
+                    Function = TabFunction.Secondary,
+                    Text = yamuiSecMenuTab.Name,
+                    Name = yamuiSecMenuTab.PageName,
+                    Padding = new Padding(30, 25, 0, 0),
+                    TabStop = true
+                };
+
+                yamuiSecMenuTab.Page.TabStop = true;
+                yamuiSecMenuTab.Page.Dock = DockStyle.Fill;
+                secTabPage.Controls.Add(yamuiSecMenuTab.Page);
+                secTabControl.Controls.Add(secTabPage);
+            }
+
+            mainTabPage.Controls.Add(secTabControl);
+            mainTabControl.Controls.Add(mainTabPage);
         }
         #endregion
 
@@ -660,6 +711,31 @@ namespace YamuiFramework.Forms {
         }
         #endregion
     }
+
+    public class YamuiMainMenuTab {
+        public string Name { get; private set; }
+        public string PageName { get; private set; }
+        public bool Hidden { get; private set; }
+        public List<YamuiSecMenuTab> SecTabs { get; private set; }
+        public YamuiMainMenuTab(string name, string pageName, bool hidden, List<YamuiSecMenuTab> secTabs) {
+            this.Name = name;
+            Hidden = hidden;
+            SecTabs = secTabs;
+            PageName = pageName;
+        }
+    }
+
+    public class YamuiSecMenuTab {
+        public string Name { get; private set; }
+        public string PageName { get; private set; }
+        public YamuiPage Page { get; private set; }
+        public YamuiSecMenuTab(string name, string pageName, YamuiPage page) {
+            this.Name = name;
+            Page = page;
+            PageName = pageName;
+        }
+    }
+    
 
     internal class YamuiFormDesigner : FormViewDesigner {
         protected override void PreFilterProperties(IDictionary properties) {

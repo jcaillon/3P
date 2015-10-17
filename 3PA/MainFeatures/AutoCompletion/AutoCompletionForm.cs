@@ -422,13 +422,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     fastOLV.SelectedIndex--;
                 else
                     fastOLV.SelectedIndex = (TotalItems - 1);
-                fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+                if (fastOLV.SelectedIndex >= 0)
+                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } else if (key == Keys.Down) {
                 if (fastOLV.SelectedIndex < (TotalItems - 1))
                     fastOLV.SelectedIndex++;
                 else
                     fastOLV.SelectedIndex = 0;
-                fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+                if (fastOLV.SelectedIndex >= 0)
+                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
 
                 // escape close
             } else if (key == Keys.Escape) {
@@ -497,15 +499,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
             nbitems.Text = TotalItems + StrItems;
 
             // if the selected row is > to number of items, then there will be a unselect
-            try {
-                // # it creates a visual glitch and is not worth it afterall
-                if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
-                    Keyword.Width = _normalWidth;
-                if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
+            if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
+                Keyword.Width = _normalWidth;
+            if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
+            if (fastOLV.SelectedIndex >= 0)
                 fastOLV.EnsureVisible(fastOLV.SelectedIndex);
-            } catch (Exception) {
-                // ignored
-            }
         }
 
         /// <summary>
@@ -529,6 +527,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);
                 // check for the definition line
                 output = output && _currentLineNumber >= compData.ParsedItem.Line;
+
+                // for labels, only dislay them in the block which they label
+                if (compData.ParsedItem is ParsedLabel)
+                    output = output && _currentLineNumber <= ((ParsedLabel)compData.ParsedItem).UndefinedLine;
 
             } else if (compData.ParsedItem is ParsedPreProc) {
                 // if preproc, check line of definition and undefine

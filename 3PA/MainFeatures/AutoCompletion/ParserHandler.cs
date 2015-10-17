@@ -86,15 +86,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Monitor.TryEnter(_parserLock, 500, ref lockTaken);
                 if (!lockTaken) return;
 
-                //------------
-                // TODO: DELETE MEASURE
-                var watch = Stopwatch.StartNew();
-                //------------
-
                 _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath(), null, DataBase.GetTablesDictionary());
                 ParsedItemsList.Clear();
                 ParsedExplorerItemsList.Clear();
-                var parserVisitor = new ParserVisitor(true, Npp.GetCurrentFileName());
+                var parserVisitor = new ParserVisitor(true, Npp.GetCurrentFileName(), _ablParser.GetLineInfo);
                 _ablParser.Accept(parserVisitor);
 
                 // correct the internal/external type of run statements :
@@ -103,11 +98,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
 
-                //--------------
-                watch.Stop();
-                //UserCommunication.Notify("Parsed in " + watch.ElapsedMilliseconds + " ms", 2);
-                //------------
-            
+                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                    if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
+                        item.IconType = CodeExplorerIconType.RunInternal;
+                }
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
             } finally {

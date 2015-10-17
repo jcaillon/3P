@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.Appli.Pages.Navigation {
-    partial class Other {
+namespace _3PA.MainFeatures.Appli.Pages {
+    partial class template {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -27,13 +27,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Navigation {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
-            this.yamuiButton6 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // yamuiPanel1
             // 
-            this.yamuiPanel1.Controls.Add(this.yamuiButton6);
             this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
@@ -44,23 +41,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Navigation {
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
             // 
-            // yamuiButton6
-            // 
-            this.yamuiButton6.Location = new System.Drawing.Point(0, 0);
-            this.yamuiButton6.Name = "yamuiButton6";
-            this.yamuiButton6.Size = new System.Drawing.Size(100, 23);
-            this.yamuiButton6.TabIndex = 2;
-            this.yamuiButton6.Text = "TaskWindow";
-            this.yamuiButton6.Click += new System.EventHandler(this.yamuiButton6_Click);
-            // 
-            // Other
+            // PageTemplate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel1);
-            this.Name = "Other";
+            this.Name = "SetEnvironment";
             this.Size = new System.Drawing.Size(715, 315);
-            this.yamuiPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -68,6 +55,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Navigation {
         #endregion
 
         private YamuiPanel yamuiPanel1;
-        private YamuiButton yamuiButton6;
     }
 }

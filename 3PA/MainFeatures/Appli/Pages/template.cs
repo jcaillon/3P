@@ -2,17 +2,15 @@
 using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.Appli.Pages {
-    public partial class PageTemplate : YamuiPage {
+    public partial class template : YamuiPage {
 
         #region fields
-        private Form _ownerForm;
+
         #endregion
 
-
         #region constructor
-        public PageTemplate() {
+        public template() {
             InitializeComponent();
-            _ownerForm = FindForm();
         }
         #endregion
 
