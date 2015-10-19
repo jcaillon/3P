@@ -76,7 +76,6 @@ namespace _3PA.MainFeatures.Appli {
             this.yamuiLink6.Name = "yamuiLink6";
             this.yamuiLink6.Size = new System.Drawing.Size(57, 17);
             this.yamuiLink6.TabIndex = 12;
-            this.yamuiLink6.TabStop = false;
             this.yamuiLink6.Text = "SETTINGS";
             this.yamuiLink6.Click += new System.EventHandler(this.yamuiLink6_Click);
             // 
@@ -100,7 +99,6 @@ namespace _3PA.MainFeatures.Appli {
             this.yamuiLink7.Name = "yamuiLink7";
             this.yamuiLink7.Size = new System.Drawing.Size(43, 17);
             this.yamuiLink7.TabIndex = 10;
-            this.yamuiLink7.TabStop = false;
             this.yamuiLink7.Text = "ABOUT";
             this.yamuiLink7.Click += new System.EventHandler(this.yamuiLink7_Click);
             // 
@@ -112,16 +110,16 @@ namespace _3PA.MainFeatures.Appli {
             this.yamuiLink8.Name = "yamuiLink8";
             this.yamuiLink8.Size = new System.Drawing.Size(32, 17);
             this.yamuiLink8.TabIndex = 9;
-            this.yamuiLink8.TabStop = false;
             this.yamuiLink8.Text = "HELP";
             this.yamuiLink8.Click += new System.EventHandler(this.yamuiLink8_Click);
             // 
             // statusLabel
             // 
-            this.statusLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.statusLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.statusLabel.Location = new System.Drawing.Point(1, 580);
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(760, 17);
+            this.statusLabel.Size = new System.Drawing.Size(676, 21);
             this.statusLabel.TabIndex = 12;
             this.statusLabel.Text = "yamuiLabel1";
             // 
@@ -129,7 +127,10 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.labelTitle.BackColor = System.Drawing.Color.Transparent;
             this.labelTitle.BaseStylesheet = null;
-            this.labelTitle.Location = new System.Drawing.Point(5, 4);
+            this.labelTitle.Enabled = false;
+            this.labelTitle.IsContextMenuEnabled = false;
+            this.labelTitle.IsSelectionEnabled = false;
+            this.labelTitle.Location = new System.Drawing.Point(11, 6);
             this.labelTitle.Name = "labelTitle";
             this.labelTitle.Size = new System.Drawing.Size(59, 15);
             this.labelTitle.TabIndex = 13;

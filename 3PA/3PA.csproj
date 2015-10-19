@@ -250,6 +250,8 @@
   <ItemGroup>
     <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Html\StyleSheet.css" />
+    <Content Include="Images\Appli\OpenInExplorer.png" />
+    <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
@@ -292,6 +294,7 @@
     <Content Include="Images\DockableExplorer\Type\FunctionCallInternal.png" />
     <Content Include="Images\DockableExplorer\Type\Include.png" />
     <Content Include="Images\DockableExplorer\Type\PreprocessorBlock.png" />
+    <Content Include="Images\DockableExplorer\Type\ProgramParameter.png" />
     <Content Include="Images\DockableExplorer\Type\Prototype.png" />
     <Content Include="Images\DockableExplorer\Type\RunExternal.png" />
     <Content Include="Images\DockableExplorer\Type\RunInternal.png" />

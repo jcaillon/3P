@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.PanelAccentColor.Location = new System.Drawing.Point(0, 101);
             this.PanelAccentColor.Margin = new System.Windows.Forms.Padding(0);
             this.PanelAccentColor.Name = "PanelAccentColor";
-            this.PanelAccentColor.Size = new System.Drawing.Size(584, 234);
+            this.PanelAccentColor.Size = new System.Drawing.Size(590, 179);
             this.PanelAccentColor.TabIndex = 10;
             this.PanelAccentColor.VerticalScrollbarHighlightOnWheel = false;
             this.PanelAccentColor.VerticalScrollbarSize = 10;

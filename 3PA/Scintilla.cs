@@ -6,6 +6,8 @@ using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA {
     /// <summary>
@@ -266,9 +268,6 @@ namespace _3PA {
         public static int SetTextByRange(int start, int end, string text) {
             SetTargetRange(start, end);
             if (IsUtf8()) text = text.Utf8ToAnsi();
-            // If length is -1, text is a zero terminated string, otherwise length sets the number of character to replace 
-            // the target with. After replacement, the target range refers to the replacement text. The return value is the 
-            // length of the replacement string.
             return Call(SciMsg.SCI_REPLACETARGET, text.Length, text);
         }
 

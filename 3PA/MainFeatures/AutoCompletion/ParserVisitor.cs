@@ -329,6 +329,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 switch (pars.Type) {
                     case ParseDefineType.Parameter:
                         type = CompletionType.VariablePrimitive;
+                        // To code explorer, program parameters
+                        if (_isBaseFile && pars.Scope == ParsedScope.File)
+                            ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                                DisplayText = pars.Name,
+                                Branch = CodeExplorerBranch.ProgramParameter,
+                                IconType = CodeExplorerIconType.Parameter,
+                                SubString = subString,
+                                GoToLine = pars.Line,
+                                IsNotBlock = true
+                            });
                         break;
                     case ParseDefineType.Variable:
                         if (!string.IsNullOrEmpty(pars.ViewAs))

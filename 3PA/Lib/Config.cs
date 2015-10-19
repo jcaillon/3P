@@ -48,7 +48,7 @@ namespace _3PA.Lib {
         public bool CodeExplorerUseAlternateColors = false;
         public bool CodeExplorerVisible = true;
         [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")]
-        public string CodeExplorerPriorityList = "0,1,2,6,3,4,5,7,8,9,10,11";
+        public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
 
 
         public double AppliOpacityUnfocused = 0.5;

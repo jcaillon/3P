@@ -107,6 +107,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
+            FormIntegration.UnRegisterToNpp(Handle);
             Tag = true;
             Close();
         }

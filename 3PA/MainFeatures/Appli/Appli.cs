@@ -1,5 +1,4 @@
 ﻿using System;
-using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.Appli {
     class Appli {

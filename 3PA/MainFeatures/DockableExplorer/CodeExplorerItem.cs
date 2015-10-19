@@ -105,6 +105,9 @@ namespace _3PA.MainFeatures.DockableExplorer {
         Browse,
         [CodeExplorerTypeAttr(DisplayText = "Tables used")]
         TableUsed,
+        [CodeExplorerTypeAttr(DisplayText = "Program parameters")]
+        ProgramParameter,
+        
     }
 
     /// <summary>
@@ -124,7 +127,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
         RunInternal,
         RunExternal,
         Table,
-        TempTable
+        TempTable,
+        Parameter
     }
 
     [Flags]

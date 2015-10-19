@@ -1,3 +1,21 @@
+// ========================================================================
+// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// This file is part of 3P.
+
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -350,12 +368,16 @@ namespace _3PA {
                 //TODO: if multiselection, replace everywhere!
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
+                    // replace abbreviation by completekeyword
+                    if (Config.Instance.AutocompleteReplaceAbbreviations) {
+                        var fullKeyword = Keywords.GetFullKeyword(keyword);
+                        if (fullKeyword != null)
+                            Npp.ReplaceKeywordWrapped(fullKeyword, -offset);
+                    }
 
-                    // automaticcally insert selected keyword of the completion list
+                    // automatically insert selected keyword of the completion list
                     if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && AutoComplete.LastSelectItemDisplayText != null) {
-                        var curSel = AutoComplete.GetCurrentSuggestion();
-                        if (curSel != null)
-                            Npp.ReplaceKeywordWrapped(AutoComplete.LastSelectItemDisplayText, -offset);
+                        Npp.ReplaceKeywordWrapped(AutoComplete.LastSelectItemDisplayText, -offset);
                         AutoComplete.UpdateAutocompletion();
                     }
 
@@ -364,13 +386,6 @@ namespace _3PA {
                         var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                         if (casedKeyword != null)
                             Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
-                    }
-
-                    // replace abbreviation by completekeyword
-                    if (Config.Instance.AutocompleteReplaceAbbreviations) {
-                        var fullKeyword = Keywords.GetFullKeyword(keyword);
-                        if (fullKeyword != null)
-                            Npp.ReplaceKeywordWrapped(fullKeyword, -offset);
                     }
                 }
                 

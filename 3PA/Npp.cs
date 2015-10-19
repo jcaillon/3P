@@ -90,7 +90,19 @@ namespace _3PA {
             get { return new WindowWrapper(HandleNpp); }
         }
 
+        public static void SaveCurrentSession(string file) {
+            Win32.SendMessage(HandleNpp,  NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
+        }
 
+        public static void LoadCurrentSession(string file) {
+            Win32.SendMessage(HandleNpp,  NppMsg.NPPM_LOADSESSION, 0, file);
+        }
+
+        /// <summary>
+        /// Helper to add a clickable icon in the toolbar
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="pluginId"></param>
         public static void SetToolbarImage(Bitmap image, int pluginId) {
             var tbIcons = new toolbarIcons { hToolbarBmp = image.GetHbitmap() };
             var pTbIcons = Marshal.AllocHGlobal(Marshal.SizeOf(tbIcons));

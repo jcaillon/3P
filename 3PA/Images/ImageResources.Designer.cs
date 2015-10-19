@@ -443,6 +443,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap OpenInExplorer {
+            get {
+                object obj = ResourceManager.GetObject("OpenInExplorer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Parameter {
             get {
                 object obj = ResourceManager.GetObject("Parameter", resourceCulture);
@@ -486,6 +496,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Procedure {
             get {
                 object obj = ResourceManager.GetObject("Procedure", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap ProgramParameter {
+            get {
+                object obj = ResourceManager.GetObject("ProgramParameter", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -566,6 +586,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap RuntimeBlock {
             get {
                 object obj = ResourceManager.GetObject("RuntimeBlock", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap SelectFile {
+            get {
+                object obj = ResourceManager.GetObject("SelectFile", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

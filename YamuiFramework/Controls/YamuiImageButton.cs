@@ -40,6 +40,9 @@ namespace YamuiFramework.Controls {
                 Color borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
+                if (DesignMode)
+                    backColor = Color.Fuchsia;
+
                 // draw background
                 using (SolidBrush b = new SolidBrush(backColor)) {
                     e.Graphics.FillRectangle(b, ClientRectangle);

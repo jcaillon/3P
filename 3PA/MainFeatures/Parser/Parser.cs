@@ -96,7 +96,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // add missing values to the line dictionnary
-            var current = new LineInfo(_lexer.MaxLine - 1, ParsedScope.File, defaultOwnerName);
+            var current = new LineInfo(GetCurrentDepth(), ParsedScope.File, defaultOwnerName);
             for (int i = _lexer.MaxLine - 1; i >= 0; i--) {
                 if (_lineInfo.ContainsKey(i))
                     current = _lineInfo[i];
@@ -302,31 +302,26 @@ namespace _3PA.MainFeatures.Parser {
                 // match a label if there was only one word followed by : in the statement
                 if (_context.StatementWordCount == 1 && _context.FirstWordToken != null && token.Value.Equals(":"))
                     CreateParsedLabel();
-                NewStatement();
+                NewStatement(token);
             }
         }
 
         /// <summary>
         /// called when a Eos token is found, store information on the statement's line
         /// </summary>
-        private void NewStatement() {
-
-            var depth = 0;
-            var lastLine = -1;
-            bool lastStackThenDo = false;
-            foreach (var blockInfo in _context.BlockStack) {
-                if (blockInfo.LineTriggerWord != lastLine) 
-                    depth++;
-                else if (depth == 1) 
-                    lastStackThenDo = true;
-                lastLine = blockInfo.LineTriggerWord;
-            }
-            if (depth > 0 && _context.BlockStack.Peek().LineStart == _context.StatementStartLine && !lastStackThenDo) 
-                depth--;
+        private void NewStatement(Token token) {
 
             // remember the blockDepth of the current token's line (add block depth if the statement started after else of then)
+            var depth = GetCurrentDepth();
             if (!_lineInfo.ContainsKey(_context.StatementStartLine))
                 _lineInfo.Add(_context.StatementStartLine, new LineInfo(depth, _context.Scope, _context.OwnerName));
+
+            // add missing values to the line dictionnary
+            if (token.Line > _context.StatementStartLine) {
+                for (int i = _context.StatementStartLine + 1; i <= token.Line; i++)
+                    if (!_lineInfo.ContainsKey(i))
+                        _lineInfo.Add(i, new LineInfo(depth + 1, _context.Scope, _context.OwnerName));
+            }
 
             // Pop all the then/else blocks that are on top
             if (_context.BlockStack.Count > 0 && _context.BlockStack.Peek().StatementNumber != _context.StatementCount)
@@ -340,6 +335,26 @@ namespace _3PA.MainFeatures.Parser {
             _context.StatementWordCount = 0;
             _context.StatementStartLine = -1;
             _context.FirstWordToken = null;
+        }
+
+        /// <summary>
+        /// Returns the current block depth
+        /// </summary>
+        /// <returns></returns>
+        private int GetCurrentDepth() {
+            var depth = 0;
+            var lastLine = -1;
+            bool lastStackThenDo = false;
+            foreach (var blockInfo in _context.BlockStack) {
+                if (blockInfo.LineTriggerWord != lastLine)
+                    depth++;
+                else if (depth == 1)
+                    lastStackThenDo = true;
+                lastLine = blockInfo.LineTriggerWord;
+            }
+            if (depth > 0 && _context.BlockStack.Peek().LineStart == _context.StatementStartLine && !lastStackThenDo)
+                depth--;
+            return depth;
         }
 
         /// <summary>

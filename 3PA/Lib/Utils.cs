@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Windows.Forms;
 using System.Xml.Serialization;
 using _3PA.Interop;
 
@@ -10,6 +11,53 @@ namespace _3PA.Lib {
     /// <summary>
     /// </summary>
     public static class Utils {
+
+        /// <summary>
+        /// Shows a dialog that allows the user to pick a file
+        /// </summary>
+        /// <param name="initialFile"></param>
+        /// <returns></returns>
+        public static string ShowFileSelection(string initialFile) {
+            OpenFileDialog dialog = new OpenFileDialog();
+            dialog.Multiselect = false;
+            dialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
+            var initialFolder = Path.GetDirectoryName(initialFile);
+            if (Directory.Exists(initialFolder))
+                dialog.InitialDirectory = initialFolder;
+            if (File.Exists(initialFile))
+                dialog.FileName = initialFile;
+            dialog.Title = "Select a text file";
+            if (dialog.ShowDialog() == DialogResult.OK) {
+                return dialog.FileName;
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Show a dialog that allows the user to pick a folder
+        /// </summary>
+        /// <param name="initialFolder"></param>
+        /// <returns></returns>
+        public static string ShowFolderSelection(string initialFolder) {
+            var fbd = new FolderBrowserDialog();
+            if (Directory.Exists(initialFolder))
+                fbd.SelectedPath = initialFolder;
+            if (fbd.ShowDialog() == DialogResult.OK) {
+                return fbd.SelectedPath;
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Opens a file's folder and select the file in it
+        /// </summary>
+        /// <param name="filePath"></param>
+        public static void OpenFileInFolder(string filePath) {
+            if (!File.Exists(filePath))
+                return;
+            string argument = "/select, \"" + filePath + "\"";
+            System.Diagnostics.Process.Start("explorer.exe", argument);
+        }
 
         public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original

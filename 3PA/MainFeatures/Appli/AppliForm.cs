@@ -7,6 +7,7 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -33,23 +34,27 @@ namespace _3PA.MainFeatures.Appli {
             // create the tabs / content
             var content = new List<YamuiMainMenuTab> {
                 new YamuiMainMenuTab("Set", "set", false, new List<YamuiSecMenuTab>() {
-                    new YamuiSecMenuTab("Environment", "environment", new SetEnvironment())
+                    new YamuiSecMenuTab("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
                 new YamuiMainMenuTab("Options", "options", true, new List<YamuiSecMenuTab>() {
-                    new YamuiSecMenuTab("Appearances", "appearances", new SettingAppearance())
+                    new YamuiSecMenuTab("APPEARANCES", "appearances", new SettingAppearance())
                 }),
             };
             CreateContent(content);
 
             // title
-            labelTitle.Text = @"<b>3</b>P : <b>P</b>rogress <b>P</b>rogrammers <b>P</b>al";
+            labelTitle.Text = @"<span style='font-size: 18px'><b>3</b>P : <b>P</b>rogress <b>P</b>rogrammers <b>P</b>al</span>";
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
 
+            // reorder tab indexes
+            (new TabOrderManager(this)).SetTabOrder(TabOrderManager.TabScheme.AcrossFirst);
+
             Opacity = 0;
             Visible = false;
             Tag = false;
+            KeyPreview = true;
         }
 
         #endregion
@@ -75,6 +80,7 @@ namespace _3PA.MainFeatures.Appli {
         /// Call this method instead of Close() to really close this form
         /// </summary>
         public void ForceClose() {
+            FormIntegration.UnRegisterToNpp(Handle);
             Tag = true;
             Close();
         }
@@ -128,6 +134,19 @@ namespace _3PA.MainFeatures.Appli {
             Cloack();
         }
         #endregion
+
+        #region events
+
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
+            if (e.Alt && e.KeyCode == Keys.Space) {
+                Cloack();
+                e.IsInputKey = false;
+            }
+            base.OnPreviewKeyDown(e);
+        }
+
+        #endregion
+
 
         private void yamuiLink6_Click(object sender, EventArgs e) {
             GoToPage("appearances");

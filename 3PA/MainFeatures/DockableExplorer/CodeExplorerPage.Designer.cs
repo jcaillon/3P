@@ -46,9 +46,10 @@
             // buttonSort
             // 
             this.buttonSort.BackGrndImage = null;
-            this.buttonSort.Location = new System.Drawing.Point(53, 4);
+            this.buttonSort.Location = new System.Drawing.Point(43, 4);
+            this.buttonSort.Margin = new System.Windows.Forms.Padding(0);
             this.buttonSort.Name = "buttonSort";
-            this.buttonSort.Size = new System.Drawing.Size(25, 25);
+            this.buttonSort.Size = new System.Drawing.Size(20, 20);
             this.buttonSort.TabIndex = 12;
             this.buttonSort.TabStop = false;
             this.buttonSort.Text = "yamuiImageButton2";
@@ -58,7 +59,7 @@
             this.buttonRefresh.BackGrndImage = null;
             this.buttonRefresh.Location = new System.Drawing.Point(3, 4);
             this.buttonRefresh.Name = "buttonRefresh";
-            this.buttonRefresh.Size = new System.Drawing.Size(25, 25);
+            this.buttonRefresh.Size = new System.Drawing.Size(20, 20);
             this.buttonRefresh.TabIndex = 11;
             this.buttonRefresh.TabStop = false;
             this.buttonRefresh.Text = "yamuiImageButton2";
@@ -67,9 +68,10 @@
             // 
             this.buttonCleanText.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.buttonCleanText.BackGrndImage = null;
-            this.buttonCleanText.Location = new System.Drawing.Point(277, 4);
+            this.buttonCleanText.Location = new System.Drawing.Point(281, 4);
+            this.buttonCleanText.Margin = new System.Windows.Forms.Padding(0);
             this.buttonCleanText.Name = "buttonCleanText";
-            this.buttonCleanText.Size = new System.Drawing.Size(25, 25);
+            this.buttonCleanText.Size = new System.Drawing.Size(20, 20);
             this.buttonCleanText.TabIndex = 10;
             this.buttonCleanText.TabStop = false;
             this.buttonCleanText.Text = "yamuiImageButton2";
@@ -77,9 +79,9 @@
             // buttonExpandRetract
             // 
             this.buttonExpandRetract.BackGrndImage = null;
-            this.buttonExpandRetract.Location = new System.Drawing.Point(28, 4);
+            this.buttonExpandRetract.Location = new System.Drawing.Point(23, 4);
             this.buttonExpandRetract.Name = "buttonExpandRetract";
-            this.buttonExpandRetract.Size = new System.Drawing.Size(25, 25);
+            this.buttonExpandRetract.Size = new System.Drawing.Size(20, 20);
             this.buttonExpandRetract.TabIndex = 9;
             this.buttonExpandRetract.TabStop = false;
             this.buttonExpandRetract.Text = "yamuiImageButton1";
@@ -99,13 +101,13 @@
             this.ovlTree.FullRowSelect = true;
             this.ovlTree.HeaderMaximumHeight = 0;
             this.ovlTree.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
-            this.ovlTree.Location = new System.Drawing.Point(3, 35);
+            this.ovlTree.Location = new System.Drawing.Point(3, 30);
             this.ovlTree.MultiSelect = false;
             this.ovlTree.Name = "ovlTree";
             this.ovlTree.OwnerDraw = true;
             this.ovlTree.RowHeight = 20;
             this.ovlTree.ShowGroups = false;
-            this.ovlTree.Size = new System.Drawing.Size(299, 168);
+            this.ovlTree.Size = new System.Drawing.Size(299, 173);
             this.ovlTree.TabIndex = 8;
             this.ovlTree.TabStop = false;
             this.ovlTree.UseCompatibleStateImageBehavior = false;
@@ -127,13 +129,14 @@
             this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxFilter.Lines = new string[0];
-            this.textBoxFilter.Location = new System.Drawing.Point(84, 4);
+            this.textBoxFilter.Location = new System.Drawing.Point(68, 4);
+            this.textBoxFilter.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.textBoxFilter.MaxLength = 32767;
             this.textBoxFilter.Name = "textBoxFilter";
             this.textBoxFilter.PasswordChar = '\0';
             this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textBoxFilter.SelectedText = "";
-            this.textBoxFilter.Size = new System.Drawing.Size(187, 25);
+            this.textBoxFilter.Size = new System.Drawing.Size(208, 20);
             this.textBoxFilter.TabIndex = 7;
             this.textBoxFilter.TabStop = false;
             this.textBoxFilter.WaterMark = "Filter here!";
