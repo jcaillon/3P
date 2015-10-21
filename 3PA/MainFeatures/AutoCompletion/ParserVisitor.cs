@@ -101,15 +101,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFoundTableUse pars) {
-            if (_isBaseFile)
+            if (_isBaseFile) {
+                bool missingDbName = pars.Name.IndexOf('.') < 0;
+                var name = pars.Name.Split('.');
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
-                    DisplayText = pars.Name,
+                    DisplayText = missingDbName ? pars.Name : name[1],
                     Branch = CodeExplorerBranch.TableUsed,
                     IconType = CodeExplorerIconType.Table,
                     GoToLine = pars.Line,
-                    Flag = pars.Name.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName,
+                    Flag = missingDbName ? CodeExplorerFlag.MissingDbName : 0,
                     IsNotBlock = true
                 });
+            }
         }
 
         /// <summary>

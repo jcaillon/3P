@@ -345,7 +345,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
                 case 0:
                     return _items.Where(expItem => expItem.Branch == item.Branch && expItem.Level == 1).ToList();
                 case 1:
-                    return _items.Where(expItem => expItem.Branch == item.Branch && expItem.Level == 2 && expItem.DisplayText.EqualsCi(item.DisplayText)).ToList();
+                    return _items.Where(expItem => expItem.Branch == item.Branch && 
+                        expItem.Level == 2 && 
+                        expItem.IconType == item.IconType &&
+                        expItem.DisplayText.EqualsCi(item.DisplayText)).ToList();
             }
 
             return new List<CodeExplorerItem>();

@@ -66,6 +66,9 @@ namespace _3PA.Lib {
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
+        public string EnvCurrentAppli = "";
+        public string EnvCurrentEnvLetter = "";
+        public string EnvCurrentDatabase = "";
 
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;

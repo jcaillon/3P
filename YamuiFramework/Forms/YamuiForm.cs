@@ -209,7 +209,10 @@ namespace YamuiFramework.Forms {
             var lastPage = _formHistory.Last();
             GoToPage(lastPage[0], lastPage[1]);
             _formHistory.Remove(_formHistory.Last());
-            if (_formHistory.Count == 0 && _goBackButton != null) _goBackButton.FakeDisabled = true;
+            if (_formHistory.Count == 0 && _goBackButton != null) {
+                _goBackButton.FakeDisabled = true;
+                _goBackButton.TabStop = false;
+            }
         }
 
         /// <summary>
@@ -228,7 +231,10 @@ namespace YamuiFramework.Forms {
                 if (lastPage[0] == pageMainInt && lastPage[1] == pageSecInt) return;
             }
             _formHistory.Add(new[] { pageMainInt, pageSecInt });
-            if (_goBackButton.FakeDisabled) _goBackButton.FakeDisabled = false;
+            if (_goBackButton.FakeDisabled) {
+                _goBackButton.FakeDisabled = false;
+                _goBackButton.TabStop = true;
+            }
         }
 
         private YamuiTabControl GetMainTabControl() {
@@ -239,6 +245,10 @@ namespace YamuiFramework.Forms {
             return (YamuiTabControl)ControlHelper.GetFirst(mainControl.TabPages[mainControl.SelectedIndex], typeof(YamuiTabControl));
         }
 
+        /// <summary>
+        /// allows to automatically generates the tabs/pages
+        /// </summary>
+        /// <param name="menuDescriber"></param>
         public void CreateContent(List<YamuiMainMenuTab> menuDescriber) {
 
             var mainTabControl = new YamuiTabControl {
@@ -309,6 +319,7 @@ namespace YamuiFramework.Forms {
                 Controls.Add(_goBackButton);
                 _goBackButton.Location = new Point(8, Padding.Top + 6);
                 _goBackButton.Size = new Size(27, 27);
+                _goBackButton.TabStop = false;
             }
 
             if (DesignMode) return;

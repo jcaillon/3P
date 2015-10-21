@@ -66,6 +66,13 @@ namespace _3PA.MainFeatures.Parser {
         public Dictionary<int, LineInfo> GetLineInfo { get { return _lineInfo; } }
 
         /// <summary>
+        /// If true the parsing went ok, if false, it means that we matched too much starting block compared to 
+        /// ending block statements (or the opposite), in short, was the parsing OK or not?
+        /// Allows to decide if we can reindent the code or not
+        /// </summary>
+        public bool ParsingOk { get; set; }
+
+        /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
         /// <param name="data"></param>
@@ -83,6 +90,8 @@ namespace _3PA.MainFeatures.Parser {
                 _matchDatabaseTables = false;
             else
                 _databaseTableDictionary = tablesDictionary;
+
+            ParsingOk = true;
 
             // create root item
             if (isRootFile)
@@ -168,7 +177,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "function":
                             // parse a function definition
                             if (CreateParsedFunction(token)) {
-                                //if (_context.BlockStack.Count != 0) UserCommunication.Notify("We should be at zero depth!!");
+                                if (_context.BlockStack.Count != 0) ParsingOk = false;
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
@@ -176,6 +185,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "procedure":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
+                                if (_context.BlockStack.Count != 0) ParsingOk = false;
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
@@ -183,6 +193,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "on":
                             // parse a ON statement
                             if (CreateParsedOnEvent(token)) {
+                                if (_context.BlockStack.Count != 0) ParsingOk = false;
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
@@ -211,13 +222,17 @@ namespace _3PA.MainFeatures.Parser {
                             PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "end":
-                            // decrease block depth
-                            var popped = _context.BlockStack.Pop();
-                            // in case of a then do: we have created 2 stacks for actually the same block, pop them both
-                            if (_context.BlockStack.Count > 0 && 
-                                _context.BlockStack.Peek().BlockType == BlockType.ThenElse &&
-                                popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
-                                _context.BlockStack.Pop();
+                            if (_context.BlockStack.Count > 0) {
+                                // decrease block depth
+                                var popped = _context.BlockStack.Pop();
+
+                                // in case of a then do: we have created 2 stacks for actually the same block, pop them both
+                                if (_context.BlockStack.Count > 0 &&
+                                    _context.BlockStack.Peek().BlockType == BlockType.ThenElse &&
+                                    popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
+                                    _context.BlockStack.Pop();
+                            } else
+                                ParsingOk = false;
 
                             if (_context.BlockStack.Count == 0) {
                                 // end of a proc, func or on event block

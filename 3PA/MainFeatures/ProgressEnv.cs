@@ -66,6 +66,16 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
+        /// Returns the currently selected database's .pf for the current environment
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentPfPath() {
+            return Current.PfPath.ContainsKey(Config.Instance.EnvCurrentDatabase) ?
+                Current.PfPath[Config.Instance.EnvCurrentDatabase] :
+                Current.PfPath.FirstOrDefault().Value;
+        }
+
+        /// <summary>
         /// returns the content of the .ini for the current env
         /// </summary>
         public string GetIniContent {
@@ -75,7 +85,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// returns the propath value for the current env
         /// </summary>
-        public string GetProPath {
+        public static string GetProPath {
             get {
                 if (_currentProPath != null) return _currentProPath;
                 IniReader ini = new IniReader(Current.IniPath);
@@ -90,7 +100,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <param name="fileTofind"></param>
         /// <returns></returns>
-        public string FindFileInPropath(string fileTofind) {
+        public static string FindFileInPropath(string fileTofind) {
             foreach (var item in GetProPath.Split(',')) {
                 string curPath = item;
                 // need to take into account relative paths
@@ -114,7 +124,7 @@ namespace _3PA.MainFeatures {
         public string Appli = "";
         public string EnvLetter = "";
         public string IniPath = "";
-        public string PfPath = "";
+        public Dictionary<string, string> PfPath = new Dictionary<string, string>();
         /// <summary>
         /// Propath for compilation time, we can find the .i there
         /// </summary>

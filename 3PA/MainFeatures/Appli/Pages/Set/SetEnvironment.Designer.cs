@@ -27,28 +27,36 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
-            this.yamuiImageButton9 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiImageButton10 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiTextBox3 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiImageButton7 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiImageButton8 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiTextBox7 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiImageButton5 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiImageButton6 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiTextBox5 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiImageButton3 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiImageButton4 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiTextBox6 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiImageButton2 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiImageButton();
+            this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
+            this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
+            this.btright6 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft6 = new YamuiFramework.Controls.YamuiImageButton();
+            this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
+            this.yamuiLabel8 = new YamuiFramework.Controls.YamuiLabel();
+            this.envLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.cbDatabase = new YamuiFramework.Controls.YamuiComboBox();
+            this.btright1 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft1 = new YamuiFramework.Controls.YamuiImageButton();
+            this.textbox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright5 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft5 = new YamuiFramework.Controls.YamuiImageButton();
+            this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright4 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft4 = new YamuiFramework.Controls.YamuiImageButton();
+            this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright3 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft3 = new YamuiFramework.Controls.YamuiImageButton();
+            this.textbox3 = new YamuiFramework.Controls.YamuiTextBox();
+            this.btright2 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft2 = new YamuiFramework.Controls.YamuiImageButton();
             this.yamuiLabel7 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel6 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiTextBox4 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox2 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.multitextbox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.multibox2 = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
             this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
             this.cbEnvLetter = new YamuiFramework.Controls.YamuiComboBox();
             this.cbAppli = new YamuiFramework.Controls.YamuiComboBox();
@@ -58,28 +66,36 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // yamuiPanel1
             // 
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton9);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton10);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox3);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton7);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton8);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox7);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton5);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton6);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox5);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton3);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton4);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox6);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton2);
-            this.yamuiPanel1.Controls.Add(this.yamuiImageButton1);
+            this.yamuiPanel1.Controls.Add(this.yamuiButton2);
+            this.yamuiPanel1.Controls.Add(this.yamuiButton1);
+            this.yamuiPanel1.Controls.Add(this.btright6);
+            this.yamuiPanel1.Controls.Add(this.btleft6);
+            this.yamuiPanel1.Controls.Add(this.textbox6);
+            this.yamuiPanel1.Controls.Add(this.yamuiLabel8);
+            this.yamuiPanel1.Controls.Add(this.envLabel);
+            this.yamuiPanel1.Controls.Add(this.cbDatabase);
+            this.yamuiPanel1.Controls.Add(this.btright1);
+            this.yamuiPanel1.Controls.Add(this.btleft1);
+            this.yamuiPanel1.Controls.Add(this.textbox1);
+            this.yamuiPanel1.Controls.Add(this.btright5);
+            this.yamuiPanel1.Controls.Add(this.btleft5);
+            this.yamuiPanel1.Controls.Add(this.textbox5);
+            this.yamuiPanel1.Controls.Add(this.btright4);
+            this.yamuiPanel1.Controls.Add(this.btleft4);
+            this.yamuiPanel1.Controls.Add(this.textbox4);
+            this.yamuiPanel1.Controls.Add(this.btright3);
+            this.yamuiPanel1.Controls.Add(this.btleft3);
+            this.yamuiPanel1.Controls.Add(this.textbox3);
+            this.yamuiPanel1.Controls.Add(this.btright2);
+            this.yamuiPanel1.Controls.Add(this.btleft2);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel7);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel6);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel5);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel3);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel2);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox4);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox2);
-            this.yamuiPanel1.Controls.Add(this.yamuiTextBox1);
+            this.yamuiPanel1.Controls.Add(this.multitextbox1);
+            this.yamuiPanel1.Controls.Add(this.multibox2);
+            this.yamuiPanel1.Controls.Add(this.textbox2);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel4);
             this.yamuiPanel1.Controls.Add(this.cbEnvLetter);
             this.yamuiPanel1.Controls.Add(this.cbAppli);
@@ -89,173 +105,255 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(500, 467);
+            this.yamuiPanel1.Size = new System.Drawing.Size(809, 490);
             this.yamuiPanel1.TabIndex = 0;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
             // 
-            // yamuiImageButton9
+            // yamuiButton2
             // 
-            this.yamuiImageButton9.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton9.BackGrndImage = null;
-            this.yamuiImageButton9.Location = new System.Drawing.Point(228, 221);
-            this.yamuiImageButton9.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton9.Name = "yamuiImageButton9";
-            this.yamuiImageButton9.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton9.TabIndex = 39;
-            this.yamuiImageButton9.Text = "yamuiImageButton9";
+            this.yamuiButton2.Location = new System.Drawing.Point(710, 464);
+            this.yamuiButton2.Name = "yamuiButton2";
+            this.yamuiButton2.Size = new System.Drawing.Size(94, 23);
+            this.yamuiButton2.TabIndex = 47;
+            this.yamuiButton2.Text = "Modify";
             // 
-            // yamuiImageButton10
+            // yamuiButton1
             // 
-            this.yamuiImageButton10.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton10.BackGrndImage = null;
-            this.yamuiImageButton10.Location = new System.Drawing.Point(208, 221);
-            this.yamuiImageButton10.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton10.Name = "yamuiImageButton10";
-            this.yamuiImageButton10.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton10.TabIndex = 38;
-            this.yamuiImageButton10.Text = "yamuiImageButton10";
+            this.yamuiButton1.Location = new System.Drawing.Point(610, 464);
+            this.yamuiButton1.Name = "yamuiButton1";
+            this.yamuiButton1.Size = new System.Drawing.Size(94, 23);
+            this.yamuiButton1.TabIndex = 46;
+            this.yamuiButton1.Text = "Add new";
             // 
-            // yamuiTextBox3
+            // btright6
             // 
-            this.yamuiTextBox3.Lines = new string[0];
-            this.yamuiTextBox3.Location = new System.Drawing.Point(18, 221);
-            this.yamuiTextBox3.MaxLength = 32767;
-            this.yamuiTextBox3.Name = "yamuiTextBox3";
-            this.yamuiTextBox3.PasswordChar = '\0';
-            this.yamuiTextBox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox3.SelectedText = "";
-            this.yamuiTextBox3.Size = new System.Drawing.Size(189, 20);
-            this.yamuiTextBox3.TabIndex = 37;
+            this.btright6.BackColor = System.Drawing.Color.Transparent;
+            this.btright6.BackGrndImage = null;
+            this.btright6.Location = new System.Drawing.Point(441, 260);
+            this.btright6.Margin = new System.Windows.Forms.Padding(0);
+            this.btright6.Name = "btright6";
+            this.btright6.Size = new System.Drawing.Size(20, 20);
+            this.btright6.TabIndex = 45;
+            this.btright6.Text = "yamuiImageButton11";
             // 
-            // yamuiImageButton7
+            // btleft6
             // 
-            this.yamuiImageButton7.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton7.BackGrndImage = null;
-            this.yamuiImageButton7.Location = new System.Drawing.Point(480, 221);
-            this.yamuiImageButton7.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton7.Name = "yamuiImageButton7";
-            this.yamuiImageButton7.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton7.TabIndex = 36;
-            this.yamuiImageButton7.Text = "yamuiImageButton7";
+            this.btleft6.BackColor = System.Drawing.Color.Transparent;
+            this.btleft6.BackGrndImage = null;
+            this.btleft6.Location = new System.Drawing.Point(421, 260);
+            this.btleft6.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft6.Name = "btleft6";
+            this.btleft6.Size = new System.Drawing.Size(20, 20);
+            this.btleft6.TabIndex = 44;
+            this.btleft6.Text = "yamuiImageButton12";
             // 
-            // yamuiImageButton8
+            // textbox6
             // 
-            this.yamuiImageButton8.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton8.BackGrndImage = null;
-            this.yamuiImageButton8.Location = new System.Drawing.Point(460, 221);
-            this.yamuiImageButton8.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton8.Name = "yamuiImageButton8";
-            this.yamuiImageButton8.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton8.TabIndex = 35;
-            this.yamuiImageButton8.Text = "yamuiImageButton8";
+            this.textbox6.Lines = new string[0];
+            this.textbox6.Location = new System.Drawing.Point(464, 260);
+            this.textbox6.MaxLength = 32767;
+            this.textbox6.Name = "textbox6";
+            this.textbox6.PasswordChar = '\0';
+            this.textbox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox6.SelectedText = "";
+            this.textbox6.Size = new System.Drawing.Size(340, 20);
+            this.textbox6.TabIndex = 43;
             // 
-            // yamuiTextBox7
+            // yamuiLabel8
             // 
-            this.yamuiTextBox7.Lines = new string[0];
-            this.yamuiTextBox7.Location = new System.Drawing.Point(270, 221);
-            this.yamuiTextBox7.MaxLength = 32767;
-            this.yamuiTextBox7.Name = "yamuiTextBox7";
-            this.yamuiTextBox7.PasswordChar = '\0';
-            this.yamuiTextBox7.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox7.SelectedText = "";
-            this.yamuiTextBox7.Size = new System.Drawing.Size(189, 20);
-            this.yamuiTextBox7.TabIndex = 34;
+            this.yamuiLabel8.AutoSize = true;
+            this.yamuiLabel8.Location = new System.Drawing.Point(464, 242);
+            this.yamuiLabel8.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel8.Name = "yamuiLabel8";
+            this.yamuiLabel8.Size = new System.Drawing.Size(73, 15);
+            this.yamuiLabel8.TabIndex = 42;
+            this.yamuiLabel8.Text = "Log file path";
             // 
-            // yamuiImageButton5
+            // envLabel
             // 
-            this.yamuiImageButton5.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton5.BackGrndImage = null;
-            this.yamuiImageButton5.Location = new System.Drawing.Point(480, 162);
-            this.yamuiImageButton5.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton5.Name = "yamuiImageButton5";
-            this.yamuiImageButton5.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton5.TabIndex = 33;
-            this.yamuiImageButton5.Text = "yamuiImageButton5";
+            this.envLabel.AutoSize = false;
+            this.envLabel.AutoSizeHeightOnly = true;
+            this.envLabel.BackColor = System.Drawing.Color.Transparent;
+            this.envLabel.BaseStylesheet = null;
+            this.envLabel.Location = new System.Drawing.Point(187, 25);
+            this.envLabel.Name = "envLabel";
+            this.envLabel.Size = new System.Drawing.Size(313, 15);
+            this.envLabel.TabIndex = 41;
+            this.envLabel.Text = "?";
             // 
-            // yamuiImageButton6
+            // cbDatabase
             // 
-            this.yamuiImageButton6.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton6.BackGrndImage = null;
-            this.yamuiImageButton6.Location = new System.Drawing.Point(460, 162);
-            this.yamuiImageButton6.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton6.Name = "yamuiImageButton6";
-            this.yamuiImageButton6.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton6.TabIndex = 32;
-            this.yamuiImageButton6.Text = "yamuiImageButton6";
+            this.cbDatabase.ItemHeight = 19;
+            this.cbDatabase.Location = new System.Drawing.Point(18, 116);
+            this.cbDatabase.Name = "cbDatabase";
+            this.cbDatabase.Size = new System.Drawing.Size(189, 25);
+            this.cbDatabase.TabIndex = 40;
+            this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
-            // yamuiTextBox5
+            // btright1
             // 
-            this.yamuiTextBox5.Lines = new string[0];
-            this.yamuiTextBox5.Location = new System.Drawing.Point(270, 162);
-            this.yamuiTextBox5.MaxLength = 32767;
-            this.yamuiTextBox5.Name = "yamuiTextBox5";
-            this.yamuiTextBox5.PasswordChar = '\0';
-            this.yamuiTextBox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox5.SelectedText = "";
-            this.yamuiTextBox5.Size = new System.Drawing.Size(189, 20);
-            this.yamuiTextBox5.TabIndex = 31;
+            this.btright1.BackColor = System.Drawing.Color.Transparent;
+            this.btright1.BackGrndImage = null;
+            this.btright1.Location = new System.Drawing.Point(38, 147);
+            this.btright1.Margin = new System.Windows.Forms.Padding(0);
+            this.btright1.Name = "btright1";
+            this.btright1.Size = new System.Drawing.Size(20, 20);
+            this.btright1.TabIndex = 39;
+            this.btright1.Text = "yamuiImageButton9";
             // 
-            // yamuiImageButton3
+            // btleft1
             // 
-            this.yamuiImageButton3.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton3.BackGrndImage = null;
-            this.yamuiImageButton3.Location = new System.Drawing.Point(480, 115);
-            this.yamuiImageButton3.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton3.Name = "yamuiImageButton3";
-            this.yamuiImageButton3.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton3.TabIndex = 30;
-            this.yamuiImageButton3.Text = "yamuiImageButton3";
+            this.btleft1.BackColor = System.Drawing.Color.Transparent;
+            this.btleft1.BackGrndImage = null;
+            this.btleft1.Location = new System.Drawing.Point(18, 147);
+            this.btleft1.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft1.Name = "btleft1";
+            this.btleft1.Size = new System.Drawing.Size(20, 20);
+            this.btleft1.TabIndex = 38;
+            this.btleft1.Text = "yamuiImageButton10";
             // 
-            // yamuiImageButton4
+            // textbox1
             // 
-            this.yamuiImageButton4.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton4.BackGrndImage = null;
-            this.yamuiImageButton4.Location = new System.Drawing.Point(460, 115);
-            this.yamuiImageButton4.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton4.Name = "yamuiImageButton4";
-            this.yamuiImageButton4.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton4.TabIndex = 29;
-            this.yamuiImageButton4.Text = "yamuiImageButton4";
+            this.textbox1.Lines = new string[0];
+            this.textbox1.Location = new System.Drawing.Point(61, 147);
+            this.textbox1.MaxLength = 32767;
+            this.textbox1.Name = "textbox1";
+            this.textbox1.PasswordChar = '\0';
+            this.textbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox1.SelectedText = "";
+            this.textbox1.Size = new System.Drawing.Size(340, 20);
+            this.textbox1.TabIndex = 37;
             // 
-            // yamuiTextBox6
+            // btright5
             // 
-            this.yamuiTextBox6.Lines = new string[0];
-            this.yamuiTextBox6.Location = new System.Drawing.Point(270, 115);
-            this.yamuiTextBox6.MaxLength = 32767;
-            this.yamuiTextBox6.Name = "yamuiTextBox6";
-            this.yamuiTextBox6.PasswordChar = '\0';
-            this.yamuiTextBox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox6.SelectedText = "";
-            this.yamuiTextBox6.Size = new System.Drawing.Size(189, 20);
-            this.yamuiTextBox6.TabIndex = 28;
+            this.btright5.BackColor = System.Drawing.Color.Transparent;
+            this.btright5.BackGrndImage = null;
+            this.btright5.Location = new System.Drawing.Point(441, 212);
+            this.btright5.Margin = new System.Windows.Forms.Padding(0);
+            this.btright5.Name = "btright5";
+            this.btright5.Size = new System.Drawing.Size(20, 20);
+            this.btright5.TabIndex = 36;
+            this.btright5.Text = "yamuiImageButton7";
             // 
-            // yamuiImageButton2
+            // btleft5
             // 
-            this.yamuiImageButton2.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton2.BackGrndImage = null;
-            this.yamuiImageButton2.Location = new System.Drawing.Point(228, 115);
-            this.yamuiImageButton2.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton2.Name = "yamuiImageButton2";
-            this.yamuiImageButton2.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton2.TabIndex = 27;
-            this.yamuiImageButton2.Text = "yamuiImageButton2";
+            this.btleft5.BackColor = System.Drawing.Color.Transparent;
+            this.btleft5.BackGrndImage = null;
+            this.btleft5.Location = new System.Drawing.Point(421, 212);
+            this.btleft5.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft5.Name = "btleft5";
+            this.btleft5.Size = new System.Drawing.Size(20, 20);
+            this.btleft5.TabIndex = 35;
+            this.btleft5.Text = "yamuiImageButton8";
             // 
-            // yamuiImageButton1
+            // textbox5
             // 
-            this.yamuiImageButton1.BackColor = System.Drawing.Color.Transparent;
-            this.yamuiImageButton1.BackGrndImage = null;
-            this.yamuiImageButton1.Location = new System.Drawing.Point(208, 115);
-            this.yamuiImageButton1.Margin = new System.Windows.Forms.Padding(0);
-            this.yamuiImageButton1.Name = "yamuiImageButton1";
-            this.yamuiImageButton1.Size = new System.Drawing.Size(20, 20);
-            this.yamuiImageButton1.TabIndex = 26;
-            this.yamuiImageButton1.Text = "yamuiImageButton1";
+            this.textbox5.Lines = new string[0];
+            this.textbox5.Location = new System.Drawing.Point(464, 212);
+            this.textbox5.MaxLength = 32767;
+            this.textbox5.Name = "textbox5";
+            this.textbox5.PasswordChar = '\0';
+            this.textbox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox5.SelectedText = "";
+            this.textbox5.Size = new System.Drawing.Size(340, 20);
+            this.textbox5.TabIndex = 34;
+            // 
+            // btright4
+            // 
+            this.btright4.BackColor = System.Drawing.Color.Transparent;
+            this.btright4.BackGrndImage = null;
+            this.btright4.Location = new System.Drawing.Point(441, 164);
+            this.btright4.Margin = new System.Windows.Forms.Padding(0);
+            this.btright4.Name = "btright4";
+            this.btright4.Size = new System.Drawing.Size(20, 20);
+            this.btright4.TabIndex = 33;
+            this.btright4.Text = "yamuiImageButton5";
+            // 
+            // btleft4
+            // 
+            this.btleft4.BackColor = System.Drawing.Color.Transparent;
+            this.btleft4.BackGrndImage = null;
+            this.btleft4.Location = new System.Drawing.Point(421, 164);
+            this.btleft4.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft4.Name = "btleft4";
+            this.btleft4.Size = new System.Drawing.Size(20, 20);
+            this.btleft4.TabIndex = 32;
+            this.btleft4.Text = "yamuiImageButton6";
+            // 
+            // textbox4
+            // 
+            this.textbox4.Lines = new string[0];
+            this.textbox4.Location = new System.Drawing.Point(464, 164);
+            this.textbox4.MaxLength = 32767;
+            this.textbox4.Name = "textbox4";
+            this.textbox4.PasswordChar = '\0';
+            this.textbox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox4.SelectedText = "";
+            this.textbox4.Size = new System.Drawing.Size(340, 20);
+            this.textbox4.TabIndex = 31;
+            // 
+            // btright3
+            // 
+            this.btright3.BackColor = System.Drawing.Color.Transparent;
+            this.btright3.BackGrndImage = null;
+            this.btright3.Location = new System.Drawing.Point(441, 116);
+            this.btright3.Margin = new System.Windows.Forms.Padding(0);
+            this.btright3.Name = "btright3";
+            this.btright3.Size = new System.Drawing.Size(20, 20);
+            this.btright3.TabIndex = 30;
+            this.btright3.Text = "yamuiImageButton3";
+            // 
+            // btleft3
+            // 
+            this.btleft3.BackColor = System.Drawing.Color.Transparent;
+            this.btleft3.BackGrndImage = null;
+            this.btleft3.Location = new System.Drawing.Point(421, 116);
+            this.btleft3.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft3.Name = "btleft3";
+            this.btleft3.Size = new System.Drawing.Size(20, 20);
+            this.btleft3.TabIndex = 29;
+            this.btleft3.Text = "yamuiImageButton4";
+            // 
+            // textbox3
+            // 
+            this.textbox3.Lines = new string[0];
+            this.textbox3.Location = new System.Drawing.Point(464, 116);
+            this.textbox3.MaxLength = 32767;
+            this.textbox3.Name = "textbox3";
+            this.textbox3.PasswordChar = '\0';
+            this.textbox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox3.SelectedText = "";
+            this.textbox3.Size = new System.Drawing.Size(340, 20);
+            this.textbox3.TabIndex = 28;
+            // 
+            // btright2
+            // 
+            this.btright2.BackColor = System.Drawing.Color.Transparent;
+            this.btright2.BackGrndImage = null;
+            this.btright2.Location = new System.Drawing.Point(38, 259);
+            this.btright2.Margin = new System.Windows.Forms.Padding(0);
+            this.btright2.Name = "btright2";
+            this.btright2.Size = new System.Drawing.Size(20, 20);
+            this.btright2.TabIndex = 27;
+            this.btright2.Text = "yamuiImageButton2";
+            // 
+            // btleft2
+            // 
+            this.btleft2.BackColor = System.Drawing.Color.Transparent;
+            this.btleft2.BackGrndImage = null;
+            this.btleft2.Location = new System.Drawing.Point(18, 259);
+            this.btleft2.Margin = new System.Windows.Forms.Padding(0);
+            this.btleft2.Name = "btleft2";
+            this.btleft2.Size = new System.Drawing.Size(20, 20);
+            this.btleft2.TabIndex = 26;
+            this.btleft2.Text = "yamuiImageButton1";
             // 
             // yamuiLabel7
             // 
             this.yamuiLabel7.AutoSize = true;
-            this.yamuiLabel7.Location = new System.Drawing.Point(270, 202);
+            this.yamuiLabel7.Location = new System.Drawing.Point(464, 194);
+            this.yamuiLabel7.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
             this.yamuiLabel7.Name = "yamuiLabel7";
             this.yamuiLabel7.Size = new System.Drawing.Size(103, 15);
             this.yamuiLabel7.TabIndex = 25;
@@ -264,7 +362,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel6
             // 
             this.yamuiLabel6.AutoSize = true;
-            this.yamuiLabel6.Location = new System.Drawing.Point(270, 144);
+            this.yamuiLabel6.Location = new System.Drawing.Point(464, 146);
+            this.yamuiLabel6.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
             this.yamuiLabel6.Name = "yamuiLabel6";
             this.yamuiLabel6.Size = new System.Drawing.Size(157, 15);
             this.yamuiLabel6.TabIndex = 23;
@@ -273,7 +372,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel5
             // 
             this.yamuiLabel5.AutoSize = true;
-            this.yamuiLabel5.Location = new System.Drawing.Point(270, 97);
+            this.yamuiLabel5.Location = new System.Drawing.Point(464, 98);
+            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
             this.yamuiLabel5.Name = "yamuiLabel5";
             this.yamuiLabel5.Size = new System.Drawing.Size(122, 15);
             this.yamuiLabel5.TabIndex = 22;
@@ -282,7 +382,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Location = new System.Drawing.Point(18, 202);
+            this.yamuiLabel3.Location = new System.Drawing.Point(18, 97);
             this.yamuiLabel3.Name = "yamuiLabel3";
             this.yamuiLabel3.Size = new System.Drawing.Size(189, 15);
             this.yamuiLabel3.TabIndex = 21;
@@ -291,53 +391,54 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Location = new System.Drawing.Point(18, 97);
+            this.yamuiLabel2.Location = new System.Drawing.Point(18, 241);
+            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
             this.yamuiLabel2.Name = "yamuiLabel2";
             this.yamuiLabel2.Size = new System.Drawing.Size(213, 15);
             this.yamuiLabel2.TabIndex = 20;
             this.yamuiLabel2.Text = "PROPATH (read from .ini then append)";
             // 
-            // yamuiTextBox4
+            // multitextbox1
             // 
-            this.yamuiTextBox4.DisplayIcon = false;
-            this.yamuiTextBox4.Lines = new string[0];
-            this.yamuiTextBox4.Location = new System.Drawing.Point(18, 249);
-            this.yamuiTextBox4.MaxLength = 32767;
-            this.yamuiTextBox4.Multiline = true;
-            this.yamuiTextBox4.Name = "yamuiTextBox4";
-            this.yamuiTextBox4.PasswordChar = '\0';
-            this.yamuiTextBox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox4.SelectedText = "";
-            this.yamuiTextBox4.Size = new System.Drawing.Size(230, 55);
-            this.yamuiTextBox4.TabIndex = 15;
-            this.yamuiTextBox4.WaterMark = "Appended to the .pf file";
+            this.multitextbox1.DisplayIcon = false;
+            this.multitextbox1.Lines = new string[0];
+            this.multitextbox1.Location = new System.Drawing.Point(18, 173);
+            this.multitextbox1.MaxLength = 32767;
+            this.multitextbox1.Multiline = true;
+            this.multitextbox1.Name = "multitextbox1";
+            this.multitextbox1.PasswordChar = '\0';
+            this.multitextbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.multitextbox1.SelectedText = "";
+            this.multitextbox1.Size = new System.Drawing.Size(383, 55);
+            this.multitextbox1.TabIndex = 15;
+            this.multitextbox1.WaterMark = "Appended to the .pf file";
             // 
-            // yamuiTextBox2
+            // multibox2
             // 
-            this.yamuiTextBox2.DisplayIcon = false;
-            this.yamuiTextBox2.Lines = new string[0];
-            this.yamuiTextBox2.Location = new System.Drawing.Point(18, 144);
-            this.yamuiTextBox2.MaxLength = 32767;
-            this.yamuiTextBox2.Multiline = true;
-            this.yamuiTextBox2.Name = "yamuiTextBox2";
-            this.yamuiTextBox2.PasswordChar = '\0';
-            this.yamuiTextBox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox2.SelectedText = "";
-            this.yamuiTextBox2.Size = new System.Drawing.Size(230, 55);
-            this.yamuiTextBox2.TabIndex = 11;
-            this.yamuiTextBox2.WaterMark = "Appended to the .ini PROPATH";
+            this.multibox2.DisplayIcon = false;
+            this.multibox2.Lines = new string[0];
+            this.multibox2.Location = new System.Drawing.Point(18, 282);
+            this.multibox2.MaxLength = 32767;
+            this.multibox2.Multiline = true;
+            this.multibox2.Name = "multibox2";
+            this.multibox2.PasswordChar = '\0';
+            this.multibox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.multibox2.SelectedText = "";
+            this.multibox2.Size = new System.Drawing.Size(383, 55);
+            this.multibox2.TabIndex = 11;
+            this.multibox2.WaterMark = "Appended to the .ini PROPATH";
             // 
-            // yamuiTextBox1
+            // textbox2
             // 
-            this.yamuiTextBox1.Lines = new string[0];
-            this.yamuiTextBox1.Location = new System.Drawing.Point(18, 115);
-            this.yamuiTextBox1.MaxLength = 32767;
-            this.yamuiTextBox1.Name = "yamuiTextBox1";
-            this.yamuiTextBox1.PasswordChar = '\0';
-            this.yamuiTextBox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox1.SelectedText = "";
-            this.yamuiTextBox1.Size = new System.Drawing.Size(189, 20);
-            this.yamuiTextBox1.TabIndex = 9;
+            this.textbox2.Lines = new string[0];
+            this.textbox2.Location = new System.Drawing.Point(61, 259);
+            this.textbox2.MaxLength = 32767;
+            this.textbox2.Name = "textbox2";
+            this.textbox2.PasswordChar = '\0';
+            this.textbox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textbox2.SelectedText = "";
+            this.textbox2.Size = new System.Drawing.Size(340, 20);
+            this.textbox2.TabIndex = 9;
             // 
             // yamuiLabel4
             // 
@@ -353,19 +454,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbEnvLetter
             // 
             this.cbEnvLetter.ItemHeight = 19;
-            this.cbEnvLetter.Location = new System.Drawing.Point(145, 25);
+            this.cbEnvLetter.Location = new System.Drawing.Point(118, 25);
             this.cbEnvLetter.Name = "cbEnvLetter";
-            this.cbEnvLetter.Size = new System.Drawing.Size(121, 25);
+            this.cbEnvLetter.Size = new System.Drawing.Size(62, 25);
             this.cbEnvLetter.TabIndex = 6;
+            this.cbEnvLetter.SelectionChangeCommitted += new System.EventHandler(this.cbEnvLetter_SelectedIndexChanged);
             // 
             // cbAppli
             // 
             this.cbAppli.ItemHeight = 19;
             this.cbAppli.Location = new System.Drawing.Point(18, 25);
             this.cbAppli.Name = "cbAppli";
-            this.cbAppli.Size = new System.Drawing.Size(121, 25);
+            this.cbAppli.Size = new System.Drawing.Size(94, 25);
             this.cbAppli.TabIndex = 3;
-            this.cbAppli.SelectedIndexChanged += new System.EventHandler(this.yamuiComboBox1_SelectedIndexChanged);
+            this.cbAppli.SelectionChangeCommitted += new System.EventHandler(this.cbAppli_SelectedIndexChanged);
             // 
             // yamuiLabel1
             // 
@@ -384,7 +486,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel1);
             this.Name = "SetEnvironment";
-            this.Size = new System.Drawing.Size(500, 467);
+            this.Size = new System.Drawing.Size(809, 490);
             this.yamuiPanel1.ResumeLayout(false);
             this.yamuiPanel1.PerformLayout();
             this.ResumeLayout(false);
@@ -398,27 +500,35 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiComboBox cbEnvLetter;
         private YamuiComboBox cbAppli;
         private YamuiLabel yamuiLabel4;
-        private YamuiTextBox yamuiTextBox1;
-        private YamuiTextBox yamuiTextBox2;
-        private YamuiTextBox yamuiTextBox4;
+        private YamuiTextBox textbox2;
+        private YamuiTextBox multibox2;
+        private YamuiTextBox multitextbox1;
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel7;
         private YamuiLabel yamuiLabel6;
         private YamuiLabel yamuiLabel5;
-        private YamuiImageButton yamuiImageButton2;
-        private YamuiImageButton yamuiImageButton1;
-        private YamuiImageButton yamuiImageButton9;
-        private YamuiImageButton yamuiImageButton10;
-        private YamuiTextBox yamuiTextBox3;
-        private YamuiImageButton yamuiImageButton7;
-        private YamuiImageButton yamuiImageButton8;
-        private YamuiTextBox yamuiTextBox7;
-        private YamuiImageButton yamuiImageButton5;
-        private YamuiImageButton yamuiImageButton6;
-        private YamuiTextBox yamuiTextBox5;
-        private YamuiImageButton yamuiImageButton3;
-        private YamuiImageButton yamuiImageButton4;
-        private YamuiTextBox yamuiTextBox6;
+        private YamuiImageButton btright2;
+        private YamuiImageButton btleft2;
+        private YamuiImageButton btright1;
+        private YamuiImageButton btleft1;
+        private YamuiTextBox textbox1;
+        private YamuiImageButton btright5;
+        private YamuiImageButton btleft5;
+        private YamuiTextBox textbox5;
+        private YamuiImageButton btright4;
+        private YamuiImageButton btleft4;
+        private YamuiTextBox textbox4;
+        private YamuiImageButton btright3;
+        private YamuiImageButton btleft3;
+        private YamuiTextBox textbox3;
+        private YamuiComboBox cbDatabase;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel envLabel;
+        private YamuiImageButton btright6;
+        private YamuiImageButton btleft6;
+        private YamuiTextBox textbox6;
+        private YamuiLabel yamuiLabel8;
+        private YamuiButton yamuiButton2;
+        private YamuiButton yamuiButton1;
     }
 }

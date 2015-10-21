@@ -593,7 +593,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void OnPaint(PaintEventArgs e) {
             try {
                 Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                Color borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
                 // draw background
@@ -606,15 +605,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     img = Utils.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
                 var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width)/2, (ClientRectangle.Height - img.Height)/2), new Size(img.Width, img.Height));
                 e.Graphics.DrawImage(img, recImg);
-
-                // border
-                recImg = ClientRectangle;
-                recImg.Inflate(-2, -2);
-                if (borderColor != Color.Transparent) {
-                    using (Pen b = new Pen(borderColor, 2f)) {
-                        e.Graphics.DrawRectangle(b, recImg);
-                    }
-                }
             } catch {
                 // ignored
             }

@@ -45,7 +45,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(590, 417);
+            this.yamuiPanel1.Size = new System.Drawing.Size(809, 490);
             this.yamuiPanel1.TabIndex = 0;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.PanelAccentColor.Location = new System.Drawing.Point(0, 101);
             this.PanelAccentColor.Margin = new System.Windows.Forms.Padding(0);
             this.PanelAccentColor.Name = "PanelAccentColor";
-            this.PanelAccentColor.Size = new System.Drawing.Size(590, 179);
+            this.PanelAccentColor.Size = new System.Drawing.Size(809, 136);
             this.PanelAccentColor.TabIndex = 10;
             this.PanelAccentColor.VerticalScrollbarHighlightOnWheel = false;
             this.PanelAccentColor.VerticalScrollbarSize = 10;
@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel1);
             this.Name = "SettingAppearance";
-            this.Size = new System.Drawing.Size(590, 417);
+            this.Size = new System.Drawing.Size(809, 490);
             this.yamuiPanel1.ResumeLayout(false);
             this.yamuiPanel1.PerformLayout();
             this.ResumeLayout(false);

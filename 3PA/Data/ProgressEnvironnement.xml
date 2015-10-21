@@ -5,7 +5,12 @@
     <Appli>BOI</Appli>
     <EnvLetter>A</EnvLetter>
     <IniPath>o:\appli\boia\boidevv1110.ini</IniPath>
-    <PfPath>o:\appli\boia\boidev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>o:\appli\boia\boidev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -54,7 +59,12 @@
     <Appli>BOI</Appli>
     <EnvLetter>B</EnvLetter>
     <IniPath>o:\appli\boib\boidevv1110.ini</IniPath>
-    <PfPath>o:\appli\boib\boidev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>o:\appli\boib\boidev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -103,7 +113,12 @@
     <Appli>BOI</Appli>
     <EnvLetter>J</EnvLetter>
     <IniPath>O:\appli\boij\boidevv1110.ini</IniPath>
-    <PfPath>o:\appli\boij\boidev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>o:\appli\boij\boidev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -152,7 +167,12 @@
     <Appli>COM</Appli>
     <EnvLetter>3</EnvLetter>
     <IniPath>P:\appli\CR23RR~B\comdevv10.ini</IniPath>
-    <PfPath>P:\appli\CR23RR~B\commissi.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\CR23RR~B\commissi.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -177,7 +197,12 @@
     <Appli>COM</Appli>
     <EnvLetter>Z</EnvLetter>
     <IniPath>P:\appli\comz\comdevv10.ini</IniPath>
-    <PfPath>P:\appli\comz\commissi.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\comz\commissi.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -210,7 +235,12 @@
     <Appli>FTE</Appli>
     <EnvLetter>9</EnvLetter>
     <IniPath>P:\appli\tie9\progress.ini</IniPath>
-    <PfPath>P:\appli\tie9\tiers.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\tie9\tiers.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -235,7 +265,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>0</EnvLetter>
     <IniPath>P:\appli\grh0\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grh0\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grh0\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -256,7 +291,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>4</EnvLetter>
     <IniPath>P:\appli\grh4\grhcompil.ini</IniPath>
-    <PfPath>P:\appli\grh4\grhcompil.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grh4\grhcompil.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -277,7 +317,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>5</EnvLetter>
     <IniPath>P:\appli\grh5\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grh5\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grh5\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -298,7 +343,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>8</EnvLetter>
     <IniPath>P:\appli\grh8\grhcompil.ini</IniPath>
-    <PfPath>P:\appli\grh8\grhcompil.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grh8\grhcompil.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -319,7 +369,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>S</EnvLetter>
     <IniPath>p:\appli\grhs\grhdev.ini</IniPath>
-    <PfPath>p:\appli\grhs\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\grhs\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 5000 -zn</CmdLineParameters>
@@ -340,7 +395,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>T</EnvLetter>
     <IniPath>P:\appli\grht\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grht\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grht\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -361,7 +421,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>U</EnvLetter>
     <IniPath>P:\appli\grhu\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grhu\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grhu\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -382,7 +447,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>V</EnvLetter>
     <IniPath>P:\appli\grhv\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grhv\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grhv\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -403,7 +473,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>W</EnvLetter>
     <IniPath>P:\appli\grhw\grhcompil.ini</IniPath>
-    <PfPath>P:\appli\grhw\grhdev69n.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grhw\grhdev69n.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -424,7 +499,12 @@
     <Appli>GRH</Appli>
     <EnvLetter>X</EnvLetter>
     <IniPath>P:\appli\grhx\grhdev.ini</IniPath>
-    <PfPath>P:\appli\grhx\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\grhx\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -445,7 +525,12 @@
     <Appli>MCOGRH</Appli>
     <EnvLetter>M</EnvLetter>
     <IniPath>P:\appli\grh0\grhdev.ini</IniPath>
-    <PfPath>P:\base\mcogrh\yaka.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\base\mcogrh\yaka.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -466,7 +551,12 @@
     <Appli>PER</Appli>
     <EnvLetter>3</EnvLetter>
     <IniPath>P:\appli\per3\perqual.ini</IniPath>
-    <PfPath>p:\appli\per3\personne.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\per3\personne.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -503,7 +593,12 @@
     <Appli>PER</Appli>
     <EnvLetter>Z</EnvLetter>
     <IniPath>P:\appli\perz\perdevv11.ini</IniPath>
-    <PfPath>P:\appli\perz\perz169n_s.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\perz\perz169n_s.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -540,7 +635,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>1</EnvLetter>
     <IniPath>P:\appli\sac1\sacdev.ini</IniPath>
-    <PfPath>P:\appli\sac1\sacdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sac1\sacdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000</CmdLineParameters>
@@ -649,7 +749,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>D</EnvLetter>
     <IniPath>P:\appli\sacd\sacdev11.ini</IniPath>
-    <PfPath>P:\appli\sacd\sacdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sacd\sacdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000</CmdLineParameters>
@@ -758,7 +863,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>E</EnvLetter>
     <IniPath>P:\appli\sace\sacdev.ini</IniPath>
-    <PfPath>P:\appli\sace\sacdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sace\sacdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000</CmdLineParameters>
@@ -871,7 +981,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>G</EnvLetter>
     <IniPath>P:\appli\sacg\sacdev-v11.ini</IniPath>
-    <PfPath>P:\appli\sacg\sacdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sacg\sacdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -976,7 +1091,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>H</EnvLetter>
     <IniPath>P:\appli\sach\sacqual.ini</IniPath>
-    <PfPath>P:\appli\sach\sac_clt.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sach\sac_clt.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -1085,7 +1205,12 @@
     <Appli>SAC</Appli>
     <EnvLetter>K</EnvLetter>
     <IniPath>P:\appli\sack\sacdev.ini</IniPath>
-    <PfPath>P:\appli\sack\sacdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sack\sacdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000</CmdLineParameters>
@@ -1194,7 +1319,12 @@
     <Appli>SAI</Appli>
     <EnvLetter>2</EnvLetter>
     <IniPath>P:\appli\sai2\saidev.ini</IniPath>
-    <PfPath>P:\appli\sai2\saidesk.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sai2\saidesk.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -1247,7 +1377,12 @@
     <Appli>SAI</Appli>
     <EnvLetter>Z</EnvLetter>
     <IniPath>P:\appli\saiz\saidevv10.ini</IniPath>
-    <PfPath>p:\appli\saiz\sai.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\saiz\sai.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters/>
@@ -1352,7 +1487,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>0</EnvLetter>
     <IniPath>P:\appli\sim0\simqual.ini</IniPath>
-    <PfPath>P:\appli\sim0\simqual.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\sim0\simqual.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1373,7 +1513,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>4</EnvLetter>
     <IniPath>p:\appli\grh4\simcompil.ini</IniPath>
-    <PfPath>p:\appli\grh4\grhcompil.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\grh4\grhcompil.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1394,7 +1539,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>8</EnvLetter>
     <IniPath>p:\appli\sim8\simcompil.ini</IniPath>
-    <PfPath>p:\appli\grh8\grhcompil.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\grh8\grhcompil.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1415,7 +1565,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>S</EnvLetter>
     <IniPath>p:\appli\sims\simdev.ini</IniPath>
-    <PfPath>p:\appli\sims\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\sims\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1436,7 +1591,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>T</EnvLetter>
     <IniPath>p:\appli\simt\simcompil.ini</IniPath>
-    <PfPath>p:\appli\simt\simdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\simt\simdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1457,7 +1617,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>U</EnvLetter>
     <IniPath>p:\appli\simu\simqual.ini</IniPath>
-    <PfPath>p:\appli\simu\grhdev691.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\simu\grhdev691.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1478,7 +1643,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>V</EnvLetter>
     <IniPath>p:\appli\simv\simqual.ini</IniPath>
-    <PfPath>p:\appli\simv\simqual.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\simv\simqual.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1499,7 +1669,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>W</EnvLetter>
     <IniPath>p:\appli\simw\simcompil.ini</IniPath>
-    <PfPath>p:\appli\simw\simdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>p:\appli\simw\simdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>
@@ -1520,7 +1695,12 @@
     <Appli>SIM</Appli>
     <EnvLetter>X</EnvLetter>
     <IniPath>P:\appli\simx\simqual.ini</IniPath>
-    <PfPath>P:\appli\simx\grhdev.pf</PfPath>
+    <DicoPfPath>
+      <PfPath>
+        <Key>0</Key>
+        <Value>P:\appli\simx\grhdev.pf</Value>
+      </PfPath>
+    </DicoPfPath>
     <ProPath/>
     <DataBaseConnection/>
     <CmdLineParameters>-s 50000 -zn</CmdLineParameters>

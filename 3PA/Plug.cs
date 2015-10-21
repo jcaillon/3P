@@ -361,11 +361,15 @@ namespace _3PA {
 
                 // we finished entering a keyword
                 var curPos = Npp.GetCaretPosition();
-                int offset = (c == '\n' && Npp.GetTextOnLeftOfPos(curPos, 2).Equals("\r\n")) ? 2 : 1;
+                int offset;
+                if (c == '\n') {
+                    offset = curPos - Npp.GetPositionFromLine(Npp.GetLineFromPosition(curPos));
+                    offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 0;
+                } else
+                    offset = 1;
                 var searchWordAt = curPos - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
-                //TODO: if multiselection, replace everywhere!
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
                     // replace abbreviation by completekeyword

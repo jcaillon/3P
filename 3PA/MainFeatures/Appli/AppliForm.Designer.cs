@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.Appli {
             this.yamuiPanel3.Controls.Add(this.yamuiLink8);
             this.yamuiPanel3.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel3.HorizontalScrollbarSize = 10;
-            this.yamuiPanel3.Location = new System.Drawing.Point(446, 0);
+            this.yamuiPanel3.Location = new System.Drawing.Point(786, 0);
             this.yamuiPanel3.Name = "yamuiPanel3";
             this.yamuiPanel3.Size = new System.Drawing.Size(144, 34);
             this.yamuiPanel3.TabIndex = 9;
@@ -117,9 +117,9 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.statusLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.statusLabel.Location = new System.Drawing.Point(1, 580);
+            this.statusLabel.Location = new System.Drawing.Point(1, 620);
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(676, 21);
+            this.statusLabel.Size = new System.Drawing.Size(1016, 21);
             this.statusLabel.TabIndex = 12;
             this.statusLabel.Text = "yamuiLabel1";
             // 
@@ -141,13 +141,13 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(700, 600);
+            this.ClientSize = new System.Drawing.Size(1040, 640);
             this.Controls.Add(this.labelTitle);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.yamuiPanel3);
             this.IsMainForm = true;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(700, 600);
+            this.MinimumSize = new System.Drawing.Size(1040, 640);
             this.Name = "AppliForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
