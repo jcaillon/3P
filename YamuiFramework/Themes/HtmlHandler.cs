@@ -29,10 +29,7 @@ namespace YamuiFramework.Themes {
         }
 
         /// <summary>
-        /// Define the extra css sheet to use in all html panels/labels/tooltips, you can use those keywords that will
-        /// be replaced by the theme's colors :
-        /// %FGcolor%
-        /// %BGcolor%
+        /// Define the extra css sheet to use in all html panels/labels/tooltips
         /// </summary>
         public static string ExtraCssSheet { get; set; }
 
@@ -40,10 +37,10 @@ namespace YamuiFramework.Themes {
         /// Updates the colors of the basic css sheet shared by all html panels/labels
         /// </summary>
         public static void UpdateBaseCssData() {
-            var baseCss = Resources.Resources.BaseStyleSheet + "\n" + ExtraCssSheet;
+            var baseCss = Resources.Resources.BaseStyleSheet;
             baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
             baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.FormColorBackColor));
-            _baseCssData = HtmlRender.ParseStyleSheet(baseCss);
+            _baseCssData = HtmlRender.ParseStyleSheet(baseCss + "\n" + ExtraCssSheet);
         }
 
         /// <summary>

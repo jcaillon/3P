@@ -46,10 +46,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
         // the private fields below are used for the filter function
-        private Dictionary<CompletionType, SelectorButton> _displayedTypes;
-        private string _filterString;
-        private string _currentOwnerName = "";
-        private int _currentLineNumber;
+        private static Dictionary<CompletionType, SelectorButton> _displayedTypes;
+        private static string _filterString = "";
+        private static string _currentOwnerName = "";
+        private static int _currentLineNumber;
 
         private int _currentType;
 
@@ -487,7 +487,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName;
+            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(Npp.GetCaretLineNumber());
             _currentLineNumber = Npp.GetCaretLineNumber();
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
             //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
@@ -511,11 +511,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="o"></param>
         /// <returns></returns>
-        private bool FilterPredicate(object o) {
+        private static bool FilterPredicate(object o) {
             var compData = (CompletionData)o;
             // check for the filter match, the activated category,
-            bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString) &&
-                _displayedTypes[compData.Type].Activated;
+            bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString);
+            if (_displayedTypes.ContainsKey(compData.Type))
+                output = output && _displayedTypes[compData.Type].Activated;
 
             // if the item isn't a parsed item, it is avaiable no matter where we are in the code
             if (!compData.FromParser) return output;
@@ -542,6 +543,23 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             return output;
         }
+
+        /// <summary>
+        /// Applies the same sorting / filtering as the autocompletion form to a given list
+        /// of items
+        /// </summary>
+        /// <param name="objectsList"></param>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public static List<CompletionData> ExternalFilterItems(List<CompletionData> objectsList, int line) {
+            objectsList.Sort(new CompletionDataSortingClass());
+            if (_displayedTypes == null)
+                _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
+            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
+            _currentLineNumber = line;
+            return objectsList.Where(FilterPredicate).ToList();
+        }
+
         #endregion
     }
 

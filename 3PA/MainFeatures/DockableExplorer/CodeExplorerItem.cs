@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using _3PA.Lib;
 
@@ -26,6 +25,17 @@ namespace _3PA.MainFeatures.DockableExplorer {
         /// if the item has no children, clicking on it will make the carret move to this line
         /// </summary>
         public int GoToLine { get; set; }
+
+        /// <summary>
+        /// if the item has no children, clicking on it will make the carret move to this GoToColumn
+        /// </summary>
+        public int GoToColumn { get; set; }
+
+        /// <summary>
+        /// the document in which the item was found, for example if we found a procedure block in a .i
+        /// we want to switch to the owning document before going to the line
+        /// </summary>
+        public string DocumentOwner { get; set; }
 
         /// <summary>
         /// The level of the item defines its place in the tree, level 0 is the root, 1 is deeper and so on...
@@ -139,6 +149,10 @@ namespace _3PA.MainFeatures.DockableExplorer {
         Uncertain = 2,
         // if a table found w/o the database name before it
         MissingDbName = 4,
+        // if the .i file is not found in the propath
+        NotFound = 8,
+        // if the extracted info is from an external file (.i)
+        External = 16,
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {

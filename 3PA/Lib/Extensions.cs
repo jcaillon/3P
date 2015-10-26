@@ -203,20 +203,6 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Converts from ANSI to UTF8
-        /// </summary>
-        public static string AnsiToUtf8(this string str) {
-            return Encoding.UTF8.GetString(Encoding.Default.GetBytes(str));
-        }
-
-        /// <summary>
-        /// Converts from UT8 to ANSI
-        /// </summary>
-        public static string Utf8ToAnsi(this string str) {
-            return Encoding.Default.GetString(Encoding.UTF8.GetBytes(str));
-        }
-
-        /// <summary>
         /// Converts from ANSI
         /// </summary>
         public static string AnsiToXencode(this string str, Encoding xencode) {

@@ -99,6 +99,26 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Switch to a document, can be already opended or not
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        public static void Goto(string document, int line = -1, int column = -1) {
+            if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
+                if (GetOpenedFiles().Contains(document))
+                    SwitchToDocument(document);
+                else
+                    OpenFile(document);
+            }
+            if (line > 0) {
+                GoToLine(line);
+                if (column > 0)
+                    SetCaretPosition(GetPosFromLineColumn(line, column));
+            }
+        }
+
+        /// <summary>
         /// Helper to add a clickable icon in the toolbar
         /// </summary>
         /// <param name="image"></param>
@@ -112,8 +132,7 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Gets the file path of each file currently opened, return
-        /// the files separated by a new line
+        /// Gets the file path of each file currently opened
         /// </summary>
         /// <returns></returns>
         public static List<string> GetOpenedFiles() {
@@ -171,8 +190,8 @@ namespace _3PA {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
         }
 
-        public static void OpenFile(string file) {
-            Win32.SendMessage(HandleScintilla, NppMsg.NPPM_DOOPEN, 0, file);
+        public static bool OpenFile(string file) {
+            return ((int) Win32.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
 
         /// <summary>

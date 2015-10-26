@@ -52,21 +52,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Returns the owner name (currentScopeName) of the caret line
         /// </summary>
         /// <returns></returns>
-        public static string GetCarretLineOwnerName {
-            get {
-                var line = Npp.GetCaretLineNumber();
-                if (_ablParser == null) return "";
-                bool lockTaken = false;
-                try {
-                    Monitor.TryEnter(_parserLock, 500, ref lockTaken);
-                    if (lockTaken) {
-                        return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
-                    }
-                } finally {
-                    if (lockTaken) Monitor.Exit(_parserLock);
+        public static string GetCarretLineOwnerName(int line) {
+            if (_ablParser == null) return "";
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
+                if (lockTaken) {
+                    return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
                 }
-                return string.Empty;
+            } finally {
+                if (lockTaken) Monitor.Exit(_parserLock);
             }
+            return string.Empty;
         }
 
         #endregion
@@ -261,9 +258,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // try to find the complete word in abbreviations list
-            var completeStr = Keywords.GetFullKeyword(str).ToLower();
-            if (completeStr != str)
-                foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => completeStr.Equals(typ.ToLower()))) {
+            var completeStr = Keywords.GetFullKeyword(str);
+            if (completeStr != null)
+                foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
                     return (ParsedPrimitiveType) Enum.Parse(typeof (ParsedPrimitiveType), typ, true);
                 }
             return ParsedPrimitiveType.Unknow;
@@ -301,16 +298,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // find table
                 var foundTable = DataBase.FindTableByName(tableName, foundDb);
-                if (foundTable == null) return ParsedPrimitiveType.Unknow;
+                if (foundTable != null) {
 
-                // find field
-                var foundField = DataBase.FindFieldByName(fieldName, foundTable);
-                return foundField == null ? ParsedPrimitiveType.Unknow : foundField.Type;
+                    // find field
+                    var foundField = DataBase.FindFieldByName(fieldName, foundTable);
+                    if (foundField != null) return foundField.Type;
+                }
             }
 
             // Search in temp tables
             if (nbPoints != 1) return ParsedPrimitiveType.Unknow;
-            var foundTtable = FindTempTableByName(likeStr);
+            var foundTtable = FindTempTableByName(tableName);
             if (foundTtable == null) return ParsedPrimitiveType.Unknow;
 
             var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));

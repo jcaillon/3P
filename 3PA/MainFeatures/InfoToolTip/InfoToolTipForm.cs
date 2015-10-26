@@ -24,23 +24,24 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // find max height taken by the html
             Width = Screen.PrimaryScreen.WorkingArea.Width / 3;
             labelContent.Text = content;
-            Height = Math.Min(labelContent.Location.Y + labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 3);
+            var prefHeight = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height/3) + 10;
 
             // now we got the final height, resize width until height changes
             int j = 0;
-            int detla = 300;
+            int detla = 100;
             int curWidth = Width;
             do {
                 curWidth -= detla;
                 Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 3, curWidth);
                 labelContent.Text = content;
-                var compHeight = Math.Min(labelContent.Location.Y + labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 3);
-                if (compHeight > Height) {
+                if (labelContent.Height > prefHeight) {
                     curWidth += detla;
                     detla /= 2;
                 }
                 j++;
             } while (j < 10);
+            Width = curWidth;
+            Height = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 3) + 10;
         }
 
         public void SetPosition(Point position, int lineHeight) {

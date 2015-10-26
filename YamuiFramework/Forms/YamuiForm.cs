@@ -723,11 +723,14 @@ namespace YamuiFramework.Forms {
         #endregion
     }
 
+    #region AutoBuild tabs
+
     public class YamuiMainMenuTab {
         public string Name { get; private set; }
         public string PageName { get; private set; }
         public bool Hidden { get; private set; }
         public List<YamuiSecMenuTab> SecTabs { get; private set; }
+
         public YamuiMainMenuTab(string name, string pageName, bool hidden, List<YamuiSecMenuTab> secTabs) {
             this.Name = name;
             Hidden = hidden;
@@ -740,13 +743,17 @@ namespace YamuiFramework.Forms {
         public string Name { get; private set; }
         public string PageName { get; private set; }
         public YamuiPage Page { get; private set; }
+
         public YamuiSecMenuTab(string name, string pageName, YamuiPage page) {
             this.Name = name;
             Page = page;
             PageName = pageName;
         }
     }
-    
+
+    #endregion
+
+    #region Designer
 
     internal class YamuiFormDesigner : FormViewDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
@@ -755,4 +762,7 @@ namespace YamuiFramework.Forms {
             base.PreFilterProperties(properties);
         }
     }
+
+    #endregion
+
 }

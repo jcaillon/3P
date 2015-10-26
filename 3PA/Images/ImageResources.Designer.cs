@@ -423,6 +423,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap NotFound {
+            get {
+                object obj = ResourceManager.GetObject("NotFound", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap numerical_sorting_12 {
             get {
                 object obj = ResourceManager.GetObject("numerical_sorting_12", resourceCulture);

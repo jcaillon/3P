@@ -1,6 +1,11 @@
 ﻿namespace _3PA.MainFeatures {
     class ProgressCodeUtils {
 
+        public static void GoToDefinition() {
+            // handles a stack of points to go back to where we came from when we "goto definition"
+        }
+
+
         /// <summary>
         /// Toggle comments on and off on selected lines
         /// </summary>

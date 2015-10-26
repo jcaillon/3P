@@ -75,8 +75,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region public misc.
 
-        public static string LastSelectItemDisplayText;
-
         /// <summary>
         /// returns the ranking of each CompletionType, helps sorting them as we wish
         /// </summary>
@@ -99,7 +97,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static string CorrectKeywordCase(string keyword, int lastWordPos) {
             string output = null;
-            var found = FindCompletionData(keyword);
+            var found = FindInSavedItems(keyword, Npp.GetCaretLineNumber());
             if (found != null) {
                 RememberUseOf(found);
                 output = !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
@@ -127,12 +125,34 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
         /// <param name="keyword"></param>
+        /// <param name="line"></param>
         /// <returns></returns>
-        public static CompletionData FindCompletionData(string keyword) {
-            var currentOwnerName = ParserHandler.GetCarretLineOwnerName;
-            if (_savedAllItems == null) return null;
-            CompletionData found = _savedAllItems.Find(data =>
-                data.DisplayText.EqualsCi(keyword) && (!data.FromParser || data.ParsedItem.OwnerName.Equals(currentOwnerName)));
+        public static CompletionData FindInSavedItems(string keyword, int line) {
+            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), line);
+            if (filteredList == null || filteredList.Count <= 0) return null;
+            CompletionData found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
+            return found;
+        }
+
+        /// <summary>
+        /// Find an item in the completion and return it, if it can't be found returns null
+        /// Uses the position to filter the list the same way the autocompletion form would
+        /// </summary>
+        /// <param name="keyword"></param>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public static CompletionData FindInCompletionData(string keyword, int position) {
+            CompletionData found;
+            found = FindInSavedItems(keyword, Npp.GetLineFromPosition(position));
+            if (found != null)
+            return found;
+
+            // search in tables fields
+            var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(position));
+            if (tableFound == null) return null;
+
+            var listOfFields = DataBase.GetFieldsList(tableFound).ToList();
+            found = listOfFields.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
             return found;
         }
 
@@ -197,7 +217,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 var watch = Stopwatch.StartNew();
                 FillItems();
                 watch.Stop();
-                //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 2);
+                if (Config.Instance.DisplayParserElapsedTime)
+                    UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
                 //------------
             } catch (Exception e) {
                         ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
@@ -290,16 +311,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void UpdateAutocompletion() {
             try {
-                LastSelectItemDisplayText = null;
-
                 if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut) 
                     return;
-
-                // we need to remember the currently selected word of the list
-                if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && IsVisible) {
-                    var data = _form.GetCurrentSuggestion();
-                    LastSelectItemDisplayText = data == null ? null : data.DisplayText;
-                }
 
                 // get current word, current previous word (table or database name)
                 int nbPoints;

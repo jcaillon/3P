@@ -44,35 +44,36 @@ namespace _3PA.MainFeatures {
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml", _filePath);
                 }
+            _currentProPath = null;
         }
 
         /// <summary>
         /// Return the current ProgressEnvironnement object (null if the list is empty!)
         /// </summary>
         public static ProgressEnvironnement Current {
-            set {
-                _currentEnv = value;
-            }
             get {
                 if (_currentEnv != null)
                     return _currentEnv;
-                var list = GetList();
-                _currentEnv = null;
-                if (Config.Instance.GlobalCurrentEnvironnement + 1 > list.Count) {
-                    _currentEnv = list.Count > 0 ? list[0] : new ProgressEnvironnement();
-                } else _currentEnv = list[Config.Instance.GlobalCurrentEnvironnement];
+                SetCurrent();
                 return _currentEnv;
             }
         }
 
-        /// <summary>
-        /// Returns the currently selected database's .pf for the current environment
-        /// </summary>
-        /// <returns></returns>
-        public static string GetCurrentPfPath() {
-            return Current.PfPath.ContainsKey(Config.Instance.EnvCurrentDatabase) ?
-                Current.PfPath[Config.Instance.EnvCurrentDatabase] :
-                Current.PfPath.FirstOrDefault().Value;
+        public static void SetCurrent() {
+            // determines the current item selected in the envList
+            var envList = GetList();
+            try {
+                try {
+                    _currentEnv = envList.First(environnement =>
+                        environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli) &&
+                        environnement.EnvLetter.EqualsCi(Config.Instance.EnvCurrentEnvLetter));
+                } catch (Exception) {
+                    _currentEnv = envList.First(environnement =>
+                        environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli));
+                }
+            } catch (Exception) {
+                _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
+            }
         }
 
         /// <summary>
@@ -140,5 +141,15 @@ namespace _3PA.MainFeatures {
         public string VersionId = "";
         public string ProwinPath = "";
         public Dictionary<string, string> CompPath = new Dictionary<string, string>();
+
+        /// <summary>
+        /// Returns the currently selected database's .pf for the current environment
+        /// </summary>
+        /// <returns></returns>
+        public string GetCurrentPfPath() {
+            return PfPath.ContainsKey(Config.Instance.EnvCurrentDatabase) ?
+                PfPath[Config.Instance.EnvCurrentDatabase] :
+                PfPath.FirstOrDefault().Value;
+        }
     }
 }

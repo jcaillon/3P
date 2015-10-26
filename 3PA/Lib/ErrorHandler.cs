@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
     class ErrorHandler {
@@ -21,10 +22,14 @@ namespace _3PA.Lib {
         }
 
         public static void ShowErrors(Exception e, string message) {
-#if DEBUG
-            MessageBox.Show("Custom error : " + message + "\n" + e.ToString());
-#else
-#endif
+            var errorToStr = e.ToString();
+
+            // log the error into a file
+
+            // show it to the user, conditionally
+            if (!Config.Instance.GlobalShowAllErros)
+                return;
+            UserCommunication.Notify(@"<img src='poison' /><b class='NotificationTitle'>Oops an error has occured!</b><br><b>" + message + @"</b><br><br>" + errorToStr.Replace("à", "<br>à"), 0, Screen.PrimaryScreen.WorkingArea.Height / 3);
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {

@@ -5,9 +5,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
-using _3PA.Lib;
-using _3PA.MainFeatures;
-using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA {
     /// <summary>
@@ -448,12 +445,12 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Returns the ABL word at the given position (read on left and right)
+        /// Returns the ABL word at the given position (read on left and right) (stops at points)
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
         public static string GetWordAtPosition(int position) {
-            return Abl.ReadAblWord(GetTextOnLeftOfPos(position), false) + Abl.ReadAblWord(GetTextOnRightOfPos(position), false, false);
+            return Abl.ReadAblWord(GetTextOnLeftOfPos(position), true) + Abl.ReadAblWord(GetTextOnRightOfPos(position), true, false);
         }
 
         public static string GetTextBetween(Point point) {
@@ -1069,5 +1066,21 @@ namespace _3PA {
         }
 
         #endregion
+    }
+
+    static class StringExtension {
+        /// <summary>
+        /// Converts from ANSI to UTF8
+        /// </summary>
+        public static string AnsiToUtf8(this string str) {
+            return Encoding.UTF8.GetString(Encoding.Default.GetBytes(str));
+        }
+
+        /// <summary>
+        /// Converts from UT8 to ANSI
+        /// </summary>
+        public static string Utf8ToAnsi(this string str) {
+            return Encoding.Default.GetString(Encoding.UTF8.GetBytes(str));
+        }
     }
 }

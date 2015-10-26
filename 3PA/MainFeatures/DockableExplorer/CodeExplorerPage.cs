@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             get {
                 if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
                 _explorerBranchTypePriority = new List<int>();
-                var temp = Config.Instance.CodeExplorerPriorityList.Split(',').Select(Int32.Parse).ToList();
+                var temp = Config.Instance.CodeExplorerPriorityList.Split(',').Select(int.Parse).ToList();
                 for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++)
                     _explorerBranchTypePriority.Add(temp.IndexOf(i));
                 return _explorerBranchTypePriority;
@@ -90,6 +90,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             buttonExpandRetract.BackGrndImage = ImageResources.collapse;
             buttonRefresh.BackGrndImage = ImageResources.refresh;
             buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
+            buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
             _isExpanded = true;
 
             // Register to events
@@ -98,8 +99,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
             textBoxFilter.TextChanged += textBoxFilter_TextChanged;
             buttonRefresh.ButtonPressed += buttonRefresh_Click;
             buttonSort.ButtonPressed += buttonSort_Click;
+            buttonIncludeExternal.ButtonPressed += ButtonIncludeExternalOnButtonPressed;
             ovlTree.Click += OvlTreeOnClick;
-            ovlTree.KeyDown += OvlTreeOnKeyDown;
 
             // decorate rows
             ovlTree.UseCellFormatEvents = true;
@@ -110,6 +111,8 @@ namespace _3PA.MainFeatures.DockableExplorer {
             toolTipHtml.SetToolTip(buttonCleanText, "<b>Clean</b> the current text filter");
             toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
             toolTipHtml.SetToolTip(buttonSort, "Toggle <b>Categories/Code order sorting</b>");
+            toolTipHtml.SetToolTip(buttonIncludeExternal, "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)");
+            toolTipHtml.SetToolTip(textBoxFilter, "Allows to <b>filter</b> the items of the list below");
 
             // problems with the width of the column, set here
             DisplayText.Width = ovlTree.Width - 17;
@@ -143,7 +146,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
             CodeExplorerItem obj = (CodeExplorerItem) args.Model;
 
             // currently selected block
-            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName)) {
+            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.GetCaretLineNumber()))) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
                     FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
                     BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),
@@ -451,14 +454,9 @@ namespace _3PA.MainFeatures.DockableExplorer {
             } else {
                 // Item clicked : go to line
                 var realSelection = _unsortedItems.Find(item => item.Index == selection.Index);
-                Npp.GoToLine(realSelection.GoToLine);
+                Npp.Goto(realSelection.DocumentOwner, realSelection.GoToLine, realSelection.GoToColumn);
                 ovlTree.Invalidate();
             }
-        }
-
-        private void OvlTreeOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
-            OnKeyDown(keyEventArgs.KeyCode);
-            ovlTree.RefreshSelectedObjects();
         }
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
@@ -472,10 +470,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
-            CleanFilter();
-            _unsortedItems.Clear();
-            AutoComplete.ParseCurrentDocument(true);
-            Npp.GrabFocus();
+            RefreshParserAndCodeExplorer();
         }
 
         private void buttonSort_Click(object sender, EventArgs e) {
@@ -504,10 +499,22 @@ namespace _3PA.MainFeatures.DockableExplorer {
             Npp.GrabFocus();
         }
 
+        private void ButtonIncludeExternalOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
+            buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
+            RefreshParserAndCodeExplorer();
+        }
         
         #endregion
 
         #region filter
+
+        private void RefreshParserAndCodeExplorer() {
+            CleanFilter();
+            _unsortedItems.Clear();
+            AutoComplete.ParseCurrentDocument(true);
+            Npp.GrabFocus();
+        }
 
         public void ReapplyFilter() {
             if (string.IsNullOrWhiteSpace(textBoxFilter.Text)) return;

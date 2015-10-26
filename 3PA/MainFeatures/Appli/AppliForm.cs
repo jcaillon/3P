@@ -4,8 +4,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
-using YamuiFramework.Controls;
-using YamuiFramework.Fonts;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
@@ -43,7 +41,7 @@ namespace _3PA.MainFeatures.Appli {
             CreateContent(content);
 
             // title
-            labelTitle.Text = @"<span style='font-size: 18px'><b>3</b>P : <b>P</b>rogress <b>P</b>rogrammers <b>P</b>al</span>";
+            UpdateTitle();
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -143,10 +141,7 @@ namespace _3PA.MainFeatures.Appli {
                 e.IsInputKey = false;
             }
             base.OnPreviewKeyDown(e);
-        }
-
-        #endregion
-
+        }      
 
         private void yamuiLink6_Click(object sender, EventArgs e) {
             GoToPage("appearances");
@@ -178,5 +173,17 @@ namespace _3PA.MainFeatures.Appli {
             t.run();
             _lab = !_lab;
         }
+
+        #endregion
+
+        #region Public methods
+
+        public void UpdateTitle() {
+            string strongBold = "<b style='color: " + ColorTranslator.ToHtml(ThemeManager.AccentColor) + "'>";
+            labelTitle.Text = @"<span style='font-size: 18px'>" + strongBold + @"3</b>P : " + strongBold + @"P</b>rogress " + strongBold + @"P</b>rogrammers " + strongBold + @"P</b>al</span>";
+        }
+
+        #endregion
+
     }
 }

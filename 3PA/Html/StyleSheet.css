@@ -1,4 +1,33 @@
-﻿h1, h2, h3 { color: navy; font-weight:normal; }
+﻿html {
+    padding: 0;
+    margin: 0;
+    Font: 12px "Segoe UI";
+    color: %FGcolor%;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
+/* this decorates the htmllabels */
+.yamui-text { 
+    Font: 12px "Segoe UI";
+    color: %FGcolor%;
+    margin: 0;
+    padding: 0;
+}
+
+/*This is the class of the HtmlToolTip*/
+.yamui-tooltip {
+    border: solid 1px %FGcolor%;
+    background-color: %BGcolor%;
+    color: %FGcolor%;
+    padding: 5px;
+    Font: 12px "Segoe UI";
+}
+
+h1, h2, h3 { color: navy; font-weight:normal; }
 h1 { margin-bottom: .47em }
 h2 { margin-bottom: .3em }
 h3 { margin-bottom: .4em }
@@ -11,6 +40,7 @@ a:link {
      text-decoration: none;
      color: red;
 }
+
 .gray    { color:gray; }
 .example { background-color:#efefef; corner-radius:5px; padding:0.5em; }
 .whitehole { background-color:white; corner-radius:10px; padding:15px; }
@@ -20,11 +50,12 @@ a:link {
 
 /*This is the class of the InfoToolTip*/
 .InfoToolTip {
-    margin: 5px;
-    border: solid 1px #767676;
     background-color: %BGcolor%;
     color: %FGcolor%;
-    padding: 5px;
     Font: 12px "Segoe UI";
     border: none;
+}
+
+.NotificationTitle {
+    font-size: 18px;
 }

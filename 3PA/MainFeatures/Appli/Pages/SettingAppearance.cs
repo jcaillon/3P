@@ -100,16 +100,21 @@ namespace _3PA.MainFeatures.Appli.Pages {
                 } catch (Exception) {
                     //ignored
                 }
+
                 // force the autocomplete to redraw
                 AutoComplete.ForceClose();
+
                 // force the dockable to redraw
                 DockableExplorer.DockableExplorer.Redraw();
+
                 Application.DoEvents();
                 thisForm.Invalidate();
                 Application.DoEvents();
                 thisForm.Update();
                 Application.DoEvents();
                 thisForm.Refresh();
+
+                Appli.Form.UpdateTitle();
             }
         }
     }

@@ -34,9 +34,9 @@
             this.labelContent.AutoSizeHeightOnly = true;
             this.labelContent.BackColor = System.Drawing.Color.Transparent;
             this.labelContent.BaseStylesheet = null;
-            this.labelContent.Location = new System.Drawing.Point(1, 1);
+            this.labelContent.Location = new System.Drawing.Point(5, 5);
             this.labelContent.Name = "labelContent";
-            this.labelContent.Size = new System.Drawing.Size(200, 15);
+            this.labelContent.Size = new System.Drawing.Size(190, 15);
             this.labelContent.TabIndex = 0;
             this.labelContent.Text = "ok";
             // 
@@ -44,7 +44,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(202, 203);
+            this.ClientSize = new System.Drawing.Size(200, 200);
             this.Controls.Add(this.labelContent);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "InfoToolTipForm";

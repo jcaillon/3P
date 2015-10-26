@@ -49,7 +49,7 @@ namespace _3PA.Lib {
         public bool CodeExplorerVisible = true;
         [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")]
         public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
-
+        public bool CodeExplorerDisplayExternalItems = false;
 
         public double AppliOpacityUnfocused = 0.5;
         public bool AppliAllowTabAnimation = true;
@@ -65,15 +65,17 @@ namespace _3PA.Lib {
         public int GlobalCurrentEnvironnement = 0;
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
+        public bool GlobalShowAllErros = true;
 
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";
 
+        
+        public bool DisplayParserElapsedTime = true;
+
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
-
-        public string ProgressProwin32ExePath = @"C:\Progress\client\v1110_dv\dlc\bin\prowin32.exe";
     }
 
     /// <summary>
@@ -118,20 +120,15 @@ namespace _3PA.Lib {
             }
         }
 
-        static FileSystemWatcher _configWatcher;
+        private static FileSystemWatcher _configWatcher;
         
         private static void SetupFileWatcher() {
-            var dir = Path.GetDirectoryName(_location);
-            var filen = Path.GetFileName(_fileName);
-            if (dir != null && filen != null) {
-                _configWatcher = new FileSystemWatcher(dir, filen);
-                _configWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                _configWatcher.Changed += configWatcher_Changed;
-                _configWatcher.EnableRaisingEvents = true;
-            }
+            _configWatcher = new FileSystemWatcher(_location, _fileName) { NotifyFilter = NotifyFilters.LastWrite };
+            _configWatcher.Changed += configWatcher_Changed;
         }
 
         private static void configWatcher_Changed(object sender, FileSystemEventArgs e) {
+            UserCommunication.Notify("Config changed");
             Init();
         }
     }

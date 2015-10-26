@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.DockableExplorer;
@@ -41,7 +42,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private Dictionary<int, LineInfo> _lineInfo;
         #endregion
 
-
         #region constructor
 
         /// <summary>
@@ -58,7 +58,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-
         #region visit implementation
 
         /// <summary>
@@ -69,14 +68,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
             // to code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Run,
                     IconType = CodeExplorerIconType.RunExternal,
-                    GoToLine = pars.Line,
                     IsNotBlock = true,
-                    Flag = pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0
+                    Flag = AddExternalFlag(pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0),
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
                 });
         }
 
@@ -86,13 +88,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedFunctionCall pars) {
             // To code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.DynamicFunctionCall,
                     IconType = pars.ExternalCall ? CodeExplorerIconType.FunctionCallExternal : CodeExplorerIconType.FunctionCallInternal,
+                    IsNotBlock = true,
+                    Flag = AddExternalFlag((CodeExplorerFlag)0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    IsNotBlock = true
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
                 });
         }
 
@@ -101,16 +107,21 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedFoundTableUse pars) {
-            if (_isBaseFile) {
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems) {
                 bool missingDbName = pars.Name.IndexOf('.') < 0;
                 var name = pars.Name.Split('.');
+
+                // to code explorer
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = missingDbName ? pars.Name : name[1],
                     Branch = CodeExplorerBranch.TableUsed,
                     IconType = CodeExplorerIconType.Table,
+                    Flag = AddExternalFlag(missingDbName ? CodeExplorerFlag.MissingDbName : 0),
+                    IsNotBlock = true,
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    Flag = missingDbName ? CodeExplorerFlag.MissingDbName : 0,
-                    IsNotBlock = true
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
                 });
             }
         }
@@ -120,17 +131,34 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedIncludeFile pars) {
+            // try to find the file in the propath
+            var fullFilePath = ProgressEnv.FindFileInPropath(pars.Name);
+
             // To code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Include,
+                    IsNotBlock = true,
+                    Flag = AddExternalFlag(string.IsNullOrEmpty(fullFilePath) ? CodeExplorerFlag.NotFound : 0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    IsNotBlock = true
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
                 });
 
-            // Parse the include file, dont forget to flag the items as External
-            // dont forget to fill DefinedProcedures
+            // Parse the include file
+            if (string.IsNullOrEmpty(fullFilePath)) return;
+
+            var ablParser = new Parser.Parser(File.ReadAllText(fullFilePath, TextEncodingDetect.GetFileEncoding(fullFilePath)), fullFilePath, pars.OwnerName, DataBase.GetTablesDictionary());
+
+            var parserVisitor = new ParserVisitor(false, Path.GetFileName(fullFilePath), ablParser.GetLineInfo);
+            ablParser.Accept(parserVisitor);
+            
+            // fill the defined procedures dictionnary
+            foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.ContainsKey(definedProcedure.Key))) {
+                DefinedProcedures.Add(definedProcedure.Key, definedProcedure.Value);
+            }
         }
 
 
@@ -141,13 +169,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedBlock pars) {
             // to code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem {
                     DisplayText = pars.Name,
                     Branch = pars.Branch,
                     IconType = pars.IconIconType,
+                    Level = pars.IsRoot ? 0 : 1,
+                    Flag = AddExternalFlag((CodeExplorerFlag)0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    Level = pars.IsRoot ? 0 : 1
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
                 });
         }
 
@@ -160,13 +192,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
 
             // To code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
                     Branch = CodeExplorerBranch.OnEvent,
+                    Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
                 });
         }
 
@@ -179,13 +213,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
 
             // to code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Function,
+                    Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
                 });
 
             // to completion data
@@ -194,7 +230,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
-                Flag = (pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0),
+                Flag = AddExternalFlag((pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0)),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -214,13 +250,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DefinedProcedures.Add(pars.Name, false);
 
             // to code explorer
-            if (_isBaseFile)
+            if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                 ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Procedure,
+                    Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
+                    DocumentOwner = pars.FilePath,
                     GoToLine = pars.Line,
-                    Flag = pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0,
-                    SubString = pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
                 });
 
             // to completion data
@@ -228,7 +266,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
-                Flag = pars.IsExternal ? ParseFlag.ExternalProc : 0,
+                Flag = AddExternalFlag(pars.IsExternal ? ParseFlag.ExternalProc : 0),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -243,11 +281,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
+
+            // to completion data
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
-                Flag = pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope,
+                Flag = AddExternalFlag(pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -259,6 +299,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedLabel pars) {
+
+            if (!_isBaseFile) return;
+
             // find the end line of the labelled block
             var line = pars.Line + 1;
             var depth = (_lineInfo.ContainsKey(pars.Line)) ? _lineInfo[pars.Line].BlockDepth : 0;
@@ -273,6 +316,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
             pars.UndefinedLine = line;
 
+            // to completion data
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
@@ -315,14 +359,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
 
                     // To code explorer, list buffers and associated tables
-                    if (_isBaseFile)
+                    if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                         ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                             DisplayText = foundTable.Name,
                             Branch = CodeExplorerBranch.TableUsed,
                             IconType = CodeExplorerIconType.TempTable,
-                            Flag = pars.BufferFor.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName,
+                            Flag = AddExternalFlag(pars.BufferFor.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName),
+                            IsNotBlock = true,
+                            DocumentOwner = pars.FilePath,
                             GoToLine = pars.Line,
-                            IsNotBlock = true
+                            GoToColumn = pars.Column,
+                            SubString = SetExternalInclude(null)
                         });
                 }
 
@@ -332,15 +379,19 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 switch (pars.Type) {
                     case ParseDefineType.Parameter:
                         type = CompletionType.VariablePrimitive;
+
                         // To code explorer, program parameters
                         if (_isBaseFile && pars.Scope == ParsedScope.File)
                             ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                                 DisplayText = pars.Name,
                                 Branch = CodeExplorerBranch.ProgramParameter,
                                 IconType = CodeExplorerIconType.Parameter,
-                                SubString = subString,
+                                IsNotBlock = true,
+                                Flag = AddExternalFlag((CodeExplorerFlag)0),
+                                DocumentOwner = pars.FilePath,
                                 GoToLine = pars.Line,
-                                IsNotBlock = true
+                                GoToColumn = pars.Column,
+                                SubString = SetExternalInclude(subString)
                             });
                         break;
                     case ParseDefineType.Variable:
@@ -368,19 +419,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // To explorer code for browse
             if (pars.Type == ParseDefineType.Browse) {
-                if (_isBaseFile)
+                if (_isBaseFile || Config.Instance.CodeExplorerDisplayExternalItems)
                     ParserHandler.ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                         DisplayText = pars.Name,
                         Branch = CodeExplorerBranch.Browse,
+                        Flag = AddExternalFlag((CodeExplorerFlag)0),
+                        DocumentOwner = pars.FilePath,
                         GoToLine = pars.Line,
+                        GoToColumn = pars.Column,
+                        SubString = SetExternalInclude(null)
                     });
             }
 
+            // to completion data
             ParserHandler.ParsedItemsList.Add(new CompletionData() {
                 DisplayText = pars.Name,
                 Type = type,
                 SubString = subString,
-                Flag = SetFlags(flag, pars.LcFlagString),
+                Flag = AddExternalFlag(SetFlags(flag, pars.LcFlagString)),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -433,7 +489,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.TempTable,
                 SubString = subStr,
-                Flag = SetFlags(0, pars.LcFlagString),
+                Flag = AddExternalFlag(SetFlags(0, pars.LcFlagString)),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -442,8 +498,26 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-
         #region helper
+
+        /// <summary>
+        /// Adds the "external" flag if needed
+        /// </summary>
+        /// <param name="flag"></param>
+        /// <returns></returns>
+        private ParseFlag AddExternalFlag(ParseFlag flag) {
+            if (_isBaseFile) return flag;
+            return flag | ParseFlag.External;
+        }
+
+        private CodeExplorerFlag AddExternalFlag(CodeExplorerFlag flag) {
+            if (_isBaseFile) return flag;
+            return flag | CodeExplorerFlag.External;
+        }
+
+        private string SetExternalInclude(string subString) {
+            return _isBaseFile ? subString : subString ?? _currentParsedFile;
+        }
 
         /// <summary>
         /// Determines flags

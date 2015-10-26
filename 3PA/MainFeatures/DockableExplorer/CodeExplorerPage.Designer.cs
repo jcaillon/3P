@@ -17,8 +17,8 @@
                 textBoxFilter.TextChanged -= textBoxFilter_TextChanged;
                 buttonRefresh.ButtonPressed -= buttonRefresh_Click;
                 buttonSort.ButtonPressed -= buttonSort_Click;
+                buttonIncludeExternal.ButtonPressed -= ButtonIncludeExternalOnButtonPressed;
                 ovlTree.Click -= OvlTreeOnClick;
-                ovlTree.KeyDown -= OvlTreeOnKeyDown;
             }
             base.Dispose(disposing);
         }
@@ -40,6 +40,7 @@
             this.DisplayText = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiImageButton();
             ((System.ComponentModel.ISupportInitialize)(this.ovlTree)).BeginInit();
             this.SuspendLayout();
             // 
@@ -129,14 +130,14 @@
             this.textBoxFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.textBoxFilter.Lines = new string[0];
-            this.textBoxFilter.Location = new System.Drawing.Point(68, 4);
+            this.textBoxFilter.Location = new System.Drawing.Point(88, 4);
             this.textBoxFilter.Margin = new System.Windows.Forms.Padding(5, 0, 5, 0);
             this.textBoxFilter.MaxLength = 32767;
             this.textBoxFilter.Name = "textBoxFilter";
             this.textBoxFilter.PasswordChar = '\0';
             this.textBoxFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textBoxFilter.SelectedText = "";
-            this.textBoxFilter.Size = new System.Drawing.Size(208, 20);
+            this.textBoxFilter.Size = new System.Drawing.Size(188, 20);
             this.textBoxFilter.TabIndex = 7;
             this.textBoxFilter.TabStop = false;
             this.textBoxFilter.WaterMark = "Filter here!";
@@ -149,10 +150,22 @@
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.TooltipCssClass = "htmltooltip";
             // 
+            // buttonIncludeExternal
+            // 
+            this.buttonIncludeExternal.BackGrndImage = null;
+            this.buttonIncludeExternal.Location = new System.Drawing.Point(63, 4);
+            this.buttonIncludeExternal.Margin = new System.Windows.Forms.Padding(0);
+            this.buttonIncludeExternal.Name = "buttonIncludeExternal";
+            this.buttonIncludeExternal.Size = new System.Drawing.Size(20, 20);
+            this.buttonIncludeExternal.TabIndex = 13;
+            this.buttonIncludeExternal.TabStop = false;
+            this.buttonIncludeExternal.Text = "yamuiImageButton2";
+            // 
             // CodeExplorerPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.buttonIncludeExternal);
             this.Controls.Add(this.buttonSort);
             this.Controls.Add(this.buttonRefresh);
             this.Controls.Add(this.buttonCleanText);
@@ -176,5 +189,6 @@
         private BrightIdeasSoftware.OLVColumn DisplayText;
         private YamuiFramework.Controls.YamuiTextBox textBoxFilter;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTipHtml;
+        private YamuiFramework.Controls.YamuiImageButton buttonIncludeExternal;
     }
 }

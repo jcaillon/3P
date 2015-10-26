@@ -26,9 +26,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
-            this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
+            this.mainPanel = new YamuiFramework.Controls.YamuiPanel();
+            this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
+            this.btcontrol1 = new YamuiFramework.Controls.YamuiButton();
             this.btright6 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft6 = new YamuiFramework.Controls.YamuiImageButton();
             this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
@@ -61,70 +61,71 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.cbEnvLetter = new YamuiFramework.Controls.YamuiComboBox();
             this.cbAppli = new YamuiFramework.Controls.YamuiComboBox();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiPanel1.SuspendLayout();
+            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.mainPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiPanel1
+            // mainPanel
             // 
-            this.yamuiPanel1.Controls.Add(this.yamuiButton2);
-            this.yamuiPanel1.Controls.Add(this.yamuiButton1);
-            this.yamuiPanel1.Controls.Add(this.btright6);
-            this.yamuiPanel1.Controls.Add(this.btleft6);
-            this.yamuiPanel1.Controls.Add(this.textbox6);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel8);
-            this.yamuiPanel1.Controls.Add(this.envLabel);
-            this.yamuiPanel1.Controls.Add(this.cbDatabase);
-            this.yamuiPanel1.Controls.Add(this.btright1);
-            this.yamuiPanel1.Controls.Add(this.btleft1);
-            this.yamuiPanel1.Controls.Add(this.textbox1);
-            this.yamuiPanel1.Controls.Add(this.btright5);
-            this.yamuiPanel1.Controls.Add(this.btleft5);
-            this.yamuiPanel1.Controls.Add(this.textbox5);
-            this.yamuiPanel1.Controls.Add(this.btright4);
-            this.yamuiPanel1.Controls.Add(this.btleft4);
-            this.yamuiPanel1.Controls.Add(this.textbox4);
-            this.yamuiPanel1.Controls.Add(this.btright3);
-            this.yamuiPanel1.Controls.Add(this.btleft3);
-            this.yamuiPanel1.Controls.Add(this.textbox3);
-            this.yamuiPanel1.Controls.Add(this.btright2);
-            this.yamuiPanel1.Controls.Add(this.btleft2);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel7);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel6);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel5);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel3);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel2);
-            this.yamuiPanel1.Controls.Add(this.multitextbox1);
-            this.yamuiPanel1.Controls.Add(this.multibox2);
-            this.yamuiPanel1.Controls.Add(this.textbox2);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel4);
-            this.yamuiPanel1.Controls.Add(this.cbEnvLetter);
-            this.yamuiPanel1.Controls.Add(this.cbAppli);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel1);
-            this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.HorizontalScrollbarSize = 10;
-            this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(809, 490);
-            this.yamuiPanel1.TabIndex = 0;
-            this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.VerticalScrollbarSize = 10;
+            this.mainPanel.Controls.Add(this.btcontrol2);
+            this.mainPanel.Controls.Add(this.btcontrol1);
+            this.mainPanel.Controls.Add(this.btright6);
+            this.mainPanel.Controls.Add(this.btleft6);
+            this.mainPanel.Controls.Add(this.textbox6);
+            this.mainPanel.Controls.Add(this.yamuiLabel8);
+            this.mainPanel.Controls.Add(this.envLabel);
+            this.mainPanel.Controls.Add(this.cbDatabase);
+            this.mainPanel.Controls.Add(this.btright1);
+            this.mainPanel.Controls.Add(this.btleft1);
+            this.mainPanel.Controls.Add(this.textbox1);
+            this.mainPanel.Controls.Add(this.btright5);
+            this.mainPanel.Controls.Add(this.btleft5);
+            this.mainPanel.Controls.Add(this.textbox5);
+            this.mainPanel.Controls.Add(this.btright4);
+            this.mainPanel.Controls.Add(this.btleft4);
+            this.mainPanel.Controls.Add(this.textbox4);
+            this.mainPanel.Controls.Add(this.btright3);
+            this.mainPanel.Controls.Add(this.btleft3);
+            this.mainPanel.Controls.Add(this.textbox3);
+            this.mainPanel.Controls.Add(this.btright2);
+            this.mainPanel.Controls.Add(this.btleft2);
+            this.mainPanel.Controls.Add(this.yamuiLabel7);
+            this.mainPanel.Controls.Add(this.yamuiLabel6);
+            this.mainPanel.Controls.Add(this.yamuiLabel5);
+            this.mainPanel.Controls.Add(this.yamuiLabel3);
+            this.mainPanel.Controls.Add(this.yamuiLabel2);
+            this.mainPanel.Controls.Add(this.multitextbox1);
+            this.mainPanel.Controls.Add(this.multibox2);
+            this.mainPanel.Controls.Add(this.textbox2);
+            this.mainPanel.Controls.Add(this.yamuiLabel4);
+            this.mainPanel.Controls.Add(this.cbEnvLetter);
+            this.mainPanel.Controls.Add(this.cbAppli);
+            this.mainPanel.Controls.Add(this.yamuiLabel1);
+            this.mainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.mainPanel.HorizontalScrollbarHighlightOnWheel = false;
+            this.mainPanel.HorizontalScrollbarSize = 10;
+            this.mainPanel.Location = new System.Drawing.Point(0, 0);
+            this.mainPanel.Name = "mainPanel";
+            this.mainPanel.Size = new System.Drawing.Size(809, 490);
+            this.mainPanel.TabIndex = 0;
+            this.mainPanel.VerticalScrollbarHighlightOnWheel = false;
+            this.mainPanel.VerticalScrollbarSize = 10;
             // 
-            // yamuiButton2
+            // btcontrol2
             // 
-            this.yamuiButton2.Location = new System.Drawing.Point(710, 464);
-            this.yamuiButton2.Name = "yamuiButton2";
-            this.yamuiButton2.Size = new System.Drawing.Size(94, 23);
-            this.yamuiButton2.TabIndex = 47;
-            this.yamuiButton2.Text = "Modify";
+            this.btcontrol2.Location = new System.Drawing.Point(610, 464);
+            this.btcontrol2.Name = "btcontrol2";
+            this.btcontrol2.Size = new System.Drawing.Size(94, 23);
+            this.btcontrol2.TabIndex = 47;
+            this.btcontrol2.Text = "Modify";
             // 
-            // yamuiButton1
+            // btcontrol1
             // 
-            this.yamuiButton1.Location = new System.Drawing.Point(610, 464);
-            this.yamuiButton1.Name = "yamuiButton1";
-            this.yamuiButton1.Size = new System.Drawing.Size(94, 23);
-            this.yamuiButton1.TabIndex = 46;
-            this.yamuiButton1.Text = "Add new";
+            this.btcontrol1.Location = new System.Drawing.Point(710, 464);
+            this.btcontrol1.Name = "btcontrol1";
+            this.btcontrol1.Size = new System.Drawing.Size(94, 23);
+            this.btcontrol1.TabIndex = 46;
+            this.btcontrol1.Text = "Add new";
             // 
             // btright6
             // 
@@ -159,6 +160,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6.SelectedText = "";
             this.textbox6.Size = new System.Drawing.Size(340, 20);
             this.textbox6.TabIndex = 43;
+            this.textbox6.Tag = "log file (*.log)|*.log";
             // 
             // yamuiLabel8
             // 
@@ -176,7 +178,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.envLabel.AutoSizeHeightOnly = true;
             this.envLabel.BackColor = System.Drawing.Color.Transparent;
             this.envLabel.BaseStylesheet = null;
-            this.envLabel.Location = new System.Drawing.Point(187, 25);
+            this.envLabel.Location = new System.Drawing.Point(187, 30);
             this.envLabel.Name = "envLabel";
             this.envLabel.Size = new System.Drawing.Size(313, 15);
             this.envLabel.TabIndex = 41;
@@ -187,7 +189,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.cbDatabase.ItemHeight = 19;
             this.cbDatabase.Location = new System.Drawing.Point(18, 116);
             this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(189, 25);
+            this.cbDatabase.Size = new System.Drawing.Size(133, 25);
             this.cbDatabase.TabIndex = 40;
             this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
@@ -224,6 +226,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox1.SelectedText = "";
             this.textbox1.Size = new System.Drawing.Size(340, 20);
             this.textbox1.TabIndex = 37;
+            this.textbox1.Tag = "pf file (*.pf)|*.pf";
             // 
             // btright5
             // 
@@ -258,6 +261,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox5.SelectedText = "";
             this.textbox5.Size = new System.Drawing.Size(340, 20);
             this.textbox5.TabIndex = 34;
+            this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             // 
             // btright4
             // 
@@ -292,6 +296,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4.SelectedText = "";
             this.textbox4.Size = new System.Drawing.Size(340, 20);
             this.textbox4.TabIndex = 31;
+            this.textbox4.Tag = "true";
             // 
             // btright3
             // 
@@ -326,6 +331,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3.SelectedText = "";
             this.textbox3.Size = new System.Drawing.Size(340, 20);
             this.textbox3.TabIndex = 28;
+            this.textbox3.Tag = "true";
             // 
             // btright2
             // 
@@ -439,6 +445,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.SelectedText = "";
             this.textbox2.Size = new System.Drawing.Size(340, 20);
             this.textbox2.TabIndex = 9;
+            this.textbox2.Tag = "ini file (*.ini)|*.ini";
             // 
             // yamuiLabel4
             // 
@@ -480,22 +487,30 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel1.TabIndex = 2;
             this.yamuiLabel1.Text = "SELECTION";
             // 
+            // toolTip
+            // 
+            this.toolTip.AllowLinksHandling = true;
+            this.toolTip.BaseStylesheet = null;
+            this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this.toolTip.OwnerDraw = true;
+            this.toolTip.TooltipCssClass = "htmltooltip";
+            // 
             // SetEnvironment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiPanel1);
+            this.Controls.Add(this.mainPanel);
             this.Name = "SetEnvironment";
             this.Size = new System.Drawing.Size(809, 490);
-            this.yamuiPanel1.ResumeLayout(false);
-            this.yamuiPanel1.PerformLayout();
+            this.mainPanel.ResumeLayout(false);
+            this.mainPanel.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiPanel yamuiPanel1;
+        private YamuiPanel mainPanel;
         private YamuiLabel yamuiLabel1;
         private YamuiComboBox cbEnvLetter;
         private YamuiComboBox cbAppli;
@@ -528,7 +543,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiImageButton btleft6;
         private YamuiTextBox textbox6;
         private YamuiLabel yamuiLabel8;
-        private YamuiButton yamuiButton2;
-        private YamuiButton yamuiButton1;
+        private YamuiButton btcontrol2;
+        private YamuiButton btcontrol1;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
     }
 }

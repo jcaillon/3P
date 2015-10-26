@@ -8,9 +8,12 @@ namespace _3PA.Lib {
         Dictionary<string, Dictionary<string, string>> _ini = new Dictionary<string, Dictionary<string, string>>(StringComparer.InvariantCultureIgnoreCase);
 
         public IniReader(string file) {
+            var currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+
+            if (!File.Exists(file)) return;
+
             var txt = File.ReadAllText(file);
 
-            Dictionary<string, string> currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
 
             _ini[""] = currentSection;
 

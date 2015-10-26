@@ -40,7 +40,7 @@ namespace YamuiFramework.Themes {
 		public Color ButtonColorsDisabledForeColor         = Color.FromArgb(100, 100, 100);
 		public Color ButtonColorsDisabledBorderColor       = Color.FromArgb(190, 190, 190);
 
-		// special for 3PA, autocompletion colors
+		// special for 3P, autocompletion colors
 		public Color AutoCompletionNormalBackColor         = Color.FromArgb(250, 250, 250);
 		public Color AutoCompletionNormalAlternateBackColor= Color.FromArgb(230, 230, 230);
 		public Color AutoCompletionNormalForeColor         = Color.FromArgb(30, 30, 30);
@@ -51,6 +51,8 @@ namespace YamuiFramework.Themes {
 		public Color AutoCompletionFocusForeColor          = Color.FromArgb(0, 0, 0);
 		public Color AutoCompletionHighlightBack           = Color.FromArgb(254, 228, 101);
 		public Color AutoCompletionHighlightBorder         = Color.FromArgb(255, 171, 0);
+
+        public Color GenericErrorColor = Color.OrangeRed;
     }
 
 }

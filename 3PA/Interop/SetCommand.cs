@@ -5,7 +5,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA.Interop {
-    public partial class Plug {
+    public class Plug {
 
         public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts { get; set; }
 
@@ -112,6 +112,11 @@ namespace _3PA.Interop {
             }
         }
 
+        /// <summary>
+        /// Converts a shortcut into a string
+        /// </summary>
+        /// <param name="shortcut"></param>
+        /// <returns></returns>
         public static string ShortcutKey2String(ShortcutKey shortcut) {
             return (shortcut.IsCtrl ? "Ctrl+" : "") + (shortcut.IsShift ? "Shift+" : "") + (shortcut.IsAlt ? "Alt+" : "") + Enum.GetName(typeof(Keys), shortcut._key);
         }

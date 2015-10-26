@@ -356,15 +356,12 @@ namespace _3PA {
         /// <param name="c"></param>
         public static void OnCharAddedWordEnd(char c) {
             try {
-                // handles the autocompletion
-                AutoComplete.UpdateAutocompletion();
-
                 // we finished entering a keyword
                 var curPos = Npp.GetCaretPosition();
                 int offset;
                 if (c == '\n') {
                     offset = curPos - Npp.GetPositionFromLine(Npp.GetLineFromPosition(curPos));
-                    offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 0;
+                    offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 1;
                 } else
                     offset = 1;
                 var searchWordAt = curPos - offset;
@@ -372,37 +369,50 @@ namespace _3PA {
                 var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
+                    string replacementWord = null;
+
+                    // automatically insert selected keyword of the completion list
+                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd) {
+                        if (AutoComplete.IsVisible) {
+                            var lastSugg = AutoComplete.GetCurrentSuggestion();
+                            if (lastSugg != null)
+                                replacementWord = lastSugg;
+                        }
+                    }
+
                     // replace abbreviation by completekeyword
                     if (Config.Instance.AutocompleteReplaceAbbreviations) {
                         var fullKeyword = Keywords.GetFullKeyword(keyword);
                         if (fullKeyword != null)
-                            Npp.ReplaceKeywordWrapped(fullKeyword, -offset);
+                            replacementWord = fullKeyword;
                     }
 
-                    // automatically insert selected keyword of the completion list
-                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && AutoComplete.LastSelectItemDisplayText != null) {
-                        Npp.ReplaceKeywordWrapped(AutoComplete.LastSelectItemDisplayText, -offset);
-                        AutoComplete.UpdateAutocompletion();
-                    }
-
-                    // replace the last keyword by the correct case, check the context of the caret
-                    else if (Config.Instance.AutoCompleteChangeCaseMode != 0) {
+                    // replace the last keyword by the correct case
+                    if (replacementWord == null && Config.Instance.AutoCompleteChangeCaseMode != 0) {
                         var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                         if (casedKeyword != null)
-                            Npp.ReplaceKeywordWrapped(casedKeyword, -offset);
+                            replacementWord = casedKeyword;
                     }
-                }
-                
-                /*
-            bool isNormalContext = Highlight.IsNormalContext();
 
-            // only do more stuff if we are not in a string/comment/include definition 
-            if (!isNormalContext) return;
-                    
-            bool lastWordInDico = true;
-            Npp.SetStatusbarLabel(keyword + " " + lastWordInDico);
+                    if (replacementWord != null)
+                        Npp.ReplaceKeywordWrapped(replacementWord, -offset);
+                }
+
+
+                // replace semicolon by a point
+                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && isNormalContext) {
+                    curPos = Npp.GetCaretPosition();
+                    Npp.BeginUndoAction();
+                    Npp.SetTextByRange(curPos - 1, curPos, ".");
+                    Npp.SetCaretPosition(curPos);
+                    Npp.EndUndoAction();
+                }
+
+                // handles the autocompletion
+                AutoComplete.UpdateAutocompletion();
+                
+            /*
             // trigger snippet insertion on space if the setting is activated (and the leave)
-                    
             if (c == ' ' && Config.Instance.AutoCompleteUseSpaceToInsertSnippet &&
                 Snippets.Contains(keyword)) {
                 Npp.BeginUndoAction();
@@ -413,47 +423,8 @@ namespace _3PA {
                 Npp.SetStatusbarLabel("trigger"); //TODO
                 return;
             }
-                    
-            return;
-
-            // replace semicolon by a point
-            if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && lastWordInDico)
-                Npp.WrappedKeywordReplace(".", new Point(curPos - 1, curPos), curPos);
-
-            // on DO: add an END
-            //if (c == ':' && Config.Instance.AutoCompleteInsertEndAfterDo && (keyword.EqualsCi("do") || Npp.GetKeyword(curPos - offset - 1).EqualsCi("do"))) {
-            //    int nbPrevInd = Npp.GetLineIndent(Npp.GetLineNumber(curPos));
-            //    string repStr = new String(' ', nbPrevInd);
-            //    repStr = "\r\n" + repStr + new String(' ', Config.Instance.AutoCompleteIndentNbSpaces) + "\r\n" + repStr + Abl.AutoCaseToUserLiking("END.");
-            //    Npp.WrappedKeywordReplace(repStr, new Point(curPos, curPos), curPos + 2 + nbPrevInd + Config.Instance.AutoCompleteIndentNbSpaces);
-            //}
-
-            // handle indentation
-            if (newStr.Equals("\n")) {
-                // indent once after then
-                if (keyword.EqualsCi("then"))
-                    ActionAfterUpdateUi = () => {
-                        Npp.SetCurrentLineRelativeIndent(Config.Instance.AutoCompleteIndentNbSpaces);
-                    };
-
-                // add dot atfer an end
-                if (keyword.EqualsCi("end")) {
-                    Npp.WrappedKeywordReplace(Abl.AutoCaseToUserLiking("END."), keywordPos, curPos + 1);
-                    Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
-                    ActionAfterUpdateUi = () => {
-                        Npp.SetCurrentLineRelativeIndent(0);
-                    };
-                }
-            }
-
-            if (c == '.' && (keyword.EqualsCi("end"))) {
-                Npp.AddTextAtCaret("\r\n");
-                Npp.SetPreviousLineRelativeIndent(-Config.Instance.AutoCompleteIndentNbSpaces);
-                ActionAfterUpdateUi = () => {
-                    Npp.SetCurrentLineRelativeIndent(0);
-                };
-            }
             */
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
             }
@@ -463,14 +434,18 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnDwellStart() {
-            InfoToolTip.ShowToolTip(true);
+            Modifiers modifiers = KeyInterceptor.GetModifiers();
+            if (!modifiers.IsCtrl)
+                InfoToolTip.ShowToolTip(true);
         }
 
         /// <summary>
         /// When the user moves his cursor
         /// </summary>
         public static void OnDwellEnd() {
-            InfoToolTip.Close(true);
+            Modifiers modifiers = KeyInterceptor.GetModifiers();
+            if (!modifiers.IsCtrl)
+                InfoToolTip.Close(true);
         }
 
         /// <summary>
@@ -574,7 +549,9 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            MessageBox.Show("!" + Npp.GetSelectedText() + "!");
+            var x = 0;
+            var y = 1/x;
+            //Npp.Goto(@"C:\Users\Julien\Desktop\in.p", 1000, 10);
             //ProgressCodeUtils.ToggleComment();
             /*
             Task.Factory.StartNew(() => {

@@ -101,7 +101,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 abbreviations.CompleteText.ContainsFast(abbreviation) &&
                 abbreviation.ContainsFast(abbreviations.ShortText)
                 );
-            return found != null ? found.CompleteText : abbreviation;
+            return found != null ? found.CompleteText : null;
         }
     }
 

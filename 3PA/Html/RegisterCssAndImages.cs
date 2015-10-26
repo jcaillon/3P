@@ -10,7 +10,11 @@ namespace _3PA.Html {
     class RegisterCssAndImages {
 
         public static void Init() {
-            HtmlHandler.ExtraCssSheet = Properties.Resources.StyleSheet;
+            var cssStyleSheet = Properties.Resources.StyleSheet;
+            cssStyleSheet = cssStyleSheet.Replace("%FGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
+            cssStyleSheet = cssStyleSheet.Replace("%BGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.FormColorBackColor));
+            HtmlHandler.ExtraCssSheet = cssStyleSheet;
+            HtmlHandler.UpdateBaseCssData();
 
             HtmlHandler.ImageNeeded += (sender, args) => {
                 Image tryImg = (Image)ImageResources.ResourceManager.GetObject(args.Src);
