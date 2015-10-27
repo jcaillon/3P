@@ -512,6 +512,7 @@ namespace _3PA.MainFeatures.DockableExplorer {
         private void RefreshParserAndCodeExplorer() {
             CleanFilter();
             _unsortedItems.Clear();
+            ParserHandler.SavedParserVisitors.Clear();
             AutoComplete.ParseCurrentDocument(true);
             Npp.GrabFocus();
         }

@@ -21,6 +21,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static bool _openedFromShortCut;
 
+        /// <summary>
+        /// position of the carret when the autocompletion was opened (from shortcut)
+        /// </summary>
+        private static int _openedFromShortCutPosition;
+
         private static AutoCompletionForm _form;
 
         /// <summary>
@@ -298,6 +303,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void OnShowCompleteSuggestionList() {
             ParseCurrentDocument();
             _openedFromShortCut = true;
+            _openedFromShortCutPosition = Npp.GetCaretPosition();
             try {
                 UpdateAutocompletion();
             } catch (Exception e) {
@@ -376,7 +382,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // close if there is nothing to suggest
-                if (!_openedFromShortCut && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.GetCaretPosition()) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                     Close();
                     return;
                 }

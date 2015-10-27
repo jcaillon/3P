@@ -44,6 +44,8 @@ namespace _3PA.MainFeatures {
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml", _filePath);
                 }
+
+            // need to compute the propath again
             _currentProPath = null;
         }
 
@@ -90,7 +92,7 @@ namespace _3PA.MainFeatures {
             get {
                 if (_currentProPath != null) return _currentProPath;
                 IniReader ini = new IniReader(Current.IniPath);
-                _currentProPath = Current.ProPath + "," + ini.GetValue("PROPATH");
+                _currentProPath = ini.GetValue("PROPATH") + "," + Current.ProPath;
                 return _currentProPath;
             }
         }

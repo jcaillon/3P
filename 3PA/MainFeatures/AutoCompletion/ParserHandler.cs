@@ -36,6 +36,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
 
+        /// <summary>
+        /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
+        /// </summary>
+        public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
+
         private static Parser.Parser _ablParser;
 
         /// <summary>
@@ -74,26 +79,28 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// as well as the dynamic items found by the parser
         /// </summary>
         public static void RefreshParser() {
-            if (ParsedItemsList == null) ParsedItemsList = new List<CompletionData>();
-
             // we launch the parser, that will fill the DynamicItems
             bool lockTaken = false;
             try {
                 Monitor.TryEnter(_parserLock, 500, ref lockTaken);
                 if (!lockTaken) return;
 
-                _ablParser = new Parser.Parser(Npp.GetDocumentText(), Npp.GetCurrentFilePath(), null, DataBase.GetTablesDictionary());
-                ParsedItemsList.Clear();
-                ParsedExplorerItemsList.Clear();
-                var parserVisitor = new ParserVisitor(true, Npp.GetCurrentFileName(), _ablParser.GetLineInfo);
+                // if this document is in the Saved parsed visitors, we remove it because it might change so
+                // we want to re parse it later
+                var currentFilePath = Npp.GetCurrentFilePath();
+                if (SavedParserVisitors.ContainsKey(currentFilePath))
+                    SavedParserVisitors.Remove(currentFilePath);
+
+                // Parse the document
+                _ablParser = new Parser.Parser(Npp.GetDocumentText(), currentFilePath, null, DataBase.GetTablesDictionary());
+
+                // visitor
+                var parserVisitor = new ParserVisitor(true, System.IO.Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
                 _ablParser.Accept(parserVisitor);
+                ParsedItemsList = parserVisitor.ParsedItemsList.ToList();
+                ParsedExplorerItemsList = parserVisitor.ParsedExplorerItemsList.ToList();
 
                 // correct the internal/external type of run statements :
-                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                    if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
-                        item.IconType = CodeExplorerIconType.RunInternal;
-                }
-
                 foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
                     if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
                         item.IconType = CodeExplorerIconType.RunInternal;

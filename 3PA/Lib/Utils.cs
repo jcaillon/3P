@@ -65,7 +65,7 @@ namespace _3PA.Lib {
         public static bool OpenFolder(string folderPath) {
             if (!Directory.Exists(folderPath))
                 return false;
-            string argument = "/select, \"" + folderPath + "\"";
+            string argument = "\"" + folderPath + "\"";
             Process.Start("explorer.exe", argument);
             return true;
         }
