@@ -1,10 +1,13 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Serialization;
+using YamuiFramework.Forms;
+using YamuiFramework.Resources;
 
 namespace _3PA.Lib {
     /// <summary>
@@ -98,6 +101,35 @@ namespace _3PA.Lib {
             //dispose the Graphics object
             g.Dispose();
             return newBitmap;
+        }
+
+        /// <summary>
+        /// Gets the image from the resource folder and resize it
+        /// </summary>
+        /// <param name="imgToResize"></param>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        private static Image ResizeImage(Image imgToResize, Size size) {
+
+            int sourceWidth = imgToResize.Width;
+            int sourceHeight = imgToResize.Height;
+
+            var nPercentW = (size.Width / (float)sourceWidth);
+            var nPercentH = (size.Height / (float)sourceHeight);
+
+            var nPercent = nPercentH < nPercentW ? nPercentH : nPercentW;
+
+            int destWidth = (int)(sourceWidth * nPercent);
+            int destHeight = (int)(sourceHeight * nPercent);
+
+            Bitmap b = new Bitmap(destWidth, destHeight);
+            Graphics g = Graphics.FromImage(b);
+            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+
+            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
+            g.Dispose();
+
+            return b;
         }
 
         private static DateTime Str2Date(string str) {

@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
     Font: 12px "Segoe UI";
-    color: %FGcolor%;
+    color: %FGCOLOR%;
 }
 
 body {
@@ -13,16 +13,16 @@ body {
 /* this decorates the htmllabels */
 .yamui-text { 
     Font: 12px "Segoe UI";
-    color: %FGcolor%;
+    color: %FGCOLOR%;
     margin: 0;
     padding: 0;
 }
 
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
-    border: solid 1px %FGcolor%;
-    background-color: %BGcolor%;
-    color: %FGcolor%;
+    border: solid 1px %FGCOLOR%;
+    background-color: %BGCOLOR%;
+    color: %FGCOLOR%;
     padding: 5px;
     Font: 12px "Segoe UI";
 }
@@ -50,12 +50,22 @@ a:link {
 
 /*This is the class of the InfoToolTip*/
 .InfoToolTip {
-    background-color: %BGcolor%;
-    color: %FGcolor%;
+    background-color: %BGCOLOR%;
+    color: %FGCOLOR%;
     Font: 12px "Segoe UI";
     border: none;
 }
 
 .NotificationTitle {
-    font-size: 18px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.NotificationSubTitle {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.AccentColor {
+    color: %ACCENTCOLOR%;
 }

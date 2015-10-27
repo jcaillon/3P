@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
@@ -211,9 +210,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static ParsedTable FindTempTableByName(string name) {
+        private static ParsedTable FindTempTableByName(string name) {
             var foundTable = ParsedItemsList.Find(data => (data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
-            if (foundTable != null) return (ParsedTable) foundTable.ParsedItem;
+            if (foundTable != null && foundTable.ParsedItem is ParsedTable) return (ParsedTable)foundTable.ParsedItem;
             return null;
         }
 
@@ -308,7 +307,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // Search in temp tables
             if (nbPoints != 1) return ParsedPrimitiveType.Unknow;
-            var foundTtable = FindTempTableByName(tableName);
+            var foundTtable = FindAnyTableOrBufferByName(tableName);
             if (foundTtable == null) return ParsedPrimitiveType.Unknow;
 
             var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));

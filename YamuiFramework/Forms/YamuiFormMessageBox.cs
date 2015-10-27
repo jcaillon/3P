@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
@@ -47,7 +46,7 @@ namespace YamuiFramework.Forms {
         /// <param name="htmlContent"></param>
         /// <param name="buttonsList"></param>
         /// <param name="dontWrapLines"></param>
-        private YamuiFormMessageBox(MsgType type, string htmlContent, List<string> buttonsList, bool dontWrapLines) {
+        private YamuiFormMessageBox(string htmlContent, List<string> buttonsList, bool dontWrapLines) {
             InitializeComponent();
 
             // register to the panel onclicked event and propagate it as a public field of this class
@@ -73,7 +72,6 @@ namespace YamuiFramework.Forms {
                 i++;
             }
 
-            pictureBox.Image = GetImg(type, pictureBox.Size);
             var minButtonsWidth = (ButtonWidth + 5) * buttonsList.Count + 12 + 30;
 
             // small loop to compute a good width that is enough to display the entire lines of the input text
@@ -142,7 +140,23 @@ namespace YamuiFramework.Forms {
         /// <param name="dontWrapLines">set to true if you want to display you whole lines without going on a new line</param>
         /// <returns>returns an integer (-1 if closed, or from 0 to x = buttons.count - 1)</returns>
         /// <remarks>As of today, you can only show 1 msgbox at a given time!!!</remarks>
-        public static int ShwDlg(IntPtr ownerHandle, MsgType type, string heading, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null, bool dontWrapLines = false) {
+        public static int ShwDlg(IntPtr ownerHandle, MessageImage type, string heading, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null, bool dontWrapLines = false) {
+
+            text = @"
+                <table style='margin-bottom: 7px;>
+                    <tr>
+                        <td rowspan='2'><img style='padding-right: 10px;' src='" + type + @"' width='64' height='64' /></td>
+                        <td class='NotificationTitle'>" + heading + @"</td>
+                    </tr>
+                    <tr>
+                        <td class='NotificationSubTitle'></td>
+                    </tr>
+                </table><br>" + text;
+
+            return ShwDlg(ownerHandle, text, buttonsList, waitResponse, onLinkClicked, dontWrapLines);
+        }
+
+        public static int ShwDlg(IntPtr ownerHandle, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null, bool dontWrapLines = false) {
             // try to get the owner as a yamui form, if we can then we will animate both the msgbox and the main form
             YamuiForm ownerForm = null;
             try {
@@ -152,9 +166,11 @@ namespace YamuiFramework.Forms {
             }
 
             // new message box
-            var msgbox = new YamuiFormMessageBox(type, text, buttonsList, dontWrapLines) { ShowInTaskbar = !waitResponse, TopMost = true };
+            var msgbox = new YamuiFormMessageBox(text, buttonsList, dontWrapLines) { ShowInTaskbar = !waitResponse, TopMost = true };
+
             if (onLinkClicked != null)
                 msgbox.LinkClicked += onLinkClicked;
+
             if (ownerForm != null && ownerForm.Width > msgbox.Width && ownerForm.Height > msgbox.Height) {
                 // center parent
                 msgbox.Location = new Point((ownerForm.Width - msgbox.Width) / 2 + ownerForm.Location.X, (ownerForm.Height - msgbox.Height) / 2 + ownerForm.Location.Y);
@@ -212,38 +228,6 @@ namespace YamuiFramework.Forms {
         }
 
         /// <summary>
-        /// Gets the image from the resource folder and resize it
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="size"></param>
-        /// <returns></returns>
-        private static Image GetImg(MsgType type, Size size) {
-            var resname = Enum.GetName(typeof (MsgType), type);
-            if (resname == null) resname = "ant";
-            var imgToResize = ImageGetter.GetInstance().Get(resname.ToLower());
-
-            int sourceWidth = imgToResize.Width;
-            int sourceHeight = imgToResize.Height;
-
-            var nPercentW = (size.Width / (float)sourceWidth);
-            var nPercentH = (size.Height / (float)sourceHeight);
-
-            var nPercent = nPercentH < nPercentW ? nPercentH : nPercentW;
-
-            int destWidth = (int)(sourceWidth * nPercent);
-            int destHeight = (int)(sourceHeight * nPercent);
-
-            Bitmap b = new Bitmap(destWidth, destHeight);
-            Graphics g = Graphics.FromImage(b);
-            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-            g.DrawImage(imgToResize, 0, 0, destWidth, destHeight);
-            g.Dispose();
-
-            return b;
-        }
-
-        /// <summary>
         /// Propagate the LinkClicked event from root container.
         /// </summary>
         protected virtual void OnLinkClicked(HtmlLinkClickedEventArgs e) {
@@ -257,7 +241,8 @@ namespace YamuiFramework.Forms {
         }
     }
 
-    public enum MsgType {
+    public enum MessageImage {
+        Free,
         Ant,
         Error,
         HighImportance,

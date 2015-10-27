@@ -55,7 +55,7 @@ namespace YamuiFramework.Forms {
             // find max height taken by the html
             Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
             contentLabel.Text = body;
-            var prefHeight = Math.Min(contentLabel.Height + 10 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
+            var prefHeight = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
 
             // now we got the final height, resize width until height changes
             int j = 0;
@@ -72,7 +72,7 @@ namespace YamuiFramework.Forms {
                 j++;
             } while (j < 10);
             Width = Math.Max(curWidth, defaultWidth);
-            Height = Math.Min(contentLabel.Height + 10 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
+            Height = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
 
 
             // do we need to animate a panel on the bottom to visualise time left

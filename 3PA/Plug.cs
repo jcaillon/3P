@@ -202,7 +202,7 @@ namespace _3PA {
                 Keywords.Init();
                 FileTags.Init();
                 Config.Save();
-                RegisterCssAndImages.Init();
+                LocalHtmlHandler.Init();
 
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);
@@ -316,6 +316,12 @@ namespace _3PA {
         /// </summary>
         /// <param name="c"></param>
         static public void OnCharTyped(char c) {
+            // CTRL + S : char code 19
+            if (c == (char) 19) {
+                Npp.SetTextByRange(Npp.GetCaretPosition() - 1, Npp.GetCaretPosition(), "");
+                Npp.SaveCurrentDocument();
+            }
+
             // we are still entering a keyword
             if (Abl.IsCharAllowedInVariables(c)) {
                 ActionAfterUpdateUi = () => {
@@ -549,6 +555,7 @@ namespace _3PA {
 
         #region tests
         static void Test() {
+            UserCommunication.MessageToUser();
             var x = 0;
             var y = 1/x;
             //Npp.Goto(@"C:\Users\Julien\Desktop\in.p", 1000, 10);

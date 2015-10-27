@@ -6,10 +6,14 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
     class ErrorHandler {
+
+        private static Dictionary<string, bool> _catchedErrors = new Dictionary<string, bool>();
 
         public static void ShowErrors(Exception e, string message, string fileName) {
             MessageBox.Show("Error in " + AssemblyInfo.ProductTitle + ", couldn't load the following file : \n" +
@@ -24,12 +28,18 @@ namespace _3PA.Lib {
         public static void ShowErrors(Exception e, string message) {
             var errorToStr = e.ToString();
 
+            // don't show/store the same error twice in a session
+            if (_catchedErrors.ContainsKey(errorToStr))
+                return;
+            _catchedErrors.Add(errorToStr, true);
+
             // log the error into a file
 
             // show it to the user, conditionally
             if (!Config.Instance.GlobalShowAllErros)
                 return;
-            UserCommunication.Notify(@"<img src='poison' /><b class='NotificationTitle'>Oops an error has occured!</b><br><b>" + message + @"</b><br><br>" + errorToStr.Replace("à", "<br>à"), 0, Screen.PrimaryScreen.WorkingArea.Height / 3);
+
+            UserCommunication.Notify(errorToStr.Replace("à", "<br>à"), MessageImage.Poison, "Oops an error has occured!", message, 0, 500);
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
