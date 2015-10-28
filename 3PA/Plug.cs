@@ -1,21 +1,22 @@
-// ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file is part of 3P.
-
-// 3P is a free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-
-// 3P is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// GNU General Public License for more details.
-
-// You should have received a copy of the GNU General Public License
-// along with 3P. If not, see <http://www.gnu.org/licenses/>.
-// ========================================================================
-
+#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (Plug.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -29,11 +30,10 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.DockableExplorer;
+using _3PA.MainFeatures.CodeExplorer;
+using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.SynthaxHighlighting;
-
-#pragma warning disable 1591
 
 namespace _3PA {
 
@@ -110,8 +110,12 @@ namespace _3PA {
 
             SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
             */
-            Interop.Plug.SetCommand(cmdIndex++, "Dockable explorer", DockableExplorer.Toggle);
-            DockableExplorer.DockableCommandIndex = cmdIndex - 1;
+
+            Interop.Plug.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
+            CodeExplorer.DockableCommandIndex = cmdIndex - 1;
+
+            Interop.Plug.SetCommand(cmdIndex++, "Toggle file explorer", FileExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = cmdIndex - 1;
 
             //NPP already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
@@ -138,7 +142,8 @@ namespace _3PA {
         /// display images in the npp toolbar
         /// </summary>
         static internal void InitToolbarImages() {
-            Npp.SetToolbarImage(ImageResources._3PA, DockableExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources._3PA, FileExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources._3PA, CodeExplorer.DockableCommandIndex);
         }
 
         /// <summary>
@@ -217,8 +222,8 @@ namespace _3PA {
                 Npp.SetWhiteSpaceView();
 
                 // dockable explorer
-                if (Config.Instance.CodeExplorerVisible && !DockableExplorer.IsVisible)
-                    Appli.Form.BeginInvoke((Action)DockableExplorer.Toggle);
+                if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
+                    Appli.Form.BeginInvoke((Action)CodeExplorer.Toggle);
 
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched();
@@ -318,8 +323,9 @@ namespace _3PA {
         static public void OnCharTyped(char c) {
             // CTRL + S : char code 19
             if (c == (char) 19) {
-                Npp.SetTextByRange(Npp.GetCaretPosition() - 1, Npp.GetCaretPosition(), "");
+                Npp.Undo();
                 Npp.SaveCurrentDocument();
+                return;
             }
 
             // we are still entering a keyword
@@ -465,7 +471,7 @@ namespace _3PA {
             Snippets.FinalizeCurrent();
 
             // update scope of code explorer (the selection img)
-            DockableExplorer.RedrawCodeExplorer();
+            CodeExplorer.RedrawCodeExplorer();
         }
 
         /// <summary>

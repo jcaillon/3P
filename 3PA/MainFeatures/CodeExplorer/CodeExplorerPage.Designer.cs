@@ -1,4 +1,4 @@
-﻿namespace _3PA.MainFeatures.DockableExplorer {
+﻿namespace _3PA.MainFeatures.CodeExplorer {
     partial class CodeExplorerPage {
         /// <summary> 
         /// Required designer variable.

@@ -1,3 +1,22 @@
+#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (Scintilla.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -786,6 +805,13 @@ namespace _3PA {
         /// </summary>
         public static void SetEolMode() {
             Call(SciMsg.SCI_SETEOLMODE, (int)SciMsg.SC_EOL_CRLF);
+        }
+
+        /// <summary>
+        /// reverts the last change
+        /// </summary>
+        public static void Undo() {
+            Call(SciMsg.SCI_UNDO);
         }
 
         #endregion

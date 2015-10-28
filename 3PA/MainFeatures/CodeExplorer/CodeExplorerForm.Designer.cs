@@ -1,5 +1,5 @@
-﻿namespace _3PA.MainFeatures.DockableExplorer {
-    partial class DockableExplorerForm {
+﻿namespace _3PA.MainFeatures.CodeExplorer {
+    partial class CodeExplorerForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -23,33 +23,15 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.panelBottom = new YamuiFramework.Controls.YamuiPanel();
-            this._codeExplorerPage = new _3PA.MainFeatures.DockableExplorer.CodeExplorerPage();
+            this._codeExplorerPage = new CodeExplorerPage();
             this.SuspendLayout();
             // 
-            // panelBottom
+            // _codeExplorerPage
             // 
-            this.panelBottom.AutoScroll = true;
-            this.panelBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelBottom.HorizontalScrollbar = true;
-            this.panelBottom.HorizontalScrollbarHighlightOnWheel = false;
-            this.panelBottom.HorizontalScrollbarSize = 10;
-            this.panelBottom.Location = new System.Drawing.Point(1, 256);
-            this.panelBottom.Name = "panelBottom";
-            this.panelBottom.Size = new System.Drawing.Size(375, 47);
-            this.panelBottom.TabIndex = 4;
-            this.panelBottom.VerticalScrollbar = true;
-            this.panelBottom.VerticalScrollbarHighlightOnWheel = false;
-            this.panelBottom.VerticalScrollbarSize = 10;
-            // 
-            // codeExplorer
-            // 
-            this._codeExplorerPage.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this._codeExplorerPage.Location = new System.Drawing.Point(5, 4);
+            this._codeExplorerPage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this._codeExplorerPage.Location = new System.Drawing.Point(1, 1);
             this._codeExplorerPage.Name = "_codeExplorerPage";
-            this._codeExplorerPage.Size = new System.Drawing.Size(368, 246);
+            this._codeExplorerPage.Size = new System.Drawing.Size(375, 302);
             this._codeExplorerPage.TabIndex = 5;
             // 
             // DockableExplorerForm
@@ -58,7 +40,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(377, 304);
             this.Controls.Add(this._codeExplorerPage);
-            this.Controls.Add(this.panelBottom);
             this.Name = "DockableExplorerForm";
             this.Padding = new System.Windows.Forms.Padding(1);
             this.ShowIcon = false;
@@ -70,7 +51,6 @@
 
         #endregion
 
-        private YamuiFramework.Controls.YamuiPanel panelBottom;
         private CodeExplorerPage _codeExplorerPage;
     }
 }

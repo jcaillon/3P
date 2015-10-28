@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (Object2Xml.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -14,11 +33,18 @@ namespace _3PA.Lib {
     /// </summary>
     public class Object2Xml<T> {
 
+        #region Fields
+
+        private const string RootString = "Root";
         private const string KeyString = "Key";
         private const string ValueString = "Value";
-        private const string RootString = "Root";
-        private const string InstanceListItemString = "Item";
+        private const string PrefixToParentOfList = "List";
         private const string PrefixToParentOfDico = "Dico";
+
+        #endregion
+
+
+        #region Save methods
 
         /// <summary>
         /// Saves an object of type T into an xml,
@@ -28,7 +54,7 @@ namespace _3PA.Lib {
         /// <param name="filename"></param>
         /// <param name="valueInAttribute"></param>
         public static void SaveToFile(T instance, string filename, bool valueInAttribute = false) {
-            var x = new List<T> { instance };
+            var x = new List<T> {instance};
             SaveToFile(x, filename, valueInAttribute);
         }
 
@@ -69,23 +95,23 @@ namespace _3PA.Lib {
         /// <param name="valueInAttribute"></param>
         /// <returns></returns>
         public static XElement SaveToXElement(T item, bool valueInAttribute = false) {
-            XElement itemElement = new XElement(InstanceListItemString);
-            var properties = typeof(T).GetFields();
+            XElement itemElement = new XElement(typeof (T).Name);
+            var properties = typeof (T).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) continue;
 
                 XElement fieldElement = new XElement(property.Name);
-                if (property.FieldType == typeof(Dictionary<string, string>)) {
-                    itemElement.Add(DictToXml((Dictionary<string, string>)property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
+                if (property.FieldType == typeof (Dictionary<string, string>)) {
+                    itemElement.Add(DictToXml((Dictionary<string, string>) property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
                 } else {
-                    if (property.FieldType == typeof(Color)) {
+                    if (property.FieldType == typeof (Color)) {
                         if (valueInAttribute)
-                            fieldElement.Add(new XAttribute(ValueString, ColorTranslator.ToHtml((Color)property.GetValue(item))));
+                            fieldElement.Add(new XAttribute(ValueString, ColorTranslator.ToHtml((Color) property.GetValue(item))));
                         else
-                            fieldElement.Add(ColorTranslator.ToHtml((Color)property.GetValue(item)));
-                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
+                            fieldElement.Add(ColorTranslator.ToHtml((Color) property.GetValue(item)));
+                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof (string)) {
                         // case of a simple value
                         if (valueInAttribute)
                             fieldElement.Add(new XAttribute(ValueString, property.GetValue(item)));
@@ -98,6 +124,11 @@ namespace _3PA.Lib {
             }
             return itemElement;
         }
+
+        #endregion
+
+
+        #region Load methods
 
         /// <summary>
         /// This reads xmlContent and load a list of item from it,
@@ -120,7 +151,7 @@ namespace _3PA.Lib {
         public static void LoadFromFile(T instance, string filename, bool valueInAttribute = false) {
             var root = XDocument.Load(filename).Root;
             if (root != null)
-                LoadFromXElement(instance, root.Descendants(InstanceListItemString).First(), valueInAttribute);
+                LoadFromXElement(instance, root.Descendants(typeof (T).Name).First(), valueInAttribute);
         }
 
         /// <summary>
@@ -135,7 +166,7 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Load an instance of objetc T from a XDocument,
+        /// Load an instance of object T from a XDocument,
         /// it mirros SaveToXDocument
         /// </summary>
         /// <param name="instance"></param>
@@ -146,11 +177,9 @@ namespace _3PA.Lib {
             if (rootElement == null) return;
 
             /* loop through InstanceListItemString elements */
-            foreach (XElement itemElement in rootElement.Descendants(InstanceListItemString)) {
-                T item = (T)Activator.CreateInstance(typeof(T), new object[] { });
-
+            foreach (XElement itemElement in rootElement.Descendants(typeof (T).Name)) {
+                T item = (T) Activator.CreateInstance(typeof (T), new object[] {});
                 LoadFromXElement(item, itemElement, valueInAttribute);
-
                 instance.Add(item);
             }
         }
@@ -163,14 +192,14 @@ namespace _3PA.Lib {
         /// <param name="itemElement"></param>
         /// <param name="valueInAttribute"></param>
         private static void LoadFromXElement(T item, XElement itemElement, bool valueInAttribute = false) {
-            var properties = typeof(T).GetFields();
+            var properties = typeof (T).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {
                 if (property.IsPrivate) continue;
 
                 /* dico */
-                if (property.FieldType == typeof(Dictionary<string, string>)) {
+                if (property.FieldType == typeof (Dictionary<string, string>)) {
                     XElement elm = itemElement.Element(PrefixToParentOfDico + property.Name);
                     if (elm == null) continue;
 
@@ -180,18 +209,23 @@ namespace _3PA.Lib {
                     if (elm == null) continue;
 
                     /* color > to hex */
-                    if (property.FieldType == typeof(Color)) {
+                    if (property.FieldType == typeof (Color)) {
                         if (valueInAttribute) property.SetValue(item, ColorTranslator.FromHtml(elm.Attribute(ValueString).Value));
                         else property.SetValue(item, ColorTranslator.FromHtml(elm.Value));
 
                         /* other type */
-                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof(string)) {
+                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof (string)) {
                         if (valueInAttribute) property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Attribute(ValueString).Value));
                         else property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Value));
                     }
                 }
             }
         }
+
+        #endregion
+
+
+        #region Dictionnary
 
         private static Dictionary<string, string> XmlToDictionary(XElement baseElm, bool valueInAttribute = false) {
             Dictionary<string, string> dict = new Dictionary<string, string>();
@@ -232,6 +266,9 @@ namespace _3PA.Lib {
             }
             return outElm;
         }
+
+        #endregion
+
     }
     
 }

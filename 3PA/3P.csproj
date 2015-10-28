@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>_3PA</RootNamespace>
-    <AssemblyName>2P2B</AssemblyName>
+    <AssemblyName>3P</AssemblyName>
     <OutputPath>bin\Debug\</OutputPath>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
@@ -83,11 +83,24 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerPage.cs">
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerPage.Designer.cs">
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.Designer.cs">
       <DependentUpon>CodeExplorerPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
+    <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.Designer.cs">
+      <DependentUpon>FileExplorerPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
+      <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
@@ -156,17 +169,17 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeFormatter.cs" />
-    <Compile Include="MainFeatures\DockableExplorer\CustomTreeRenderer.cs">
+    <Compile Include="MainFeatures\CodeExplorer\CustomTreeRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\DockableExplorer.cs" />
-    <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.cs">
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\DockableExplorerForm.Designer.cs">
-      <DependentUpon>DockableExplorerForm.cs</DependentUpon>
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\DockableExplorer\CodeExplorerItem.cs" />
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SynthaxHighlighting\Highlight.cs" />
@@ -222,11 +235,17 @@
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\DockableExplorer\CodeExplorerPage.resx">
+    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerPage.resx">
       <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\DockableExplorer\DockableExplorerForm.resx">
-      <DependentUpon>DockableExplorerForm.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
+      <DependentUpon>FileExplorerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerPage.resx">
+      <DependentUpon>FileExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
       <DependentUpon>NppInterfaceForm.cs</DependentUpon>

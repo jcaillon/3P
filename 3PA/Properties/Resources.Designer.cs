@@ -71,48 +71,36 @@ namespace _3PA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 3PA.
-        /// </summary>
-        internal static string PluginFolderName {
-            get {
-                return ResourceManager.GetString("PluginFolderName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to HKEY_CURRENT_USER\Software\NppTool.
-        /// </summary>
-        internal static string RegistryPath {
-            get {
-                return ResourceManager.GetString("RegistryPath", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to html {
         ///    padding: 0;
         ///    margin: 0;
         ///    Font: 12px &quot;Segoe UI&quot;;
-        ///    color: %FGcolor%;
+        ///    color: %FGCOLOR%;
         ///}
         ///
-        ///h1, h2, h3 { color: navy; font-weight:normal; }
-        ///h1 { margin-bottom: .47em }
-        ///h2 { margin-bottom: .3em }
-        ///h3 { margin-bottom: .4em }
-        ///ul { margin-top: .5em }
-        ///ul li {margin: .25em}
-        ///
         ///body {
-        ///    Font: 12px SEGOEUI;
-        ///    color: %FGcolor%;
         ///    padding: 0;
         ///    margin: 0;
         ///}
         ///
-        ///a:hover { text-decoration: underline; }
-        ///pre  { border:solid 1px gray; background-color:#eee; padding:1em }
-        ///a:link { text-decoration: no [rest of string was truncated]&quot;;.
+        ////* this decorates the htmllabels */
+        ///.yamui-text { 
+        ///    Font: 12px &quot;Segoe UI&quot;;
+        ///    color: %FGCOLOR%;
+        ///    margin: 0;
+        ///    padding: 0;
+        ///}
+        ///
+        ////*This is the class of the HtmlToolTip*/
+        ///.yamui-tooltip {
+        ///    border: solid 1px %FGCOLOR%;
+        ///    background-color: %BGCOLOR%;
+        ///    color: %FGCOLOR%;
+        ///    padding: 5px;
+        ///    Font: 12px &quot;Segoe UI&quot;;
+        ///}
+        ///
+        ///h1, h2, h3 { color: navy [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string StyleSheet {
             get {

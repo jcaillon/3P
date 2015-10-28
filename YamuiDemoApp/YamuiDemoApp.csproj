@@ -141,9 +141,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\3PA\3PA.csproj">
+    <ProjectReference Include="..\3PA\3P.csproj">
       <Project>{9a5ec9f0-4db3-44d6-aa1f-27e031666936}</Project>
-      <Name>3PA</Name>
+      <Name>3P</Name>
     </ProjectReference>
     <ProjectReference Include="..\ObjectListView\ObjectListView2012.csproj">
       <Project>{18feda0c-d147-4286-b39a-01204808106a}</Project>

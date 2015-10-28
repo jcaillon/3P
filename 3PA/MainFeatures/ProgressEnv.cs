@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (ProgressEnv.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -104,21 +123,25 @@ namespace _3PA.MainFeatures {
         /// <param name="fileTofind"></param>
         /// <returns></returns>
         public static string FindFileInPropath(string fileTofind) {
-            foreach (var item in GetProPath.Split(',')) {
-                string curPath = item;
-                // need to take into account relative paths
-                if (curPath.StartsWith("."))
-                    curPath = Path.GetFullPath(Path.Combine(Npp.GetCurrentFilePath(), curPath));
-                curPath = Path.GetFullPath(Path.Combine(curPath, fileTofind));
-                if (File.Exists(curPath))
-                    return curPath;
+            try {
+                foreach (var item in GetProPath.Split(',')) {
+                    string curPath = item;
+                    // need to take into account relative paths
+                    if (curPath.StartsWith("."))
+                        curPath = Path.GetFullPath(Path.Combine(Npp.GetCurrentFilePath(), curPath));
+                    curPath = Path.GetFullPath(Path.Combine(curPath, fileTofind));
+                    if (File.Exists(curPath))
+                        return curPath;
+                }
+            } catch (Exception) {
+                return "";
             }
             return "";
         }
 
-        public static IEnumerable<string> FilterFiles(string path, params string[] exts) {
+        public static List<string> FilterFiles(string path, params string[] exts) {
             return exts.Select(x => "*." + x) // turn into globs
-                .SelectMany(x => Directory.EnumerateFiles(path, x));
+                .SelectMany(x => Directory.EnumerateFiles(path, x)).ToList();
         }
     }
 

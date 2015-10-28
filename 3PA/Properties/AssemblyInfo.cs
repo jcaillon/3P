@@ -1,16 +1,35 @@
-﻿using System.Reflection;
+﻿#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (AssemblyInfo.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("2P2B")]
-[assembly: AssemblyDescription("Progress programmers' best bud")]
+[assembly: AssemblyTitle("3P")]
+[assembly: AssemblyDescription("Progress programmers Pal")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BullAnt")]
-[assembly: AssemblyProduct("2P2B")]
-[assembly: AssemblyCopyright("Freeware © jcaillon 2015")]
+[assembly: AssemblyProduct("3P")]
+[assembly: AssemblyCopyright("Copyright (c) 2015 - Julien Caillon - GNU General Public License v3")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

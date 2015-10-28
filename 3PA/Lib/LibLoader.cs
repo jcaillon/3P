@@ -1,7 +1,25 @@
-﻿using System;
+﻿#region Header
+// // ========================================================================
+// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// // This file (LibLoader.cs) is part of 3P.
+// 
+// // 3P is a free software: you can redistribute it and/or modify
+// // it under the terms of the GNU General Public License as published by
+// // the Free Software Foundation, either version 3 of the License, or
+// // (at your option) any later version.
+// 
+// // 3P is distributed in the hope that it will be useful,
+// // but WITHOUT ANY WARRANTY; without even the implied warranty of
+// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// // GNU General Public License for more details.
+// 
+// // You should have received a copy of the GNU General Public License
+// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// // ========================================================================
+#endregion
+using System;
 using System.IO;
 using System.Reflection;
-using BrightIdeasSoftware;
 using _3PA.Properties;
 
 namespace _3PA.Lib {
@@ -19,7 +37,7 @@ namespace _3PA.Lib {
 
             var assPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (assPath == null) return; //TODO throw an error
-            _rootDir = Path.Combine(assPath, Resources.PluginFolderName);
+            _rootDir = Path.Combine(assPath, AssemblyInfo.ProductTitle);
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
             _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");  
           

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Root>
-  <Item>
+  <ProgressEnvironnement>
     <Label>Environnement de dev BOI</Label>
     <Appli>BOI</Appli>
     <EnvLetter>A</EnvLetter>
@@ -53,8 +53,8 @@
         <Value>client\v1110\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev BOI</Label>
     <Appli>BOI</Appli>
     <EnvLetter>B</EnvLetter>
@@ -107,8 +107,8 @@
         <Value>client\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev BOI GRH</Label>
     <Appli>BOI</Appli>
     <EnvLetter>J</EnvLetter>
@@ -161,8 +161,8 @@
         <Value>client-serveur\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de qual COMMISSI</Label>
     <Appli>COM</Appli>
     <EnvLetter>3</EnvLetter>
@@ -191,8 +191,8 @@
         <Value>v10\client\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev COMMISSIO</Label>
     <Appli>COM</Appli>
     <EnvLetter>Z</EnvLetter>
@@ -229,8 +229,8 @@
         <Value>v102b_32\trig\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Facade Tiers</Label>
     <Appli>FTE</Appli>
     <EnvLetter>9</EnvLetter>
@@ -259,8 +259,8 @@
         <Value>client\v1110\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de dev GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>0</EnvLetter>
@@ -285,8 +285,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>4</EnvLetter>
@@ -311,8 +311,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env modele de GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>5</EnvLetter>
@@ -337,8 +337,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>8</EnvLetter>
@@ -363,8 +363,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>S</EnvLetter>
@@ -389,8 +389,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>T</EnvLetter>
@@ -415,8 +415,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>U</EnvLetter>
@@ -441,8 +441,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>V</EnvLetter>
@@ -467,8 +467,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>W</EnvLetter>
@@ -493,8 +493,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
     <Appli>GRH</Appli>
     <EnvLetter>X</EnvLetter>
@@ -519,8 +519,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>MCO GRH</Label>
     <Appli>MCOGRH</Appli>
     <EnvLetter>M</EnvLetter>
@@ -545,8 +545,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de qual PERSONNE</Label>
     <Appli>PER</Appli>
     <EnvLetter>3</EnvLetter>
@@ -587,8 +587,8 @@
         <Value>serveur\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev PERSONNE</Label>
     <Appli>PER</Appli>
     <EnvLetter>Z</EnvLetter>
@@ -629,8 +629,8 @@
         <Value>v1110\trig\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev SAC 1</Label>
     <Appli>SAC</Appli>
     <EnvLetter>1</EnvLetter>
@@ -743,8 +743,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev SAC D</Label>
     <Appli>SAC</Appli>
     <EnvLetter>D</EnvLetter>
@@ -857,8 +857,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de qualif SAC E</Label>
     <Appli>SAC</Appli>
     <EnvLetter>E</EnvLetter>
@@ -975,8 +975,8 @@
         <Value>serveur\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de dev SAC G</Label>
     <Appli>SAC</Appli>
     <EnvLetter>G</EnvLetter>
@@ -1085,8 +1085,8 @@
         <Value>trig\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement Qualif SAC H</Label>
     <Appli>SAC</Appli>
     <EnvLetter>H</EnvLetter>
@@ -1199,8 +1199,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement qualif SAC K</Label>
     <Appli>SAC</Appli>
     <EnvLetter>K</EnvLetter>
@@ -1313,8 +1313,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de Dev SAI</Label>
     <Appli>SAI</Appli>
     <EnvLetter>2</EnvLetter>
@@ -1371,8 +1371,8 @@
         <Value>..\trig\exec\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Environnement de Dev SAI</Label>
     <Appli>SAI</Appli>
     <EnvLetter>Z</EnvLetter>
@@ -1481,8 +1481,8 @@
         <Value>spi\exec\serveur\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env Paie SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>0</EnvLetter>
@@ -1507,8 +1507,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>4</EnvLetter>
@@ -1533,8 +1533,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>8</EnvLetter>
@@ -1559,8 +1559,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>S</EnvLetter>
@@ -1585,8 +1585,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>T</EnvLetter>
@@ -1611,8 +1611,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>U</EnvLetter>
@@ -1637,8 +1637,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>V</EnvLetter>
@@ -1663,8 +1663,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>W</EnvLetter>
@@ -1689,8 +1689,8 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
-  <Item>
+  </ProgressEnvironnement>
+  <ProgressEnvironnement>
     <Label>Env Paie SimBud</Label>
     <Appli>SIM</Appli>
     <EnvLetter>X</EnvLetter>
@@ -1715,5 +1715,5 @@
         <Value>.\</Value>
       </CompPath>
     </DicoCompPath>
-  </Item>
+  </ProgressEnvironnement>
 </Root>
