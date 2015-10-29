@@ -36,7 +36,7 @@ namespace YamuiDemoApp {
 
 
             // OUTPUT INFO ON EACH LINE
-            if (true) {
+            if (false) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
                 var dic = tok.GetLineInfo;
@@ -113,7 +113,7 @@ namespace YamuiDemoApp {
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended);
+                Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended);
         }
 
         public void Visit(ParsedTable pars) {

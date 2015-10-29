@@ -18,11 +18,19 @@
 // // ========================================================================
 #endregion
 using System;
+using System.Drawing;
+using System.Linq;
+using System.Text;
+using BrightIdeasSoftware;
+using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     class InfoToolTip {
+
+        #region fields
 
         private static InfoToolTipForm _form;
 
@@ -30,6 +38,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Was the form opened because the user left his mouse too long on a word?
         /// </summary>
         private static bool _openedFromDwell;
+
+        /// <summary>
+        /// If a tooltip is opened and it's a parsed item, this point leads to its definition
+        /// </summary>
+        public static Point GoToDefinitionPoint = new Point(-1, -1);
+
+        #endregion
+
+        #region Tooltip
 
         public static void ShowToolTip(bool openedFromDwell = false) {
             if (Config.Instance.ToolTipDeactivate) return;
@@ -49,9 +66,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // opened from dwell
             if (openedFromDwell) {
                 var position = Npp.GetPositionFromMouseLocation();
-                
+
                 // sets the tooltip content
-                if (!SetToolTip(position)) return;
+                if (position < 0) 
+                    return;
+                var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
+                if (data == null) return;
+                SetToolTip(data);
 
                 // update position
                 var point = Npp.GetPointXyFromPosition(position);
@@ -65,28 +86,182 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _form.UnCloack();
         }
 
+        #endregion
+
+        #region SetToolTip text
+
         /// <summary>
         /// Sets the content of the tooltip (when we want to descibe something present
         /// in the completionData list)
         /// </summary>
-        /// <param name="position"></param>
-        private static bool SetToolTip(int position) {
-            if (position < 0) return false;
+        private static void SetToolTip(CompletionData data) {
+            var toDisplay = new StringBuilder();
 
-            // retrieves the corresponding completionData
-            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
-            if (data == null) return false;
+            // general stuff
+            toDisplay.Append("<div class='InfoToolTip'>");
+            toDisplay.Append("<div class='ToolTipName'><img style='padding-right: 7px;' src ='" + data.Type + "'>" + data.Type + "</div>");
 
-            switch (data.Type) {
-                case CompletionType.Database:
+            // the rest depends on the data type
+            try {
+                switch (data.Type) {
+                    case CompletionType.TempTable:
+                    case CompletionType.Table:
+                        // buffer
+                        if (data.ParsedItem is ParsedDefine)
+                            toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR <span class='ToolTipSubString'>" + data.SubString + "</span>"));
 
-                    break;
+                        var tbItem = ParserHandler.FindAnyTableOrBufferByName(data.DisplayText);
+                        if (tbItem != null) {
+                            if (!string.IsNullOrEmpty(tbItem.Description))
+                                toDisplay.Append(FormatRow("Description", tbItem.Description));
+                            toDisplay.Append(FormatRow("Number of fields", tbItem.Fields.Count.ToString()));
+
+                            if (tbItem.Triggers.Count > 0) {
+                                toDisplay.Append(FormatSubtitle("TRIGGERS"));
+                                foreach (var parsedTrigger in tbItem.Triggers)
+                                    toDisplay.Append(FormatRow(parsedTrigger.Event, parsedTrigger.ProcName));
+                            }
+
+                            if (tbItem.Indexes.Count > 0) {
+                                toDisplay.Append(FormatSubtitle("INDEXES"));
+                                foreach (var parsedIndex in tbItem.Indexes)
+                                    toDisplay.Append(FormatRow(parsedIndex.Name, parsedIndex.Flag + " - " + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
+                            }
+                        }
+                        break;
+                    case CompletionType.Database:
+                        var dbItem = DataBase.GetDb(data.DisplayText);
+
+                        toDisplay.Append(FormatRow("Logical name", dbItem.LogicalName));
+                        toDisplay.Append(FormatRow("Physical name", dbItem.PhysicalName));
+                        toDisplay.Append(FormatRow("Progress version", dbItem.ProgressVersion));
+                        toDisplay.Append(FormatRow("Number of Tables", dbItem.Tables.Count.ToString()));
+                        break;
+                    case CompletionType.Field:
+                    case CompletionType.FieldPk:
+                        // find field
+                        var fieldFound = DataBase.FindFieldByName(data.DisplayText, (ParsedTable) data.ParsedItem);
+                        if (fieldFound != null) {
+                            if (fieldFound.AsLike == ParsedAsLike.Like) {
+                                toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
+                            }
+                            toDisplay.Append(FormatRow("Type", "<span class='ToolTipSubString'>" + data.SubString + "</span>"));
+                            toDisplay.Append(FormatRow("Owner table", ((ParsedTable)data.ParsedItem).Name));
+                            if (!string.IsNullOrEmpty(fieldFound.Description))
+                                toDisplay.Append(FormatRow("Description", fieldFound.Description));
+                            if (!string.IsNullOrEmpty(fieldFound.Format))
+                                toDisplay.Append(FormatRow("Format", fieldFound.Format));
+                            if (!string.IsNullOrEmpty(fieldFound.InitialValue))
+                                toDisplay.Append(FormatRow("Initial value", fieldFound.InitialValue));
+                            toDisplay.Append(FormatRow("Order", fieldFound.Order.ToString()));
+                        }
+  
+                        break;
+                    case CompletionType.Function:
+                        var funcItem = (ParsedFunction) data.ParsedItem;
+                        toDisplay.Append(FormatRow("Return type", "<span class='ToolTipSubString'>" + funcItem.ParsedReturnType + "</span>"));
+                        if (funcItem.PrototypeLine > 0)
+                            toDisplay.Append("<a href=''>Go to prototype</a>");
+
+                        toDisplay.Append(FormatSubtitle("PARAMETERS"));
+                        if (!string.IsNullOrEmpty(funcItem.Parameters)) {
+                            foreach (var param in funcItem.Parameters.Split(',')) {
+                                toDisplay.Append(FormatRowWithImg(ParseFlag.Parameter.ToString(), param.Trim()));
+                            }
+                        } else
+                            toDisplay.Append("No parameters!<br>");
+                        break;
+                    case CompletionType.Keyword:
+                    case CompletionType.KeywordObject:
+                        toDisplay.Append(FormatRow("Type of keyword", "<span class='ToolTipSubString'>" + data.SubString + "</span>"));
+                        toDisplay.Append(FormatSubtitle("DESCRIPTION"));
+                        // TODO
+                        toDisplay.Append(FormatSubtitle("SYNTHAX"));
+                        // TODO
+                        break;
+                    case CompletionType.Label:
+                        break;
+                    case CompletionType.Preprocessed:
+                        var preprocItem = (ParsedPreProc) data.ParsedItem;
+                        if (preprocItem.UndefinedLine > 0)
+                            toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
+                        break;
+                    case CompletionType.Snippet:
+                        // TODO
+                        break;
+                    case CompletionType.VariableComplex:
+                    case CompletionType.VariablePrimitive:
+                    case CompletionType.Widget:
+                        var varItem = (ParsedDefine) data.ParsedItem;
+                        toDisplay.Append(FormatRow("Define type", "<span class='ToolTipSubString'>" + varItem.Type + "</span>"));
+                        if (!string.IsNullOrEmpty(varItem.TempPrimitiveType))
+                            toDisplay.Append(FormatRow("Variable type", "<span class='ToolTipSubString'>" + varItem.PrimitiveType + "</span>"));
+                        if (varItem.AsLike == ParsedAsLike.Like)
+                            toDisplay.Append(FormatRow("Is LIKE", varItem.TempPrimitiveType));
+                        if (!string.IsNullOrEmpty(varItem.ViewAs))
+                            toDisplay.Append(FormatRow("Screen representation", varItem.ViewAs));
+                        toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
+                        toDisplay.Append(FormatRow("Rest of decla", varItem.Left));
+                        break;
+
+                }
+            } catch (Exception e) {
+                toDisplay.Append("Error when appending info :<br>" + e + "<br>");
             }
 
-            _form.SetText("<div class='InfoToolTip'><b>THIS ISSSS</b><br>A simple test :)<br><img src='wink'>hey<br>" + data.DisplayText + "</div>");
+            // parsed item?
+            if (data.FromParser) {
+                toDisplay.Append(FormatSubtitle("ORIGINS"));
+                toDisplay.Append(FormatRow("Scope name", data.ParsedItem.OwnerName));
+                if (!Npp.GetCurrentFilePath().Equals(data.ParsedItem.FilePath))
+                    toDisplay.Append(FormatRow("Owner file", data.ParsedItem.FilePath));
+            }
 
-            return true;
+            // Flags
+            var flagStrBuilder = new StringBuilder();
+            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                if (flag == 0) continue;
+                if (!data.Flag.HasFlag(flag)) continue;
+                flagStrBuilder.Append(FormatRowWithImg(name, "<b>" + name + "</b>"));
+            }
+            if (flagStrBuilder.Length > 0) {
+                toDisplay.Append(FormatSubtitle("FLAGS"));
+                toDisplay.Append(flagStrBuilder);
+            }
+
+            // parsed item?
+            if (data.FromParser) {
+                toDisplay.Append("<div class='ToolTipBottomGoTo'>[CTRL + B] GO TO DEFINITION</div>");
+                GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
+            }
+
+            toDisplay.Append("</div>");
+            _form.SetText(toDisplay.ToString());
+
         }
+
+        #region formatting functions
+
+        private static string FormatRow(string describe, string result) {
+            return "- " + describe + " : <b>" + result + "</b><br>";
+        }
+
+        private static string FormatRowWithImg(string image, string text) {
+            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='" + image + "' height='15px'>" + text + "</div>";
+        }
+
+        private static string FormatSubtitle(string text) {
+            return "<div class='ToolTipSubTitle'>" + text + "</div>";
+        }
+
+        #endregion
+
+
+        #endregion
+
+
+        #region handle form
 
         /// <summary>
         /// Closes the form
@@ -96,6 +271,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 if (calledFromDwellEnd && !_openedFromDwell) return;
                 _form.Cloack();
                 _openedFromDwell = false;
+                GoToDefinitionPoint = new Point(-1, -1);
             } catch (Exception) {
                 // ignored
             }
@@ -112,5 +288,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 // ignored
             }
         }
+
+        #endregion
+
     }
 }

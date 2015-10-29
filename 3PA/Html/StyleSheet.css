@@ -1,4 +1,6 @@
-﻿html {
+﻿/* ==================================== */
+/* GENRAL STUFF */
+html {
     padding: 0;
     margin: 0;
     Font: 12px "Segoe UI";
@@ -27,35 +29,63 @@ body {
     Font: 12px "Segoe UI";
 }
 
-h1, h2, h3 { color: navy; font-weight:normal; }
-h1 { margin-bottom: .47em }
-h2 { margin-bottom: .3em }
-h3 { margin-bottom: .4em }
-ul { margin-top: .5em }
-ul li {margin: .25em}
+.AccentColor {
+    color: %ACCENTCOLOR%;
+}
 
 a:hover { text-decoration: underline; }
-pre  { border:solid 1px gray; background-color:#eee; padding:1em }
 a:link {
      text-decoration: none;
      color: red;
 }
+pre  { border:solid 1px gray; background-color:#eee; padding:1em }
 
-.gray    { color:gray; }
-.example { background-color:#efefef; corner-radius:5px; padding:0.5em; }
-.whitehole { background-color:white; corner-radius:10px; padding:15px; }
-.caption { font-size: 1.1em }
-.comment { color: green; margin-bottom: 5px; margin-left: 3px; }
-.comment2 { color: green; }
 
-/*This is the class of the InfoToolTip*/
+/* ==================================== */
+/* TOOL TIPS */
+
 .InfoToolTip {
     background-color: %BGCOLOR%;
     color: %FGCOLOR%;
     Font: 12px "Segoe UI";
     border: none;
 }
+.ToolTipName {
+    font-weight: bold;
+    font-size: 13px;
+    background-color: %ALTERNATEBGCOLOR%;
+    margin-bottom: 5px;
+}
+.ToolGotoDefinition:link {
+    text-decoration: underline;
+    color: green;
+}
+.ToolGotoDefinition:hover {
+    color: red;
+}
+.ToolTipBottomGoTo {
+    background-color: %ALTERNATEBGCOLOR%;
+    margin-top: 10px;
+    font-style: italic;
+    font-size: 11px;
+}
+.ToolTipSubString {
+    color: %SUBSTRINGCOLOR%;
+    font-weight: bold;
+}
+.ToolTipRowWithImg {
+    padding-bottom: 5px;
+}
+.ToolTipSubTitle {
+    text-decoration: underline;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
 
+
+
+/* ==================================== */
+/* NOTIFICATIONS */
 .NotificationTitle {
     font-size: 20px;
     font-weight: bold;
@@ -66,6 +96,11 @@ a:link {
     font-weight: bold;
 }
 
-.AccentColor {
-    color: %ACCENTCOLOR%;
+
+
+/* ==================================== */
+/* NOTIFICATIONS */
+.AppliTitle {
+    font-weight: bold;
+    font-size: 19px;
 }

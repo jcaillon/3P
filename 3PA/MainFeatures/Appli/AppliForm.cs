@@ -198,8 +198,8 @@ namespace _3PA.MainFeatures.Appli {
         #region Public methods
 
         public void UpdateTitle() {
-            string strongBold = "<b style='color: " + ColorTranslator.ToHtml(ThemeManager.AccentColor) + "'>";
-            labelTitle.Text = @"<span style='font-size: 18px'>" + strongBold + @"3</b>P : " + strongBold + @"P</b>rogress " + strongBold + @"P</b>rogrammers " + strongBold + @"P</b>al</span>";
+            string strongBold = "<span class='AccentColor'>";
+            labelTitle.Text = @"<span class='AppliTitle'>" + strongBold + @"3P</span> : " + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
         }
 
         #endregion

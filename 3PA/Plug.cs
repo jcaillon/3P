@@ -189,6 +189,7 @@ namespace _3PA {
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             // TODO: delete when releasing! (we dont want the user to access those themes!)
             ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
+            LocalHtmlHandler.Init();
 
             // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
@@ -207,7 +208,6 @@ namespace _3PA {
                 Keywords.Init();
                 FileTags.Init();
                 Config.Save();
-                LocalHtmlHandler.Init();
 
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);

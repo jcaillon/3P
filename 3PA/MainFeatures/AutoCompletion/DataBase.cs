@@ -174,6 +174,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
+        /// Get db info by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedDataBase GetDb(string name) {
+            return _dataBases.First(@base => @base.LogicalName.EqualsCi(name));
+        }
+
+        /// <summary>
         /// returns a dictionary containing all the table names of each database, 
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
         /// </summary>
@@ -242,7 +251,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(field.Name),
                 Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
-                       (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0)
+                       (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0),
+                ParsedItem = table
             }));
             return output;
         }

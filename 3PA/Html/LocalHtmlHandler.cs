@@ -49,9 +49,11 @@ namespace _3PA.Html {
         /// </summary>
         public static void ProvideCssSheet() {
             var cssStyleSheet = Properties.Resources.StyleSheet;
-            cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
-            cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormColorBackColor));
+            cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalForeColor));
+            cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalBackColor));
+            cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalAlternateBackColor));
             cssStyleSheet = cssStyleSheet.Replace("%ACCENTCOLOR%", ColorTranslator.ToHtml(ThemeManager.AccentColor));
+            cssStyleSheet = cssStyleSheet.Replace("%SUBSTRINGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalSubTypeForeColor));
             HtmlHandler.ExtraCssSheet = cssStyleSheet;
             HtmlHandler.UpdateBaseCssData();
         }

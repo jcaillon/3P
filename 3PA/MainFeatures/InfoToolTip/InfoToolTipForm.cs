@@ -59,7 +59,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 }
                 j++;
             } while (j < 10);
-            Width = curWidth;
+            Width = curWidth < 50 ? 150 : curWidth;
             Height = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 3) + 10;
         }
 

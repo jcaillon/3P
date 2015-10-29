@@ -46,9 +46,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// The filter to apply to the autocompletion form
         /// </summary>
         public string FilterByText {
-            get { return _filterString; }
-            set { _filterString = value.ToLower(); ApplyFilter(); }
+            get { return _filterByText; }
+            set { _filterByText = value.ToLower(); ApplyFilter(); }
         }
+        private static string _filterByText = "";
 
         public bool UseAlternateBackColor {
             set { fastOLV.UseAlternatingBackColors = value; }
@@ -140,7 +141,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.KeyDown += FastOlvOnKeyDown;
 
             fastOLV.UseTabAsInput = true;
-            _filterString = initialFilter.ToLower();
+            _filterByText = initialFilter.ToLower();
 
             // handles mouse leave/mouse enter
             MouseLeave += CustomOnMouseLeave;
@@ -493,25 +494,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // order the list, first the ones that are equals to the filter, then the
             // ones that start with the filter, then the rest
-            if (string.IsNullOrEmpty(_filterString)) {
+            if (string.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
             } else {
-                char firstChar = char.ToUpperInvariant(_filterString[0]);
+                char firstChar = char.ToUpperInvariant(_filterByText[0]);
                 fastOLV.SetObjects(_initialObjectsList.OrderBy(
                 x => {
                     if (x.DisplayText.Length < 1 || char.ToUpperInvariant(x.DisplayText[0]) != firstChar) return 2;
-                    return x.DisplayText.Equals(_filterString, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
+                    return x.DisplayText.Equals(_filterByText, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
                 }).ToList());
             }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(Npp.GetCaretLineNumber());
             _currentLineNumber = Npp.GetCaretLineNumber();
+            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
+            _filterString = _filterByText;
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
-            //((CompletionData) o).DisplayText.ToLower().FullyMatchFilter(_filterString) && _activeTypes[((CompletionData) o).Type].Activate
 
-            fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterString);
+            fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
 
             // update total items
             TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
@@ -576,6 +577,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
             _currentLineNumber = line;
+            _filterString = "";
             return objectsList.Where(FilterPredicate).ToList();
         }
 

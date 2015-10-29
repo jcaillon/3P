@@ -351,7 +351,7 @@ namespace _3PA.MainFeatures.Parser {
                 _lineInfo.Add(_context.StatementStartLine, new LineInfo(depth, _context.Scope, _context.OwnerName));
 
             // add missing values to the line dictionnary
-            if (token.Line > _context.StatementStartLine) {
+            if (_context.StatementStartLine > -1 && token.Line > _context.StatementStartLine) {
                 for (int i = _context.StatementStartLine + 1; i <= token.Line; i++)
                     if (!_lineInfo.ContainsKey(i))
                         _lineInfo.Add(i, new LineInfo(depth + 1, _context.Scope, _context.OwnerName));
@@ -929,10 +929,7 @@ namespace _3PA.MainFeatures.Parser {
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
-                if (token is TokenEos) {
-                    if (!token.Value.Equals(":")) state = 0;
-                    break;
-                }
+                if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 switch (state) {
                     case 0:
@@ -1030,8 +1027,10 @@ namespace _3PA.MainFeatures.Parser {
             if (_functionPrototype.ContainsKey(name)) {
                 createdFunc.PrototypeLine = _functionPrototype[name].X;
                 createdFunc.PrototypeColumn = _functionPrototype[name].Y;
-            } else
+            } else {
+                createdFunc.PrototypeLine = -1;
                 _functionPrototype.Add(name, new Point());
+            }
             _parsedItemList.Add(createdFunc);
 
             // add the parameters to the list

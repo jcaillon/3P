@@ -308,6 +308,9 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public bool IsDynamic { get; private set; }
         public string Left { get; private set; }
+        /// <summary>
+        /// The "Type" is what succeeds the DEFINE word of the statement (VARIABLE, BUFFER....)
+        /// </summary>
         public ParseDefineType Type { get; private set; }
         /// <summary>
         /// When parsing, we store the value of the "primitive-type" in there, 
@@ -315,8 +318,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string TempPrimitiveType { get; private set; } 
         /// <summary>
-        /// (Used for variables) contains the raw (string) primitive type, will be converted to ParseDefineType
-        /// in the ParserVisitor
+        /// (Used for variables) contains the primitive type of the variable
         /// </summary>
         public ParsedPrimitiveType PrimitiveType { get; set; }
         /// <summary>
