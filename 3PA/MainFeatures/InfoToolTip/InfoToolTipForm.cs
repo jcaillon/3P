@@ -20,17 +20,17 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     public partial class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
-        //Very important to keep it. It prevents the form from stealing the focus
-        protected override bool ShowWithoutActivation {
-            get { return true; }
-        }
+        // prevents the form from stealing the focus
+        //protected override bool ShowWithoutActivation {
+        //    get { return true; }
+        //}
         #endregion
-
 
         #region constructor
         public InfoToolTipForm() {
@@ -39,11 +39,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #endregion
 
         #region public
+        /// <summary>
+        /// set the html of the label, resize the tooltip
+        /// </summary>
+        /// <param name="content"></param>
         public void SetText(string content) {
             // find max height taken by the html
-            Width = Screen.PrimaryScreen.WorkingArea.Width / 3;
+            Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
             labelContent.Text = content;
-            var prefHeight = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height/3) + 10;
+            var prefHeight = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 2) + 10;
 
             // now we got the final height, resize width until height changes
             int j = 0;
@@ -51,7 +55,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             int curWidth = Width;
             do {
                 curWidth -= detla;
-                Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 3, curWidth);
+                Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 2, curWidth);
                 labelContent.Text = content;
                 if (labelContent.Height > prefHeight) {
                     curWidth += detla;
@@ -60,16 +64,29 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 j++;
             } while (j < 10);
             Width = curWidth < 50 ? 150 : curWidth;
-            Height = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 3) + 10;
+            Height = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 2) + 10;
         }
 
+        /// <summary>
+        /// Position the tooltip relatively to a point
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
             // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2 * Screen.PrimaryScreen.WorkingArea.Width / 3)
+            if (position.X > Screen.PrimaryScreen.WorkingArea.X + Screen.PrimaryScreen.WorkingArea.Width / 2)
                 position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3 * Screen.PrimaryScreen.WorkingArea.Height / 5)
+            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + Screen.PrimaryScreen.WorkingArea.Height / 2)
                 position.Y = position.Y - Height - lineHeight;
             Location = position;
+        }
+
+        /// <summary>
+        /// Sets the link clicked event for the label
+        /// </summary>
+        /// <param name="clickHandler"></param>
+        public void SetLinkClickedEvent(Action<HtmlLinkClickedEventArgs> clickHandler) {
+            labelContent.LinkClicked += (sender, args) => clickHandler(args);
         }
         #endregion
 

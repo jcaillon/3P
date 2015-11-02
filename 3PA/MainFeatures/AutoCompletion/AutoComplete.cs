@@ -159,16 +159,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Find an item in the completion and return it, if it can't be found returns null
+        /// Find a list of items in the completion and return it
         /// Uses the position to filter the list the same way the autocompletion form would
         /// </summary>
         /// <param name="keyword"></param>
         /// <param name="position"></param>
         /// <returns></returns>
-        public static CompletionData FindInCompletionData(string keyword, int position) {
-            CompletionData found;
-            found = FindInSavedItems(keyword, Npp.GetLineFromPosition(position));
-            if (found != null)
+        public static List<CompletionData> FindInCompletionData(string keyword, int position) {
+            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.GetLineFromPosition(position));
+            if (filteredList == null || filteredList.Count <= 0) return null;
+            var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
+            if (found.Count > 0)
             return found;
 
             // search in tables fields
@@ -176,8 +177,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (tableFound == null) return null;
 
             var listOfFields = DataBase.GetFieldsList(tableFound).ToList();
-            found = listOfFields.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
-            return found;
+            return listOfFields.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
         }
 
         /// <summary>

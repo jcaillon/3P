@@ -33,12 +33,13 @@ body {
     color: %ACCENTCOLOR%;
 }
 
-a:hover { text-decoration: underline; }
-a:link {
-     text-decoration: none;
-     color: red;
+a:hover {
+     text-decoration: underline;
 }
-pre  { border:solid 1px gray; background-color:#eee; padding:1em }
+a:link {
+    color: %LINKCOLOR%;
+    text-decoration: underline;
+}
 
 
 /* ==================================== */
@@ -56,18 +57,19 @@ pre  { border:solid 1px gray; background-color:#eee; padding:1em }
     background-color: %ALTERNATEBGCOLOR%;
     margin-bottom: 5px;
 }
-.ToolGotoDefinition:link {
-    text-decoration: underline;
-    color: green;
-}
-.ToolGotoDefinition:hover {
-    color: red;
-}
 .ToolTipBottomGoTo {
     background-color: %ALTERNATEBGCOLOR%;
     margin-top: 10px;
-    font-style: italic;
+
     font-size: 11px;
+}
+.ToolGotoDefinition:link {
+    color: %LINKCOLOR%;
+    text-decoration: underline;
+}
+.ToolTipDownArrow {
+    font-family: wingdings;
+    font-style: normal;
 }
 .ToolTipSubString {
     color: %SUBSTRINGCOLOR%;
@@ -81,7 +83,12 @@ pre  { border:solid 1px gray; background-color:#eee; padding:1em }
     margin-top: 6px;
     margin-bottom: 6px;
 }
-
+.ToolTipCount {
+    width: 30px;
+    font-weight: bold;
+    font-size: 10px;
+    text-align: right;
+}
 
 
 /* ==================================== */

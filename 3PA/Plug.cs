@@ -117,7 +117,7 @@ namespace _3PA {
             Interop.Plug.SetCommand(cmdIndex++, "Toggle file explorer", FileExplorer.Toggle);
             FileExplorer.DockableCommandIndex = cmdIndex - 1;
 
-            //NPP already intercepts these shortcuts so we need to hook keyboard messages
+            // NPP already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
 
             foreach (var key in uniqueKeys.Keys)
@@ -258,6 +258,7 @@ namespace _3PA {
             if (!IsCurrentFileProgress) return;
 
             try {
+                Modifiers modifiers = KeyInterceptor.GetModifiers();
                 // Close interfacePopups
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                     ClosePopups();
@@ -266,13 +267,13 @@ namespace _3PA {
                     if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
                         handled = AutoComplete.OnKeyDown(key);
                     else {
-                        Modifiers modifiers = KeyInterceptor.GetModifiers();
+                        
                         if ((key == Keys.Right || key == Keys.Left) && modifiers.IsAlt)
                             handled = AutoComplete.OnKeyDown(key);
                     }
                 } else {
+                    /* snippet ? */
                     if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
-                        Modifiers modifiers = KeyInterceptor.GetModifiers();
                         if (!modifiers.IsCtrl && !modifiers.IsAlt && !modifiers.IsShift) {
                             if (!Snippets.InsertionActive) {
                                 //no snippet insertion in progress
@@ -294,20 +295,28 @@ namespace _3PA {
                             }
                         }
                     }
+                }                  
+                /* next tooltip */
+                if (modifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
+                    if (key == Keys.Up) 
+                        InfoToolTip.IndexToShow++;
+                    else 
+                        InfoToolTip.IndexToShow--;
+                    InfoToolTip.TryToShowIndex();
+                    handled = true;
                 }
 
 
                 // check if the user triggered a function for which we set a shortcut (internalShortcuts)
                 foreach (var shortcut in Interop.Plug.InternalShortCuts.Keys) {
-                    if ((byte) key == shortcut._key) {
-                        Modifiers modifiers = KeyInterceptor.GetModifiers();
-                        if (modifiers.IsCtrl == shortcut.IsCtrl && modifiers.IsShift == shortcut.IsShift &&
-                            modifiers.IsAlt == shortcut.IsAlt) {
-                            handled = true;
-                            var shortcut1 = shortcut;
-                            Interop.Plug.InternalShortCuts[shortcut1].Item1();
-                            break;
-                        }
+                    if ((byte) key == shortcut._key 
+                        && modifiers.IsCtrl == shortcut.IsCtrl 
+                        && modifiers.IsShift == shortcut.IsShift 
+                        && modifiers.IsAlt == shortcut.IsAlt) {
+                        handled = true;
+                        var shortcut1 = shortcut;
+                        Interop.Plug.InternalShortCuts[shortcut1].Item1();
+                        break;
                     }
                 }
 
@@ -446,9 +455,7 @@ namespace _3PA {
         /// When the user leaves his cursor inactive on npp
         /// </summary>
         public static void OnDwellStart() {
-            Modifiers modifiers = KeyInterceptor.GetModifiers();
-            if (!modifiers.IsCtrl)
-                InfoToolTip.ShowToolTip(true);
+            InfoToolTip.ShowToolTipFromDwell();
         }
 
         /// <summary>

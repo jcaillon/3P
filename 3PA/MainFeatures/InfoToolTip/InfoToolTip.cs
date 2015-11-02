@@ -18,11 +18,11 @@
 // // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using BrightIdeasSoftware;
-using _3PA.Images;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -31,8 +31,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
     class InfoToolTip {
 
         #region fields
-
+        // The tooltip form
         private static InfoToolTipForm _form;
+
+        // we save the conditions with which we showed the tooltip to be able to update it as is
+        private static List<CompletionData> _currentCompletionList;
+        private static Point _currentPosition;
+        private static int _currentLineHeight;
 
         /// <summary>
         /// Was the form opened because the user left his mouse too long on a word?
@@ -44,48 +49,101 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         public static Point GoToDefinitionPoint = new Point(-1, -1);
 
+        /// <summary>
+        /// Index of the tooltip to show in case where a word corresponds to several items in the
+        /// CompletionData list
+        /// </summary>
+        public static int IndexToShow;
         #endregion
 
         #region Tooltip
-
-        public static void ShowToolTip(bool openedFromDwell = false) {
+        /// <summary>
+        /// Method called when the tooltip is opened from the mouse being inactive on scintilla
+        /// </summary>
+        public static void ShowToolTipFromDwell(bool openTemporary = true) {
+            _openedFromDwell = openTemporary;
             if (Config.Instance.ToolTipDeactivate) return;
 
-            // remember if the popup was opened because of the dwell time
-            _openedFromDwell = openedFromDwell;
+            InitIfneeded();
 
-            // instanciate the form
-            if (_form == null) {
-                _form = new InfoToolTipForm {
-                    UnfocusedOpacity = Config.Instance.ToolTipUnfocusedOpacity,
-                    FocusedOpacity = Config.Instance.ToolTipFocusedOpacity
-                };
-                _form.Show(Npp.Win32WindowNpp);
-            }
+            var position = Npp.GetPositionFromMouseLocation();
 
-            // opened from dwell
-            if (openedFromDwell) {
-                var position = Npp.GetPositionFromMouseLocation();
+            // sets the tooltip content
+            if (position < 0) 
+                return;
+            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
+            if (data != null && data.Count == 0) return;
 
-                // sets the tooltip content
-                if (position < 0) 
-                    return;
-                var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
-                if (data == null) return;
-                SetToolTip(data);
+            // save the current list
+            _currentCompletionList = data;
 
-                // update position
-                var point = Npp.GetPointXyFromPosition(position);
-                point.Offset(Npp.GetWindowRect().Location);
-                var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
-                point.Y += lineHeight + 5;
-                _form.SetPosition(point, lineHeight + 5);
-            }
+            SetToolTip(data);
+
+            // update position
+            var point = Npp.GetPointXyFromPosition(position);
+            point.Offset(Npp.GetWindowRect().Location);
+            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+            point.Y += lineHeight + 5;
+            _form.SetPosition(point, lineHeight + 5);
+
+            // save current
+            _currentPosition = point;
+            _currentLineHeight = lineHeight;
 
             if (!_form.Visible)
                 _form.UnCloack();
         }
 
+        /// <summary>
+        /// Called when a tooltip is shown and the user presses CTRL + down/up to show 
+        /// the other definitions available
+        /// </summary>
+        public static void TryToShowIndex() {
+            if (_currentCompletionList == null) return;
+
+            // refresh tooltip with the correct index
+            _form.Cloack();
+            SetToolTip(_currentCompletionList);
+            _form.SetPosition(_currentPosition, _currentLineHeight + 5);
+            if (!_form.Visible)
+                _form.UnCloack();
+        }
+
+        /// <summary>
+        /// Method called when the tooltip is opened to help the user during autocompletion
+        /// </summary>
+        public static void ShowToolTipFromAutocomplete() {
+            if (Config.Instance.ToolTipDeactivate) return;
+
+            InitIfneeded();
+
+            var position = Npp.GetPositionFromMouseLocation();
+
+            // sets the tooltip content
+            if (position < 0)
+                return;
+            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
+            if (data != null && data.Count == 0) return;
+            SetToolTip(data);
+
+            // update position
+            var point = Npp.GetPointXyFromPosition(position);
+            point.Offset(Npp.GetWindowRect().Location);
+            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+            point.Y += lineHeight + 5;
+            _form.SetPosition(point, lineHeight + 5);
+
+            if (!_form.Visible)
+                _form.UnCloack();
+        }
+
+        /// <summary>
+        /// Handles the clicks on the link displayed in the tooltip
+        /// </summary>
+        /// <param name="htmlLinkClickedEventArgs"></param>
+        private static void ClickHandler(HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
+            UserCommunication.Notify(htmlLinkClickedEventArgs.Link);
+        }
         #endregion
 
         #region SetToolTip text
@@ -94,12 +152,29 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present
         /// in the completionData list)
         /// </summary>
-        private static void SetToolTip(CompletionData data) {
+        private static void SetToolTip(List<CompletionData> listOfCompletionData) {
+            
             var toDisplay = new StringBuilder();
+
+            // only select one item from the list
+            if (IndexToShow < 0) IndexToShow = listOfCompletionData.Count - 1;
+            if (IndexToShow >= listOfCompletionData.Count) IndexToShow = 0;
+            var data = listOfCompletionData.ElementAt(IndexToShow);
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip'>");
-            toDisplay.Append("<div class='ToolTipName'><img style='padding-right: 7px;' src ='" + data.Type + "'>" + data.Type + "</div>");
+            toDisplay.Append(@"
+                <table width='100%' class='ToolTipName'><tr style='vertical-align: top;'>
+                <td>
+                    <img style='padding-right: 7px;' src ='" + data.Type + "'>" + data.Type + @"
+                </td>");
+            if (listOfCompletionData.Count > 1)
+                toDisplay.Append(@"
+                    <td class='ToolTipCount'>" +
+                        (IndexToShow + 1) + "/" + listOfCompletionData.Count + @"
+                    </td>");
+            toDisplay.Append(@"
+                </tr></table>");
 
             // the rest depends on the data type
             try {
@@ -108,7 +183,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Table:
                         // buffer
                         if (data.ParsedItem is ParsedDefine)
-                            toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR <span class='ToolTipSubString'>" + data.SubString + "</span>"));
+                            toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(data.SubString)));
 
                         var tbItem = ParserHandler.FindAnyTableOrBufferByName(data.DisplayText);
                         if (tbItem != null) {
@@ -119,7 +194,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (tbItem.Triggers.Count > 0) {
                                 toDisplay.Append(FormatSubtitle("TRIGGERS"));
                                 foreach (var parsedTrigger in tbItem.Triggers)
-                                    toDisplay.Append(FormatRow(parsedTrigger.Event, parsedTrigger.ProcName));
+                                    toDisplay.Append(FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='triggerproc#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
                             }
 
                             if (tbItem.Indexes.Count > 0) {
@@ -145,7 +220,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (fieldFound.AsLike == ParsedAsLike.Like) {
                                 toDisplay.Append(FormatRow("Is LIKE", fieldFound.TempType));
                             }
-                            toDisplay.Append(FormatRow("Type", "<span class='ToolTipSubString'>" + data.SubString + "</span>"));
+                            toDisplay.Append(FormatRow("Type", FormatSubString(data.SubString)));
                             toDisplay.Append(FormatRow("Owner table", ((ParsedTable)data.ParsedItem).Name));
                             if (!string.IsNullOrEmpty(fieldFound.Description))
                                 toDisplay.Append(FormatRow("Description", fieldFound.Description));
@@ -159,7 +234,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         break;
                     case CompletionType.Function:
                         var funcItem = (ParsedFunction) data.ParsedItem;
-                        toDisplay.Append(FormatRow("Return type", "<span class='ToolTipSubString'>" + funcItem.ParsedReturnType + "</span>"));
+                        toDisplay.Append(FormatRow("Return type", FormatSubString(funcItem.ParsedReturnType)));
                         if (funcItem.PrototypeLine > 0)
                             toDisplay.Append("<a href=''>Go to prototype</a>");
 
@@ -173,7 +248,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
-                        toDisplay.Append(FormatRow("Type of keyword", "<span class='ToolTipSubString'>" + data.SubString + "</span>"));
+                        toDisplay.Append(FormatRow("Type of keyword", FormatSubString(data.SubString)));
                         toDisplay.Append(FormatSubtitle("DESCRIPTION"));
                         // TODO
                         toDisplay.Append(FormatSubtitle("SYNTHAX"));
@@ -193,15 +268,17 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.VariablePrimitive:
                     case CompletionType.Widget:
                         var varItem = (ParsedDefine) data.ParsedItem;
-                        toDisplay.Append(FormatRow("Define type", "<span class='ToolTipSubString'>" + varItem.Type + "</span>"));
+                        toDisplay.Append(FormatRow("Define type", FormatSubString(varItem.Type.ToString())));
                         if (!string.IsNullOrEmpty(varItem.TempPrimitiveType))
-                            toDisplay.Append(FormatRow("Variable type", "<span class='ToolTipSubString'>" + varItem.PrimitiveType + "</span>"));
+                            toDisplay.Append(FormatRow("Variable type", FormatSubString(varItem.PrimitiveType.ToString())));
                         if (varItem.AsLike == ParsedAsLike.Like)
                             toDisplay.Append(FormatRow("Is LIKE", varItem.TempPrimitiveType));
                         if (!string.IsNullOrEmpty(varItem.ViewAs))
                             toDisplay.Append(FormatRow("Screen representation", varItem.ViewAs));
-                        toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
-                        toDisplay.Append(FormatRow("Rest of decla", varItem.Left));
+                        if (!string.IsNullOrEmpty(varItem.LcFlagString))
+                            toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
+                        if (!string.IsNullOrEmpty(varItem.Left))
+                            toDisplay.Append(FormatRow("Rest of decla", varItem.Left));
                         break;
 
                 }
@@ -232,7 +309,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append("<div class='ToolTipBottomGoTo'>[CTRL + B] GO TO DEFINITION</div>");
+                toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
+                    [HOLD CTRL] Prevent auto-close<br>
+                    [CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
+                if (listOfCompletionData.Count > 1)
+                    toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
+                toDisplay.Append("</div>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
             }
 
@@ -255,6 +337,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
             return "<div class='ToolTipSubTitle'>" + text + "</div>";
         }
 
+        private static string FormatSubString(string text) {
+            return "<span class='ToolTipSubString'>" + text.ToUpper() + "</span>";
+        }
+
         #endregion
 
 
@@ -262,6 +348,20 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
 
         #region handle form
+        /// <summary>
+        /// Method to init the tooltip form if needed
+        /// </summary>
+        public static void InitIfneeded() {
+            // instanciate the form
+            if (_form == null) {
+                _form = new InfoToolTipForm {
+                    UnfocusedOpacity = Config.Instance.ToolTipUnfocusedOpacity,
+                    FocusedOpacity = Config.Instance.ToolTipFocusedOpacity
+                };
+                _form.Show(Npp.Win32WindowNpp);
+                _form.SetLinkClickedEvent(ClickHandler);
+            }
+        }
 
         /// <summary>
         /// Closes the form
@@ -287,6 +387,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
             } catch (Exception) {
                 // ignored
             }
+        }
+
+        /// <summary>
+        /// Is a tooltip visible?
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsVisible {
+            get { return _form != null && _form.Visible; }
         }
 
         #endregion
