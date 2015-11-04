@@ -30,6 +30,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
         //protected override bool ShowWithoutActivation {
         //    get { return true; }
         //}
+
+        private static int _positionMode = 0;
+        private static Point _position;
+        private static int _lineHeight;
+        private static Rectangle _rect;
+        private static bool _reversed;
         #endregion
 
         #region constructor
@@ -44,6 +50,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <param name="content"></param>
         public void SetText(string content) {
+
+            if (Visible)
+                Cloack();
+
             // find max height taken by the html
             Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
             labelContent.Text = content;
@@ -58,6 +68,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 2, curWidth);
                 labelContent.Text = content;
                 if (labelContent.Height > prefHeight) {
+                //if (labelContent.Height > curWidth * 2 / 3) {
                     curWidth += detla;
                     detla /= 2;
                 }
@@ -73,12 +84,50 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <param name="position"></param>
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
+            _positionMode = 0;
+            _position = position;
+            _lineHeight = lineHeight;
+
             // position the window smartly
             if (position.X > Screen.PrimaryScreen.WorkingArea.X + Screen.PrimaryScreen.WorkingArea.Width / 2)
                 position.X = position.X - Width;
             if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + Screen.PrimaryScreen.WorkingArea.Height / 2)
                 position.Y = position.Y - Height - lineHeight;
             Location = position;
+        }
+
+        /// <summary>
+        /// Position the tooltip relatively to the autocompletion form (represented by a rectangle)
+        /// reversed = true if the autocompletion is ABOVE the text it completes
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="reversed"></param>
+        public void SetPosition(Rectangle rect, bool reversed) {
+            _positionMode = 1;
+            _rect = rect;
+            _reversed = reversed;
+
+            var position = new Point(0, 0);
+            // position the window smartly
+            if (reversed)
+                position.Y = (rect.Y + rect.Height) - Height;
+            else
+                position.Y = rect.Y;
+            if (rect.X > (Screen.PrimaryScreen.WorkingArea.Width - (rect.X + rect.Width)))
+                position.X = rect.X - Width;
+            else
+                position.X = rect.X + rect.Width;
+            Location = position;
+        }
+
+        /// <summary>
+        /// Reposition the tooltip with the last SetPosition method called
+        /// </summary>
+        public void SetPosition() {
+            if (_positionMode == 1) 
+                SetPosition(_rect, _reversed);
+            else
+                SetPosition(_position, _lineHeight);
         }
 
         /// <summary>

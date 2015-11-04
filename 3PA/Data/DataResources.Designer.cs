@@ -81,21 +81,34 @@ namespace _3PA.Data {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] keywordsHelp {
+            get {
+                object obj = ResourceManager.GetObject("keywordsHelp", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;Root&gt;
-        ///  &lt;Item&gt;
+        ///  &lt;ProgressEnvironnement&gt;
         ///    &lt;Label&gt;Environnement de dev BOI&lt;/Label&gt;
         ///    &lt;Appli&gt;BOI&lt;/Appli&gt;
         ///    &lt;EnvLetter&gt;A&lt;/EnvLetter&gt;
         ///    &lt;IniPath&gt;o:\appli\boia\boidevv1110.ini&lt;/IniPath&gt;
-        ///    &lt;PfPath&gt;o:\appli\boia\boidev.pf&lt;/PfPath&gt;
+        ///    &lt;DicoPfPath&gt;
+        ///      &lt;PfPath&gt;
+        ///        &lt;Key&gt;0&lt;/Key&gt;
+        ///        &lt;Value&gt;o:\appli\boia\boidev.pf&lt;/Value&gt;
+        ///      &lt;/PfPath&gt;
+        ///    &lt;/DicoPfPath&gt;
         ///    &lt;ProPath/&gt;
         ///    &lt;DataBaseConnection/&gt;
         ///    &lt;CmdLineParameters/&gt;
         ///    &lt;BaseLocalPath&gt;D:\Cnaf\boi-a-dev\boi\&lt;/BaseLocalPath&gt;
-        ///    &lt;BaseCompilationPath&gt;O:\appli\boia\sopra\exec\&lt;/BaseCompilationPath&gt;
-        ///    &lt;LogFilePath&gt;O:\appli\boia\log\server.log&lt;/LogFilePath&gt;
-        ///    &lt;V [rest of string was truncated]&quot;;.
+        ///    &lt;BaseCompilationPath&gt;O:\appli [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ProgressEnvironnement {
             get {

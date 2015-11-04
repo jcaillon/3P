@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
@@ -36,8 +37,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         // we save the conditions with which we showed the tooltip to be able to update it as is
         private static List<CompletionData> _currentCompletionList;
-        private static Point _currentPosition;
-        private static int _currentLineHeight;
 
         /// <summary>
         /// Was the form opened because the user left his mouse too long on a word?
@@ -54,30 +53,48 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// CompletionData list
         /// </summary>
         public static int IndexToShow;
+
+        /// <summary>
+        /// is used to make sure that we finish to display a tooltip before trying to display another one
+        /// </summary>
+        private static object _thisLock = new object();
         #endregion
+
+        #region public misc
+
+        /// <summary>
+        /// Returns the current CompletionData used in the tooltip
+        /// </summary>
+        /// <returns></returns>
+        public static CompletionData GetCurrentlyDisplayedCompletionData() {
+            if (_currentCompletionList == null) return null;
+            if (IndexToShow < 0) IndexToShow = _currentCompletionList.Count - 1;
+            if (IndexToShow >= _currentCompletionList.Count) IndexToShow = 0;
+            return _currentCompletionList.ElementAt(IndexToShow);
+        }
+
+        #endregion
+
 
         #region Tooltip
         /// <summary>
         /// Method called when the tooltip is opened from the mouse being inactive on scintilla
         /// </summary>
         public static void ShowToolTipFromDwell(bool openTemporary = true) {
-            _openedFromDwell = openTemporary;
             if (Config.Instance.ToolTipDeactivate) return;
-
             InitIfneeded();
 
             var position = Npp.GetPositionFromMouseLocation();
+            if (position < 0)
+                return;
 
             // sets the tooltip content
-            if (position < 0) 
-                return;
             var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
-            if (data != null && data.Count == 0) return;
-
-            // save the current list
-            _currentCompletionList = data;
-
-            SetToolTip(data);
+            if (data != null && data.Count > 0)
+                _currentCompletionList = data;
+            else
+                return;    
+            SetToolTip();
 
             // update position
             var point = Npp.GetPointXyFromPosition(position);
@@ -86,10 +103,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             point.Y += lineHeight + 5;
             _form.SetPosition(point, lineHeight + 5);
 
-            // save current
-            _currentPosition = point;
-            _currentLineHeight = lineHeight;
-
+            _openedFromDwell = openTemporary;
             if (!_form.Visible)
                 _form.UnCloack();
         }
@@ -103,8 +117,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // refresh tooltip with the correct index
             _form.Cloack();
-            SetToolTip(_currentCompletionList);
-            _form.SetPosition(_currentPosition, _currentLineHeight + 5);
+            SetToolTip();
+            _form.SetPosition();
             if (!_form.Visible)
                 _form.UnCloack();
         }
@@ -112,29 +126,30 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <summary>
         /// Method called when the tooltip is opened to help the user during autocompletion
         /// </summary>
-        public static void ShowToolTipFromAutocomplete() {
+        public static void ShowToolTipFromAutocomplete(CompletionData data, Rectangle completionRectangle, bool reversedForm) {
             if (Config.Instance.ToolTipDeactivate) return;
+            
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_thisLock, 0, ref lockTaken);
+                if (!lockTaken) return;
 
-            InitIfneeded();
+                InitIfneeded();
 
-            var position = Npp.GetPositionFromMouseLocation();
+                // sets the tooltip content
+                _currentCompletionList = new List<CompletionData> { data };
+                SetToolTip();
 
-            // sets the tooltip content
-            if (position < 0)
-                return;
-            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
-            if (data != null && data.Count == 0) return;
-            SetToolTip(data);
+                // update position
+                _form.SetPosition(completionRectangle, reversedForm);
 
-            // update position
-            var point = Npp.GetPointXyFromPosition(position);
-            point.Offset(Npp.GetWindowRect().Location);
-            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
-            point.Y += lineHeight + 5;
-            _form.SetPosition(point, lineHeight + 5);
+                _openedFromDwell = false;
+                if (!_form.Visible)
+                    _form.UnCloack();
 
-            if (!_form.Visible)
-                _form.UnCloack();
+            } finally {
+                if (lockTaken) Monitor.Exit(_thisLock);
+            } 
         }
 
         /// <summary>
@@ -152,14 +167,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present
         /// in the completionData list)
         /// </summary>
-        private static void SetToolTip(List<CompletionData> listOfCompletionData) {
+        private static void SetToolTip() {
             
             var toDisplay = new StringBuilder();
 
             // only select one item from the list
-            if (IndexToShow < 0) IndexToShow = listOfCompletionData.Count - 1;
-            if (IndexToShow >= listOfCompletionData.Count) IndexToShow = 0;
-            var data = listOfCompletionData.ElementAt(IndexToShow);
+            var data = GetCurrentlyDisplayedCompletionData();
+            //if (data == null) return;
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip'>");
@@ -168,10 +182,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 <td>
                     <img style='padding-right: 7px;' src ='" + data.Type + "'>" + data.Type + @"
                 </td>");
-            if (listOfCompletionData.Count > 1)
+            if (_currentCompletionList.Count > 1)
                 toDisplay.Append(@"
                     <td class='ToolTipCount'>" +
-                        (IndexToShow + 1) + "/" + listOfCompletionData.Count + @"
+                        (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
                     </td>");
             toDisplay.Append(@"
                 </tr></table>");
@@ -249,10 +263,22 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
                         toDisplay.Append(FormatRow("Type of keyword", FormatSubString(data.SubString)));
-                        toDisplay.Append(FormatSubtitle("DESCRIPTION"));
-                        // TODO
-                        toDisplay.Append(FormatSubtitle("SYNTHAX"));
-                        // TODO
+                        var dataHelp = Keywords.GetKeywordHelp(data);
+                        if (dataHelp != null) {
+                            toDisplay.Append(FormatSubtitle("DESCRIPTION"));
+                            toDisplay.Append(dataHelp.Description);
+
+                            if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
+                                toDisplay.Append(FormatSubtitle("SYNTHAX"));
+                                foreach (var synthax in dataHelp.Synthax) {
+                                    toDisplay.Append(synthax + "<br>");
+                                }
+                            }
+                            //
+                            // TODO
+                        } else {
+                            toDisplay.Append("This keyword doesn't have any help text associated, press F1 to open 4GL help");
+                        }
                         break;
                     case CompletionType.Label:
                         break;
@@ -260,6 +286,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var preprocItem = (ParsedPreProc) data.ParsedItem;
                         if (preprocItem.UndefinedLine > 0)
                             toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
+                        toDisplay.Append(FormatRow("Value", preprocItem.Value));
                         break;
                     case CompletionType.Snippet:
                         // TODO
@@ -312,7 +339,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
                     [HOLD CTRL] Prevent auto-close<br>
                     [CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
-                if (listOfCompletionData.Count > 1)
+                if (_currentCompletionList.Count > 1)
                     toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
                 toDisplay.Append("</div>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
@@ -371,6 +398,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 if (calledFromDwellEnd && !_openedFromDwell) return;
                 _form.Cloack();
                 _openedFromDwell = false;
+                _currentCompletionList = null;
                 GoToDefinitionPoint = new Point(-1, -1);
             } catch (Exception) {
                 // ignored

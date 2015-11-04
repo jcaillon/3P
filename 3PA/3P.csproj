@@ -262,6 +262,7 @@
   <ItemGroup>
     <None Include="Data\abbreviations.data" />
     <None Include="Data\keywords.data" />
+    <None Include="Data\keywordsHelp.data" />
     <None Include="Data\nppTool.p" />
     <None Include="Data\snippets.data" />
     <None Include="Interop\DllExport\NppPlugin.DllExport.targets" />

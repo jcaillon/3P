@@ -104,6 +104,23 @@ namespace _3PA.Lib {
 
 
         #region string extensions
+
+        /// <summary>
+        /// Check if word contains at least one letter
+        /// </summary>
+        /// <param name="word"></param>
+        /// <returns></returns>
+        public static bool ContainsAtLeastOneLetter(this string word) {
+            var max = word.Length - 1;
+            int count = 0;
+            while (count <= max) {
+                if (char.IsLetter(word[count]))
+                    return true;
+                count++;
+            }
+            return false;
+        }
+
         /// <summary>
         /// autocase the keyword in input according to the user config
         /// </summary>

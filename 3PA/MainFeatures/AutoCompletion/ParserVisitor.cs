@@ -305,7 +305,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
-                Flag = AddExternalFlag(pars.IsExternal ? ParseFlag.ExternalProc : 0),
+                Flag = AddExternalFlag((pars.IsExternal ? ParseFlag.ExternalProc : 0) | (pars.IsPrivate ? ParseFlag.Private : 0)),
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
@@ -429,7 +429,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 DocumentOwner = pars.FilePath,
                                 GoToLine = pars.Line,
                                 GoToColumn = pars.Column,
-                                SubString = SetExternalInclude(subString)
+                                SubString = subString
                             });
                         break;
                     case ParseDefineType.Variable:

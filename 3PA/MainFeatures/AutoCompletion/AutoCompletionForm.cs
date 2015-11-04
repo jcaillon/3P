@@ -79,6 +79,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // remember the list that was passed to the autocomplete form when we set the items, we need this
         // because we reorder the list each time the user filters stuff, but we need the original order
         private List<CompletionData> _initialObjectsList;
+
+        /// <summary>
+        /// True if the form is ABOVE the text it autocompletes
+        /// </summary>
+        private bool _isReversed;
         #endregion
 
         #region constructor
@@ -331,10 +336,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
             // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + 2*Screen.PrimaryScreen.WorkingArea.Width/3)
+            if (position.X > Screen.PrimaryScreen.WorkingArea.X + Screen.PrimaryScreen.WorkingArea.Width/2)
                 position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + 3*Screen.PrimaryScreen.WorkingArea.Height/5)
+            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + Screen.PrimaryScreen.WorkingArea.Height/2) {
                 position.Y = position.Y - Height - lineHeight;
+                _isReversed = true;
+            } else
+                _isReversed = false;
             Location = position;
         }
 
@@ -359,6 +367,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
             return null;
         }
+
         #endregion
 
         #region events
@@ -455,6 +464,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // escape close
             } else if (key == Keys.Escape) {
                 Close();
+                InfoToolTip.InfoToolTip.Close();
 
                 // left and right keys
             } else if (key == Keys.Left) {
@@ -470,6 +480,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // else, any other key needs to be analysed by Npp
             } else {
                 handled = false;
+            }
+
+            // down and up activate the display of tooltip
+            if (key == Keys.Up || key == Keys.Down) {
+                InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
             }
             return handled;
         }

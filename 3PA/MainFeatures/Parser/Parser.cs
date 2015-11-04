@@ -865,11 +865,11 @@ namespace _3PA.MainFeatures.Parser {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global));
+                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global, toParse.Substring(pos, toParse.Length - pos)));
                     break;
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope));
+                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope, toParse.Substring(pos, toParse.Length - pos)));
                     break;
                 case "&ANALYZE-SUSPEND":
                     _context.Scope = ParsedScope.File;
@@ -923,6 +923,7 @@ namespace _3PA.MainFeatures.Parser {
             // info we will extract from the current statement :
             string name = "";
             bool isExternal = false;
+            bool isPrivate = false;
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
 
@@ -942,13 +943,13 @@ namespace _3PA.MainFeatures.Parser {
                         // matching external
                         if (!(token is TokenWord)) continue;
                         if (token.Value.EqualsCi("external")) isExternal = true;
-                        state++;
+                        if (token.Value.EqualsCi("private")) isPrivate = true;
                         break;
                 }
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
             if (state < 1) return false;
-            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), isExternal));
+            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), isExternal, isPrivate));
             _context.Scope = ParsedScope.Procedure;
             _context.OwnerName = name;
             return true;

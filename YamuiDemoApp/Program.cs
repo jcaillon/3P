@@ -23,6 +23,8 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
+
+            CreateHelpConfigFile.Do();
             
             TextTests.Run();
 

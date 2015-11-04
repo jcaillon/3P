@@ -129,14 +129,19 @@ namespace _3PA.MainFeatures.Parser {
         /// Has the external flag in its definition
         /// </summary>
         public bool IsExternal { get; private set; }
+        /// <summary>
+        /// Has the private flag
+        /// </summary>
+        public bool IsPrivate { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string left, bool isExternal)
+        public ParsedProcedure(string name, int line, int column, string left, bool isExternal, bool isPrivate)
             : base(name, line, column) {
             Left = left;
             IsExternal = isExternal;
+            IsPrivate = isPrivate;
         }
     }
 
@@ -263,15 +268,17 @@ namespace _3PA.MainFeatures.Parser {
     /// Pre-processed var parsed item
     /// </summary>
     public class ParsedPreProc : ParsedItem {
+        public string Value { get; private set; }
         public int UndefinedLine { get; set; }
         public ParsedPreProcFlag Flag { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedPreProc(string name, int line, int column, int undefinedLine, ParsedPreProcFlag flag) : base(name, line, column) {
+        public ParsedPreProc(string name, int line, int column, int undefinedLine, ParsedPreProcFlag flag, string value) : base(name, line, column) {
             UndefinedLine = undefinedLine;
             Flag = flag;
+            Value = value;
         }
     }
 

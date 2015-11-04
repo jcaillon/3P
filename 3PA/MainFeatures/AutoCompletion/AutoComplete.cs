@@ -138,7 +138,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             Ranking = 0
                         });
                         ParserHandler.RememberUseOfDatabaseItem(fieldFound.Name);
-                        output = keyword.AutoCaseToUserLiking();
+                        output = tableFound.IsTempTable ? fieldFound.Name : keyword.AutoCaseToUserLiking();
                     }
                 }
             }
@@ -184,9 +184,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the keyword currently selected in the completion list
         /// </summary>
         /// <returns></returns>
-        public static string GetCurrentSuggestion() {
-            var data = _form.GetCurrentSuggestion();
-            return data == null ? null : data.DisplayText;
+        public static CompletionData GetCurrentSuggestion() {
+            return _form.GetCurrentSuggestion();
         }
         #endregion
 

@@ -393,11 +393,11 @@ namespace _3PA {
                     string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list
-                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd) {
+                    if (Config.Instance.AutoCompleteInsertSelectedSuggestionOnWordEnd && keyword.ContainsAtLeastOneLetter()) {
                         if (AutoComplete.IsVisible) {
                             var lastSugg = AutoComplete.GetCurrentSuggestion();
                             if (lastSugg != null)
-                                replacementWord = lastSugg;
+                                replacementWord = lastSugg.DisplayText;
                         }
                     }
 
