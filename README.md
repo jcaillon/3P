@@ -1,9 +1,5 @@
 # 3P: Progress Programmers Pal #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+### About this project ###
 
-### What is this repository for? ###
-
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+Progress Programmers Pal (3P), is a notepad++ plugin designed to help writing 4GL code. It transforms notepad++ into a viable competitor to the appbuilder, providing synthax checking, compilation, autocompletion, tooltips and much more!
