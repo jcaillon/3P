@@ -453,7 +453,6 @@ CONNECTED	Method	1	1
 Connected	Property	1	0
 CONSTRUCTOR	Statement	0	0
 CONSTRUCTOR	Option	0	0
-CONSTRUCTOR 	Statement	0	0
 CONTAINS	Option	0	0
 CONTENTS	Option	0	0
 CONTEXT	Option	0	0
@@ -656,7 +655,6 @@ DESELECT-ROWS	Method	0	1
 DESELECT-SELECTED-ROW	Method	0	1
 DESTRUCTOR	Statement	0	0
 DESTRUCTOR	Option	0	0
-DESTRUCTOR 	Statement	0	0
 DETACH-DATA-SOURCE	Method	0	1
 DIALOG-BOX	Widget	0	1
 DIALOG-BOX	Option	0	1
@@ -928,7 +926,6 @@ FONT	Option	1	12
 FONT-TABLE	Handle	0	0
 FOR	Statement	1	25
 FOR	Option	1	25
-FOR 	Statement	0	0
 FORCE-FILE	Option	0	0
 FORE	Abbreviation	0	0
 FOREGROUND	Attribute	0	0
@@ -1813,7 +1810,6 @@ OFF	Option	1	0
 OffEnd	Event	0	0
 OFF-END	Event	0	1
 OFF-HOME	Event	0	0
-OFF-HOME 	Event	0	0
 Offset	Property	0	0
 OK	Option	0	3
 OK-CANCEL	Option	0	1
@@ -1885,7 +1881,6 @@ PARENT-ID-RELATION	Attribute	0	1
 PARENT-ID-RELATION	Option	0	1
 PARENT-RELATION	Attribute	0	0
 PARENT-WINDOW-CLOSE	Event	0	0
-PARENT-WINDOW-CLOSE 	Event	0	0
 Parse	Method	0	0
 ParseFile	Method	0	0
 PARSE-STATUS	Attribute	0	1
@@ -2626,7 +2621,6 @@ UNDERLINE	Option	1	1
 UNDO	Attribute	1	14
 UNDO	Statement	1	14
 UNDO	Option	1	14
-UNDO,	Statement	0	0
 UNFORM	Abbreviation	0	0
 UNFORMATTED	Option	1	7
 UNION	Option	1	0
