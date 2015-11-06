@@ -1,0 +1,74 @@
+C Method	Specifies the justification of the string within its maximum length. The default justification depends on how the string is used. If the string is displayed with side labels, the default is right justification. If column labels are used, the defaults are left justification for character fields and right justification for numeric fields. Strings used in expressions are trimmed by default. C means centered within the string and padded on both the right and left as needed: "Hello":C10 = " Hello ".	"characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]	
+L Method	Specifies the justification of the string within its maximum length. The default justification depends on how the string is used. If the string is displayed with side labels, the default is right justification. If column labels are used, the defaults are left justification for character fields and right justification for numeric fields. Strings used in expressions are trimmed by default. L means left justified and padded on the right with spaces: "Hello":L10 = "Hello ".	"characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]	
+R Method	Specifies the justification of the string within its maximum length. The default justification depends on how the string is used. If the string is displayed with side labels, the default is right justification. If column labels are used, the defaults are left justification for character fields and right justification for numeric fields. Strings used in expressions are trimmed by default. R means right justified and padded on the left with spaces: "Hello":R10 = " Hello".	"characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]	
+T Method	Specifies the justification of the string within its maximum length. The default justification depends on how the string is used. If the string is displayed with side labels, the default is right justification. If column labels are used, the defaults are left justification for character fields and right justification for numeric fields. Strings used in expressions are trimmed by default. T means trimmed of leading and trailing blanks (although storage space and screen space is still allocated for the maximum number of characters): " Hello":T10 = "Hello" (but screen and storage space is still reserved for 10 characters).	"characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]	
+U Method	Specifies the justification of the string within its maximum length. The default justification depends on how the string is used. If the string is displayed with side labels, the default is right justification. If column labels are used, the defaults are left justification for character fields and right justification for numeric fields. Strings used in expressions are trimmed by default. U specifies that the string is untranslatable. This means that the string will not be processed by the OpenEdge Translation Manager. If you do not specify U, then the string is assumed to be translatable.	"characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]	
+LOWER Function	Converts any uppercase characters in a CHARACTER or LONGCHAR expression to lowercase characters, and returns the result.	LOWER ( expression )	
+UPPER Function	Converts any lowercase characters in a CHARACTER or LONGCHAR expression to uppercase characters, and returns the result.	UPPER ( expression )	
+
+BLOB Type	BLOB (Binary Large OBject) specifies a database table or temp-table field that contains a BLOB locator, which points to the associated BLOB data stored in the database. You must use a MEMPTR to manipulate the binary contents of a BLOB field in ABL.	
+BUFFER Type	A handle to a buffer object, corresponding to an underlying ABL buffer, which can be static or dynamic. An example of a static underlying buffer is one you define at compile time by using the DEFINE BUFFER statement, or by implicitly referencing a table in an ABL construct such as Customer.CustNum. An example of a dynamic underlying buffer is one you create at run time with the CREATE BUFFER statement.	
+CHARACTER Type	CHARACTER data consists of numbers, letters, and special characters.	
+CLOB Type	CLOB (Character Large OBject) specifies a database table or temp-table field that contains a CLOB locator, which points to the associated CLOB data stored in the database. You must use a LONGCHAR to manipulate the character contents of a CLOB field in ABL.	
+COM-HANDLE Type	A COM-HANDLE is a handle to a COM object (ActiveX Automation object or ActiveX Control).	
+DATE Type	DATE fields contain dates.	
+DATETIME Type	DATETIME data has two parts: an ABL date and an ABL time. The unit of time is milliseconds from midnight. 	
+DATETIME-TZ Type	DATETIME-TZ data has three parts: an ABL date, an ABL time, and an integer representing the time zone offset from Coordinated Universal Time (UTC). The unit of time is milliseconds from midnight. The unit of time zone offset is minutes.	
+DECIMAL Type	DECIMAL data consists of decimal numbers up to 50 digits in length including up to 10 digits to the right of the decimal point.	
+HANDLE Type	A HANDLE is a pointer to an ABL handle-based object. This can be a compile-time defined static object or a run-time defined dynamic object.
+Note: HANDLE and WIDGET-HANDLE can be assigned to each other and used interchangeably. WIDGET-HANDLE is supported only for backward compatibility.	
+INT64 Type	An INT64 consists of 64-bit data (whole numbers).	
+INTEGER Type	An INTEGER consists of 32-bit data (whole numbers).	
+LOGICAL Type	LOGICAL data evaluates to TRUE or FALSE (or YES or NO).	
+LONGCHAR Type	A LONGCHAR consists of CHARACTER data that is not limited to 32K in size. You can use a LONGCHAR to manipulate the character contents of a CLOB database or temp-table field in ABL. 	
+MEMPTR Type	A MEMPTR contains a sequence of bytes in memory. You can use a MEMPTR to manipulate the contents of a BLOB database or temp-table field in ABL.	
+RAW Type	RAW data can be any kind of data, even data from non-OpenEdge databases. It is not converted in any way.	
+RECID Type	A RECID is a unique internal identifier for a record within a single database storage area. Note: RECID is supported mainly for backward compatibility. For most applications, use ROWID instead.	
+ROWID Type	A ROWID is a unique internal identifier for a record within a single database storage area.	
+WIDGET-HANDLE Type	A WIDGET-HANDLE is a pointer to an ABL handle-based object. Note: HANDLE and WIDGET-HANDLE can be assigned to each other and used interchangeably. WIDGET-HANDLE is supported only for backward compatibility.	
+
+
+
+
+
+DEFINE BROWSE	Statement	0	0
+DEFINE BUFFER	Statement	0	0
+DEFINE BUTTON	Statement	0	0
+DEFINE DATASET	Statement	0	0
+DEFINE DATA-SOURCE	Statement	0	0
+DEFINE EVENT	Statement	0	0
+DEFINE FRAME	Statement	0	0
+DEFINE IMAGE	Statement	0	0
+DEFINE MENU	Statement	0	0
+DEFINE PARAMETER	Statement	0	0
+DEFINE PROPERTY	Statement	0	0
+DEFINE QUERY	Statement	0	0
+DEFINE RECTANGLE	Statement	0	0
+DEFINE STREAM	Statement	0	0
+DEFINE SUB-MENU	Statement	0	0
+DEFINE TEMP-TABLE	Statement	0	0
+DEFINE VARIABLE	Statement	0	0
+DEFINE WORKFILE	Statement	0	0
+DEFINE WORK-TABLE	Statement	0	0
+
+CREATE ALIAS	Statement	0	0
+CREATE BROWSE	Statement	0	0
+CREATE BUFFER	Statement	0	0
+CREATE CALL	Statement	0	0
+CREATE CLIENT-PRINCIPAL	Statement	0	0
+CREATE DATABASE	Statement	0	0
+CREATE DATASET	Statement	0	0
+CREATE DATA-SOURCE	Statement	0	0
+CREATE QUERY	Statement	0	0
+CREATE SAX-ATTRIBUTES	Statement	0	0
+CREATE SAX-READER	Statement	0	0
+CREATE SAX-WRITER	Statement	0	0
+CREATE SERVER	Statement	0	0
+CREATE SERVER-SOCKET	Statement	0	0
+CREATE SOAP-HEADER	Statement	0	0
+CREATE SOAP-HEADER-ENTRYREF	Statement	0	0
+CREATE SOCKET	Statement	0	0
+CREATE TEMP-TABLE	Statement	0	0
+CREATE WIDGET-POOL	Statement	0	0
+CREATE X-DOCUMENT	Statement	0	0
+CREATE X-NODEREF	Statement	0	0
