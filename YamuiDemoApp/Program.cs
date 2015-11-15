@@ -12,6 +12,7 @@ using YamuiFramework.Themes;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace YamuiDemoApp {
     static class Program {
@@ -23,6 +24,9 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
+
+            Highlight.Init();
+            return;
 
             CreateHelpConfigFile.Do();
             

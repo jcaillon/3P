@@ -67,6 +67,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         // the private fields below are used for the filter function
         private static Dictionary<CompletionType, SelectorButton> _displayedTypes;
+        private static bool _useTypeFiltering;
         private static string _filterString = "";
         private static string _currentOwnerName = "";
         private static int _currentLineNumber;
@@ -525,6 +526,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _currentLineNumber = Npp.GetCaretLineNumber();
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
             _filterString = _filterByText;
+            _useTypeFiltering = true;
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
 
             fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
@@ -550,7 +552,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var compData = (CompletionData)o;
             // check for the filter match, the activated category,
             bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString);
-            if (_displayedTypes.ContainsKey(compData.Type))
+            if (_useTypeFiltering && _displayedTypes.ContainsKey(compData.Type))
                 output = output && _displayedTypes[compData.Type].Activated;
 
             // if the item isn't a parsed item, it is avaiable no matter where we are in the code
@@ -590,6 +592,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             objectsList.Sort(new CompletionDataSortingClass());
             if (_displayedTypes == null)
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
+            _useTypeFiltering = false;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
             _currentLineNumber = line;
             _filterString = "";

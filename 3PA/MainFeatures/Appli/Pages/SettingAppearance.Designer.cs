@@ -31,11 +31,15 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.PanelAccentColor = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel21 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
+            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.cbSyntax = new YamuiFramework.Controls.YamuiComboBox();
             this.yamuiPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // yamuiPanel1
             // 
+            this.yamuiPanel1.Controls.Add(this.cbSyntax);
+            this.yamuiPanel1.Controls.Add(this.yamuiLabel1);
             this.yamuiPanel1.Controls.Add(this.comboTheme);
             this.yamuiPanel1.Controls.Add(this.PanelAccentColor);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel21);
@@ -92,6 +96,25 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.yamuiLabel20.TabIndex = 8;
             this.yamuiLabel20.Text = "THEME";
             // 
+            // yamuiLabel1
+            // 
+            this.yamuiLabel1.AutoSize = true;
+            this.yamuiLabel1.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel1.Location = new System.Drawing.Point(0, 255);
+            this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
+            this.yamuiLabel1.Name = "yamuiLabel1";
+            this.yamuiLabel1.Size = new System.Drawing.Size(169, 19);
+            this.yamuiLabel1.TabIndex = 14;
+            this.yamuiLabel1.Text = "SYNTAX HIGHLIGHTING";
+            // 
+            // cbSyntax
+            // 
+            this.cbSyntax.ItemHeight = 19;
+            this.cbSyntax.Location = new System.Drawing.Point(0, 284);
+            this.cbSyntax.Name = "cbSyntax";
+            this.cbSyntax.Size = new System.Drawing.Size(180, 25);
+            this.cbSyntax.TabIndex = 15;
+            // 
             // SettingAppearance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -112,6 +135,8 @@ namespace _3PA.MainFeatures.Appli.Pages {
         private YamuiLabel yamuiLabel21;
         private YamuiLabel yamuiLabel20;
         private YamuiComboBox comboTheme;
+        private YamuiLabel yamuiLabel1;
+        private YamuiComboBox cbSyntax;
 
     }
 }

@@ -28,6 +28,7 @@ using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.Appli.Pages {
     public partial class SettingAppearance : YamuiPage {
@@ -62,6 +63,12 @@ namespace _3PA.MainFeatures.Appli.Pages {
             comboTheme.SelectedIndex = ThemeManager.CurrentThemeIndex;
 
             comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
+
+            // syntax combo
+            cbSyntax.DataSource = Highlight.GetThemesList().Select(theme => theme.Name).ToList();
+            cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
+
+            cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
 
         /// <summary>
@@ -82,6 +89,22 @@ namespace _3PA.MainFeatures.Appli.Pages {
                 PlsRefresh();
             }
             
+        }
+
+        /// <summary>
+        /// Changing syntax theme
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
+            try {
+                Highlight.CurrentTheme = Highlight.GetThemesList()[cbSyntax.SelectedIndex];
+            } catch (Exception) {
+                // ignored
+            } finally {
+                Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
+                Highlight.SetCustomStyles();
+            }
         }
 
         /// <summary>

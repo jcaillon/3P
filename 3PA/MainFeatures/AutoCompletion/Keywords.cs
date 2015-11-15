@@ -163,14 +163,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Returns the help for a specified keyword
         /// </summary>
-        /// <param name="data"></param>
+        /// <param name="key"></param>
         /// <returns></returns>
-        public static KeywordsHelp GetKeywordHelp(CompletionData data) {
-            var key = data.DisplayText + " " + data.SubString;
-            if (_help.ContainsKey(key)) {
-                return _help[key];
-            }
-            return null;
+        public static KeywordsHelp GetKeywordHelp(string key) {
+            return _help.ContainsKey(key) ? _help[key] : null;
         }
 
         #endregion

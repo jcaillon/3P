@@ -244,7 +244,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
                 //------------
             } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
             } finally {
                 if (lockTaken) Monitor.Exit(_thisLock);
             }
@@ -551,6 +551,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 _form.Cloack();
                 _openedFromShortCut = false;
+
+                // closing the autocompletion form also closes the tooltip
+                InfoToolTip.InfoToolTip.CloseIfOpenedForCompletion();
             } catch (Exception) {
                 // ignored
             }

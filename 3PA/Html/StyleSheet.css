@@ -89,6 +89,14 @@ a:link {
     font-size: 10px;
     text-align: right;
 }
+.ToolTipcodeSnippet {
+    background-color: %ALTERNATEBGCOLOR%;
+    margin: 10px 2px;
+    padding: 5px 5px;
+    word-wrap: normal;
+    font-family: Consolas,Courier,monospace;
+    font-size: 11px;
+}
 
 
 /* ==================================== */

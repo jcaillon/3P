@@ -252,6 +252,12 @@ namespace _3PA.Lib {
             return Encoding.Default.GetString(xencode.GetBytes(str));
         }
 
+        /// <summary>
+        /// case insensitive contains
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="toCheck"></param>
+        /// <returns></returns>
         public static bool ContainsFast(this string source, string toCheck) {
             return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }

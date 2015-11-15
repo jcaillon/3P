@@ -20,8 +20,8 @@
 using System.Windows.Forms;
 using _3PA.MainFeatures.Parser;
 
-namespace _3PA.MainFeatures.SynthaxHighlighting {
-    internal class SynthaxHighlightVisitor : ILexerVisitor {
+namespace _3PA.MainFeatures.SyntaxHighlighting {
+    internal class SyntaxHighlightVisitor : ILexerVisitor {
         /// <summary>
         /// Only colorize from this line!
         /// </summary>

@@ -33,7 +33,7 @@ using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
-using _3PA.MainFeatures.SynthaxHighlighting;
+using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA {
 
@@ -165,10 +165,12 @@ namespace _3PA {
             }
         }
 
+        #region init
+
         /// <summary>
         /// Called on npp ready
         /// </summary>
-        static internal void OnNppReady() {
+        internal static void OnNppReady() {
             // This allows to correctly feed the dll with dependencies
             LibLoader.Init();
 
@@ -182,7 +184,10 @@ namespace _3PA {
             InitPlugin();
         }
 
-        static internal void InitPlugin() {
+        internal static void InitPlugin() {
+
+            #region Themes
+
             // themes
             ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
             ThemeManager.AccentColor = Config.Instance.AccentColor;
@@ -190,6 +195,11 @@ namespace _3PA {
             // TODO: delete when releasing! (we dont want the user to access those themes!)
             ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
             LocalHtmlHandler.Init();
+
+            //Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SynthaxHighlighting.xml");
+            #endregion
+
+
 
             // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
@@ -223,7 +233,7 @@ namespace _3PA {
 
                 // dockable explorer
                 if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
-                    Appli.Form.BeginInvoke((Action)CodeExplorer.Toggle);
+                    Appli.Form.BeginInvoke((Action) CodeExplorer.Toggle);
 
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched();
@@ -237,9 +247,15 @@ namespace _3PA {
                 if (Config.Instance.GlobalShowNotifAboutDefaultAutoComp)
                     UserCommunication.NotifyUserAboutNppDefaultAutoComp();
 
+                // make sure the UDL is present
+                Highlight.Init();
+
                 PluginIsFullyLoaded = true;
             });
         }
+
+        #endregion
+
         #endregion
 
         #region OnEvents
@@ -507,11 +523,8 @@ namespace _3PA {
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
 
-            // TODO: FIX COLOR HIGHLIGHTING.?
-            // set the lexer to use
-            //if (Config.Instance.GlobalUseContainedLexer && Abl.IsCurrentProgressFile())
-            //    Highlight.Colorize(0, Npp.GetTextLenght());
-            //Npp.SetLexerToContainerLexer();
+            // Syntax Highlight
+            Highlight.SetCustomStyles();
         }
 
         /// <summary>
@@ -568,9 +581,10 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            UserCommunication.MessageToUser();
-            var x = 0;
-            var y = 1/x;
+            UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
+            //UserCommunication.MessageToUser();
+            //var x = 0;
+            //var y = 1/x;
             //Npp.Goto(@"C:\Users\Julien\Desktop\in.p", 1000, 10);
             //ProgressCodeUtils.ToggleComment();
             /*

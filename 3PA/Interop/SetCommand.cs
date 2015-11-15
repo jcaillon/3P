@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 
@@ -124,7 +125,7 @@ namespace _3PA.Interop {
                     Config.Instance.ShortCuts.Add(shortcutName, ShortcutKey2String(shortcut));
                     Config.Save();
                     if (!_alreadyWarnedUserAboutShortkey) {
-                        UserCommunication.MessageUser("You successfully changed a shortcut, a restart of notepad++ is needed to correctly take this change into account");
+                        UserCommunication.Notify("You successfully changed a shortcut.<br>Your change will be taken into account at the next notepad++ restart!", MessageImage.Pin, "Information", "Shortcut modification");
                         _alreadyWarnedUserAboutShortkey = true;
                     }
                 }

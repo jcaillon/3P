@@ -25,9 +25,6 @@ using _3PA.Html;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
-        public static void MessageUser(string text) {
-            Notify(text);
-        }
 
         /// <summary>
         /// Displays a notification on the bottom right of the screen
@@ -40,12 +37,13 @@ namespace _3PA.MainFeatures {
         }
 
         public static void Notify(string html, MessageImage imageType, string title, string subTitle = "", int duration = 0, int width = 300) {
-            Appli.Appli.Form.BeginInvoke((Action)delegate {
-                var toastNotification = new YamuiNotifications(
-                    LocalHtmlHandler.FormatMessage(html, imageType, title, subTitle)
-                    , duration, width);
-                toastNotification.Show();
-            });
+            if (Appli.Appli.Form != null)
+                Appli.Appli.Form.BeginInvoke((Action)delegate {
+                    var toastNotification = new YamuiNotifications(
+                        LocalHtmlHandler.FormatMessage(html, imageType, title.ToUpper(), subTitle)
+                        , duration, width);
+                    toastNotification.Show();
+                });
         }
 
         public static void NotifyUserAboutNppDefaultAutoComp() {

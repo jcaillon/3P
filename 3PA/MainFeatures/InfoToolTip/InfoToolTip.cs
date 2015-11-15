@@ -44,6 +44,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static bool _openedFromDwell;
 
         /// <summary>
+        /// Was the form displayed for an autocompletion item?
+        /// </summary>
+        private static bool _openedForCompletion;
+
+        /// <summary>
         /// If a tooltip is opened and it's a parsed item, this point leads to its definition
         /// </summary>
         public static Point GoToDefinitionPoint = new Point(-1, -1);
@@ -144,6 +149,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _form.SetPosition(completionRectangle, reversedForm);
 
                 _openedFromDwell = false;
+                _openedForCompletion = true;
                 if (!_form.Visible)
                     _form.UnCloack();
 
@@ -263,21 +269,49 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
                         toDisplay.Append(FormatRow("Type of keyword", FormatSubString(data.SubString)));
-                        var dataHelp = Keywords.GetKeywordHelp(data);
+                        // for abbreviations, find the complete keyword first
+                        string keyword = data.DisplayText;
+                        if (data.KeywordType == KeywordType.Abbreviation) {
+                            keyword = Keywords.GetFullKeyword(keyword);
+                            var associatedKeyword = AutoComplete.FindInCompletionData(keyword, 0);
+                            if (associatedKeyword != null && associatedKeyword.Count > 0)
+                                data = associatedKeyword.First();
+                        }
+                        string keyToFind = null;
+                        // for the keywords define and create, we try to match the second keyword that goes with it
+                        if (data.KeywordType == KeywordType.Statement &&
+                            (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
+                            var lineStr = Npp.GetLineText(Npp.GetLineFromPosition(Npp.GetPositionFromMouseLocation()));
+                            var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
+                            foreach (var word in listOfSecWords) {
+                                if (lineStr.ContainsFast(word)) {
+                                    keyToFind = string.Join(" ", keyword, word, data.SubString);
+                                    break;
+                                }
+                            }
+                        }
+                        if (keyToFind == null)
+                            keyToFind = string.Join(" ", keyword, data.SubString);
+                        var dataHelp = Keywords.GetKeywordHelp(keyToFind);
                         if (dataHelp != null) {
                             toDisplay.Append(FormatSubtitle("DESCRIPTION"));
                             toDisplay.Append(dataHelp.Description);
 
+                            // synthax
                             if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
                                 toDisplay.Append(FormatSubtitle("SYNTHAX"));
+                                toDisplay.Append(@"<pre class='ToolTipcodeSnippet'>");
+                                var i = 0;
                                 foreach (var synthax in dataHelp.Synthax) {
-                                    toDisplay.Append(synthax + "<br>");
+                                    if (i > 0) toDisplay.Append(@"<br>");
+                                    toDisplay.Append(synthax);
+                                    i++;
                                 }
+                                toDisplay.Append(@"</pre>");
                             }
-                            //
-                            // TODO
                         } else {
-                            toDisplay.Append("This keyword doesn't have any help text associated, press F1 to open 4GL help");
+                            toDisplay.Append(FormatSubtitle("404 NOT FOUND"));
+                            toDisplay.Append("<i>This keyword doesn't have any help associated, please refer to the 4GL help</i>");
                         }
                         break;
                     case CompletionType.Label:
@@ -304,8 +338,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append(FormatRow("Screen representation", varItem.ViewAs));
                         if (!string.IsNullOrEmpty(varItem.LcFlagString))
                             toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
-                        if (!string.IsNullOrEmpty(varItem.Left))
-                            toDisplay.Append(FormatRow("Rest of decla", varItem.Left));
+                        if (!string.IsNullOrEmpty(varItem.Left)) {
+                            toDisplay.Append(FormatSubtitle("Rest of the declaration"));
+                            toDisplay.Append(@"<pre class='ToolTipcodeSnippet'>");
+                            toDisplay.Append(varItem.Left);
+                            toDisplay.Append(@"</pre>");
+                        }
                         break;
 
                 }
@@ -334,16 +372,17 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(flagStrBuilder);
             }
 
+            
+            toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
+                [HOLD CTRL] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
-                    [HOLD CTRL] Prevent auto-close<br>
-                    [CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
-                if (_currentCompletionList.Count > 1)
-                    toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
-                toDisplay.Append("</div>");
+                toDisplay.Append(@"<br>[CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
             }
+            if (_currentCompletionList.Count > 1)
+                toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
+            toDisplay.Append("</div>");
 
             toDisplay.Append("</div>");
             _form.SetText(toDisplay.ToString());
@@ -398,11 +437,20 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 if (calledFromDwellEnd && !_openedFromDwell) return;
                 _form.Cloack();
                 _openedFromDwell = false;
+                _openedForCompletion = false;
                 _currentCompletionList = null;
                 GoToDefinitionPoint = new Point(-1, -1);
             } catch (Exception) {
                 // ignored
             }
+        }
+
+        /// <summary>
+        /// Closes the tooltip, but only if it was opened to help for an autocompletion item
+        /// </summary>
+        public static void CloseIfOpenedForCompletion() {
+            if (_openedForCompletion)
+                Close();
         }
 
         /// <summary>

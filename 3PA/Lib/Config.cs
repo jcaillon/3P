@@ -95,6 +95,8 @@ namespace _3PA.Lib {
 
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
+
+        public int SyntaxHighlightThemeId = 0;
     }
 
     /// <summary>

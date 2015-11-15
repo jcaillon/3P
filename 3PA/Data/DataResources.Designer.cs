@@ -125,5 +125,44 @@ namespace _3PA.Data {
                 return ((byte[])(obj));
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;Root&gt;
+        ///  &lt;HighlightTheme&gt;
+        ///    &lt;Name Value=&quot;Default&quot; /&gt;
+        ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
+        ///    &lt;BgDefault Value=&quot;#FFFFFF&quot; /&gt;
+        ///    &lt;FgDefault Value=&quot;#4D4D4C&quot; /&gt;
+        ///    &lt;FgComment Value=&quot;#718C00&quot; /&gt;
+        ///    &lt;FgLineComment Value=&quot;#EAB700&quot; /&gt;
+        ///    &lt;FgNumbers Value=&quot;#C82829&quot; /&gt;
+        ///    &lt;FgKeyword1 Value=&quot;#183E56&quot; /&gt;
+        ///    &lt;BgKeyword1 Value=&quot;#BBDAFF&quot; /&gt;
+        ///    &lt;FgKeyword2 Value=&quot;#183E56&quot; /&gt;
+        ///    &lt;FgKeyword3 Value=&quot;#2F5E9B&quot; /&gt;
+        ///    &lt;FgKeyword4 Value=&quot;#2F5E9B&quot; /&gt;
+        ///    &lt;FgKeyword5 Value=&quot;#EAB [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string SyntaxHighlighting {
+            get {
+                return ResourceManager.GetString("SyntaxHighlighting", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;UserLang name=&quot;OpenEdgeABL&quot; ext=&quot;p i t w cls lst&quot; udlVersion=&quot;2.1&quot;&gt;
+        ///  &lt;Settings&gt;
+        ///    &lt;Global caseIgnored=&quot;yes&quot; allowFoldOfComments=&quot;no&quot; foldCompact=&quot;no&quot; forcePureLC=&quot;0&quot; decimalSeparator=&quot;0&quot; /&gt;
+        ///    &lt;Prefix Keywords1=&quot;no&quot; Keywords2=&quot;no&quot; Keywords3=&quot;no&quot; Keywords4=&quot;no&quot; Keywords5=&quot;no&quot; Keywords6=&quot;yes&quot; Keywords7=&quot;no&quot; Keywords8=&quot;no&quot; /&gt;
+        ///  &lt;/Settings&gt;
+        ///  &lt;KeywordLists&gt;
+        ///    &lt;Keywords name=&quot;Comments&quot;&gt;00&amp;amp;ANALYZE-SUSPEND 00&amp;amp;GLOBAL-DEFINE 00&amp;amp;SCOPED-DEFINE 00&amp;amp;SCOPED 00&amp;amp;GLOB 00&amp;amp;GLOBAL 00&amp;amp;MES [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string UDL {
+            get {
+                return ResourceManager.GetString("UDL", resourceCulture);
+            }
+        }
     }
 }
