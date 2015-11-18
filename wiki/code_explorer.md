@@ -1,3 +1,9 @@
+# 3P: Progress Programmers Pal #
+
+*[Go back the home page](../master/README.md)*
+
+## The code explorer ##
+
 * The code explorer acts as an improved `function list`, well known to the notepad++ users. It displays the structure of the program and provides a quick way to jump from a code's portion to another (left click an item to get redirected to it) :
 
 ![image](https://cloud.githubusercontent.com/assets/11553075/11218752/256db7f8-8d57-11e5-9924-93fa3d87e83e.png)
