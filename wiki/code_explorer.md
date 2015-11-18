@@ -1,6 +1,6 @@
 # 3P: Progress Programmers Pal #
 
-*[Go back the home page](../master/README.md)*
+*[Return to home page](../../master/README.md)*
 
 ## The code explorer ##
 
@@ -15,3 +15,7 @@
 * You can also filter the items by typing a word in the textbox available for this end :
 
 ![image](https://cloud.githubusercontent.com/assets/11553075/11219059/8e34ca6e-8d58-11e5-9ffb-e954cb291fcc.png)
+
+***
+
+*[Return to home page](../../master/README.md)*
