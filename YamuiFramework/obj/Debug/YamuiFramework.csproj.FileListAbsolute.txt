@@ -30,3 +30,17 @@ C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resource
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3PA\YamuiFramework\obj\Debug\YamuiFramework.pdb
+C:\Work\3P\3P\Lib\YamuiFolder\YamuiFramework.dll
+C:\Work\3P\3P\Lib\YamuiFolder\YamuiFramework.pdb
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Fonts.ResourceFont.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiForm.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiFormMessageBox.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiNotifications.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiSmokeScreen.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiTabAnimation.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resources
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.dll
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.pdb
+C:\Work\3P\3PA\Lib\YamuiFolder\YamuiFramework.dll
+C:\Work\3P\3PA\Lib\YamuiFolder\YamuiFramework.pdb

@@ -80,7 +80,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #endregion
 
-
         #region Tooltip
         /// <summary>
         /// Method called when the tooltip is opened from the mouse being inactive on scintilla
@@ -374,7 +373,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             
             toDisplay.Append(@"<div class='ToolTipBottomGoTo'>
-                [HOLD CTRL] Prevent auto-close");
+                [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
                 toDisplay.Append(@"<br>[CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
@@ -409,9 +408,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #endregion
 
-
         #endregion
-
 
         #region handle form
         /// <summary>

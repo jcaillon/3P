@@ -319,4 +319,19 @@
   <data name="NotFound" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\flag\notfound.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="logo20x20" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>logo20x20.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="logo30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>logo30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="logo16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>logo16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="logo16x16_r" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>logo16x16_r.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="code_explorer_logo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\code_explorer_logo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

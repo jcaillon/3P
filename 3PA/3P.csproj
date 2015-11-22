@@ -102,6 +102,25 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\FileInfo\FileTags.cs" />
+    <Compile Include="MainFeatures\FileInfo\FileTagsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\FileInfo\FileTagsForm.Designer.cs">
+      <DependentUpon>FileTagsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\FileInfo\FileTagsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\FileInfo\FileTagsPage.Designer.cs">
+      <DependentUpon>FileTagsPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.Designer.cs">
+      <DependentUpon>NppInterfaceYamuiForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
@@ -134,7 +153,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\ShowFileTags.cs" />
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
     <Compile Include="Interop\LocalWindowsHook.cs" />
     <Compile Include="Interop\NppPluginNETHelper.cs" />
@@ -180,7 +198,6 @@
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
-    <Compile Include="MainFeatures\FileTags.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\Highlight.cs" />
     <Compile Include="MainFeatures\ProgressHandler.cs" />
@@ -247,6 +264,12 @@
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerPage.resx">
       <DependentUpon>FileExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\FileInfo\FileTagsForm.resx">
+      <DependentUpon>FileTagsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\FileInfo\FileTagsPage.resx">
+      <DependentUpon>FileTagsPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
       <DependentUpon>NppInterfaceForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -307,6 +330,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
+    <Content Include="Images\DockableExplorer\code_explorer_logo.png" />
     <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
     <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
@@ -341,6 +365,10 @@
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
     <Content Include="Images\Html\wink.png" />
+    <Content Include="Images\logo16x16.png" />
+    <Content Include="Images\logo16x16_r.png" />
+    <Content Include="Images\logo20x20.png" />
+    <Content Include="Images\logo30x30.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />

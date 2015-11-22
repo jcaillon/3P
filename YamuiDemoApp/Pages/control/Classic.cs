@@ -77,5 +77,10 @@ namespace YamuiDemoApp.Pages.control {
             };
             t.run();
         }
+
+        private void yamuiButton5_ButtonPressed(object sender, ButtonPressedEventArgs e) {
+            yamuiButton4.UseCustomBackColor = true;
+            Transition.run(yamuiButton4, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false; });
+        }
     }
 }

@@ -24,7 +24,7 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
-
+            /*
             Highlight.Init();
             return;
 
@@ -45,7 +45,7 @@ namespace YamuiDemoApp {
             Application.Run(fuck);
 
             return;
-            /*
+            
             Application.EnableVisualStyles();
            
             Keywords.Init();
@@ -56,10 +56,10 @@ namespace YamuiDemoApp {
             testAutoComp.ShowDialog();
 
             return;
-
+            */
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
-             */
+             
             ThemeManager.TabAnimationAllowed = true;
             MainForm = new Form1();
 

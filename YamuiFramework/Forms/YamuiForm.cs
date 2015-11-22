@@ -622,7 +622,7 @@ namespace YamuiFramework.Forms {
             Refresh();
         }
 
-        private class YamuiFormButton : Label {
+        public class YamuiFormButton : Label {
             #region Constructor
 
             public YamuiFormButton() {

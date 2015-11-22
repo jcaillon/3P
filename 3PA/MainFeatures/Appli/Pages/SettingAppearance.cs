@@ -28,6 +28,7 @@ using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FileInfo;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.Appli.Pages {
@@ -160,6 +161,9 @@ namespace _3PA.MainFeatures.Appli.Pages {
                 thisForm.Refresh();
 
                 Appli.Form.UpdateTitle();
+
+                // file tags
+                FileTags.ForceClose();
             }
         }
     }

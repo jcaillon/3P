@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -32,6 +33,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
+using _3PA.MainFeatures.FileInfo;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
@@ -142,8 +144,8 @@ namespace _3PA {
         /// display images in the npp toolbar
         /// </summary>
         static internal void InitToolbarImages() {
-            Npp.SetToolbarImage(ImageResources._3PA, FileExplorer.DockableCommandIndex);
-            Npp.SetToolbarImage(ImageResources._3PA, CodeExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.logo16x16_r, FileExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.logo16x16, CodeExplorer.DockableCommandIndex);
         }
 
         /// <summary>
@@ -171,6 +173,7 @@ namespace _3PA {
         /// Called on npp ready
         /// </summary>
         internal static void OnNppReady() {
+
             // This allows to correctly feed the dll with dependencies
             LibLoader.Init();
 
@@ -199,8 +202,6 @@ namespace _3PA {
             //Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SynthaxHighlighting.xml");
             #endregion
 
-
-
             // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
             Appli.Init();
@@ -213,11 +214,10 @@ namespace _3PA {
                 //    Directory.CreateDirectory(tempPath);
                 //}
                 //Registry.SetValue(Resources.RegistryPath, "tempPath", tempPath, RegistryValueKind.String);
-
                 Snippets.Init();
                 Keywords.Init();
-                FileTags.Init();
                 Config.Save();
+                FileTags.Init();
 
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);
@@ -268,7 +268,9 @@ namespace _3PA {
         // ReSharper disable once RedundantAssignment
         static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
-            handled = false; 
+            handled = false;
+
+            if (!PluginIsFullyLoaded) return;
 
             // only do stuff if we are in a progress file
             if (!IsCurrentFileProgress) return;
@@ -524,7 +526,8 @@ namespace _3PA {
                 AutoComplete.ParseCurrentDocument(true);
 
             // Syntax Highlight
-            Highlight.SetCustomStyles();
+            if (IsCurrentFileProgress)
+                Highlight.SetCustomStyles();
         }
 
         /// <summary>
@@ -578,10 +581,11 @@ namespace _3PA {
 
         #endregion
 
-
         #region tests
         static void Test() {
-            UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
+            FileTags.UnCloak();
+
+            //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
             //UserCommunication.MessageToUser();
             //var x = 0;
             //var y = 1/x;

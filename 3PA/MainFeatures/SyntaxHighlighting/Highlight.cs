@@ -77,7 +77,12 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// to restart Notepad++
         /// </summary>
         public static void Init() {
-            var udlFilePath = Path.Combine(Npp.GetNppDirectory(), @"userDefineLang.xml");
+            var udlFilePath = Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml");
+
+            if (!File.Exists(udlFilePath)) {
+                File.WriteAllText(udlFilePath, @"<NotepadPlus />", Encoding.Default);
+            }
+
             var fileContent = File.ReadAllText(udlFilePath, Encoding.Default);
 
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);

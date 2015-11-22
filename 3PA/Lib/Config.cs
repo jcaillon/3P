@@ -91,8 +91,6 @@ namespace _3PA.Lib {
         public string EnvCurrentDatabase = "";
 
         
-        public bool DisplayParserElapsedTime = true;
-
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
 
