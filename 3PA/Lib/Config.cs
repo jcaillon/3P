@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
+using YamuiFramework.Forms;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -147,7 +148,7 @@ namespace _3PA.Lib {
         }
 
         private static void configWatcher_Changed(object sender, FileSystemEventArgs e) {
-            UserCommunication.Notify("Config changed");
+            UserCommunication.Notify("Config changed", MessageImage.Ok, "EVENT", "File changed");
             Init();
         }
     }

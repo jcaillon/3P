@@ -21,29 +21,39 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
-
         /// <summary>
         /// Displays a notification on the bottom right of the screen
         /// </summary>
         /// <param name="html"></param>
+        /// <param name="clickHandler"></param>
+        /// <param name="subTitle"></param>
         /// <param name="duration"></param>
         /// <param name="width"></param>
-        public static void Notify(string html, int duration = 0, int width = 300) {
-            Notify(html, MessageImage.Ant, "Debug message", "=)", duration, width);
-        }
-
-        public static void Notify(string html, MessageImage imageType, string title, string subTitle = "", int duration = 0, int width = 300) {
+        /// <param name="imageType"></param>
+        /// <param name="title"></param>
+        public static void Notify(string html, MessageImage imageType, string title, Action<HtmlLinkClickedEventArgs> clickHandler, string subTitle = "", int duration = 0, int width = 450) {
             if (Appli.Appli.Form != null)
                 Appli.Appli.Form.BeginInvoke((Action)delegate {
                     var toastNotification = new YamuiNotifications(
                         LocalHtmlHandler.FormatMessage(html, imageType, title.ToUpper(), subTitle)
                         , duration, width);
+                    if (clickHandler != null)
+                        toastNotification.LinkClicked += (sender, args) => clickHandler(args);
                     toastNotification.Show();
                 });
+        }
+
+        public static void Notify(string html, MessageImage imageType, string title, string subTitle = "", int duration = 0, int width = 450) {
+            Notify(html, imageType, title, null, subTitle, duration, width);
+        }
+
+        public static void Notify(string html, int duration = 0, int width = 450) {
+            Notify(html, MessageImage.Logo, "debug", "?", duration, width);
         }
 
         public static void NotifyUserAboutNppDefaultAutoComp() {

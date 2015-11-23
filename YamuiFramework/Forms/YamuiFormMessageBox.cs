@@ -262,6 +262,7 @@ namespace YamuiFramework.Forms {
 
     public enum MessageImage {
         Free,
+        Logo,
         Ant,
         Error,
         HighImportance,

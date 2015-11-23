@@ -93,12 +93,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             using (Bitmap newBmp = new Bitmap(16, 16)) {
                 Graphics g = Graphics.FromImage(newBmp);
                 ColorMap[] colorMap = new ColorMap[1];
-                colorMap[0] = new ColorMap();
-                colorMap[0].OldColor = Color.White;
-                colorMap[0].NewColor = Color.FromKnownColor(KnownColor.ButtonFace);
+                colorMap[0] = new ColorMap {
+                    OldColor = Color.White,
+                    NewColor = Color.FromKnownColor(KnownColor.ButtonFace)
+                };
                 ImageAttributes attr = new ImageAttributes();
                 attr.SetRemapTable(colorMap);
-                g.DrawImage(ImageResources._3PA, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
+                g.DrawImage(ImageResources.code_explorer_logo, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
                 dockableIcon = Icon.FromHandle(newBmp.GetHicon());
             }
 

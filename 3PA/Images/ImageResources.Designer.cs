@@ -63,16 +63,6 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap _3PA {
-            get {
-                object obj = ResourceManager.GetObject("_3PA", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap Abbreviation {
             get {
                 object obj = ResourceManager.GetObject("Abbreviation", resourceCulture);

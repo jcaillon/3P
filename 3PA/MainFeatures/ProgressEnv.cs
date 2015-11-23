@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures {
                 }
 
             // need to compute the propath again
-            _currentProPath = null;
+            ResetPropath();
         }
 
         /// <summary>
@@ -95,6 +95,7 @@ namespace _3PA.MainFeatures {
             } catch (Exception) {
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
             }
+            ResetPropath();
         }
 
         /// <summary>
@@ -114,6 +115,13 @@ namespace _3PA.MainFeatures {
                 _currentProPath = ini.GetValue("PROPATH") + "," + Current.ProPath;
                 return _currentProPath;
             }
+        }
+
+        /// <summary>
+        /// Call the is method to recompute the propath next time we need it
+        /// </summary>
+        public static void ResetPropath() {
+            _currentProPath = null;
         }
 
         /// <summary>

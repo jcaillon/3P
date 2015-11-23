@@ -764,6 +764,19 @@ namespace _3PA {
             return Call(SciMsg.SCI_FINDCOLUMN, line, column);
         }
 
+        /// <summary>
+        /// This message returns the column number of a position pos within the document taking the width of tabs into account. 
+        /// This returns the column number of the last tab on the line before pos, plus the number of characters between the last tab and pos. 
+        /// If there are no tab characters on the line, the return value is the number of characters up to the position on the line. 
+        /// In both cases, double byte characters count as a single character. 
+        /// This is probably only useful with monospaced fonts.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        public static int GetColumnFromPos(int position) {
+            return Call(SciMsg.SCI_GETCOLUMN, position);
+        }
+
         #endregion
 
 

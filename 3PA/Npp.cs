@@ -24,8 +24,10 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures;
 
 namespace _3PA {
     /// <summary>
@@ -124,6 +126,10 @@ namespace _3PA {
         /// <param name="line"></param>
         /// <param name="column"></param>
         public static void Goto(string document, int line = -1, int column = -1) {
+            if (!File.Exists(document)) {
+                UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImage.HighImportance, "Warning", "File not found", 5);
+                return;
+            }
             if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);

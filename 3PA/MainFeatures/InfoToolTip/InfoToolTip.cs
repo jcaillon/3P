@@ -52,6 +52,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// If a tooltip is opened and it's a parsed item, this point leads to its definition
         /// </summary>
         public static Point GoToDefinitionPoint = new Point(-1, -1);
+        public static string GoToDefinitionFile;
 
         /// <summary>
         /// Index of the tooltip to show in case where a word corresponds to several items in the
@@ -162,7 +163,41 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <param name="htmlLinkClickedEventArgs"></param>
         private static void ClickHandler(HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            UserCommunication.Notify(htmlLinkClickedEventArgs.Link);
+            var split = htmlLinkClickedEventArgs.Link.Split('#');
+            var actionType = split[0];
+            bool handled = true;
+            switch (actionType) {
+                case "gotoownerfile":
+                    if (split.Length > 1) {
+                        Npp.Goto(split[1]);
+                        Close();
+                    }
+                    break;
+                case "trigger":
+                    if (split.Length > 1) {
+                        var fullPath = ProgressEnv.FindFileInPropath(split[1]);
+                        Npp.Goto(string.IsNullOrEmpty(fullPath) ? split[1] : fullPath);
+                        Close();
+                    }
+                    break;
+                case "proto":
+                    if (split.Length > 3) {
+                        Npp.Goto(split[1], int.Parse(split[2]), int.Parse(split[3]));
+                        Close();
+                    }
+                break;
+                case "gotodefinition":
+                    ProgressCodeUtils.GoToDefinition();
+                    break;
+                case "nexttooltip":
+                    IndexToShow++;
+                    TryToShowIndex();
+                    break;
+                default:
+                    handled = false;
+                    break;
+            }
+            htmlLinkClickedEventArgs.Handled = handled;
         }
         #endregion
 
@@ -175,6 +210,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static void SetToolTip() {
             
             var toDisplay = new StringBuilder();
+
+            GoToDefinitionFile = null;
 
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
@@ -213,7 +250,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (tbItem.Triggers.Count > 0) {
                                 toDisplay.Append(FormatSubtitle("TRIGGERS"));
                                 foreach (var parsedTrigger in tbItem.Triggers)
-                                    toDisplay.Append(FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='triggerproc#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
+                                    toDisplay.Append(FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='trigger#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
                             }
 
                             if (tbItem.Indexes.Count > 0) {
@@ -255,7 +292,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var funcItem = (ParsedFunction) data.ParsedItem;
                         toDisplay.Append(FormatRow("Return type", FormatSubString(funcItem.ParsedReturnType)));
                         if (funcItem.PrototypeLine > 0)
-                            toDisplay.Append("<a href=''>Go to prototype</a>");
+                            toDisplay.Append("<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>");
 
                         toDisplay.Append(FormatSubtitle("PARAMETERS"));
                         if (!string.IsNullOrEmpty(funcItem.Parameters)) {
@@ -299,14 +336,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             // synthax
                             if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
                                 toDisplay.Append(FormatSubtitle("SYNTHAX"));
-                                toDisplay.Append(@"<pre class='ToolTipcodeSnippet'>");
+                                toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
                                 var i = 0;
                                 foreach (var synthax in dataHelp.Synthax) {
                                     if (i > 0) toDisplay.Append(@"<br>");
                                     toDisplay.Append(synthax);
                                     i++;
                                 }
-                                toDisplay.Append(@"</pre>");
+                                toDisplay.Append(@"</div>");
                             }
                         } else {
                             toDisplay.Append(FormatSubtitle("404 NOT FOUND"));
@@ -339,9 +376,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
                         if (!string.IsNullOrEmpty(varItem.Left)) {
                             toDisplay.Append(FormatSubtitle("Rest of the declaration"));
-                            toDisplay.Append(@"<pre class='ToolTipcodeSnippet'>");
+                            toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
                             toDisplay.Append(varItem.Left);
-                            toDisplay.Append(@"</pre>");
+                            toDisplay.Append(@"</div>");
                         }
                         break;
 
@@ -355,7 +392,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 toDisplay.Append(FormatSubtitle("ORIGINS"));
                 toDisplay.Append(FormatRow("Scope name", data.ParsedItem.OwnerName));
                 if (!Npp.GetCurrentFilePath().Equals(data.ParsedItem.FilePath))
-                    toDisplay.Append(FormatRow("Owner file", data.ParsedItem.FilePath));
+                    toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + data.ParsedItem.FilePath + "'>" + data.ParsedItem.FilePath + "</a>"));
             }
 
             // Flags
@@ -376,8 +413,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append(@"<br>[CTRL + B] <a class='ToolGotoDefinition' href='nexttooltip'>Go to definition</a>");
+                toDisplay.Append(@"<br>[CTRL + B] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
+                GoToDefinitionFile = data.ParsedItem.FilePath;
             }
             if (_currentCompletionList.Count > 1)
                 toDisplay.Append("<br>[CTRL + <span class='ToolTipDownArrow'>" + (char)242 + "</span>] <a class='ToolGotoDefinition' href='nexttooltip'>Read next tooltip</a>");
@@ -436,7 +474,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _openedFromDwell = false;
                 _openedForCompletion = false;
                 _currentCompletionList = null;
-                GoToDefinitionPoint = new Point(-1, -1);
+                GoToDefinitionFile = null;
             } catch (Exception) {
                 // ignored
             }

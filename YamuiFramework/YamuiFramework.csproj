@@ -299,6 +299,7 @@
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
     <Content Include="Resources\BackGround\hellokitty.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\Logo.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Ant.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Error.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\HighImportance.png" />

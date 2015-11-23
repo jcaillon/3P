@@ -44,3 +44,4 @@ C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.pdb
 C:\Work\3P\3PA\Lib\YamuiFolder\YamuiFramework.dll
 C:\Work\3P\3PA\Lib\YamuiFolder\YamuiFramework.pdb
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache

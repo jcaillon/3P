@@ -335,7 +335,6 @@
     <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
-    <Content Include="Images\DockableExplorer\Type\3PA.png" />
     <Content Include="Images\DockableExplorer\Type\Block.png" />
     <Content Include="Images\DockableExplorer\Type\DefinitionBlock.png" />
     <Content Include="Images\DockableExplorer\Type\DynamicFunctionCall.png" />

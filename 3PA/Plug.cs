@@ -78,9 +78,15 @@ namespace _3PA {
 
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Toggle comment", ProgressCodeUtils.ToggleComment, "_ToggleComment:Ctrl+Q", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Toggle comment", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false, uniqueKeys);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "_Test:Ctrl+D", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "Test:Ctrl+D", false, uniqueKeys);
+
+            Interop.Plug.SetCommand(cmdIndex++, "Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false, uniqueKeys);
+
+            Interop.Plug.SetCommand(cmdIndex++, "Go backwards", ProgressCodeUtils.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
+            
+            
             /*
             SetCommand(cmdIndex++, "---", null);
 
@@ -281,6 +287,7 @@ namespace _3PA {
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                     ClosePopups();
                 }
+                // Autocompletion 
                 if (AutoComplete.IsVisible) {
                     if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
                         handled = AutoComplete.OnKeyDown(key);
@@ -290,7 +297,7 @@ namespace _3PA {
                             handled = AutoComplete.OnKeyDown(key);
                     }
                 } else {
-                    /* snippet ? */
+                    // snippet ?
                     if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
                         if (!modifiers.IsCtrl && !modifiers.IsAlt && !modifiers.IsShift) {
                             if (!Snippets.InsertionActive) {
@@ -314,7 +321,7 @@ namespace _3PA {
                         }
                     }
                 }                  
-                /* next tooltip */
+                // next tooltip
                 if (modifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
                     if (key == Keys.Up) 
                         InfoToolTip.IndexToShow++;
@@ -584,6 +591,7 @@ namespace _3PA {
         #region tests
         static void Test() {
             FileTags.UnCloak();
+
 
             //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
             //UserCommunication.MessageToUser();
