@@ -42,10 +42,15 @@ namespace _3PA.MainFeatures {
             _filePath = Path.Combine(_location, _fileName);
             if (_listOfEnv.Count == 0) {
                 if (!File.Exists(_filePath)) {
-                    try {
-                        Object2Xml<ProgressEnvironnement>.LoadFromString(_listOfEnv, DataResources.ProgressEnvironnement);
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error when loading ProgressEnvironnement.xml", _filePath);
+                    if (Config.Instance.UserFromSopra) {
+                        try {
+                            Object2Xml<ProgressEnvironnement>.LoadFromString(_listOfEnv, DataResources.ProgressEnvironnement);
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error when loading ProgressEnvironnement.xml", _filePath);
+                        }
+                    }
+                    if (_listOfEnv == null || _listOfEnv.Count == 0) {
+                        _listOfEnv = new List<ProgressEnvironnement>();
                     }
                 } else
                     Object2Xml<ProgressEnvironnement>.LoadFromFile(_listOfEnv, _filePath);
@@ -173,7 +178,6 @@ namespace _3PA.MainFeatures {
         public string LogFilePath = "";
         public string VersionId = "";
         public string ProwinPath = "";
-        public Dictionary<string, string> CompPath = new Dictionary<string, string>();
 
         /// <summary>
         /// Returns the currently selected database's .pf for the current environment

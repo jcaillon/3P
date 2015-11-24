@@ -17,6 +17,7 @@
 // // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -126,11 +127,24 @@ namespace _3PA {
         /// <param name="line"></param>
         /// <param name="column"></param>
         public static void Goto(string document, int line = -1, int column = -1) {
+            Goto(document, line, column, true);
+        }
+
+        /// <summary>
+        /// Switch to a document, can be already opended or not, can decide to remember the current position to jump back to it
+        /// </summary>
+        /// <param name="document"></param>
+        /// <param name="line"></param>
+        /// <param name="column"></param>
+        /// <param name="saveHistoric"></param>
+        public static void Goto(string document, int line, int column, bool saveHistoric) {
             if (!File.Exists(document)) {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImage.HighImportance, "Warning", "File not found", 5);
                 return;
             }
-            if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
+            if (saveHistoric)
+                _goToHistory.Push(new Tuple<string, Point>(GetCurrentFilePath(), new Point(GetLineFromPosition(GetCaretPosition()), GetColumnFromPos(GetCaretPosition()))));
+            if (!String.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
                 else
@@ -142,6 +156,23 @@ namespace _3PA {
                     SetCaretPosition(GetPosFromLineColumn(line, column));
             }
         }
+
+        /// <summary>
+        /// handles a stack of points to go back to where we came from when we "goto definition"
+        /// </summary>
+        private static Stack<Tuple<string, Point>> _goToHistory = new Stack<Tuple<string, Point>>();
+
+        /// <summary>
+        /// When you use the GoToDefinition method, you stack points of your position before the jump,
+        /// this method allows you to navigate back to where you were
+        /// </summary>
+        public static void GoBackFromDefinition() {
+            if (_goToHistory.Count > 0) {
+                var lastPoint = _goToHistory.Pop();
+                Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y, false);
+            }
+        }
+
 
         /// <summary>
         /// Helper to add a clickable icon in the toolbar
@@ -195,7 +226,7 @@ namespace _3PA {
         /// <returns></returns>
         public static bool SaveSession(string sessionFilePath) {
             string sessionPath = Marshal.PtrToStringUni(Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, sessionFilePath));
-            return !string.IsNullOrEmpty(sessionPath);
+            return !String.IsNullOrEmpty(sessionPath);
         }
 
         /// <summary>
@@ -255,7 +286,7 @@ namespace _3PA {
             var path = new StringBuilder(Win32.MAX_PATH);
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             var file = path.ToString();
-            return !string.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase);
+            return !String.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase);
         }
 
         /// <summary>
@@ -295,7 +326,7 @@ namespace _3PA {
         }
             
         /// <summary>
-        /// Returns the configuration directory path
+        /// Returns the configuration directory path e.g. /plugins/config/{ProductTitle}
         /// </summary>
         /// <returns></returns>
         public static string GetConfigDir() {
@@ -366,6 +397,5 @@ namespace _3PA {
             }
             return retval;
         }
-
     }
 }

@@ -19,40 +19,6 @@
     <LogFilePath>O:\appli\boia\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\boi57\client-serveur\</Key>
-        <Value>client-serveur\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\serveur\</Key>
-        <Value>serveur\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client-serveur\</Key>
-        <Value>client-serveur\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur-dls\</Key>
-        <Value>serveur\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur\</Key>
-        <Value>serveur\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\triggers\</Key>
-        <Value>trig\v1100\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\client\</Key>
-        <Value>client\v1110\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>client\v1110\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev BOI</Label>
@@ -73,40 +39,6 @@
     <LogFilePath>O:\appli\boib\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\boi57\client-serveur\</Key>
-        <Value>client-serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\serveur\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur-dls\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\triggers\</Key>
-        <Value>trig\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client-serveur\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev BOI GRH</Label>
@@ -127,40 +59,6 @@
     <LogFilePath>O:\appli\boij\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\client-serveur\</Key>
-        <Value>client-serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\serveur\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur-dls\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\triggers\</Key>
-        <Value>triggers\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\boi57\client-serveur\</Key>
-        <Value>client-serveur\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de qual COMMISSI</Label>
@@ -181,16 +79,6 @@
     <LogFilePath>P:\appli\boi3\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\clientserveur\</Key>
-        <Value>v10\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>v10\client\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev COMMISSIO</Label>
@@ -211,24 +99,6 @@
     <LogFilePath>P:\appli\boiz\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\paquet\</Key>
-        <Value>v101a\paquet\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\clientserveur\</Key>
-        <Value>v102b_32\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>v102b\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\trig\</Key>
-        <Value>v102b_32\trig\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Facade Tiers</Label>
@@ -249,16 +119,6 @@
     <LogFilePath>p:\appli\boi9\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\clientserveur\</Key>
-        <Value>clientserveur\v1110\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>client\v1110\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de dev GRH</Label>
@@ -279,12 +139,6 @@
     <LogFilePath>P:\appli\boi0\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
@@ -305,12 +159,6 @@
     <LogFilePath>P:\appli\boi4\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env modele de GRH</Label>
@@ -331,12 +179,6 @@
     <LogFilePath>P:\appli\boi5\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
@@ -357,12 +199,6 @@
     <LogFilePath>P:\appli\boi8\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
@@ -383,12 +219,6 @@
     <LogFilePath>P:\appli\bois\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev GRH</Label>
@@ -409,12 +239,6 @@
     <LogFilePath>P:\appli\boit\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
@@ -435,12 +259,6 @@
     <LogFilePath>P:\appli\boiu\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
@@ -461,12 +279,6 @@
     <LogFilePath>P:\appli\boiv\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
@@ -487,12 +299,6 @@
     <LogFilePath>P:\appli\boiw\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env de qualif GRH</Label>
@@ -513,12 +319,6 @@
     <LogFilePath>P:\appli\boix\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>MCO GRH</Label>
@@ -539,12 +339,6 @@
     <LogFilePath>P:\appli\boim\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de qual PERSONNE</Label>
@@ -565,28 +359,6 @@
     <LogFilePath>P:\appli\boi3\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\trig\</Key>
-        <Value>trig\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev PERSONNE</Label>
@@ -607,28 +379,6 @@
     <LogFilePath>P:\appli\boiz\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>src\clientserveur\</Key>
-        <Value>v1110\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\client\</Key>
-        <Value>v1110\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\serveur\</Key>
-        <Value>v1110\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\sdo\</Key>
-        <Value>v1110\sdo\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>src\trig\</Key>
-        <Value>v1110\trig\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev SAC 1</Label>
@@ -649,100 +399,6 @@
     <LogFilePath>P:\appli\boi1\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correctives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\..\trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>_outils\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev SAC D</Label>
@@ -763,100 +419,6 @@
     <LogFilePath>P:\appli\boid\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correctives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\..\trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>_outils\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de qualif SAC E</Label>
@@ -877,104 +439,6 @@
     <LogFilePath>P:\appli\boie\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correctives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\..\trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\inc\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\inc\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de dev SAC G</Label>
@@ -995,96 +459,6 @@
     <LogFilePath>P:\appli\boig\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correctives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>trig\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement Qualif SAC H</Label>
@@ -1105,100 +479,6 @@
     <LogFilePath>P:\appli\boih\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correctives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\..\trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>_outils\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement qualif SAC K</Label>
@@ -1219,100 +499,6 @@
     <LogFilePath>P:\appli\boik\log\server.log</LogFilePath>
     <VersionId>v11.1</VersionId>
     <ProwinPath>c:\progress\client\v1110_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\clientserveur\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\paquet\maj\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\procedures_correcetives\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_edt\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\client\proc_uib\</Key>
-        <Value>client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_edt\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\proc_uib\</Key>
-        <Value>.\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spc\src\serveur\sdo\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\..\trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sac\src\serveur\proc_edt\</Key>
-        <Value>serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>_outils\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de Dev SAI</Label>
@@ -1333,44 +519,6 @@
     <LogFilePath>P:\appli\boi2\log\server.log</LogFilePath>
     <VersionId>v9.1</VersionId>
     <ProwinPath>c:\progress\client\v91d_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>..\baosias\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>..\baosias\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>saixml\src\client\proc_edt\</Key>
-        <Value>..\saixml\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>saixml\src\client\proc_uib\</Key>
-        <Value>..\saixml\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\client\proc_edt\</Key>
-        <Value>..\sai\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\client\proc_uib\</Key>
-        <Value>..\sai\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\client\proc_uib\</Key>
-        <Value>..\cpi\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\serveur\proc_edt\</Key>
-        <Value>..\spi\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>..\trig\exec\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Environnement de Dev SAI</Label>
@@ -1391,96 +539,6 @@
     <LogFilePath>P:\appli\boiz\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>baosias\client\proc_edt\</Key>
-        <Value>baosias\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_uib\</Key>
-        <Value>baosias\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>saixml\src\client\proc_edt\</Key>
-        <Value>saixml\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>saixml\src\client\proc_uib\</Key>
-        <Value>saixml\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\client\proc_edt\</Key>
-        <Value>sai\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\client\proc_uib\</Key>
-        <Value>sai\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\client\proc_uib\</Key>
-        <Value>spi\exec\client\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\serveur\proc_edt\</Key>
-        <Value>spi\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>trig\src\trig\</Key>
-        <Value>trig\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baocnaf\procedt\</Key>
-        <Value>baocnaf\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\clientserveur\proc_edt\</Key>
-        <Value>baosias\exec\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\proc_edt\</Key>
-        <Value>baosias\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>baosias\serveur\proc_edt\</Key>
-        <Value>baosias\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\clientserveur\proc_edt\</Key>
-        <Value>sai\exec\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>saixml\src\serveur\proc_edt\</Key>
-        <Value>saixml\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\paquet\maj\proc_edt\</Key>
-        <Value>sai\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\proc_edt\</Key>
-        <Value>sai\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\proc_uib\</Key>
-        <Value>sai\exec\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\serveur\proc_edt\</Key>
-        <Value>sai\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>sai\src\serveur\sdo\</Key>
-        <Value>sai\exec\serveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\clientserveur\proc_edt\</Key>
-        <Value>spi\exec\clientserveur\</Value>
-      </CompPath>
-      <CompPath>
-        <Key>spi\src\serveur\sdo\</Key>
-        <Value>spi\exec\serveur\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env Paie SimBud</Label>
@@ -1501,12 +559,6 @@
     <LogFilePath>p:\appli\boi0\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
@@ -1527,12 +579,6 @@
     <LogFilePath>p:\appli\boi4\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
@@ -1553,12 +599,6 @@
     <LogFilePath>p:\appli\boi8\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
@@ -1579,12 +619,6 @@
     <LogFilePath>p:\appli\bois\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env Dev SimBud</Label>
@@ -1605,12 +639,6 @@
     <LogFilePath>p:\appli\boit\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
@@ -1631,12 +659,6 @@
     <LogFilePath>p:\appli\boiu\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
@@ -1657,12 +679,6 @@
     <LogFilePath>p:\appli\boiv\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Qual Dev SimBud</Label>
@@ -1683,12 +699,6 @@
     <LogFilePath>p:\appli\boiw\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
   <ProgressEnvironnement>
     <Label>Env Paie SimBud</Label>
@@ -1709,11 +719,5 @@
     <LogFilePath>p:\appli\boix\log\server.log</LogFilePath>
     <VersionId>v10.1</VersionId>
     <ProwinPath>c:\progress\client\v101a_dv\dlc\bin\prowin32.exe</ProwinPath>
-    <DicoCompPath>
-      <CompPath>
-        <Key>.\</Key>
-        <Value>.\</Value>
-      </CompPath>
-    </DicoCompPath>
   </ProgressEnvironnement>
 </Root>

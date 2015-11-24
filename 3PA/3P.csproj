@@ -89,6 +89,7 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.Designer.cs">
       <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.cs">
       <SubType>UserControl</SubType>

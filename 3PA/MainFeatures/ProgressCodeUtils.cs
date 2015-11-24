@@ -18,9 +18,6 @@
 // // ========================================================================
 #endregion
 
-using System;
-using System.Collections.Generic;
-using System.Drawing;
 using System.Text;
 using YamuiFramework.Forms;
 using _3PA.Lib;
@@ -32,11 +29,6 @@ namespace _3PA.MainFeatures {
         #region Go to definition
 
         /// <summary>
-        /// handles a stack of points to go back to where we came from when we "goto definition"
-        /// </summary>
-        private static Stack<Tuple<string, Point>> _goToHistory = new Stack<Tuple<string, Point>>();
-
-        /// <summary>
         /// This method allows the user to GOTO a word definition, if a tooltip is opened then it tries to 
         /// go to the definition of the displayed word, otherwise it tries to find the declaration of the parsed word under the
         /// caret. At last, it tries to find a file in the propath
@@ -45,7 +37,6 @@ namespace _3PA.MainFeatures {
             // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
             if (InfoToolTip.InfoToolTip.IsVisible) {
                 if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
-                    RememberCurrentPosition();
                     Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
                     InfoToolTip.InfoToolTip.Close();
                     return;
@@ -63,7 +54,6 @@ namespace _3PA.MainFeatures {
             if (data != null && data.Count > 0) {
                 foreach (var completionData in data) {
                     if (completionData.FromParser) {
-                        RememberCurrentPosition();
                         Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
                         return;
                     }
@@ -95,22 +85,7 @@ namespace _3PA.MainFeatures {
                 return;
             }
 
-            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImage.Info, "info", "Don't be mad", 5);
-        }
-
-        /// <summary>
-        /// When you use the GoToDefinition method, you stack points of your position before the jump,
-        /// this method allows you to navigate back to where you were
-        /// </summary>
-        public static void GoBackFromDefinition() {
-            if (_goToHistory.Count > 0) {
-                var lastPoint = _goToHistory.Pop();
-                Npp.Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y);
-            }
-        }
-
-        private static void RememberCurrentPosition() {
-            _goToHistory.Push(new Tuple<string, Point>(Npp.GetCurrentFilePath(), new Point(Npp.GetLineFromPosition(Npp.GetCaretPosition()), Npp.GetColumnFromPos(Npp.GetCaretPosition()))));
+            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImage.Info, "information", "Failed to find an origin", 5);
         }
 
         #endregion
@@ -182,6 +157,5 @@ namespace _3PA.MainFeatures {
 
             Npp.EndUndoAction();
         }
-
     }
 }

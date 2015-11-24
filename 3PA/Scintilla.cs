@@ -265,7 +265,7 @@ namespace _3PA {
         /// </summary>
         public static string GetTextByRange(int start, int end) {
             start = (start > 0) ? start : 0;
-            if ((end - start) < 1) return string.Empty;
+            if ((end - start) < 1) return String.Empty;
             using (var textRange = new Sci_TextRange(start, end, end - start + 1)) {
                 Call(SciMsg.SCI_GETTEXTRANGE, 0, textRange.NativePointer);
                 return IsUtf8() ? textRange.lpstrText.AnsiToUtf8() : textRange.lpstrText;
@@ -346,7 +346,7 @@ namespace _3PA {
         public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
             var startPos = curPos - maxLenght;
             startPos = (startPos > 0) ? startPos : 0;
-            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : String.Empty;
         }
 
         /// <summary>
@@ -359,7 +359,7 @@ namespace _3PA {
             var endPos = curPos + maxLenght;
             var fullLength = GetDocumentLength();
             endPos = (endPos < fullLength) ? endPos : fullLength;
-            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
+            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : String.Empty;
         }
 
         /// <summary>
@@ -442,7 +442,7 @@ namespace _3PA {
                 case 2:
                     return wholeWord.Split('.')[1];
             }
-            return string.Empty;
+            return String.Empty;
         }
 
         /// <summary>

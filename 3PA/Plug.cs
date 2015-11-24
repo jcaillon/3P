@@ -84,7 +84,7 @@ namespace _3PA {
 
             Interop.Plug.SetCommand(cmdIndex++, "Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false, uniqueKeys);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Go backwards", ProgressCodeUtils.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
+            Interop.Plug.SetCommand(cmdIndex++, "Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
             
             
             /*

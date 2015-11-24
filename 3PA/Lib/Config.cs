@@ -31,11 +31,12 @@ namespace _3PA.Lib {
     /// The config object, should not be used
     /// </summary>
     public class ConfigObject {
-        public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
-
         // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
         [Display(Name = "User trigram", Description = "This is your user trigram duh")]
         public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
+
+        // is the user from SOPRA?
+        public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
 
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
@@ -96,6 +97,8 @@ namespace _3PA.Lib {
         public Color AccentColor = Color.DarkOrange;
 
         public int SyntaxHighlightThemeId = 0;
+
+        public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
     }
 
     /// <summary>
