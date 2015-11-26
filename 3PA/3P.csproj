@@ -64,6 +64,11 @@
   <ItemGroup>
     <Compile Include="Abl.cs" />
     <Compile Include="Html\LocalHtmlHandler.cs" />
+    <Compile Include="Html\HtmlResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>HtmlResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -75,6 +80,12 @@
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\PageAbout.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\PageAbout.Designer.cs">
+      <DependentUpon>PageAbout.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\AutoCompletion\FastObjectListViewWoScrolls.cs">
       <SubType>Component</SubType>
@@ -143,10 +154,10 @@
     <Compile Include="MainFeatures\Appli\Pages\template.Designer.cs">
       <DependentUpon>template.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\SettingAppearance.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\SettingAppearance.Designer.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.Designer.cs">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
     <Compile Include="Data\DataResources.Designer.cs">
@@ -228,13 +239,20 @@
     <Compile Include="UnmanagedExports.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Html\HtmlResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>HtmlResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\AppliForm.resx">
       <DependentUpon>AppliForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\PageAbout.resx">
+      <DependentUpon>PageAbout.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\template.resx">
       <DependentUpon>template.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\SettingAppearance.resx">
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\SettingAppearance.resx">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Data\DataResources.resx">
@@ -297,6 +315,7 @@
     <Content Include="Data\UDL.xml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="Html\Pages\about.html" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\SelectFile.png" />

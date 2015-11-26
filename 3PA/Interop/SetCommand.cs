@@ -1,21 +1,21 @@
-﻿#region Header
-// // ========================================================================
-// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// // This file (SetCommand.cs) is part of 3P.
+﻿#region header
+// ========================================================================
+// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// This file (SetCommand.cs) is part of 3P.
 // 
-// // 3P is a free software: you can redistribute it and/or modify
-// // it under the terms of the GNU General Public License as published by
-// // the Free Software Foundation, either version 3 of the License, or
-// // (at your option) any later version.
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 // 
-// // 3P is distributed in the hope that it will be useful,
-// // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// // GNU General Public License for more details.
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 // 
-// // You should have received a copy of the GNU General Public License
-// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
-// // ========================================================================
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
 #endregion
 using System;
 using System.Collections.Generic;
@@ -27,6 +27,9 @@ using _3PA.MainFeatures;
 namespace _3PA.Interop {
     public class Plug {
 
+        /// <summary>
+        /// new Tuple Action, int, string = (functionPointer, index, shortcutName)
+        /// </summary>
         public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts { get; set; }
 
         /// <summary>
@@ -139,6 +142,15 @@ namespace _3PA.Interop {
         /// <returns></returns>
         public static string ShortcutKey2String(ShortcutKey shortcut) {
             return (shortcut.IsCtrl ? "Ctrl+" : "") + (shortcut.IsShift ? "Shift+" : "") + (shortcut.IsAlt ? "Alt+" : "") + Enum.GetName(typeof(Keys), shortcut._key);
+        }
+
+        /// <summary>
+        /// Returns the shortcut specs corresponding to the shortcut name given
+        /// </summary>
+        /// <param name="shortcutName"></param>
+        /// <returns></returns>
+        public static string GetShortcutSpecFromName(string shortcutName) {
+            return (Config.Instance.ShortCuts.ContainsKey(shortcutName) ? Config.Instance.ShortCuts[shortcutName] : "Unknown shortcut");
         }
     }
 }

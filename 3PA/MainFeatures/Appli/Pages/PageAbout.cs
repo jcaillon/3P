@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (template.cs) is part of 3P.
+// This file (PageAbout.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,17 +19,20 @@
 #endregion
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using _3PA.Html;
 
 namespace _3PA.MainFeatures.Appli.Pages {
-    public partial class template : YamuiPage {
+    public partial class PageAbout : YamuiPage {
 
         #region fields
 
         #endregion
 
         #region constructor
-        public template() {
+        public PageAbout() {
             InitializeComponent();
+
+            aboutHtml.Text = HtmlResources.about;
         }
         #endregion
 

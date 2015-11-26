@@ -1,21 +1,21 @@
-﻿#region Header
-// // ========================================================================
-// // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// // This file (InfoToolTip.cs) is part of 3P.
+﻿#region header
+// ========================================================================
+// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// This file (InfoToolTip.cs) is part of 3P.
 // 
-// // 3P is a free software: you can redistribute it and/or modify
-// // it under the terms of the GNU General Public License as published by
-// // the Free Software Foundation, either version 3 of the License, or
-// // (at your option) any later version.
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 // 
-// // 3P is distributed in the hope that it will be useful,
-// // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-// // GNU General Public License for more details.
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
 // 
-// // You should have received a copy of the GNU General Public License
-// // along with 3P. If not, see <http://www.gnu.org/licenses/>.
-// // ========================================================================
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
 #endregion
 using System;
 using System.Collections.Generic;
@@ -220,17 +220,33 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // general stuff
             toDisplay.Append("<div class='InfoToolTip'>");
             toDisplay.Append(@"
-                <table width='100%' class='ToolTipName'><tr style='vertical-align: top;'>
-                <td>
-                    <img style='padding-right: 7px;' src ='" + data.Type + "'>" + data.Type + @"
-                </td>");
-            if (_currentCompletionList.Count > 1)
-                toDisplay.Append(@"
-                    <td class='ToolTipCount'>" +
-                        (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
+                <table width='100%' class='ToolTipName'>
+                    <tr style='vertical-align: top;'>
+                    <td>
+                        <table width='100%' style='margin: 0; padding: 0;'>
+                            <tr>
+                                <td rowspan='2' style='width: 25px;'>
+                                    <img src ='" + data.Type + @"'>
+                                </td>
+                                <td>
+                                    " + data.DisplayText + @"
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <span class='ToolTipSubString'>" + data.Type + @"</span>
+                                </td>
+                            </tr>
+                        </table>
                     </td>");
-            toDisplay.Append(@"
-                </tr></table>");
+                if (_currentCompletionList.Count > 1)
+                    toDisplay.Append(@"
+                        <td class='ToolTipCount'>" +
+                            (IndexToShow + 1) + "/" + _currentCompletionList.Count + @"
+                        </td>");
+                toDisplay.Append(@"
+                    </tr>
+                </table>");
 
             // the rest depends on the data type
             try {
@@ -256,7 +272,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (tbItem.Indexes.Count > 0) {
                                 toDisplay.Append(FormatSubtitle("INDEXES"));
                                 foreach (var parsedIndex in tbItem.Indexes)
-                                    toDisplay.Append(FormatRow(parsedIndex.Name, parsedIndex.Flag + " - " + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
+                                    toDisplay.Append(FormatRow(parsedIndex.Name, ((parsedIndex.Flag != ParsedIndexFlag.None) ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
                             }
                         }
                         break;
@@ -413,7 +429,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append(@"<br>[CTRL + B] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
+                toDisplay.Append(@"<br>[" + Interop.Plug.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
                 GoToDefinitionFile = data.ParsedItem.FilePath;
             }

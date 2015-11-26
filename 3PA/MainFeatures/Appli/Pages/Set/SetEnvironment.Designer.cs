@@ -106,14 +106,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.HorizontalScrollbarSize = 10;
             this.mainPanel.Location = new System.Drawing.Point(0, 0);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(809, 490);
+            this.mainPanel.Size = new System.Drawing.Size(750, 600);
             this.mainPanel.TabIndex = 0;
             this.mainPanel.VerticalScrollbarHighlightOnWheel = false;
             this.mainPanel.VerticalScrollbarSize = 10;
             // 
             // btcontrol2
             // 
-            this.btcontrol2.Location = new System.Drawing.Point(610, 464);
+            this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btcontrol2.Location = new System.Drawing.Point(551, 574);
             this.btcontrol2.Name = "btcontrol2";
             this.btcontrol2.Size = new System.Drawing.Size(94, 23);
             this.btcontrol2.TabIndex = 47;
@@ -121,7 +122,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btcontrol1
             // 
-            this.btcontrol1.Location = new System.Drawing.Point(710, 464);
+            this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btcontrol1.Location = new System.Drawing.Point(651, 574);
             this.btcontrol1.Name = "btcontrol1";
             this.btcontrol1.Size = new System.Drawing.Size(94, 23);
             this.btcontrol1.TabIndex = 46;
@@ -131,7 +133,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(784, 259);
+            this.btright6.Location = new System.Drawing.Point(452, 495);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -142,7 +144,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
-            this.btleft6.Location = new System.Drawing.Point(421, 260);
+            this.btleft6.Location = new System.Drawing.Point(18, 495);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
@@ -152,21 +154,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox6
             // 
             this.textbox6.Lines = new string[0];
-            this.textbox6.Location = new System.Drawing.Point(444, 260);
+            this.textbox6.Location = new System.Drawing.Point(41, 495);
             this.textbox6.MaxLength = 32767;
             this.textbox6.Name = "textbox6";
             this.textbox6.PasswordChar = '\0';
             this.textbox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox6.SelectedText = "";
-            this.textbox6.Size = new System.Drawing.Size(337, 20);
+            this.textbox6.Size = new System.Drawing.Size(408, 20);
             this.textbox6.TabIndex = 43;
             this.textbox6.Tag = "log file (*.log)|*.log";
             // 
             // yamuiLabel8
             // 
             this.yamuiLabel8.AutoSize = true;
-            this.yamuiLabel8.Location = new System.Drawing.Point(464, 242);
-            this.yamuiLabel8.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel8.Location = new System.Drawing.Point(41, 477);
+            this.yamuiLabel8.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.yamuiLabel8.Name = "yamuiLabel8";
             this.yamuiLabel8.Size = new System.Drawing.Size(73, 15);
             this.yamuiLabel8.TabIndex = 42;
@@ -178,7 +180,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.envLabel.AutoSizeHeightOnly = true;
             this.envLabel.BackColor = System.Drawing.Color.Transparent;
             this.envLabel.BaseStylesheet = null;
-            this.envLabel.Location = new System.Drawing.Point(187, 30);
+            this.envLabel.Location = new System.Drawing.Point(210, 30);
             this.envLabel.Name = "envLabel";
             this.envLabel.Size = new System.Drawing.Size(313, 15);
             this.envLabel.TabIndex = 41;
@@ -187,9 +189,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbDatabase
             // 
             this.cbDatabase.ItemHeight = 19;
-            this.cbDatabase.Location = new System.Drawing.Point(18, 116);
+            this.cbDatabase.Location = new System.Drawing.Point(238, 97);
             this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(133, 25);
+            this.cbDatabase.Size = new System.Drawing.Size(234, 25);
             this.cbDatabase.TabIndex = 40;
             this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
@@ -197,7 +199,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(381, 147);
+            this.btright1.Location = new System.Drawing.Point(452, 129);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
@@ -208,7 +210,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft1.BackColor = System.Drawing.Color.Transparent;
             this.btleft1.BackGrndImage = null;
-            this.btleft1.Location = new System.Drawing.Point(18, 147);
+            this.btleft1.Location = new System.Drawing.Point(18, 128);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
             this.btleft1.Size = new System.Drawing.Size(20, 20);
@@ -218,13 +220,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox1
             // 
             this.textbox1.Lines = new string[0];
-            this.textbox1.Location = new System.Drawing.Point(41, 147);
+            this.textbox1.Location = new System.Drawing.Point(41, 128);
             this.textbox1.MaxLength = 32767;
             this.textbox1.Name = "textbox1";
             this.textbox1.PasswordChar = '\0';
             this.textbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox1.SelectedText = "";
-            this.textbox1.Size = new System.Drawing.Size(337, 20);
+            this.textbox1.Size = new System.Drawing.Size(408, 20);
             this.textbox1.TabIndex = 37;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
             // 
@@ -232,7 +234,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(784, 212);
+            this.btright5.Location = new System.Drawing.Point(452, 447);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -243,7 +245,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
-            this.btleft5.Location = new System.Drawing.Point(421, 212);
+            this.btleft5.Location = new System.Drawing.Point(18, 446);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
@@ -253,13 +255,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox5
             // 
             this.textbox5.Lines = new string[0];
-            this.textbox5.Location = new System.Drawing.Point(444, 212);
+            this.textbox5.Location = new System.Drawing.Point(41, 446);
             this.textbox5.MaxLength = 32767;
             this.textbox5.Name = "textbox5";
             this.textbox5.PasswordChar = '\0';
             this.textbox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox5.SelectedText = "";
-            this.textbox5.Size = new System.Drawing.Size(337, 20);
+            this.textbox5.Size = new System.Drawing.Size(408, 20);
             this.textbox5.TabIndex = 34;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             // 
@@ -267,7 +269,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(784, 164);
+            this.btright4.Location = new System.Drawing.Point(452, 398);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -278,7 +280,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
-            this.btleft4.Location = new System.Drawing.Point(421, 164);
+            this.btleft4.Location = new System.Drawing.Point(18, 397);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
@@ -288,13 +290,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox4
             // 
             this.textbox4.Lines = new string[0];
-            this.textbox4.Location = new System.Drawing.Point(444, 164);
+            this.textbox4.Location = new System.Drawing.Point(41, 397);
             this.textbox4.MaxLength = 32767;
             this.textbox4.Name = "textbox4";
             this.textbox4.PasswordChar = '\0';
             this.textbox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox4.SelectedText = "";
-            this.textbox4.Size = new System.Drawing.Size(337, 20);
+            this.textbox4.Size = new System.Drawing.Size(408, 20);
             this.textbox4.TabIndex = 31;
             this.textbox4.Tag = "true";
             // 
@@ -302,7 +304,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(784, 116);
+            this.btright3.Location = new System.Drawing.Point(452, 349);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -313,7 +315,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
-            this.btleft3.Location = new System.Drawing.Point(421, 116);
+            this.btleft3.Location = new System.Drawing.Point(18, 348);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
@@ -323,13 +325,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox3
             // 
             this.textbox3.Lines = new string[0];
-            this.textbox3.Location = new System.Drawing.Point(444, 116);
+            this.textbox3.Location = new System.Drawing.Point(41, 348);
             this.textbox3.MaxLength = 32767;
             this.textbox3.Name = "textbox3";
             this.textbox3.PasswordChar = '\0';
             this.textbox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox3.SelectedText = "";
-            this.textbox3.Size = new System.Drawing.Size(337, 20);
+            this.textbox3.Size = new System.Drawing.Size(408, 20);
             this.textbox3.TabIndex = 28;
             this.textbox3.Tag = "true";
             // 
@@ -337,7 +339,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(381, 259);
+            this.btright2.Location = new System.Drawing.Point(452, 239);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -348,7 +350,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
-            this.btleft2.Location = new System.Drawing.Point(18, 259);
+            this.btleft2.Location = new System.Drawing.Point(18, 238);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
             this.btleft2.Size = new System.Drawing.Size(20, 20);
@@ -358,8 +360,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel7
             // 
             this.yamuiLabel7.AutoSize = true;
-            this.yamuiLabel7.Location = new System.Drawing.Point(464, 194);
-            this.yamuiLabel7.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel7.Location = new System.Drawing.Point(41, 428);
+            this.yamuiLabel7.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.yamuiLabel7.Name = "yamuiLabel7";
             this.yamuiLabel7.Size = new System.Drawing.Size(103, 15);
             this.yamuiLabel7.TabIndex = 25;
@@ -368,8 +370,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel6
             // 
             this.yamuiLabel6.AutoSize = true;
-            this.yamuiLabel6.Location = new System.Drawing.Point(464, 146);
-            this.yamuiLabel6.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel6.Location = new System.Drawing.Point(41, 379);
+            this.yamuiLabel6.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.yamuiLabel6.Name = "yamuiLabel6";
             this.yamuiLabel6.Size = new System.Drawing.Size(157, 15);
             this.yamuiLabel6.TabIndex = 23;
@@ -378,8 +380,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel5
             // 
             this.yamuiLabel5.AutoSize = true;
-            this.yamuiLabel5.Location = new System.Drawing.Point(464, 98);
-            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel5.Location = new System.Drawing.Point(41, 330);
+            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.yamuiLabel5.Name = "yamuiLabel5";
             this.yamuiLabel5.Size = new System.Drawing.Size(122, 15);
             this.yamuiLabel5.TabIndex = 22;
@@ -388,7 +390,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Location = new System.Drawing.Point(18, 97);
+            this.yamuiLabel3.Location = new System.Drawing.Point(41, 101);
             this.yamuiLabel3.Name = "yamuiLabel3";
             this.yamuiLabel3.Size = new System.Drawing.Size(189, 15);
             this.yamuiLabel3.TabIndex = 21;
@@ -397,8 +399,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Location = new System.Drawing.Point(18, 241);
-            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3, 10, 3, 0);
+            this.yamuiLabel2.Location = new System.Drawing.Point(41, 220);
+            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
             this.yamuiLabel2.Name = "yamuiLabel2";
             this.yamuiLabel2.Size = new System.Drawing.Size(213, 15);
             this.yamuiLabel2.TabIndex = 20;
@@ -408,14 +410,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.multitextbox1.DisplayIcon = false;
             this.multitextbox1.Lines = new string[0];
-            this.multitextbox1.Location = new System.Drawing.Point(18, 173);
+            this.multitextbox1.Location = new System.Drawing.Point(41, 154);
             this.multitextbox1.MaxLength = 32767;
             this.multitextbox1.Multiline = true;
             this.multitextbox1.Name = "multitextbox1";
             this.multitextbox1.PasswordChar = '\0';
             this.multitextbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multitextbox1.SelectedText = "";
-            this.multitextbox1.Size = new System.Drawing.Size(383, 55);
+            this.multitextbox1.Size = new System.Drawing.Size(431, 55);
             this.multitextbox1.TabIndex = 15;
             this.multitextbox1.WaterMark = "Appended to the .pf file";
             // 
@@ -423,27 +425,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.multibox2.DisplayIcon = false;
             this.multibox2.Lines = new string[0];
-            this.multibox2.Location = new System.Drawing.Point(18, 285);
+            this.multibox2.Location = new System.Drawing.Point(41, 264);
             this.multibox2.MaxLength = 32767;
             this.multibox2.Multiline = true;
             this.multibox2.Name = "multibox2";
             this.multibox2.PasswordChar = '\0';
             this.multibox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multibox2.SelectedText = "";
-            this.multibox2.Size = new System.Drawing.Size(383, 55);
+            this.multibox2.Size = new System.Drawing.Size(431, 55);
             this.multibox2.TabIndex = 11;
             this.multibox2.WaterMark = "Appended to the .ini PROPATH";
             // 
             // textbox2
             // 
             this.textbox2.Lines = new string[0];
-            this.textbox2.Location = new System.Drawing.Point(41, 259);
+            this.textbox2.Location = new System.Drawing.Point(41, 238);
             this.textbox2.MaxLength = 32767;
             this.textbox2.Name = "textbox2";
             this.textbox2.PasswordChar = '\0';
             this.textbox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox2.SelectedText = "";
-            this.textbox2.Size = new System.Drawing.Size(337, 20);
+            this.textbox2.Size = new System.Drawing.Size(408, 20);
             this.textbox2.TabIndex = 9;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
             // 
@@ -461,7 +463,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbEnvLetter
             // 
             this.cbEnvLetter.ItemHeight = 19;
-            this.cbEnvLetter.Location = new System.Drawing.Point(118, 25);
+            this.cbEnvLetter.Location = new System.Drawing.Point(141, 25);
             this.cbEnvLetter.Name = "cbEnvLetter";
             this.cbEnvLetter.Size = new System.Drawing.Size(62, 25);
             this.cbEnvLetter.TabIndex = 6;
@@ -470,7 +472,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbAppli
             // 
             this.cbAppli.ItemHeight = 19;
-            this.cbAppli.Location = new System.Drawing.Point(18, 25);
+            this.cbAppli.Location = new System.Drawing.Point(41, 25);
             this.cbAppli.Name = "cbAppli";
             this.cbAppli.Size = new System.Drawing.Size(94, 25);
             this.cbAppli.TabIndex = 3;
@@ -501,7 +503,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.mainPanel);
             this.Name = "SetEnvironment";
-            this.Size = new System.Drawing.Size(809, 490);
+            this.Size = new System.Drawing.Size(750, 600);
             this.mainPanel.ResumeLayout(false);
             this.mainPanel.PerformLayout();
             this.ResumeLayout(false);

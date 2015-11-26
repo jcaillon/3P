@@ -57,6 +57,11 @@ a:link {
     background-color: %ALTERNATEBGCOLOR%;
     margin-bottom: 5px;
 }
+.ToolTipDisplayText {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
 .ToolTipBottomGoTo {
     background-color: %ALTERNATEBGCOLOR%;
     margin-top: 10px;
@@ -86,7 +91,8 @@ a:link {
 .ToolTipCount {
     width: 30px;
     font-weight: bold;
-    font-size: 10px;
+    font-style: italic;
+    font-size: 11px;
     text-align: right;
 }
 .ToolTipcodeSnippet {

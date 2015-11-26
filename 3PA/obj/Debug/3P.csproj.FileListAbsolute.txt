@@ -21,7 +21,6 @@ C:\Work\3PA\3PA\obj\Debug\3P.pdb
 C:\Work\3P\3PA\obj\Debug\3P.csprojResolveAssemblyReference.cache
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.AppliForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.template.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.SettingAppearance.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Data.DataResources.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Images.ImageResources.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetEnvironment.resources
@@ -38,3 +37,6 @@ C:\Work\3P\3PA\obj\Debug\3P.dll
 C:\Work\3P\3PA\obj\Debug\3P.pdb
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileInfo.FileTagsForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileInfo.FileTagsPage.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.Html.HtmlResources.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.PageAbout.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.SettingAppearance.resources
