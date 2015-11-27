@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
+using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -24,6 +25,8 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
+            UpdateHandler.GetLatestReleaseInfo();
+            return;
             /*
             Highlight.Init();
             return;

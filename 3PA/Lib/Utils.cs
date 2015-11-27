@@ -25,8 +25,6 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Windows.Forms;
 using System.Xml.Serialization;
-using YamuiFramework.Forms;
-using YamuiFramework.Resources;
 
 namespace _3PA.Lib {
     /// <summary>

@@ -75,6 +75,7 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Lib\TextEncodingDetect.cs" />
+    <Compile Include="Lib\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -384,10 +385,10 @@
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
     <Content Include="Images\Html\wink.png" />
-    <Content Include="Images\logo16x16.png" />
-    <Content Include="Images\logo16x16_r.png" />
-    <Content Include="Images\logo20x20.png" />
-    <Content Include="Images\logo30x30.png" />
+    <Content Include="Images\logo\logo16x16.png" />
+    <Content Include="Images\logo\logo16x16_r.png" />
+    <Content Include="Images\logo\logo20x20.png" />
+    <Content Include="Images\logo\logo30x30.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />

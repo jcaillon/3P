@@ -27,13 +27,14 @@ using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
+    #region config Object
+
     /// <summary>
     /// The config object, should not be used
     /// </summary>
     public class ConfigObject {
         // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
-        [Display(Name = "User trigram", Description = "This is your user trigram duh")]
-        public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
+        [Display(Name = "User trigram", Description = "This is your user trigram duh")] public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
 
         // is the user from SOPRA?
         public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
@@ -43,7 +44,7 @@ namespace _3PA.Lib {
         public int AutoCompleteStartShowingListAfterXChar = 1;
         public bool AutoCompleteUseTabToAccept = true;
         public bool AutoCompleteUseEnterToAccept = false;
-        
+
         public bool AutoCompleteReplaceSemicolon = true;
         public bool AutoCompleteInsertEndAfterDo = true;
 
@@ -62,14 +63,12 @@ namespace _3PA.Lib {
         public bool AutocompleteReplaceAbbreviations = true;
 
 
-        [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")]
-        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
+        [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")] public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
 
         public bool CodeExplorerUseAlternateColors = false;
         public bool CodeExplorerVisible = true;
-        [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")]
-        public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
+        [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")] public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
         public bool CodeExplorerDisplayExternalItems = false;
 
         public double AppliOpacityUnfocused = 0.5;
@@ -92,7 +91,7 @@ namespace _3PA.Lib {
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";
 
-        
+
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
 
@@ -101,19 +100,43 @@ namespace _3PA.Lib {
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
     }
 
+    #endregion
+
+
     /// <summary>
     /// Holds the configuration of the application, this class is a singleton and
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
     public static class Config {
+
+        #region private fields
+
         private static ConfigObject _instance;
         private static string _filePath;
         private static string _location = Npp.GetConfigDir();
         private static string _fileName = "settings.xml";
 
+        #endregion
+
+        #region public fields
+
+        /// <summary>
+        /// Url to request to get info on the latest releases
+        /// </summary>
+        public static string ReleasesUrl {
+            get { return @"https://api.github.com/repos/jcaillon/battle-code/releases"; }
+        }
+
+        /// <summary>
+        /// Singleton instance of ConfigObject
+        /// </summary>
         public static ConfigObject Instance {
             get { return _instance ?? (_instance = Init()); }
         }
+
+        #endregion
+
+        #region mechanics
 
         /// <summary>
         /// init the instance by either reading the values from an existing file or 
@@ -134,8 +157,11 @@ namespace _3PA.Lib {
             return _instance;
         }
 
+        /// <summary>
+        /// Call this method to save the content of the config.instance into an .xml file
+        /// </summary>
         public static void Save() {
-            try  {
+            try {
                 if (!string.IsNullOrWhiteSpace(_filePath))
                     Object2Xml<ConfigObject>.SaveToFile(_instance, _filePath);
             } catch (Exception e) {
@@ -144,9 +170,9 @@ namespace _3PA.Lib {
         }
 
         private static FileSystemWatcher _configWatcher;
-        
+
         private static void SetupFileWatcher() {
-            _configWatcher = new FileSystemWatcher(_location, _fileName) { NotifyFilter = NotifyFilters.LastWrite };
+            _configWatcher = new FileSystemWatcher(_location, _fileName) {NotifyFilter = NotifyFilters.LastWrite};
             _configWatcher.Changed += configWatcher_Changed;
         }
 
@@ -154,5 +180,8 @@ namespace _3PA.Lib {
             UserCommunication.Notify("Config changed", MessageImage.Ok, "EVENT", "File changed");
             Init();
         }
+
+        #endregion
+
     }
 }

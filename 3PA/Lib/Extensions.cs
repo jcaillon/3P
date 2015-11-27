@@ -106,6 +106,29 @@ namespace _3PA.Lib {
         #region string extensions
 
         /// <summary>
+        /// Compares two version string "1.0.0.0".IsHigherVersionThan("0.9") returns true
+        /// Must be STRICTLY superior
+        /// </summary>
+        /// <param name="localVersion"></param>
+        /// <param name="distantVersion"></param>
+        /// <returns></returns>
+        public static bool IsHigherVersionThan(this string localVersion, string distantVersion) {
+            var splitLocal = localVersion.Split('.');
+            var splitDistant = distantVersion.Split('.');
+            try {
+                var i = 0;
+                while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
+                    if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
+                        return true;
+                    i++;
+                }
+            } catch (Exception) {
+                // ignored
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Check if word contains at least one letter
         /// </summary>
         /// <param name="word"></param>

@@ -42,12 +42,8 @@ namespace _3PA.Lib {
         /// </summary>
         public static string Version {
             get {
-                string result = string.Empty;
                 Version version = _assembly.GetName().Version;
-                if (version != null)
-                    return version.ToString();
-                else
-                    return "1.0.0.0";
+                return version != null ? version.ToString() : "???";
             }
         }
 
