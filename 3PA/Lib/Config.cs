@@ -39,6 +39,8 @@ namespace _3PA.Lib {
         // is the user from SOPRA?
         public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
 
+        public bool UserGetsPreReleases = true;
+
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
         public int AutoCompleteStartShowingListAfterXChar = 1;

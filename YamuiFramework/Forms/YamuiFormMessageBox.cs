@@ -276,6 +276,7 @@ namespace YamuiFramework.Forms {
         Services,
         Skull,
         Warning,
-        WarningShield
+        WarningShield,
+        Update
     }
 }

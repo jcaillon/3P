@@ -63,6 +63,36 @@ namespace _3PA.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        internal static byte[] _3pUpdater {
+            get {
+                object obj = ResourceManager.GetObject("_3pUpdater", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] _7z {
+            get {
+                object obj = ResourceManager.GetObject("_7z", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] _7zdll {
+            get {
+                object obj = ResourceManager.GetObject("_7zdll", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         internal static byte[] ObjectListView {
             get {
                 object obj = ResourceManager.GetObject("ObjectListView", resourceCulture);
@@ -71,7 +101,9 @@ namespace _3PA.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to html {
+        ///   Looks up a localized string similar to /* ==================================== */
+        ////* GENRAL STUFF */
+        ///html {
         ///    padding: 0;
         ///    margin: 0;
         ///    Font: 12px &quot;Segoe UI&quot;;
@@ -96,11 +128,7 @@ namespace _3PA.Properties {
         ///    border: solid 1px %FGCOLOR%;
         ///    background-color: %BGCOLOR%;
         ///    color: %FGCOLOR%;
-        ///    padding: 5px;
-        ///    Font: 12px &quot;Segoe UI&quot;;
-        ///}
-        ///
-        ///h1, h2, h3 { color: navy [rest of string was truncated]&quot;;.
+        ///    padding: [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string StyleSheet {
             get {

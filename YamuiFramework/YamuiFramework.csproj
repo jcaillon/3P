@@ -312,6 +312,7 @@
     <Content Include="Resources\MsgBoxAndHtmlImg\RadioActive.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Services.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Skull.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\Update.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Warning.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\WarningShield.png" />
     <Content Include="Resources\themesXml.xml" />

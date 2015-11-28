@@ -113,8 +113,8 @@ namespace _3PA.Lib {
         /// <param name="distantVersion"></param>
         /// <returns></returns>
         public static bool IsHigherVersionThan(this string localVersion, string distantVersion) {
-            var splitLocal = localVersion.Split('.');
-            var splitDistant = distantVersion.Split('.');
+            var splitLocal = (localVersion.StartsWith("v") ? localVersion.Remove(0, 1) : localVersion).Split('.');
+            var splitDistant = (distantVersion.StartsWith("v") ? distantVersion.Remove(0, 1) : distantVersion).Split('.');
             try {
                 var i = 0;
                 while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {

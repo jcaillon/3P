@@ -5,12 +5,12 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Sparkle Library")]
-[assembly: AssemblyDescription("An animation library to add some sparkly eye candy to an application")]
+[assembly: AssemblyTitle("3pUpdater")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Bright Ideas Software")]
-[assembly: AssemblyProduct("SparkleLibrary")]
-[assembly: AssemblyCopyright("Copyright ©  2010")]
+[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyProduct("3pUpdater")]
+[assembly: AssemblyCopyright("Copyright © Microsoft 2015")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("6bc11313-3880-41ce-94af-39b60ab4ef33")]
+[assembly: Guid("e58e7b3e-c0c2-4d99-ac63-b69aa4618c92")]
 
 // Version information for an assembly consists of the following four values:
 //

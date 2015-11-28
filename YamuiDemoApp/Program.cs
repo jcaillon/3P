@@ -25,8 +25,7 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
-            UpdateHandler.GetLatestReleaseInfo();
-            return;
+
             /*
             Highlight.Init();
             return;

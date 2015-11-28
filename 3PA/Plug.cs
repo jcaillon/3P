@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -169,6 +170,8 @@ namespace _3PA {
                 // dispose of all popup
                 ForceCloseAllWindows();
                 PluginIsFullyLoaded = false;
+
+                UpdateHandler.OnNotepadExit();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");
             }
@@ -259,6 +262,9 @@ namespace _3PA {
 
                 PluginIsFullyLoaded = true;
             });
+
+            // Try to update 3P
+            UpdateHandler.OnNotepadStart();
         }
 
         #endregion
@@ -591,6 +597,10 @@ namespace _3PA {
 
         #region tests
         static void Test() {
+            
+
+            UserCommunication.Notify("Dear user, <br><br>a new version of 3P is available on github and will be automatically installed the next time you restart notepad++", MessageImage.Update, "Update check", null, "An update is available");
+
             FileTags.UnCloak();
 
 

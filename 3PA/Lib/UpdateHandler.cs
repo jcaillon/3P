@@ -1,16 +1,48 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using YamuiFramework.Forms;
+using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using _3PA.Properties;
 
 namespace _3PA.Lib {
+
+    /// <summary>
+    /// Handles the update of this software
+    /// </summary>
     public class UpdateHandler {
 
-        public static ReleaseInfo GetLatestReleaseInfo() {
+        private static string PathUpdateFolder { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
+
+        private static string PathDownloadedPlugin { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3P.dll"); } }
+
+        private static string Path7ZipExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.exe"); } }
+
+        private static string Path7ZipDll { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.dll"); } }
+
+        private static string PathUpdaterExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3pUpdater.exe"); } }
+
+        private static string PathLatestReleaseZip { get { return Path.Combine(Npp.GetConfigDir(), "Update", "latestRelease.zip"); } }
+
+        private static string PathLatestReleaseBin { get { return Path.Combine(Npp.GetConfigDir(), "Update", "latestRelease.bin"); } }
+
+        /// <summary>
+        /// Holds the info about the latest release found on the distant update server
+        /// </summary>
+        public static ReleaseInfo LatestReleaseInfo { get; set; }
+
+        /// <summary>
+        /// Gets an object with the latest release info
+        /// </summary>
+        /// <returns></returns>
+        public static void GetLatestReleaseInfo() {
 
             using (WebClient wc = new WebClient()) {
 
@@ -24,63 +56,197 @@ namespace _3PA.Lib {
                 */
 
                 wc.Headers.Add ("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                wc.Proxy = null;
 
-                // Download release list from GITHUB API Config.ReleasesUrl
-                //var json = wc.DownloadString(@"https://api.github.com/repos/jcaillon/battle-code/releases");
+                // Download release list from GITHUB API 
+                //var json = wc.DownloadString(Config.ReleasesUrl);
 
                 // Parse the .json
                 var parser = new JsonParser(File.ReadAllText(@"C:\Users\Julien\Desktop\releases.json"));
                 parser.Tokenize();
+                var releasesList = parser.GetList();
 
-                // For each version higher than the local one, append to the release body
-                // Will be used to display the version log to the user
+                // Releases list empty?
+                if (releasesList[0].Count == 0 && releasesList.Count == 1)
+                    return;
+
                 var localVersion = AssemblyInfo.Version;
+
                 var outputBody = new StringBuilder();
-                foreach (var release in parser.GetList()) {
-                    var releaseVersion = release.Find(tuple => tuple.Item1.Equals("tag_name"));
-                    if (releaseVersion != null && releaseVersion.Item1.IsHigherVersionThan(localVersion)) {
-                        outputBody.AppendLine("**" + releaseVersion.Item1 + "**\n");
-                        var locBody = release.Find(tuple => tuple.Item1.Equals("body"));
-                        if (locBody != null)
-                            outputBody.AppendLine(locBody.Item2);
+                var highestVersion = localVersion;
+                var highestVersionInt = -1;
+                var iCount = 0;
+                foreach (var release in releasesList) {
+
+                    var releaseVersionTuple = release.Find(tuple => tuple.Item1.Equals("tag_name"));
+                    var prereleaseTuple = release.Find(tuple => tuple.Item1.Equals("prerelease"));
+
+                    if (releaseVersionTuple != null && prereleaseTuple != null) {
+
+                        var releaseVersion = releaseVersionTuple.Item2.StartsWith("v") ? releaseVersionTuple.Item2.Remove(0, 1) : releaseVersionTuple.Item2;
+
+                        // is it the highest version ? for prereleases or full releases depending on the user config
+                        if (((Config.Instance.UserGetsPreReleases && prereleaseTuple.Item2.EqualsCi("true"))
+                                || (!Config.Instance.UserGetsPreReleases && prereleaseTuple.Item2.EqualsCi("false")))
+                            && releaseVersion.IsHigherVersionThan(highestVersion)) {
+                            highestVersion = releaseVersion;
+                            highestVersionInt = iCount;
+                        }
+
+                        // For each version higher than the local one, append to the release body
+                        // Will be used to display the version log to the user
+                        if (releaseVersion.IsHigherVersionThan(localVersion)) {
+                            outputBody.AppendLine("\n\n##Version " + releaseVersion + "##\n");
+                            var locBody = release.Find(tuple => tuple.Item1.Equals("body"));
+                            if (locBody != null)
+                                outputBody.AppendLine(locBody.Item2);
+                        }
+                    }
+                    iCount++;
+                }
+
+                // There is a distant version higher than the local one
+                if (highestVersionInt > -1) {
+                    // Update dir
+                    if (Directory.Exists(PathUpdateFolder))
+                        Directory.Delete(PathUpdateFolder, true);
+                    Directory.CreateDirectory(PathUpdateFolder);
+
+                    // Hookup DownloadFileCompleted Event
+                    var downloadUriTuple = releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("browser_download_url"));
+                    if (downloadUriTuple != null) {
+                        wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
+                        wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), PathLatestReleaseZip);
+                    }
+
+                    // latest release info
+                    try {
+                        LatestReleaseInfo = new ReleaseInfo(
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("tag_name")).Item2,
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("name")).Item2,
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("prerelease")).Item2.EqualsCi("true"),
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("html_url")).Item2,
+                            outputBody.ToString(),
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("draft")).Item2.EqualsCi("true"),
+                            releasesList[highestVersionInt].Find(tuple => tuple.Item1.Equals("updated_at")).Item2.Substring(0, 10)
+                            );
+
+                        // Save release info
+                        BinWriter.WriteToBinaryFile(PathLatestReleaseBin, LatestReleaseInfo);
+                    } catch (Exception) {
+                        // ignored
                     }
                 }
-                
-                
+            }
+        }
 
+        /// <summary>
+        /// Called when the latest release download is done
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="asyncCompletedEventArgs"></param>
+        private static void WcOnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
 
-                /*
-                // Hookup DownloadFileCompleted Event
-                wc.DownloadFileCompleted +=    new AsyncCompletedEventHandler(client_DownloadFileCompleted);
+            // copy 7zip.exe
+            if (!File.Exists(Path7ZipExe))
+                File.WriteAllBytes(Path7ZipExe, Resources._7z);
+            if (!File.Exists(Path7ZipDll))
+                File.WriteAllBytes(Path7ZipDll, Resources._7zdll);
 
-                // Start the download and copy the file to c:\temp
-                wc.DownloadFileAsync(new Uri(url), @"c:\temp\image35.png");
-                 * */
+            // Extract the .zip file
+            Run(Path7ZipExe, string.Format("x -y \"-o{0}\" \"{1}\"", Path.Combine(Npp.GetConfigDir(), "Update"), PathLatestReleaseZip));
+
+            // check the presence of the plugin file
+            if (!File.Exists(PathDownloadedPlugin)) {
+                Directory.Delete(PathUpdateFolder, true);
+                return;
             }
 
-            File.WriteAllText(@"C:\Users\Julien\Desktop\tt.p", AssemblyInfo.Version);
+            // copy the 3pUpdater.exe, which basically copies the downloaded version of the plugin into the /plugins/ dir
+            if (!File.Exists(PathUpdaterExe))
+                File.WriteAllBytes(PathUpdaterExe, Resources._3pUpdater);
 
-            return null;
+            UserCommunication.Notify(@"Dear user, <br>
+                <br>
+                a new version of 3P is available on github and will be automatically installed the next time you restart notepad++<br>
+                <br>
+                Your version : <b>" + AssemblyInfo.Version + @"</b><br>
+                Distant version : <b>" + LatestReleaseInfo.Version + @"</b><br>
+                Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
+                Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" + 
+                (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : "  + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImage.Update, "Update check", null, "An update is available");
         }
+
+        /// <summary>
+        /// Method to call when the user leaves notepad++,
+        /// check if there is an update to make
+        /// </summary>
+        public static void OnNotepadExit() {
+            if (File.Exists(PathUpdaterExe))
+                Process.Start(PathUpdaterExe);
+        }
+
+        /// <summary>
+        /// Method to call when the user starts notepad++,
+        /// check if an update has been done since the last time notepad was closed
+        /// </summary>
+        public static void OnNotepadStart() {
+            // an update has been done
+            if (File.Exists(PathLatestReleaseBin)) {
+                // load release info
+                LatestReleaseInfo = BinWriter.ReadFromBinaryFile<ReleaseInfo>(PathLatestReleaseBin);
+
+                if (LatestReleaseInfo != null) {
+                    //TODO :dzdzae
+                    UserCommunication.Notify(@"Congratulations user,<br>
+                    <br>TOOOODOOOO
+                    The latest version of 3P has been successfully installed<br>
+                    <b>" + AssemblyInfo.Version + @"</b><br>
+                    Distant version : <b>" + LatestReleaseInfo.Version + @"</b><br>
+                    Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
+                    Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
+                                             (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : " + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImage.Update, "Update check", null, "An update is available");
+                }
+
+            }
+
+            // Check for new updates
+            Task.Factory.StartNew(GetLatestReleaseInfo);
+        }
+
+        private static void Run(string app, string args) {
+            var process = Process.Start(new ProcessStartInfo {
+                FileName = app,
+                Arguments = args,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            });
+            if (process != null)
+                process.WaitForExit();
+        }
+
     }
 
-    
-
+    /// <summary>
+    /// Contains info about the latest release
+    /// </summary>
     public class ReleaseInfo {
         public string Version { private set; get; }
         public string Name { private set; get; }
         public bool IsPreRelease { private set; get; }
         public bool IsDraft { private set; get; }
-        public string AssetUrl { private set; get; }
+        public string ReleaseUrl { private set; get; }
         public string Body { private set; get; }
+        public string ReleaseDate { private set; get; }
 
-        public ReleaseInfo(string version, string name, bool isPreRelease, string assetUrl, string body, bool isDraft) {
+        public ReleaseInfo(string version, string name, bool isPreRelease, string releaseUrl, string body, bool isDraft, string releaseDate) {
             Version = version;
             Name = name;
             IsPreRelease = isPreRelease;
-            AssetUrl = assetUrl;
+            ReleaseUrl = releaseUrl;
             Body = body;
             IsDraft = isDraft;
+            ReleaseDate = releaseDate;
         }
     }
 
@@ -150,7 +316,10 @@ namespace _3PA.Lib {
                         var varName = token.Value;
                         if (varName[0] == '"')
                             varName = varName.Substring(1, varName.Length - 2);
-                        releaseJsonontent[outerI].Add(new Tuple<string, string>(varName, PeekAtToken(3).Value));
+                        var varValue = PeekAtToken(3).Value;
+                        if (varValue[0] == '"')
+                            varValue = varValue.Substring(1, varValue.Length - 2);
+                        releaseJsonontent[outerI].Add(new Tuple<string, string>(varName, varValue));
                         _tokenPos = _tokenPos + 3;
                     }
                 }

@@ -393,6 +393,9 @@
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />
     <Content Include="Interop\DllExport\README.txt" />
+    <Content Include="Lib\3pUpdater\3pUpdater.exe" />
+    <Content Include="Lib\3pUpdater\7z.dll" />
+    <Content Include="Lib\3pUpdater\7z.exe" />
     <Content Include="Lib\ObjectListView\ObjectListView.dll" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
