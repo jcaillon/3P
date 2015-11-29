@@ -20,11 +20,13 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
+using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli.Pages;
@@ -75,6 +77,18 @@ namespace _3PA.MainFeatures.Appli {
             Visible = false;
             Tag = false;
             KeyPreview = true;
+        }
+
+        #endregion
+
+        #region Public methods
+
+        /// <summary>
+        /// Updates the title of the main form
+        /// </summary>
+        public void UpdateTitle() {
+            string strongBold = "<span class='AccentColor'>";
+            labelTitle.Text = @"<img src='" + LocalHtmlHandler.GetLogo() + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
         }
 
         #endregion
@@ -158,7 +172,7 @@ namespace _3PA.MainFeatures.Appli {
         #region events
 
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            if (e.Alt && e.KeyCode == Keys.Space) {
+            if ((e.Alt && e.KeyCode == Keys.Space) || e.KeyCode == Keys.Escape) {
                 Cloack();
                 e.IsInputKey = false;
             }
@@ -173,8 +187,9 @@ namespace _3PA.MainFeatures.Appli {
             GoToPage("soft_info");
         }
 
-        private static bool _lab = true;
         private void yamuiLink8_Click(object sender, EventArgs e) {
+            Process.Start(@"http://jcaillon.github.io/3P/");
+            /*
             statusLabel.UseCustomForeColor = true;
             statusLabel.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
             var t = new Transition(new TransitionType_Linear(500));
@@ -188,15 +203,7 @@ namespace _3PA.MainFeatures.Appli {
             };
             t.run();
             _lab = !_lab;
-        }
-
-        #endregion
-
-        #region Public methods
-
-        public void UpdateTitle() {
-            string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='logo30x30' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
+             * */
         }
 
         #endregion

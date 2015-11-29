@@ -82,6 +82,11 @@ namespace _3PA.Lib {
 
         #endregion
 
+        /// <summary>
+        /// Returns the encoding of the input file
+        /// </summary>
+        /// <param name="srcFile"></param>
+        /// <returns></returns>
         public static Encoding GetFileEncoding(string srcFile) {
             Encoding encoding = Encoding.Default;
 

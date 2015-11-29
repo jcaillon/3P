@@ -20,6 +20,7 @@
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using _3PA.Html;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages {
     public partial class PageAbout : YamuiPage {
@@ -32,7 +33,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
         public PageAbout() {
             InitializeComponent();
 
-            aboutHtml.Text = HtmlResources.about;
+            aboutHtml.Text = HtmlResources.about.Replace("%version%", AssemblyInfo.Version);
         }
         #endregion
 

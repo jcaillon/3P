@@ -69,15 +69,23 @@ namespace _3PA.Html {
         /// <returns></returns>
         public static string FormatMessage(string content, MessageImage image, string title, string subtitle) {
             return @"
-            <table style='margin-bottom: 7px; width: 100%'>
+            <table style='margin-bottom: 5px; width: 100%'>
                 <tr>
                     <td rowspan='2' style='width: 80px'><img src='" + image + @"' width='64' height='64' /></td>
-                    <td class='NotificationTitle'><img src='logo30x30' style='padding-right: 10px;'>" + title + @"</td>
+                    <td class='NotificationTitle'><img src='" + GetLogo() + @"' style='padding-right: 10px;'>" + title + @"</td>
                 </tr>
                 <tr>
                     <td class='NotificationSubTitle'>" + subtitle + @"</td>
                 </tr>
             </table><br>" + content;
+        }
+
+        /// <summary>
+        /// Returns the image of the logo (30x30)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLogo() {
+            return "logo30x30";
         }
     }
 }

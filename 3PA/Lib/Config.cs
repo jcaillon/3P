@@ -126,7 +126,7 @@ namespace _3PA.Lib {
         /// Url to request to get info on the latest releases
         /// </summary>
         public static string ReleasesUrl {
-            get { return @"https://api.github.com/repos/jcaillon/battle-code/releases"; }
+            get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
         }
 
         /// <summary>

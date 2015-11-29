@@ -42,8 +42,6 @@ namespace _3PA {
     public class Plug {
 
         #region Fields
-        public static string TempPath;
-
         public static bool PluginIsFullyLoaded;
         public static NppData NppData;
         public static FuncItems FuncItems = new FuncItems();
@@ -60,6 +58,18 @@ namespace _3PA {
         /// true if the current file is a progress file, false otherwise
         /// </summary>
         public static bool IsCurrentFileProgress { get; set; }
+
+        /// <summary>
+        /// Gets the temporary directory to use
+        /// </summary>
+        public static string TempDir {
+            get {
+                var dir = Path.Combine(Path.GetTempPath(), AssemblyInfo.ProductTitle);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                return dir;
+            }
+        }
         #endregion
 
         #region Init and clean up
@@ -597,9 +607,6 @@ namespace _3PA {
 
         #region tests
         static void Test() {
-            
-
-            UserCommunication.Notify("Dear user, <br><br>a new version of 3P is available on github and will be automatically installed the next time you restart notepad++", MessageImage.Update, "Update check", null, "An update is available");
 
             FileTags.UnCloak();
 

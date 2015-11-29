@@ -42,7 +42,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
             this.yamuiPanel1.Name = "yamuiPanel1";
             this.yamuiPanel1.Size = new System.Drawing.Size(750, 600);
             this.yamuiPanel1.TabIndex = 0;
-            this.yamuiPanel1.UseCustomBackColor = true;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
             // 

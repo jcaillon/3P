@@ -43,7 +43,7 @@ namespace _3PA.Lib {
         public static string Version {
             get {
                 Version version = _assembly.GetName().Version;
-                return version != null ? version.ToString() : "???";
+                return version != null ? "v" + version : "???";
             }
         }
 

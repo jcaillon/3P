@@ -69,6 +69,19 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>HtmlResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Html\MarkdownDeep\Abbreviation.cs" />
+    <Compile Include="Html\MarkdownDeep\Block.cs" />
+    <Compile Include="Html\MarkdownDeep\BlockProcessor.cs" />
+    <Compile Include="Html\MarkdownDeep\FootnoteReference.cs" />
+    <Compile Include="Html\MarkdownDeep\HtmlTag.cs" />
+    <Compile Include="Html\MarkdownDeep\LinkDefinition.cs" />
+    <Compile Include="Html\MarkdownDeep\LinkInfo.cs" />
+    <Compile Include="Html\MarkdownDeep\MardownDeep.cs" />
+    <Compile Include="Html\MarkdownDeep\SpanFormatter.cs" />
+    <Compile Include="Html\MarkdownDeep\StringScanner.cs" />
+    <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
+    <Compile Include="Html\MarkdownDeep\Token.cs" />
+    <Compile Include="Html\MarkdownDeep\Utils.cs" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -384,10 +397,9 @@
     <Content Include="Images\DockableExplorer\buttons\refresh.png" />
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
-    <Content Include="Images\Html\wink.png" />
     <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo16x16_r.png" />
-    <Content Include="Images\logo\logo20x20.png" />
+    <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
@@ -424,6 +436,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Images\Html\" />
     <Folder Include="MainFeatures\SmallMenu\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

@@ -25,7 +25,6 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Resources;
 
 namespace YamuiFramework.Forms {
     public partial class YamuiFormMessageBox : YamuiForm {
@@ -61,7 +60,6 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Constructor, you should the method ShwDlg instead
         /// </summary>
-        /// <param name="type"></param>
         /// <param name="htmlContent"></param>
         /// <param name="buttonsList"></param>
         /// <param name="dontWrapLines"></param>
@@ -84,7 +82,7 @@ namespace YamuiFramework.Forms {
                 };
                 yamuiButton1.Location = new Point(Width - 12 - ButtonWidth - (ButtonWidth + 5) * i, Height - 12 - yamuiButton1.Height);
                 yamuiButton1.ButtonPressed += (sender, args) => {
-                    _dialogResult = (int) args.OriginalEventArgs;
+                    _dialogResult = (int) ((YamuiButton)sender).Tag;
                     Close();
                 };
                 Controls.Add(yamuiButton1);
@@ -144,6 +142,11 @@ namespace YamuiFramework.Forms {
                 Focus();
                 WinApi.SetForegroundWindow(Handle);
             };
+        }
+
+        public override sealed Size MinimumSize {
+            get { return base.MinimumSize; }
+            set { base.MinimumSize = value; }
         }
 
         /// <summary>

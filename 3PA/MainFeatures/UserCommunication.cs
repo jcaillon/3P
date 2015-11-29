@@ -26,6 +26,7 @@ using _3PA.Html;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
+
         /// <summary>
         /// Displays a notification on the bottom right of the screen
         /// </summary>
@@ -56,8 +57,28 @@ namespace _3PA.MainFeatures {
             Notify(html, MessageImage.Logo, "debug", "?", duration, width);
         }
 
+
         public static void NotifyUserAboutNppDefaultAutoComp() {
             
+        }
+
+        /// <summary>
+        /// 
+        /// new List string  { "fu", "ok" }
+        /// </summary>
+        /// <param name="html"></param>
+        /// <param name="type"></param>
+        /// <param name="title"></param>
+        /// <param name="subTitle"></param>
+        /// <param name="buttons"></param>
+        /// <param name="waitResponse"></param>
+        /// <param name="clickHandler"></param>
+        /// <param name="dontWrapLines"></param>
+        public static void Message(string html, MessageImage type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler, bool dontWrapLines) {
+            if (Appli.Appli.Form != null)
+                Appli.Appli.Form.BeginInvoke((Action)delegate {
+                    YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);
+                });
         }
 
         public static void MessageToUser() {
