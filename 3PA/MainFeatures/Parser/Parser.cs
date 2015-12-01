@@ -475,12 +475,13 @@ namespace _3PA.MainFeatures.Parser {
             // info we will extract from the current statement :
             string name = "";
             bool isValue = false;
+            bool hasPersistent = false;
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
-                if (state == 1) break; // stop after finding the RUN name to be able to match other words in the statement
+                if (state == 2) break; // stop after finding the RUN name to be able to match other words in the statement
                 if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 switch (state) {
@@ -495,15 +496,18 @@ namespace _3PA.MainFeatures.Parser {
                         } else if (token is TokenSymbol && token.Value.Equals(")"))
                             state++;
                         break;
-                    //case 1:
-                    //    // matching the rest of run
-                    //    AddTokenToStringBuilder(leftStr, token);
-                    //    break;
+                    case 1:
+                        // matching PERSISTENT
+                        if (!(token is TokenWord)) break;
+                        if (token.Value.EqualsCi("persistent"))
+                            hasPersistent = true;
+                        state++;
+                        break;
                 }
             } while (MoveNext());
 
             if (state == 0) return;
-            AddParsedItem(new ParsedRun(name, runToken.Line, runToken.Column, leftStr.ToString(), isValue));
+            AddParsedItem(new ParsedRun(name, runToken.Line, runToken.Column, leftStr.ToString(), isValue, hasPersistent));
         }
 
         /// <summary>
@@ -1159,14 +1163,24 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="token"></param>
         private void CreateParsedIncludeFile(Token token) {
             var toParse = token.Value;
-            if (toParse.Length < 2 || toParse[1] == '&') return;
-            int pos;
-            for (pos = 1; pos < toParse.Length; pos++) {
-                if (char.IsWhiteSpace(toParse[pos]) || toParse[pos] == '}') break;
-            }
-            toParse = toParse.Substring(1, pos - 1);
-            // we matched the include file name
 
+            // skip whitespaces
+            int startPos = 1;
+            while (startPos < toParse.Length) {
+                if (!char.IsWhiteSpace(toParse[startPos])) break;
+                startPos++;
+            }
+            if (toParse[startPos] == '&') return;
+
+            // read first word as the filename
+            int curPos = startPos;
+            while (curPos < toParse.Length) {
+                if (char.IsWhiteSpace(toParse[curPos]) || toParse[curPos] == '}') break;
+                curPos++;
+            }
+            toParse = toParse.Substring(startPos, curPos - startPos);
+
+            // we matched the include file name
             AddParsedItem(new ParsedIncludeFile(toParse, token.Line, token.Column));
         }
 

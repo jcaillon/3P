@@ -26,6 +26,7 @@ hr {
     color: %FGCOLOR%;
     margin: 0;
     padding: 0;
+    margin-bottom: 5px;
 }
 
 /*This is the class of the HtmlToolTip*/
@@ -49,12 +50,11 @@ hr {
     background-color: %ALTERNATEBGCOLOR%;
 }
 
-a:hover {
-     text-decoration: none;
-}
 a:link {
     color: %LINKCOLOR%;
     text-decoration: underline;
+    margin: 0px;
+    padding: 0px;
 }
 
 
@@ -124,12 +124,12 @@ a:link {
 /* ==================================== */
 /* LOCAL HTML HANDLER */
 .NotificationTitle {
-    font-size: 20px;
+    font-size: 24px;
     font-weight: bold;
 }
 
 .NotificationSubTitle {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     color: %SUBSTRINGCOLOR%;
 }

@@ -45,6 +45,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CreateHelpConfigFile.cs" />
+    <Compile Include="fastJSON\dynamic.cs" />
+    <Compile Include="fastJSON\Formatter.cs" />
+    <Compile Include="fastJSON\Getters.cs" />
+    <Compile Include="fastJSON\JSON.cs" />
+    <Compile Include="fastJSON\JsonParser.cs" />
+    <Compile Include="fastJSON\JsonSerializer.cs" />
+    <Compile Include="fastJSON\Reflection.cs" />
+    <Compile Include="fastJSON\SafeDictionary.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>

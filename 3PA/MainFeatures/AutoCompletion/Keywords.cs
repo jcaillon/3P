@@ -133,6 +133,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Save the keywords data into the file (to remember the ranking of each keyword)
         /// </summary>
         public static void Save() {
+            if (_keywords.Count == 0) return;
             var strBuilder = new StringBuilder();
             foreach (var keyword in _keywords) {
                 strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubString + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);

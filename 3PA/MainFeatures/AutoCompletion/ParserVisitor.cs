@@ -104,12 +104,34 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Branch = CodeExplorerBranch.Run,
                 IconType = CodeExplorerIconType.RunExternal,
                 IsNotBlock = true,
-                Flag = AddExternalFlag(pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0),
+                Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.Persistent : 0)),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
                 SubString = SetExternalInclude(null)
             });
+
+            // if the run is PERSISTENT, we need to load the functions/proc of the program
+            if (pars.HasPersistent) {
+
+                // try to find the file in the propath
+                var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+
+                // Parse the include file
+                if (string.IsNullOrEmpty(fullFilePath)) return;
+
+                ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
+
+                // add info from the parser
+                ParsedItemsList.AddRange(parserVisitor.ParsedItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList());
+                //if (Config.Instance.CodeExplorerDisplayExternalItems)
+                    //ParsedExplorerItemsList.AddRange(parserVisitor.ParsedExplorerItemsList.ToList());
+
+                // fill the defined procedures dictionnary
+                foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.ContainsKey(definedProcedure.Key))) {
+                    DefinedProcedures.Add(definedProcedure.Key, definedProcedure.Value);
+                }
+            }
         }
 
         /// <summary>
@@ -160,7 +182,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void Visit(ParsedIncludeFile pars) {
 
             // try to find the file in the propath
-            var fullFilePath = ProgressEnv.FindFileInPropath(pars.Name);
+            var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
 
             // To code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem() {
@@ -177,21 +199,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Parse the include file
             if (string.IsNullOrEmpty(fullFilePath)) return;
 
-            ParserVisitor parserVisitor;
-
-            // did we already parsed this file?
-            if (ParserHandler.SavedParserVisitors.ContainsKey(fullFilePath)) {
-                parserVisitor = ParserHandler.SavedParserVisitors[fullFilePath];
-            } else {
-                // Parse it
-                var ablParser = new Parser.Parser(File.ReadAllText(fullFilePath, TextEncodingDetect.GetFileEncoding(fullFilePath)), fullFilePath, pars.OwnerName, DataBase.GetTablesDictionary());
-
-                parserVisitor = new ParserVisitor(false, Path.GetFileName(fullFilePath), ablParser.GetLineInfo);
-                ablParser.Accept(parserVisitor);
-
-                // save it for future uses
-                ParserHandler.SavedParserVisitors.Add(fullFilePath, parserVisitor);
-            }
+            ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
 
             // add info from the parser
             ParsedItemsList.AddRange(parserVisitor.ParsedItemsList.ToList());
@@ -536,6 +544,31 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         #region helper
+
+        /// <summary>
+        /// Parses a file.
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="ownerName"></param>
+        /// <returns></returns>
+        private ParserVisitor ParseFile(string fileName, string ownerName) {
+            ParserVisitor parserVisitor;
+
+            // did we already parsed this file?
+            if (ParserHandler.SavedParserVisitors.ContainsKey(fileName)) {
+                parserVisitor = ParserHandler.SavedParserVisitors[fileName];
+            } else {
+                // Parse it
+                var ablParser = new Parser.Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName, DataBase.GetTablesDictionary());
+
+                parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.GetLineInfo);
+                ablParser.Accept(parserVisitor);
+
+                // save it for future uses
+                ParserHandler.SavedParserVisitors.Add(fileName, parserVisitor);
+            }
+            return parserVisitor;
+        }
 
         /// <summary>
         /// Adds the "external" flag if needed

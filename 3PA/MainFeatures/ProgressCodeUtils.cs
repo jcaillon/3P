@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -66,7 +68,7 @@ namespace _3PA.MainFeatures {
             var fullPaths = Config.Instance.GlobalProgressExtension.Split(',').Select(extension => ProgressEnv.FindFileInPropath(curWord + extension)).Where(fullPath => !string.IsNullOrEmpty(fullPath)).ToList();
             if (Directory.Exists(ProgressEnv.Current.BaseLocalPath)) {
                 var fileList = new DirectoryInfo(ProgressEnv.Current.BaseLocalPath).GetFiles(curWord + ".*", SearchOption.AllDirectories);
-                fullPaths.AddRange(fileList.Where(info => !fullPaths.Contains(info.FullName)).Select(fileInfo => fileInfo.FullName));
+                fullPaths.AddRange(fileList.Where(info => !fullPaths.Contains(info.FullName, StringComparer.CurrentCultureIgnoreCase)).Select(fileInfo => fileInfo.FullName));
             }
 
             if (fullPaths.Count > 0) {

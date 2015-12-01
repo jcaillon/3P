@@ -125,6 +125,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
 
+                //// correct the internal/external type of dynamic functions :
+                //foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.DynamicFunctionCall)) {
+                //    if (parserVisitor.DefinedFunctions.ContainsKey(item.DisplayText))
+                //        item.IconType = CodeExplorerIconType.FunctionCallInternal;
+                //}
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
             } finally {

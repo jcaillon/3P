@@ -113,7 +113,7 @@ namespace _3PA.MainFeatures.FileInfo {
                     try {
                         Map.Load(ConfigFile);
                     } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error while loading file info!");
+                        ErrorHandler.ShowErrors(e, "Error while loading file info!", ConfigFile);
                     }
                 }
                 try {
@@ -204,7 +204,7 @@ namespace _3PA.MainFeatures.FileInfo {
                 try {
                     Map.Save(ConfigFile);
                 } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while saving file info!", ConfigFile);
+                    ErrorHandler.ShowErrors(e, "Error while saving file info!");
                 }
             }
         }

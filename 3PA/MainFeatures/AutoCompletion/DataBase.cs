@@ -146,6 +146,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading database info!", _filePath);
+                return;
             }
 
             // fill dictionary

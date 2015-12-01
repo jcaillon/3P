@@ -368,6 +368,7 @@
     <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
     <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
+    <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
     <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
     <Content Include="Images\DockableExplorer\Type\Block.png" />
     <Content Include="Images\DockableExplorer\Type\DefinitionBlock.png" />

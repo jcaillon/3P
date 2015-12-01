@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         ///     Create a TreeRenderer
         /// </summary>
         public CustomTreeRenderer(string filterStr) {
-            _linePen = new Pen(ThemeManager.AccentColor, 1.5f) {
+            _linePen = new Pen(ThemeManager.Current.AutoCompletionNormalAlternateBackColor, 1.5f) {
                 DashStyle = DashStyle.Solid
             };
             _fillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);

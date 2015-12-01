@@ -56,6 +56,19 @@ namespace _3PA.Lib {
             }
             return -1;
         }
+
+        /// <summary>
+        /// Use : var name = player.GetAttributeFrom<DisplayAttribute>("PlayerDescription").Name;
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="instance"></param>
+        /// <param name="propertyName"></param>
+        /// <returns></returns>
+        public static T GetAttributeFrom<T>(this object instance, string propertyName) where T : Attribute {
+            var attrType = typeof(T);
+            var property = instance.GetType().GetProperty(propertyName);
+            return (T)property.GetCustomAttributes(attrType, false).First();
+        }
         #endregion
 
 

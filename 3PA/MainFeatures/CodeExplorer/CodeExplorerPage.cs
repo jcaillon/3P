@@ -465,10 +465,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (selection == null) return;
             // Branch clicked : expand/retract
             if (selection.HasChildren) {
-                if (ovlTree.IsExpanded(selection))
-                    ovlTree.Collapse(selection);
-                else
-                    ovlTree.Expand(selection);
+                // only allow it if we are not filtering by text
+                if (string.IsNullOrWhiteSpace(textBoxFilter.Text)) {
+                    if (ovlTree.IsExpanded(selection))
+                        ovlTree.Collapse(selection);
+                    else
+                        ovlTree.Expand(selection);
+                }
                 Npp.GrabFocus();
             } else {
                 // Item clicked : go to line

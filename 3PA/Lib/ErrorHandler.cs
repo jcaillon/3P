@@ -19,31 +19,45 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
     class ErrorHandler {
 
+        private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
+        private static string PathLogfile { get { return Path.Combine(PathLogFolder, "message.log"); } }
+        private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }
+
         private static Dictionary<string, bool> _catchedErrors = new Dictionary<string, bool>();
 
+        /// <summary>
+        /// Shows a Messagebox informing the user that something went wrong with a file,
+        /// renames said file with the suffix "_errors"
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="message"></param>
+        /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
-            MessageBox.Show("Error in " + AssemblyInfo.ProductTitle + ", couldn't load the following file : \n" +
-                            fileName +
-                            "\nThe file has been renamed with the '_errors' suffix to avoid further problems.");
+            MessageBox.Show(@"Attention user! An error has occured while loading in the following file :" + "\n\n"
+                + fileName +
+                "\n\n" + @"The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             if (File.Exists(fileName + "_errors"))
                 File.Delete(fileName + "_errors");
             File.Move(fileName, fileName + "_errors");
-            ShowErrors(e, message);
         }
 
+        /// <summary>
+        /// Shows an error to the user
+        /// </summary>
+        /// <param name="e"></param>
+        /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message) {
             var errorToStr = e.ToString();
 
@@ -53,12 +67,57 @@ namespace _3PA.Lib {
             _catchedErrors.Add(errorToStr, true);
 
             // log the error into a file
+            if (!Directory.Exists(PathLogFolder))
+                Directory.CreateDirectory(PathLogFolder);
+            var toAppend = new StringBuilder("============================");
+            toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
+            toAppend.AppendLine(errorToStr);
+            try {
+                File.AppendAllText(PathErrorfile, toAppend.ToString());
+            } catch (Exception) {
+                // live with it...
+            }
 
             // show it to the user, conditionally
-            if (!Config.Instance.GlobalShowAllError)
-                return;
+            //if (!Config.Instance.UserIsAGoodGuy)
+              //  return;
 
-            UserCommunication.Notify(errorToStr.Replace("à", "<br>à"), MessageImage.Poison, "Oops an error has occured!", message, 0, 500);
+            UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error / message logs below :" +
+                (File.Exists(PathLogfile) ? "<br><a href='" + PathLogfile + "'>Link to the message log</a>" : "") +
+                (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
+                "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>", 
+                MessageImage.Poison, "An error has occured", 
+                args => {
+                    Npp.Goto(args.Link);
+                    args.Handled = true;
+                }, 
+                message, 0, 500);
+
+            // send to github
+            Task.Factory.StartNew(() => {
+                
+            });
+        }
+
+        /// <summary>
+        /// Log a piece of information
+        /// </summary>
+        /// <param name="message"></param>
+        public static void Log(string message) {
+            StackFrame frame = new StackFrame(1);
+            var method = frame.GetMethod();
+            var callingClass = method.DeclaringType;
+            var callingMethod = method.Name;
+
+            if (!Directory.Exists(PathLogFolder))
+                Directory.CreateDirectory(PathLogFolder);
+
+            var toAppend = new StringBuilder("============================");
+            toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
+            toAppend.AppendLine("From " + callingClass + "." + callingMethod + "()");
+            toAppend.AppendLine(message);
+
+            File.AppendAllText(PathLogfile, toAppend.ToString());
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {

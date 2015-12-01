@@ -241,14 +241,16 @@ namespace _3PA.MainFeatures.Parser {
         /// true if the Run statement is based on a evaluating a VALUE()
         /// </summary>
         public bool IsEvaluateValue { get; private set; }
+        public bool HasPersistent { get; private set; }
         public string Left { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedRun(string name, int line, int column, string left, bool isEvaluateValue) : base(name, line, column) {
+        public ParsedRun(string name, int line, int column, string left, bool isEvaluateValue, bool hasPersistent) : base(name, line, column) {
             Left = left;
             IsEvaluateValue = isEvaluateValue;
+            HasPersistent = hasPersistent;
         }
     }
 

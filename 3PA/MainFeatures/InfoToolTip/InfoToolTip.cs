@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     break;
                 case "trigger":
                     if (split.Length > 1) {
-                        var fullPath = ProgressEnv.FindFileInPropath(split[1]);
+                        var fullPath = ProgressEnv.FindFirstFileInEnv(split[1]);
                         Npp.Goto(string.IsNullOrEmpty(fullPath) ? split[1] : fullPath);
                         Close();
                     }

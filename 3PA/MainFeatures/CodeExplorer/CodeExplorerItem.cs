@@ -172,6 +172,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         NotFound = 8,
         // if the extracted info is from an external file (.i)
         External = 16,
+        // a run file has the keyword PERSISTENT
+        Persistent = 32,
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {

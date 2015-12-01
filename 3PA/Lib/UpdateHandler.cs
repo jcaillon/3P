@@ -43,8 +43,14 @@ namespace _3PA.Lib {
         /// <summary>
         /// Gets an object with the latest release info
         /// </summary>
-        /// <returns></returns>
         public static void GetLatestReleaseInfo() {
+            GetLatestReleaseInfo(false);
+        }
+
+        /// <summary>
+        /// Gets an object with the latest release info
+        /// </summary>
+        public static void GetLatestReleaseInfo(bool alwaysGetFeedBack) {
 
             try {
                 using (WebClient wc = new WebClient()) {
@@ -59,10 +65,16 @@ namespace _3PA.Lib {
                 */
 
                     wc.Headers.Add ("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
-                    wc.Proxy = null;
+                    //wc.Proxy = null;
 
                     // Download release list from GITHUB API 
-                    var json = wc.DownloadString(Config.ReleasesUrl);
+                    string json = "";
+                    try {
+                        json = wc.DownloadString(Config.ReleasesUrl);
+                    } catch (WebException e) {
+                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesUrl + "'>" + Config.ReleasesUrl + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImage.HighImportance, "Couldn't reach github");
+                        ErrorHandler.Log(e.ToString());
+                    }
 
                     // Parse the .json
                     var parser = new JsonParser(json);
@@ -136,7 +148,9 @@ namespace _3PA.Lib {
                             wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
                             wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), PathLatestReleaseZip);
                         }
-                   
+
+                    } else if (alwaysGetFeedBack) {
+                        UserCommunication.Notify("You already possess the latest version of 3P!", MessageImage.Ok, "Update check", "You own the " + AssemblyInfo.Version);
                     }
                 }
             } catch (Exception e) {
@@ -182,7 +196,7 @@ namespace _3PA.Lib {
                 Release name : <b>" + LatestReleaseInfo.Name + @"</b><br>
                 Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
                 Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" + 
-                                         (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : "  + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImage.Update, "Update check", null, "An update is available");
+                                         (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : "  + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImage.Update, "Update check", "An update is available");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
             }
@@ -214,7 +228,7 @@ namespace _3PA.Lib {
                         Copy this file : <b><a href='" + PathDownloadedPlugin + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
                         In this folder (replacing the old file) : <b><a href='" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + "'>" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + @"</a></b><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        Thank you for your patience!<br>", MessageImage.Update, "Update", null, "Problem during the update!");
+                        Thank you for your patience!<br>", MessageImage.Update, "Update", "Problem during the update!");
                         return;
                     }
 

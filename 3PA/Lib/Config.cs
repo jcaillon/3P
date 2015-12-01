@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
@@ -32,14 +33,19 @@ namespace _3PA.Lib {
     /// <summary>
     /// The config object, should not be used
     /// </summary>
+
     public class ConfigObject {
         // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
-        [Display(Name = "User trigram", Description = "This is your user trigram duh")] public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
+
+        //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
+        [Display(Name = "User trigram", Description = "This is your user trigram duh")]
+        [StringLength(15)]
+        public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
 
         // is the user from SOPRA?
         public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
-
         public bool UserGetsPreReleases = true;
+        public bool UserIsAGoodGuy = true;
 
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
@@ -51,6 +57,8 @@ namespace _3PA.Lib {
         public bool AutoCompleteInsertEndAfterDo = true;
 
         public bool AutoCompleteShowInCommentsAndStrings = false;
+        
+        [Range(5, 100)]
         public int AutoCompleteIndentNbSpaces = 4;
         public int AutoCompleteShowListOfXSuggestions = 12;
         public double AutoCompleteUnfocusedOpacity = 0.92d;
@@ -87,18 +95,17 @@ namespace _3PA.Lib {
         public int GlobalCurrentEnvironnement = 0;
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
-        public bool GlobalShowAllError = true;
 
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";
 
-
+        // THEMES
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
-
         public int SyntaxHighlightThemeId = 0;
 
+        // SHORTCUTS
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
     }
 
@@ -153,6 +160,7 @@ namespace _3PA.Lib {
                     Object2Xml<ConfigObject>.LoadFromFile(_instance, _filePath);
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when loading settings", _filePath);
+                    _instance = new ConfigObject();
                 }
             }
             SetupFileWatcher();

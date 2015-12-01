@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures {
                 try {
                     Object2Xml<ProgressEnvironnement>.SaveToFile(_listOfEnv, _filePath);
                 } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml", _filePath);
+                    ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml");
                 }
 
             // need to compute the propath again
@@ -152,6 +152,22 @@ namespace _3PA.MainFeatures {
             }
             return "";
         }
+
+        /// <summary>
+        /// Find a file in the propath and if it can't find it, in the env base local path
+        /// </summary>
+        /// <param name="fileToFind"></param>
+        /// <returns></returns>
+        public static string FindFirstFileInEnv(string fileToFind) {
+            var propathRes = FindFileInPropath(fileToFind);
+            if (string.IsNullOrEmpty(propathRes)) {
+                var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
+                if (fileList.Any())
+                    return fileList.Select(fileInfo => fileInfo.FullName).First();
+                return "";
+            }
+            return propathRes;
+        } 
 
         public static List<string> FilterFiles(string path, params string[] exts) {
             return exts.Select(x => "*." + x) // turn into globs
