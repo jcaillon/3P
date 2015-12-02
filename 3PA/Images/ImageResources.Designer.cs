@@ -343,6 +343,26 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Input {
+            get {
+                object obj = ResourceManager.GetObject("Input", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap InputOutput {
+            get {
+                object obj = ResourceManager.GetObject("InputOutput", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap IsTooLong {
             get {
                 object obj = ResourceManager.GetObject("IsTooLong", resourceCulture);
@@ -376,6 +396,26 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Label {
             get {
                 object obj = ResourceManager.GetObject("Label", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LoadPersistent {
+            get {
+                object obj = ResourceManager.GetObject("LoadPersistent", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap LoadPersistent1 {
+            get {
+                object obj = ResourceManager.GetObject("LoadPersistent1", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -496,6 +536,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap OpenInExplorer {
             get {
                 object obj = ResourceManager.GetObject("OpenInExplorer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Output {
+            get {
+                object obj = ResourceManager.GetObject("Output", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

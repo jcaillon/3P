@@ -89,6 +89,19 @@ namespace _3PA.MainFeatures.AutoCompletion {
             return string.Empty;
         }
 
+        /// <summary>
+        /// Returns a list of "parameters" for a given internal procedure
+        /// </summary>
+        /// <param name="procedureData"></param>
+        /// <returns></returns>
+        public static List<CompletionData> FindProcedureParameters(CompletionData procedureData) {
+            var parserVisitor = ParserVisitor.ParseFile(procedureData.ParsedItem.FilePath, "");
+            return parserVisitor.ParsedItemsList.Where(data =>
+                data.FromParser &&
+                data.ParsedItem.OwnerName.EqualsCi(procedureData.DisplayText) &&
+                (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget) &&
+                ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
+        }
         #endregion
 
         #region do the parsing and get the results
@@ -124,12 +137,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
-
-                //// correct the internal/external type of dynamic functions :
-                //foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.DynamicFunctionCall)) {
-                //    if (parserVisitor.DefinedFunctions.ContainsKey(item.DisplayText))
-                //        item.IconType = CodeExplorerIconType.FunctionCallInternal;
-                //}
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");

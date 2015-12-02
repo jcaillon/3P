@@ -304,19 +304,38 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         }
   
                         break;
+                    case CompletionType.Procedure:
+                        // find its parameters
+                        toDisplay.Append(FormatSubtitle("PARAMETERS"));
+                        var paramList = ParserHandler.FindProcedureParameters(data);
+                        if (paramList.Count > 0)
+                            foreach (var parameter in paramList) {
+                                var defItem = (ParsedDefine) parameter.ParsedItem;
+                                toDisplay.Append(FormatRowParam(defItem.LcFlagString, parameter.DisplayText + " as <span class='ToolTipSubString'>" + defItem.PrimitiveType + "</span>"));
+                            }
+                        else
+                            toDisplay.Append("None");
+                        break;
                     case CompletionType.Function:
                         var funcItem = (ParsedFunction) data.ParsedItem;
-                        toDisplay.Append(FormatRow("Return type", FormatSubString(funcItem.ParsedReturnType)));
-                        if (funcItem.PrototypeLine > 0)
-                            toDisplay.Append("<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>");
+                        toDisplay.Append(FormatSubtitle("RETURN TYPE"));
+                        toDisplay.Append(FormatRowParam("output", "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
 
                         toDisplay.Append(FormatSubtitle("PARAMETERS"));
-                        if (!string.IsNullOrEmpty(funcItem.Parameters)) {
-                            foreach (var param in funcItem.Parameters.Split(',')) {
-                                toDisplay.Append(FormatRowWithImg(ParseFlag.Parameter.ToString(), param.Trim()));
+                        var param2List = ParserHandler.FindProcedureParameters(data);
+                        if (param2List.Count > 0)
+                            foreach (var parameter in param2List) {
+                                var defItem = (ParsedDefine) parameter.ParsedItem;
+                                toDisplay.Append(FormatRowParam(defItem.LcFlagString, parameter.DisplayText + " as " + FormatSubString(defItem.PrimitiveType.ToString())));
                             }
-                        } else
-                            toDisplay.Append("No parameters!<br>");
+                        else
+                            toDisplay.Append("None");
+
+                        toDisplay.Append(FormatSubtitle("PROTOTYPE"));
+                        if (funcItem.PrototypeLine > 0)
+                            toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>"));
+                        else
+                            toDisplay.Append("Has none");
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
@@ -363,7 +382,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             }
                         } else {
                             toDisplay.Append(FormatSubtitle("404 NOT FOUND"));
-                            toDisplay.Append("<i>This keyword doesn't have any help associated, please refer to the 4GL help</i>");
+                            if (data.KeywordType == KeywordType.Option)
+                                toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Since this keyword is an option, try to hover the first keyword of the statement or refer to the 4GL help</i>");
+                            else
+                                toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");
                         }
                         break;
                     case CompletionType.Label:
@@ -372,7 +394,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         var preprocItem = (ParsedPreProc) data.ParsedItem;
                         if (preprocItem.UndefinedLine > 0)
                             toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
-                        toDisplay.Append(FormatRow("Value", preprocItem.Value));
+                            toDisplay.Append(FormatSubtitle("VALUE"));
+                            toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
+                            toDisplay.Append(preprocItem.Value);
+                            toDisplay.Append(@"</div>");
                         break;
                     case CompletionType.Snippet:
                         // TODO
@@ -391,7 +416,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         if (!string.IsNullOrEmpty(varItem.LcFlagString))
                             toDisplay.Append(FormatRow("Define flags", varItem.LcFlagString));
                         if (!string.IsNullOrEmpty(varItem.Left)) {
-                            toDisplay.Append(FormatSubtitle("Rest of the declaration"));
+                            toDisplay.Append(FormatSubtitle("END OF DECLARATION"));
                             toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
                             toDisplay.Append(varItem.Left);
                             toDisplay.Append(@"</div>");
@@ -452,12 +477,21 @@ namespace _3PA.MainFeatures.InfoToolTip {
             return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='" + image + "' height='15px'>" + text + "</div>";
         }
 
+        private static string FormatRowParam(string paramType, string text) {
+            var image = "Output";
+            if (paramType.ContainsFast("input-output"))
+                image = "InputOutput";
+            else if (paramType.ContainsFast("input"))
+                image = "Input";
+            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='" + image + "' height='15px'>" + text + "</div>";
+        }
+
         private static string FormatSubtitle(string text) {
             return "<div class='ToolTipSubTitle'>" + text + "</div>";
         }
 
         private static string FormatSubString(string text) {
-            return "<span class='ToolTipSubString'>" + text.ToUpper() + "</span>";
+            return "<span class='ToolTipSubString'>" + text + "</span>";
         }
 
         #endregion

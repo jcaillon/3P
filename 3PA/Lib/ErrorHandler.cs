@@ -71,6 +71,8 @@ namespace _3PA.Lib {
                 Directory.CreateDirectory(PathLogFolder);
             var toAppend = new StringBuilder("============================");
             toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
+            toAppend.AppendLine(Environment.UserName + " (" + Environment.MachineName + ")");
+            
             toAppend.AppendLine(errorToStr);
             try {
                 File.AppendAllText(PathErrorfile, toAppend.ToString());

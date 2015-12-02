@@ -98,13 +98,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedRun pars) {
+
+            // try to find the file in the propath
+            var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem() {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Run,
                 IconType = CodeExplorerIconType.RunExternal,
                 IsNotBlock = true,
-                Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.Persistent : 0)),
+                Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.LoadPersistent : 0) | ((string.IsNullOrEmpty(fullFilePath) && pars.HasPersistent) ? CodeExplorerFlag.NotFound : 0)),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
@@ -112,26 +116,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
 
             // if the run is PERSISTENT, we need to load the functions/proc of the program
-            if (pars.HasPersistent) {
-
-                // try to find the file in the propath
-                var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
-
-                // Parse the include file
-                if (string.IsNullOrEmpty(fullFilePath)) return;
-
-                ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
-
-                // add info from the parser
-                ParsedItemsList.AddRange(parserVisitor.ParsedItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList());
-                //if (Config.Instance.CodeExplorerDisplayExternalItems)
-                    //ParsedExplorerItemsList.AddRange(parserVisitor.ParsedExplorerItemsList.ToList());
-
-                // fill the defined procedures dictionnary
-                foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.ContainsKey(definedProcedure.Key))) {
-                    DefinedProcedures.Add(definedProcedure.Key, definedProcedure.Value);
-                }
-            }
+            if (!string.IsNullOrEmpty(fullFilePath) && pars.HasPersistent)
+                LoadProcPersistent(fullFilePath, pars.OwnerName, true);
         }
 
         /// <summary>
@@ -551,7 +537,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="fileName"></param>
         /// <param name="ownerName"></param>
         /// <returns></returns>
-        private ParserVisitor ParseFile(string fileName, string ownerName) {
+        public static ParserVisitor ParseFile(string fileName, string ownerName) {
             ParserVisitor parserVisitor;
 
             // did we already parsed this file?
@@ -568,6 +554,36 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParserHandler.SavedParserVisitors.Add(fileName, parserVisitor);
             }
             return parserVisitor;
+        }
+
+        /// <summary>
+        /// Parses given file and load its function + procedures has persistent so they are
+        /// accessible from the autocompletion list
+        /// Set runPersistentIsInFile = false (default) to add items only to the completion list,
+        /// set to true to also display proc/func in the code explorer tree if asked
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="ownerName"></param>
+        /// <param name="runPersistentIsInFile"></param>
+        public void LoadProcPersistent(string fileName, string ownerName, bool runPersistentIsInFile = false) {
+            ParserVisitor parserVisitor = ParseFile(fileName, ownerName);
+
+            // add info to the completion list
+            var listToAdd = parserVisitor.ParsedItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList();
+            foreach (var completionData in listToAdd) {
+                completionData.Flag = completionData.Flag | ParseFlag.Persistent;
+            }
+            ParsedItemsList.AddRange(listToAdd);
+
+            // add info to the code explorer
+            if (runPersistentIsInFile && Config.Instance.CodeExplorerDisplayExternalItems) {
+                var listExpToAdd = parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Procedure || item.Branch == CodeExplorerBranch.Function).ToList();
+                foreach (var codeExplorerItem in listExpToAdd) {
+                    codeExplorerItem.Flag = codeExplorerItem.Flag | CodeExplorerFlag.Persistent;
+                }
+                ParsedExplorerItemsList.AddRange(listExpToAdd);
+
+            }
         }
 
         /// <summary>

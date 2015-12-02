@@ -25,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -190,6 +191,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
         #endregion
 
+        #region core mechanism
+
         /// <summary>
         /// Call this method to asynchronously parse the current document 
         /// (or set doNow = true to do it synchonously)
@@ -200,7 +203,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 Monitor.TryEnter(_thisLock, 500, ref lockTaken);
                 if (!lockTaken) return;
-                
+
                 // parse immediatly
                 if (doNow) {
                     ParseCurrentDocumentTick();
@@ -209,7 +212,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // parse in 1s, if nothing delays the timer
                 if (_parserTimer == null) {
-                    _parserTimer = new Timer { Interval = 800 };
+                    _parserTimer = new Timer {Interval = 800};
                     _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
                     _parserTimer.Start();
                 } else {
@@ -219,7 +222,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
             } finally {
                 if (lockTaken) Monitor.Exit(_thisLock);
-            } 
+            }
         }
 
         /// <summary>
@@ -255,7 +258,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// as well as the dynamic items found by the parser
         /// </summary>
         public static void FillItems() {
-            if (_savedAllItems == null) 
+            if (_savedAllItems == null)
                 _savedAllItems = new List<CompletionData>();
 
             // init with static items
@@ -285,10 +288,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _savedAllItems = new List<CompletionData>();
 
             // creates the static items list
-            if (_staticItems == null) 
+            if (_staticItems == null)
                 _staticItems = new List<CompletionData>();
             _staticItems.Clear();
-            _staticItems =Keywords.GetList().ToList();
+            _staticItems = Keywords.GetList().ToList();
             _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
                 DisplayText = x,
                 Type = CompletionType.Snippet,
@@ -335,7 +338,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void UpdateAutocompletion() {
             try {
-                if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut) 
+                if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                     return;
 
                 // get current word, current previous word (table or database name)
@@ -443,7 +446,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // only activate certain types
-            if (_needToSetActiveTypes || !_form.Visible) { 
+            if (_needToSetActiveTypes || !_form.Visible) {
                 // only activate certain types
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
@@ -534,6 +537,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_form != null)
                 _form.SortItems();
         }
+
+        #endregion
 
         #region _form handler
 

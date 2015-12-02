@@ -1078,6 +1078,7 @@ namespace _3PA.MainFeatures.Parser {
                                 paramPrimitiveType = lwToken;
                                 state = 20;
                                 break;
+                            case "return":
                             case "input":
                             case "output":
                             case "input-output":
@@ -1132,11 +1133,12 @@ namespace _3PA.MainFeatures.Parser {
                         if (token is TokenWord && token.Value.EqualsCi("extent")) isExtended = true;
                         else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
                             // create a variable for this function scope
-                            parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
-                                FilePath = _filePathBeingParsed,
-                                Scope = ParsedScope.Function,
-                                OwnerName = ownerName
-                            });
+                            if (!string.IsNullOrEmpty(paramName))
+                                parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
+                                    FilePath = _filePathBeingParsed,
+                                    Scope = ParsedScope.Function,
+                                    OwnerName = ownerName
+                                });
                             paramName = "";
                             paramAsLike = ParsedAsLike.None;
                             paramPrimitiveType = "";

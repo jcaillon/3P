@@ -84,6 +84,8 @@ namespace _3PA.MainFeatures.Parser {
         Dynamic = 16384,
         // the procedure is EXTERNAL
         ExternalProc = 32768,
+        // a proc or func was loaded in persistent
+        Persistent = 65536,
     }
 
     /// <summary>

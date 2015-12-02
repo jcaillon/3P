@@ -365,10 +365,11 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\code_explorer_logo.png" />
-    <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
-    <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
+    <Content Include="Images\DockableExplorer\Flag\LoadPersistent.png" />
+    <Content Include="Images\DockableExplorer\Flag\IsTooLong.png" />
+    <Content Include="Images\DockableExplorer\Flag\MissingDbName.png" />
     <Content Include="Images\DockableExplorer\Flag\Uncertain.png" />
     <Content Include="Images\DockableExplorer\Type\Block.png" />
     <Content Include="Images\DockableExplorer\Type\DefinitionBlock.png" />
@@ -402,6 +403,9 @@
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
+    <Content Include="Images\tooltips\Output.png" />
+    <Content Include="Images\tooltips\InputOutput.png" />
+    <Content Include="Images\tooltips\Input.png" />
     <Content Include="Interop\DllExport\Mono.Cecil.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
     <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />

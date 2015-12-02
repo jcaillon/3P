@@ -173,7 +173,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // if the extracted info is from an external file (.i)
         External = 16,
         // a run file has the keyword PERSISTENT
-        Persistent = 32,
+        LoadPersistent = 32,
+        // a proc or func was loaded in persistent
+        Persistent = 64,
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {
