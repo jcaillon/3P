@@ -488,7 +488,7 @@ namespace _3PA.MainFeatures.Parser {
                     case 0:
                         // matching proc name (or VALUE)
                         if (token is TokenWord || token is TokenQuotedString) {
-                            name = (token is TokenWord) ? token.Value : token.Value.Substring(1, token.Value.Length - 2);
+                            name += (token is TokenWord) ? token.Value : token.Value.Substring(1, token.Value.Length - 2);
                             if (!name.ToLower().Equals("value"))
                                 state++;
                             else
@@ -497,8 +497,15 @@ namespace _3PA.MainFeatures.Parser {
                             state++;
                         break;
                     case 1:
-                        // matching PERSISTENT
-                        if (!(token is TokenWord)) break;
+                        // matching PERSISTENT (or a path instead of a file)
+                        if (token is TokenSymbol && (token.Value.Equals("/") || token.Value.Equals("\\"))) {
+                            // if it's a path, append it to the name of the run
+                            name += token.Value;
+                            state = 0;
+                            break;
+                        } 
+                        if (!(token is TokenWord)) 
+                            break;
                         if (token.Value.EqualsCi("persistent"))
                             hasPersistent = true;
                         state++;
@@ -1181,6 +1188,9 @@ namespace _3PA.MainFeatures.Parser {
                 curPos++;
             }
             toParse = toParse.Substring(startPos, curPos - startPos);
+
+            if (!toParse.ContainsFast("."))
+                return;
 
             // we matched the include file name
             AddParsedItem(new ParsedIncludeFile(toParse, token.Line, token.Column));

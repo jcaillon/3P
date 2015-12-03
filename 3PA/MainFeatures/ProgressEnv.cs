@@ -160,10 +160,14 @@ namespace _3PA.MainFeatures {
         /// <returns></returns>
         public static string FindFirstFileInEnv(string fileToFind) {
             var propathRes = FindFileInPropath(fileToFind);
-            if (string.IsNullOrEmpty(propathRes) && Directory.Exists(Current.BaseLocalPath)) {
-                var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
-                if (fileList.Any())
-                    return fileList.Select(fileInfo => fileInfo.FullName).First();
+            try {
+                if (string.IsNullOrEmpty(propathRes) && Directory.Exists(Current.BaseLocalPath)) {
+                    var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
+                    if (fileList.Any())
+                        return fileList.Select(fileInfo => fileInfo.FullName).First();
+                    return "";
+                }
+            } catch (Exception) {
                 return "";
             }
             return propathRes;

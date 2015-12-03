@@ -100,7 +100,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void Visit(ParsedRun pars) {
 
             // try to find the file in the propath
-            var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+            string fullFilePath = "";
+            if (pars.HasPersistent)
+                fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
 
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem() {
@@ -108,7 +110,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Branch = CodeExplorerBranch.Run,
                 IconType = CodeExplorerIconType.RunExternal,
                 IsNotBlock = true,
-                Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.LoadPersistent : 0) | ((string.IsNullOrEmpty(fullFilePath) && pars.HasPersistent) ? CodeExplorerFlag.NotFound : 0)),
+                Flag = AddExternalFlag((pars.IsEvaluateValue ? CodeExplorerFlag.Uncertain : 0) | (pars.HasPersistent ? CodeExplorerFlag.LoadPersistent : 0) | ((pars.HasPersistent && string.IsNullOrEmpty(fullFilePath)) ? CodeExplorerFlag.NotFound : 0)),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
@@ -116,7 +118,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
 
             // if the run is PERSISTENT, we need to load the functions/proc of the program
-            if (!string.IsNullOrEmpty(fullFilePath) && pars.HasPersistent)
+            if (pars.HasPersistent && !string.IsNullOrEmpty(fullFilePath))
                 LoadProcPersistent(fullFilePath, pars.OwnerName, true);
         }
 

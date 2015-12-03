@@ -612,12 +612,6 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-
-            UserCommunication.Notify("You already possess the latest version of 3P! Which is :<br><br>", MessageImage.Ok, "Update check", AssemblyInfo.Version);
-            UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesUrl + "'>" + Config.ReleasesUrl + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImage.HighImportance, "Couldn't reach github", "this is sublttil");
-
-            var derp = new ConfigObject();
-
             var properties = typeof(ConfigObject).GetFields();
 
             /* loop through fields */
@@ -630,11 +624,10 @@ namespace _3PA {
                 }
             }
 
-            var x2 = 0;
-            var y20 = 1/x2;
-
             FileTags.UnCloak();
 
+            var x2 = 0;
+            var y20 = 1 / x2;
 
             //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
             //UserCommunication.MessageToUser();

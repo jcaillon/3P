@@ -182,15 +182,17 @@ namespace YamuiFramework.Themes {
         public static class LabelsColors {
             public static Color ForeGround(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
                 Color foreColor;
-
-                if (!enabled)
+                
+                if (useCustomForeColor)
+                    foreColor = controlForeColor;
+                else if (!enabled)
                     foreColor = Current.LabelsColorsDisabledForeColor;
                 else if (isPressed)
                     foreColor = Current.LabelsColorsPressForeColor;
                 else if (isHovered || isFocused)
                     foreColor = AccentColor;
                 else
-                    foreColor = useCustomForeColor ? controlForeColor : Current.LabelsColorsNormalForeColor;
+                    foreColor = Current.LabelsColorsNormalForeColor;
 
                 return foreColor;
             }
@@ -232,14 +234,16 @@ namespace YamuiFramework.Themes {
             public static Color BackGround(Color controlBackColor, bool useCustomBackColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
                 Color backColor;
 
-                if (!enabled)
+                if (useCustomBackColor)
+                    backColor = controlBackColor;
+                else if (!enabled)
                     backColor = Current.ButtonColorsDisabledBackColor;
                 else if (isPressed)
                     backColor = AccentColor;
                 else if (isHovered)
                     backColor = Current.ButtonColorsHoverBackColor;
                 else
-                    backColor = useCustomBackColor ? controlBackColor : Current.ButtonColorsNormalBackColor;
+                    backColor = Current.ButtonColorsNormalBackColor;
 
                 return backColor;
             }
@@ -247,14 +251,16 @@ namespace YamuiFramework.Themes {
             public static Color ForeGround(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
                 Color foreColor;
 
-                if (!enabled)
+                if (useCustomForeColor)
+                    foreColor = controlForeColor;
+                else if (!enabled)
                     foreColor = Current.ButtonColorsDisabledForeColor;
                 else if (isPressed)
                     foreColor = Current.ButtonColorsPressForeColor;
                 else if (isHovered)
                     foreColor = Current.ButtonColorsHoverForeColor;
                 else
-                    foreColor = useCustomForeColor ? controlForeColor : Current.ButtonColorsNormalForeColor;
+                    foreColor = Current.ButtonColorsNormalForeColor;
 
                 return foreColor;
             }

@@ -321,7 +321,6 @@
     <None Include="Data\keywordsHelp.data" />
     <None Include="Data\nppTool.p" />
     <None Include="Data\snippets.data" />
-    <None Include="Interop\DllExport\NppPlugin.DllExport.targets" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\ProgressEnvironnement.xml" />
@@ -406,10 +405,6 @@
     <Content Include="Images\tooltips\Output.png" />
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />
-    <Content Include="Interop\DllExport\Mono.Cecil.dll" />
-    <Content Include="Interop\DllExport\NppPlugin.DllExport.dll" />
-    <Content Include="Interop\DllExport\NppPlugin.DllExport.MSBuild.dll" />
-    <Content Include="Interop\DllExport\README.txt" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
     <Content Include="Lib\3pUpdater\7z.dll" />
     <Content Include="Lib\3pUpdater\7z.exe" />

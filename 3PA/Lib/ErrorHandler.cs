@@ -69,7 +69,7 @@ namespace _3PA.Lib {
             // log the error into a file
             if (!Directory.Exists(PathLogFolder))
                 Directory.CreateDirectory(PathLogFolder);
-            var toAppend = new StringBuilder("============================");
+            var toAppend = new StringBuilder("============================\n");
             toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
             toAppend.AppendLine(Environment.UserName + " (" + Environment.MachineName + ")");
             

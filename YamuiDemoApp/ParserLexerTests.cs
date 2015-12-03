@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\sacmagicinterface_s.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\sacmagicinterface_s.p"), @"C:\Users\Julien\Desktop\sacmagicinterface_s.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
