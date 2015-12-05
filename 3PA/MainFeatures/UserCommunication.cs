@@ -19,10 +19,14 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
@@ -78,6 +82,43 @@ namespace _3PA.MainFeatures {
                 Appli.Appli.Form.BeginInvoke((Action)delegate {
                     YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);
                 });
+        }
+
+        /// <summary>
+        /// Sends an issue for debug purposes
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="url"></param>
+        public static void SendIssue(string message, string url) {
+            try {
+                HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
+                if (req == null)
+                    return;
+                req.Method = "POST";
+                req.ContentType = "application/json";
+                req.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)";
+                req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
+                StreamWriter writer = new StreamWriter(req.GetRequestStream());
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                writer.Write("{\"body\": " + serializer.Serialize(
+                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###" +
+                    message
+                    ) + "}");
+                writer.Close();
+                string result = null;
+                using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
+                    if (resp != null && resp.GetResponseStream() != null) {
+                        StreamReader reader = new StreamReader(resp.GetResponseStream());
+                        result = reader.ReadToEnd();
+                        reader.Close();
+                    }
+                }
+                if (result != null) {
+                    File.Delete(ErrorHandler.PathErrorToSend);
+                }
+            } catch (Exception ex) {
+                ErrorHandler.Log(ex.ToString());
+            }
         }
     }
 }

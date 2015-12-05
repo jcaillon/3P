@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using _3PA.Lib;
 
 namespace _3PA {
@@ -78,6 +80,17 @@ namespace _3PA {
         public static string ReadAblWord(string input, bool stopAtPoint, bool readRightToLeft = true) {
             int nb;
             return ReadAblWord(input, stopAtPoint, out nb, readRightToLeft);
+        }
+
+        /// <summary>
+        /// Returns true if the document starts with & ANALYZE-SUSPEND _VERSION-NUMBER
+        /// which indicates that it will be opened as a structured proc in the appbuilder
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsCurrentFileFromAppBuilder() {
+            if (!Npp.GetLineText(0).Trim().StartsWith("&ANALYZE-SUSPEND _VERSION-NUMBER", StringComparison.CurrentCultureIgnoreCase))
+                return false;
+            return true;
         }
     }
 }

@@ -58,6 +58,10 @@ namespace _3PA.Interop {
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg Msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
         [DllImport("user32")]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg Msg, int wParam, int lParam);
+        [DllImport("user32")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, byte[] infos);
+        [DllImport("user32")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg Msg, string text) {
             byte[] bites = Encoding.UTF8.GetBytes(text);
@@ -141,9 +145,13 @@ namespace _3PA.Interop {
             Marshal.FreeHGlobal(ip);
         }
 
+        public static void SendData(IntPtr hWnd, SciMsg msg, int line, byte[] infos) {
+            IntPtr ip = ToUnmanagedArray(infos);
+            SendMessage(hWnd, msg, line, ip);
+            Marshal.FreeHGlobal(ip);
+        }
+
         #endregion
-
-
     }
 
     public class ClikeStringArray : IDisposable {

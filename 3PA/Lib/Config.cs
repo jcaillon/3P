@@ -44,8 +44,9 @@ namespace _3PA.Lib {
 
         // is the user from SOPRA?
         public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
+
+
         public bool UserGetsPreReleases = true;
-        public bool UserIsAGoodGuy = true;
 
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
@@ -58,11 +59,19 @@ namespace _3PA.Lib {
 
         public bool AutoCompleteShowInCommentsAndStrings = false;
         
-        [Range(5, 100)]
+        [Range(0, 10)]
         public int AutoCompleteIndentNbSpaces = 4;
+
+        [Range(3, 20)]
         public int AutoCompleteShowListOfXSuggestions = 12;
-        public double AutoCompleteUnfocusedOpacity = 0.92d;
-        public double AutoCompleteFocusedOpacity = 0.92d;
+
+        [Range(0, 1)]
+        public double AutoCompleteUnfocusedOpacity = 0.92;
+
+        [Range(0, 1)]
+        public double AutoCompleteFocusedOpacity = 0.92;
+
+        [Range(0, 3)]
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
         public bool AutoCompleteAlternateBackColor = false;
 
@@ -72,27 +81,32 @@ namespace _3PA.Lib {
         public bool AutoCompleteHideScrollBar = true;
         public bool AutocompleteReplaceAbbreviations = true;
 
-
-        [Display(Name = "Display priority list", Description = "Defines the order in which the CompletionType are displayed")] public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
+        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
 
         public bool CodeExplorerUseAlternateColors = false;
         public bool CodeExplorerVisible = true;
-        [Display(Name = "Display priority list", Description = "Defines the order in which the ExplorerType are displayed")] public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
+        
+        public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
         public bool CodeExplorerDisplayExternalItems = false;
 
+        [Range(0, 1)]
         public double AppliOpacityUnfocused = 0.5;
         public bool AppliAllowTabAnimation = true;
 
-
+        [Range(0, 5000)]
         public int ToolTipmsBeforeShowing = 1000;
-        public double ToolTipUnfocusedOpacity = 0.9;
-        public double ToolTipFocusedOpacity = 0.9;
+
+        [Range(0, 1)]
+        public double ToolTipOpacity = 0.9;
+
         public bool ToolTipDeactivate = false;
 
-
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
+
+        [Range(0, 1)]
         public int GlobalCurrentEnvironnement = 0;
+
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
@@ -100,10 +114,13 @@ namespace _3PA.Lib {
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";
 
+        // TECHNICAL
+        public bool LogError = true;
+
         // THEMES
         public int ThemeId = 1;
         public Color AccentColor = Color.DarkOrange;
-        public int SyntaxHighlightThemeId = 0;
+        public int SyntaxHighlightThemeId = 0;       
 
         // SHORTCUTS
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
@@ -134,6 +151,13 @@ namespace _3PA.Lib {
         /// </summary>
         public static string ReleasesUrl {
             get { return @"https://api.github.com/repos/jcaillon/3P/releases"; }
+        }
+
+        /// <summary>
+        /// Url to post logs
+        /// </summary>
+        public static string SendLogUrl {
+            get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; }
         }
 
         /// <summary>

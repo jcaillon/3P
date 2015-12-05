@@ -24,10 +24,11 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
+using _3PA.MainFeatures;
 
 namespace _3PA {
     /// <summary>
-    ///     This class contains very generic wrappers for basic Notepad++ functionality.
+    /// This class contains methods to control scintilla
     /// </summary>
     public partial class Npp {
 
@@ -39,7 +40,6 @@ namespace _3PA {
         private static IntPtr _curScintilla;
 
         #endregion
-
 
         #region misc for npp/scintilla
 
@@ -115,7 +115,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region indentation
 
@@ -232,7 +231,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region mouse
 
         /// <summary>
@@ -258,7 +256,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region text
         /// <summary>
         /// Returns the text between the positions start and end
@@ -272,8 +269,6 @@ namespace _3PA {
             }
         }
 
-        [DllImport("user32")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
 
         /// <summary>
         /// Replaces a range of text with new text.
@@ -492,7 +487,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region selection and position
 
@@ -779,8 +773,6 @@ namespace _3PA {
 
         #endregion
 
-
-
         #region others
 
         /// <summary>
@@ -828,8 +820,6 @@ namespace _3PA {
         }
 
         #endregion
-
-
 
         #region indicators
 
@@ -883,8 +873,6 @@ namespace _3PA {
 
         #endregion
 
-
-
         #region bookmarks
 
         /// <summary>
@@ -919,8 +907,6 @@ namespace _3PA {
 
         #endregion
 
-
-
         #region marks
 
         /// <summary>
@@ -939,8 +925,6 @@ namespace _3PA {
         }
 
         #endregion
-
-
 
         #region Lexer stuff
 
@@ -1041,6 +1025,113 @@ namespace _3PA {
         }
         #endregion
 
+        #region annotations
+
+        /// <summary>
+        /// TODO: THIS IS UNTESTED SO FAR!!!
+        /// set the style of a text from startPos to startPos + styleArray.Length,
+        /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="styleArray"></param>
+        public static void SetAnnotationStyles(int line, byte[] styleArray) {
+            Win32.SendData(HandleScintilla, SciMsg.SCI_ANNOTATIONSETSTYLES, line, styleArray);
+        }
+
+        /// <summary>
+        /// Set a style for an annotation
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="style"></param>
+        public static void SetAnnotationStyle(int line, int style) {
+            Call(SciMsg.SCI_ANNOTATIONSETSTYLE, line, style);
+        }
+
+        /// <summary>
+        /// Sets the text of an annotation for a given line, set text to null to erase a line
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="message"></param>
+        public static void SetAnnotationText(int line, string message) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, line, message);
+        }
+
+        /// <summary>
+        /// Clear all annotations in one go
+        /// </summary>
+        public static void ClearAllAnnotations() {
+            Call(SciMsg.SCI_ANNOTATIONCLEARALL);
+        }
+
+        /// <summary>
+        /// Sets a mode of display for the annotations
+        /// ANNOTATION_HIDDEN	0	Annotations are not displayed.
+        /// ANNOTATION_STANDARD	1	Annotations are drawn left justified with no adornment.
+        /// ANNOTATION_BOXED	2	Annotations are indented to match the text and are surrounded by a box.
+        /// ANNOTATION_INDENTED	3	Annotations are indented to match the text.
+        /// </summary>
+        /// <param name="mode"></param>
+        public static void SetAnnotationVisible(int mode = 3) {
+            Call(SciMsg.SCI_ANNOTATIONSETVISIBLE, mode);
+        }
+
+        /// <summary>
+        /// Returns the mode of display for annotation (see SetAnnotationVisible)
+        /// </summary>
+        /// <returns></returns>
+        public static int GetAnnotationVisible() {
+            return Call(SciMsg.SCI_ANNOTATIONGETVISIBLE);
+        }
+
+        /// <summary>
+        /// Sets a style for an annotation (reduced font)
+        /// </summary>
+        /// <param name="style"></param>
+        /// <param name="bgColor"></param>
+        /// <param name="fgColor"></param>
+        public static void SetAnnotationStyleDefinition(int style, Color bgColor, Color fgColor) {
+            int curFontSize = Call(SciMsg.SCI_STYLEGETSIZE, 0);
+            Call(SciMsg.SCI_STYLESETSIZE, style, (int) (curFontSize*0.9));
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_STYLESETFONT, style, "Segoe ui");
+            SetStyle(style, bgColor, fgColor);
+        }
+        #endregion
+
+        #region Annotations
+
+        public static void DisplayExtraMargin() {
+            /* These two routines set and get the type of a margin. The margin argument should be 0, 1, 2, 3 or 4. You can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set a margin as either a line number or a symbol margin. A margin with application defined text may use SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text. By convention, margin 0 is used for line numbers and the next two are used for symbols. You can also use the constants SC_MARGIN_BACK (2) and SC_MARGIN_FORE (3) for symbol margins that set their background colour to match the STYLE_DEFAULT background and foreground colours. */
+            int marginNumber = 4; /* 0 to 4 */
+            int markerNumber = 1;
+
+            /* set the type of a margin. The second argument should be 0, 1, 2, 3 or 4. You can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set a margin as either a line number or a symbol margin. A margin with application defined text may use SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text. By convention, margin 0 is used for line numbers and the next two are used for symbols. You can also use the constants SC_MARGIN_BACK (2) and SC_MARGIN_FORE (3) for symbol margins that set their background colour to match the STYLE_DEFAULT background and foreground colours. */
+            Call(SciMsg.SCI_SETMARGINTYPEN, marginNumber, 0);
+
+            Call(SciMsg.SCI_SETMARGINSENSITIVEN, marginNumber, 1);
+
+            Call(SciMsg.SCI_SETMARGINWIDTHN, marginNumber, 10);
+            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, markerNumber);
+            Call(SciMsg.SCI_MARKERDEFINE, markerNumber, (int) SciMsg.SC_MARK_CHARACTER + 65);
+            Call(SciMsg.SCI_MARKERSETFORE, markerNumber, (int) (new COLORREF(Color.Crimson)).ColorDWORD);
+            Call(SciMsg.SCI_MARKERSETBACK, markerNumber, (int) (new COLORREF(Color.Wheat)).ColorDWORD);
+
+            /* You add logical markers to a line with SCI_MARKERADD. If a line has an associated marker that does not appear in the mask of any margin with a non-zero width, the marker changes the background colour of the line */
+            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, 2 ^ markerNumber);
+
+            Call(SciMsg.SCI_MARKERADD, 0, markerNumber);
+            //Call(SciMsg.SCI_MARKERDELETE, 0, markerNumber);
+            //Call(SciMsg.SCI_MARKERDELETEALL, markerNumber);
+
+            /*
+            SCI_MARKERGET(int line)
+            This returns a 32-bit integer that indicates which markers were present on the line. Bit 0 is set if marker 0 is present, bit 1 for marker 1 and so on.
+
+            SCI_MARKERNEXT(int lineStart, int markerMask)
+            SCI_MARKERPREVIOUS(int lineStart, int markerMask)
+             * */
+        }
+
+        #endregion
 
 
         #region helper

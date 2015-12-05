@@ -31,6 +31,14 @@
     <FgDelimiters6 Value="#000000" />
     <FgDelimiters7 Value="#000000" />
     <FgDelimiters8 Value="#408080" />
+    <FgAnnotationDefault Value="#3F3F3F" />
+    <BgAnnotationDefault Value="#F2F2F2" />
+    <FgAnnotation1 Value="#9C6500" />
+    <BgAnnotation1 Value="#FFEB9C" />
+    <FgAnnotation2 Value="#833C0C" />
+    <BgAnnotation2 Value="#FFCC99" />
+    <FgAnnotation3 Value="#9C0006" />
+    <BgAnnotation3 Value="#FFC7CE" />
   </HighlightTheme>
   <HighlightTheme>
     <Name Value="Tomorrow" />
@@ -63,5 +71,13 @@
     <FgDelimiters6 Value="#000000" />
     <FgDelimiters7 Value="#000000" />
     <FgDelimiters8 Value="#8E908C" />
+    <FgAnnotationDefault Value="#3F3F3F" />
+    <BgAnnotationDefault Value="#F2F2F2" />
+    <FgAnnotation1 Value="#9C6500" />
+    <BgAnnotation1 Value="#FFEB9C" />
+    <FgAnnotation2 Value="#833C0C" />
+    <BgAnnotation2 Value="#FFCC99" />
+    <FgAnnotation3 Value="#9C0006" />
+    <BgAnnotation3 Value="#FFC7CE" />
   </HighlightTheme>
 </Root>

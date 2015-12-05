@@ -491,8 +491,10 @@ namespace _3PA.MainFeatures.Parser {
                             name += (token is TokenWord) ? token.Value : token.Value.Substring(1, token.Value.Length - 2);
                             if (!name.ToLower().Equals("value"))
                                 state++;
-                            else
+                            else {
                                 isValue = true;
+                                name = "";
+                            }
                         } else if (token is TokenSymbol && token.Value.Equals(")"))
                             state++;
                         break;

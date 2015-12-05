@@ -21,9 +21,11 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using _3PA.MainFeatures;
@@ -32,9 +34,12 @@ namespace _3PA.Lib {
     class ErrorHandler {
 
         private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
-        private static string PathLogfile { get { return Path.Combine(PathLogFolder, "message.log"); } }
         private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }
+        public static string PathErrorToSend { get { return Path.Combine(PathLogFolder, "error_.log"); } }
 
+        /// <summary>
+        /// Allows to keep track of the messages already displayed to the user
+        /// </summary>
         private static Dictionary<string, bool> _catchedErrors = new Dictionary<string, bool>();
 
         /// <summary>
@@ -45,6 +50,7 @@ namespace _3PA.Lib {
         /// <param name="message"></param>
         /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
+            Log(e.ToString());
             MessageBox.Show(@"Attention user! An error has occured while loading in the following file :" + "\n\n"
                 + fileName +
                 "\n\n" + @"The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -67,59 +73,75 @@ namespace _3PA.Lib {
             _catchedErrors.Add(errorToStr, true);
 
             // log the error into a file
-            if (!Directory.Exists(PathLogFolder))
-                Directory.CreateDirectory(PathLogFolder);
-            var toAppend = new StringBuilder("============================\n");
-            toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
-            toAppend.AppendLine(Environment.UserName + " (" + Environment.MachineName + ")");
-            
-            toAppend.AppendLine(errorToStr);
-            try {
-                File.AppendAllText(PathErrorfile, toAppend.ToString());
-            } catch (Exception) {
-                // live with it...
+            if (Log(message + "\r\n" + e)) {
+                Task.Factory.StartNew(() => {
+                    try {
+                        if (Config.Instance.LogError)
+                            UserCommunication.SendIssue(File.ReadAllText(PathErrorToSend), Config.SendLogUrl);
+                    } catch (Exception exception) {
+                        Log(exception.ToString());
+                    }
+                });
             }
 
             // show it to the user, conditionally
-            //if (!Config.Instance.UserIsAGoodGuy)
-              //  return;
-
-            UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error / message logs below :" +
-                (File.Exists(PathLogfile) ? "<br><a href='" + PathLogfile + "'>Link to the message log</a>" : "") +
-                (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
-                "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>", 
-                MessageImage.Poison, "An error has occured", 
-                args => {
-                    Npp.Goto(args.Link);
-                    args.Handled = true;
-                }, 
-                message, 0, 500);
-
-            // send to github
-            Task.Factory.StartNew(() => {
-                
-            });
+            if (Config.Instance.UserGetsPreReleases)
+                UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
+                    (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
+                    "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + 
+                    "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                    MessageImage.Poison, "An error has occured",
+                    args => {
+                        Npp.Goto(args.Link);
+                        args.Handled = true;
+                    },
+                    message, 0, 500);
+            else
+                UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>",
+                    MessageImage.Poison, "An error has occured", 
+                    args => {
+                        Npp.Goto(args.Link);
+                        args.Handled = true;
+                    }, 
+                    message, 0, 500);
         }
 
         /// <summary>
         /// Log a piece of information
         /// </summary>
         /// <param name="message"></param>
-        public static void Log(string message) {
-            StackFrame frame = new StackFrame(1);
-            var method = frame.GetMethod();
-            var callingClass = method.DeclaringType;
-            var callingMethod = method.Name;
+        public static bool Log(string message) {
+            bool success = true;
+            var toAppend = new StringBuilder("***************************\r\n");
 
-            if (!Directory.Exists(PathLogFolder))
-                Directory.CreateDirectory(PathLogFolder);
+            try {
+                StackFrame frame = new StackFrame(1);
+                var method = frame.GetMethod();
+                var callingClass = method.DeclaringType;
+                var callingMethod = method.Name;
 
-            var toAppend = new StringBuilder("============================");
-            toAppend.AppendLine(DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz"));
-            toAppend.AppendLine("From " + callingClass + "." + callingMethod + "()");
-            toAppend.AppendLine(message);
+                if (!Directory.Exists(PathLogFolder))
+                    Directory.CreateDirectory(PathLogFolder);
 
-            File.AppendAllText(PathLogfile, toAppend.ToString());
+                toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
+                if (method.DeclaringType != null && !method.DeclaringType.Name.Equals("ErrorHandler"))
+                    toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
+                toAppend.AppendLine("```");
+                toAppend.AppendLine(message);
+                toAppend.AppendLine("```\r\n");
+
+                File.AppendAllText(PathErrorfile, toAppend.ToString());
+            } catch (Exception) {
+                success = false;
+            }
+
+            try {
+                File.AppendAllText(PathErrorToSend, toAppend.ToString());
+            } catch (Exception) {
+                // hm it's ok..
+            }
+
+            return success;
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {

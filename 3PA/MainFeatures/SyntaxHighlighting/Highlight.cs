@@ -70,6 +70,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #endregion
 
+        #region init
+
         /// <summary>
         /// The role of this method is to make sure that the User Defined Language for "OpenEdgeABL" exists in the
         /// userDefineLang.xml file, if it does it updates it, if it doesn't exists it creates it and asks the user
@@ -100,11 +102,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             File.WriteAllText(udlFilePath, fileContent, Encoding.Default);
         }
 
+        #endregion
+
         #region public methods
 
         public static void SetCustomStyles() {
             var curTheme = CurrentTheme;
-            //Npp.SetDefaultStyle(Color.White, Color.Crimson);
+
+            //Npp.SetDefaultStyle(curTheme.BgDefault, curTheme.FgDefault);
             Npp.SetStyle((int)UdlStyles.Default, curTheme.BgDefault, curTheme.FgDefault);
             Npp.SetStyle((int)UdlStyles.Comment, curTheme.BgDefault, curTheme.FgComment);
             Npp.SetStyle((int)UdlStyles.CommentLine, curTheme.BgDefault, curTheme.FgLineComment);
@@ -127,6 +132,12 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             Npp.SetStyle((int)UdlStyles.Delimiter7, curTheme.BgDefault, curTheme.FgDelimiters7);
             Npp.SetStyle((int)UdlStyles.Delimiter8, curTheme.BgDefault, curTheme.FgDelimiters8);
             Npp.SetStyle((int)UdlStyles.Operators, curTheme.BgDefault, curTheme.FgOperators);
+
+            // for annotations :
+            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Default, curTheme.BgAnnotationDefault, curTheme.FgAnnotationDefault);
+            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level1, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
+            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level2, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
+            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level3, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
         }
 
         /// <summary>
@@ -269,6 +280,16 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         Idk = 24, /* ?? */
     }
 
+    /// <summary>
+    /// Enumeration of the style id used by the annotations
+    /// </summary>
+    public enum AnnotationStyles {
+        Default = 250,
+        Level1 = 251,
+        Level2 = 252,
+        Level3 = 253
+    }
+
     #endregion
 
     #region Theme class
@@ -308,6 +329,15 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public Color FgDelimiters6 = ColorTranslator.FromHtml("#000000");
         public Color FgDelimiters7 = ColorTranslator.FromHtml("#000000");
         public Color FgDelimiters8 = ColorTranslator.FromHtml("#8E908C");
+
+        public Color FgAnnotationDefault = ColorTranslator.FromHtml("#3F3F3F");
+        public Color BgAnnotationDefault = ColorTranslator.FromHtml("#F2F2F2");
+        public Color FgAnnotation1 = ColorTranslator.FromHtml("#9C6500");
+        public Color BgAnnotation1 = ColorTranslator.FromHtml("#FFEB9C");
+        public Color FgAnnotation2 = ColorTranslator.FromHtml("#833C0C");
+        public Color BgAnnotation2 = ColorTranslator.FromHtml("#FFCC99");
+        public Color FgAnnotation3 = ColorTranslator.FromHtml("#9C0006");
+        public Color BgAnnotation3 = ColorTranslator.FromHtml("#FFC7CE");
     }
 
     #endregion

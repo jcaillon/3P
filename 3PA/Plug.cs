@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -52,6 +53,7 @@ namespace _3PA {
 
         private static bool _indentWithTabs;
         private static int _indentWidth;
+        private static int _annotationMode;
 
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui (example is indentation)
@@ -578,15 +580,18 @@ namespace _3PA {
             if (_indentWidth == 0) {
                 _indentWidth = Npp.GetIndent();
                 _indentWithTabs = Npp.GetUseTabs();
+                _annotationMode = Npp.GetAnnotationVisible();
             }
             if (!IsCurrentFileProgress || forceToDefault) {
                 Npp.ResetDefaultAutoCompletion();
                 Npp.SetIndent(_indentWidth);
                 Npp.SetUseTabs(_indentWithTabs);
+                Npp.SetAnnotationVisible(_annotationMode);
             } else {
                 Npp.HideDefaultAutoCompletion();
                 Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
                 Npp.SetUseTabs(false);
+                Npp.SetAnnotationVisible();
             }
         }
 
@@ -612,6 +617,17 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
+            Npp.SetAnnotationVisible();
+
+            //Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level2, Color.AliceBlue, Color.BlueViolet);
+            Npp.SetAnnotationText(0, "test annot\nderpderp");
+
+            Npp.SetAnnotationText(2, "test annot\nderpderp");
+
+            Npp.SetAnnotationStyle(0, (int)AnnotationStyles.Level2);
+
+            Npp.DisplayExtraMargin();
+
             var properties = typeof(ConfigObject).GetFields();
 
             /* loop through fields */
@@ -626,8 +642,6 @@ namespace _3PA {
 
             FileTags.UnCloak();
 
-            var x2 = 0;
-            var y20 = 1 / x2;
 
             //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
             //UserCommunication.MessageToUser();

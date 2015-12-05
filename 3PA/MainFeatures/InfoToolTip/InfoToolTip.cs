@@ -506,8 +506,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // instanciate the form
             if (_form == null) {
                 _form = new InfoToolTipForm {
-                    UnfocusedOpacity = Config.Instance.ToolTipUnfocusedOpacity,
-                    FocusedOpacity = Config.Instance.ToolTipFocusedOpacity
+                    UnfocusedOpacity = Config.Instance.ToolTipOpacity,
+                    FocusedOpacity = Config.Instance.ToolTipOpacity
                 };
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetLinkClickedEvent(ClickHandler);
