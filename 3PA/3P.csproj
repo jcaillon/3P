@@ -88,7 +88,8 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Lib\TextEncodingDetect.cs" />
-    <Compile Include="Lib\UpdateHandler.cs" />
+    <Compile Include="MainFeatures\FilesInfo\FilesInfo.cs" />
+    <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -128,17 +129,17 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FileInfo\FileTags.cs" />
-    <Compile Include="MainFeatures\FileInfo\FileTagsForm.cs">
+    <Compile Include="MainFeatures\FilesInfo\FileTags.cs" />
+    <Compile Include="MainFeatures\FilesInfo\FileTagsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\FileInfo\FileTagsForm.Designer.cs">
+    <Compile Include="MainFeatures\FilesInfo\FileTagsForm.Designer.cs">
       <DependentUpon>FileTagsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FileInfo\FileTagsPage.cs">
+    <Compile Include="MainFeatures\FilesInfo\FileTagsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\FileInfo\FileTagsPage.Designer.cs">
+    <Compile Include="MainFeatures\FilesInfo\FileTagsPage.Designer.cs">
       <DependentUpon>FileTagsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.cs">
@@ -189,11 +190,11 @@
     <Compile Include="Lib\AssemblyInfo.cs" />
     <Compile Include="Lib\BinWriter.cs" />
     <Compile Include="Lib\DropToWindows.cs" />
-    <Compile Include="Lib\ErrorHandler.cs" />
+    <Compile Include="MainFeatures\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
     <Compile Include="MainFeatures\Appli\Appli.cs" />
     <Compile Include="MainFeatures\Parser\ParsedItem.cs" />
-    <Compile Include="Lib\Config.cs" />
+    <Compile Include="MainFeatures\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
     <Compile Include="Lib\IniFile.cs" />
     <Compile Include="Lib\IniReader.cs" />
@@ -212,7 +213,6 @@
     <Compile Include="MainFeatures\AutoCompletion\CustomHighlightTextRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="MainFeatures\CodeFormatter.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CustomTreeRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -297,10 +297,10 @@
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerPage.resx">
       <DependentUpon>FileExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FileInfo\FileTagsForm.resx">
+    <EmbeddedResource Include="MainFeatures\FilesInfo\FileTagsForm.resx">
       <DependentUpon>FileTagsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FileInfo\FileTagsPage.resx">
+    <EmbeddedResource Include="MainFeatures\FilesInfo\FileTagsPage.resx">
       <DependentUpon>FileTagsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">

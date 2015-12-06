@@ -17,16 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
 using YamuiFramework.Forms;
-using _3PA.MainFeatures;
+using _3PA.Lib;
 
-namespace _3PA.Lib {
+namespace _3PA.MainFeatures {
 
     #region config Object
 
@@ -37,9 +37,13 @@ namespace _3PA.Lib {
     public class ConfigObject {
         // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
 
+        //[StringLength(15)]
         //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
-        [Display(Name = "User trigram", Description = "This is your user trigram duh")]
-        [StringLength(15)]
+
+        [Display(
+            Name = "User trigram", 
+            Description = "This is your user trigram duh", 
+            GroupName = "")]
         public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
 
         // is the user from SOPRA?

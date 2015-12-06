@@ -9,12 +9,12 @@ using System.Text;
 using System.Threading.Tasks;
 using MarkdownDeep;
 using YamuiFramework.Forms;
-using _3PA.MainFeatures;
+using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.Properties;
 using Token = _3PA.MainFeatures.Parser.Token;
 
-namespace _3PA.Lib {
+namespace _3PA.MainFeatures {
 
     /// <summary>
     /// Handles the update of this software

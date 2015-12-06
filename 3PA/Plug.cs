@@ -25,7 +25,9 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
@@ -38,9 +40,10 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.FileInfo;
+using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.SyntaxHighlighting;
+using Timer = System.Timers.Timer;
 
 namespace _3PA {
 
@@ -50,10 +53,6 @@ namespace _3PA {
         public static bool PluginIsFullyLoaded;
         public static NppData NppData;
         public static FuncItems FuncItems = new FuncItems();
-
-        private static bool _indentWithTabs;
-        private static int _indentWidth;
-        private static int _annotationMode;
 
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui (example is indentation)
@@ -72,10 +71,24 @@ namespace _3PA {
             get {
                 var dir = Path.Combine(Path.GetTempPath(), AssemblyInfo.ProductTitle);
                 if (!Directory.Exists(dir))
-                    Directory.CreateDirectory(dir);
+                    try {
+                        Directory.CreateDirectory(dir);
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Permission denied when creating " + dir);
+                    }
                 return dir;
             }
         }
+        #endregion
+
+        #region default option values
+
+        private static bool _indentWithTabs;
+        private static int _indentWidth;
+        private static int _annotationMode;
+        private static int _marginWidth;
+        private static int _marginSensitive;
+
         #endregion
 
         #region Init and clean up
@@ -180,6 +193,7 @@ namespace _3PA {
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
                 // save config (should be done but just in case)
+                CodeExplorer.UpdateMenuItemChecked();
                 Config.Save();
                 // remember the most used keywords
                 Keywords.Save();
@@ -223,6 +237,7 @@ namespace _3PA {
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             // TODO: delete when releasing! (we dont want the user to access those themes!)
             ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
+            Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             LocalHtmlHandler.Init();
 
             //Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SynthaxHighlighting.xml");
@@ -479,20 +494,6 @@ namespace _3PA {
 
                 // handles the autocompletion
                 AutoComplete.UpdateAutocompletion();
-                
-            /*
-            // trigger snippet insertion on space if the setting is activated (and the leave)
-            if (c == ' ' && Config.Instance.AutoCompleteUseSpaceToInsertSnippet &&
-                Snippets.Contains(keyword)) {
-                Npp.BeginUndoAction();
-                Npp.ReplaceText(curPos - offset, curPos, "");
-                Npp.SetCaretPosition(curPos - offset);
-                Snippets.TriggerCodeSnippetInsertion();
-                Npp.EndUndoAction();
-                Npp.SetStatusbarLabel("trigger"); //TODO
-                return;
-            }
-            */
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
@@ -546,18 +547,23 @@ namespace _3PA {
             // update current scintilla
             Npp.UpdateScintilla();
 
+            // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyPluginSpecificOptions(false);
 
             // close popups..
             ClosePopups();
 
+            if (IsCurrentFileProgress) {
+                // Syntax Highlight
+                Highlight.SetCustomStyles();
+
+                // Update info on the current file
+                FilesInfo.DisplayCurrentFileInfo();
+            }
+
             // Parse the document
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
-
-            // Syntax Highlight
-            if (IsCurrentFileProgress)
-                Highlight.SetCustomStyles();
         }
 
         /// <summary>
@@ -565,6 +571,7 @@ namespace _3PA {
         /// </summary>
         public static void OnFileSaved() {
             // check for block that are too long and display a warning
+            
         }
 
         #endregion
@@ -573,7 +580,7 @@ namespace _3PA {
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
-        /// when switch tab or when we leave npp, param can be set to true to force the defautl values
+        /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         /// <param name="forceToDefault"></param>
         public static void ApplyPluginSpecificOptions(bool forceToDefault) {
@@ -581,17 +588,20 @@ namespace _3PA {
                 _indentWidth = Npp.GetIndent();
                 _indentWithTabs = Npp.GetUseTabs();
                 _annotationMode = Npp.GetAnnotationVisible();
+                _marginWidth = Npp.GetMarginWidth(FilesInfo.ErrorMarginNumber);
+                _marginSensitive = Npp.GetMarginSentivity(FilesInfo.ErrorMarginNumber);
             }
             if (!IsCurrentFileProgress || forceToDefault) {
                 Npp.ResetDefaultAutoCompletion();
                 Npp.SetIndent(_indentWidth);
                 Npp.SetUseTabs(_indentWithTabs);
                 Npp.SetAnnotationVisible(_annotationMode);
+                Npp.SetMargin(FilesInfo.ErrorMarginNumber, SciMsg.SC_MARGIN_SYMBOL, _marginWidth, _marginSensitive);
             } else {
                 Npp.HideDefaultAutoCompletion();
                 Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
                 Npp.SetUseTabs(false);
-                Npp.SetAnnotationVisible();
+                Npp.SetAnnotationVisible(2);
             }
         }
 
@@ -610,6 +620,7 @@ namespace _3PA {
             AutoComplete.ForceClose();
             InfoToolTip.ForceClose();
             Appli.ForceClose();
+            FileTags.ForceClose();
         }
 
         #endregion
@@ -617,16 +628,10 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-            Npp.SetAnnotationVisible();
-
-            //Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level2, Color.AliceBlue, Color.BlueViolet);
-            Npp.SetAnnotationText(0, "test annot\nderpderp");
-
-            Npp.SetAnnotationText(2, "test annot\nderpderp");
-
-            Npp.SetAnnotationStyle(0, (int)AnnotationStyles.Level2);
-
-            Npp.DisplayExtraMargin();
+            var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
+            foreach (var kpv in derp) {
+                FilesInfo.UpdateFileErrors(kpv.Key, kpv.Value);
+            }
 
             var properties = typeof(ConfigObject).GetFields();
 
@@ -641,7 +646,6 @@ namespace _3PA {
             }
 
             FileTags.UnCloak();
-
 
             //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
             //UserCommunication.MessageToUser();

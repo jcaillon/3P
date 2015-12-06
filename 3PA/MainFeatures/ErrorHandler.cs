@@ -17,20 +17,19 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using _3PA.MainFeatures;
+using _3PA.Lib;
 
-namespace _3PA.Lib {
+namespace _3PA.MainFeatures {
     class ErrorHandler {
 
         private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }

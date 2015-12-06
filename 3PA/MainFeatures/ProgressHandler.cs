@@ -24,9 +24,42 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
-    class ProgressHandler {
+
+    /// <summary>
+    /// This class handles external operations interacting with progress
+    /// </summary>
+    public class ProgressHandler {
+
+        private string _workingDirectory;
+
+        /// <summary>
+        /// Constructor, creates and sets the workig directory for the incoming operations
+        /// </summary>
+        public ProgressHandler() {
+            _workingDirectory = Path.Combine(Plug.TempDir, DateTime.UtcNow.ToString("yy-MM-dd_HH-mm-ss-fff"));
+            if (!Directory.Exists(_workingDirectory))
+                try {
+                    Directory.CreateDirectory(_workingDirectory);
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Permission denied when creating " + _workingDirectory);
+                }
+        }
+
+        public void CheckSynthax(string file = null) {
+            PrepareExecution(file);
+            // execute
+
+        }
+
+        private bool PrepareExecution(string file) {
+
+
+
+            return true;
+        }
 
         public void run_ext(string command, string currentFile) {
             // should be in config :

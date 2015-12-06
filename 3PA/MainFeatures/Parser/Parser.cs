@@ -487,16 +487,18 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         // matching proc name (or VALUE)
-                        if (token is TokenWord || token is TokenQuotedString) {
-                            name += (token is TokenWord) ? token.Value : token.Value.Substring(1, token.Value.Length - 2);
-                            if (!name.ToLower().Equals("value"))
-                                state++;
-                            else {
-                                isValue = true;
-                                name = "";
-                            }
-                        } else if (token is TokenSymbol && token.Value.Equals(")"))
+                        if (token is TokenSymbol && token.Value.Equals(")")) {
                             state++;
+                        } else if (isValue && !(token is TokenWhiteSpace || token is TokenSymbol)) {
+                            name += (token is TokenQuotedString) ? token.Value.Substring(1, token.Value.Length - 2) : token.Value;
+                        } else if (token is TokenWord) {
+                            if (token.Value.ToLower().Equals("value"))
+                                isValue = true;
+                            else {
+                                name += token.Value;
+                                state++;
+                            }
+                        }
                         break;
                     case 1:
                         // matching PERSISTENT (or a path instead of a file)

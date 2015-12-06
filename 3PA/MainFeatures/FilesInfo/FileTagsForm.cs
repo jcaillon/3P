@@ -21,7 +21,7 @@
 using _3PA.Html;
 using _3PA.MainFeatures.NppInterfaceForm;
 
-namespace _3PA.MainFeatures.FileInfo {
+namespace _3PA.MainFeatures.FilesInfo {
     public partial class FileTagsForm : NppInterfaceYamuiForm {
         public FileTagsForm() {
             InitializeComponent();

@@ -55,6 +55,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
+        /// Clear tree data
+        /// </summary>
+        public static void ClearTree() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.CodeExplorerPage.ClearTree();
+        }
+
+        /// <summary>
         /// Toggle the docked form on and off, can be called first and will initialize the form
         /// </summary>
         public static void Toggle() {

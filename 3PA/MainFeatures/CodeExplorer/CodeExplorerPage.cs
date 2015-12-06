@@ -221,6 +221,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
+        /// Clear the tree
+        /// </summary>
+        public void ClearTree() {
+            ovlTree.ClearObjects();
+        }
+
+        /// <summary>
         /// This method uses the items found by the parser to update the code explorer tree
         /// </summary>
         public void UpdateTreeData(bool forceUpdate = false) {

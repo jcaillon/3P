@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,7 +25,7 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.FileInfo {
+namespace _3PA.MainFeatures.FilesInfo {
 
     public class FileTags {
 

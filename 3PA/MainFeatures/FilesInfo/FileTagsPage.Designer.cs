@@ -1,4 +1,4 @@
-﻿namespace _3PA.MainFeatures.FileInfo {
+﻿namespace _3PA.MainFeatures.FilesInfo {
     partial class FileTagsPage {
         /// <summary> 
         /// Required designer variable.

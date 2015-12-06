@@ -17,14 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
-using _3PA.MainFeatures;
 
 namespace _3PA {
     /// <summary>
@@ -77,8 +76,8 @@ namespace _3PA {
         /// </summary>
         public static void HideDefaultAutoCompletion() {
             //TODO: find a better technique to hide the autocompletion!!! this slows npp down
-            //Call(SciMsg.SCI_AUTOCSETIGNORECASE, 1);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, @"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~");
+            // #$%&'()*+,-./:;<=>?[\]^_`{|}~@
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, @"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
         }
 
         /// <summary>
@@ -968,8 +967,8 @@ namespace _3PA {
         /// <param name="bg"></param>
         /// <param name="fg"></param>
         public static void SetStyle(int id, Color bg, Color fg) {
-            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new COLORREF(bg)).ColorDWORD);
-            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new COLORREF(fg)).ColorDWORD);
+            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new Colorref(bg)).ColorDWORD);
+            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new Colorref(fg)).ColorDWORD);
         }
 
         /// <summary>
@@ -989,8 +988,30 @@ namespace _3PA {
         /// <param name="bg"></param>
         /// <param name="fg"></param>
         public static void SetWhiteSpaceStyle(Color bg, Color fg) {
-            Call(SciMsg.SCI_SETWHITESPACEFORE, 1, (int)(new COLORREF(fg)).ColorDWORD);
-            Call(SciMsg.SCI_SETWHITESPACEBACK, 1, (int)(new COLORREF(bg)).ColorDWORD);
+            Call(SciMsg.SCI_SETWHITESPACEFORE, 1, (int)(new Colorref(fg)).ColorDWORD);
+            Call(SciMsg.SCI_SETWHITESPACEBACK, 1, (int)(new Colorref(bg)).ColorDWORD);
+        }
+
+        public static void SetSelectionStyle(Color bgColor, Color fgColor) {
+            Call(SciMsg.SCI_SETSELBACK, 1, (int)(new Colorref(bgColor)).ColorDWORD);
+            Call(SciMsg.SCI_SETSELFORE, 1, (int)(new Colorref(fgColor)).ColorDWORD);
+        }
+
+        public static void SetCaretStyle(Color fgColor) {
+            Call(SciMsg.SCI_SETCARETFORE, (int)(new Colorref(fgColor)).ColorDWORD);
+        }
+
+        /// <summary>
+        /// You can choose to make the background colour of the line containing the caret different with these messages. To do this, set the desired background colour with SCI_SETCARETLINEBACK, then use SCI_SETCARETLINEVISIBLE(true) to enable the effect. You can cancel the effect with SCI_SETCARETLINEVISIBLE(false). The two SCI_GETCARET* functions return the state and the colour. This form of background colouring has highest priority when a line has markers that would otherwise change the background colour. The caret line may also be drawn translucently which allows other background colours to show through. This is done by setting the alpha (translucency) value by calling SCI_SETCARETLINEBACKALPHA. When the alpha is not SC_ALPHA_NOALPHA (256), the caret line is drawn after all other features so will affect the colour of all other features. 
+        /// Alpha goes from 0 (transparent) to 256 (opaque)
+        /// </summary>
+        /// <param name="bgColor"></param>
+        /// <param name="alpha"></param>
+        public static void SetCaretLineStyle(Color bgColor, int alpha) {
+            Call(SciMsg.SCI_SETCARETLINEBACK, (int)(new Colorref(bgColor)).ColorDWORD);
+            Call(SciMsg.SCI_SETCARETLINEVISIBLE, 1);
+
+            Call(SciMsg.SCI_SETCARETLINEBACKALPHA, alpha);
         }
 
         /// <summary>
@@ -1013,7 +1034,7 @@ namespace _3PA {
         /// <param name="styleArray"></param>
         public static void StyleTextEx(int startPos, byte[] styleArray) {
             Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
-            Win32.SendData(HandleScintilla, SciMsg.SCI_SETSTYLINGEX, styleArray);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSTYLINGEX, styleArray.Length, styleArray);
         }
 
         /// <summary>
@@ -1028,14 +1049,16 @@ namespace _3PA {
         #region annotations
 
         /// <summary>
-        /// TODO: THIS IS UNTESTED SO FAR!!!
         /// set the style of a text from startPos to startPos + styleArray.Length,
-        /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte
+        /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte    
+        /// Example :
+        /// Npp.SetAnnotationText(2, "aaaaa\nbbbbb");
+        /// Npp.SetAnnotationStyles(2, new[] { (byte)250, (byte)250, (byte)250, (byte)250, (byte)250, (byte)250, (byte)253, (byte)253, (byte)253, (byte)253, (byte)253 });
         /// </summary>
         /// <param name="line"></param>
         /// <param name="styleArray"></param>
         public static void SetAnnotationStyles(int line, byte[] styleArray) {
-            Win32.SendData(HandleScintilla, SciMsg.SCI_ANNOTATIONSETSTYLES, line, styleArray);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETSTYLES, line, styleArray);
         }
 
         /// <summary>
@@ -1048,18 +1071,26 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Sets the text of an annotation for a given line, set text to null to erase a line
+        /// Sets the text of an annotation for a given line
         /// </summary>
         /// <param name="line"></param>
         /// <param name="message"></param>
-        public static void SetAnnotationText(int line, string message) {
+        public static void AddAnnotation(int line, string message) {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, line, message);
+        }
+
+        /// <summary>
+        /// Delete annotation on given line
+        /// </summary>
+        /// <param name="line"></param>
+        public static void DeleteAnnotation(int line) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, line, (string)null);
         }
 
         /// <summary>
         /// Clear all annotations in one go
         /// </summary>
-        public static void ClearAllAnnotations() {
+        public static void DeleteAllAnnotations() {
             Call(SciMsg.SCI_ANNOTATIONCLEARALL);
         }
 
@@ -1084,7 +1115,7 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Sets a style for an annotation (reduced font)
+        /// Sets a style for an annotation (reduced font + segoe ui)
         /// </summary>
         /// <param name="style"></param>
         /// <param name="bgColor"></param>
@@ -1095,44 +1126,132 @@ namespace _3PA {
             Win32.SendMessage(HandleScintilla, SciMsg.SCI_STYLESETFONT, style, "Segoe ui");
             SetStyle(style, bgColor, fgColor);
         }
+
         #endregion
 
-        #region Annotations
+        #region Margin and Marker
 
-        public static void DisplayExtraMargin() {
-            /* These two routines set and get the type of a margin. The margin argument should be 0, 1, 2, 3 or 4. You can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set a margin as either a line number or a symbol margin. A margin with application defined text may use SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text. By convention, margin 0 is used for line numbers and the next two are used for symbols. You can also use the constants SC_MARGIN_BACK (2) and SC_MARGIN_FORE (3) for symbol margins that set their background colour to match the STYLE_DEFAULT background and foreground colours. */
-            int marginNumber = 4; /* 0 to 4 */
-            int markerNumber = 1;
+        /// <summary>
+        /// for the displayType, you can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set 
+        /// a margin as either a line number or a symbol margin. A margin with application defined text may use 
+        /// SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text
+        /// </summary>
+        /// <param name="marginNumber"></param>
+        /// <param name="displayType"></param>
+        /// <param name="width"></param>
+        /// <param name="sensitive"></param>
+        public static void SetMargin(int marginNumber, SciMsg displayType, int width, int sensitive) {
+            Call(SciMsg.SCI_SETMARGINTYPEN, marginNumber, (int)displayType);
+            Call(SciMsg.SCI_SETMARGINSENSITIVEN, marginNumber, sensitive);
+            Call(SciMsg.SCI_SETMARGINWIDTHN, marginNumber, width);
+        }
 
-            /* set the type of a margin. The second argument should be 0, 1, 2, 3 or 4. You can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set a margin as either a line number or a symbol margin. A margin with application defined text may use SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text. By convention, margin 0 is used for line numbers and the next two are used for symbols. You can also use the constants SC_MARGIN_BACK (2) and SC_MARGIN_FORE (3) for symbol margins that set their background colour to match the STYLE_DEFAULT background and foreground colours. */
-            Call(SciMsg.SCI_SETMARGINTYPEN, marginNumber, 0);
+        /// <summary>
+        /// Get a margin width
+        /// </summary>
+        /// <param name="marginNumber"></param>
+        /// <returns></returns>
+        public static int GetMarginWidth(int marginNumber) {
+            return Call(SciMsg.SCI_GETMARGINWIDTHN, marginNumber);
+        }
+        
+        public static int GetMarginSentivity(int marginNumber) {
+            return Call(SciMsg.SCI_GETMARGINSENSITIVEN, marginNumber);
+        }
 
-            Call(SciMsg.SCI_SETMARGINSENSITIVEN, marginNumber, 1);
+        /// <summary>
+        /// Add a single marker on a single line
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="markerNumber"></param>
+        public static void AddMarker(int line, int markerNumber) {
+            Call(SciMsg.SCI_MARKERADD, line, markerNumber);
+        }
 
-            Call(SciMsg.SCI_SETMARGINWIDTHN, marginNumber, 10);
-            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, markerNumber);
-            Call(SciMsg.SCI_MARKERDEFINE, markerNumber, (int) SciMsg.SC_MARK_CHARACTER + 65);
-            Call(SciMsg.SCI_MARKERSETFORE, markerNumber, (int) (new COLORREF(Color.Crimson)).ColorDWORD);
-            Call(SciMsg.SCI_MARKERSETBACK, markerNumber, (int) (new COLORREF(Color.Wheat)).ColorDWORD);
+        /// <summary>
+        /// Delete a single marker on a single line
+        /// set markerNumber to -1 to delete all markers on a line
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="markerNumber"></param>
+        public static void DeleteMarker(int line, int markerNumber) {
+            Call(SciMsg.SCI_MARKERDELETE, line, markerNumber);
+        }
 
-            /* You add logical markers to a line with SCI_MARKERADD. If a line has an associated marker that does not appear in the mask of any margin with a non-zero width, the marker changes the background colour of the line */
-            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, 2 ^ markerNumber);
+        /// <summary>
+        /// Delete all the markers of number markerNumber
+        /// </summary>
+        /// <param name="markerNumber"></param>
+        public static void DeleteAllMarker(int markerNumber) {
+            Call(SciMsg.SCI_MARKERDELETE, markerNumber);
+        }
 
-            Call(SciMsg.SCI_MARKERADD, 0, markerNumber);
-            //Call(SciMsg.SCI_MARKERDELETE, 0, markerNumber);
-            //Call(SciMsg.SCI_MARKERDELETEALL, markerNumber);
+        /// <summary>
+        /// Sets a style for a marker
+        /// SciMsg.SC_MARK_FULLRECT
+        /// </summary>
+        /// <param name="marker"></param>
+        /// <param name="bgColor"></param>
+        /// <param name="fgColor"></param>
+        /// <param name="markerStyle"></param>
+        public static void SetMarkerStyle(int marker, Color bgColor, Color fgColor, SciMsg markerStyle) {
+            Call(SciMsg.SCI_MARKERDEFINE, marker, (int) markerStyle);
+            Call(SciMsg.SCI_MARKERSETFORE, marker, (int)(new Colorref(fgColor)).ColorDWORD);
+            Call(SciMsg.SCI_MARKERSETBACK, marker, (int)(new Colorref(bgColor)).ColorDWORD);
+        }
 
-            /*
-            SCI_MARKERGET(int line)
-            This returns a 32-bit integer that indicates which markers were present on the line. Bit 0 is set if marker 0 is present, bit 1 for marker 1 and so on.
+        /// <summary>
+        /// The markers that can be displayed in each margin are set with SCI_SETMARGINMASKN
+        /// Any markers not associated with a visible margin will be displayed as changes in background colour in the text
+        /// If you want marker number 5 and 3 to be displayed in margin 4 : SetMarginMask(4, 2^5 + 2^3)
+        /// </summary>
+        /// <param name="marginNumber"></param>
+        /// <param name="markerNumberMask"></param>
+        public static void SetMarginMask(int marginNumber, int markerNumberMask) {
+            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, markerNumberMask);
+        }
 
-            SCI_MARKERNEXT(int lineStart, int markerMask)
-            SCI_MARKERPREVIOUS(int lineStart, int markerMask)
-             * */
+        /// <summary>
+        /// This returns a 32-bit integer that indicates which markers were present on the line
+        /// Bit 0 is set if marker 0 is present, bit 1 for marker 1 and so on
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public static int GetMarkers(int line) {
+            return Call(SciMsg.SCI_MARKERGET, line);
+        }
+
+        /// <summary>
+        /// Search the next line with the given marker, return -1 if not found
+        /// The markerMask argument should have one bit set for each marker you wish to find
+        /// Set bit 0 to find marker 0, bit 1 for marker 1 and so on
+        /// </summary>
+        /// <param name="lineStart"></param>
+        /// <param name="markerMask"></param>
+        /// <returns></returns>
+        public static int GetNextMarkerLine(int lineStart, int markerMask) {
+            return Call(SciMsg.SCI_MARKERNEXT, lineStart, markerMask);
+        }
+
+        /// <summary>
+        /// Search the previous line with the given marker, return -1 if not found
+        /// The markerMask argument should have one bit set for each marker you wish to find
+        /// Set bit 0 to find marker 0, bit 1 for marker 1 and so on
+        /// </summary>
+        /// <param name="lineStart"></param>
+        /// <param name="markerMask"></param>
+        /// <returns></returns>
+        public static int GetPreviousMarkerLine(int lineStart, int markerMask) {
+            return Call(SciMsg.SCI_MARKERPREVIOUS, lineStart, markerMask);
         }
 
         #endregion
 
+        #region Caret, selection, and hotspot styles
+
+
+
+        #endregion
 
         #region helper
         /// <summary>
@@ -1198,7 +1317,9 @@ namespace _3PA {
         #endregion
     }
 
-    static class StringExtension {
+    #region Ansi to UTF8 extensions
+
+    internal static class StringExtension {
         /// <summary>
         /// Converts from ANSI to UTF8
         /// </summary>
@@ -1213,4 +1334,7 @@ namespace _3PA {
             return Encoding.Default.GetString(Encoding.UTF8.GetBytes(str));
         }
     }
+
+    #endregion
+
 }

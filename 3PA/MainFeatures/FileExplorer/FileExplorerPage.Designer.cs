@@ -109,14 +109,14 @@
             this.yamuiLabel3.TabIndex = 1;
             this.yamuiLabel3.Text = "File Explorer";
             // 
-            // FileExplorer
+            // FileExplorerPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel3);
             this.Controls.Add(this.yamuiPanel2);
             this.Controls.Add(this.yamuiPanel1);
-            this.Name = "FileExplorer";
+            this.Name = "FileExplorerPage";
             this.Size = new System.Drawing.Size(218, 484);
             this.yamuiPanel1.ResumeLayout(false);
             this.yamuiPanel1.PerformLayout();

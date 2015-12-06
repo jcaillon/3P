@@ -24,6 +24,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 // ReSharper disable InconsistentNaming
@@ -161,11 +162,15 @@ namespace _3PA
 
                     case (uint)SciMsg.SCN_MARGINCLICK:
                         // called each time the user click on a margin
-                        /* 
-                         * modifiers	The appropriate combination of SCI_SHIFT, SCI_CTRL and SCI_ALT to indicate the keys that were held down at the time of the margin click.
-                         * position	The position of the start of the line in the document that corresponds to the margin click.
-                         * margin	The margin number that was clicked.*/
-                        UserCommunication.Notify(nc.margin.ToString() + " " + nc.position + " " + nc.modifiers);
+                        // click on the error margin
+                        if (nc.margin == FilesInfo.ErrorMarginNumber) {
+                            // if it's an error symbol that has been clicked, the error on the line will be cleared
+                            if (!FilesInfo.ClearError(Npp.GetLineFromPosition(nc.position))) {
+                                // if nothing has been cleared, we go to the next error position
+                                FilesInfo.GoToNextError(Npp.GetLineFromPosition(nc.position));
+                            }
+                        }
+                        //can also use : modifiers, the appropriate combination of SCI_SHIFT, SCI_CTRL and SCI_ALT to indicate the keys that were held down at the time of the margin click.
                         return;
 
                     case (uint) NppMsg.NPPN_FILEBEFOREOPEN:

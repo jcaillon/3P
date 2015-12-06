@@ -149,9 +149,9 @@ namespace _3PA {
                 else
                     OpenFile(document);
             }
-            if (line > 0) {
+            if (line >= 0) {
                 GoToLine(line);
-                if (column > 0)
+                if (column >= 0)
                     SetCaretPosition(GetPosFromLineColumn(line, column));
             }
         }
@@ -193,7 +193,7 @@ namespace _3PA {
         public static List<string> GetOpenedFiles() {
             var output = new List<string>();
             int nbFile = (int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, 0);
-            using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
+            using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MaxPath)) {
                 if (Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);
             }
@@ -210,7 +210,7 @@ namespace _3PA {
             var output = new StringBuilder();
             int nbFile = (int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETNBSESSIONFILES, 0, sessionFilePath);
             if (nbFile > 0) {
-                using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MAX_PATH)) {
+                using (ClikeStringArray cStrArray = new ClikeStringArray(nbFile, Win32.MaxPath)) {
                     if (Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETSESSIONFILES, cStrArray.NativePointer, sessionFilePath) != IntPtr.Zero)
                         foreach (string file in cStrArray.ManagedStringsUnicode) output.AppendLine(file);
                 }
@@ -233,7 +233,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetCurrentFilePath() {
-            var path = new StringBuilder(Win32.MAX_PATH);
+            var path = new StringBuilder(Win32.MaxPath);
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             return path.ToString();
         }
@@ -282,7 +282,7 @@ namespace _3PA {
         /// <param name="extension">The extension.</param>
         /// <returns></returns>
         public static bool IsCurrentFileHasExtension(string extension) {
-            var path = new StringBuilder(Win32.MAX_PATH);
+            var path = new StringBuilder(Win32.MaxPath);
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETFULLCURRENTPATH, 0, path);
             var file = path.ToString();
             return !String.IsNullOrWhiteSpace(file) && file.EndsWith(extension, StringComparison.CurrentCultureIgnoreCase);
@@ -329,8 +329,8 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetConfigDir() {
-            var buffer = new StringBuilder(Win32.MAX_PATH);
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MAX_PATH, buffer);
+            var buffer = new StringBuilder(Win32.MaxPath);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MaxPath, buffer);
             var configDir = Path.Combine(buffer.ToString(), AssemblyInfo.ProductTitle);
             if (!Directory.Exists(configDir))
                 Directory.CreateDirectory(configDir);

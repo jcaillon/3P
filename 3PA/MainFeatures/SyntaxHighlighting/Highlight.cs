@@ -26,7 +26,9 @@ using System.Text;
 using System.Text.RegularExpressions;
 using YamuiFramework.Forms;
 using _3PA.Data;
+using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.FilesInfo;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
 
@@ -134,10 +136,20 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             Npp.SetStyle((int)UdlStyles.Operators, curTheme.BgDefault, curTheme.FgOperators);
 
             // for annotations :
-            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Default, curTheme.BgAnnotationDefault, curTheme.FgAnnotationDefault);
-            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level1, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
-            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level2, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
-            Npp.SetAnnotationStyleDefinition((int)AnnotationStyles.Level3, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
+            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Information + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
+            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Warning + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
+            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.StrongWarning + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
+            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Error + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
+            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Critical + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
+
+            // for markers :
+            Npp.SetMarkerStyle((int)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0, SciMsg.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((int)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1, SciMsg.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((int)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2, SciMsg.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((int)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3, SciMsg.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((int)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4, SciMsg.SC_MARK_SMALLRECT);
+
+            // set style 33 for the margin with line numbers
         }
 
         /// <summary>
@@ -280,16 +292,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         Idk = 24, /* ?? */
     }
 
-    /// <summary>
-    /// Enumeration of the style id used by the annotations
-    /// </summary>
-    public enum AnnotationStyles {
-        Default = 250,
-        Level1 = 251,
-        Level2 = 252,
-        Level3 = 253
-    }
-
     #endregion
 
     #region Theme class
@@ -330,14 +332,16 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public Color FgDelimiters7 = ColorTranslator.FromHtml("#000000");
         public Color FgDelimiters8 = ColorTranslator.FromHtml("#8E908C");
 
-        public Color FgAnnotationDefault = ColorTranslator.FromHtml("#3F3F3F");
-        public Color BgAnnotationDefault = ColorTranslator.FromHtml("#F2F2F2");
+        public Color FgAnnotation0 = ColorTranslator.FromHtml("#3F3F3F");
+        public Color BgAnnotation0 = ColorTranslator.FromHtml("#F2F2F2");
         public Color FgAnnotation1 = ColorTranslator.FromHtml("#9C6500");
         public Color BgAnnotation1 = ColorTranslator.FromHtml("#FFEB9C");
         public Color FgAnnotation2 = ColorTranslator.FromHtml("#833C0C");
         public Color BgAnnotation2 = ColorTranslator.FromHtml("#FFCC99");
         public Color FgAnnotation3 = ColorTranslator.FromHtml("#9C0006");
         public Color BgAnnotation3 = ColorTranslator.FromHtml("#FFC7CE");
+        public Color FgAnnotation4 = ColorTranslator.FromHtml("#58267E");
+        public Color BgAnnotation4 = ColorTranslator.FromHtml("#CC99FF");
     }
 
     #endregion

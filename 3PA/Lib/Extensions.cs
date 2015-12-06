@@ -27,6 +27,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -117,6 +118,21 @@ namespace _3PA.Lib {
 
 
         #region string extensions
+
+        /// <summary>
+        /// Breaks new lines every lineLength char, taking into account words to not
+        /// split them
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="lineLength"></param>
+        /// <returns></returns>
+        public static string BreakText(this string text, int lineLength) {
+            var charCount = 0;
+            var lines = text.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries)
+                .GroupBy(w => (charCount += w.Length + 1) / lineLength)
+                .Select(g => string.Join(" ", g));
+            return string.Join("\n", lines.ToArray());
+        }
 
         /// <summary>
         /// Compares two version string "1.0.0.0".IsHigherVersionThan("0.9") returns true
@@ -341,96 +357,8 @@ namespace _3PA.Lib {
             return text;
         }
 
-        //http://www.softcircuits.com/Blog/post/2010/01/10/Implementing-Word-Wrap-in-C.aspx
-        public static string WordWrap(this string text, int width) {
-            int pos, next;
-            StringBuilder sb = new StringBuilder();
-
-            // Lucidity check
-            if (width < 1)
-                return text;
-            // Parse each line of text
-            for (pos = 0; pos < text.Length; pos = next) {
-                // Find end of line
-                int eol = text.IndexOf(Environment.NewLine, pos, StringComparison.CurrentCultureIgnoreCase);
-                if (eol == -1)
-                    next = eol = text.Length;
-                else
-                    next = eol + Environment.NewLine.Length;
-                // Copy this line of text, breaking into smaller lines as needed
-                if (eol > pos) {
-                    do {
-                        int len = eol - pos;
-                        if (len > width)
-                            len = BreakLine(text, pos, width);
-                        sb.Append(text, pos, len);
-                        sb.Append(Environment.NewLine);
-                        // Trim whitespace following break
-                        pos += len;
-                        while (pos < eol && Char.IsWhiteSpace(text[pos]))
-                            pos++;
-                    } while (eol > pos);
-                } else sb.Append(Environment.NewLine); // Empty line
-            }
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Locates position to break the given line so as to avoid
-        /// breaking words.
-        /// </summary>
-        /// <param name="text">String that contains line of text</param>
-        /// <param name="pos">Index where line of text starts</param>
-        /// <param name="max">Maximum line length</param>
-        /// <returns>The modified line length</returns>
-        public static int BreakLine(this string text, int pos, int max) {
-            // Find last whitespace in line
-            int i = max - 1;
-            while (i >= 0 && !Char.IsWhiteSpace(text[pos + i]))
-                i--;
-            if (i < 0)
-                return max; // No whitespace found; break at maximum length
-            // Find start of whitespace
-            while (i >= 0 && Char.IsWhiteSpace(text[pos + i]))
-                i--;
-            // Return length of text before whitespace
-            return i + 1;
-        }
-
-        public static bool IsScriptFile(this string file) {
-            return file.EndsWith(".cs", StringComparison.InvariantCultureIgnoreCase) ||
-                   file.EndsWith(".csx", StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        public static bool IsToken(this string text, string pattern, int position) {
-            if (position < text.Length) {
-                int endPos = position;
-                for (; endPos < text.Length; endPos++)
-                    if (char.IsWhiteSpace(text[endPos])) {
-                        break;
-                    }
-
-                int startPos = position - 1;
-                for (; startPos >= 0; startPos--)
-                    if (char.IsWhiteSpace(text[startPos])) {
-                        startPos = startPos + 1;
-                        break;
-                    }
-
-                if (startPos == -1)
-                    startPos = 0;
-
-                if ((endPos - startPos) == pattern.Length)
-                    return (text.IndexOf(pattern, startPos, StringComparison.CurrentCultureIgnoreCase) == startPos);
-            }
-            return false;
-        }
-
         public static bool IsOneOf(this char ch, params char[] patterns) {
-            foreach (char c in patterns)
-                if (c == ch)
-                    return true;
-            return false;
+            return patterns.Any(c => c == ch);
         }
 
         public static bool IsNonWhitespaceNext(this string text, string pattern, int startPos) {
@@ -448,25 +376,6 @@ namespace _3PA.Lib {
 
         public static int GetUtf8ByteCount(this string text) {
             return Encoding.UTF8.GetByteCount(text);
-        }
-
-        public static bool IsControlStatement(this string text) {
-            text = text.TrimEnd();
-
-            if (text.EndsWith(")")) {
-                if (Regex.Match(text, @"\s*foreach\s*\(").Success)
-                    return true;
-                else if (Regex.Match(text, @"\s*for\s*\(").Success)
-                    return true;
-                else if (Regex.Match(text, @"\s*while\s*\(").Success)
-                    return true;
-                else if (Regex.Match(text, @"\s*if\s*\(").Success)
-                    return true;
-                //else if (Regex.Match(text, @"\s*else\s*\(").Success)
-                //    return true;
-            }
-
-            return false;
         }
 
         public static bool IsInlineElseIf(this string text) {

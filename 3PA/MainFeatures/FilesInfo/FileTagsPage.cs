@@ -17,14 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
-using _3PA.Lib;
 
-namespace _3PA.MainFeatures.FileInfo {
+namespace _3PA.MainFeatures.FilesInfo {
     public partial class FileTagsPage : YamuiPage {
 
         #region fields

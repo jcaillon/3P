@@ -1,4 +1,4 @@
-﻿namespace _3PA.MainFeatures.FileInfo {
+﻿namespace _3PA.MainFeatures.FilesInfo {
     partial class FileTagsForm {
         /// <summary>
         /// Required designer variable.
@@ -23,7 +23,7 @@
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.fileTagsPage1 = new _3PA.MainFeatures.FileInfo.FileTagsPage();
+            this.fileTagsPage1 = new FileTagsPage();
             this.lblTitle = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.SuspendLayout();
             // 
