@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     SavedParserVisitors.Remove(currentFilePath);
 
                 // Parse the document
-                _ablParser = new Parser.Parser(Npp.GetDocumentText(), currentFilePath, null, DataBase.GetTablesDictionary());
+                _ablParser = new Parser.Parser(Npp.Text, currentFilePath, null, DataBase.GetTablesDictionary());
 
                 // visitor
                 var parserVisitor = new ParserVisitor(true, System.IO.Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);

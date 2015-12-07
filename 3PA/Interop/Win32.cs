@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -26,41 +25,47 @@ using System.Text;
 
 namespace _3PA.Interop {
     public class Win32 {
-        [DllImport("user32")]
+        private const string DllNameKernel32 = "kernel32.dll";
+        private const string DllNameUser32 = "user32.dll";
+
+        [DllImport(DllNameUser32)]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, ref LangType lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, SciMsg wParam, string lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, SciMsg wParam, int lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, IntPtr lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, string lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, int lParam);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, byte[] infos);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr SendMessage(IntPtr hWnd, int msg, int wParam, [MarshalAs(UnmanagedType.LPStr)] StringBuilder lParam);
 
         public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, string text) {
@@ -95,20 +100,16 @@ namespace _3PA.Interop {
         public const int MfChecked = 8;
         public const int MfUnchecked = 0;
 
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern IntPtr GetMenu(IntPtr hWnd);
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern int CheckMenuItem(IntPtr hmenu, int uIdCheckItem, int uCheck);
 
         public const int WmCreate = 1;
 
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
-
-        [DllImport("kernel32")]
-        public static extern void OutputDebugString(string lpOutputString);
-
-        [DllImport("user32", EntryPoint = "SetWindowPos")]
+        [DllImport(DllNameUser32, EntryPoint = "SetWindowPos")]
         public static extern bool SetWindowPos(
             int hWnd, // Window handle
             int hWndInsertAfter, // Placement-order handle
@@ -118,21 +119,24 @@ namespace _3PA.Interop {
             int cy, // Height
             uint uFlags); // Window positioning flags
 
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
 
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern bool ScreenToClient(IntPtr hWnd, ref Point lpPoint);
 
-        [DllImport("user32")]
+        [DllImport(DllNameUser32)]
         public static extern long GetWindowRect(IntPtr hWnd, ref Rectangle lpRect);
 
-        [DllImport("user32", SetLastError = true)]
+        [DllImport(DllNameUser32, SetLastError = true)]
         public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className,
             IntPtr windowTitle);
 
-        [DllImport("user32", CharSet = CharSet.Auto)]
+        [DllImport(DllNameUser32, CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+
+        [DllImport(DllNameKernel32, CharSet = CharSet.Ansi, ExactSpelling = true, SetLastError = true)]
+        public static extern IntPtr GetProcAddress(HandleRef hModule, string lpProcName);
     }
 
     public class ClikeStringArray : IDisposable {

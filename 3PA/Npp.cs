@@ -142,7 +142,7 @@ namespace _3PA {
                 return;
             }
             if (saveHistoric)
-                _goToHistory.Push(new Tuple<string, Point>(GetCurrentFilePath(), new Point(GetLineFromPosition(GetCaretPosition()), GetColumnFromPos(GetCaretPosition()))));
+                _goToHistory.Push(new Tuple<string, Point>(GetCurrentFilePath(), new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
             if (!String.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
@@ -351,7 +351,6 @@ namespace _3PA {
             Win32.SetWindowPos(frm.Handle.ToInt32(), HandleNpp.ToInt32(), frm.Left, frm.Top, frm.Width, frm.Height,
                 SwpNoactivate);
         }
-
 
         /// <summary>
         /// Sets the label in the status of npp (bottom right)

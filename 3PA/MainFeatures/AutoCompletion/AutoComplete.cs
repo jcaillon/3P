@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="position"></param>
         /// <returns></returns>
         public static List<CompletionData> FindInCompletionData(string keyword, int position) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.GetLineFromPosition(position));
+            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.LineFromPosition(position));
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)
@@ -324,7 +324,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void OnShowCompleteSuggestionList() {
             ParseCurrentDocument();
             _openedFromShortCut = true;
-            _openedFromShortCutPosition = Npp.GetCaretPosition();
+            _openedFromShortCutPosition = Npp.CurrentPosition;
             try {
                 UpdateAutocompletion();
             } catch (Exception e) {
@@ -345,7 +345,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 int nbPoints;
                 string previousWord = "";
                 //TODO: for multiselection, when we erase a char, the last char is a " " idk why
-                var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.GetCaretPosition());
+                var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
                 var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
                 var splitted = keyword.Split('.');
                 string lastCharBeforeWord = "";
@@ -403,7 +403,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // close if there is nothing to suggest
-                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.GetCaretPosition()) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
                     Close();
                     return;
                 }

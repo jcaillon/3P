@@ -25,6 +25,7 @@ using System.Text;
 using System.Windows.Forms;
 
 namespace _3PA.Interop {
+
     #region " Notepad++ "
 
     [StructLayout(LayoutKind.Sequential)]
@@ -2258,6 +2259,8 @@ namespace _3PA.Interop {
 
     #region " Scintilla "
 
+    #region notifications
+
     [StructLayout(LayoutKind.Sequential)]
     public struct Sci_NotifyHeader {
         /* Compatible with Windows NMHDR.
@@ -2271,86 +2274,1285 @@ namespace _3PA.Interop {
     [StructLayout(LayoutKind.Sequential)]
     public struct SCNotification {
         public Sci_NotifyHeader nmhdr;
-        public int position;            /* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
-        public int ch;                    /* SCN_CHARADDED, SCN_KEY */
-        public int modifiers;            /* SCN_KEY */
-        public int modificationType;    /* SCN_MODIFIED */
-        public IntPtr text;                /* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
-        public int length;                /* SCN_MODIFIED */
-        public int linesAdded;            /* SCN_MODIFIED */
-        public int message;                /* SCN_MACRORECORD */
-        public uint wParam;                /* SCN_MACRORECORD */
-        public int lParam;                /* SCN_MACRORECORD */
-        public int line;                /* SCN_MODIFIED */
-        public int foldLevelNow;        /* SCN_MODIFIED */
-        public int foldLevelPrev;        /* SCN_MODIFIED */
-        public int margin;                /* SCN_MARGINCLICK */
-        public int listType;            /* SCN_USERLISTSELECTION */
-        public int x;                    /* SCN_DWELLSTART, SCN_DWELLEND */
-        public int y;                    /* SCN_DWELLSTART, SCN_DWELLEND */
-        public int token;                /* SCN_MODIFIED with SC_MOD_CONTAINER */
-        public int annotationLinesAdded;    /* SC_MOD_CHANGEANNOTATION */
-        public int updated;             	/* SCN_UPDATEUI */
-        public int listCompletionMethod;    /* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
+        public int position; /* SCN_STYLENEEDED, SCN_MODIFIED, SCN_DWELLSTART, SCN_DWELLEND */
+        public int ch; /* SCN_CHARADDED, SCN_KEY */
+        public int modifiers; /* SCN_KEY */
+        public int modificationType; /* SCN_MODIFIED */
+        public IntPtr text; /* SCN_MODIFIED, SCN_USERLISTSELECTION, SCN_AUTOCSELECTION */
+        public int length; /* SCN_MODIFIED */
+        public int linesAdded; /* SCN_MODIFIED */
+        public int message; /* SCN_MACRORECORD */
+        public uint wParam; /* SCN_MACRORECORD */
+        public int lParam; /* SCN_MACRORECORD */
+        public int line; /* SCN_MODIFIED */
+        public int foldLevelNow; /* SCN_MODIFIED */
+        public int foldLevelPrev; /* SCN_MODIFIED */
+        public int margin; /* SCN_MARGINCLICK */
+        public int listType; /* SCN_USERLISTSELECTION */
+        public int x; /* SCN_DWELLSTART, SCN_DWELLEND */
+        public int y; /* SCN_DWELLSTART, SCN_DWELLEND */
+        public int token; /* SCN_MODIFIED with SC_MOD_CONTAINER */
+        public int annotationLinesAdded; /* SC_MOD_CHANGEANNOTATION */
+        public int updated; /* SCN_UPDATEUI */
+        public int listCompletionMethod; /* SCN_AUTOCSELECTION, SCN_AUTOCCOMPLETED, SCN_USERLISTSELECTION */
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Sci_CharacterRange {
+        public Sci_CharacterRange(int cpmin, int cpmax) {
+            cpMin = cpmin; cpMax = cpmax;
+        }
+        public int cpMin;
+        public int cpMax;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Sci_TextRange {
+        public Sci_CharacterRange chrg;
+        public IntPtr lpstrText;
+    }
+
+    public class Sci_TextToFind : IDisposable {
+        _Sci_TextToFind _sciTextToFind;
+        IntPtr _ptrSciTextToFind;
+        bool _disposed = false;
+
+        public Sci_TextToFind(Sci_CharacterRange chrRange, string searchText) {
+            _sciTextToFind.chrg = chrRange;
+            _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
+        }
+        public Sci_TextToFind(int cpmin, int cpmax, string searchText) {
+            _sciTextToFind.chrg.cpMin = cpmin;
+            _sciTextToFind.chrg.cpMax = cpmax;
+            _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct _Sci_TextToFind {
+            public Sci_CharacterRange chrg;
+            public IntPtr lpstrText;
+            public Sci_CharacterRange chrgText;
+        }
+
+        public IntPtr NativePointer { get { _initNativeStruct(); return _ptrSciTextToFind; } }
+        public string lpstrText { set { _freeNativeString(); _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(value); } }
+        public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextToFind.chrg; } set { _sciTextToFind.chrg = value; _initNativeStruct(); } }
+        public Sci_CharacterRange chrgText { get { _readNativeStruct(); return _sciTextToFind.chrgText; } }
+        void _initNativeStruct() {
+            if (_ptrSciTextToFind == IntPtr.Zero)
+                _ptrSciTextToFind = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextToFind));
+            Marshal.StructureToPtr(_sciTextToFind, _ptrSciTextToFind, false);
+        }
+        void _readNativeStruct() {
+            if (_ptrSciTextToFind != IntPtr.Zero)
+                _sciTextToFind = (_Sci_TextToFind)Marshal.PtrToStructure(_ptrSciTextToFind, typeof(_Sci_TextToFind));
+        }
+        void _freeNativeString() {
+            if (_sciTextToFind.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextToFind.lpstrText);
+        }
+
+        public void Dispose() {
+            if (!_disposed) {
+                _freeNativeString();
+                if (_ptrSciTextToFind != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextToFind);
+                _disposed = true;
+            }
+        }
+        ~Sci_TextToFind() {
+            Dispose();
+        }
+    }
+
+    #endregion
+
+    #region from scintilla NET
+
+    /// <summary>
+    /// Additional location options for line wrapping visual indicators.
+    /// </summary>
+    public enum WrapVisualFlagLocation {
+        /// <summary>
+        /// Wrap indicators are drawn near the border. This is the default.
+        /// </summary>
+        Default = SciMsg.SC_WRAPVISUALFLAGLOC_DEFAULT,
+
+        /// <summary>
+        /// Wrap indicators are drawn at the end of sublines near the text.
+        /// </summary>
+        EndByText = SciMsg.SC_WRAPVISUALFLAGLOC_END_BY_TEXT,
+
+        /// <summary>
+        /// Wrap indicators are drawn at the beginning of sublines near the text.
+        /// </summary>
+        StartByText = SciMsg.SC_WRAPVISUALFLAGLOC_START_BY_TEXT
+    }
+
+    /// <summary>
+    /// The visual indicator used on a wrapped line.
+    /// </summary>
+    [Flags]
+    public enum WrapVisualFlags {
+        /// <summary>
+        /// No visual indicator is displayed. This the default.
+        /// </summary>
+        None = SciMsg.SC_WRAPVISUALFLAG_NONE,
+
+        /// <summary>
+        /// A visual indicator is displayed at th end of a wrapped subline.
+        /// </summary>
+        End = SciMsg.SC_WRAPVISUALFLAG_END,
+
+        /// <summary>
+        /// A visual indicator is displayed at the beginning of a subline.
+        /// The subline is indented by 1 pixel to make room for the display.
+        /// </summary>
+        Start = SciMsg.SC_WRAPVISUALFLAG_START,
+
+        /// <summary>
+        /// A visual indicator is displayed in the number margin.
+        /// </summary>
+        Margin = SciMsg.SC_WRAPVISUALFLAG_MARGIN
+    }
+
+    /// <summary>
+    /// The line wrapping strategy.
+    /// </summary>
+    public enum WrapMode {
+        /// <summary>
+        /// Line wrapping is disabled. This is the default.
+        /// </summary>
+        None = SciMsg.SC_WRAP_NONE,
+
+        /// <summary>
+        /// Lines are wrapped on word or style boundaries.
+        /// </summary>
+        Word = SciMsg.SC_WRAP_WORD,
+
+        /// <summary>
+        /// Lines are wrapped between any character.
+        /// </summary>
+        Char = SciMsg.SC_WRAP_CHAR,
+
+        /// <summary>
+        /// Lines are wrapped on whitespace.
+        /// </summary>
+        Whitespace = SciMsg.SC_WRAP_WHITESPACE
+    }
+
+    /// <summary>
+    /// Indenting behavior of wrapped sublines.
+    /// </summary>
+    public enum WrapIndentMode {
+        /// <summary>
+        /// Wrapped sublines aligned to left of window plus the amount set by <see cref="ScintillaNET.Scintilla.WrapStartIndent" />.
+        /// This is the default.
+        /// </summary>
+        Fixed,
+
+        /// <summary>
+        /// Wrapped sublines are aligned to first subline indent.
+        /// </summary>
+        Same,
+
+        /// <summary>
+        /// Wrapped sublines are aligned to first subline indent plus one more level of indentation.
+        /// </summary>
+        Indent = SciMsg.SC_WRAPINDENT_INDENT
+    }
+
+    public enum WhitespaceMode {
+        /// <summary>
+        /// The normal display mode with whitespace displayed as an empty background color.
+        /// </summary>
+        Invisible = SciMsg.SCWS_INVISIBLE,
+
+        /// <summary>
+        /// Whitespace characters are drawn as dots and arrows.
+        /// </summary>
+        VisibleAlways = SciMsg.SCWS_VISIBLEALWAYS,
+
+        /// <summary>
+        /// Whitespace used for indentation is displayed normally but after the first visible character,
+        /// it is shown as dots and arrows.
+        /// </summary>
+        VisibleAfterIndent = SciMsg.SCWS_VISIBLEAFTERINDENT,
+    }
+
+    /// <summary>
+    /// Specifies the how patterns are matched when performing a search in a <see cref="Scintilla" /> control.
+    /// </summary>
+    /// <remarks>This enumeration has a FlagsAttribute attribute that allows a bitwise combination of its member values.</remarks>
+    [Flags]
+    public enum SearchFlags {
+        /// <summary>
+        /// Matches every instance of the search string.
+        /// </summary>
+        None = 0,
+
+        /// <summary>
+        /// A match only occurs with text that matches the case of the search string.
+        /// </summary>
+        MatchCase = SciMsg.SCFIND_MATCHCASE,
+
+        /// <summary>
+        /// A match only occurs if the characters before and after are not word characters.
+        /// </summary>
+        WholeWord = SciMsg.SCFIND_WHOLEWORD,
+
+        /// <summary>
+        /// A match only occurs if the character before is not a word character.
+        /// </summary>
+        WordStart = SciMsg.SCFIND_WORDSTART,
+
+        /// <summary>
+        /// The search string should be interpreted as a regular expression.
+        /// Regular expressions will only match ranges within a single line, never matching over multiple lines.
+        /// </summary>
+        Regex = SciMsg.SCFIND_REGEXP,
+
+        /// <summary>
+        /// Treat regular expression in a more POSIX compatible manner by interpreting bare '(' and ')' for tagged sections rather than "\(" and "\)".
+        /// </summary>
+        Posix = SciMsg.SCFIND_POSIX
+    }
+
+    /// <summary>
+    /// Specifies the behavior of pasting into multiple selections.
+    /// </summary>
+    public enum MultiPaste {
+        /// <summary>
+        /// Pasting into multiple selections only pastes to the main selection. This is the default.
+        /// </summary>
+        Once = SciMsg.SC_MULTIPASTE_ONCE,
+
+        /// <summary>
+        /// Pasting into multiple selections pastes into each selection.
+        /// </summary>
+        Each = SciMsg.SC_MULTIPASTE_EACH
+    }
+
+    /// <summary>
+    /// Specifies the lexer to use for syntax highlighting in a <see cref="Scintilla" /> control.
+    /// </summary>
+    public enum Lexer {
+        /// <summary>
+        /// Lexing is performed by the <see cref="Scintilla" /> control container (host) using
+        /// the <see cref="Scintilla.StyleNeeded" /> event.
+        /// </summary>
+        Container = SciMsg.SCLEX_CONTAINER,
+
+        /// <summary>
+        /// No lexing should be performed.
+        /// </summary>
+        Null = SciMsg.SCLEX_NULL,
+
+        /// <summary>
+        /// The Ada (95) language lexer.
+        /// </summary>
+        Ada = SciMsg.SCLEX_ADA,
+
+        /// <summary>
+        /// The assembly language lexer.
+        /// </summary>
+        Asm = SciMsg.SCLEX_ASM,
+
+        /// <summary>
+        /// The batch file lexer.
+        /// </summary>
+        Batch = SciMsg.SCLEX_BATCH,
+
+        /// <summary>
+        /// The C language family (C++, C, C#, Java, JavaScript, etc...) lexer.
+        /// </summary>
+        Cpp = SciMsg.SCLEX_CPP,
+
+        /// <summary>
+        /// The Cascading Style Sheets (CSS, SCSS) lexer.
+        /// </summary>
+        Css = SciMsg.SCLEX_CSS,
+
+        /// <summary>
+        /// The Fortran language lexer.
+        /// </summary>
+        Fortran = SciMsg.SCLEX_FORTRAN,
+
+        /// <summary>
+        /// The FreeBASIC language lexer.
+        /// </summary>
+        FreeBasic = SciMsg.SCLEX_FREEBASIC,
+
+        /// <summary>
+        /// The HyperText Markup Language (HTML) lexer.
+        /// </summary>
+        Html = SciMsg.SCLEX_HTML,
+
+        /// <summary>
+        /// The Lisp language lexer.
+        /// </summary>
+        Lisp = SciMsg.SCLEX_LISP,
+
+        /// <summary>
+        /// The Lua scripting language lexer.
+        /// </summary>
+        Lua = SciMsg.SCLEX_LUA,
+
+        /// <summary>
+        /// The Pascal language lexer.
+        /// </summary>
+        Pascal = SciMsg.SCLEX_PASCAL,
+
+        /// <summary>
+        /// The Perl language lexer.
+        /// </summary>
+        Perl = SciMsg.SCLEX_PERL,
+
+        /// <summary>
+        /// The PHP: Hypertext Preprocessor (PHP) script lexer.
+        /// </summary>
+        PhpScript = SciMsg.SCLEX_PHPSCRIPT,
+
+        /// <summary>
+        /// Properties file (INI) lexer.
+        /// </summary>
+        Properties = SciMsg.SCLEX_PROPERTIES,
+
+        /// <summary>
+        /// The PureBasic language lexer.
+        /// </summary>
+        PureBasic = SciMsg.SCLEX_PUREBASIC,
+
+        /// <summary>
+        /// The Python language lexer.
+        /// </summary>
+        Python = SciMsg.SCLEX_PYTHON,
+
+        /// <summary>
+        /// The Ruby language lexer.
+        /// </summary>
+        Ruby = SciMsg.SCLEX_RUBY,
+
+        /// <summary>
+        /// The SmallTalk language lexer.
+        /// </summary>
+        Smalltalk = SciMsg.SCLEX_SMALLTALK,
+
+        /// <summary>
+        /// The Structured Query Language (SQL) lexer.
+        /// </summary>
+        Sql = SciMsg.SCLEX_SQL,
+
+        /// <summary>
+        /// The Visual Basic (VB) lexer.
+        /// </summary>
+        Vb = SciMsg.SCLEX_VB,
+
+        /// <summary>
+        /// The Visual Basic Script (VBScript) lexer.
+        /// </summary>
+        VbScript = SciMsg.SCLEX_VBSCRIPT,
+
+        /// <summary>
+        /// The Verilog hardware description language lexer.
+        /// </summary>
+        Verilog = SciMsg.SCLEX_VERILOG,
+
+        /// <summary>
+        /// The Extensible Markup Language (XML) lexer.
+        /// </summary>
+        Xml = SciMsg.SCLEX_XML,
+
+        /// <summary>
+        /// The Blitz (Blitz3D, BlitzMax, etc...) variant of Basic lexer.
+        /// </summary>
+        BlitzBasic = SciMsg.SCLEX_BLITZBASIC,
+
+        /// <summary>
+        /// The Markdown syntax lexer.
+        /// </summary>
+        Markdown = SciMsg.SCLEX_MARKDOWN,
+
+        /// <summary>
+        /// The R programming language lexer.
+        /// </summary>
+        R = SciMsg.SCLEX_R
+    }
+
+    public enum FontQuality {
+        /// <summary>
+        /// Specifies that the character quality of the font does not matter; so the lowest quality can be used.
+        /// This is the default.
+        /// </summary>
+        Default = SciMsg.SC_EFF_QUALITY_DEFAULT,
+
+        /// <summary>
+        /// Specifies that anti-aliasing should not be used when rendering text.
+        /// </summary>
+        NonAntiAliased = SciMsg.SC_EFF_QUALITY_NON_ANTIALIASED,
+
+        /// <summary>
+        /// Specifies that anti-aliasing should be used when rendering text, if the font supports it.
+        /// </summary>
+        AntiAliased = SciMsg.SC_EFF_QUALITY_ANTIALIASED,
+
+        /// <summary>
+        /// Specifies that ClearType anti-aliasing should be used when rendering text, if the font supports it.
+        /// </summary>
+        LcdOptimized = SciMsg.SC_EFF_QUALITY_LCD_OPTIMIZED
+    }
+
+    /// <summary>
+    /// End-of-line format.
+    /// </summary>
+    public enum Eol {
+        /// <summary>
+        /// Carriage Return, Line Feed pair "\r\n" (0x0D0A).
+        /// </summary>
+        CrLf = SciMsg.SC_EOL_CRLF,
+
+        /// <summary>
+        /// Carriage Return '\r' (0x0D).
+        /// </summary>
+        Cr = SciMsg.SC_EOL_CR,
+
+        /// <summary>
+        /// Line Feed '\n' (0x0A).
+        /// </summary>
+        Lf = SciMsg.SC_EOL_LF
+    }
+
+    /// <summary>
+    /// Actions which can be performed by the application or bound to keys in a Scintilla control.
+    /// </summary>
+    public enum Command {
+        /// <summary>
+        /// When bound to keys performs the standard platform behavior.
+        /// </summary>
+        Default = 0,
+
+        /// <summary>
+        /// Performs no action and when bound to keys prevents them from propagating to the parent window.
+        /// </summary>
+        Null = SciMsg.SCI_NULL,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret down one line.
+        /// </summary>
+        LineDown = SciMsg.SCI_LINEDOWN,
+
+        /// <summary>
+        /// Extends the selection down one line.
+        /// </summary>
+        LineDownExtend = SciMsg.SCI_LINEDOWNEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection down one line.
+        /// </summary>
+        LineDownRectExtend = SciMsg.SCI_LINEDOWNRECTEXTEND,
+
+        /// <summary>
+        /// Scrolls down one line.
+        /// </summary>
+        LineScrollDown = SciMsg.SCI_LINESCROLLDOWN,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret up one line.
+        /// </summary>
+        LineUp = SciMsg.SCI_LINEUP,
+
+        /// <summary>
+        /// Extends the selection up one line.
+        /// </summary>
+        LineUpExtend = SciMsg.SCI_LINEUPEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection up one line.
+        /// </summary>
+        LineUpRectExtend = SciMsg.SCI_LINEUPRECTEXTEND,
+
+        /// <summary>
+        /// Scrolls up one line.
+        /// </summary>
+        LineScrollUp = SciMsg.SCI_LINESCROLLUP,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret down one paragraph.
+        /// </summary>
+        ParaDown = SciMsg.SCI_PARADOWN,
+
+        /// <summary>
+        /// Extends the selection down one paragraph.
+        /// </summary>
+        ParaDownExtend = SciMsg.SCI_PARADOWNEXTEND,
+
+        /// <summary>
+        /// Moves the caret up one paragraph.
+        /// </summary>
+        ParaUp = SciMsg.SCI_PARAUP,
+
+        /// <summary>
+        /// Extends the selection up one paragraph.
+        /// </summary>
+        ParaUpExtend = SciMsg.SCI_PARAUPEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret left one character.
+        /// </summary>
+        CharLeft = SciMsg.SCI_CHARLEFT,
+
+        /// <summary>
+        /// Extends the selection left one character.
+        /// </summary>
+        CharLeftExtend = SciMsg.SCI_CHARLEFTEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection left one character.
+        /// </summary>
+        CharLeftRectExtend = SciMsg.SCI_CHARLEFTRECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret right one character.
+        /// </summary>
+        CharRight = SciMsg.SCI_CHARRIGHT,
+
+        /// <summary>
+        /// Extends the selection right one character.
+        /// </summary>
+        CharRightExtend = SciMsg.SCI_CHARRIGHTEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection right one character.
+        /// </summary>
+        CharRightRectExtend = SciMsg.SCI_CHARRIGHTRECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the start of the previous word.
+        /// </summary>
+        WordLeft = SciMsg.SCI_WORDLEFT,
+
+        /// <summary>
+        /// Extends the selection to the start of the previous word.
+        /// </summary>
+        WordLeftExtend = SciMsg.SCI_WORDLEFTEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the start of the next word.
+        /// </summary>
+        WordRight = SciMsg.SCI_WORDRIGHT,
+
+        /// <summary>
+        /// Extends the selection to the start of the next word.
+        /// </summary>
+        WordRightExtend = SciMsg.SCI_WORDRIGHTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the end of the previous word.
+        /// </summary>
+        WordLeftEnd = SciMsg.SCI_WORDLEFTEND,
+
+        /// <summary>
+        /// Extends the selection to the end of the previous word.
+        /// </summary>
+        WordLeftEndExtend = SciMsg.SCI_WORDLEFTENDEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the end of the next word.
+        /// </summary>
+        WordRightEnd = SciMsg.SCI_WORDRIGHTEND,
+
+        /// <summary>
+        /// Extends the selection to the end of the next word.
+        /// </summary>
+        WordRightEndExtend = SciMsg.SCI_WORDRIGHTENDEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the previous word segment (case change or underscore).
+        /// </summary>
+        WordPartLeft = SciMsg.SCI_WORDPARTLEFT,
+
+        /// <summary>
+        /// Extends the selection to the previous word segment (case change or underscore).
+        /// </summary>
+        WordPartLeftExtend = SciMsg.SCI_WORDPARTLEFTEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the next word segment (case change or underscore).
+        /// </summary>
+        WordPartRight = SciMsg.SCI_WORDPARTRIGHT,
+
+        /// <summary>
+        /// Extends the selection to the next word segment (case change or underscore).
+        /// </summary>
+        WordPartRightExtend = SciMsg.SCI_WORDPARTRIGHTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the start of the line.
+        /// </summary>
+        Home = SciMsg.SCI_HOME,
+
+        /// <summary>
+        /// Extends the selection to the start of the line.
+        /// </summary>
+        HomeExtend = SciMsg.SCI_HOMEEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection to the start of the line.
+        /// </summary>
+        HomeRectExtend = SciMsg.SCI_HOMERECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the start of the display line.
+        /// </summary>
+        HomeDisplay = SciMsg.SCI_HOMEDISPLAY,
+
+        /// <summary>
+        /// Extends the selection to the start of the display line.
+        /// </summary>
+        HomeDisplayExtend = SciMsg.SCI_HOMEDISPLAYEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the start of the display or document line.
+        /// </summary>
+        HomeWrap = SciMsg.SCI_HOMEWRAP,
+
+        /// <summary>
+        /// Extends the selection to the start of the display or document line.
+        /// </summary>
+        HomeWrapExtend = SciMsg.SCI_HOMEWRAPEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the first non-whitespace character of the line.
+        /// </summary>
+        VcHome = SciMsg.SCI_VCHOME,
+
+        /// <summary>
+        /// Extends the selection to the first non-whitespace character of the line.
+        /// </summary>
+        VcHomeExtend = SciMsg.SCI_VCHOMEEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection to the first non-whitespace character of the line.
+        /// </summary>
+        VcHomeRectExtend = SciMsg.SCI_VCHOMERECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the first non-whitespace character of the display or document line.
+        /// </summary>
+        VcHomeWrap = SciMsg.SCI_VCHOMEWRAP,
+
+        /// <summary>
+        /// Extends the selection to the first non-whitespace character of the display or document line.
+        /// </summary>
+        VcHomeWrapExtend = SciMsg.SCI_VCHOMEWRAPEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the first non-whitespace character of the display line.
+        /// </summary>
+        VcHomeDisplay = SciMsg.SCI_VCHOMEDISPLAY,
+
+        /// <summary>
+        /// Extends the selection to the first non-whitespace character of the display line.
+        /// </summary>
+        VcHomeDisplayExtend = SciMsg.SCI_VCHOMEDISPLAYEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the end of the document line.
+        /// </summary>
+        LineEnd = SciMsg.SCI_LINEEND,
+
+        /// <summary>
+        /// Extends the selection to the end of the document line.
+        /// </summary>
+        LineEndExtend = SciMsg.SCI_LINEENDEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection to the end of the document line.
+        /// </summary>
+        LineEndRectExtend = SciMsg.SCI_LINEENDRECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the end of the display line.
+        /// </summary>
+        LineEndDisplay = SciMsg.SCI_LINEENDDISPLAY,
+
+        /// <summary>
+        /// Extends the selection to the end of the display line.
+        /// </summary>
+        LineEndDisplayExtend = SciMsg.SCI_LINEENDDISPLAYEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the end of the display or document line.
+        /// </summary>
+        LineEndWrap = SciMsg.SCI_LINEENDWRAP,
+
+        /// <summary>
+        /// Extends the selection to the end of the display or document line.
+        /// </summary>
+        LineEndWrapExtend = SciMsg.SCI_LINEENDWRAPEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret to the start of the document.
+        /// </summary>
+        DocumentStart = SciMsg.SCI_DOCUMENTSTART,
+
+        /// <summary>
+        /// Extends the selection to the start of the document.
+        /// </summary>
+        DocumentStartExtend = SciMsg.SCI_DOCUMENTSTARTEXTEND,
+
+        /// <summary>
+        /// Moves the caret to the end of the document.
+        /// </summary>
+        DocumentEnd = SciMsg.SCI_DOCUMENTEND,
+
+        /// <summary>
+        /// Extends the selection to the end of the document.
+        /// </summary>
+        DocumentEndExtend = SciMsg.SCI_DOCUMENTENDEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret up one page.
+        /// </summary>
+        PageUp = SciMsg.SCI_PAGEUP,
+
+        /// <summary>
+        /// Extends the selection up one page.
+        /// </summary>
+        PageUpExtend = SciMsg.SCI_PAGEUPEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection up one page.
+        /// </summary>
+        PageUpRectExtend = SciMsg.SCI_PAGEUPRECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret down one page.
+        /// </summary>
+        PageDown = SciMsg.SCI_PAGEDOWN,
+
+        /// <summary>
+        /// Extends the selection down one page.
+        /// </summary>
+        PageDownExtend = SciMsg.SCI_PAGEDOWNEXTEND,
+
+        /// <summary>
+        /// Extends the rectangular selection down one page.
+        /// </summary>
+        PageDownRectExtend = SciMsg.SCI_PAGEDOWNRECTEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret up one window or page.
+        /// </summary>
+        StutteredPageUp = SciMsg.SCI_STUTTEREDPAGEUP,
+
+        /// <summary>
+        /// Extends the selection up one window or page.
+        /// </summary>
+        StutteredPageUpExtend = SciMsg.SCI_STUTTEREDPAGEUPEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the caret down one window or page.
+        /// </summary>
+        StutteredPageDown = SciMsg.SCI_STUTTEREDPAGEDOWN,
+
+        /// <summary>
+        /// Extends the selection down one window or page.
+        /// </summary>
+        StutteredPageDownExtend = SciMsg.SCI_STUTTEREDPAGEDOWNEXTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Deletes the character left of the caret.
+        /// </summary>
+        DeleteBack = SciMsg.SCI_DELETEBACK,
+
+        /// <summary>
+        /// Deletes the character (excluding line breaks) left of the caret.
+        /// </summary>
+        DeleteBackNotLine = SciMsg.SCI_DELETEBACKNOTLINE,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Deletes from the caret to the start of the previous word.
+        /// </summary>
+        DelWordLeft = SciMsg.SCI_DELWORDLEFT,
+
+        /// <summary>
+        /// Deletes from the caret to the start of the next word.
+        /// </summary>
+        DelWordRight = SciMsg.SCI_DELWORDRIGHT,
+
+        /// <summary>
+        /// Deletes from the caret to the end of the next word.
+        /// </summary>
+        DelWordRightEnd = SciMsg.SCI_DELWORDRIGHTEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Deletes the characters left of the caret to the start of the line.
+        /// </summary>
+        DelLineLeft = SciMsg.SCI_DELLINELEFT,
+
+        /// <summary>
+        /// Deletes the characters right of the caret to the start of the line.
+        /// </summary>
+        DelLineRight = SciMsg.SCI_DELLINERIGHT,
+
+        /// <summary>
+        /// Deletes the current line.
+        /// </summary>
+        LineDelete = SciMsg.SCI_LINEDELETE,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Removes the current line and places it on the clipboard.
+        /// </summary>
+        LineCut = SciMsg.SCI_LINECUT,
+
+        /// <summary>
+        /// Copies the current line and places it on the clipboard.
+        /// </summary>
+        LineCopy = SciMsg.SCI_LINECOPY,
+
+        /// <summary>
+        /// Transposes the current and previous lines.
+        /// </summary>
+        LineTranspose = SciMsg.SCI_LINETRANSPOSE,
+
+        /// <summary>
+        /// Duplicates the current line.
+        /// </summary>
+        LineDuplicate = SciMsg.SCI_LINEDUPLICATE,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Converts the selection to lowercase.
+        /// </summary>
+        Lowercase = SciMsg.SCI_LOWERCASE,
+
+        /// <summary>
+        /// Converts the selection to uppercase.
+        /// </summary>
+        Uppercase = SciMsg.SCI_UPPERCASE,
+
+        /// <summary>
+        /// Cancels autocompletion, calltip display, and drops any additional selections.
+        /// </summary>
+        Cancel = SciMsg.SCI_CANCEL,
+
+        /// <summary>
+        /// Toggles overtype. See <see cref="Scintilla.Overtype" />.
+        /// </summary>
+        EditToggleOvertype = SciMsg.SCI_EDITTOGGLEOVERTYPE,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Inserts a newline character.
+        /// </summary>
+        NewLine = SciMsg.SCI_NEWLINE,
+
+        /// <summary>
+        /// Inserts a form feed character.
+        /// </summary>
+        FormFeed = SciMsg.SCI_FORMFEED,
+
+        /// <summary>
+        /// Adds a tab (indent) character.
+        /// </summary>
+        Tab = SciMsg.SCI_TAB,
+
+        /// <summary>
+        /// Removes a tab (indent) character from the start of a line.
+        /// </summary>
+        BackTab = SciMsg.SCI_BACKTAB,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Duplicates the current selection.
+        /// </summary>
+        SelectionDuplicate = SciMsg.SCI_SELECTIONDUPLICATE,
+
+        /// <summary>
+        /// Moves the caret vertically to the center of the screen.
+        /// </summary>
+        VerticalCenterCaret = SciMsg.SCI_VERTICALCENTRECARET,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Moves the selected lines up.
+        /// </summary>
+        MoveSelectedLinesUp = SciMsg.SCI_MOVESELECTEDLINESUP,
+
+        /// <summary>
+        /// Moves the selected lines down.
+        /// </summary>
+        MoveSelectedLinesDown = SciMsg.SCI_MOVESELECTEDLINESDOWN,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Scrolls to the start of the document without changing the selection.
+        /// </summary>
+        ScrollToStart = SciMsg.SCI_SCROLLTOSTART,
+
+        /// <summary>
+        /// Scrolls to the end of the document without changing the selection.
+        /// </summary>
+        ScrollToEnd = SciMsg.SCI_SCROLLTOEND,
+
+        // --------------------------------------------------------------------
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.ZoomIn" />.
+        /// </summary>
+        ZoomIn = SciMsg.SCI_ZOOMIN,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.ZoomOut" />.
+        /// </summary>
+        ZoomOut = SciMsg.SCI_ZOOMOUT,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.Undo" />.
+        /// </summary>
+        Undo = SciMsg.SCI_UNDO,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.Redo" />.
+        /// </summary>
+        Redo = SciMsg.SCI_REDO,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.SwapMainAnchorCaret" />
+        /// </summary>
+        SwapMainAnchorCaret = SciMsg.SCI_SWAPMAINANCHORCARET,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.RotateSelection" />
+        /// </summary>
+        RotateSelection = SciMsg.SCI_ROTATESELECTION,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.MultipleSelectAddNext" />
+        /// </summary>
+        MultipleSelectAddNext = SciMsg.SCI_MULTIPLESELECTADDNEXT,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.MultipleSelectAddEach" />
+        /// </summary>
+        MultipleSelectAddEach = SciMsg.SCI_MULTIPLESELECTADDEACH,
+
+        /// <summary>
+        /// Command equivalent to <see cref="Scintilla.SelectAll" />
+        /// </summary>
+        SelectAll = SciMsg.SCI_SELECTALL
+    }
+
+    /// <summary>
+    /// Fold actions.
+    /// </summary>
+    public enum FoldAction {
+        /// <summary>
+        /// Contract the fold.
+        /// </summary>
+        Contract = SciMsg.SC_FOLDACTION_CONTRACT,
+
+        /// <summary>
+        /// Expand the fold.
+        /// </summary>
+        Expand = SciMsg.SC_FOLDACTION_EXPAND,
+
+        /// <summary>
+        /// Toggle between contracted and expanded.
+        /// </summary>
+        Toggle = SciMsg.SC_FOLDACTION_TOGGLE
+    }
+
+    #endregion
+
+
+    [Flags]
+    public enum SciSpecialStyles {
+        STYLE_DEFAULT = 32,
+        STYLE_LINENUMBER = 33,
+        STYLE_BRACELIGHT = 34,
+        STYLE_BRACEBAD = 35,
+        STYLE_CONTROLCHAR = 36,
+        STYLE_INDENTGUIDE = 37,
+        STYLE_CALLTIP = 38,
+        STYLE_LASTPREDEFINED = 39
     }
 
     [Flags]
-    public enum SciMsg : uint {
-        SCN_FOCUSIN = 2028,
-        SCN_FOCUSOUT = 2029,
-        SCI_CALLTIPSETPOSSTART = 2214,
-        SCI_CALLTIPSETPOSITION = 2213,
-        INVALID_POSITION = 0xFFFFFFFF,
-        SCI_START = 2000,
-        SCI_OPTIONAL_START = 3000,
-        SCI_LEXER_START = 4000,
-        SCI_ADDTEXT = 2001,
-        SCI_ADDSTYLEDTEXT = 2002,
-        SCI_INSERTTEXT = 2003,
-        SCI_CLEARALL = 2004,
-        SCI_CLEARDOCUMENTSTYLE = 2005,
-        SCI_GETLENGTH = 2006,
-        SCI_GETCHARAT = 2007,
-        SCI_GETCURRENTPOS = 2008,
-        SCI_GETANCHOR = 2009,
-        SCI_GETSTYLEAT = 2010,
-        SCI_REDO = 2011,
-        SCI_SETUNDOCOLLECTION = 2012,
-        SCI_SELECTALL = 2013,
-        SCI_SETSAVEPOINT = 2014,
-        SCI_GETSTYLEDTEXT = 2015,
-        SCI_CANREDO = 2016,
-        SCI_MARKERLINEFROMHANDLE = 2017,
-        SCI_MARKERDELETEHANDLE = 2018,
-        SCI_GETUNDOCOLLECTION = 2019,
-        SCWS_INVISIBLE = 0,
-        SCWS_VISIBLEALWAYS = 1,
-        SCWS_VISIBLEAFTERINDENT = 2,
-        SCI_GETVIEWWS = 2020,
-        SCI_SETVIEWWS = 2021,
-        SCI_POSITIONFROMPOINT = 2022,
-        SCI_POSITIONFROMPOINTCLOSE = 2023,
-        SCI_GOTOLINE = 2024,
-        SCI_GOTOPOS = 2025,
-        SCI_SETANCHOR = 2026,
-        SCI_GETCURLINE = 2027,
-        SCI_GETENDSTYLED = 2028,
+    public enum SciMarkerStyle {
+        SC_MARK_CIRCLE = 0,
+        SC_MARK_ROUNDRECT = 1,
+        SC_MARK_ARROW = 2,
+        SC_MARK_SMALLRECT = 3,
+        SC_MARK_SHORTARROW = 4,
+        SC_MARK_EMPTY = 5,
+        SC_MARK_ARROWDOWN = 6,
+        SC_MARK_MINUS = 7,
+        SC_MARK_PLUS = 8,
+        SC_MARK_VLINE = 9,
+        SC_MARK_LCORNER = 10,
+        SC_MARK_TCORNER = 11,
+        SC_MARK_BOXPLUS = 12,
+        SC_MARK_BOXPLUSCONNECTED = 13,
+        SC_MARK_BOXMINUS = 14,
+        SC_MARK_BOXMINUSCONNECTED = 15,
+        SC_MARK_LCORNERCURVE = 16,
+        SC_MARK_TCORNERCURVE = 17,
+        SC_MARK_CIRCLEPLUS = 18,
+        SC_MARK_CIRCLEPLUSCONNECTED = 19,
+        SC_MARK_CIRCLEMINUS = 20,
+        SC_MARK_CIRCLEMINUSCONNECTED = 21,
+        SC_MARK_BACKGROUND = 22,
+        SC_MARK_DOTDOTDOT = 23,
+        SC_MARK_ARROWS = 24,
+        SC_MARK_PIXMAP = 25,
+        SC_MARK_FULLRECT = 26,
+        SC_MARK_LEFTRECT = 27,
+        SC_MARK_AVAILABLE = 28,
+        SC_MARK_UNDERLINE = 29,
+        SC_MARK_RGBAIMAGE = 30,
+        SC_MARK_CHARACTER = 10000,
+    }
+
+    [Flags]
+    public enum SciMarginType {
+        SC_MARGIN_SYMBOL = 0,
+        SC_MARGIN_NUMBER = 1,
+        SC_MARGIN_BACK = 2,
+        SC_MARGIN_FORE = 3,
+        SC_MARGIN_TEXT = 4,
+        SC_MARGIN_RTEXT = 5,
+    }
+
+    [Flags]
+    public enum SciIndicatorType {
+        INDIC_PLAIN = 0,
+        INDIC_SQUIGGLE = 1,
+        INDIC_TT = 2,
+        INDIC_DIAGONAL = 3,
+        INDIC_STRIKE = 4,
+        INDIC_HIDDEN = 5,
+        INDIC_BOX = 6,
+        INDIC_ROUNDBOX = 7,
+        INDIC_STRAIGHTBOX = 8,
+        INDIC_DASH = 9,
+        INDIC_DOTS = 10,
+        INDIC_SQUIGGLELOW = 11,
+        INDIC_DOTBOX = 12,
+        INDIC_SQUIGGLEPIXMAP = 13,
+        INDIC_COMPOSITIONTHICK = 14,
+        INDIC_COMPOSITIONTHIN = 15,
+        INDIC_TEXTFORE = 17
+    }
+
+    [Flags]
+    public enum SciMsg : int {
+        // Autocompletions
+        SC_AC_FILLUP = 1,
+        SC_AC_DOUBLECLICK = 2,
+        SC_AC_TAB = 3,
+        SC_AC_NEWLINE = 4,
+        SC_AC_COMMAND = 5,
+
+        // Annotations
+        ANNOTATION_HIDDEN = 0,
+        ANNOTATION_STANDARD = 1,
+        ANNOTATION_BOXED = 2,
+        ANNOTATION_INDENTED = 3,
+
+        // Indentation 
+        SC_IV_NONE = 0,
+        SC_IV_REAL = 1,
+        SC_IV_LOOKFORWARD = 2,
+        SC_IV_LOOKBOTH = 3,
+
+        // Keys
+        SCMOD_NORM = 0,
+        SCMOD_SHIFT = 1,
+        SCMOD_CTRL = 2,
+        SCMOD_ALT = 4,
+        SCMOD_SUPER = 8,
+        SCMOD_META = 16,
+
+        SCI_NORM = 0,
+        SCI_SHIFT = SCMOD_SHIFT,
+        SCI_CTRL = SCMOD_CTRL,
+        SCI_ALT = SCMOD_ALT,
+        SCI_META = SCMOD_META,
+        SCI_CSHIFT = (SCI_CTRL | SCI_SHIFT),
+        SCI_ASHIFT = (SCI_ALT | SCI_SHIFT),
+
+        // Caret styles
+        CARETSTYLE_INVISIBLE = 0,
+        CARETSTYLE_LINE = 1,
+        CARETSTYLE_BLOCK = 2,
+
+        // Line edges
+        EDGE_NONE = 0,
+        EDGE_LINE = 1,
+        EDGE_BACKGROUND = 2,
+
+        // Indicators
+        INDIC_PLAIN = 0,
+        INDIC_SQUIGGLE = 1,
+        INDIC_TT = 2,
+        INDIC_DIAGONAL = 3,
+        INDIC_STRIKE = 4,
+        INDIC_HIDDEN = 5,
+        INDIC_BOX = 6,
+        INDIC_ROUNDBOX = 7,
+        INDIC_STRAIGHTBOX = 8,
+        INDIC_DASH = 9,
+        INDIC_DOTS = 10,
+        INDIC_SQUIGGLELOW = 11,
+        INDIC_DOTBOX = 12,
+        INDIC_SQUIGGLEPIXMAP = 13,
+        INDIC_COMPOSITIONTHICK = 14,
+        INDIC_COMPOSITIONTHIN = 15,
+        INDIC_FULLBOX = 16,
+        INDIC_TEXTFORE = 17,
+        INDIC_MAX = 31,
+        INDIC_CONTAINER = 8,
+
+        // Phases
+        SC_PHASES_ONE = 0,
+        SC_PHASES_TWO = 1,
+        SC_PHASES_MULTIPLE = 2,
+
+        // Indicator flags
+        SC_INDICFLAG_VALUEFORE = 1,
+        SC_INDICVALUEBIT = 0x1000000,
+        SC_INDICVALUEMASK = 0xFFFFFF,
+
+        // public const int INDIC0_MASK = 0x20,
+        // public const int INDIC1_MASK = 0x40,
+        // public const int INDIC2_MASK = 0x80,
+        // public const int INDICS_MASK = 0xE0,
+
+        KEYWORDSET_MAX = 8,
+
+        // Alpha ranges
+        SC_ALPHA_TRANSPARENT = 0,
+        SC_ALPHA_OPAQUE = 255,
+        SC_ALPHA_NOALPHA = 256,
+
+        // Automatic folding
+        SC_AUTOMATICFOLD_SHOW = 0x0001,
+        SC_AUTOMATICFOLD_CLICK = 0x0002,
+        SC_AUTOMATICFOLD_CHANGE = 0x0004,
+
+        // Caret sticky behavior
+        SC_CARETSTICKY_OFF = 0,
+        SC_CARETSTICKY_ON = 1,
+        SC_CARETSTICKY_WHITESPACE = 2,
+
+        // Encodings
+        SC_CP_UTF8 = 65001,
+
+        // Cursors
+        SC_CURSORNORMAL = -1,
+        SC_CURSORARROW = 2,
+        SC_CURSORWAIT = 4,
+        SC_CURSORREVERSEARROW = 7,
+
+        // Font quality
+        SC_EFF_QUALITY_DEFAULT = 0,
+        SC_EFF_QUALITY_NON_ANTIALIASED = 1,
+        SC_EFF_QUALITY_ANTIALIASED = 2,
+        SC_EFF_QUALITY_LCD_OPTIMIZED = 3,
+
+        // End-of-line
         SC_EOL_CRLF = 0,
         SC_EOL_CR = 1,
         SC_EOL_LF = 2,
-        SCI_CONVERTEOLS = 2029,
-        SCI_GETEOLMODE = 2030,
-        SCI_SETEOLMODE = 2031,
-        SCI_STARTSTYLING = 2032,
-        SCI_SETSTYLING = 2033,
-        SCI_GETBUFFEREDDRAW = 2034,
-        SCI_SETBUFFEREDDRAW = 2035,
-        SCI_SETTABWIDTH = 2036,
-        SCI_GETTABWIDTH = 2121,
-        SC_CP_UTF8 = 65001,
-        SC_CP_DBCS = 1,
-        SCI_SETCODEPAGE = 2037,
-        SCI_SETUSEPALETTE = 2039,
+
+        // Fold action
+        SC_FOLDACTION_CONTRACT = 0,
+        SC_FOLDACTION_EXPAND = 1,
+        SC_FOLDACTION_TOGGLE = 2,
+
+        // Fold level
+        SC_FOLDLEVELBASE = 0x400,
+        SC_FOLDLEVELWHITEFLAG = 0x1000,
+        SC_FOLDLEVELHEADERFLAG = 0x2000,
+        SC_FOLDLEVELNUMBERMASK = 0x0FFF,
+
+        // Fold flags
+        SC_FOLDFLAG_LINEBEFORE_EXPANDED = 0x0002,
+        SC_FOLDFLAG_LINEBEFORE_CONTRACTED = 0x0004,
+        SC_FOLDFLAG_LINEAFTER_EXPANDED = 0x0008,
+        SC_FOLDFLAG_LINEAFTER_CONTRACTED = 0x0010,
+        SC_FOLDFLAG_LEVELNUMBERS = 0x0040,
+        SC_FOLDFLAG_LINESTATE = 0x0080,
+
+        // Line end type
+        SC_LINE_END_TYPE_DEFAULT = 0,
+        SC_LINE_END_TYPE_UNICODE = 1,
+
+        // Margins
+        SC_MAX_MARGIN = 4,
+
+        SC_MARGIN_SYMBOL = 0,
+        SC_MARGIN_NUMBER = 1,
+        SC_MARGIN_BACK = 2,
+        SC_MARGIN_FORE = 3,
+        SC_MARGIN_TEXT = 4,
+        SC_MARGIN_RTEXT = 5,
+
+        SC_MARGINOPTION_NONE = 0,
+        SC_MARGINOPTION_SUBLINESELECT = 1,
+
+        // Markers
         MARKER_MAX = 31,
         SC_MARK_CIRCLE = 0,
         SC_MARK_ROUNDRECT = 1,
@@ -2382,6 +3584,8 @@ namespace _3PA.Interop {
         SC_MARK_LEFTRECT = 27,
         SC_MARK_AVAILABLE = 28,
         SC_MARK_UNDERLINE = 29,
+        SC_MARK_RGBAIMAGE = 30,
+        SC_MARK_BOOKMARK = 31,
         SC_MARK_CHARACTER = 10000,
         SC_MARKNUM_FOLDEREND = 25,
         SC_MARKNUM_FOLDEROPENMID = 26,
@@ -2390,10 +3594,108 @@ namespace _3PA.Interop {
         SC_MARKNUM_FOLDERSUB = 29,
         SC_MARKNUM_FOLDER = 30,
         SC_MARKNUM_FOLDEROPEN = 31,
-        SC_MASK_FOLDERS = 0xFE000000,
+        //SC_MASK_FOLDERS = 0xFE000000,
+
+        SC_MULTIPASTE_ONCE = 0,
+        SC_MULTIPASTE_EACH = 1,
+
+        SC_ORDER_PRESORTED = 0,
+        SC_ORDER_PERFORMSORT = 1,
+        SC_ORDER_CUSTOM = 2,
+
+        // Update notification reasons
+        SC_UPDATE_CONTENT = 0x01,
+        SC_UPDATE_SELECTION = 0x02,
+        SC_UPDATE_V_SCROLL = 0x04,
+        SC_UPDATE_H_SCROLL = 0x08,
+
+        // Modified notification types
+        SC_MOD_INSERTTEXT = 0x1,
+        SC_MOD_DELETETEXT = 0x2,
+        SC_MOD_BEFOREINSERT = 0x400,
+        SC_MOD_BEFOREDELETE = 0x800,
+        SC_MOD_CHANGEANNOTATION = 0x20000,
+        SC_MOD_INSERTCHECK = 0x100000,
+
+        // Modified flags
+        SC_PERFORMED_USER = 0x10,
+        SC_PERFORMED_UNDO = 0x20,
+        SC_PERFORMED_REDO = 0x40,
+
+        // Status codes
+        SC_STATUS_OK = 0,
+        SC_STATUS_FAILURE = 1,
+        SC_STATUS_BADALLOC = 2,
+
+        // Dwell
+        SC_TIME_FOREVER = 10000000,
+
+        // Property types
+        SC_TYPE_BOOLEAN = 0,
+        SC_TYPE_INTEGER = 1,
+        SC_TYPE_STRING = 2,
+
+        // Search flags
+        SCFIND_WHOLEWORD = 0x2,
+        SCFIND_MATCHCASE = 0x4,
+        SCFIND_WORDSTART = 0x00100000,
+        SCFIND_REGEXP = 0x00200000,
+        SCFIND_POSIX = 0x00400000,
+        SCFIND_CXX11REGEX = 0x00800000,
+
+        // Functions
+        SCI_POSITIONAFTER = 2418,
+        SCI_START = 2000,
+        SCI_OPTIONAL_START = 3000,
+        SCI_LEXER_START = 4000,
+        SCI_ADDTEXT = 2001,
+        SCI_ADDSTYLEDTEXT = 2002,
+        SCI_INSERTTEXT = 2003,
+        SCI_CHANGEINSERTION = 2672,
+        SCI_CLEARALL = 2004,
+        SCI_DELETERANGE = 2645,
+        SCI_CLEARDOCUMENTSTYLE = 2005,
+        SCI_GETLENGTH = 2006,
+        SCI_GETCHARAT = 2007,
+        SCI_GETCURRENTPOS = 2008,
+        SCI_GETANCHOR = 2009,
+        SCI_GETSTYLEAT = 2010,
+        SCI_REDO = 2011,
+        SCI_SETUNDOCOLLECTION = 2012,
+        SCI_SELECTALL = 2013,
+        SCI_SETSAVEPOINT = 2014,
+        SCI_GETSTYLEDTEXT = 2015,
+        SCI_CANREDO = 2016,
+        SCI_MARKERLINEFROMHANDLE = 2017,
+        SCI_MARKERDELETEHANDLE = 2018,
+        SCI_GETUNDOCOLLECTION = 2019,
+        SCI_GETVIEWWS = 2020,
+        SCI_SETVIEWWS = 2021,
+        SCI_POSITIONFROMPOINT = 2022,
+        SCI_POSITIONFROMPOINTCLOSE = 2023,
+        SCI_GOTOLINE = 2024,
+        SCI_GOTOPOS = 2025,
+        SCI_SETANCHOR = 2026,
+        SCI_GETCURLINE = 2027,
+        SCI_GETENDSTYLED = 2028,
+        SCI_CONVERTEOLS = 2029,
+        SCI_GETEOLMODE = 2030,
+        SCI_SETEOLMODE = 2031,
+        SCI_STARTSTYLING = 2032,
+        SCI_SETSTYLING = 2033,
+        SCI_GETBUFFEREDDRAW = 2034,
+        SCI_SETBUFFEREDDRAW = 2035,
+        SCI_SETTABWIDTH = 2036,
+        SCI_GETTABWIDTH = 2121,
+        SCI_CLEARTABSTOPS = 2675,
+        SCI_ADDTABSTOP = 2676,
+        SCI_GETNEXTTABSTOP = 2677,
+        SCI_SETCODEPAGE = 2037,
         SCI_MARKERDEFINE = 2040,
         SCI_MARKERSETFORE = 2041,
         SCI_MARKERSETBACK = 2042,
+        SCI_MARKERSETBACKSELECTED = 2292,
+        SCI_MARKERENABLEHIGHLIGHT = 2293,
         SCI_MARKERADD = 2043,
         SCI_MARKERDELETE = 2044,
         SCI_MARKERDELETEALL = 2045,
@@ -2403,12 +3705,6 @@ namespace _3PA.Interop {
         SCI_MARKERDEFINEPIXMAP = 2049,
         SCI_MARKERADDSET = 2466,
         SCI_MARKERSETALPHA = 2476,
-        SC_MARGIN_SYMBOL = 0,
-        SC_MARGIN_NUMBER = 1,
-        SC_MARGIN_BACK = 2,
-        SC_MARGIN_FORE = 3,
-        SC_MARGIN_TEXT = 4,
-        SC_MARGIN_RTEXT = 5,
         SCI_SETMARGINTYPEN = 2240,
         SCI_GETMARGINTYPEN = 2241,
         SCI_SETMARGINWIDTHN = 2242,
@@ -2417,36 +3713,8 @@ namespace _3PA.Interop {
         SCI_GETMARGINMASKN = 2245,
         SCI_SETMARGINSENSITIVEN = 2246,
         SCI_GETMARGINSENSITIVEN = 2247,
-        STYLE_DEFAULT = 32,
-        STYLE_LINENUMBER = 33,
-        STYLE_BRACELIGHT = 34,
-        STYLE_BRACEBAD = 35,
-        STYLE_CONTROLCHAR = 36,
-        STYLE_INDENTGUIDE = 37,
-        STYLE_CALLTIP = 38,
-        STYLE_LASTPREDEFINED = 39,
-        STYLE_MAX = 255,
-        SC_CHARSET_ANSI = 0,
-        SC_CHARSET_DEFAULT = 1,
-        SC_CHARSET_BALTIC = 186,
-        SC_CHARSET_CHINESEBIG5 = 136,
-        SC_CHARSET_EASTEUROPE = 238,
-        SC_CHARSET_GB2312 = 134,
-        SC_CHARSET_GREEK = 161,
-        SC_CHARSET_HANGUL = 129,
-        SC_CHARSET_MAC = 77,
-        SC_CHARSET_OEM = 255,
-        SC_CHARSET_RUSSIAN = 204,
-        SC_CHARSET_CYRILLIC = 1251,
-        SC_CHARSET_SHIFTJIS = 128,
-        SC_CHARSET_SYMBOL = 2,
-        SC_CHARSET_TURKISH = 162,
-        SC_CHARSET_JOHAB = 130,
-        SC_CHARSET_HEBREW = 177,
-        SC_CHARSET_ARABIC = 178,
-        SC_CHARSET_VIETNAMESE = 163,
-        SC_CHARSET_THAI = 222,
-        SC_CHARSET_8859_15 = 1000,
+        SCI_SETMARGINCURSORN = 2248,
+        SCI_GETMARGINCURSORN = 2249,
         SCI_STYLECLEARALL = 2050,
         SCI_STYLESETFORE = 2051,
         SCI_STYLESETBACK = 2052,
@@ -2457,9 +3725,6 @@ namespace _3PA.Interop {
         SCI_STYLESETEOLFILLED = 2057,
         SCI_STYLERESETDEFAULT = 2058,
         SCI_STYLESETUNDERLINE = 2059,
-        SC_CASE_MIXED = 0,
-        SC_CASE_UPPER = 1,
-        SC_CASE_LOWER = 2,
         SCI_STYLEGETFORE = 2481,
         SCI_STYLEGETBACK = 2482,
         SCI_STYLEGETBOLD = 2483,
@@ -2474,6 +3739,10 @@ namespace _3PA.Interop {
         SCI_STYLEGETCHANGEABLE = 2492,
         SCI_STYLEGETHOTSPOT = 2493,
         SCI_STYLESETCASE = 2060,
+        SCI_STYLESETSIZEFRACTIONAL = 2061,
+        SCI_STYLEGETSIZEFRACTIONAL = 2062,
+        SCI_STYLESETWEIGHT = 2063,
+        SCI_STYLEGETWEIGHT = 2064,
         SCI_STYLESETCHARACTERSET = 2066,
         SCI_STYLESETHOTSPOT = 2409,
         SCI_SETSELFORE = 2067,
@@ -2491,34 +3760,25 @@ namespace _3PA.Interop {
         SCI_GETCARETPERIOD = 2075,
         SCI_SETCARETPERIOD = 2076,
         SCI_SETWORDCHARS = 2077,
+        SCI_GETWORDCHARS = 2646,
         SCI_BEGINUNDOACTION = 2078,
         SCI_ENDUNDOACTION = 2079,
-        INDIC_PLAIN = 0,
-        INDIC_SQUIGGLE = 1,
-        INDIC_TT = 2,
-        INDIC_DIAGONAL = 3,
-        INDIC_STRIKE = 4,
-        INDIC_HIDDEN = 5,
-        INDIC_BOX = 6,
-        INDIC_ROUNDBOX = 7,
-        INDIC_MAX = 31,
-        INDIC_CONTAINER = 8,
-        INDIC0_MASK = 0x20,
-        INDIC1_MASK = 0x40,
-        INDIC2_MASK = 0x80,
-        INDICS_MASK = 0xE0,
         SCI_INDICSETSTYLE = 2080,
         SCI_INDICGETSTYLE = 2081,
         SCI_INDICSETFORE = 2082,
         SCI_INDICGETFORE = 2083,
         SCI_INDICSETUNDER = 2510,
         SCI_INDICGETUNDER = 2511,
-        SCI_GETCARETLINEVISIBLEALWAYS = 3095,
-        SCI_SETCARETLINEVISIBLEALWAYS = 3096,
+        SCI_INDICSETHOVERSTYLE = 2680,
+        SCI_INDICGETHOVERSTYLE = 2681,
+        SCI_INDICSETHOVERFORE = 2682,
+        SCI_INDICGETHOVERFORE = 2683,
+        SCI_INDICSETFLAGS = 2684,
+        SCI_INDICGETFLAGS = 2685,
         SCI_SETWHITESPACEFORE = 2084,
         SCI_SETWHITESPACEBACK = 2085,
-        SCI_SETSTYLEBITS = 2090,
-        SCI_GETSTYLEBITS = 2091,
+        SCI_SETWHITESPACESIZE = 2086,
+        SCI_GETWHITESPACESIZE = 2087,
         SCI_SETLINESTATE = 2092,
         SCI_GETLINESTATE = 2093,
         SCI_GETMAXLINESTATE = 2094,
@@ -2564,12 +3824,9 @@ namespace _3PA.Interop {
         SCI_GETLINEINDENTATION = 2127,
         SCI_GETLINEINDENTPOSITION = 2128,
         SCI_GETCOLUMN = 2129,
+        SCI_COUNTCHARACTERS = 2633,
         SCI_SETHSCROLLBAR = 2130,
         SCI_GETHSCROLLBAR = 2131,
-        SC_IV_NONE = 0,
-        SC_IV_REAL = 1,
-        SC_IV_LOOKFORWARD = 2,
-        SC_IV_LOOKBOTH = 3,
         SCI_SETINDENTATIONGUIDES = 2132,
         SCI_GETINDENTATIONGUIDES = 2133,
         SCI_SETHIGHLIGHTGUIDE = 2134,
@@ -2577,31 +3834,20 @@ namespace _3PA.Interop {
         SCI_GETLINEENDPOSITION = 2136,
         SCI_GETCODEPAGE = 2137,
         SCI_GETCARETFORE = 2138,
-        SCI_GETUSEPALETTE = 2139,
         SCI_GETREADONLY = 2140,
         SCI_SETCURRENTPOS = 2141,
         SCI_SETSELECTIONSTART = 2142,
         SCI_GETSELECTIONSTART = 2143,
         SCI_SETSELECTIONEND = 2144,
         SCI_GETSELECTIONEND = 2145,
+        SCI_SETEMPTYSELECTION = 2556,
         SCI_SETPRINTMAGNIFICATION = 2146,
         SCI_GETPRINTMAGNIFICATION = 2147,
-        SC_PRINT_NORMAL = 0,
-        SC_PRINT_INVERTLIGHT = 1,
-        SC_PRINT_BLACKONWHITE = 2,
-        SC_PRINT_COLOURONWHITE = 3,
-        SC_PRINT_COLOURONWHITEDEFAULTBG = 4,
         SCI_SETPRINTCOLOURMODE = 2148,
         SCI_GETPRINTCOLOURMODE = 2149,
-        SCFIND_WHOLEWORD = 2,
-        SCFIND_MATCHCASE = 4,
-        SCFIND_WORDSTART = 0x00100000,
-        SCFIND_REGEXP = 0x00200000,
-        SCFIND_POSIX = 0x00400000,
         SCI_FINDTEXT = 2150,
         SCI_FORMATRANGE = 2151,
         SCI_GETFIRSTVISIBLELINE = 2152,
-        SCI_SETFIRSTVISIBLELINE = 2613,
         SCI_GETLINE = 2153,
         SCI_GETLINECOUNT = 2154,
         SCI_SETMARGINLEFT = 2155,
@@ -2619,6 +3865,7 @@ namespace _3PA.Interop {
         SCI_POSITIONFROMLINE = 2167,
         SCI_LINESCROLL = 2168,
         SCI_SCROLLCARET = 2169,
+        SCI_SCROLLRANGE = 2569,
         SCI_REPLACESEL = 2170,
         SCI_SETREADONLY = 2171,
         SCI_NULL = 2172,
@@ -2645,7 +3892,6 @@ namespace _3PA.Interop {
         SCI_GETTARGETEND = 2193,
         SCI_REPLACETARGET = 2194,
         SCI_REPLACETARGETRE = 2195,
-        SCI_GETTARGETTEXT = 2687,
         SCI_SEARCHINTARGET = 2197,
         SCI_SETSEARCHFLAGS = 2198,
         SCI_GETSEARCHFLAGS = 2199,
@@ -2653,18 +3899,16 @@ namespace _3PA.Interop {
         SCI_CALLTIPCANCEL = 2201,
         SCI_CALLTIPACTIVE = 2202,
         SCI_CALLTIPPOSSTART = 2203,
+        SCI_CALLTIPSETPOSSTART = 2214,
         SCI_CALLTIPSETHLT = 2204,
         SCI_CALLTIPSETBACK = 2205,
         SCI_CALLTIPSETFORE = 2206,
         SCI_CALLTIPSETFOREHLT = 2207,
         SCI_CALLTIPUSESTYLE = 2212,
+        SCI_CALLTIPSETPOSITION = 2213,
         SCI_VISIBLEFROMDOCLINE = 2220,
         SCI_DOCLINEFROMVISIBLE = 2221,
         SCI_WRAPCOUNT = 2235,
-        SC_FOLDLEVELBASE = 0x400,
-        SC_FOLDLEVELWHITEFLAG = 0x1000,
-        SC_FOLDLEVELHEADERFLAG = 0x2000,
-        SC_FOLDLEVELNUMBERMASK = 0x0FFF,
         SCI_SETFOLDLEVEL = 2222,
         SCI_GETFOLDLEVEL = 2223,
         SCI_GETLASTCHILD = 2224,
@@ -2672,52 +3916,38 @@ namespace _3PA.Interop {
         SCI_SHOWLINES = 2226,
         SCI_HIDELINES = 2227,
         SCI_GETLINEVISIBLE = 2228,
+        SCI_GETALLLINESVISIBLE = 2236,
         SCI_SETFOLDEXPANDED = 2229,
         SCI_GETFOLDEXPANDED = 2230,
         SCI_TOGGLEFOLD = 2231,
+        SCI_FOLDLINE = 2237,
+        SCI_FOLDCHILDREN = 2238,
+        SCI_EXPANDCHILDREN = 2239,
+        SCI_FOLDALL = 2662,
         SCI_ENSUREVISIBLE = 2232,
-        SC_FOLDFLAG_LINEBEFORE_EXPANDED = 0x0002,
-        SC_FOLDFLAG_LINEBEFORE_CONTRACTED = 0x0004,
-        SC_FOLDFLAG_LINEAFTER_EXPANDED = 0x0008,
-        SC_FOLDFLAG_LINEAFTER_CONTRACTED = 0x0010,
-        SC_FOLDFLAG_LEVELNUMBERS = 0x0040,
+        SCI_SETAUTOMATICFOLD = 2663,
+        SCI_GETAUTOMATICFOLD = 2664,
         SCI_SETFOLDFLAGS = 2233,
         SCI_ENSUREVISIBLEENFORCEPOLICY = 2234,
         SCI_SETTABINDENTS = 2260,
         SCI_GETTABINDENTS = 2261,
         SCI_SETBACKSPACEUNINDENTS = 2262,
         SCI_GETBACKSPACEUNINDENTS = 2263,
-        SC_TIME_FOREVER = 10000000,
         SCI_SETMOUSEDWELLTIME = 2264,
         SCI_GETMOUSEDWELLTIME = 2265,
         SCI_WORDSTARTPOSITION = 2266,
         SCI_WORDENDPOSITION = 2267,
-        SC_WRAP_NONE = 0,
-        SC_WRAP_WORD = 1,
-        SC_WRAP_CHAR = 2,
+        SCI_ISRANGEWORD = 2691,
         SCI_SETWRAPMODE = 2268,
         SCI_GETWRAPMODE = 2269,
-        SC_WRAPVISUALFLAG_NONE = 0x0000,
-        SC_WRAPVISUALFLAG_END = 0x0001,
-        SC_WRAPVISUALFLAG_START = 0x0002,
         SCI_SETWRAPVISUALFLAGS = 2460,
         SCI_GETWRAPVISUALFLAGS = 2461,
-        SC_WRAPVISUALFLAGLOC_DEFAULT = 0x0000,
-        SC_WRAPVISUALFLAGLOC_END_BY_TEXT = 0x0001,
-        SC_WRAPVISUALFLAGLOC_START_BY_TEXT = 0x0002,
         SCI_SETWRAPVISUALFLAGSLOCATION = 2462,
         SCI_GETWRAPVISUALFLAGSLOCATION = 2463,
         SCI_SETWRAPSTARTINDENT = 2464,
         SCI_GETWRAPSTARTINDENT = 2465,
-        SC_WRAPINDENT_FIXED = 0,
-        SC_WRAPINDENT_SAME = 1,
-        SC_WRAPINDENT_INDENT = 2,
         SCI_SETWRAPINDENTMODE = 2472,
         SCI_GETWRAPINDENTMODE = 2473,
-        SC_CACHE_NONE = 0,
-        SC_CACHE_CARET = 1,
-        SC_CACHE_PAGE = 2,
-        SC_CACHE_DOCUMENT = 3,
         SCI_SETLAYOUTCACHE = 2272,
         SCI_GETLAYOUTCACHE = 2273,
         SCI_SETSCROLLWIDTH = 2274,
@@ -2733,7 +3963,16 @@ namespace _3PA.Interop {
         SCI_APPENDTEXT = 2282,
         SCI_GETTWOPHASEDRAW = 2283,
         SCI_SETTWOPHASEDRAW = 2284,
+        SCI_GETPHASESDRAW = 2673,
+        SCI_SETPHASESDRAW = 2674,
+        SCI_SETFONTQUALITY = 2611,
+        SCI_GETFONTQUALITY = 2612,
+        SCI_SETFIRSTVISIBLELINE = 2613,
+        SCI_SETMULTIPASTE = 2614,
+        SCI_GETMULTIPASTE = 2615,
+        SCI_GETTAG = 2616,
         SCI_TARGETFROMSELECTION = 2287,
+        SCI_TARGETWHOLEDOCUMENT = 2690,
         SCI_LINESJOIN = 2288,
         SCI_LINESSPLIT = 2289,
         SCI_SETFOLDMARGINCOLOUR = 2290,
@@ -2799,16 +4038,15 @@ namespace _3PA.Interop {
         SCI_MOVECARETINSIDEVIEW = 2401,
         SCI_LINELENGTH = 2350,
         SCI_BRACEHIGHLIGHT = 2351,
+        SCI_BRACEHIGHLIGHTINDICATOR = 2498,
         SCI_BRACEBADLIGHT = 2352,
+        SCI_BRACEBADLIGHTINDICATOR = 2499,
         SCI_BRACEMATCH = 2353,
         SCI_GETVIEWEOL = 2355,
         SCI_SETVIEWEOL = 2356,
         SCI_GETDOCPOINTER = 2357,
         SCI_SETDOCPOINTER = 2358,
         SCI_SETMODEVENTMASK = 2359,
-        EDGE_NONE = 0,
-        EDGE_LINE = 1,
-        EDGE_BACKGROUND = 2,
         SCI_GETEDGECOLUMN = 2360,
         SCI_SETEDGECOLUMN = 2361,
         SCI_GETEDGEMODE = 2362,
@@ -2829,15 +4067,10 @@ namespace _3PA.Interop {
         SCI_GETMODEVENTMASK = 2378,
         SCI_SETFOCUS = 2380,
         SCI_GETFOCUS = 2381,
-        SC_STATUS_OK = 0,
-        SC_STATUS_FAILURE = 1,
-        SC_STATUS_BADALLOC = 2,
         SCI_SETSTATUS = 2382,
         SCI_GETSTATUS = 2383,
         SCI_SETMOUSEDOWNCAPTURES = 2384,
         SCI_GETMOUSEDOWNCAPTURES = 2385,
-        SC_CURSORNORMAL = 0xFFFFFFFF,
-        SC_CURSORWAIT = 4,
         SCI_SETCURSOR = 2386,
         SCI_GETCURSOR = 2387,
         SCI_SETCONTROLCHARSYMBOL = 2388,
@@ -2846,8 +4079,6 @@ namespace _3PA.Interop {
         SCI_WORDPARTLEFTEXTEND = 2391,
         SCI_WORDPARTRIGHT = 2392,
         SCI_WORDPARTRIGHTEXTEND = 2393,
-        VISIBLE_SLOP = 0x01,
-        VISIBLE_STRICT = 0x04,
         SCI_SETVISIBLEPOLICY = 2394,
         SCI_DELLINELEFT = 2395,
         SCI_DELLINERIGHT = 2396,
@@ -2855,10 +4086,6 @@ namespace _3PA.Interop {
         SCI_GETXOFFSET = 2398,
         SCI_CHOOSECARETX = 2399,
         SCI_GRABFOCUS = 2400,
-        CARET_SLOP = 0x01,
-        CARET_STRICT = 0x04,
-        CARET_JUMPS = 0x10,
-        CARET_EVEN = 0x08,
         SCI_SETXCARETPOLICY = 2402,
         SCI_SETYCARETPOLICY = 2403,
         SCI_SETPRINTWRAPMODE = 2406,
@@ -2875,14 +4102,9 @@ namespace _3PA.Interop {
         SCI_PARADOWNEXTEND = 2414,
         SCI_PARAUP = 2415,
         SCI_PARAUPEXTEND = 2416,
-        SCI_POSITIONBEFORE = 2417,
-        SCI_POSITIONAFTER = 2418,
+        SCI_POSITIONRELATIVE = 2670,
         SCI_COPYRANGE = 2419,
         SCI_COPYTEXT = 2420,
-        SC_SEL_STREAM = 0,
-        SC_SEL_RECTANGLE = 1,
-        SC_SEL_LINES = 2,
-        SC_SEL_THIN = 3,
         SCI_SETSELECTIONMODE = 2422,
         SCI_GETSELECTIONMODE = 2423,
         SCI_GETLINESELSTARTPOSITION = 2424,
@@ -2905,8 +4127,18 @@ namespace _3PA.Interop {
         SCI_WORDRIGHTEND = 2441,
         SCI_WORDRIGHTENDEXTEND = 2442,
         SCI_SETWHITESPACECHARS = 2443,
+        SCI_GETWHITESPACECHARS = 2647,
+        SCI_SETPUNCTUATIONCHARS = 2648,
+        SCI_GETPUNCTUATIONCHARS = 2649,
         SCI_SETCHARSDEFAULT = 2444,
         SCI_AUTOCGETCURRENT = 2445,
+        SCI_AUTOCGETCURRENTTEXT = 2610,
+        SCI_AUTOCSETCASEINSENSITIVEBEHAVIOUR = 2634,
+        SCI_AUTOCGETCASEINSENSITIVEBEHAVIOUR = 2635,
+        SCI_AUTOCSETMULTI = 2636,
+        SCI_AUTOCGETMULTI = 2637,
+        SCI_AUTOCSETORDER = 2660,
+        SCI_AUTOCGETORDER = 2661,
         SCI_ALLOCATE = 2446,
         SCI_TARGETASUTF8 = 2447,
         SCI_SETLENGTHFORENCODE = 2448,
@@ -2918,14 +4150,8 @@ namespace _3PA.Interop {
         SCI_SETPASTECONVERTENDINGS = 2467,
         SCI_GETPASTECONVERTENDINGS = 2468,
         SCI_SELECTIONDUPLICATE = 2469,
-        SC_ALPHA_TRANSPARENT = 0,
-        SC_ALPHA_OPAQUE = 255,
-        SC_ALPHA_NOALPHA = 256,
         SCI_SETCARETLINEBACKALPHA = 2470,
         SCI_GETCARETLINEBACKALPHA = 2471,
-        CARETSTYLE_INVISIBLE = 0,
-        CARETSTYLE_LINE = 1,
-        CARETSTYLE_BLOCK = 2,
         SCI_SETCARETSTYLE = 2512,
         SCI_GETCARETSTYLE = 2513,
         SCI_SETINDICATORCURRENT = 2500,
@@ -2942,10 +4168,12 @@ namespace _3PA.Interop {
         SCI_GETPOSITIONCACHE = 2515,
         SCI_COPYALLOWLINE = 2519,
         SCI_GETCHARACTERPOINTER = 2520,
-        SCI_SETKEYSUNICODE = 2521,
-        SCI_GETKEYSUNICODE = 2522,
+        SCI_GETRANGEPOINTER = 2643,
+        SCI_GETGAPPOSITION = 2644,
         SCI_INDICSETALPHA = 2523,
         SCI_INDICGETALPHA = 2524,
+        SCI_INDICSETOUTLINEALPHA = 2558,
+        SCI_INDICGETOUTLINEALPHA = 2559,
         SCI_SETEXTRAASCENT = 2525,
         SCI_GETEXTRAASCENT = 2526,
         SCI_SETEXTRADESCENT = 2527,
@@ -2960,6 +4188,8 @@ namespace _3PA.Interop {
         SCI_MARGINTEXTCLEARALL = 2536,
         SCI_MARGINSETSTYLEOFFSET = 2537,
         SCI_MARGINGETSTYLEOFFSET = 2538,
+        SCI_SETMARGINOPTIONS = 2539,
+        SCI_GETMARGINOPTIONS = 2557,
         SCI_ANNOTATIONSETTEXT = 2540,
         SCI_ANNOTATIONGETTEXT = 2541,
         SCI_ANNOTATIONSETSTYLE = 2542,
@@ -2968,27 +4198,31 @@ namespace _3PA.Interop {
         SCI_ANNOTATIONGETSTYLES = 2545,
         SCI_ANNOTATIONGETLINES = 2546,
         SCI_ANNOTATIONCLEARALL = 2547,
-        ANNOTATION_HIDDEN = 0,
-        ANNOTATION_STANDARD = 1,
-        ANNOTATION_BOXED = 2,
         SCI_ANNOTATIONSETVISIBLE = 2548,
         SCI_ANNOTATIONGETVISIBLE = 2549,
         SCI_ANNOTATIONSETSTYLEOFFSET = 2550,
         SCI_ANNOTATIONGETSTYLEOFFSET = 2551,
-        UNDO_MAY_COALESCE = 1,
+        SCI_RELEASEALLEXTENDEDSTYLES = 2552,
+        SCI_ALLOCATEEXTENDEDSTYLES = 2553,
         SCI_ADDUNDOACTION = 2560,
         SCI_CHARPOSITIONFROMPOINT = 2561,
         SCI_CHARPOSITIONFROMPOINTCLOSE = 2562,
+        SCI_SETMOUSESELECTIONRECTANGULARSWITCH = 2668,
+        SCI_GETMOUSESELECTIONRECTANGULARSWITCH = 2669,
         SCI_SETMULTIPLESELECTION = 2563,
         SCI_GETMULTIPLESELECTION = 2564,
         SCI_SETADDITIONALSELECTIONTYPING = 2565,
         SCI_GETADDITIONALSELECTIONTYPING = 2566,
         SCI_SETADDITIONALCARETSBLINK = 2567,
         SCI_GETADDITIONALCARETSBLINK = 2568,
+        SCI_SETADDITIONALCARETSVISIBLE = 2608,
+        SCI_GETADDITIONALCARETSVISIBLE = 2609,
         SCI_GETSELECTIONS = 2570,
+        SCI_GETSELECTIONEMPTY = 2650,
         SCI_CLEARSELECTIONS = 2571,
         SCI_SETSELECTION = 2572,
         SCI_ADDSELECTION = 2573,
+        SCI_DROPSELECTIONN = 2671,
         SCI_SETMAINSELECTION = 2574,
         SCI_GETMAINSELECTION = 2575,
         SCI_SETSELECTIONNCARET = 2576,
@@ -3011,9 +4245,6 @@ namespace _3PA.Interop {
         SCI_GETRECTANGULARSELECTIONCARETVIRTUALSPACE = 2593,
         SCI_SETRECTANGULARSELECTIONANCHORVIRTUALSPACE = 2594,
         SCI_GETRECTANGULARSELECTIONANCHORVIRTUALSPACE = 2595,
-        SCVS_NONE = 0,
-        SCVS_RECTANGULARSELECTION = 1,
-        SCVS_USERACCESSIBLE = 2,
         SCI_SETVIRTUALSPACEOPTIONS = 2596,
         SCI_GETVIRTUALSPACEOPTIONS = 2597,
         SCI_SETRECTANGULARSELECTIONMODIFIER = 2598,
@@ -3026,44 +4257,70 @@ namespace _3PA.Interop {
         SCI_GETADDITIONALCARETFORE = 2605,
         SCI_ROTATESELECTION = 2606,
         SCI_SWAPMAINANCHORCARET = 2607,
+        SCI_MULTIPLESELECTADDNEXT = 2688,
+        SCI_MULTIPLESELECTADDEACH = 2689,
+        SCI_CHANGELEXERSTATE = 2617,
+        SCI_CONTRACTEDFOLDNEXT = 2618,
+        SCI_VERTICALCENTRECARET = 2619,
+        SCI_MOVESELECTEDLINESUP = 2620,
+        SCI_MOVESELECTEDLINESDOWN = 2621,
+        SCI_SETIDENTIFIER = 2622,
+        SCI_GETIDENTIFIER = 2623,
+        SCI_RGBAIMAGESETWIDTH = 2624,
+        SCI_RGBAIMAGESETHEIGHT = 2625,
+        SCI_RGBAIMAGESETSCALE = 2651,
+        SCI_MARKERDEFINERGBAIMAGE = 2626,
+        SCI_REGISTERRGBAIMAGE = 2627,
+        SCI_SCROLLTOSTART = 2628,
+        SCI_SCROLLTOEND = 2629,
+        SCI_SETTECHNOLOGY = 2630,
+        SCI_GETTECHNOLOGY = 2631,
+        SCI_CREATELOADER = 2632,
+        SCI_FINDINDICATORSHOW = 2640,
+        SCI_FINDINDICATORFLASH = 2641,
+        SCI_FINDINDICATORHIDE = 2642,
+        SCI_VCHOMEDISPLAY = 2652,
+        SCI_VCHOMEDISPLAYEXTEND = 2653,
+        SCI_GETCARETLINEVISIBLEALWAYS = 2654,
+        SCI_SETCARETLINEVISIBLEALWAYS = 2655,
+        SCI_SETLINEENDTYPESALLOWED = 2656,
+        SCI_GETLINEENDTYPESALLOWED = 2657,
+        SCI_GETLINEENDTYPESACTIVE = 2658,
+        SCI_SETREPRESENTATION = 2665,
+        SCI_GETREPRESENTATION = 2666,
+        SCI_CLEARREPRESENTATION = 2667,
+        SCI_SETTARGETRANGE = 2686,
+        SCI_GETTARGETTEXT = 2687,
         SCI_STARTRECORD = 3001,
         SCI_STOPRECORD = 3002,
         SCI_SETLEXER = 4001,
         SCI_GETLEXER = 4002,
         SCI_COLOURISE = 4003,
         SCI_SETPROPERTY = 4004,
-        KEYWORDSET_MAX = 8,
         SCI_SETKEYWORDS = 4005,
         SCI_SETLEXERLANGUAGE = 4006,
         SCI_LOADLEXERLIBRARY = 4007,
         SCI_GETPROPERTY = 4008,
         SCI_GETPROPERTYEXPANDED = 4009,
         SCI_GETPROPERTYINT = 4010,
-        SCI_GETSTYLEBITSNEEDED = 4011,
-        SC_MOD_INSERTTEXT = 0x1,
-        SC_MOD_DELETETEXT = 0x2,
-        SC_MOD_CHANGESTYLE = 0x4,
-        SC_MOD_CHANGEFOLD = 0x8,
-        SC_PERFORMED_USER = 0x10,
-        SC_PERFORMED_UNDO = 0x20,
-        SC_PERFORMED_REDO = 0x40,
-        SC_MULTISTEPUNDOREDO = 0x80,
-        SC_LASTSTEPINUNDOREDO = 0x100,
-        SC_MOD_CHANGEMARKER = 0x200,
-        SC_MOD_BEFOREINSERT = 0x400,
-        SC_MOD_BEFOREDELETE = 0x800,
-        SC_MULTILINEUNDOREDO = 0x1000,
-        SC_STARTACTION = 0x2000,
-        SC_MOD_CHANGEINDICATOR = 0x4000,
-        SC_MOD_CHANGELINESTATE = 0x8000,
-        SC_MOD_CHANGEMARGIN = 0x10000,
-        SC_MOD_CHANGEANNOTATION = 0x20000,
-        SC_MOD_CONTAINER = 0x40000,
-        SC_MODEVENTMASKALL = 0x7FFFF,
-        SC_SEARCHRESULT_LINEBUFFERMAXLENGTH = 1024,
-        SCEN_CHANGE = 768,
-        SCEN_SETFOCUS = 512,
-        SCEN_KILLFOCUS = 256,
+        SCI_GETLEXERLANGUAGE = 4012,
+        SCI_PRIVATELEXERCALL = 4013,
+        SCI_PROPERTYNAMES = 4014,
+        SCI_PROPERTYTYPE = 4015,
+        SCI_DESCRIBEPROPERTY = 4016,
+        SCI_DESCRIBEKEYWORDSETS = 4017,
+        SCI_GETLINEENDTYPESSUPPORTED = 4018,
+        SCI_ALLOCATESUBSTYLES = 4020,
+        SCI_GETSUBSTYLESSTART = 4021,
+        SCI_GETSUBSTYLESLENGTH = 4022,
+        SCI_GETSTYLEFROMSUBSTYLE = 4027,
+        SCI_GETPRIMARYSTYLEFROMSTYLE = 4028,
+        SCI_FREESUBSTYLES = 4023,
+        SCI_SETIDENTIFIERS = 4024,
+        SCI_DISTANCETOSECONDARYSTYLES = 4025,
+        SCI_GETSUBSTYLEBASES = 4026,
+
+        // Keys
         SCK_DOWN = 300,
         SCK_UP = 301,
         SCK_LEFT = 302,
@@ -3084,11 +4341,8 @@ namespace _3PA.Interop {
         SCK_WIN = 313,
         SCK_RWIN = 314,
         SCK_MENU = 315,
-        SCMOD_NORM = 0,
-        SCMOD_SHIFT = 1,
-        SCMOD_CTRL = 2,
-        SCMOD_ALT = 4,
-        SCMOD_SUPER = 8,
+
+        // Notifications
         SCN_STYLENEEDED = 2000,
         SCN_CHARADDED = 2001,
         SCN_SAVEPOINTREACHED = 2002,
@@ -3115,140 +4369,648 @@ namespace _3PA.Interop {
         SCN_INDICATORRELEASE = 2024,
         SCN_AUTOCCANCELLED = 2025,
         SCN_AUTOCCHARDELETED = 2026,
-        SCN_SCROLLED = 2080,
-        SC_UPDATE_CONTENT = 0x1,
-        SC_UPDATE_SELECTION = 0x2,
-        SC_UPDATE_V_SCROLL = 0x4,
-        SC_UPDATE_H_SCROLL = 0x8
-    }
+        SCN_HOTSPOTRELEASECLICK = 2027,
+        SCN_FOCUSIN = 2028,
+        SCN_FOCUSOUT = 2029,
+        SCN_AUTOCCOMPLETED = 2030,
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct Sci_CharacterRange {
-        public Sci_CharacterRange(int cpmin, int cpmax) {
-            cpMin = cpmin; cpMax = cpmax;
-        }
-        public int cpMin;
-        public int cpMax;
-    }
+        // Line wrapping
+        SC_WRAP_NONE = 0,
+        SC_WRAP_WORD = 1,
+        SC_WRAP_CHAR = 2,
+        SC_WRAP_WHITESPACE = 3,
 
-    public class Sci_TextRange : IDisposable {
-        _Sci_TextRange _sciTextRange;
-        IntPtr _ptrSciTextRange;
-        bool _disposed = false;
+        SC_WRAPVISUALFLAG_NONE = 0x0000,
+        SC_WRAPVISUALFLAG_END = 0x0001,
+        SC_WRAPVISUALFLAG_START = 0x0002,
+        SC_WRAPVISUALFLAG_MARGIN = 0x0004,
 
-        public Sci_TextRange(Sci_CharacterRange chrRange, int stringCapacity) {
-            _sciTextRange.chrg = chrRange;
-            _sciTextRange.lpstrText = Marshal.AllocHGlobal(stringCapacity);
-        }
-        public Sci_TextRange(int cpmin, int cpmax, int stringCapacity) {
-            _sciTextRange.chrg.cpMin = cpmin;
-            _sciTextRange.chrg.cpMax = cpmax;
-            _sciTextRange.lpstrText = Marshal.AllocHGlobal(stringCapacity);
-        }
+        SC_WRAPVISUALFLAGLOC_DEFAULT = 0x0000,
+        SC_WRAPVISUALFLAGLOC_END_BY_TEXT = 0x0001,
+        SC_WRAPVISUALFLAGLOC_START_BY_TEXT = 0x0002,
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct _Sci_TextRange {
-            public Sci_CharacterRange chrg;
-            public IntPtr lpstrText;
-        }
+        SC_WRAPINDENT_FIXED = 0,
+        SC_WRAPINDENT_SAME = 1,
+        SC_WRAPINDENT_INDENT = 2,
 
-        public IntPtr NativePointer { get { _initNativeStruct(); return _ptrSciTextRange; } }
-        public string lpstrAnsiText { get { _readNativeStruct(); return Marshal.PtrToStringAnsi(_sciTextRange.lpstrText); } }
+        // Virtual space
+        SCVS_NONE = 0,
+        SCVS_RECTANGULARSELECTION = 1,
+        SCVS_USERACCESSIBLE = 2,
 
-        public string lpstrText {
-            get {
-                _readNativeStruct();
-                return Utf8PtrToString(_sciTextRange.lpstrText);
-            }
-        }
+        // Styles constants
+        STYLE_DEFAULT = 32,
+        STYLE_LINENUMBER = 33,
+        STYLE_BRACELIGHT = 34,
+        STYLE_BRACEBAD = 35,
+        STYLE_CONTROLCHAR = 36,
+        STYLE_INDENTGUIDE = 37,
+        STYLE_CALLTIP = 38,
+        STYLE_LASTPREDEFINED = 39,
+        STYLE_MAX = 255,
 
-        public static string Utf8PtrToString(IntPtr pChar) {
-            int len = MultiByteToWideChar(65001, 0, pChar, -1, null, 0);
-            if (len == 0) throw new System.ComponentModel.Win32Exception();
-            var buf = new StringBuilder(len);
-            len = MultiByteToWideChar(65001, 0, pChar, -1, buf, len);
-            return buf.ToString();
-        }
+        SC_FONT_SIZE_MULTIPLIER = 100,
+        SC_CASE_MIXED = 0,
+        SC_CASE_UPPER = 1,
+        SC_CASE_LOWER = 2,
+        SC_CASE_CAMEL = 3,
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        private static extern int MultiByteToWideChar(int codepage, int flags, IntPtr utf8, int utf8len, StringBuilder buffer, int buflen);
+        // Technology
+        SC_TECHNOLOGY_DEFAULT = 0,
+        SC_TECHNOLOGY_DIRECTWRITE = 1,
+        SC_TECHNOLOGY_DIRECTWRITERETAIN = 2,
+        SC_TECHNOLOGY_DIRECTWRITEDC = 3,
 
-        public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextRange.chrg; } set { _sciTextRange.chrg = value; _initNativeStruct(); } }
-        void _initNativeStruct() {
-            if (_ptrSciTextRange == IntPtr.Zero)
-                _ptrSciTextRange = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextRange));
-            Marshal.StructureToPtr(_sciTextRange, _ptrSciTextRange, false);
-        }
-        void _readNativeStruct() {
-            if (_ptrSciTextRange != IntPtr.Zero)
-                _sciTextRange = (_Sci_TextRange)Marshal.PtrToStructure(_ptrSciTextRange, typeof(_Sci_TextRange));
-        }
+        // Undo
+        UNDO_MAY_COALESCE = 1,
 
-        public void Dispose() {
-            if (!_disposed) {
-                try {
-                    if (_sciTextRange.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextRange.lpstrText);
-                    if (_ptrSciTextRange != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextRange);
-                } catch (Exception) {
-                    // ignored
-                }
-                _disposed = true;
-            }
-        }
-        ~Sci_TextRange() {
-            Dispose();
-        }
-    }
+        // Whitespace
+        SCWS_INVISIBLE = 0,
+        SCWS_VISIBLEALWAYS = 1,
+        SCWS_VISIBLEAFTERINDENT = 2,
 
-    public class Sci_TextToFind : IDisposable {
-        _Sci_TextToFind _sciTextToFind;
-        IntPtr _ptrSciTextToFind;
-        bool _disposed = false;
+        // Window messages
+        WM_CREATE = 0x0001,
+        WM_DESTROY = 0x0002,
+        WM_SETCURSOR = 0x0020,
+        WM_NOTIFY = 0x004E,
+        WM_LBUTTONDBLCLK = 0x0203,
+        WM_RBUTTONDBLCLK = 0x0206,
+        WM_MBUTTONDBLCLK = 0x0209,
+        WM_XBUTTONDBLCLK = 0x020D,
+        WM_USER = 0x0400,
+        WM_REFLECT = WM_USER + 0x1C00,
 
-        public Sci_TextToFind(Sci_CharacterRange chrRange, string searchText) {
-            _sciTextToFind.chrg = chrRange;
-            _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
-        }
-        public Sci_TextToFind(int cpmin, int cpmax, string searchText) {
-            _sciTextToFind.chrg.cpMin = cpmin;
-            _sciTextToFind.chrg.cpMax = cpmax;
-            _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(searchText);
-        }
+        // Window styles
+        WS_BORDER = 0x00800000,
+        WS_EX_CLIENTEDGE = 0x00000200,
 
-        [StructLayout(LayoutKind.Sequential)]
-        struct _Sci_TextToFind {
-            public Sci_CharacterRange chrg;
-            public IntPtr lpstrText;
-            public Sci_CharacterRange chrgText;
-        }
+    #endregion Constants
 
-        public IntPtr NativePointer { get { _initNativeStruct(); return _ptrSciTextToFind; } }
-        public string lpstrText { set { _freeNativeString(); _sciTextToFind.lpstrText = Marshal.StringToHGlobalAnsi(value); } }
-        public Sci_CharacterRange chrg { get { _readNativeStruct(); return _sciTextToFind.chrg; } set { _sciTextToFind.chrg = value; _initNativeStruct(); } }
-        public Sci_CharacterRange chrgText { get { _readNativeStruct(); return _sciTextToFind.chrgText; } }
-        void _initNativeStruct() {
-            if (_ptrSciTextToFind == IntPtr.Zero)
-                _ptrSciTextToFind = Marshal.AllocHGlobal(Marshal.SizeOf(_sciTextToFind));
-            Marshal.StructureToPtr(_sciTextToFind, _ptrSciTextToFind, false);
-        }
-        void _readNativeStruct() {
-            if (_ptrSciTextToFind != IntPtr.Zero)
-                _sciTextToFind = (_Sci_TextToFind)Marshal.PtrToStructure(_ptrSciTextToFind, typeof(_Sci_TextToFind));
-        }
-        void _freeNativeString() {
-            if (_sciTextToFind.lpstrText != IntPtr.Zero) Marshal.FreeHGlobal(_sciTextToFind.lpstrText);
-        }
+        #region Lexer Constants
 
-        public void Dispose() {
-            if (!_disposed) {
-                _freeNativeString();
-                if (_ptrSciTextToFind != IntPtr.Zero) Marshal.FreeHGlobal(_ptrSciTextToFind);
-                _disposed = true;
-            }
-        }
-        ~Sci_TextToFind() {
-            Dispose();
-        }
+        // Lexers
+        SCLEX_CONTAINER = 0,
+        SCLEX_NULL = 1,
+        SCLEX_PYTHON = 2,
+        SCLEX_CPP = 3,
+        SCLEX_HTML = 4,
+        SCLEX_XML = 5,
+        SCLEX_PERL = 6,
+        SCLEX_SQL = 7,
+        SCLEX_VB = 8,
+        SCLEX_PROPERTIES = 9,
+        SCLEX_ERRORLIST = 10,
+        SCLEX_MAKEFILE = 11,
+        SCLEX_BATCH = 12,
+        SCLEX_XCODE = 13,
+        SCLEX_LATEX = 14,
+        SCLEX_LUA = 15,
+        SCLEX_DIFF = 16,
+        SCLEX_CONF = 17,
+        SCLEX_PASCAL = 18,
+        SCLEX_AVE = 19,
+        SCLEX_ADA = 20,
+        SCLEX_LISP = 21,
+        SCLEX_RUBY = 22,
+        SCLEX_EIFFEL = 23,
+        SCLEX_EIFFELKW = 24,
+        SCLEX_TCL = 25,
+        SCLEX_NNCRONTAB = 26,
+        SCLEX_BULLANT = 27,
+        SCLEX_VBSCRIPT = 28,
+        SCLEX_BAAN = 31,
+        SCLEX_MATLAB = 32,
+        SCLEX_SCRIPTOL = 33,
+        SCLEX_ASM = 34,
+        SCLEX_CPPNOCASE = 35,
+        SCLEX_FORTRAN = 36,
+        SCLEX_F77 = 37,
+        SCLEX_CSS = 38,
+        SCLEX_POV = 39,
+        SCLEX_LOUT = 40,
+        SCLEX_ESCRIPT = 41,
+        SCLEX_PS = 42,
+        SCLEX_NSIS = 43,
+        SCLEX_MMIXAL = 44,
+        SCLEX_CLW = 45,
+        SCLEX_CLWNOCASE = 46,
+        SCLEX_LOT = 47,
+        SCLEX_YAML = 48,
+        SCLEX_TEX = 49,
+        SCLEX_METAPOST = 50,
+        SCLEX_POWERBASIC = 51,
+        SCLEX_FORTH = 52,
+        SCLEX_ERLANG = 53,
+        SCLEX_OCTAVE = 54,
+        SCLEX_MSSQL = 55,
+        SCLEX_VERILOG = 56,
+        SCLEX_KIX = 57,
+        SCLEX_GUI4CLI = 58,
+        SCLEX_SPECMAN = 59,
+        SCLEX_AU3 = 60,
+        SCLEX_APDL = 61,
+        SCLEX_BASH = 62,
+        SCLEX_ASN1 = 63,
+        SCLEX_VHDL = 64,
+        SCLEX_CAML = 65,
+        SCLEX_BLITZBASIC = 66,
+        SCLEX_PUREBASIC = 67,
+        SCLEX_HASKELL = 68,
+        SCLEX_PHPSCRIPT = 69,
+        SCLEX_TADS3 = 70,
+        SCLEX_REBOL = 71,
+        SCLEX_SMALLTALK = 72,
+        SCLEX_FLAGSHIP = 73,
+        SCLEX_CSOUND = 74,
+        SCLEX_FREEBASIC = 75,
+        SCLEX_INNOSETUP = 76,
+        SCLEX_OPAL = 77,
+        SCLEX_SPICE = 78,
+        SCLEX_D = 79,
+        SCLEX_CMAKE = 80,
+        SCLEX_GAP = 81,
+        SCLEX_PLM = 82,
+        SCLEX_PROGRESS = 83,
+        SCLEX_ABAQUS = 84,
+        SCLEX_ASYMPTOTE = 85,
+        SCLEX_R = 86,
+        SCLEX_MAGIK = 87,
+        SCLEX_POWERSHELL = 88,
+        SCLEX_MYSQL = 89,
+        SCLEX_PO = 90,
+        SCLEX_TAL = 91,
+        SCLEX_COBOL = 92,
+        SCLEX_TACL = 93,
+        SCLEX_SORCUS = 94,
+        SCLEX_POWERPRO = 95,
+        SCLEX_NIMROD = 96,
+        SCLEX_SML = 97,
+        SCLEX_MARKDOWN = 98,
+        SCLEX_TXT2TAGS = 99,
+        SCLEX_A68K = 100,
+        SCLEX_MODULA = 101,
+        SCLEX_COFFEESCRIPT = 102,
+        SCLEX_TCMD = 103,
+        SCLEX_AVS = 104,
+        SCLEX_ECL = 105,
+        SCLEX_OSCRIPT = 106,
+        SCLEX_VISUALPROLOG = 107,
+        SCLEX_LITERATEHASKELL = 108,
+        SCLEX_STTXT = 109,
+        SCLEX_KVIRC = 110,
+        SCLEX_RUST = 111,
+        SCLEX_DMAP = 112,
+        SCLEX_AS = 113,
+        SCLEX_DMIS = 114,
+        SCLEX_REGISTRY = 115,
+        SCLEX_BIBTEX = 116,
+        SCLEX_SREC = 117,
+        SCLEX_IHEX = 118,
+        SCLEX_TEHEX = 119,
+        SCLEX_AUTOMATIC = 1000,
+
+        // Ada
+        SCE_ADA_DEFAULT = 0,
+        SCE_ADA_WORD = 1,
+        SCE_ADA_IDENTIFIER = 2,
+        SCE_ADA_NUMBER = 3,
+        SCE_ADA_DELIMITER = 4,
+        SCE_ADA_CHARACTER = 5,
+        SCE_ADA_CHARACTEREOL = 6,
+        SCE_ADA_STRING = 7,
+        SCE_ADA_STRINGEOL = 8,
+        SCE_ADA_LABEL = 9,
+        SCE_ADA_COMMENTLINE = 10,
+        SCE_ADA_ILLEGAL = 11,
+
+        // ASM
+        SCE_ASM_DEFAULT = 0,
+        SCE_ASM_COMMENT = 1,
+        SCE_ASM_NUMBER = 2,
+        SCE_ASM_STRING = 3,
+        SCE_ASM_OPERATOR = 4,
+        SCE_ASM_IDENTIFIER = 5,
+        SCE_ASM_CPUINSTRUCTION = 6,
+        SCE_ASM_MATHINSTRUCTION = 7,
+        SCE_ASM_REGISTER = 8,
+        SCE_ASM_DIRECTIVE = 9,
+        SCE_ASM_DIRECTIVEOPERAND = 10,
+        SCE_ASM_COMMENTBLOCK = 11,
+        SCE_ASM_CHARACTER = 12,
+        SCE_ASM_STRINGEOL = 13,
+        SCE_ASM_EXTINSTRUCTION = 14,
+        SCE_ASM_COMMENTDIRECTIVE = 15,
+
+        // Batch
+        SCE_BAT_DEFAULT = 0,
+        SCE_BAT_COMMENT = 1,
+        SCE_BAT_WORD = 2,
+        SCE_BAT_LABEL = 3,
+        SCE_BAT_HIDE = 4,
+        SCE_BAT_COMMAND = 5,
+        SCE_BAT_IDENTIFIER = 6,
+        SCE_BAT_OPERATOR = 7,
+
+        // CPP
+        SCE_C_DEFAULT = 0,
+        SCE_C_COMMENT = 1,
+        SCE_C_COMMENTLINE = 2,
+        SCE_C_COMMENTDOC = 3,
+        SCE_C_NUMBER = 4,
+        SCE_C_WORD = 5,
+        SCE_C_STRING = 6,
+        SCE_C_CHARACTER = 7,
+        SCE_C_UUID = 8,
+        SCE_C_PREPROCESSOR = 9,
+        SCE_C_OPERATOR = 10,
+        SCE_C_IDENTIFIER = 11,
+        SCE_C_STRINGEOL = 12,
+        SCE_C_VERBATIM = 13,
+        SCE_C_REGEX = 14,
+        SCE_C_COMMENTLINEDOC = 15,
+        SCE_C_WORD2 = 16,
+        SCE_C_COMMENTDOCKEYWORD = 17,
+        SCE_C_COMMENTDOCKEYWORDERROR = 18,
+        SCE_C_GLOBALCLASS = 19,
+        SCE_C_STRINGRAW = 20,
+        SCE_C_TRIPLEVERBATIM = 21,
+        SCE_C_HASHQUOTEDSTRING = 22,
+        SCE_C_PREPROCESSORCOMMENT = 23,
+        SCE_C_PREPROCESSORCOMMENTDOC = 24,
+        SCE_C_USERLITERAL = 25,
+        SCE_C_TASKMARKER = 26,
+        SCE_C_ESCAPESEQUENCE = 27,
+
+        // CSS
+        SCE_CSS_DEFAULT = 0,
+        SCE_CSS_TAG = 1,
+        SCE_CSS_CLASS = 2,
+        SCE_CSS_PSEUDOCLASS = 3,
+        SCE_CSS_UNKNOWN_PSEUDOCLASS = 4,
+        SCE_CSS_OPERATOR = 5,
+        SCE_CSS_IDENTIFIER = 6,
+        SCE_CSS_UNKNOWN_IDENTIFIER = 7,
+        SCE_CSS_VALUE = 8,
+        SCE_CSS_COMMENT = 9,
+        SCE_CSS_ID = 10,
+        SCE_CSS_IMPORTANT = 11,
+        SCE_CSS_DIRECTIVE = 12,
+        SCE_CSS_DOUBLESTRING = 13,
+        SCE_CSS_SINGLESTRING = 14,
+        SCE_CSS_IDENTIFIER2 = 15,
+        SCE_CSS_ATTRIBUTE = 16,
+        SCE_CSS_IDENTIFIER3 = 17,
+        SCE_CSS_PSEUDOELEMENT = 18,
+        SCE_CSS_EXTENDED_IDENTIFIER = 19,
+        SCE_CSS_EXTENDED_PSEUDOCLASS = 20,
+        SCE_CSS_EXTENDED_PSEUDOELEMENT = 21,
+        SCE_CSS_MEDIA = 22,
+        SCE_CSS_VARIABLE = 23,
+
+        // Fortran
+        SCE_F_DEFAULT = 0,
+        SCE_F_COMMENT = 1,
+        SCE_F_NUMBER = 2,
+        SCE_F_STRING1 = 3,
+        SCE_F_STRING2 = 4,
+        SCE_F_STRINGEOL = 5,
+        SCE_F_OPERATOR = 6,
+        SCE_F_IDENTIFIER = 7,
+        SCE_F_WORD = 8,
+        SCE_F_WORD2 = 9,
+        SCE_F_WORD3 = 10,
+        SCE_F_PREPROCESSOR = 11,
+        SCE_F_OPERATOR2 = 12,
+        SCE_F_LABEL = 13,
+        SCE_F_CONTINUATION = 14,
+
+        // HTML
+        SCE_H_DEFAULT = 0,
+        SCE_H_TAG = 1,
+        SCE_H_TAGUNKNOWN = 2,
+        SCE_H_ATTRIBUTE = 3,
+        SCE_H_ATTRIBUTEUNKNOWN = 4,
+        SCE_H_NUMBER = 5,
+        SCE_H_DOUBLESTRING = 6,
+        SCE_H_SINGLESTRING = 7,
+        SCE_H_OTHER = 8,
+        SCE_H_COMMENT = 9,
+        SCE_H_ENTITY = 10,
+        SCE_H_TAGEND = 11,
+        SCE_H_XMLSTART = 12,
+        SCE_H_XMLEND = 13,
+        SCE_H_SCRIPT = 14,
+        SCE_H_ASP = 15,
+        SCE_H_ASPAT = 16,
+        SCE_H_CDATA = 17,
+        SCE_H_QUESTION = 18,
+        SCE_H_VALUE = 19,
+        SCE_H_XCCOMMENT = 20,
+
+        // Lisp
+        SCE_LISP_DEFAULT = 0,
+        SCE_LISP_COMMENT = 1,
+        SCE_LISP_NUMBER = 2,
+        SCE_LISP_KEYWORD = 3,
+        SCE_LISP_KEYWORD_KW = 4,
+        SCE_LISP_SYMBOL = 5,
+        SCE_LISP_STRING = 6,
+        SCE_LISP_STRINGEOL = 8,
+        SCE_LISP_IDENTIFIER = 9,
+        SCE_LISP_OPERATOR = 10,
+        SCE_LISP_SPECIAL = 11,
+        SCE_LISP_MULTI_COMMENT = 12,
+
+        // Lua
+        SCE_LUA_DEFAULT = 0,
+        SCE_LUA_COMMENT = 1,
+        SCE_LUA_COMMENTLINE = 2,
+        SCE_LUA_COMMENTDOC = 3,
+        SCE_LUA_NUMBER = 4,
+        SCE_LUA_WORD = 5,
+        SCE_LUA_STRING = 6,
+        SCE_LUA_CHARACTER = 7,
+        SCE_LUA_LITERALSTRING = 8,
+        SCE_LUA_PREPROCESSOR = 9,
+        SCE_LUA_OPERATOR = 10,
+        SCE_LUA_IDENTIFIER = 11,
+        SCE_LUA_STRINGEOL = 12,
+        SCE_LUA_WORD2 = 13,
+        SCE_LUA_WORD3 = 14,
+        SCE_LUA_WORD4 = 15,
+        SCE_LUA_WORD5 = 16,
+        SCE_LUA_WORD6 = 17,
+        SCE_LUA_WORD7 = 18,
+        SCE_LUA_WORD8 = 19,
+        SCE_LUA_LABEL = 20,
+
+        SCE_PAS_DEFAULT = 0,
+        SCE_PAS_IDENTIFIER = 1,
+        SCE_PAS_COMMENT = 2,
+        SCE_PAS_COMMENT2 = 3,
+        SCE_PAS_COMMENTLINE = 4,
+        SCE_PAS_PREPROCESSOR = 5,
+        SCE_PAS_PREPROCESSOR2 = 6,
+        SCE_PAS_NUMBER = 7,
+        SCE_PAS_HEXNUMBER = 8,
+        SCE_PAS_WORD = 9,
+        SCE_PAS_STRING = 10,
+        SCE_PAS_STRINGEOL = 11,
+        SCE_PAS_CHARACTER = 12,
+        SCE_PAS_OPERATOR = 13,
+        SCE_PAS_ASM = 14,
+
+        // Perl
+        SCE_PL_DEFAULT = 0,
+        SCE_PL_ERROR = 1,
+        SCE_PL_COMMENTLINE = 2,
+        SCE_PL_POD = 3,
+        SCE_PL_NUMBER = 4,
+        SCE_PL_WORD = 5,
+        SCE_PL_STRING = 6,
+        SCE_PL_CHARACTER = 7,
+        SCE_PL_PUNCTUATION = 8,
+        SCE_PL_PREPROCESSOR = 9,
+        SCE_PL_OPERATOR = 10,
+        SCE_PL_IDENTIFIER = 11,
+        SCE_PL_SCALAR = 12,
+        SCE_PL_ARRAY = 13,
+        SCE_PL_HASH = 14,
+        SCE_PL_SYMBOLTABLE = 15,
+        SCE_PL_VARIABLE_INDEXER = 16,
+        SCE_PL_REGEX = 17,
+        SCE_PL_REGSUBST = 18,
+        SCE_PL_LONGQUOTE = 19,
+        SCE_PL_BACKTICKS = 20,
+        SCE_PL_DATASECTION = 21,
+        SCE_PL_HERE_DELIM = 22,
+        SCE_PL_HERE_Q = 23,
+        SCE_PL_HERE_QQ = 24,
+        SCE_PL_HERE_QX = 25,
+        SCE_PL_STRING_Q = 26,
+        SCE_PL_STRING_QQ = 27,
+        SCE_PL_STRING_QX = 28,
+        SCE_PL_STRING_QR = 29,
+        SCE_PL_STRING_QW = 30,
+        SCE_PL_POD_VERB = 31,
+        SCE_PL_SUB_PROTOTYPE = 40,
+        SCE_PL_FORMAT_IDENT = 41,
+        SCE_PL_FORMAT = 42,
+        SCE_PL_STRING_VAR = 43,
+        SCE_PL_XLAT = 44,
+        SCE_PL_REGEX_VAR = 54,
+        SCE_PL_REGSUBST_VAR = 55,
+        SCE_PL_BACKTICKS_VAR = 57,
+        SCE_PL_HERE_QQ_VAR = 61,
+        SCE_PL_HERE_QX_VAR = 62,
+        SCE_PL_STRING_QQ_VAR = 64,
+        SCE_PL_STRING_QX_VAR = 65,
+        SCE_PL_STRING_QR_VAR = 66,
+
+        // Properties
+        SCE_PROPS_DEFAULT = 0,
+        SCE_PROPS_COMMENT = 1,
+        SCE_PROPS_SECTION = 2,
+        SCE_PROPS_ASSIGNMENT = 3,
+        SCE_PROPS_DEFVAL = 4,
+        SCE_PROPS_KEY = 5,
+
+        // PHP script
+        SCE_HPHP_COMPLEX_VARIABLE = 104,
+        SCE_HPHP_DEFAULT = 118,
+        SCE_HPHP_HSTRING = 119,
+        SCE_HPHP_SIMPLESTRING = 120,
+        SCE_HPHP_WORD = 121,
+        SCE_HPHP_NUMBER = 122,
+        SCE_HPHP_VARIABLE = 123,
+        SCE_HPHP_COMMENT = 124,
+        SCE_HPHP_COMMENTLINE = 125,
+        SCE_HPHP_HSTRING_VARIABLE = 126,
+        SCE_HPHP_OPERATOR = 127,
+
+        // SQL
+        SCE_SQL_DEFAULT = 0,
+        SCE_SQL_COMMENT = 1,
+        SCE_SQL_COMMENTLINE = 2,
+        SCE_SQL_COMMENTDOC = 3,
+        SCE_SQL_NUMBER = 4,
+        SCE_SQL_WORD = 5,
+        SCE_SQL_STRING = 6,
+        SCE_SQL_CHARACTER = 7,
+        SCE_SQL_SQLPLUS = 8,
+        SCE_SQL_SQLPLUS_PROMPT = 9,
+        SCE_SQL_OPERATOR = 10,
+        SCE_SQL_IDENTIFIER = 11,
+        SCE_SQL_SQLPLUS_COMMENT = 13,
+        SCE_SQL_COMMENTLINEDOC = 15,
+        SCE_SQL_WORD2 = 16,
+        SCE_SQL_COMMENTDOCKEYWORD = 17,
+        SCE_SQL_COMMENTDOCKEYWORDERROR = 18,
+        SCE_SQL_USER1 = 19,
+        SCE_SQL_USER2 = 20,
+        SCE_SQL_USER3 = 21,
+        SCE_SQL_USER4 = 22,
+        SCE_SQL_QUOTEDIDENTIFIER = 23,
+        SCE_SQL_QOPERATOR = 24,
+
+        // Python
+        SCE_P_DEFAULT = 0,
+        SCE_P_COMMENTLINE = 1,
+        SCE_P_NUMBER = 2,
+        SCE_P_STRING = 3,
+        SCE_P_CHARACTER = 4,
+        SCE_P_WORD = 5,
+        SCE_P_TRIPLE = 6,
+        SCE_P_TRIPLEDOUBLE = 7,
+        SCE_P_CLASSNAME = 8,
+        SCE_P_DEFNAME = 9,
+        SCE_P_OPERATOR = 10,
+        SCE_P_IDENTIFIER = 11,
+        SCE_P_COMMENTBLOCK = 12,
+        SCE_P_STRINGEOL = 13,
+        SCE_P_WORD2 = 14,
+        SCE_P_DECORATOR = 15,
+
+        // Ruby
+        SCE_RB_DEFAULT = 0,
+        SCE_RB_ERROR = 1,
+        SCE_RB_COMMENTLINE = 2,
+        SCE_RB_POD = 3,
+        SCE_RB_NUMBER = 4,
+        SCE_RB_WORD = 5,
+        SCE_RB_STRING = 6,
+        SCE_RB_CHARACTER = 7,
+        SCE_RB_CLASSNAME = 8,
+        SCE_RB_DEFNAME = 9,
+        SCE_RB_OPERATOR = 10,
+        SCE_RB_IDENTIFIER = 11,
+        SCE_RB_REGEX = 12,
+        SCE_RB_GLOBAL = 13,
+        SCE_RB_SYMBOL = 14,
+        SCE_RB_MODULE_NAME = 15,
+        SCE_RB_INSTANCE_VAR = 16,
+        SCE_RB_CLASS_VAR = 17,
+        SCE_RB_BACKTICKS = 18,
+        SCE_RB_DATASECTION = 19,
+        SCE_RB_HERE_DELIM = 20,
+        SCE_RB_HERE_Q = 21,
+        SCE_RB_HERE_QQ = 22,
+        SCE_RB_HERE_QX = 23,
+        SCE_RB_STRING_Q = 24,
+        SCE_RB_STRING_QQ = 25,
+        SCE_RB_STRING_QX = 26,
+        SCE_RB_STRING_QR = 27,
+        SCE_RB_STRING_QW = 28,
+        SCE_RB_WORD_DEMOTED = 29,
+        SCE_RB_STDIN = 30,
+        SCE_RB_STDOUT = 31,
+        SCE_RB_STDERR = 40,
+        SCE_RB_UPPER_BOUND = 41,
+
+        // Smalltalk
+        SCE_ST_DEFAULT = 0,
+        SCE_ST_STRING = 1,
+        SCE_ST_NUMBER = 2,
+        SCE_ST_COMMENT = 3,
+        SCE_ST_SYMBOL = 4,
+        SCE_ST_BINARY = 5,
+        SCE_ST_BOOL = 6,
+        SCE_ST_SELF = 7,
+        SCE_ST_SUPER = 8,
+        SCE_ST_NIL = 9,
+        SCE_ST_GLOBAL = 10,
+        SCE_ST_RETURN = 11,
+        SCE_ST_SPECIAL = 12,
+        SCE_ST_KWSEND = 13,
+        SCE_ST_ASSIGN = 14,
+        SCE_ST_CHARACTER = 15,
+        SCE_ST_SPEC_SEL = 16,
+
+        // Basic / VB
+        SCE_B_DEFAULT = 0,
+        SCE_B_COMMENT = 1,
+        SCE_B_NUMBER = 2,
+        SCE_B_KEYWORD = 3,
+        SCE_B_STRING = 4,
+        SCE_B_PREPROCESSOR = 5,
+        SCE_B_OPERATOR = 6,
+        SCE_B_IDENTIFIER = 7,
+        SCE_B_DATE = 8,
+        SCE_B_STRINGEOL = 9,
+        SCE_B_KEYWORD2 = 10,
+        SCE_B_KEYWORD3 = 11,
+        SCE_B_KEYWORD4 = 12,
+        SCE_B_CONSTANT = 13,
+        SCE_B_ASM = 14,
+        SCE_B_LABEL = 15,
+        SCE_B_ERROR = 16,
+        SCE_B_HEXNUMBER = 17,
+        SCE_B_BINNUMBER = 18,
+        SCE_B_COMMENTBLOCK = 19,
+        SCE_B_DOCLINE = 20,
+        SCE_B_DOCBLOCK = 21,
+        SCE_B_DOCKEYWORD = 22,
+
+        // Markdown
+        SCE_MARKDOWN_DEFAULT = 0,
+        SCE_MARKDOWN_LINE_BEGIN = 1,
+        SCE_MARKDOWN_STRONG1 = 2,
+        SCE_MARKDOWN_STRONG2 = 3,
+        SCE_MARKDOWN_EM1 = 4,
+        SCE_MARKDOWN_EM2 = 5,
+        SCE_MARKDOWN_HEADER1 = 6,
+        SCE_MARKDOWN_HEADER2 = 7,
+        SCE_MARKDOWN_HEADER3 = 8,
+        SCE_MARKDOWN_HEADER4 = 9,
+        SCE_MARKDOWN_HEADER5 = 10,
+        SCE_MARKDOWN_HEADER6 = 11,
+        SCE_MARKDOWN_PRECHAR = 12,
+        SCE_MARKDOWN_ULIST_ITEM = 13,
+        SCE_MARKDOWN_OLIST_ITEM = 14,
+        SCE_MARKDOWN_BLOCKQUOTE = 15,
+        SCE_MARKDOWN_STRIKEOUT = 16,
+        SCE_MARKDOWN_HRULE = 17,
+        SCE_MARKDOWN_LINK = 18,
+        SCE_MARKDOWN_CODE = 19,
+        SCE_MARKDOWN_CODE2 = 20,
+        SCE_MARKDOWN_CODEBK = 21,
+
+        // R
+        SCE_R_DEFAULT = 0,
+        SCE_R_COMMENT = 1,
+        SCE_R_KWORD = 2,
+        SCE_R_BASEKWORD = 3,
+        SCE_R_OTHERKWORD = 4,
+        SCE_R_NUMBER = 5,
+        SCE_R_STRING = 6,
+        SCE_R_STRING2 = 7,
+        SCE_R_OPERATOR = 8,
+        SCE_R_IDENTIFIER = 9,
+        SCE_R_INFIX = 10,
+        SCE_R_INFIXEOL = 11,
+
+        // Verilog
+        SCE_V_DEFAULT = 0,
+        SCE_V_COMMENT = 1,
+        SCE_V_COMMENTLINE = 2,
+        SCE_V_COMMENTLINEBANG = 3,
+        SCE_V_NUMBER = 4,
+        SCE_V_WORD = 5,
+        SCE_V_STRING = 6,
+        SCE_V_WORD2 = 7,
+        SCE_V_WORD3 = 8,
+        SCE_V_PREPROCESSOR = 9,
+        SCE_V_OPERATOR = 10,
+        SCE_V_IDENTIFIER = 11,
+        SCE_V_STRINGEOL = 12,
+        SCE_V_USER = 19,
+        SCE_V_COMMENT_WORD = 20,
+        SCE_V_INPUT = 21,
+        SCE_V_OUTPUT = 22,
+        SCE_V_INOUT = 23,
+        SCE_V_PORT_CONNECT = 24,
+
     }
 
     #endregion " Scintilla "

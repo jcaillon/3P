@@ -87,8 +87,10 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Interop\DocumentLines.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="MainFeatures\FilesInfo\FilesInfo.cs" />
+    <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
       <SubType>UserControl</SubType>

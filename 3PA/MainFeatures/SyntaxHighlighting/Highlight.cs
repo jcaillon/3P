@@ -112,42 +112,42 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             var curTheme = CurrentTheme;
 
             //Npp.SetDefaultStyle(curTheme.BgDefault, curTheme.FgDefault);
-            Npp.SetStyle((int)UdlStyles.Default, curTheme.BgDefault, curTheme.FgDefault);
-            Npp.SetStyle((int)UdlStyles.Comment, curTheme.BgDefault, curTheme.FgComment);
-            Npp.SetStyle((int)UdlStyles.CommentLine, curTheme.BgDefault, curTheme.FgLineComment);
-            Npp.SetStyle((int)UdlStyles.Number, curTheme.BgDefault, curTheme.FgNumbers);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList1, curTheme.BgKeyword1, curTheme.FgKeyword1);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList2, curTheme.BgDefault, curTheme.FgKeyword2);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList3, curTheme.BgDefault, curTheme.FgKeyword3);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList4, curTheme.BgDefault, curTheme.FgKeyword4);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList5, curTheme.BgDefault, curTheme.FgKeyword5);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList6, curTheme.BgDefault, curTheme.FgKeyword6);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList7, curTheme.BgDefault, curTheme.FgKeyword7);
-            Npp.SetStyle((int)UdlStyles.KeyWordsList8, curTheme.BgKeyword8, curTheme.FgKeyword8);
-            Npp.SetStyle((int)UdlStyles.FolderInCode2, curTheme.BgDefault, curTheme.FgFoldInCode2);
-            Npp.SetStyle((int)UdlStyles.Delimiter1, curTheme.BgDefault, curTheme.FgDelimiters1);
-            Npp.SetStyle((int)UdlStyles.Delimiter2, curTheme.BgDefault, curTheme.FgDelimiters2);
-            Npp.SetStyle((int)UdlStyles.Delimiter3, curTheme.BgDelimiters3, curTheme.FgDelimiters3);
-            Npp.SetStyle((int)UdlStyles.Delimiter4, curTheme.BgDefault, curTheme.FgDelimiters4);
-            Npp.SetStyle((int)UdlStyles.Delimiter5, curTheme.BgDefault, curTheme.FgDelimiters5);
-            Npp.SetStyle((int)UdlStyles.Delimiter6, curTheme.BgDefault, curTheme.FgDelimiters6);
-            Npp.SetStyle((int)UdlStyles.Delimiter7, curTheme.BgDefault, curTheme.FgDelimiters7);
-            Npp.SetStyle((int)UdlStyles.Delimiter8, curTheme.BgDefault, curTheme.FgDelimiters8);
-            Npp.SetStyle((int)UdlStyles.Operators, curTheme.BgDefault, curTheme.FgOperators);
+            Npp.SetStyle((byte)UdlStyles.Default, curTheme.BgDefault, curTheme.FgDefault);
+            Npp.SetStyle((byte)UdlStyles.Comment, curTheme.BgDefault, curTheme.FgComment);
+            Npp.SetStyle((byte)UdlStyles.CommentLine, curTheme.BgDefault, curTheme.FgLineComment);
+            Npp.SetStyle((byte)UdlStyles.Number, curTheme.BgDefault, curTheme.FgNumbers);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList1, curTheme.BgKeyword1, curTheme.FgKeyword1);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList2, curTheme.BgDefault, curTheme.FgKeyword2);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList3, curTheme.BgDefault, curTheme.FgKeyword3);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList4, curTheme.BgDefault, curTheme.FgKeyword4);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList5, curTheme.BgDefault, curTheme.FgKeyword5);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList6, curTheme.BgDefault, curTheme.FgKeyword6);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList7, curTheme.BgDefault, curTheme.FgKeyword7);
+            Npp.SetStyle((byte)UdlStyles.KeyWordsList8, curTheme.BgKeyword8, curTheme.FgKeyword8);
+            Npp.SetStyle((byte)UdlStyles.FolderInCode2, curTheme.BgDefault, curTheme.FgFoldInCode2);
+            Npp.SetStyle((byte)UdlStyles.Delimiter1, curTheme.BgDefault, curTheme.FgDelimiters1);
+            Npp.SetStyle((byte)UdlStyles.Delimiter2, curTheme.BgDefault, curTheme.FgDelimiters2);
+            Npp.SetStyle((byte)UdlStyles.Delimiter3, curTheme.BgDelimiters3, curTheme.FgDelimiters3);
+            Npp.SetStyle((byte)UdlStyles.Delimiter4, curTheme.BgDefault, curTheme.FgDelimiters4);
+            Npp.SetStyle((byte)UdlStyles.Delimiter5, curTheme.BgDefault, curTheme.FgDelimiters5);
+            Npp.SetStyle((byte)UdlStyles.Delimiter6, curTheme.BgDefault, curTheme.FgDelimiters6);
+            Npp.SetStyle((byte)UdlStyles.Delimiter7, curTheme.BgDefault, curTheme.FgDelimiters7);
+            Npp.SetStyle((byte)UdlStyles.Delimiter8, curTheme.BgDefault, curTheme.FgDelimiters8);
+            Npp.SetStyle((byte)UdlStyles.Operators, curTheme.BgDefault, curTheme.FgOperators);
 
             // for annotations :
-            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Information + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
-            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Warning + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
-            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.StrongWarning + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
-            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Error + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
-            Npp.SetAnnotationStyleDefinition((int)ErrorLevel.Critical + FilesInfo.FilesInfo.ErrorAnnotationStyleOffset, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
+            SetAnnotationStyleDefinition((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
+            SetAnnotationStyleDefinition((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
+            SetAnnotationStyleDefinition((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
+            SetAnnotationStyleDefinition((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
+            SetAnnotationStyleDefinition((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
 
             // for markers :
-            Npp.SetMarkerStyle((int)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0, SciMsg.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((int)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1, SciMsg.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((int)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2, SciMsg.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((int)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3, SciMsg.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((int)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4, SciMsg.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0, SciMarkerStyle.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1, SciMarkerStyle.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2, SciMarkerStyle.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3, SciMarkerStyle.SC_MARK_SMALLRECT);
+            Npp.SetMarkerStyle((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4, SciMarkerStyle.SC_MARK_SMALLRECT);
 
             // set style 33 for the margin with line numbers
         }
@@ -207,6 +207,27 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #region private methods
 
+        /// <summary>
+        /// Sets a style for an annotation (reduced font + segoe ui)
+        /// </summary>
+        /// <param name="style"></param>
+        /// <param name="bgColor"></param>
+        /// <param name="fgColor"></param>
+        private static void SetAnnotationStyleDefinition(byte style, Color bgColor, Color fgColor) {
+            int curFontSize = Npp.GetFontSize(0);
+
+            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotStandardStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
+            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotStandardStyleOffset), bgColor, fgColor);
+
+            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
+            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), bgColor, fgColor);
+            Npp.SetStyleFontBold((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), true);
+
+            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
+            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), bgColor, fgColor);
+            Npp.SetStyleFontItalic((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), true);
+        }
+
         #endregion
 
         #region real colorization todo
@@ -243,8 +264,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             Lexer tok = new Lexer(Npp.GetDocumentText());
             tok.Tokenize();
             SynthaxHighlightVisitor vis = new SynthaxHighlightVisitor {
-                FromLine = Npp.GetLineFromPosition(startPos),
-                ToLine = Npp.GetLineFromPosition(endPos)
+                FromLine = Npp.LineFromPosition(startPos),
+                ToLine = Npp.LineFromPosition(endPos)
             };
             tok.Accept(vis);
 

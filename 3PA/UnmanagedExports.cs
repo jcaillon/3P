@@ -32,10 +32,8 @@ using _3PA.MainFeatures.SyntaxHighlighting;
 // ReSharper disable RedundantAssignment
 // ReSharper disable UnusedParameter.Local
 
-namespace _3PA
-{
-    class UnmanagedExports
-    {
+namespace _3PA {
+    class UnmanagedExports {
         #region Other
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -139,6 +137,9 @@ namespace _3PA
                         return;
 
                     case (uint) SciMsg.SCN_MODIFIED:
+                        // observe modification to lines
+                        Npp.Lines.ScnModified(nc);
+                        
                         // if the text has changed, parse
                         if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
                             (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)
@@ -165,12 +166,12 @@ namespace _3PA
                         // click on the error margin
                         if (nc.margin == FilesInfo.ErrorMarginNumber) {
                             // if it's an error symbol that has been clicked, the error on the line will be cleared
-                            if (!FilesInfo.ClearError(Npp.GetLineFromPosition(nc.position))) {
+                            if (!FilesInfo.ClearError(Npp.LineFromPosition(nc.position))) {
                                 // if nothing has been cleared, we go to the next error position
-                                FilesInfo.GoToNextError(Npp.GetLineFromPosition(nc.position));
+                                FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
                             }
                         }
-                        //can also use : modifiers, the appropriate combination of SCI_SHIFT, SCI_CTRL and SCI_ALT to indicate the keys that were held down at the time of the margin click.
+                        // can also use : modifiers, the appropriate combination of SCI_SHIFT, SCI_CTRL and SCI_ALT to indicate the keys that were held down at the time of the margin click.
                         return;
 
                     case (uint) NppMsg.NPPN_FILEBEFOREOPEN:

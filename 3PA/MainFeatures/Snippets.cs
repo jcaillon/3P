@@ -115,8 +115,8 @@ namespace _3PA.MainFeatures {
             if (InsertionActive) return false; // do no insert a snippet within a snippet!
 
             
-            string token = Npp.GetKeyword(Npp.GetCaretPosition());
-            var curPos = Npp.GetCaretPosition();
+            string token = Npp.GetKeyword(Npp.CurrentPosition);
+            var curPos = Npp.CurrentPosition;
             Point tokenPoints = new Point(curPos - token.Length, curPos);
 
             if (Contains(token)) {
@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures {
 
                 if (replacement != null) {
                     int line = Npp.GetCaretLineNumber();
-                    int lineStartPos = Npp.GetPositionFromLine(line);
+                    int lineStartPos = Npp.PositionFromLine(line);
 
                     int horizontalOffset = tokenPoints.X - lineStartPos;
 
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures {
                     Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
 
                     foreach (var point in LocSnippetContext.Parameters) {
-                        Npp.PlaceIndicator(SnippetContext.IndicatorId, point.X, point.Y);
+                        Npp.AddIndicator(SnippetContext.IndicatorId, point.X, point.Y);
                     }
 
                     if (LocSnippetContext.CurrentParameter.HasValue) {
@@ -159,7 +159,7 @@ namespace _3PA.MainFeatures {
 
             //restore the indicator
             Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
-            Npp.PlaceIndicator(SnippetContext.IndicatorId, indicatorRange.X, indicatorRange.X + text.Length);
+            Npp.AddIndicator(SnippetContext.IndicatorId, indicatorRange.X, indicatorRange.X + text.Length);
         }
 
         static public bool NavigateToNextParam() {
@@ -179,7 +179,7 @@ namespace _3PA.MainFeatures {
                 if (currentParamOriginalText != currentParamDetectedText) {
                     //current parameter is modified, indicator is destroyed so restore the indicator first
                     Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
-                    Npp.PlaceIndicator(SnippetContext.IndicatorId, currentParam.X, currentParam.X + currentParamDetectedText.Length);
+                    Npp.AddIndicator(SnippetContext.IndicatorId, currentParam.X, currentParam.X + currentParamDetectedText.Length);
 
                     indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);//needs refreshing as the document is modified
 
@@ -233,7 +233,7 @@ namespace _3PA.MainFeatures {
             var indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);
 
             foreach (var range in indicators)
-                Npp.ClearIndicator(SnippetContext.IndicatorId, range.X, range.Y);
+                Npp.DeleteIndicator(SnippetContext.IndicatorId, range.X, range.Y);
 
             var caretPoint = indicators.Where(point => {
                 string text = Npp.GetTextBetween(point);

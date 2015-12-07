@@ -421,7 +421,7 @@ namespace _3PA {
         public static void OnCharAddedWordContinue(char c) {
             try {
                 // dont show in string/comments..?
-                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Highlight.IsCarretInNormalContext(Npp.GetCaretPosition())) {
+                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Highlight.IsCarretInNormalContext(Npp.CurrentPosition)) {
                     AutoComplete.Close();
                 } else {
                     // handles the autocompletion
@@ -441,10 +441,10 @@ namespace _3PA {
         public static void OnCharAddedWordEnd(char c) {
             try {
                 // we finished entering a keyword
-                var curPos = Npp.GetCaretPosition();
+                var curPos = Npp.CurrentPosition;
                 int offset;
                 if (c == '\n') {
-                    offset = curPos - Npp.GetPositionFromLine(Npp.GetLineFromPosition(curPos));
+                    offset = curPos - Npp.PositionFromLine(Npp.LineFromPosition(curPos));
                     offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 1;
                 } else
                     offset = 1;
@@ -485,7 +485,7 @@ namespace _3PA {
 
                 // replace semicolon by a point
                 if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && isNormalContext) {
-                    curPos = Npp.GetCaretPosition();
+                    curPos = Npp.CurrentPosition;
                     Npp.BeginUndoAction();
                     Npp.SetTextByRange(curPos - 1, curPos, ".");
                     Npp.SetCaretPosition(curPos);
@@ -553,6 +553,9 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
+            // rebuild lines info
+            Npp.Lines.RebuildLineData();
+
             if (IsCurrentFileProgress) {
                 // Syntax Highlight
                 Highlight.SetCustomStyles();
@@ -596,7 +599,7 @@ namespace _3PA {
                 Npp.SetIndent(_indentWidth);
                 Npp.SetUseTabs(_indentWithTabs);
                 Npp.SetAnnotationVisible(_annotationMode);
-                Npp.SetMargin(FilesInfo.ErrorMarginNumber, SciMsg.SC_MARGIN_SYMBOL, _marginWidth, _marginSensitive);
+                Npp.SetMargin(FilesInfo.ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, _marginWidth, _marginSensitive);
             } else {
                 Npp.HideDefaultAutoCompletion();
                 Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
@@ -628,6 +631,29 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
+            UserCommunication.Notify("Config changed", MessageImage.Ok, "EVENT", "File changed");
+
+            Npp.SetIndicatorStyle(9, SciIndicatorType.INDIC_ROUNDBOX, Color.BlueViolet, 50);
+            Npp.SetIndicatorHoverStyle(9, SciIndicatorType.INDIC_TEXTFORE, Color.Chartreuse);
+
+            //Npp.AddText("יחאט!#");
+
+            UserCommunication.Notify(Npp.GetLineText(0) 
+                + " " + 
+                Npp.GetWordAtPosition(Npp.GetPositionFromMouseLocation()) +
+                "<br>" + Npp.GetWordAtPosition(Npp.CurrentPosition) +
+                "<br>" + Npp.CurrentPosition+
+                "<br>" + Npp.TextLength +
+                "<br>" + Npp.GetTextOnLeftOfPos(Npp.CurrentPosition, 5) +
+                "<br>" + Npp.GetTextOnRightOfPos(Npp.CurrentPosition, 5)
+                );
+
+            /*
+            Npp.AddIndicator(9, 0, 5);
+            UserCommunication.Notify(Npp.GetTextByRange(0, 5) + " " + Npp.IndicatorPresentAt(9, 3) + " " + Npp.IndicatorPresentAt(9, 7) + Npp.GetSelectedText());
+            Npp.SetTextByRange(0, 5, Npp.GetTextByRange(0, 5));
+             */
+
             var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
             foreach (var kpv in derp) {
                 FilesInfo.UpdateFileErrors(kpv.Key, kpv.Value);
@@ -647,20 +673,8 @@ namespace _3PA {
 
             FileTags.UnCloak();
 
-            //UserCommunication.Notify(Npp.GetStyleAt(Npp.GetCaretPosition()).ToString());
-            //UserCommunication.MessageToUser();
             //var x = 0;
             //var y = 1/x;
-            //Npp.Goto(@"C:\Users\Julien\Desktop\in.p", 1000, 10);
-            //ProgressCodeUtils.ToggleComment();
-            /*
-            Task.Factory.StartNew(() => {
-                Appli.Form.BeginInvoke((Action)delegate {
-                    var toastNotification2 = new YamuiNotifications(Npp.IsDocumentSaved().ToString(), 5);
-                    toastNotification2.Show();
-                });
-            });*/
-            //Highlight.Colorize(0, Npp.GetTextLenght());
         }
         #endregion
     }

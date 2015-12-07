@@ -18,9 +18,7 @@
 // // ========================================================================
 #endregion
 using System;
-using System.ComponentModel;
 using System.Drawing;
-using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
@@ -73,15 +71,17 @@ namespace YamuiFramework.Themes {
         }
 
         public static void OnImageLoad(HtmlImageLoadEventArgs e) {
-            Image tryImg = ImageGetter.GetInstance().Get(e.Src);
-            if (tryImg != null) {
-                e.Handled = true;
-                e.Callback(tryImg);
-                return;
-            }
+            // load image from user
             if (OnImageNeeded != null) {
                 OnImageNeeded(null, e);
+                if (e.Handled)
+                    return;
             }
+            // load image from yamui library
+            Image tryImg = ImageGetter.GetInstance().Get(e.Src);
+            if (tryImg == null) return;
+            e.Handled = true;
+            e.Callback(tryImg);
         }
     }
 }

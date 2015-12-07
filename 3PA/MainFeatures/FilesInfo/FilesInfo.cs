@@ -1,9 +1,30 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// This file (FilesInfo.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.FilesInfo {
 
@@ -28,7 +49,9 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// <summary>
         /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
-        public const int ErrorAnnotationStyleOffset = 250;
+        public const int ErrorAnnotStandardStyleOffset = 250;
+        public const int ErrorAnnotBoldStyleOffset = 245;
+        public const int ErrorAnnotItalicStyleOffset = 240;
 
         /// <summary>
         /// Update the current operation for the file, update the state
@@ -41,7 +64,7 @@ namespace _3PA.MainFeatures.FilesInfo {
             Npp.SetMarginMask(ErrorMarginNumber, 31);
 
             // reset margin and annotations
-            Npp.SetMargin(ErrorMarginNumber, SciMsg.SC_MARGIN_SYMBOL, 0, 1);
+            Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 0, 1);
             Npp.DeleteAllAnnotations();
             Npp.DeleteAllMarker((int)ErrorLevel.Information);
             Npp.DeleteAllMarker((int)ErrorLevel.Warning);
@@ -65,25 +88,42 @@ namespace _3PA.MainFeatures.FilesInfo {
                 return;
 
             // show margin
-            Npp.SetMargin(ErrorMarginNumber, SciMsg.SC_MARGIN_SYMBOL, 12, 1);
+            Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 12, 1);
 
+            StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;
-            string lastMessage = "";
+            StringBuilder lastMessage = new StringBuilder();
             foreach (var fileError in _sessionInfo[currentFilePath].FileErrors) {
                 if (lastLine != fileError.Line) {
-                    lastMessage = "";
-                    // set marker style
-                    Npp.AddMarker(fileError.Line, (int)fileError.Level);
-                    // set annotation style
-                    Npp.SetAnnotationStyle(fileError.Line, ErrorAnnotationStyleOffset + (int)fileError.Level);
-                } else
-                    lastMessage += "\n";
+                    stylerHelper.Clear();
+                    lastMessage.Clear();
+                    // set marker style now (the first error encountered for a given line is the highest anyway)
+                    Npp.AddMarker(fileError.Line, (int) fileError.Level);
+                    //Npp.SetAnnotationStyle(fileError.Line, ErrorAnnotationStyleOffset + (int)fileError.Level);
+                } else {
+                    stylerHelper.Style("\n", (byte)fileError.Level);
+                    lastMessage.Append("\n");
+                }
+
                 lastLine = fileError.Line;
-                lastMessage += (fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber + "): " : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber + "): ") +
-                    fileError.Message.BreakText(140) + (!string.IsNullOrEmpty(fileError.Help) ? "\nDetailed help: " + fileError.Help.BreakText(140) : "");
+
+                var mess = (fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber + "): " : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber + "): ");
+                stylerHelper.Style(mess, (byte)(ErrorAnnotBoldStyleOffset + fileError.Level));
+                lastMessage.Append(mess);
+
+                mess = fileError.Message.BreakText(140);
+                stylerHelper.Style(mess, (byte)(ErrorAnnotStandardStyleOffset + fileError.Level));
+                lastMessage.Append(mess);
+
+                if (!string.IsNullOrEmpty(fileError.Help)) {
+                    mess = "\nDetailed help: " + fileError.Help.BreakText(140);
+                    stylerHelper.Style(mess, (byte) (ErrorAnnotItalicStyleOffset + fileError.Level));
+                    lastMessage.Append(mess);
+                }
 
                 // set annotation
-                Npp.AddAnnotation(lastLine, lastMessage);
+                Npp.AddAnnotation(lastLine, lastMessage.ToString());
+                Npp.SetAnnotationStyles(lastLine, stylerHelper.GetStyleArray());
             }
         }
 
@@ -135,7 +175,7 @@ namespace _3PA.MainFeatures.FilesInfo {
 
                 // hide margin is there is nothing to display
                 if (_sessionInfo[currentFilePath].FileErrors.Count == 0)
-                    Npp.SetMargin(ErrorMarginNumber, SciMsg.SC_MARGIN_SYMBOL, 0, 1);
+                    Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 0, 1);
             }
             // hide margin if no errors
             return jobDone;
@@ -154,13 +194,34 @@ namespace _3PA.MainFeatures.FilesInfo {
             if (nextLine == -1)
                 nextLine = Npp.GetNextMarkerLine(0, 31);
             if (nextLine != -1) {
-                UserCommunication.Notify(nextLine.ToString());
                 try {
                     var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == nextLine);
-                    UserCommunication.Notify(errInfo.Line + " " + errInfo.Column);
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
                 } catch (Exception) {
                     Npp.GoToLine(nextLine);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Go to the previous error
+        /// </summary>
+        public static void GoToPrevError(int line) {
+            var currentFilePath = Npp.GetCurrentFilePath();
+            var nbLines = Npp.GetLineCount();
+            if (!_sessionInfo.ContainsKey(currentFilePath))
+                return;
+            int prevLine = Npp.GetPreviousMarkerLine(line, 31);
+            if (prevLine == -1 && _sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == nbLines))
+                prevLine = nbLines;
+            if (prevLine == -1)
+                prevLine = Npp.GetPreviousMarkerLine(nbLines, 31);
+            if (prevLine != -1) {
+                try {
+                    var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == prevLine);
+                    Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
+                } catch (Exception) {
+                    Npp.GoToLine(prevLine);
                 }
             }
         }

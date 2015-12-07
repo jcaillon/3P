@@ -17,13 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.IO;
 using System.Linq;
 using System.Text;
 using YamuiFramework.Forms;
-using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
@@ -48,7 +46,7 @@ namespace _3PA.MainFeatures {
             }
 
             // try to go to the definition of the selected word
-            var position = Npp.GetCaretPosition();
+            var position = Npp.CurrentPosition;
             var curWord = Npp.GetWordAtPosition(position);
 
 
@@ -91,7 +89,7 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-
+        #region Toggle comment
 
         /// <summary>
         /// Toggle comments on and off on selected lines
@@ -99,8 +97,8 @@ namespace _3PA.MainFeatures {
         public static void ToggleComment() {
             int mode = 0; // 0: null, 1: toggle off; 2: toggle on
             var selectionRange = Npp.GetSelectionRange();
-            var startLine = Npp.GetLineFromPosition(selectionRange.cpMin);
-            var endLine = Npp.GetLineFromPosition(selectionRange.cpMax);
+            var startLine = Npp.LineFromPosition(selectionRange.cpMin);
+            var endLine = Npp.LineFromPosition(selectionRange.cpMax);
 
             Npp.BeginUndoAction();
 
@@ -149,7 +147,7 @@ namespace _3PA.MainFeatures {
             if (mode == 2) {
                 selectionRange = Npp.GetSelectionRange();
                 if (selectionRange.cpMax - selectionRange.cpMin > 0) {
-                    if (Npp.GetAnchorPosition() > Npp.GetCaretPosition())
+                    if (Npp.AnchorPosition > Npp.CurrentPosition)
                         Npp.SetSelectionOrdered(selectionRange.cpMax + 2, selectionRange.cpMin);
                     else
                         Npp.SetSelectionOrdered(selectionRange.cpMin, selectionRange.cpMax + 2);
@@ -158,5 +156,8 @@ namespace _3PA.MainFeatures {
 
             Npp.EndUndoAction();
         }
+
+        #endregion
+
     }
 }

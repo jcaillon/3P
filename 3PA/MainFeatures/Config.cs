@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -161,7 +160,7 @@ namespace _3PA.MainFeatures {
         /// Url to post logs
         /// </summary>
         public static string SendLogUrl {
-            get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; }
+            get { return @"https://000api.github.com/repos/jcaillon/3p/issues/2/comments"; }
         }
 
         /// <summary>
