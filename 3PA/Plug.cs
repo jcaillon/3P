@@ -81,16 +81,6 @@ namespace _3PA {
         }
         #endregion
 
-        #region default option values
-
-        private static bool _indentWithTabs;
-        private static int _indentWidth;
-        private static int _annotationMode;
-        private static int _marginWidth;
-        private static int _marginSensitive;
-
-        #endregion
-
         #region Init and clean up
         /// <summary>
         /// Called on notepad++ setinfo
@@ -116,7 +106,6 @@ namespace _3PA {
             Interop.Plug.SetCommand(cmdIndex++, "Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
 
             Interop.Plug.SetCommand(cmdIndex++, "About", Appli.GoToAboutPage);
-            
             
             /*
             SetCommand(cmdIndex++, "---", null);
@@ -240,7 +229,8 @@ namespace _3PA {
             Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             LocalHtmlHandler.Init();
 
-            //Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SynthaxHighlighting.xml");
+            ApplyPluginSpecificOptions(false);
+
             #endregion
 
             // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
@@ -249,12 +239,12 @@ namespace _3PA {
 
             Task.Factory.StartNew(() => {
 
-                //// registry : temp folder path
-                //tempPath = Path.Combine(Path.GetTempPath(), Resources.PluginFolderName);
-                //if (!Directory.Exists(tempPath)) {
-                //    Directory.CreateDirectory(tempPath);
-                //}
-                //Registry.SetValue(Resources.RegistryPath, "tempPath", tempPath, RegistryValueKind.String);
+                // cool settings
+                Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
+                Npp.EndAtLastLine = false;
+                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
+
                 Snippets.Init();
                 Keywords.Init();
                 Config.Save();
@@ -263,21 +253,9 @@ namespace _3PA {
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);
 
-                // SCINTILLA
-                // set the timer of dwell time, if the user let the mouse inactive for this period of time, npp fires the dwellstart notif
-                Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMOUSEDWELLTIME, Config.Instance.ToolTipmsBeforeShowing, 0);
-                // Set a mask for notifications received
-                Win32.SendMessage(Npp.HandleScintilla, SciMsg.SCI_SETMODEVENTMASK,
-                    SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO, 0);
-                Npp.SetEndAtLastLine(false);
-                Npp.SetWhiteSpaceView();
-
                 // dockable explorer
                 if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
                     Appli.Form.BeginInvoke((Action) CodeExplorer.Toggle);
-
-                // Simulates a OnDocumentSwitched when we start this dll
-                OnDocumentSwitched();
 
                 // Fetch the info from the database, when its done, it will update the parser, if it needs
                 // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
@@ -289,9 +267,12 @@ namespace _3PA {
                     UserCommunication.NotifyUserAboutNppDefaultAutoComp();
 
                 // make sure the UDL is present
-                Highlight.Init();
+                Highlight.CheckUdl();
 
                 PluginIsFullyLoaded = true;
+
+                // Simulates a OnDocumentSwitched when we start this dll
+                OnDocumentSwitched();
             });
 
             // Try to update 3P
@@ -302,7 +283,7 @@ namespace _3PA {
 
         #endregion
 
-        #region OnEvents
+        #region public OnEvents
         /// <summary>
         /// Called when the user presses a key
         /// </summary>
@@ -310,7 +291,7 @@ namespace _3PA {
         /// <param name="repeatCount"></param>
         /// <param name="handled"></param>
         // ReSharper disable once RedundantAssignment
-        static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
+        public static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
@@ -392,7 +373,7 @@ namespace _3PA {
         /// Called when the user enters any character in npp
         /// </summary>
         /// <param name="c"></param>
-        static public void OnCharTyped(char c) {
+        public static void OnCharTyped(char c) {
             // CTRL + S : char code 19
             if (c == (char) 19) {
                 Npp.Undo();
@@ -444,7 +425,7 @@ namespace _3PA {
                 var curPos = Npp.CurrentPosition;
                 int offset;
                 if (c == '\n') {
-                    offset = curPos - Npp.PositionFromLine(Npp.LineFromPosition(curPos));
+                    offset = curPos - Npp.GetLine().Position;
                     offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 1;
                 } else
                     offset = 1;
@@ -488,7 +469,7 @@ namespace _3PA {
                     curPos = Npp.CurrentPosition;
                     Npp.BeginUndoAction();
                     Npp.SetTextByRange(curPos - 1, curPos, ".");
-                    Npp.SetCaretPosition(curPos);
+                    Npp.SetSel(curPos);
                     Npp.EndUndoAction();
                 }
 
@@ -541,32 +522,33 @@ namespace _3PA {
         /// Called when the user switches tab document
         /// </summary>
         public static void OnDocumentSwitched() {
+
             // update current file .extension check
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
-
+            
             // update current scintilla
             Npp.UpdateScintilla();
-
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
-
+            
+            // rebuild lines info
+            Npp.RebuildLinesInfo();
+            
             // close popups..
             ClosePopups();
-
-            // rebuild lines info
-            Npp.Lines.RebuildLineData();
-
+            
             if (IsCurrentFileProgress) {
                 // Syntax Highlight
                 Highlight.SetCustomStyles();
 
                 // Update info on the current file
-                FilesInfo.DisplayCurrentFileInfo();
+                //FilesInfo.DisplayCurrentFileInfo();
             }
 
             // Parse the document
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
+
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyPluginSpecificOptions(false);
         }
 
         /// <summary>
@@ -581,32 +563,59 @@ namespace _3PA {
 
         #region public
 
+        #region Apply Npp options
+
+        private static bool _indentWithTabs;
+        private static int _indentWidth;
+        private static Annotation _annotationMode;
+        private static int _marginWidth;
+        private static bool _marginSensitive;
+
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         /// <param name="forceToDefault"></param>
-        public static void ApplyPluginSpecificOptions(bool forceToDefault) {
+        public static void ApplyPluginSpecificOptions(bool forceToDefault)
+        {
+
             if (_indentWidth == 0) {
-                _indentWidth = Npp.GetIndent();
-                _indentWithTabs = Npp.GetUseTabs();
-                _annotationMode = Npp.GetAnnotationVisible();
-                _marginWidth = Npp.GetMarginWidth(FilesInfo.ErrorMarginNumber);
-                _marginSensitive = Npp.GetMarginSentivity(FilesInfo.ErrorMarginNumber);
+                _indentWidth = Npp.IndentWidth;
+                _indentWithTabs = Npp.UseTabs;
+                _annotationMode = Npp.AnnotationVisible;
+
+                _marginWidth = FilesInfo.MargError.Width;
+                _marginSensitive = FilesInfo.MargError.Sensitive;
             }
+
             if (!IsCurrentFileProgress || forceToDefault) {
-                Npp.ResetDefaultAutoCompletion();
-                Npp.SetIndent(_indentWidth);
-                Npp.SetUseTabs(_indentWithTabs);
-                Npp.SetAnnotationVisible(_annotationMode);
-                Npp.SetMargin(FilesInfo.ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, _marginWidth, _marginSensitive);
-            } else {
-                Npp.HideDefaultAutoCompletion();
-                Npp.SetIndent(Config.Instance.AutoCompleteIndentNbSpaces);
-                Npp.SetUseTabs(false);
-                Npp.SetAnnotationVisible(2);
+                Npp.AutoCStops("");
+                Npp.AnnotationVisible = _annotationMode;
+
+                FilesInfo.MargError.Width = _marginWidth;
+                FilesInfo.MargError.Sensitive = _marginSensitive;
+
+                Npp.UseTabs = _indentWithTabs;
+                Npp.IndentWidth = _indentWidth;
+            }
+            else
+            {
+                // barbarian method to force the default autocompletion window to hide, 
+                // this is a very bad technique, it makes npp slows down when there is too much text!
+                // TODO: find a better technique to hide the autocompletion!!! this slows npp down
+                // #$%&'()*+,-./:;<=>?[\]^_`{|}~@   
+                Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+                Npp.AnnotationVisible = Annotation.Boxed;
+            
+                FilesInfo.MargError.Width = 0;
+                FilesInfo.MargError.Sensitive = true;
+
+                Npp.UseTabs = false;
+                Npp.IndentWidth = Config.Instance.AutoCompleteIndentNbSpaces;
             }
         }
+
+        #endregion
 
         /// <summary>
         /// Call this method to close all popup/autocompletion form and alike
@@ -630,29 +639,6 @@ namespace _3PA {
 
         #region tests
         public static void Test() {
-
-            UserCommunication.Notify("Config changed", MessageImage.Ok, "EVENT", "File changed");
-
-            Npp.SetIndicatorStyle(9, SciIndicatorType.INDIC_ROUNDBOX, Color.BlueViolet, 50);
-            Npp.SetIndicatorHoverStyle(9, SciIndicatorType.INDIC_TEXTFORE, Color.Chartreuse);
-
-            //Npp.AddText("יחאט!#");
-
-            UserCommunication.Notify(Npp.GetLineText(0) 
-                + " " + 
-                Npp.GetWordAtPosition(Npp.GetPositionFromMouseLocation()) +
-                "<br>" + Npp.GetWordAtPosition(Npp.CurrentPosition) +
-                "<br>" + Npp.CurrentPosition+
-                "<br>" + Npp.TextLength +
-                "<br>" + Npp.GetTextOnLeftOfPos(Npp.CurrentPosition, 5) +
-                "<br>" + Npp.GetTextOnRightOfPos(Npp.CurrentPosition, 5)
-                );
-
-            /*
-            Npp.AddIndicator(9, 0, 5);
-            UserCommunication.Notify(Npp.GetTextByRange(0, 5) + " " + Npp.IndicatorPresentAt(9, 3) + " " + Npp.IndicatorPresentAt(9, 7) + Npp.GetSelectedText());
-            Npp.SetTextByRange(0, 5, Npp.GetTextByRange(0, 5));
-             */
 
             var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
             foreach (var kpv in derp) {

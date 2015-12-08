@@ -70,6 +70,17 @@ namespace _3PA.Lib {
             var property = instance.GetType().GetProperty(propertyName);
             return (T)property.GetCustomAttributes(attrType, false).First();
         }
+
+        /// <summary>
+        /// Returns true if the bit at the given position is set to true
+        /// </summary>
+        /// <param name="b"></param>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        public static bool IsBitSet(this int b, int pos) {
+            return (b & (1 << pos)) != 0;
+        }
+
         #endregion
 
 
@@ -118,6 +129,10 @@ namespace _3PA.Lib {
 
 
         #region string extensions
+
+        public static string TrimEol(this string text) {
+            return text.TrimEnd('\r', '\n');
+        }
 
         /// <summary>
         /// Breaks new lines every lineLength char, taking into account words to not

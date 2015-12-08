@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 using NppPlugin.DllExport;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -138,8 +139,8 @@ namespace _3PA {
 
                     case (uint) SciMsg.SCN_MODIFIED:
                         // observe modification to lines
-                        Npp.Lines.ScnModified(nc);
-                        
+                        Npp.UpdateLinesInfo(nc);
+
                         // if the text has changed, parse
                         if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
                             (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)

@@ -33,7 +33,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         #region private fields
 
         private List<byte> _styleArray = new List<byte>();
-        private bool _isUtf8;
 
         #endregion
 
@@ -43,11 +42,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// Simple constructor
         /// </summary>
         public StylerHelper() {
-            _isUtf8 = Npp.IsUtf8();
-        }
-
-        public StylerHelper(bool isUtf8) {
-            _isUtf8 = isUtf8;
         }
 
         #endregion
@@ -60,7 +54,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// <param name="text"></param>
         /// <param name="styleId"></param>
         public void Style(string text, byte styleId) {
-            _styleArray.AddRange(Enumerable.Repeat(styleId, _isUtf8 ? text.GetUtf8ByteCount() : text.GetByteCount()));
+            _styleArray.AddRange(Enumerable.Repeat(styleId, text.Length));
         }
 
         /// <summary>

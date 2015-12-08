@@ -523,7 +523,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
-            _currentLineNumber = Npp.GetCaretLineNumber();
+            _currentLineNumber = Npp.Line.CurrentLine;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
             _filterString = _filterByText;
             _useTypeFiltering = true;

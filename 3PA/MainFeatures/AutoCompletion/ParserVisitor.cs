@@ -640,7 +640,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="endLine"></param>
         /// <returns></returns>
         private static int NbExtraCharBetweenLines(int startLine, int endLine) {
-            return (Npp.PositionFromLine(endLine) - Npp.PositionFromLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
+            return (Npp.StartBytePosOfLine(endLine) - Npp.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
         }
 
         #endregion

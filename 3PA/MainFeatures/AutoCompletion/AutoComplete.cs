@@ -123,7 +123,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static string CorrectKeywordCase(string keyword, int lastWordPos) {
             string output = null;
-            var found = FindInSavedItems(keyword, Npp.GetCaretLineNumber());
+            var found = FindInSavedItems(keyword, Npp.Line.CurrentLine);
             if (found != null) {
                 RememberUseOf(found);
                 output = !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
@@ -481,7 +481,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // update position (and alternate color config)
             var point = Npp.GetCaretScreenLocation();
-            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+            var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight;
             _form.UseAlternateBackColor = Config.Instance.AutoCompleteAlternateBackColor;
             _form.SetPosition(point, lineHeight + 2);

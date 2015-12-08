@@ -72,14 +72,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #endregion
 
-        #region init
+        #region Check UDL
 
         /// <summary>
         /// The role of this method is to make sure that the User Defined Language for "OpenEdgeABL" exists in the
         /// userDefineLang.xml file, if it does it updates it, if it doesn't exists it creates it and asks the user
         /// to restart Notepad++
         /// </summary>
-        public static void Init() {
+        public static void CheckUdl() {
             var udlFilePath = Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml");
 
             if (!File.Exists(udlFilePath)) {
@@ -108,48 +108,100 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #region public methods
 
+        public static Npp.Style StyleDefault = Npp.GetStyle((byte)UdlStyles.Default);
+        public static Npp.Style StyleComment = Npp.GetStyle((byte)UdlStyles.Comment);
+        public static Npp.Style StyleCommentLine = Npp.GetStyle((byte)UdlStyles.CommentLine);
+        public static Npp.Style StyleNumber = Npp.GetStyle((byte)UdlStyles.Number);
+        public static Npp.Style StyleJumpInCode = Npp.GetStyle((byte)UdlStyles.KeyWordsList1);
+        public static Npp.Style StyleWordStatement = Npp.GetStyle((byte)UdlStyles.KeyWordsList2);
+        public static Npp.Style StyleVarType = Npp.GetStyle((byte)UdlStyles.KeyWordsList3);
+        public static Npp.Style StyleOtherKeyword = Npp.GetStyle((byte)UdlStyles.KeyWordsList4);
+        public static Npp.Style StylePreprocessed = Npp.GetStyle((byte)UdlStyles.KeyWordsList5);
+        public static Npp.Style StyleVariablesPrefix = Npp.GetStyle((byte)UdlStyles.KeyWordsList6);
+        public static Npp.Style StyleAbbreviation = Npp.GetStyle((byte)UdlStyles.KeyWordsList7);
+        public static Npp.Style StyleTrigram = Npp.GetStyle((byte)UdlStyles.KeyWordsList8);
+        public static Npp.Style StyleOperators = Npp.GetStyle((byte)UdlStyles.Operators);
+        public static Npp.Style StyleBlockStartKeyword = Npp.GetStyle((byte)UdlStyles.FolderInCode2);
+        public static Npp.Style StyleStrDoubleQuote = Npp.GetStyle((byte)UdlStyles.Delimiter1);
+        public static Npp.Style StyleStrSimple = Npp.GetStyle((byte)UdlStyles.Delimiter2);
+        public static Npp.Style StyleInclude = Npp.GetStyle((byte)UdlStyles.Delimiter3);
+        public static Npp.Style StyleStrDoubleQuoteComm = Npp.GetStyle((byte)UdlStyles.Delimiter4);
+        public static Npp.Style StyleStrSimpleComm = Npp.GetStyle((byte)UdlStyles.Delimiter5);
+        public static Npp.Style StyleNestedComment = Npp.GetStyle((byte)UdlStyles.Delimiter8);
+
         public static void SetCustomStyles() {
+
             var curTheme = CurrentTheme;
 
-            //Npp.SetDefaultStyle(curTheme.BgDefault, curTheme.FgDefault);
-            Npp.SetStyle((byte)UdlStyles.Default, curTheme.BgDefault, curTheme.FgDefault);
-            Npp.SetStyle((byte)UdlStyles.Comment, curTheme.BgDefault, curTheme.FgComment);
-            Npp.SetStyle((byte)UdlStyles.CommentLine, curTheme.BgDefault, curTheme.FgLineComment);
-            Npp.SetStyle((byte)UdlStyles.Number, curTheme.BgDefault, curTheme.FgNumbers);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList1, curTheme.BgKeyword1, curTheme.FgKeyword1);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList2, curTheme.BgDefault, curTheme.FgKeyword2);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList3, curTheme.BgDefault, curTheme.FgKeyword3);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList4, curTheme.BgDefault, curTheme.FgKeyword4);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList5, curTheme.BgDefault, curTheme.FgKeyword5);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList6, curTheme.BgDefault, curTheme.FgKeyword6);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList7, curTheme.BgDefault, curTheme.FgKeyword7);
-            Npp.SetStyle((byte)UdlStyles.KeyWordsList8, curTheme.BgKeyword8, curTheme.FgKeyword8);
-            Npp.SetStyle((byte)UdlStyles.FolderInCode2, curTheme.BgDefault, curTheme.FgFoldInCode2);
-            Npp.SetStyle((byte)UdlStyles.Delimiter1, curTheme.BgDefault, curTheme.FgDelimiters1);
-            Npp.SetStyle((byte)UdlStyles.Delimiter2, curTheme.BgDefault, curTheme.FgDelimiters2);
-            Npp.SetStyle((byte)UdlStyles.Delimiter3, curTheme.BgDelimiters3, curTheme.FgDelimiters3);
-            Npp.SetStyle((byte)UdlStyles.Delimiter4, curTheme.BgDefault, curTheme.FgDelimiters4);
-            Npp.SetStyle((byte)UdlStyles.Delimiter5, curTheme.BgDefault, curTheme.FgDelimiters5);
-            Npp.SetStyle((byte)UdlStyles.Delimiter6, curTheme.BgDefault, curTheme.FgDelimiters6);
-            Npp.SetStyle((byte)UdlStyles.Delimiter7, curTheme.BgDefault, curTheme.FgDelimiters7);
-            Npp.SetStyle((byte)UdlStyles.Delimiter8, curTheme.BgDefault, curTheme.FgDelimiters8);
-            Npp.SetStyle((byte)UdlStyles.Operators, curTheme.BgDefault, curTheme.FgOperators);
+            StyleDefault.ForeColor = curTheme.FgDefault;
+            StyleComment.ForeColor = curTheme.FgComment;
+            StyleCommentLine.ForeColor = curTheme.FgLineComment;
+            StyleNumber.ForeColor = curTheme.FgNumbers;
+            StyleJumpInCode.ForeColor = curTheme.FgKeyword1;
+            StyleWordStatement.ForeColor = curTheme.FgKeyword2;
+            StyleVarType.ForeColor = curTheme.FgKeyword3;
+            StyleOtherKeyword.ForeColor = curTheme.FgKeyword4;
+            StylePreprocessed.ForeColor = curTheme.FgKeyword5;
+            StyleVariablesPrefix.ForeColor = curTheme.FgKeyword6;
+            StyleAbbreviation.ForeColor = curTheme.FgKeyword7;
+            StyleTrigram.ForeColor = curTheme.FgKeyword8;
+            StyleOperators.ForeColor = curTheme.FgOperators;
+            StyleBlockStartKeyword.ForeColor = curTheme.FgFoldInCode2;
+            StyleStrDoubleQuote.ForeColor = curTheme.FgDelimiters1;
+            StyleStrSimple.ForeColor = curTheme.FgDelimiters2;
+            StyleInclude.ForeColor = curTheme.FgDelimiters3;
+            StyleStrDoubleQuoteComm.ForeColor = curTheme.FgDelimiters4;
+            StyleStrSimpleComm.ForeColor = curTheme.FgDelimiters5;
+            StyleNestedComment.ForeColor = curTheme.FgDelimiters8;
+
+            StyleDefault.BackColor = curTheme.BgDefault;
+            StyleJumpInCode.BackColor = curTheme.BgKeyword1;
+            StyleTrigram.BackColor = curTheme.BgKeyword8;
+            StyleInclude.BackColor = curTheme.BgDelimiters3;
 
             // for annotations :
-            SetAnnotationStyleDefinition((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
-            SetAnnotationStyleDefinition((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
-            SetAnnotationStyleDefinition((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
-            SetAnnotationStyleDefinition((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
-            SetAnnotationStyleDefinition((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
-
-            // for markers :
-            Npp.SetMarkerStyle((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0, SciMarkerStyle.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1, SciMarkerStyle.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2, SciMarkerStyle.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3, SciMarkerStyle.SC_MARK_SMALLRECT);
-            Npp.SetMarkerStyle((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4, SciMarkerStyle.SC_MARK_SMALLRECT);
+            SetAnnotationStyles((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
+            SetAnnotationStyles((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
+            SetAnnotationStyles((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
+            SetAnnotationStyles((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
+            SetAnnotationStyles((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
 
             // set style 33 for the margin with line numbers
+        }
+
+        /// <summary>
+        /// Sets a style for an annotation (reduced font + segoe ui)
+        /// </summary>
+        /// <param name="errorLevel"></param>
+        /// <param name="bgColor"></param>
+        /// <param name="fgColor"></param>
+        private static void SetAnnotationStyles(byte errorLevel, Color bgColor, Color fgColor) {
+            int curFontSize = Npp.GetStyle(0).Size;
+
+            var normalStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Normal));
+            normalStyle.Font = "Segoe ui";
+            normalStyle.Size = (int)(curFontSize * 0.9);
+            normalStyle.ForeColor = fgColor;
+            normalStyle.BackColor = bgColor;
+
+            var boldStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Bold));
+            boldStyle.Font = "Segoe ui";
+            boldStyle.Size = (int)(curFontSize * 0.9);
+            boldStyle.Bold = true;
+            boldStyle.ForeColor = fgColor;
+            boldStyle.BackColor = bgColor;
+
+            var italicStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Italic));
+            italicStyle.Font = "Segoe ui";
+            italicStyle.Size = (int)(curFontSize * 0.9);
+            italicStyle.Italic = true;
+            italicStyle.ForeColor = fgColor;
+            italicStyle.BackColor = bgColor;
+
+            var markerStyle = Npp.GetMarker(errorLevel);
+            markerStyle.Symbol = MarkerSymbol.SmallRect;
+            markerStyle.SetBackColor(bgColor);
+            markerStyle.SetForeColor(fgColor);
         }
 
         /// <summary>
@@ -179,7 +231,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
                     && context != UdlStyles.Delimiter2
                     && context != UdlStyles.Delimiter4
                     && context != UdlStyles.Delimiter5
-                    && context != UdlStyles.CommentLine
                     && context != UdlStyles.Delimiter8);
         }
 
@@ -205,49 +256,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #endregion
 
-        #region private methods
-
-        /// <summary>
-        /// Sets a style for an annotation (reduced font + segoe ui)
-        /// </summary>
-        /// <param name="style"></param>
-        /// <param name="bgColor"></param>
-        /// <param name="fgColor"></param>
-        private static void SetAnnotationStyleDefinition(byte style, Color bgColor, Color fgColor) {
-            int curFontSize = Npp.GetFontSize(0);
-
-            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotStandardStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
-            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotStandardStyleOffset), bgColor, fgColor);
-
-            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
-            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), bgColor, fgColor);
-            Npp.SetStyleFontBold((byte)(style + FilesInfo.FilesInfo.ErrorAnnotBoldStyleOffset), true);
-
-            Npp.SetStyleFont((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), "Segoe ui", (int)(curFontSize * 0.9));
-            Npp.SetStyle((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), bgColor, fgColor);
-            Npp.SetStyleFontItalic((byte)(style + FilesInfo.FilesInfo.ErrorAnnotItalicStyleOffset), true);
-        }
-
-        #endregion
-
         #region real colorization todo
-
-        // the class doesn't correctly handle text that is not encoded on 8 bits because we just do pos++, need to fix this 
-        // GetByteCount();
-        /*
-         * Encoding.UTF8.GetByteCount(text);
-         * 
-         * byte[] bytes = Encoding.Default.GetBytes(myString);
-            myString = Encoding.UTF8.GetString(bytes);
-         * 
-         * Encoding iso = Encoding.GetEncoding("ISO-8859-1");
-            Encoding utf8 = Encoding.UTF8;
-            byte[] utfBytes = utf8.GetBytes(Message);
-            byte[] isoBytes = Encoding.Convert(utf8, iso, utfBytes);
-            string msg = iso.GetString(isoBytes);
-         * 
-         * File.ReadAllText(file, Encoding.GetEncoding(codePage));
-         */
         /*
         /// <summary>
         /// Called on STYLENEEDED notification
@@ -290,27 +299,27 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         Comment = 1,
         CommentLine = 2,
         Number = 3,
-        KeyWordsList1 = 4, /* Jump in code (RUN, RETURN, LEAVE...) */
-        KeyWordsList2 = 5, /* statements (DEFINE VARIABLE..) */
-        KeyWordsList3 = 6, /* VAR types (BLOB, DATE, INTEGER) */
-        KeyWordsList4 = 7, /* all other keywords */
-        KeyWordsList5 = 8, /* preprocessed words (&if &global...) */
-        KeyWordsList6 = 9, /* variables prefix (gc_, li_...) */
-        KeyWordsList7 = 10, /* abbreviations */
-        KeyWordsList8 = 11, /* user trigram */
-        Operators = 12, /* also includes (matches, not...) */
+        KeyWordsList1 = 4, // Jump in code (RUN, RETURN, LEAVE...)
+        KeyWordsList2 = 5, // statements (DEFINE VARIABLE..)
+        KeyWordsList3 = 6, // VAR types (BLOB, DATE, INTEGER)
+        KeyWordsList4 = 7, // all other keywords
+        KeyWordsList5 = 8, // preprocessed words (&if &global...)
+        KeyWordsList6 = 9, // variables prefix (gc_, li_...)
+        KeyWordsList7 = 10, // abbreviations
+        KeyWordsList8 = 11, // user trigram
+        Operators = 12, // also includes (matches, not...)
         FolderInCode1 = 13,
-        FolderInCode2 = 14, /* Collapsable blocks, (FOR EACH: END.) */
+        FolderInCode2 = 14, // Collapsable blocks, (FOR EACH: END.)
         FolderInComment = 15,
-        Delimiter1 = 16, /* string double quote */
-        Delimiter2 = 17, /* string simple */
-        Delimiter3 = 18, /* include { } */
-        Delimiter4 = 19, /* string double quote in single line comment (preproc definition) */
-        Delimiter5 = 20, /* string simple quote in single line comment (preproc definition) */
-        Delimiter6 = 21, /*  */
-        Delimiter7 = 22, /*  */
-        Delimiter8 = 23, /* nested comment */
-        Idk = 24, /* ?? */
+        Delimiter1 = 16, // string double quote
+        Delimiter2 = 17, // string simple
+        Delimiter3 = 18, // include { }
+        Delimiter4 = 19, // string double quote in single line comment (preproc definition)
+        Delimiter5 = 20, // string simple quote in single line comment (preproc definition)
+        Delimiter6 = 21, // 
+        Delimiter7 = 22, // 
+        Delimiter8 = 23, // nested comment
+        Idk = 24, // ??
     }
 
     #endregion

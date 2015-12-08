@@ -58,7 +58,7 @@ namespace _3PA {
         /// <returns></returns>
         public static Encoding GetCurrentEncoding() {
             var curBufferId = Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
-            int nppEncoding = (int) Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
+            int nppEncoding = (int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
             return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
             /*
             // Logically, we should identify the correct encoding as follow, but in reality
@@ -103,6 +103,18 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
+        /// </summary>
+        public static int CurrentScintilla {
+            get {
+                int curScintilla;
+                Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+                return curScintilla;
+            }
+        }
+
+        /// <summary>
         ///     Get the IWin32Window of the Npp window
         ///     Must be used as an input for forms.Show() in order to link the create form to the Npp window
         ///     if the user switches applications, the dialog hides with Notepad++
@@ -112,11 +124,11 @@ namespace _3PA {
         }
 
         public static void SaveCurrentSession(string file) {
-            Win32.SendMessage(HandleNpp,  NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTSESSION, 0, file);
         }
 
         public static void LoadCurrentSession(string file) {
-            Win32.SendMessage(HandleNpp,  NppMsg.NPPM_LOADSESSION, 0, file);
+            Win32.SendMessage(HandleNpp, NppMsg.NPPM_LOADSESSION, 0, file);
         }
 
         /// <summary>
@@ -152,7 +164,7 @@ namespace _3PA {
             if (line >= 0) {
                 GoToLine(line);
                 if (column >= 0)
-                    SetCaretPosition(GetPosFromLineColumn(line, column));
+                    SetSel(GetPosFromLineColumn(line, column));
             }
         }
 
@@ -246,7 +258,7 @@ namespace _3PA {
         }
 
         public static bool OpenFile(string file) {
-            return ((int) Win32.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
+            return ((int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
 
         /// <summary>
@@ -269,10 +281,9 @@ namespace _3PA {
         /// displays the input text into a new document
         /// </summary>
         /// <param name="text"></param>
-        public static void DisplayInNewDocument(string text) {
+        public static void NewDocument(string text) {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, NppMenuCmd.FileNew);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ADDTEXT, text);
+            GrabFocus();
         }
 
         /// <summary>
@@ -323,7 +334,7 @@ namespace _3PA {
         public static string GetNppExePath() {
             return Path.Combine(GetNppDirectory(), "notepad++.exe");
         }
-            
+
         /// <summary>
         /// Returns the configuration directory path e.g. /plugins/config/{ProductTitle}
         /// </summary>

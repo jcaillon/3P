@@ -31,7 +31,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         public void Visit(TokenComment tok) {
             //if (tok.Line < FromLine || tok.Line > ToLine) return;
-            Npp.AddFindMark(tok.StartPosition, tok.EndPosition);
             //Npp.StyleText((int)TextStyle.Comment, tok.StartPosition, tok.EndPosition);
         }
 

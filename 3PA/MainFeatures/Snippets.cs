@@ -29,6 +29,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
+
     public class SnippetContext {
         public static int IndicatorId = 8;
         public List<List<Point>> ParametersGroups = new List<List<Point>>();
@@ -124,18 +125,20 @@ namespace _3PA.MainFeatures {
                 string replacement = GetTemplate(token);
 
                 if (replacement != null) {
-                    int line = Npp.GetCaretLineNumber();
-                    int lineStartPos = Npp.PositionFromLine(line);
+                    int line = Npp.Line.CurrentLine;
+                    int lineStartPos = Npp.GetLine(line).Position;
 
                     int horizontalOffset = tokenPoints.X - lineStartPos;
 
                     //relative selection in the replacement text
                     PrepareForIncertion(replacement, horizontalOffset, tokenPoints.X);
 
-                    Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
+                    var indic = Npp.GetIndicator(SnippetContext.IndicatorId);
+                    indic.Style = IndicatorStyle.Box;
+                    indic.ForeColor = Color.Blue;
 
                     foreach (var point in LocSnippetContext.Parameters) {
-                        Npp.AddIndicator(SnippetContext.IndicatorId, point.X, point.Y);
+                        indic.Add(point.X, point.Y);
                     }
 
                     if (LocSnippetContext.CurrentParameter.HasValue) {
@@ -158,12 +161,18 @@ namespace _3PA.MainFeatures {
             Npp.SetTextByRange(indicatorRange.X, indicatorRange.Y, text);
 
             //restore the indicator
-            Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
-            Npp.AddIndicator(SnippetContext.IndicatorId, indicatorRange.X, indicatorRange.X + text.Length);
+            var indic = Npp.GetIndicator(SnippetContext.IndicatorId);
+            indic.Style = IndicatorStyle.Box;
+            indic.ForeColor = Color.Blue;
+            indic.Add(indicatorRange.X, indicatorRange.X + text.Length);
         }
 
         static public bool NavigateToNextParam() {
-            var indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);
+            var indic = Npp.GetIndicator(SnippetContext.IndicatorId);
+            indic.Style = IndicatorStyle.Box;
+            indic.ForeColor = Color.Blue;
+
+            var indicators = indic.FindRanges().ToArray();
 
             if (!indicators.Any())
                 return false;
@@ -173,15 +182,14 @@ namespace _3PA.MainFeatures {
                 string currentParamOriginalText = LocSnippetContext.CurrentParameterValue;
 
                 Npp.SetSelection(currentParam.X, currentParam.X);
-                string currentParamDetectedText = Npp.GetWordAtCursor();
+                string currentParamDetectedText = Npp.GetWordAtPosition(Npp.CurrentPosition);
 
 
                 if (currentParamOriginalText != currentParamDetectedText) {
                     //current parameter is modified, indicator is destroyed so restore the indicator first
-                    Npp.SetIndicatorStyle(SnippetContext.IndicatorId, SciMsg.INDIC_BOX, Color.Blue);
-                    Npp.AddIndicator(SnippetContext.IndicatorId, currentParam.X, currentParam.X + currentParamDetectedText.Length);
+                    indic.Add(currentParam.X, currentParam.X + currentParamDetectedText.Length);
 
-                    indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);//needs refreshing as the document is modified
+                    indicators = indic.FindRanges().ToArray(); //needs refreshing as the document is modified
 
                     var paramsInfo = indicators.Select(p => new {
                         Index = indicators.IndexOf(p),
@@ -196,7 +204,7 @@ namespace _3PA.MainFeatures {
 
                     foreach (var param in paramsToUpdate) {
                         ReplaceTextAtIndicator(currentParamDetectedText, indicators[param.Index]);
-                        indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);//needs refreshing as the document is modified
+                        indicators = indic.FindRanges().ToArray();//needs refreshing as the document is modified
                     }
                 }
 
@@ -230,10 +238,11 @@ namespace _3PA.MainFeatures {
         }
 
         static public void FinalizeCurrent() {
-            var indicators = Npp.FindIndicatorRanges(SnippetContext.IndicatorId);
+            var indic = Npp.GetIndicator(SnippetContext.IndicatorId);
+            var indicators = indic.FindRanges().ToArray();
 
             foreach (var range in indicators)
-                Npp.DeleteIndicator(SnippetContext.IndicatorId, range.X, range.Y);
+                indic.Clear(range.X, range.Y);
 
             var caretPoint = indicators.Where(point => {
                 string text = Npp.GetTextBetween(point);

@@ -165,7 +165,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             CodeExplorerItem obj = (CodeExplorerItem) args.Model;
 
             // currently selected block
-            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.GetCaretLineNumber()))) {
+            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
                     FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
                     BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),

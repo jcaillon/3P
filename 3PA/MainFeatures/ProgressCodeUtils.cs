@@ -96,23 +96,23 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void ToggleComment() {
             int mode = 0; // 0: null, 1: toggle off; 2: toggle on
-            var selectionRange = Npp.GetSelectionRange();
-            var startLine = Npp.LineFromPosition(selectionRange.cpMin);
-            var endLine = Npp.LineFromPosition(selectionRange.cpMax);
-
+            var startLine = Npp.LineFromPosition(Npp.SelectionStart);
+            var endLine = Npp.LineFromPosition(Npp.SelectionEnd);
+            
             Npp.BeginUndoAction();
 
             // for each line in the selection
             for (int iLine = startLine; iLine <= endLine; iLine++) {
-                var startPos = Npp.GetLineIndentPosition(iLine);
-                var endPos = Npp.GetLineEndPosition(iLine);
+                var thisLine = new Npp.Line(iLine);
+                var startPos = thisLine.IndentationPosition;
+                var endPos = thisLine.EndPosition;
 
                 // the line is essentially empty
                 if ((endPos - startPos) == 0) {
                     // only one line selected, 
                     if (startLine == endLine) {
                         Npp.SetTextByRange(startPos, startPos, "/*  */");
-                        Npp.SetCaretPosition(startPos + 3);
+                        Npp.SetSel(startPos + 3);
                     }
                     continue;
                 }
@@ -145,12 +145,11 @@ namespace _3PA.MainFeatures {
 
             // correct selection...
             if (mode == 2) {
-                selectionRange = Npp.GetSelectionRange();
-                if (selectionRange.cpMax - selectionRange.cpMin > 0) {
+                if (Npp.SelectionEnd - Npp.SelectionStart > 0) {
                     if (Npp.AnchorPosition > Npp.CurrentPosition)
-                        Npp.SetSelectionOrdered(selectionRange.cpMax + 2, selectionRange.cpMin);
+                        Npp.SetSel(Npp.SelectionEnd + 2, Npp.SelectionStart);
                     else
-                        Npp.SetSelectionOrdered(selectionRange.cpMin, selectionRange.cpMax + 2);
+                        Npp.SetSel(Npp.SelectionStart, Npp.SelectionEnd + 2);
                 }
             }
 

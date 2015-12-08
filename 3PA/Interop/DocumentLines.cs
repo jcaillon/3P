@@ -43,8 +43,8 @@ namespace _3PA.Interop {
         /// </summary>
         internal int ByteToCharPosition(int pos) {
 
-            var line = Npp.Msg(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
-            var byteStart = Npp.Msg(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+            var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
+            var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
             var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
 
             return count;
@@ -83,7 +83,7 @@ namespace _3PA.Interop {
 
             // Adjust to the nearest line start
             var line = LineFromCharPosition(pos);
-            var bytePos = Npp.Msg(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+            var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
             pos -= CharPositionFromLine(line);
 
             // Optimization when the line contains NO multibyte characters
@@ -92,7 +92,7 @@ namespace _3PA.Interop {
 
             while (pos > 0) {
                 // Move char-by-char
-                bytePos = Npp.Msg(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
+                bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
                 pos--;
             }
 
@@ -117,7 +117,7 @@ namespace _3PA.Interop {
         /// Gets the number of CHARACTERS int a BYTE range.
         /// </summary>
         private int GetCharCount(int pos, int length) {
-            var ptr = Npp.Msg(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
+            var ptr = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
             return GetCharCount(ptr, length, Npp.Encoding);
         }
 
@@ -137,7 +137,7 @@ namespace _3PA.Interop {
             var perLine = _perLineData[index];
             if (perLine.ContainsMultibyte == ContainsMultibyte.Unkown) {
                 perLine.ContainsMultibyte =
-                    (Npp.Msg(SciMsg.SCI_LINELENGTH, new IntPtr(index)).ToInt32() == CharLineLength(index))
+                    (Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(index)).ToInt32() == CharLineLength(index))
                     ? ContainsMultibyte.No
                     : ContainsMultibyte.Yes;
 
@@ -184,10 +184,8 @@ namespace _3PA.Interop {
         private void InsertPerLine(int index, int length = 0) {
             MoveStep(index);
 
-            PerLine data;
-
             // Add the new line length to the existing line start
-            data = _perLineData[index];
+            var data = _perLineData[index];
             var lineStart = data.Start;
             data.Start += length;
             _perLineData[index] = data;
@@ -205,17 +203,15 @@ namespace _3PA.Interop {
             if (_stepLength == 0) {
                 _stepLine = line;
             } else if (_stepLine < line) {
-                PerLine data;
                 while (_stepLine < line) {
                     _stepLine++;
-                    data = _perLineData[_stepLine];
+                    var data = _perLineData[_stepLine];
                     data.Start += _stepLength;
                     _perLineData[_stepLine] = data;
                 }
             } else if (_stepLine > line) {
-                PerLine data;
                 while (_stepLine > line) {
-                    data = _perLineData[_stepLine];
+                    var data = _perLineData[_stepLine];
                     data.Start -= _stepLength;
                     _perLineData[_stepLine] = data;
                     _stepLine--;
@@ -232,11 +228,11 @@ namespace _3PA.Interop {
 
             // Fake an insert notification
             var scn = new SCNotification {
-                linesAdded = Npp.Msg(SciMsg.SCI_GETLINECOUNT).ToInt32() - 1,
+                linesAdded = Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() - 1,
                 position = 0,
-                length = Npp.Msg(SciMsg.SCI_GETLENGTH).ToInt32()
+                length = Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32()
             };
-            scn.text = Npp.Msg(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
             TrackInsertText(scn);
         }
 
@@ -251,15 +247,15 @@ namespace _3PA.Interop {
         }
 
         private void TrackDeleteText(SCNotification scn) {
-            var startLine = Npp.Msg(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
+            var startLine = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
             if (scn.linesAdded == 0) {
                 // That was easy
                 var delta = GetCharCount(scn.text, scn.length, Npp.Encoding);
                 AdjustLineLength(startLine, delta * -1);
             } else {
                 // Adjust the existing line
-                var lineByteStart = Npp.Msg(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
-                var lineByteLength = Npp.Msg(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
+                var lineByteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
+                var lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
                 AdjustLineLength(startLine, GetCharCount(lineByteStart, lineByteLength) - CharLineLength(startLine));
 
                 var linesRemoved = scn.linesAdded * -1;
@@ -271,15 +267,15 @@ namespace _3PA.Interop {
         }
 
         private void TrackInsertText(SCNotification scn) {
-            var startLine = Npp.Msg(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
+            var startLine = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
             if (scn.linesAdded == 0) {
                 // That was easy
                 var delta = GetCharCount(scn.position, scn.length);
                 AdjustLineLength(startLine, delta);
             } else {
                 // Adjust existing line
-                var lineByteStart = Npp.Msg(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
-                var lineByteLength = Npp.Msg(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
+                var lineByteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
+                var lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
                 AdjustLineLength(startLine, GetCharCount(lineByteStart, lineByteLength) - CharLineLength(startLine));
 
                 for (int i = 1; i <= scn.linesAdded; i++) {
@@ -287,7 +283,7 @@ namespace _3PA.Interop {
 
                     // Insert new line
                     lineByteStart += lineByteLength;
-                    lineByteLength = Npp.Msg(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
+                    lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
                     InsertPerLine(line, GetCharCount(lineByteStart, lineByteLength));
                 }
             }
@@ -298,35 +294,17 @@ namespace _3PA.Interop {
         #region Properties
 
         /// <summary>
-        /// Gets a value indicating whether all the document lines are visible (not hidden).
-        /// </summary>
-        /// <returns>true if all the lines are visible; otherwise, false.</returns>
-        public bool AllLinesVisible {
-            get {
-                return (Npp.Msg(SciMsg.SCI_GETALLLINESVISIBLE) != IntPtr.Zero);
-            }
-        }
-
-        /// <summary>
         /// Gets the number of lines.
         /// </summary>
         /// <returns>The number of lines</returns>
         public int Count {
-            get {
-                // Subtract the terminal line
-                return (_perLineData.Count - 1);
-            }
-        }
+get { return (_perLineData.Count - 1); } }
 
         /// <summary>
         /// Gets the number of CHARACTERS in the document.
         /// </summary>
         internal int TextLength {
-            get {
-                // Where the terminal line begins
-                return CharPositionFromLine(_perLineData.Count - 1);
-            }
-        }
+get { return CharPositionFromLine(_perLineData.Count - 1); } }
 
         #endregion Properties
 
@@ -479,10 +457,7 @@ namespace _3PA.Interop {
         }
 
         public int Count {
-            get {
-                return _buffer.Length - (_gapEnd - _gapStart);
-            }
-        }
+get { return _buffer.Length - (_gapEnd - _gapStart); } }
 
         public T this[int index] {
             get {

@@ -20,97 +20,199 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
+using _3PA.Lib;
 
 namespace _3PA {
     /// <summary>
-    /// This class contains methods to control scintilla
+    /// This class should be used to control the instances of scintilla in notepad++
+    /// Huge thumbs up to https://github.com/jacobslusser/ScintillaNET, this project was a real savior with the problem described below
+    /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)
+    /// - For every scintilla message that involves a position, the exepect position (expected by scintilla) is the
+    /// f***** BYTE position, not the character position (as anyone would assume at first!). This messes up with all your function
+    /// calls when the document is encoded in UTF8 (for example), as character can be encoded on 2 bytes... Every methods
+    /// defined in this class handle the position as CHAR position and convert what's needed for scintilla to cooperate
+    /// So you can this class safely without having headaches ;)
+    /// - This class also uses the direct function call to scintilla, as described in scintilla's documention. It allows
+    /// faster execution than with SendMessage
     /// </summary>
     public partial class Npp {
 
         #region fields
 
         public const int KeywordMaxLength = 30;
-        private const int IndicatorMatch = 31;
-        private const int BookmarkMarker = 24;
         private static IntPtr _curScintilla;
-        private static DocumentLines _documentLines;
+        private static DocumentLines _lines;
+        private static Scintilla _scintilla;
+
+        #endregion
+
+        #region Critical Core
+
+        /// <summary>
+        /// Gets the window handle to current Scintilla.
+        /// </summary>
+        public static IntPtr HandleScintilla {
+            get { return (_curScintilla != IntPtr.Zero) ? _curScintilla : (_curScintilla = (CurrentScintilla == 0) ? Plug.NppData._scintillaMainHandle : Plug.NppData._scintillaSecondHandle); }
+        }
+
+        /// <summary>
+        /// Instance of scintilla, the class that allows communication with the current scintilla
+        /// </summary>
+        public static Scintilla Sci {
+            get { return _scintilla ?? (_scintilla = new Scintilla(HandleScintilla)); }
+        }
+
+        /// <summary>
+        /// This is critical for a correct behavior when using any scintilla function that involves a position
+        /// </summary>
+        public static DocumentLines Lines {
+            get { return _lines ?? (_lines = new DocumentLines()); }
+        }
+
+        /// <summary>
+        /// Call this to rebuild the lines information from scratch
+        /// </summary>
+        public static void RebuildLinesInfo() {
+            Lines.RebuildLineData();
+        }
+
+        /// <summary>
+        /// Call this on SCN_MODIFIED event from scintilla to update the info on lines
+        /// </summary>
+        /// <param name="scn"></param>
+        public static void UpdateLinesInfo(SCNotification scn) {
+            Lines.ScnModified(scn);
+        }
+
+        public static bool IsLinesInfoUpdated {
+            get { return Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() == Lines.Count; }
+        }
+
+        /// <summary>
+        /// Updates the current scintilla handle for Npp's functions
+        /// Called when the user changes the current document
+        /// </summary>
+        public static void UpdateScintilla() {
+            _curScintilla = (CurrentScintilla == 0) ? Plug.NppData._scintillaMainHandle : Plug.NppData._scintillaSecondHandle;
+            Sci.UpdateScintillaDirectMessage(_curScintilla);
+        }
+
+        #endregion
+
+        #region Class accessors
+
+        /// <summary>
+        /// Returns a Line object representing the given line
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Line GetLine(int index) {
+            return new Line(index);
+        }
+
+        /// <summary>
+        /// Returns a Line object representing the current line
+        /// </summary>
+        /// <returns></returns>
+        public static Line GetLine() {
+            return new Line();
+        }
+
+        /// <summary>
+        /// Returns a selection object
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Selection GetSelection(int index) {
+            return new Selection(index);
+        }
+
+        /// <summary>
+        /// Returns a marker object
+        /// There are 32 markers, numbered 0 to MARKER_MAX (31), and you can assign any combination of them to each line in the document
+        /// Marker numbers 25 to 31 are used by Scintilla in folding margins
+        /// Marker numbers 0 to 24 have no pre-defined function; you can use them
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Marker GetMarker(int index) {
+            return new Marker(index);
+        }
+
+        /// <summary>
+        /// Returns a margin object
+        /// The margins are numbered 0 to 4. Using a margin number outside the valid range has no effect. By default, margin 0 is set to display line 
+        /// numbers, but is given a width of 0, so it is hidden. Margin 1 is set to display non-folding symbols and is given a width of 16 pixels, 
+        /// so it is visible. Margin 2 is set to display the folding symbols, but is given a width of 0, so it is hidden. Of course, 
+        /// you can set the margins to be whatever you wish.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Margin GetMargin(int index) {
+            return new Margin(index);
+        }
+
+        /// <summary>
+        /// Returns an indicator object
+        /// Range of indicator id to use is from 8=INDIC_CONTAINER .. to 31=INDIC_IME-1
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Indicator GetIndicator(int index) {
+            return new Indicator(index);
+        }
+
+        /// <summary>
+        /// Returns a style object
+        /// There are 256 lexer styles that can be set, numbered 0 to STYLE_MAX (255). There are also some predefined numbered styles starting at 32.
+        /// </summary>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        public static Style GetStyle(byte index) {
+            return new Style(index);
+        }
 
         #endregion
 
         #region misc for npp/scintilla
 
-        public static void GetDirectFunction() {
-            /*
-            // Get the native Scintilla direct function -- the only function the library exports
-            var directFunctionPointer = NativeMethods.GetProcAddress(new HandleRef(this, moduleHandle), "Scintilla_DirectFunction");
-            if (directFunctionPointer == IntPtr.Zero) {
-                var message = "The Scintilla module has no export for the 'Scintilla_DirectFunction' procedure.";
-                throw new Win32Exception(message, new Win32Exception()); // Calls GetLastError
-            }
-
-            // Create a managed callback
-            directFunction = (NativeMethods.Scintilla_DirectFunction)Marshal.GetDelegateForFunctionPointer(
-                directFunctionPointer,
-                typeof(NativeMethods.Scintilla_DirectFunction));
-             * */
-        }
-
-        public static DocumentLines Lines {
-            get {
-                if (_documentLines == null)
-                    _documentLines = new DocumentLines();
-                return _documentLines;
-            }
+        /// <summary>
+        /// Undo previous action
+        /// </summary>
+        public static void Undo() {
+            Sci.Send(SciMsg.SCI_UNDO);
         }
 
         /// <summary>
-        ///     Gets the window handle to current Scintilla.
+        ///     Mark the beginning of a set of operations that you want to undo all as one operation but that you have to generate
+        ///     as several operations. Alternatively, you can use these to mark a set of operations that you do not want to have
+        ///     combined with the preceding or following operations if they are undone.
         /// </summary>
-        /// <value>
-        ///     The current window handle to scintilla.
-        /// </value>
-        public static IntPtr HandleScintilla {
-            get {
-                if (_curScintilla == IntPtr.Zero) {
-                    UpdateScintilla();
-                }
-                return _curScintilla;
-            }
+        public static void BeginUndoAction() {
+            Sci.Send(SciMsg.SCI_BEGINUNDOACTION);
         }
 
         /// <summary>
-        /// Updates the current scintilla handle for Npp's functions
+        ///     Mark the end of a set of operations that you want to undo all as one operation but that you have to generate
+        ///     as several operations. Alternatively, you can use these to mark a set of operations that you do not want to have
+        ///     combined with the preceding or following operations if they are undone.
         /// </summary>
-        public static void UpdateScintilla() {
-            int curScintilla;
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-            _curScintilla = (curScintilla == 0)
-                ? Plug.NppData._scintillaMainHandle
-                : Plug.NppData._scintillaSecondHandle;
-        }
-
-
-        /// <summary>
-        ///  barbarian method to force the default autocompletion window to hide
-        /// <remarks>This is a very bad technique, it makes npp slows down when there is too much text!
-        /// I need to find something else but... meh i can't deactivate the default autocomplete</remarks>
-        /// </summary>
-        public static void HideDefaultAutoCompletion() {
-            //TODO: find a better technique to hide the autocompletion!!! this slows npp down
-            // #$%&'()*+,-./:;<=>?[\]^_`{|}~@
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, @"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+        public static void EndUndoAction() {
+            Sci.Send(SciMsg.SCI_ENDUNDOACTION);
         }
 
         /// <summary>
-        ///  reset the autocompletion to default behavior (used with HideDefaultAutoCompletion)
+        /// Specifies the characters that will automatically cancel autocompletion without the need to call AutoCCancel.
         /// </summary>
-        public static void ResetDefaultAutoCompletion() {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, "");
+        /// <param name="chars">A String of the characters that will cancel autocompletion. The default is empty.</param>
+        /// <remarks>Characters specified should be limited to printable ASCII characters.</remarks>
+        public static void AutoCStops(string chars) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
         }
 
         /// <summary>
@@ -126,8 +228,8 @@ namespace _3PA {
         /// <summary>
         /// Retrieve the height of a particular line of text in pixels.
         /// </summary>
-        public static int GetTextHeight(int line) {
-            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_TEXTHEIGHT, line, 0);
+        public static int TextHeight(int line) {
+            return (int)Sci.Send(SciMsg.SCI_TEXTHEIGHT, new IntPtr(line));
         }
 
         /// <summary>
@@ -135,22 +237,81 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static void GrabFocus() {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GRABFOCUS, 0, 0);
+            Sci.Send(SciMsg.SCI_GRABFOCUS);
         }
 
         /// <summary>
         /// to be tested!!!!
         /// </summary>
         /// <returns></returns>
-        public static bool IsNppFocused() {
-            return Call(SciMsg.SCI_GETFOCUS, 0, 0) == 1;
+        public static bool GetFocus() {
+            return Sci.Send(SciMsg.SCI_GETFOCUS).IsTrue();
         }
 
         /// <summary>
         /// Cancels any displayed autocompletion list.
         /// </summary>
         public static void AutoCCancel() {
-            Msg(SciMsg.SCI_AUTOCCANCEL);
+            Sci.Send(SciMsg.SCI_AUTOCCANCEL);
+        }
+
+        /// <summary>
+        /// Changes all end-of-line characters in the document to the format specified.
+        /// </summary>
+        /// <param name="eolMode">One of the Eol enumeration values.</param>
+        public static void ConvertEols(Eol eolMode) {
+            var eol = (int)eolMode;
+            Sci.Send(SciMsg.SCI_CONVERTEOLS, new IntPtr(eol));
+        }
+
+        /// <summary>
+        /// Copies the selected text from the document and places it on the clipboard.
+        /// </summary>
+        public static void Copy() {
+            Sci.Send(SciMsg.SCI_COPY);
+        }
+
+        /// <summary>
+        /// Pastes the contents of the clipboard into the current selection.
+        /// </summary>
+        public static void Paste() {
+            Sci.Send(SciMsg.SCI_PASTE);
+        }
+
+        /// <summary>
+        /// Copies the selected text from the document and places it on the clipboard.
+        /// If the selection is empty the current line is copied.
+        /// </summary>
+        /// <remarks>
+        /// If the selection is empty and the current line copied, an extra "MSDEVLineSelect" marker is added to the
+        /// clipboard which is then used in Paste to paste the whole line before the current line.
+        /// </remarks>
+        public static void CopyAllowLine() {
+            Sci.Send(SciMsg.SCI_COPYALLOWLINE);
+        }
+
+        /// <summary>
+        /// Copies the specified range of text to the clipboard.
+        /// </summary>
+        /// <param name="start">The zero-based character position in the document to start copying.</param>
+        /// <param name="end">The zero-based character position (exclusive) in the document to stop copying.</param>
+        public static void CopyRange(int start, int end) {
+            var textLength = TextLength;
+            start = Clamp(start, 0, textLength);
+            end = Clamp(end, 0, textLength);
+
+            // Convert to byte positions
+            start = Lines.CharToBytePosition(start);
+            end = Lines.CharToBytePosition(end);
+
+            Sci.Send(SciMsg.SCI_COPYRANGE, new IntPtr(start), new IntPtr(end));
+        }
+
+        /// <summary>
+        /// Cuts the selected text from the document and places it on the clipboard.
+        /// </summary>
+        public static void Cut() {
+            Sci.Send(SciMsg.SCI_CUT);
         }
 
         /// <summary>
@@ -158,96 +319,77 @@ namespace _3PA {
         /// </summary>
         /// <param name="displayLine">The zero-based display line index.</param>
         /// <returns>The zero-based document line index.</returns>
-        /// <seealso cref="Line.DisplayIndex" />
         public static int DocLineFromVisible(int displayLine) {
             displayLine = Clamp(displayLine, 0, Lines.Count);
-            return Msg(SciMsg.SCI_DOCLINEFROMVISIBLE, new IntPtr(displayLine)).ToInt32();
+            return Sci.Send(SciMsg.SCI_DOCLINEFROMVISIBLE, new IntPtr(displayLine)).ToInt32();
         }
 
         /// <summary>
         /// Performs the specified command
-        /// //TODO: à tester!!!
         /// </summary>
         /// <param name="sciCommand">The command to perform.</param>
         public static void ExecuteCmd(Command sciCommand) {
-            Msg((SciMsg)sciCommand);
+            Sci.Send((SciMsg)sciCommand);
         }
 
         /// <summary>
         /// Measures the width in pixels of the specified string when rendered in the specified style.
         /// </summary>
-        /// <param name="style">The index of the <see cref="Style" /> to use when rendering the text to measure.</param>
+        /// <param name="style">The index of the Style to use when rendering the text to measure.</param>
         /// <param name="text">The text to measure.</param>
         /// <returns>The width in pixels.</returns>
         public static unsafe int TextWidth(int style, string text) {
             style = Clamp(style, 0, 255);
             var bytes = GetBytes(text ?? string.Empty, Encoding, true);
-
-            fixed (byte* bp = bytes) {
-                return Msg(SciMsg.SCI_TEXTWIDTH, new IntPtr(style), new IntPtr(bp)).ToInt32();
-            }
+            fixed (byte* bp = bytes)
+                return Sci.Send(SciMsg.SCI_TEXTWIDTH, new IntPtr(style), new IntPtr(bp)).ToInt32();
         }
 
         /// <summary>
         /// Increases the zoom factor by 1 until it reaches 20 points.
         /// </summary>
-        /// <seealso cref="Zoom" />
+
         public static void ZoomIn() {
-            Msg(SciMsg.SCI_ZOOMIN);
+            Sci.Send(SciMsg.SCI_ZOOMIN);
         }
 
         /// <summary>
         /// Decreases the zoom factor by 1 until it reaches -10 points.
         /// </summary>
-        /// <seealso cref="Zoom" />
+
         public static void ZoomOut() {
-            Msg(SciMsg.SCI_ZOOMOUT);
+            Sci.Send(SciMsg.SCI_ZOOMOUT);
         }
 
         /// <summary>
         /// Gets or sets whether vertical scrolling ends at the last line or can scroll past.
         /// </summary>
         /// <returns>true if the maximum vertical scroll position ends at the last line; otherwise, false. The default is true.</returns>
-        public bool EndAtLastLine {
-            get {
-                return (Msg(SciMsg.SCI_GETENDATLASTLINE) != IntPtr.Zero);
-            }
-            set {
-                var endAtLastLine = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETENDATLASTLINE, endAtLastLine);
-            }
+        public static bool EndAtLastLine {
+            get { return Sci.Send(SciMsg.SCI_GETENDATLASTLINE).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETENDATLASTLINE, value.ToPointer()); }
         }
 
         /// <summary>
         /// Gets or sets the end-of-line mode, or rather, the characters added into
         /// the document when the user presses the Enter key.
         /// </summary>
-        /// <returns>One of the <see cref="Eol" /> enumeration values. The default is <see cref="Eol.CrLf" />.</returns>
-        public Eol EolMode {
-            get {
-                return (Eol)Msg(SciMsg.SCI_GETEOLMODE);
-            }
-            set {
-                var eolMode = (int)value;
-                Msg(SciMsg.SCI_SETEOLMODE, new IntPtr(eolMode));
-            }
+        /// <returns>One of the Eol enumeration values. The default is Eol.CrLf.</returns>
+        public static Eol EolMode {
+            get { return (Eol)Sci.Send(SciMsg.SCI_GETEOLMODE); }
+            set { Sci.Send(SciMsg.SCI_SETEOLMODE, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets font quality (anti-aliasing method) used to render fonts.
         /// </summary>
         /// <returns>
-        /// One of the <see cref="Interop.FontQuality" /> enumeration values.
-        /// The default is <see cref="Interop.FontQuality.Default" />.
+        /// One of the Interop.FontQuality enumeration values.
+        /// The default is Interop.FontQuality.Default.
         /// </returns>
-        public FontQuality FontQuality {
-            get {
-                return (FontQuality)Msg(SciMsg.SCI_GETFONTQUALITY);
-            }
-            set {
-                var fontQuality = (int)value;
-                Msg(SciMsg.SCI_SETFONTQUALITY, new IntPtr(fontQuality));
-            }
+        public static FontQuality FontQuality {
+            get { return (FontQuality)Sci.Send(SciMsg.SCI_GETFONTQUALITY); }
+            set { Sci.Send(SciMsg.SCI_SETFONTQUALITY, new IntPtr((int)value)); }
         }
 
         /// <summary>
@@ -258,20 +400,16 @@ namespace _3PA {
         /// The number of screen lines which could be displayed (including any partial lines).
         /// </returns>
         public static int LinesOnScreen {
-            get {
-                return Msg(SciMsg.SCI_LINESONSCREEN).ToInt32();
-            }
+            get { return Sci.Send(SciMsg.SCI_LINESONSCREEN).ToInt32(); }
         }
 
         /// <summary>
         /// Gets a value indicating whether the document has been modified (is dirty)
-        /// since the last call to <see cref="SetSavePoint" />.
+        /// since the last call to SetSavePoint.
         /// </summary>
         /// <returns>true if the document has been modified; otherwise, false.</returns>
-        public bool Modified {
-            get {
-                return (Msg(SciMsg.SCI_GETMODIFY) != IntPtr.Zero);
-            }
+        public static bool GetModify {
+            get { return Sci.Send(SciMsg.SCI_GETMODIFY).IsTrue(); }
         }
 
         /// <summary>
@@ -281,14 +419,23 @@ namespace _3PA {
         /// true if the current mouse selection can be switched to a rectangular selection by pressing the ALT key; otherwise, false.
         /// The default is false.
         /// </returns>
-        public bool MouseSelectionRectangularSwitch {
-            get {
-                return Msg(SciMsg.SCI_GETMOUSESELECTIONRECTANGULARSWITCH) != IntPtr.Zero;
-            }
-            set {
-                var mouseSelectionRectangularSwitch = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETMOUSESELECTIONRECTANGULARSWITCH, mouseSelectionRectangularSwitch);
-            }
+        public static bool MouseSelectionRectangularSwitch {
+            get { return Sci.Send(SciMsg.SCI_GETMOUSESELECTIONRECTANGULARSWITCH).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETMOUSESELECTIONRECTANGULARSWITCH, value.ToPointer()); }
+        }
+
+        /// <summary>
+        /// These messages set and get an event mask that determines which document change events are notified to the container with SCN_MODIFIED 
+        /// and SCEN_CHANGE. For example, a container may decide to see only notifications about changes to text and not styling changes 
+        /// by calling SCI_SETMODEVENTMASK(SC_MOD_INSERTTEXT|SC_MOD_DELETETEXT).
+        /// The possible notification types are the same as the modificationType bit flags used by SCN_MODIFIED: SC_MOD_INSERTTEXT, 
+        /// SC_MOD_DELETETEXT, SC_MOD_CHANGESTYLE, SC_MOD_CHANGEFOLD, SC_PERFORMED_USER, SC_PERFORMED_UNDO, SC_PERFORMED_REDO, 
+        /// SC_MULTISTEPUNDOREDO, SC_LASTSTEPINUNDOREDO, SC_MOD_CHANGEMARKER, SC_MOD_BEFOREINSERT, SC_MOD_BEFOREDELETE, SC_MULTILINEUNDOREDO, 
+        /// and SC_MODEVENTMASKALL.
+        /// </summary>
+        public static int EventMask {
+            get { return Sci.Send(SciMsg.SCI_GETMODEVENTMASK).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETMODEVENTMASK, new IntPtr(value)); }
         }
 
         /// <summary>
@@ -298,121 +445,78 @@ namespace _3PA {
         /// true if multiple selections can be made by holding the CTRL key and dragging the mouse; otherwise, false.
         /// The default is false.
         /// </returns>
-        public bool MultipleSelection {
-            get {
-                return Msg(SciMsg.SCI_GETMULTIPLESELECTION) != IntPtr.Zero;
-            }
-            set {
-                var multipleSelection = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETMULTIPLESELECTION, multipleSelection);
-            }
+        public static bool MultipleSelection {
+            get { return Sci.Send(SciMsg.SCI_GETMULTIPLESELECTION).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETMULTIPLESELECTION, value.ToPointer()); }
         }
 
         /// <summary>
         /// Gets or sets the behavior when pasting text into multiple selections.
         /// </summary>
-        /// <returns>One of the <see cref="Interop.MultiPaste" /> enumeration values. The default is <see cref="Interop.MultiPaste.Once" />.</returns>
-        public MultiPaste MultiPaste {
-            get {
-                return (MultiPaste)Msg(SciMsg.SCI_GETMULTIPASTE);
-            }
-            set {
-                var multiPaste = (int)value;
-                Msg(SciMsg.SCI_SETMULTIPASTE, new IntPtr(multiPaste));
-            }
+        /// <returns>One of the Interop.MultiPaste enumeration values. The default is Interop.MultiPaste.Once.</returns>
+        public static MultiPaste MultiPaste {
+            get { return (MultiPaste)Sci.Send(SciMsg.SCI_GETMULTIPASTE); }
+            set { Sci.Send(SciMsg.SCI_SETMULTIPASTE, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets whether to write over text rather than insert it.
         /// </summary>
         /// <return>true to write over text; otherwise, false. The default is false.</return>
-        public bool Overtype {
-            get {
-                return (Msg(SciMsg.SCI_GETOVERTYPE) != IntPtr.Zero);
-            }
-            set {
-                var overtype = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETOVERTYPE, overtype);
-            }
+        public static bool Overtype {
+            get { return (Sci.Send(SciMsg.SCI_GETOVERTYPE).IsTrue()); }
+            set { Sci.Send(SciMsg.SCI_SETOVERTYPE, value.ToPointer()); }
         }
 
         /// <summary>
-        /// Gets or sets whether line endings in pasted text are convereted to the document <see cref="EolMode" />.
+        /// Gets or sets whether line endings in pasted text are convereted to the document EolMode.
         /// </summary>
         /// <returns>true to convert line endings in pasted text; otherwise, false. The default is true.</returns>
-        public bool PasteConvertEndings {
-            get {
-                return (Msg(SciMsg.SCI_GETPASTECONVERTENDINGS) != IntPtr.Zero);
-            }
-            set {
-                var convert = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETPASTECONVERTENDINGS, convert);
-            }
+        public static bool PasteConvertEndings {
+            get { return (Sci.Send(SciMsg.SCI_GETPASTECONVERTENDINGS).IsTrue()); }
+            set { Sci.Send(SciMsg.SCI_SETPASTECONVERTENDINGS, value.ToPointer()); }
         }
 
         /// <summary>
         /// Gets or sets whether the document is read-only.
         /// </summary>
         /// <returns>true if the document is read-only; otherwise, false. The default is false.</returns>
-        /// <seealso cref="ModifyAttempt" />
-        public bool ReadOnly {
-            get {
-                return (Msg(SciMsg.SCI_GETREADONLY) != IntPtr.Zero);
-            }
-            set {
-                var readOnly = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETREADONLY, readOnly);
-            }
+        public static bool ReadOnly {
+            get { return (Sci.Send(SciMsg.SCI_GETREADONLY).IsTrue()); }
+            set { Sci.Send(SciMsg.SCI_SETREADONLY, value.ToPointer()); }
         }
 
         /// <summary>
         /// Gets or sets how to display whitespace characters.
         /// </summary>
-        /// <returns>One of the <see cref="WhitespaceMode" /> enumeration values. The default is <see cref="WhitespaceMode.Invisible" />.</returns>
-        /// <seealso cref="SetWhitespaceForeColor" />
-        /// <seealso cref="SetWhitespaceBackColor" />
-        public WhitespaceMode ViewWhitespace {
-            get {
-                return (WhitespaceMode)Msg(SciMsg.SCI_GETVIEWWS);
-            }
-            set {
-                var wsMode = (int)value;
-                Msg(SciMsg.SCI_SETVIEWWS, new IntPtr(wsMode));
-            }
+        /// <returns>One of the WhitespaceMode enumeration values. The default is WhitespaceMode.Invisible.</returns>
+        public static WhitespaceMode ViewWhitespace {
+            get { return (WhitespaceMode)Sci.Send(SciMsg.SCI_GETVIEWWS); }
+            set { Sci.Send(SciMsg.SCI_SETVIEWWS, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets the line wrapping indent mode.
         /// </summary>
         /// <returns>
-        /// One of the <see cref="ScintillaNET.WrapIndentMode" /> enumeration values. 
-        /// The default is <see cref="ScintillaNET.WrapIndentMode.Fixed" />.
+        /// One of the Interop.WrapIndentMode enumeration values. 
+        /// The default is Interop.WrapIndentMode.Fixed.
         /// </returns>
-        public WrapIndentMode WrapIndentMode {
-            get {
-                return (WrapIndentMode)Msg(SciMsg.SCI_GETWRAPINDENTMODE);
-            }
-            set {
-                var wrapIndentMode = (int)value;
-                Msg(SciMsg.SCI_SETWRAPINDENTMODE, new IntPtr(wrapIndentMode));
-            }
+        public static WrapIndentMode WrapIndentMode {
+            get { return (WrapIndentMode)Sci.Send(SciMsg.SCI_GETWRAPINDENTMODE); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPINDENTMODE, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets the line wrapping mode.
         /// </summary>
         /// <returns>
-        /// One of the <see cref="ScintillaNET.WrapMode" /> enumeration values. 
-        /// The default is <see cref="ScintillaNET.WrapMode.None" />.
+        /// One of the WrapMode enumeration values. 
+        /// The default is WrapMode.None.
         /// </returns>
-        public WrapMode WrapMode {
-            get {
-                return (WrapMode)Msg(SciMsg.SCI_GETWRAPMODE);
-            }
-            set {
-                var wrapMode = (int)value;
-                Msg(SciMsg.SCI_SETWRAPMODE, new IntPtr(wrapMode));
-            }
+        public static WrapMode WrapMode {
+            get { return (WrapMode)Sci.Send(SciMsg.SCI_GETWRAPMODE); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPMODE, new IntPtr((int)value)); }
         }
 
         /// <summary>
@@ -420,65 +524,58 @@ namespace _3PA {
         /// </summary>
         /// <returns>The indented size of wrapped sublines measured in pixels. The default is 0.</returns>
         /// <remarks>
-        /// Setting <see cref="WrapVisualFlags" /> to <see cref="ScintillaNET.WrapVisualFlags.Start" /> will add an
+        /// Setting WrapVisualFlags to Interop.WrapVisualFlags.Start will add an
         /// additional 1 pixel to the value specified.
         /// </remarks>
         public static int WrapStartIndent {
-            get {
-                return Msg(SciMsg.SCI_GETWRAPSTARTINDENT).ToInt32();
-            }
+            get { return Sci.Send(SciMsg.SCI_GETWRAPSTARTINDENT).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Msg(SciMsg.SCI_SETWRAPSTARTINDENT, new IntPtr(value));
+                Sci.Send(SciMsg.SCI_SETWRAPSTARTINDENT, new IntPtr(value));
             }
+        }
+
+        /// <summary>
+        /// Gets or sets the mouse dwell time
+        /// The time the mouse must sit still, in milliseconds, to generate a SCN_DWELLSTART notification. 
+        /// If set to SC_TIME_FOREVER, the default, no dwell events are generated.
+        /// </summary>
+        public static int MouseDwellTime {
+            get { return Sci.Send(SciMsg.SCI_GETMOUSEDWELLTIME).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETMOUSEDWELLTIME, new IntPtr(value)); }
         }
 
         /// <summary>
         /// Gets or sets the wrap visual flags.
         /// </summary>
         /// <returns>
-        /// A bitwise combination of the <see cref="ScintillaNET.WrapVisualFlags" /> enumeration.
-        /// The default is <see cref="ScintillaNET.WrapVisualFlags.None" />.
+        /// A bitwise combination of the Interop.WrapVisualFlags enumeration.
+        /// The default is Interop.WrapVisualFlags.None.
         /// </returns>
-        public WrapVisualFlags WrapVisualFlags {
-            get {
-                return (WrapVisualFlags)Msg(SciMsg.SCI_GETWRAPVISUALFLAGS);
-            }
-            set {
-                int wrapVisualFlags = (int)value;
-                Msg(SciMsg.SCI_SETWRAPVISUALFLAGS, new IntPtr(wrapVisualFlags));
-            }
+        public static WrapVisualFlags WrapVisualFlags {
+            get { return (WrapVisualFlags)Sci.Send(SciMsg.SCI_GETWRAPVISUALFLAGS); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPVISUALFLAGS, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets additional location options when displaying wrap visual flags.
         /// </summary>
         /// <returns>
-        /// One of the <see cref="ScintillaNET.WrapVisualFlagLocation" /> enumeration values.
-        /// The default is <see cref="ScintillaNET.WrapVisualFlagLocation.Default" />.
+        /// One of the Interop.WrapVisualFlagLocation enumeration values.
+        /// The default is Interop.WrapVisualFlagLocation.Default.
         /// </returns>
-        public WrapVisualFlagLocation WrapVisualFlagLocation {
-            get {
-                return (WrapVisualFlagLocation)Msg(SciMsg.SCI_GETWRAPVISUALFLAGSLOCATION);
-            }
-            set {
-                var location = (int)value;
-                Msg(SciMsg.SCI_SETWRAPVISUALFLAGSLOCATION, new IntPtr(location));
-            }
+        public static WrapVisualFlagLocation WrapVisualFlagLocation {
+            get { return (WrapVisualFlagLocation)Sci.Send(SciMsg.SCI_GETWRAPVISUALFLAGSLOCATION); }
+            set { Sci.Send(SciMsg.SCI_SETWRAPVISUALFLAGSLOCATION, new IntPtr((int)value)); }
         }
 
         /// <summary>
         /// Gets or sets the visibility of end-of-line characters.
         /// </summary>
         /// <returns>true to display end-of-line characters; otherwise, false. The default is false.</returns>
-        public bool ViewEol {
-            get {
-                return Msg(SciMsg.SCI_GETVIEWEOL) != IntPtr.Zero;
-            }
-            set {
-                var visible = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETVIEWEOL, visible);
-            }
+        public static bool ViewEol {
+            get { return Sci.Send(SciMsg.SCI_GETVIEWEOL).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETVIEWEOL, value.ToPointer()); }
         }
 
         /// <summary>
@@ -486,15 +583,11 @@ namespace _3PA {
         /// </summary>
         /// <returns>The zoom factor measured in points.</returns>
         /// <remarks>For best results, values should range from -10 to 20 points.</remarks>
-        /// <seealso cref="ZoomIn" />
-        /// <seealso cref="ZoomOut" />
+
+
         public static int Zoom {
-            get {
-                return Msg(SciMsg.SCI_GETZOOM).ToInt32();
-            }
-            set {
-                Msg(SciMsg.SCI_SETZOOM, new IntPtr(value));
-            }
+            get { return Sci.Send(SciMsg.SCI_GETZOOM).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETZOOM, new IntPtr(value)); }
         }
 
         #endregion
@@ -504,10 +597,10 @@ namespace _3PA {
         /// <summary>
         /// Performs the specified fold action on the entire document.
         /// </summary>
-        /// <param name="action">One of the <see cref="FoldAction" /> enumeration values.</param>
-        /// <remarks>When using <see cref="FoldAction.Toggle" /> the first fold header in the document is examined to decide whether to expand or contract.</remarks>
+        /// <param name="action">One of the FoldAction enumeration values.</param>
+        /// <remarks>When using FoldAction.Toggle the first fold header in the document is examined to decide whether to expand or contract.</remarks>
         public static void FoldAll(FoldAction action) {
-            Msg(SciMsg.SCI_FOLDALL, new IntPtr((int)action));
+            Sci.Send(SciMsg.SCI_FOLDALL, new IntPtr((int)action));
         }
 
         /// <summary>
@@ -515,13 +608,20 @@ namespace _3PA {
         /// </summary>
         /// <param name="lineStart">The zero-based index of the line range to start hiding.</param>
         /// <param name="lineEnd">The zero-based index of the line range to end hiding.</param>
-        /// <seealso cref="ShowLines" />
-        /// <seealso cref="Line.Visible" />
+
         public static void HideLines(int lineStart, int lineEnd) {
             lineStart = Clamp(lineStart, 0, Lines.Count);
             lineEnd = Clamp(lineEnd, lineStart, Lines.Count);
 
-            Msg(SciMsg.SCI_HIDELINES, new IntPtr(lineStart), new IntPtr(lineEnd));
+            Sci.Send(SciMsg.SCI_HIDELINES, new IntPtr(lineStart), new IntPtr(lineEnd));
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether all the document lines are visible (not hidden).
+        /// </summary>
+        /// <returns>true if all the lines are visible; otherwise, false.</returns>
+        public bool AllLinesVisible {
+            get { return Sci.Send(SciMsg.SCI_GETALLLINESVISIBLE).IsTrue(); }
         }
 
         #endregion
@@ -532,14 +632,9 @@ namespace _3PA {
         /// Gets or sets whether to use a mixture of tabs and spaces for indentation or purely spaces.
         /// </summary>
         /// <returns>true to use tab characters; otherwise, false. The default is true.</returns>
-        public bool UseTabs {
-            get {
-                return (Msg(SciMsg.SCI_GETUSETABS) != IntPtr.Zero);
-            }
-            set {
-                var useTabs = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETUSETABS, useTabs);
-            }
+        public static bool UseTabs {
+            get { return (Sci.Send(SciMsg.SCI_GETUSETABS).IsTrue()); }
+            set { Sci.Send(SciMsg.SCI_SETUSETABS, value.ToPointer()); }
         }
 
         /// <summary>
@@ -547,12 +642,8 @@ namespace _3PA {
         /// </summary>
         /// <returns>The width of a tab measured in characters. The default is 4.</returns>
         public static int TabWidth {
-            get {
-                return Msg(SciMsg.SCI_GETTABWIDTH).ToInt32();
-            }
-            set {
-                Msg(SciMsg.SCI_SETTABWIDTH, new IntPtr(value));
-            }
+            get { return Sci.Send(SciMsg.SCI_GETTABWIDTH).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETTABWIDTH, new IntPtr(value)); }
         }
 
         /// <summary>
@@ -561,60 +652,11 @@ namespace _3PA {
         /// <returns>The indentation size measured in characters. The default is 0.</returns>
         /// <remarks> A value of 0 will make the indent width the same as the tab width.</remarks>
         public static int IndentWidth {
-            get {
-                return Msg(SciMsg.SCI_GETINDENT).ToInt32();
-            }
+            get { return Sci.Send(SciMsg.SCI_GETINDENT).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Msg(SciMsg.SCI_SETINDENT, new IntPtr(value));
+                Sci.Send(SciMsg.SCI_SETINDENT, new IntPtr(value));
             }
-        }
-
-        /// <summary>
-        /// set the indentation of the current line relatively to the previous indentation
-        /// </summary>
-        /// <param name="indent"></param>
-        public static void SetCurrentLineRelativeIndent(int indent) {
-            int curPos = CurrentPosition;
-            int line = LineFromPosition(curPos);
-            Call(SciMsg.SCI_SETLINEINDENTATION, line, GetPreviousLineIndent(curPos) + indent);
-            SetCaretPosition(GetLineEndPosition(line));
-        }
-
-        /// <summary>
-        /// set the indentation of the previous (-1) line relatively to its current indentation
-        /// </summary>
-        /// <param name="indent"></param>
-        public static void SetPreviousLineRelativeIndent(int indent) {
-            int line = GetCaretLineNumber();
-            Call(SciMsg.SCI_SETLINEINDENTATION, line - 1, GetLineIndent(line - 1) + indent);
-        }
-
-        /// <summary>
-        /// get the indentation of the specified line (in number of spaces)
-        /// </summary>
-        /// <returns></returns>
-        public static int GetLineIndent(int line) {
-            return Call(SciMsg.SCI_GETLINEINDENTATION, line, 0);
-        }
-
-        /// <summary>
-        /// get the indentation of the first non null previous line from the specified position
-        /// </summary>
-        /// <param name="curPos"></param>
-        /// <returns></returns>
-        public static int GetPreviousLineIndent(int curPos) {
-            int lineToIndent = LineFromPosition(curPos);
-            string curLineText;
-            int nbindent;
-            int line = lineToIndent;
-            do {
-                line = line - 1;
-                curLineText = GetLineText(line);
-                nbindent = GetLineIndent(line);
-                //Call(SciMsg.SCI_SETLINEINDENTATION, lineToIndent, nbindent + 4);
-            } while (line >= 0 && String.IsNullOrWhiteSpace(curLineText.Trim()) && (lineToIndent - line) < 50);
-            return nbindent;
         }
 
         /// <summary>
@@ -622,63 +664,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetIndentString() {
-            return GetUseTabs() ? "\t" : new string(' ', GetTabWidth());
-        }
-
-        /// <summary>
-        ///     Gets the size of a tab as a multiple of the size of a space character in STYLE_DEFAULT. The default tab width is 8
-        ///     characters.
-        ///     There are no limits on tab sizes, but values less than 1 or large values may have undesirable effects.
-        /// </summary>
-        public static int GetTabWidth() {
-            return Call(SciMsg.SCI_GETTABWIDTH);
-        }
-
-        /// <summary>
-        ///     Gets the size of indentation in terms of the width of a space in STYLE_DEFAULT. If you set a width of 0,
-        ///     the indent size is the same as the tab size. There are no limits on indent sizes, but values less than 0 or
-        ///     large values may have undesirable effects.
-        /// </summary>
-        public static int GetIndent() {
-            return Call(SciMsg.SCI_GETINDENT);
-        }
-
-        /// <summary>
-        ///     Sets the size of a tab as a multiple of the size of a space character in STYLE_DEFAULT. The default tab width is 8
-        ///     characters.
-        ///     There are no limits on tab sizes, but values less than 1 or large values may have undesirable effects.
-        /// </summary>
-        /// <param name="tabSize"></param>
-        public static void SetTabWidth(int tabSize) {
-            Call(SciMsg.SCI_SETTABWIDTH, tabSize);
-        }
-
-        /// <summary>
-        ///     Sets the size of indentation in terms of the width of a space in STYLE_DEFAULT. If you set a width of 0,
-        ///     the indent size is the same as the tab size. There are no limits on indent sizes, but values less than 0 or
-        ///     large values may have undesirable effects.
-        /// </summary>
-        public static void SetIndent(int indentSize) {
-            Call(SciMsg.SCI_SETINDENT, indentSize);
-        }
-
-        /// <summary>
-        ///     Determines whether indentation should be created out of a mixture of tabs and spaces or be based purely on spaces.
-        ///     Set useTabs to false (0) to create all tabs and indents out of spaces. The default is true.
-        ///     You can use SCI_GETCOLUMN to get the column of a position taking the width of a tab into account.
-        /// </summary>
-        public static void SetUseTabs(bool useTabs) {
-            Call(SciMsg.SCI_SETUSETABS, useTabs ? 1 : 0);
-        }
-
-        /// <summary>
-        ///     Determines whether indentation should be created out of a mixture of tabs and spaces or be based purely on spaces.
-        ///     Set useTabs to false (0) to create all tabs and indents out of spaces. The default is true.
-        ///     You can use SCI_GETCOLUMN to get the column of a position taking the width of a tab into account.
-        /// </summary>
-        public static bool GetUseTabs() {
-            var retval = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETUSETABS, 0, 0);
-            return (retval == 1);
+            return UseTabs ? "\t" : new string(' ', TabWidth);
         }
 
         #endregion
@@ -686,24 +672,23 @@ namespace _3PA {
         #region Braces
 
         /// <summary>
-        /// Styles the specified character position with the <see cref="Style.BraceBad" /> style when there is an unmatched brace.
+        /// Styles the specified character position with the Style.BraceBad style when there is an unmatched brace.
         /// </summary>
-        /// <param name="position">The zero-based document position of the unmatched brace character or <seealso cref="InvalidPosition"/> to remove the highlight.</param>
+        /// <param name="position">The zero-based document position of the unmatched brace character or InvalidPosition to remove the highlight.</param>
         public static void BraceBadLight(int position) {
             position = Clamp(position, -1, TextLength);
             if (position > 0)
                 position = Lines.CharToBytePosition(position);
 
-            Msg(SciMsg.SCI_BRACEBADLIGHT, new IntPtr(position));
+            Sci.Send(SciMsg.SCI_BRACEBADLIGHT, new IntPtr(position));
         }
 
         /// <summary>
-        /// Styles the specified character positions with the <see cref="Style.BraceLight" /> style.
+        /// Styles the specified character positions with the Style.BraceLight style.
         /// </summary>
         /// <param name="position1">The zero-based document position of the open brace character.</param>
         /// <param name="position2">The zero-based document position of the close brace character.</param>
-        /// <remarks>Brace highlighting can be removed by specifying <see cref="InvalidPosition" /> for <paramref name="position1" /> and <paramref name="position2" />.</remarks>
-        /// <seealso cref="HighlightGuide" />
+        /// <remarks>Brace highlighting can be removed by specifying InvalidPosition for <paramref name="position1" /> and <paramref name="position2" />.</remarks>
         public static void BraceHighlight(int position1, int position2) {
             var textLength = TextLength;
 
@@ -715,7 +700,7 @@ namespace _3PA {
             if (position2 > 0)
                 position2 = Lines.CharToBytePosition(position2);
 
-            Msg(SciMsg.SCI_BRACEHIGHLIGHT, new IntPtr(position1), new IntPtr(position2));
+            Sci.Send(SciMsg.SCI_BRACEHIGHLIGHT, new IntPtr(position1), new IntPtr(position2));
         }
 
         /// <summary>
@@ -723,13 +708,13 @@ namespace _3PA {
         /// The brace characters handled are '(', ')', '[', ']', '{', '}', '&lt;', and '&gt;'.
         /// </summary>
         /// <param name="position">The zero-based document position of a brace character to start the search from for a matching brace character.</param>
-        /// <returns>The zero-based document position of the corresponding matching brace or <see cref="InvalidPosition" /> it no matching brace could be found.</returns>
+        /// <returns>The zero-based document position of the corresponding matching brace or InvalidPosition it no matching brace could be found.</returns>
         /// <remarks>A match only occurs if the style of the matching brace is the same as the starting brace. Nested braces are handled correctly.</remarks>
         public static int BraceMatch(int position) {
             position = Clamp(position, 0, TextLength);
             position = Lines.CharToBytePosition(position);
 
-            var match = Msg(SciMsg.SCI_BRACEMATCH, new IntPtr(position), IntPtr.Zero).ToInt32();
+            var match = Sci.Send(SciMsg.SCI_BRACEMATCH, new IntPtr(position), IntPtr.Zero).ToInt32();
             if (match > 0)
                 match = Lines.ByteToCharPosition(match);
 
@@ -741,14 +726,24 @@ namespace _3PA {
         #region mouse
 
         /// <summary>
+        /// Gets the current screen location of the caret.
+        /// </summary>
+        /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
+        public static Point GetCaretScreenLocation() {
+            var point = GetPointXyFromPosition(CurrentPosition);
+            Win32.ClientToScreen(HandleScintilla, ref point);
+            return point;
+        }
+
+        /// <summary>
         /// returns the x,y point location of the character at the position given
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
         public static Point GetPointXyFromPosition(int position) {
             var pos = Lines.CharToBytePosition(position);
-            int x = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTXFROMPOSITION, 0, pos);
-            int y = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_POINTYFROMPOSITION, 0, pos);
+            int x = (int)Sci.Send(SciMsg.SCI_POINTXFROMPOSITION, IntPtr.Zero, new IntPtr(pos));
+            int y = (int)Sci.Send(SciMsg.SCI_POINTYFROMPOSITION, IntPtr.Zero, new IntPtr(pos));
             return new Point(x, y);
         }
 
@@ -760,7 +755,7 @@ namespace _3PA {
         /// <param name="y">The y pixel coordinate within the client rectangle of the control.</param>
         /// <returns>The zero-based document position of the nearest character to the point specified when near a character; otherwise, -1.</returns>
         public static int CharPositionFromPointClose(int x, int y) {
-            var pos = Msg(SciMsg.SCI_CHARPOSITIONFROMPOINTCLOSE, new IntPtr(x), new IntPtr(y)).ToInt32();
+            var pos = Sci.Send(SciMsg.SCI_CHARPOSITIONFROMPOINTCLOSE, new IntPtr(x), new IntPtr(y)).ToInt32();
             if (pos > -1)
                 pos = Lines.ByteToCharPosition(pos);
             return pos;
@@ -784,7 +779,7 @@ namespace _3PA {
         public static int PointXFromPosition(int pos) {
             pos = Clamp(pos, 0, TextLength);
             pos = Lines.CharToBytePosition(pos);
-            return Msg(SciMsg.SCI_POINTXFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
+            return Sci.Send(SciMsg.SCI_POINTXFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
         }
 
         /// <summary>
@@ -795,7 +790,7 @@ namespace _3PA {
         public static int PointYFromPosition(int pos) {
             pos = Clamp(pos, 0, TextLength);
             pos = Lines.CharToBytePosition(pos);
-            return Msg(SciMsg.SCI_POINTYFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
+            return Sci.Send(SciMsg.SCI_POINTYFROMPOSITION, IntPtr.Zero, new IntPtr(pos)).ToInt32();
         }
 
         #endregion
@@ -803,14 +798,14 @@ namespace _3PA {
         #region text
 
         /// <summary>
-        /// Gets or sets the current document text in the <see cref="Scintilla" /> control.
+        /// Gets or sets the current document text in the Sci control.
         /// </summary>
         /// <returns>The text displayed in the control.</returns>
         /// <remarks>Depending on the length of text get or set, this operation can be expensive.</remarks>
         public static unsafe string Text {
             get {
-                var length = Msg(SciMsg.SCI_GETTEXTLENGTH).ToInt32();
-                var ptr = Msg(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(0), new IntPtr(length));
+                var length = Sci.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32();
+                var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(0), new IntPtr(length));
                 if (ptr == IntPtr.Zero)
                     return string.Empty;
 
@@ -821,10 +816,10 @@ namespace _3PA {
             }
             set {
                 if (string.IsNullOrEmpty(value)) {
-                    Msg(SciMsg.SCI_CLEARALL);
+                    Sci.Send(SciMsg.SCI_CLEARALL);
                 } else {
                     fixed (byte* bp = GetBytes(value, Encoding, true))
-                        Msg(SciMsg.SCI_SETTEXT, IntPtr.Zero, new IntPtr(bp));
+                        Sci.Send(SciMsg.SCI_SETTEXT, IntPtr.Zero, new IntPtr(bp));
                 }
             }
         }
@@ -832,19 +827,17 @@ namespace _3PA {
         /// <summary>
         /// Gets the current target text.
         /// </summary>
-        /// <returns>A String representing the text between <see cref="TargetStart" /> and <see cref="TargetEnd" />.</returns>
+        /// <returns>A String representing the text between TargetStart and TargetEnd.</returns>
         /// <remarks>Targets which have a start position equal or greater to the end position will return an empty String.</remarks>
-        /// <seealso cref="TargetStart" />
-        /// <seealso cref="TargetEnd" />
         public static unsafe string TargetText {
             get {
-                var length = Msg(SciMsg.SCI_GETTARGETTEXT).ToInt32();
+                var length = Sci.Send(SciMsg.SCI_GETTARGETTEXT).ToInt32();
                 if (length == 0)
                     return string.Empty;
 
                 var bytes = new byte[length + 1];
                 fixed (byte* bp = bytes) {
-                    Msg(SciMsg.SCI_GETTARGETTEXT, IntPtr.Zero, new IntPtr(bp));
+                    Sci.Send(SciMsg.SCI_GETTARGETTEXT, IntPtr.Zero, new IntPtr(bp));
                     return GetString(new IntPtr(bp), length, Encoding);
                 }
             }
@@ -857,13 +850,13 @@ namespace _3PA {
         public static unsafe string SelectedText {
             get {
                 // NOTE: For some reason the length returned by this API includes the terminating NULL
-                var length = Msg(SciMsg.SCI_GETSELTEXT).ToInt32() - 1;
+                var length = Sci.Send(SciMsg.SCI_GETSELTEXT).ToInt32() - 1;
                 if (length <= 0)
                     return string.Empty;
 
                 var bytes = new byte[length + 1];
                 fixed (byte* bp = bytes) {
-                    Msg(SciMsg.SCI_GETSELTEXT, IntPtr.Zero, new IntPtr(bp));
+                    Sci.Send(SciMsg.SCI_GETSELTEXT, IntPtr.Zero, new IntPtr(bp));
                     return GetString(new IntPtr(bp), length, Encoding);
                 }
             }
@@ -877,7 +870,7 @@ namespace _3PA {
         public static unsafe void AppendText(string text) {
             var bytes = GetBytes(text ?? string.Empty, Encoding, false);
             fixed (byte* bp = bytes)
-                Msg(SciMsg.SCI_APPENDTEXT, new IntPtr(bytes.Length), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_APPENDTEXT, new IntPtr(bytes.Length), new IntPtr(bp));
         }
 
         /// <summary>
@@ -888,80 +881,21 @@ namespace _3PA {
         public static unsafe void AddText(string text) {
             var bytes = GetBytes(text ?? string.Empty, Encoding, false);
             fixed (byte* bp = bytes)
-                Msg(SciMsg.SCI_ADDTEXT, new IntPtr(bytes.Length), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_ADDTEXT, new IntPtr(bytes.Length), new IntPtr(bp));
         }
 
         /// <summary>
         /// Removes the selected text from the document.
         /// </summary>
         public static void Clear() {
-            Msg(SciMsg.SCI_CLEAR);
+            Sci.Send(SciMsg.SCI_CLEAR);
         }
 
         /// <summary>
         /// Deletes all document text, unless the document is read-only.
         /// </summary>
         public static void ClearAll() {
-            Msg(SciMsg.SCI_CLEARALL);
-        }
-
-        /// <summary>
-        /// Changes all end-of-line characters in the document to the format specified.
-        /// </summary>
-        /// <param name="eolMode">One of the <see cref="Eol" /> enumeration values.</param>
-        public static void ConvertEols(Eol eolMode) {
-            var eol = (int)eolMode;
-            Msg(SciMsg.SCI_CONVERTEOLS, new IntPtr(eol));
-        }
-
-        /// <summary>
-        /// Copies the selected text from the document and places it on the clipboard.
-        /// </summary>
-        public static void Copy() {
-            Msg(SciMsg.SCI_COPY);
-        }
-
-        /// <summary>
-        /// Pastes the contents of the clipboard into the current selection.
-        /// </summary>
-        public static void Paste() {
-            Msg(SciMsg.SCI_PASTE);
-        }
-
-        /// <summary>
-        /// Copies the selected text from the document and places it on the clipboard.
-        /// If the selection is empty the current line is copied.
-        /// </summary>
-        /// <remarks>
-        /// If the selection is empty and the current line copied, an extra "MSDEVLineSelect" marker is added to the
-        /// clipboard which is then used in <see cref="Paste" /> to paste the whole line before the current line.
-        /// </remarks>
-        public static void CopyAllowLine() {
-            Msg(SciMsg.SCI_COPYALLOWLINE);
-        }
-
-        /// <summary>
-        /// Copies the specified range of text to the clipboard.
-        /// </summary>
-        /// <param name="start">The zero-based character position in the document to start copying.</param>
-        /// <param name="end">The zero-based character position (exclusive) in the document to stop copying.</param>
-        public static void CopyRange(int start, int end) {
-            var textLength = TextLength;
-            start = Clamp(start, 0, textLength);
-            end = Clamp(end, 0, textLength);
-
-            // Convert to byte positions
-            start = Lines.CharToBytePosition(start);
-            end = Lines.CharToBytePosition(end);
-
-            Msg(SciMsg.SCI_COPYRANGE, new IntPtr(start), new IntPtr(end));
-        }
-
-        /// <summary>
-        /// Cuts the selected text from the document and places it on the clipboard.
-        /// </summary>
-        public static void Cut() {
-            Msg(SciMsg.SCI_CUT);
+            Sci.Send(SciMsg.SCI_CLEARALL);
         }
 
         /// <summary>
@@ -978,7 +912,7 @@ namespace _3PA {
             var byteStartPos = Lines.CharToBytePosition(position);
             var byteEndPos = Lines.CharToBytePosition(position + length);
 
-            Msg(SciMsg.SCI_DELETERANGE, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
+            Sci.Send(SciMsg.SCI_DELETERANGE, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
         }
 
         /// <summary>
@@ -990,11 +924,11 @@ namespace _3PA {
             position = Clamp(position, 0, TextLength);
             position = Lines.CharToBytePosition(position);
 
-            var nextPosition = Msg(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(position), new IntPtr(1)).ToInt32();
+            var nextPosition = Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(position), new IntPtr(1)).ToInt32();
             var length = (nextPosition - position);
             if (length <= 1) {
                 // Position is at single-byte character
-                return Msg(SciMsg.SCI_GETCHARAT, new IntPtr(position)).ToInt32();
+                return Sci.Send(SciMsg.SCI_GETCHARAT, new IntPtr(position)).ToInt32();
             }
 
             // Position is at multibyte character
@@ -1005,7 +939,7 @@ namespace _3PA {
                 range->chrg.cpMax = nextPosition;
                 range->lpstrText = new IntPtr(bp);
 
-                Msg(SciMsg.SCI_GETTEXTRANGE, IntPtr.Zero, new IntPtr(range));
+                Sci.Send(SciMsg.SCI_GETTEXTRANGE, IntPtr.Zero, new IntPtr(range));
                 var str = GetString(new IntPtr(bp), length, Encoding);
                 return str[0];
             }
@@ -1026,7 +960,7 @@ namespace _3PA {
             var byteStartPos = Lines.CharToBytePosition(position);
             var byteEndPos = Lines.CharToBytePosition(position + length);
 
-            var ptr = Msg(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
+            var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(byteStartPos), new IntPtr(byteEndPos - byteStartPos));
             if (ptr == IntPtr.Zero)
                 return string.Empty;
 
@@ -1062,7 +996,7 @@ namespace _3PA {
                 position = textLength;
             position = Lines.CharToBytePosition(position);
             fixed (byte* bp = GetBytes(text ?? string.Empty, Encoding, true))
-                Msg(SciMsg.SCI_INSERTTEXT, new IntPtr(position), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_INSERTTEXT, new IntPtr(position), new IntPtr(bp));
         }
 
         /// <summary>
@@ -1072,21 +1006,20 @@ namespace _3PA {
         /// <remarks>
         /// If there is not a current selection, the text will be inserted at the current caret position.
         /// Following the operation the caret is placed at the end of the inserted text and scrolled into view.
+        /// Does nothing if string is null or empty?
         /// </remarks>
         public static unsafe void ReplaceSelection(string text) {
-            // TODO I don't like how using a null/empty string does nothing
-
             fixed (byte* bp = GetBytes(text ?? string.Empty, Encoding, true))
-                Msg(SciMsg.SCI_REPLACESEL, IntPtr.Zero, new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_REPLACESEL, IntPtr.Zero, new IntPtr(bp));
         }
 
         /// <summary>
-        /// Replaces the target defined by <see cref="TargetStart" /> and <see cref="TargetEnd" /> with the specified <paramref name="text" />.
+        /// Replaces the target defined by TargetStart and TargetEnd with the specified <paramref name="text" />.
         /// </summary>
         /// <param name="text">The text that will replace the current target.</param>
         /// <returns>The length of the replaced text.</returns>
         /// <remarks>
-        /// The <see cref="TargetStart" /> and <see cref="TargetEnd" /> properties will be updated to the start and end positions of the replaced text.
+        /// The TargetStart and TargetEnd properties will be updated to the start and end positions of the replaced text.
         /// The recommended way to delete text in the document is to set the target range to be removed and replace the target with an empty string.
         /// </remarks>
         public static unsafe int ReplaceTarget(string text) {
@@ -1094,25 +1027,25 @@ namespace _3PA {
                 text = string.Empty;
             var bytes = GetBytes(text, Encoding, false);
             fixed (byte* bp = bytes)
-                Msg(SciMsg.SCI_REPLACETARGET, new IntPtr(bytes.Length), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_REPLACETARGET, new IntPtr(bytes.Length), new IntPtr(bp));
             return text.Length;
         }
 
         /// <summary>
-        /// Replaces the target text defined by <see cref="TargetStart" /> and <see cref="TargetEnd" /> with the specified value after first substituting
+        /// Replaces the target text defined by TargetStart and TargetEnd with the specified value after first substituting
         /// "\1" through "\9" macros in the <paramref name="text" /> with the most recent regular expression capture groups.
         /// </summary>
         /// <param name="text">The text containing "\n" macros that will be substituted with the most recent regular expression capture groups and then replace the current target.</param>
         /// <returns>The length of the replaced text.</returns>
         /// <remarks>
         /// The "\0" macro will be substituted by the entire matched text from the most recent search.
-        /// The <see cref="TargetStart" /> and <see cref="TargetEnd" /> properties will be updated to the start and end positions of the replaced text.
+        /// The TargetStart and TargetEnd properties will be updated to the start and end positions of the replaced text.
         /// </remarks>
-        /// <seealso cref="GetTag" />
+
         public static unsafe int ReplaceTargetRe(string text) {
             var bytes = GetBytes(text ?? string.Empty, Encoding, false);
             fixed (byte* bp = bytes)
-                Msg(SciMsg.SCI_REPLACETARGETRE, new IntPtr(bytes.Length), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_REPLACETARGETRE, new IntPtr(bytes.Length), new IntPtr(bp));
 
             return Math.Abs(TargetEnd - TargetStart);
         }
@@ -1125,7 +1058,7 @@ namespace _3PA {
         /// <returns> The length of the replacement string.</returns>
         public static int SetTextByRange(int start, int end, string text) {
             SetTargetRange(start, end);
-            return ReplaceTarget(text); ;
+            return ReplaceTarget(text);
         }
 
         /// <summary>
@@ -1137,7 +1070,7 @@ namespace _3PA {
         public static string GetTextOnLeftOfPos(int curPos, int maxLenght = KeywordMaxLength) {
             var startPos = curPos - maxLenght;
             startPos = (startPos > 0) ? startPos : 0;
-            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : String.Empty;
+            return curPos - startPos > 0 ? GetTextByRange(startPos, curPos) : string.Empty;
         }
 
         /// <summary>
@@ -1150,32 +1083,7 @@ namespace _3PA {
             var endPos = curPos + maxLenght;
             var fullLength = TextLength;
             endPos = (endPos < fullLength) ? endPos : fullLength;
-            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : String.Empty;
-        }
-
-        /// <summary>
-        /// get the content of the line specified
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static unsafe string GetLineText(int line) {
-            var start = Msg(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line));
-            var length = Msg(SciMsg.SCI_LINELENGTH, new IntPtr(line));
-            var ptr = Msg(SciMsg.SCI_GETRANGEPOINTER, start, length);
-            if (ptr == IntPtr.Zero)
-                return string.Empty;
-
-            var text = new string((sbyte*)ptr, 0, length.ToInt32(), Encoding);
-            return text;
-        }
-
-        /// <summary>
-        /// replace the line specified by the text specified
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="text"></param>
-        public static void SetLineText(int line, string text) {
-            SetTextByRange(PositionFromLine(line), GetLineEndPosition(line), text);
+            return endPos - curPos > 0 ? GetTextByRange(curPos, endPos) : string.Empty;
         }
 
         /// <summary>
@@ -1206,17 +1114,32 @@ namespace _3PA {
         /// <param name="offset">offset relative to the current carret position</param>
         public static void ReplaceKeywordWrapped(string keyword, int offset) {
             BeginUndoAction();
-            var nbCarrets = Call(SciMsg.SCI_GETSELECTIONS);
+
+            var nbCarrets = Selection.Count;
             for (int i = 0; i < nbCarrets; i++) {
-                var curPos = Call(SciMsg.SCI_GETSELECTIONNCARET, i) + offset;
+                var selection = new Selection(i);
+                var curPos = selection.Caret + offset;
                 var word = GetKeyword(curPos);
                 SetTextByRange(curPos - word.Length, curPos, keyword);
 
                 // reposition carret
                 curPos = curPos - offset + keyword.Length - word.Length;
-                Call(SciMsg.SCI_SETSELECTIONNANCHOR, i, curPos);
-                Call(SciMsg.SCI_SETSELECTIONNCARET, i, curPos);
+                selection.Anchor = curPos;
+                selection.Caret = curPos;
             }
+
+            /*
+            var nbCarrets = Sci.Send(SciMsg.SCI_GETSELECTIONS);
+            for (int i = 0; i < nbCarrets; i++) {
+                var curPos = Sci.Send(SciMsg.SCI_GETSELECTIONNCARET, i) + offset;
+                var word = GetKeyword(curPos);
+                SetTextByRange(curPos - word.Length, curPos, keyword);
+
+                // reposition carret
+                curPos = curPos - offset + keyword.Length - word.Length;
+                Sci.Send(SciMsg.SCI_SETSELECTIONNANCHOR, i, curPos);
+                Sci.Send(SciMsg.SCI_SETSELECTIONNCARET, i, curPos);
+            }*/
             EndUndoAction();
         }
 
@@ -1246,15 +1169,7 @@ namespace _3PA {
         /// <param name="text"></param>
         public static void AddTextAt(int curPos, string text) {
             SetTextByRange(curPos, curPos, text);
-            SetCaretPosition(curPos + text.Length);
-        }
-
-        /// <summary>
-        /// returns the ABL word at cursor
-        /// </summary>
-        /// <returns></returns>
-        public static string GetWordAtCursor() {
-            return GetWordAtPosition(CurrentPosition);
+            SetSel(curPos + text.Length);
         }
 
         /// <summary>
@@ -1274,9 +1189,7 @@ namespace _3PA {
         /// Get document lenght (number of character!!)
         /// </summary>
         public static int TextLength {
-            get {
-                return Lines.TextLength;
-            }
+            get { return Lines.TextLength; }
         }
 
         #endregion
@@ -1285,43 +1198,38 @@ namespace _3PA {
 
 
         /// <summary>
-        /// Sets the <see cref="TargetStart" /> and <see cref="TargetEnd" /> to the start and end positions of the selection.
+        /// Sets the TargetStart and TargetEnd to the start and end positions of the selection.
         /// </summary>
-        /// <seealso cref="TargetWholeDocument" />
         public static void TargetFromSelection() {
-            Msg(SciMsg.SCI_TARGETFROMSELECTION);
+            Sci.Send(SciMsg.SCI_TARGETFROMSELECTION);
         }
 
         /// <summary>
-        /// Sets the <see cref="TargetStart" /> and <see cref="TargetEnd" /> to the start and end positions of the document.
+        /// Sets the TargetStart and TargetEnd to the start and end positions of the document.
         /// </summary>
-        /// <seealso cref="TargetFromSelection" />
         public static void TargetWholeDocument() {
-            Msg(SciMsg.SCI_TARGETWHOLEDOCUMENT);
+            Sci.Send(SciMsg.SCI_TARGETWHOLEDOCUMENT);
         }
 
         /// <summary>
         /// Gets or sets the search flags used when searching text.
         /// </summary>
-        /// <returns>A bitwise combination of <see cref="Interop.SearchFlags" /> values. The default is <see cref="Interop.SearchFlags.None" />.</returns>
-        /// <seealso cref="SearchInTarget" />
+        /// <returns>A bitwise combination of Interop.SearchFlags values. The default is Interop.SearchFlags.None.</returns>
         public SearchFlags SearchFlags {
             get {
-                return (SearchFlags)Msg(SciMsg.SCI_GETSEARCHFLAGS).ToInt32();
+                return (SearchFlags)Sci.Send(SciMsg.SCI_GETSEARCHFLAGS).ToInt32();
             }
             set {
                 var searchFlags = (int)value;
-                Msg(SciMsg.SCI_SETSEARCHFLAGS, new IntPtr(searchFlags));
+                Sci.Send(SciMsg.SCI_SETSEARCHFLAGS, new IntPtr(searchFlags));
             }
         }
 
         /// <summary>
-        /// Sets the <see cref="TargetStart" /> and <see cref="TargetEnd" /> properties in a single call.
+        /// Sets the TargetStart and TargetEnd properties in a single call.
         /// </summary>
         /// <param name="start">The zero-based character position within the document to start a search or replace operation.</param>
         /// <param name="end">The zero-based character position within the document to end a search or replace operation.</param>
-        /// <seealso cref="TargetStart" />
-        /// <seealso cref="TargetEnd" />
         public static void SetTargetRange(int start, int end) {
             var textLength = TextLength;
             start = Clamp(start, 0, textLength);
@@ -1330,26 +1238,23 @@ namespace _3PA {
             start = Lines.CharToBytePosition(start);
             end = Lines.CharToBytePosition(end);
 
-            Msg(SciMsg.SCI_SETTARGETRANGE, new IntPtr(start), new IntPtr(end));
+            Sci.Send(SciMsg.SCI_SETTARGETRANGE, new IntPtr(start), new IntPtr(end));
         }
 
         /// <summary>
         /// Gets or sets the end position used when performing a search or replace.
         /// </summary>
         /// <returns>The zero-based character position within the document to end a search or replace operation.</returns>
-        /// <seealso cref="TargetStart"/>
-        /// <seealso cref="SearchInTarget" />
-        /// <seealso cref="ReplaceTarget" />
         public static int TargetEnd {
             get {
                 // The position can become stale and point to a place outside of the document so we must clamp it
-                var bytePos = Clamp(Msg(SciMsg.SCI_GETTARGETEND).ToInt32(), 0, Msg(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
+                var bytePos = Clamp(Sci.Send(SciMsg.SCI_GETTARGETEND).ToInt32(), 0, Sci.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
                 return Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
                 value = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETTARGETEND, new IntPtr(value));
+                Sci.Send(SciMsg.SCI_SETTARGETEND, new IntPtr(value));
             }
         }
 
@@ -1357,19 +1262,16 @@ namespace _3PA {
         /// Gets or sets the start position used when performing a search or replace.
         /// </summary>
         /// <returns>The zero-based character position within the document to start a search or replace operation.</returns>
-        /// <seealso cref="TargetEnd"/>
-        /// <seealso cref="SearchInTarget" />
-        /// <seealso cref="ReplaceTarget" />
         public static int TargetStart {
             get {
                 // The position can become stale and point to a place outside of the document so we must clamp it
-                var bytePos = Clamp(Msg(SciMsg.SCI_GETTARGETSTART).ToInt32(), 0, Msg(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
+                var bytePos = Clamp(Sci.Send(SciMsg.SCI_GETTARGETSTART).ToInt32(), 0, Sci.Send(SciMsg.SCI_GETTEXTLENGTH).ToInt32());
                 return Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
                 value = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETTARGETSTART, new IntPtr(value));
+                Sci.Send(SciMsg.SCI_SETTARGETSTART, new IntPtr(value));
             }
         }
 
@@ -1378,34 +1280,33 @@ namespace _3PA {
         /// </summary>
         /// <param name="tagNumber">The capture group (1 through 9) to get the text for.</param>
         /// <returns>A String containing the capture group text if it participated in the match; otherwise, an empty string.</returns>
-        /// <seealso cref="SearchInTarget" />
         public static unsafe string GetTag(int tagNumber) {
             tagNumber = Clamp(tagNumber, 1, 9);
-            var length = Msg(SciMsg.SCI_GETTAG, new IntPtr(tagNumber), IntPtr.Zero).ToInt32();
+            var length = Sci.Send(SciMsg.SCI_GETTAG, new IntPtr(tagNumber), IntPtr.Zero).ToInt32();
             if (length <= 0)
                 return string.Empty;
 
             var bytes = new byte[length + 1];
             fixed (byte* bp = bytes) {
-                Msg(SciMsg.SCI_GETTAG, new IntPtr(tagNumber), new IntPtr(bp));
+                Sci.Send(SciMsg.SCI_GETTAG, new IntPtr(tagNumber), new IntPtr(bp));
                 return GetString(new IntPtr(bp), length, Encoding);
             }
         }
 
         /// <summary>
-        /// Searches for the first occurrence of the specified text in the target defined by <see cref="TargetStart" /> and <see cref="TargetEnd" />.
+        /// Searches for the first occurrence of the specified text in the target defined by TargetStart and TargetEnd.
         /// </summary>
-        /// <param name="text">The text to search for. The interpretation of the text (i.e. whether it is a regular expression) is defined by the <see cref="SearchFlags" /> property.</param>
+        /// <param name="text">The text to search for. The interpretation of the text (i.e. whether it is a regular expression) is defined by the SearchFlags property.</param>
         /// <returns>The zero-based start position of the matched text within the document if successful; otherwise, -1.</returns>
         /// <remarks>
-        /// If successful, the <see cref="TargetStart" /> and <see cref="TargetEnd" /> properties will be updated to the start and end positions of the matched text.
-        /// Searching can be performed in reverse using a <see cref="TargetStart" /> greater than the <see cref="TargetEnd" />.
+        /// If successful, the TargetStart and TargetEnd properties will be updated to the start and end positions of the matched text.
+        /// Searching can be performed in reverse using a TargetStart greater than the TargetEnd.
         /// </remarks>
         public static unsafe int SearchInTarget(string text) {
-            int bytePos = 0;
+            int bytePos;
             var bytes = GetBytes(text ?? string.Empty, Encoding, false);
             fixed (byte* bp = bytes)
-                bytePos = Msg(SciMsg.SCI_SEARCHINTARGET, new IntPtr(bytes.Length), new IntPtr(bp)).ToInt32();
+                bytePos = Sci.Send(SciMsg.SCI_SEARCHINTARGET, new IntPtr(bytes.Length), new IntPtr(bp)).ToInt32();
 
             if (bytePos == -1)
                 return bytePos;
@@ -1415,63 +1316,54 @@ namespace _3PA {
 
         #endregion
 
-        #region selection and position
+        #region position
 
         /// <summary>
-        /// Gets or sets the start position of the selection.
+        /// Gets or sets the current caret position.
         /// </summary>
-        /// <returns>The zero-based document position where the selection starts.</returns>
+        /// <returns>The zero-based character position of the caret.</returns>
         /// <remarks>
-        /// When getting this property, the return value is <code>Math.Min(<see cref="AnchorPosition" />, <see cref="CurrentPosition" />)</code>.
-        /// When setting this property, <see cref="AnchorPosition" /> is set to the value specified and <see cref="CurrentPosition" /> set to <code>Math.Max(<see cref="CurrentPosition" />, <paramref name="value" />)</code>.
+        /// Setting the current caret position will create a selection between it and the current AnchorPosition.
         /// The caret is not scrolled into view.
         /// </remarks>
-        /// <seealso cref="SelectionEnd" />
-        public static int SelectionStart {
+
+        public static int CurrentPosition {
             get {
-                var pos = Msg(SciMsg.SCI_GETSELECTIONSTART).ToInt32();
-                return Lines.ByteToCharPosition(pos);
+                var bytePos = Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32();
+                return Lines.ByteToCharPosition(bytePos);
             }
             set {
                 value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETSELECTIONSTART, new IntPtr(value));
+                var bytePos = Lines.CharToBytePosition(value);
+                Sci.Send(SciMsg.SCI_SETCURRENTPOS, new IntPtr(bytePos));
             }
         }
 
         /// <summary>
-        /// Gets or sets the end position of the selection.
+        /// Sets the current carret position + the current anchor position to the same position
         /// </summary>
-        /// <returns>The zero-based document position where the selection ends.</returns>
-        /// <remarks>
-        /// When getting this property, the return value is <code>Math.Max(<see cref="AnchorPosition" />, <see cref="CurrentPosition" />)</code>.
-        /// When setting this property, <see cref="CurrentPosition" /> is set to the value specified and <see cref="AnchorPosition" /> set to <code>Math.Min(<see cref="AnchorPosition" />, <paramref name="value" />)</code>.
-        /// The caret is not scrolled into view.
-        /// </remarks>
-        /// <seealso cref="SelectionStart" />
-        public static int SelectionEnd {
-            get {
-                var pos = Msg(SciMsg.SCI_GETSELECTIONEND).ToInt32();
-                return Lines.ByteToCharPosition(pos);
-            }
-            set {
-                value = Clamp(value, 0, TextLength);
-                value = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETSELECTIONEND, new IntPtr(value));
-            }
+        /// <param name="pos"></param>
+        public static void SetSel(int pos) {
+            SetSel(pos, pos);
         }
 
         /// <summary>
-        /// Gets or sets the main selection when they are multiple selections.
+        /// Gets or sets the current anchor position.
         /// </summary>
-        /// <returns>The zero-based main selection index.</returns>
-        public static int MainSelection {
+        /// <returns>The zero-based character position of the anchor.</returns>
+        /// <remarks>
+        /// Setting the current anchor position will create a selection between it and the CurrentPosition.
+        /// The caret is not scrolled into view.
+        /// </remarks>
+        public static int AnchorPosition {
             get {
-                return Msg(SciMsg.SCI_GETMAINSELECTION).ToInt32();
+                var bytePos = Sci.Send(SciMsg.SCI_GETANCHOR).ToInt32();
+                return Lines.ByteToCharPosition(bytePos);
             }
             set {
-                value = ClampMin(value, 0);
-                Msg(SciMsg.SCI_SETMAINSELECTION, new IntPtr(value));
+                value = Clamp(value, 0, TextLength);
+                var bytePos = Lines.CharToBytePosition(value);
+                Sci.Send(SciMsg.SCI_SETANCHOR, new IntPtr(bytePos));
             }
         }
 
@@ -1481,89 +1373,10 @@ namespace _3PA {
         /// <returns>The zero-based index of the first visible screen line.</returns>
         /// <remarks>The value is a visible line, not a document line.</remarks>
         public static int FirstVisibleLine {
-            get {
-                return Msg(SciMsg.SCI_GETFIRSTVISIBLELINE).ToInt32();
-            }
+            get { return Sci.Send(SciMsg.SCI_GETFIRSTVISIBLELINE).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Msg(SciMsg.SCI_SETFIRSTVISIBLELINE, new IntPtr(value));
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current caret position.
-        /// </summary>
-        /// <returns>The zero-based character position of the caret.</returns>
-        /// <remarks>
-        /// Setting the current caret position will create a selection between it and the current <see cref="AnchorPosition" />.
-        /// The caret is not scrolled into view.
-        /// </remarks>
-        /// <seealso cref="ScrollCaret" />
-        public static int CurrentPosition {
-            get {
-                var bytePos = Msg(SciMsg.SCI_GETCURRENTPOS).ToInt32();
-                return Lines.ByteToCharPosition(bytePos);
-            }
-            set {
-                value = Clamp(value, 0, TextLength);
-                var bytePos = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETCURRENTPOS, new IntPtr(bytePos));
-            }
-        }
-
-        /// <summary>
-        /// Sets the current carret position
-        /// </summary>
-        /// <param name="pos"></param>
-        public static void SetCaretPosition(int pos) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSEL, pos, pos);
-        }
-
-        /// <summary>
-        /// Gets the current line index.
-        /// </summary>
-        /// <returns>The zero-based line index containing the <see cref="CurrentPosition" />.</returns>
-        public static int CurrentLine {
-            get {
-                var currentPos = Msg(SciMsg.SCI_GETCURRENTPOS).ToInt32();
-                var line = Msg(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(currentPos)).ToInt32();
-                return line;
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the current anchor position.
-        /// </summary>
-        /// <returns>The zero-based character position of the anchor.</returns>
-        /// <remarks>
-        /// Setting the current anchor position will create a selection between it and the <see cref="CurrentPosition" />.
-        /// The caret is not scrolled into view.
-        /// </remarks>
-        /// <seealso cref="ScrollCaret" />
-        public static int AnchorPosition {
-            get {
-                var bytePos = Msg(SciMsg.SCI_GETANCHOR).ToInt32();
-                return Lines.ByteToCharPosition(bytePos);
-            }
-            set {
-                value = Clamp(value, 0, TextLength);
-                var bytePos = Lines.CharToBytePosition(value);
-                Msg(SciMsg.SCI_SETANCHOR, new IntPtr(bytePos));
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether additional typing affects multiple selections.
-        /// Whether typing, backspace, or delete works with multiple selection simultaneously.
-        /// </summary>
-        /// <returns>true if typing will affect multiple selections instead of just the main selection; otherwise, false. The default is false.</returns>
-        public bool AdditionalSelectionTyping {
-            get {
-                return Msg(SciMsg.SCI_GETADDITIONALSELECTIONTYPING) != IntPtr.Zero;
-            }
-            set {
-                var additionalSelectionTyping = (value ? new IntPtr(1) : IntPtr.Zero);
-                Msg(SciMsg.SCI_SETADDITIONALSELECTIONTYPING, additionalSelectionTyping);
+                Sci.Send(SciMsg.SCI_SETFIRSTVISIBLELINE, new IntPtr(value));
             }
         }
 
@@ -1571,7 +1384,7 @@ namespace _3PA {
         /// Moves the caret to the opposite end of the main selection.
         /// </summary>
         public static void SwapMainAnchorCaret() {
-            Msg(SciMsg.SCI_SWAPMAINANCHORCARET);
+            Sci.Send(SciMsg.SCI_SWAPMAINANCHORCARET);
         }
 
         /// <summary>
@@ -1579,13 +1392,11 @@ namespace _3PA {
         /// </summary>
         /// <param name="lineStart">The zero-based index of the line range to start showing.</param>
         /// <param name="lineEnd">The zero-based index of the line range to end showing.</param>
-        /// <seealso cref="HideLines" />
-        /// <seealso cref="Line.Visible" />
         public static void ShowLines(int lineStart, int lineEnd) {
             lineStart = Clamp(lineStart, 0, Lines.Count);
             lineEnd = Clamp(lineEnd, lineStart, Lines.Count);
 
-            Msg(SciMsg.SCI_SHOWLINES, new IntPtr(lineStart), new IntPtr(lineEnd));
+            Sci.Send(SciMsg.SCI_SHOWLINES, new IntPtr(lineStart), new IntPtr(lineEnd));
         }
 
         /// <summary>
@@ -1611,7 +1422,104 @@ namespace _3PA {
                 currentPos = Lines.CharToBytePosition(currentPos);
             }
 
-            Msg(SciMsg.SCI_SETSEL, new IntPtr(anchorPos), new IntPtr(currentPos));
+            Sci.Send(SciMsg.SCI_SETSEL, new IntPtr(anchorPos), new IntPtr(currentPos));
+        }
+
+        /// <summary>
+        /// Returns the BYTE position of the start of given line
+        /// </summary>
+        public static int StartBytePosOfLine(int line) {
+            return Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+        }
+
+        /// <summary>
+        /// Move the caret and the view to the specified line (lines starts 0!)
+        /// </summary>
+        /// <param name="line"></param>
+        public static void GoToLine(int line) {
+            GetLine(line).EnsureVisible();
+            var linesOnScreen = LinesOnScreen;
+            Sci.Send(SciMsg.SCI_GOTOLINE, new IntPtr(Math.Max(line + linesOnScreen, 0)));
+            FirstVisibleLine = Math.Max(line - 1, 0);
+            Sci.Send(SciMsg.SCI_GOTOLINE, new IntPtr(line));
+            GrabFocus();
+        }
+
+        #endregion
+
+        #region selection
+
+        /// <summary>
+        /// Gets or sets the start position of the selection.
+        /// </summary>
+        /// <returns>The zero-based document position where the selection starts.</returns>
+        /// <remarks>
+        /// When getting this property, the return value is <code>Math.Min(AnchorPosition, CurrentPosition)</code>.
+        /// When setting this property, AnchorPosition is set to the value specified and CurrentPosition set to <code>Math.Max(CurrentPosition, <paramref name="value" />)</code>.
+        /// The caret is not scrolled into view.
+        /// </remarks>
+
+        public static int SelectionStart {
+            get {
+                var pos = Sci.Send(SciMsg.SCI_GETSELECTIONSTART).ToInt32();
+                return Lines.ByteToCharPosition(pos);
+            }
+            set {
+                value = Clamp(value, 0, TextLength);
+                value = Lines.CharToBytePosition(value);
+                Sci.Send(SciMsg.SCI_SETSELECTIONSTART, new IntPtr(value));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the end position of the selection.
+        /// </summary>
+        /// <returns>The zero-based document position where the selection ends.</returns>
+        /// <remarks>
+        /// When getting this property, the return value is <code>Math.Max(AnchorPosition, CurrentPosition)</code>.
+        /// When setting this property, CurrentPosition is set to the value specified and AnchorPosition set to <code>Math.Min(AnchorPosition, <paramref name="value" />)</code>.
+        /// The caret is not scrolled into view.
+        /// </remarks>
+
+        public static int SelectionEnd {
+            get {
+                var pos = Sci.Send(SciMsg.SCI_GETSELECTIONEND).ToInt32();
+                return Lines.ByteToCharPosition(pos);
+            }
+            set {
+                value = Clamp(value, 0, TextLength);
+                value = Lines.CharToBytePosition(value);
+                Sci.Send(SciMsg.SCI_SETSELECTIONEND, new IntPtr(value));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the main selection when they are multiple selections.
+        /// </summary>
+        /// <returns>The zero-based main selection index.</returns>
+        public static int MainSelection {
+            get {
+                return Sci.Send(SciMsg.SCI_GETMAINSELECTION).ToInt32();
+            }
+            set {
+                value = ClampMin(value, 0);
+                Sci.Send(SciMsg.SCI_SETMAINSELECTION, new IntPtr(value));
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether additional typing affects multiple selections.
+        /// Whether typing, backspace, or delete works with multiple selection simultaneously.
+        /// </summary>
+        /// <returns>true if typing will affect multiple selections instead of just the main selection; otherwise, false. The default is false.</returns>
+        public bool AdditionalSelectionTyping {
+            get {
+                return Sci.Send(SciMsg.SCI_GETADDITIONALSELECTIONTYPING).IsTrue();
+            }
+            set {
+                var additionalSelectionTyping = (value ? new IntPtr(1) : IntPtr.Zero);
+                Sci.Send(SciMsg.SCI_SETADDITIONALSELECTIONTYPING, additionalSelectionTyping);
+            }
         }
 
         /// <summary>
@@ -1628,7 +1536,7 @@ namespace _3PA {
             caret = Lines.CharToBytePosition(caret);
             anchor = Lines.CharToBytePosition(anchor);
 
-            Msg(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(anchor));
+            Sci.Send(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(anchor));
         }
 
         /// <summary>
@@ -1636,24 +1544,23 @@ namespace _3PA {
         /// </summary>
         /// <remarks>The current position is not scrolled into view.</remarks>
         public static void SelectAll() {
-            Msg(SciMsg.SCI_SELECTALL);
+            Sci.Send(SciMsg.SCI_SELECTALL);
         }
 
         /// <summary>
         /// Sets a single empty selection at the start of the document.
         /// </summary>
         public static void ClearSelections() {
-            Msg(SciMsg.SCI_CLEARSELECTIONS);
+            Sci.Send(SciMsg.SCI_CLEARSELECTIONS);
         }
 
         /// <summary>
         /// If there are multiple selections, removes the specified selection.
         /// </summary>
         /// <param name="selection">The zero-based selection index.</param>
-        /// <seealso cref="Selections" />
         public static void DropSelection(int selection) {
             selection = ClampMin(selection, 0);
-            Msg(SciMsg.SCI_DROPSELECTIONN, new IntPtr(selection));
+            Sci.Send(SciMsg.SCI_DROPSELECTIONN, new IntPtr(selection));
         }
 
         /// <summary>
@@ -1664,7 +1571,7 @@ namespace _3PA {
         public static int GetColumn(int position) {
             position = Clamp(position, 0, TextLength);
             position = Lines.CharToBytePosition(position);
-            return Msg(SciMsg.SCI_GETCOLUMN, new IntPtr(position)).ToInt32();
+            return Sci.Send(SciMsg.SCI_GETCOLUMN, new IntPtr(position)).ToInt32();
         }
 
         /// <summary>
@@ -1675,7 +1582,7 @@ namespace _3PA {
         public static void GotoPosition(int position) {
             position = Clamp(position, 0, TextLength);
             position = Lines.CharToBytePosition(position);
-            Msg(SciMsg.SCI_GOTOPOS, new IntPtr(position));
+            Sci.Send(SciMsg.SCI_GOTOPOS, new IntPtr(position));
         }
 
         /// <summary>
@@ -1695,24 +1602,24 @@ namespace _3PA {
         /// <param name="columns">The number of columns to scroll.</param>
         /// <remarks>
         /// Negative values scroll in the opposite direction.
-        /// A column is the width in pixels of a space character in the <see cref="Style.Default" /> style.
+        /// A column is the width in pixels of a space character in the Style.Default style.
         /// </remarks>
         public static void LineScroll(int lines, int columns) {
-            Msg(SciMsg.SCI_LINESCROLL, new IntPtr(columns), new IntPtr(lines));
+            Sci.Send(SciMsg.SCI_LINESCROLL, new IntPtr(columns), new IntPtr(lines));
         }
 
         /// <summary>
         /// Makes the next selection the main selection.
         /// </summary>
         public static void RotateSelection() {
-            Msg(SciMsg.SCI_ROTATESELECTION);
+            Sci.Send(SciMsg.SCI_ROTATESELECTION);
         }
 
         /// <summary>
         /// Scrolls the current position into view, if it is not already visible.
         /// </summary>
         public static void ScrollCaret() {
-            Msg(SciMsg.SCI_SCROLLCARET);
+            Sci.Send(SciMsg.SCI_SCROLLCARET);
         }
 
         /// <summary>
@@ -1733,7 +1640,7 @@ namespace _3PA {
             start = Lines.CharToBytePosition(start);
             end = Lines.CharToBytePosition(end);
 
-            Msg(SciMsg.SCI_SCROLLRANGE, new IntPtr(end), new IntPtr(start));
+            Sci.Send(SciMsg.SCI_SCROLLRANGE, new IntPtr(end), new IntPtr(start));
         }
 
         /// <summary>
@@ -1744,142 +1651,7 @@ namespace _3PA {
         public static void SetEmptySelection(int pos) {
             pos = Clamp(pos, 0, TextLength);
             pos = Lines.CharToBytePosition(pos);
-            Msg(SciMsg.SCI_SETEMPTYSELECTION, new IntPtr(pos));
-        }
-
-        /// <summary>
-        /// Returns the current target start and end positions from a previous operation.
-        /// </summary>
-        public static Sci_CharacterRange GetTargetRange() {
-            return new Sci_CharacterRange(
-                Lines.ByteToCharPosition(Call(SciMsg.SCI_GETTARGETSTART)),
-                Lines.ByteToCharPosition(Call(SciMsg.SCI_GETTARGETEND)));
-        }
-
-        /// <summary>
-        /// Sets both the anchor and the current position. If end is negative, it means the end of the document.
-        /// If start is negative, it means remove any selection (i.e. set the start to the same position as end).
-        /// The caret is scrolled into view after this operation.
-        /// </summary>
-        /// <param name="start">The selection start (anchor) position.</param>
-        /// <param name="end">The selection end (current) position.</param>
-        public static void SetSelectionOrdered(int start, int end) {
-            Call(SciMsg.SCI_SETSEL, Lines.CharToBytePosition(start), Lines.CharToBytePosition(end));
-        }
-
-        /// <summary>
-        ///     Returns the start and end of the selection without regard to which end is the current position and which is the
-        ///     anchor.
-        ///     SCI_GETSELECTIONSTART returns the smaller of the current position or the anchor position.
-        /// </summary>
-        /// <returns>A character range.</returns>
-        public static Sci_CharacterRange GetSelectionRange() {
-            return new Sci_CharacterRange(
-                Lines.ByteToCharPosition(Call(SciMsg.SCI_GETSELECTIONSTART)),
-                Lines.ByteToCharPosition(Call(SciMsg.SCI_GETSELECTIONEND)));
-        }
-
-        /// <summary>
-        /// Returns the current line number
-        /// </summary>
-        /// <returns></returns>
-        public static int GetCaretLineNumber() {
-            return LineFromPosition(CurrentPosition);
-        }
-
-        /// <summary>
-        /// This returns the document position that corresponds with the start of the line. If line is negative,
-        /// the position of the line holding the start of the selection is returned. If line is greater than the
-        /// lines in the document, the return value is -1. If line is equal to the number of lines in the document
-        /// (i.e. 1 line past the last line), the return value is the end of the document.
-        /// </summary>
-        public static int PositionFromLine(int line) {
-            return Lines.ByteToCharPosition(Call(SciMsg.SCI_POSITIONFROMLINE, line));
-        }
-
-        /// <summary>
-        /// returns the position at the end of the line x
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static int GetLineEndPosition(int line) {
-            return Lines.ByteToCharPosition(Call(SciMsg.SCI_GETLINEENDPOSITION, line));
-        }
-
-        /// <summary>
-        /// Gets the current screen location of the caret.
-        /// </summary>
-        /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
-        public static Point GetCaretScreenLocation() {
-            var point = GetPointXyFromPosition(CurrentPosition);
-            Win32.ClientToScreen(HandleScintilla, ref point);
-            return point;
-        }
-
-        /// <summary>
-        /// Gets the first visible line
-        /// </summary>
-        /// <returns></returns>
-        public static int GetFirstVisibleLine() {
-            return (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_GETFIRSTVISIBLELINE, 0, 0);
-        }
-
-        /// <summary>
-        /// Sets the first visible line
-        /// </summary>
-        /// <param name="line"></param>
-        public static void SetFirstVisibleLine(int line) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETFIRSTVISIBLELINE, line, 0);
-        }
-
-        /// <summary>
-        /// Move the caret and the view to the specified line (lines starts 0!)
-        /// </summary>
-        /// <param name="line"></param>
-        public static void GoToLine(int line) {
-            EnsureRangeVisible(line, line);
-            var linesOnScreen = LinesOnScreen;
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, Math.Max(line + linesOnScreen, 0), 0);
-            SetFirstVisibleLine(Math.Max(line - 1, 0));
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_GOTOLINE, line, 0);
-            GrabFocus();
-        }
-
-        /// <summary>
-        /// Returns the length of the document in bytes.
-        /// </summary>
-        public static int GetDocumentByteLength() {
-            return Call(SciMsg.SCI_GETLENGTH);
-        }
-
-        /// <summary>
-        ///     Make a range visible by scrolling to the last line of the range.
-        ///     A line may be hidden because more than one of its parent lines is contracted. Both these message travels up the
-        ///     fold hierarchy, expanding any contracted folds until they reach the top level. The line will then be visible.
-        /// </summary>
-        public static void EnsureRangeVisible(int start, int end) {
-            var lineStart = LineFromPosition(Math.Min(start, end));
-            var lineEnd = LineFromPosition(Math.Max(start, end));
-            for (var line = lineStart; line <= lineEnd; line++) {
-                Call(SciMsg.SCI_ENSUREVISIBLE, line);
-            }
-        }
-
-        /// <summary>
-        /// This returns the number of lines in the document. An empty document contains 1 line. A document holding only an
-        /// end of line sequence has 2 lines.
-        /// </summary>
-        public static int GetLineCount() {
-            return Call(SciMsg.SCI_GETLINECOUNT);
-        }
-
-        /// <summary>
-        /// This returns the position at the end of indentation of a line.
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static int GetLineIndentPosition(int line) {
-            return Lines.ByteToCharPosition(Call(SciMsg.SCI_GETLINEINDENTPOSITION, line));
+            Sci.Send(SciMsg.SCI_SETEMPTYSELECTION, new IntPtr(pos));
         }
 
         /// <summary>
@@ -1890,7 +1662,7 @@ namespace _3PA {
         /// <param name="column"></param>
         /// <returns></returns>
         public static int GetPosFromLineColumn(int line, int column) {
-            return Lines.ByteToCharPosition(Call(SciMsg.SCI_FINDCOLUMN, line, column));
+            return Lines.ByteToCharPosition(Sci.Send(SciMsg.SCI_FINDCOLUMN, new IntPtr(line), new IntPtr(column)).ToInt32());
         }
 
         /// <summary>
@@ -1898,98 +1670,14 @@ namespace _3PA {
         /// </summary>
         /// <param name="caret">The zero-based document position to end the selection.</param>
         /// <param name="anchor">The zero-based document position to start the selection.</param>
-        /// <remarks>A main selection must first have been set by a call to <see cref="SetSelection" />.</remarks>
+        /// <remarks>A main selection must first have been set by a call to SetSelection.</remarks>
         public static void AddSelection(int caret, int anchor) {
             var textLength = TextLength;
             caret = Clamp(caret, 0, textLength);
             anchor = Clamp(anchor, 0, textLength);
             caret = Lines.CharToBytePosition(caret);
             anchor = Lines.CharToBytePosition(anchor);
-            Msg(SciMsg.SCI_ADDSELECTION, new IntPtr(caret), new IntPtr(anchor));
-        }
-
-        #endregion
-
-        #region others
-
-        /// <summary>
-        ///  sets the scroll range so that maximum scroll position has the last line at the bottom of the view (default)
-        /// Setting this to false allows scrolling one page below the last line
-        /// </summary>
-        /// <param name="val"></param>
-        public static void SetEndAtLastLine(bool val) {
-            Call(SciMsg.SCI_SETENDATLASTLINE, val ? 1 : 0);
-        }
-
-        /// <summary>
-        /// White space characters are drawn as dots and arrows
-        /// SCWS_INVISIBLE	0	The normal display mode with white space displayed as an empty background colour.
-        /// SCWS_VISIBLEALWAYS	1	White space characters are drawn as dots and arrows,
-        /// SCWS_VISIBLEAFTERINDENT	2	White space used for indentation is displayed normally but after the first visible character, it is shown as dots and arrows.
-        /// SCWS_VISIBLEONLYININDENT	3	White space used for indentation is displayed as dots and arrows.
-        /// </summary>
-        public static void SetWhiteSpaceView() {
-            Call(SciMsg.SCI_SETVIEWWS, (int)SciMsg.SCWS_VISIBLEALWAYS);
-        }
-
-        /// <summary>
-        /// reverts the last change
-        /// </summary>
-        public static void Undo() {
-            Call(SciMsg.SCI_UNDO);
-        }
-
-        #endregion
-
-        #region bookmarks
-
-        /// <summary>
-        ///     Add a bookmark at a specific line.
-        /// </summary>
-        /// <param name="lineNumber">The line number to add a bookmark to.</param>
-        public static void AddBookmark(int lineNumber) {
-            if (lineNumber == -1)
-                lineNumber = GetCaretLineNumber();
-            if (!IsBookmarkPresent(lineNumber))
-                Call(SciMsg.SCI_MARKERADD, lineNumber, BookmarkMarker);
-        }
-
-        /// <summary>
-        ///     Remove all bookmarks from the document.
-        /// </summary>
-        public static void RemoveAllBookmarks() {
-            Call(SciMsg.SCI_MARKERDELETEALL, BookmarkMarker);
-        }
-
-        /// <summary>
-        ///     Is there a bookmark set on a line.
-        /// </summary>
-        /// <param name="lineNumber">The line number to check.</param>
-        /// <returns>True if a bookmark is set.</returns>
-        public static bool IsBookmarkPresent(int lineNumber) {
-            if (lineNumber == -1)
-                lineNumber = GetCaretLineNumber();
-            var state = Call(SciMsg.SCI_MARKERGET, lineNumber);
-            return (state & (1 << BookmarkMarker)) != 0;
-        }
-
-        #endregion
-
-        #region marks
-
-        /// <summary>
-        ///     Remove all 'find' marks.
-        /// </summary>
-        public static void RemoveFindMarks() {
-            Call(SciMsg.SCI_SETINDICATORCURRENT, IndicatorMatch);
-            Call(SciMsg.SCI_INDICATORCLEARRANGE, 0, GetDocumentByteLength());
-        }
-
-        /// <summary>
-        ///     Marks a range of text.
-        /// </summary>
-        public static void AddFindMark(int pos, int length) {
-            Call(SciMsg.SCI_INDICATORFILLRANGE, pos, length);
+            Sci.Send(SciMsg.SCI_ADDSELECTION, new IntPtr(caret), new IntPtr(anchor));
         }
 
         #endregion
@@ -1997,20 +1685,20 @@ namespace _3PA {
         #region Lexer stuff
 
         // Set style 
-        private static int stylingPosition;
-        private static int stylingBytePosition;
+        private static int _stylingPosition;
+        private static int _stylingBytePosition;
 
         /// <summary>
         /// Gets or sets the current lexer.
         /// </summary>
-        /// <returns>One of the <see cref="Lexer" /> enumeration values. The default is <see cref="Container" />.</returns>
-        public Lexer Lexer {
+        /// <returns>One of the Lexer enumeration values. The default is Container.</returns>
+        public static Lexer Lexer {
             get {
-                return (Lexer)Msg(SciMsg.SCI_GETLEXER);
+                return (Lexer)Sci.Send(SciMsg.SCI_GETLEXER);
             }
             set {
                 var lexer = (int)value;
-                Msg(SciMsg.SCI_SETLEXER, new IntPtr(lexer));
+                Sci.Send(SciMsg.SCI_SETLEXER, new IntPtr(lexer));
             }
         }
 
@@ -2021,23 +1709,23 @@ namespace _3PA {
         /// <remarks>Lexer names are case-sensitive.</remarks>
         public static unsafe string LexerLanguage {
             get {
-                var length = Msg(SciMsg.SCI_GETLEXERLANGUAGE).ToInt32();
+                var length = Sci.Send(SciMsg.SCI_GETLEXERLANGUAGE).ToInt32();
                 if (length == 0)
                     return string.Empty;
 
                 var bytes = new byte[length + 1];
                 fixed (byte* bp = bytes) {
-                    Msg(SciMsg.SCI_GETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
+                    Sci.Send(SciMsg.SCI_GETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
                     return GetString(new IntPtr(bp), length, Encoding.ASCII);
                 }
             }
             set {
                 if (string.IsNullOrEmpty(value)) {
-                    Msg(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, IntPtr.Zero);
                 } else {
                     var bytes = GetBytes(value, Encoding.ASCII, true);
                     fixed (byte* bp = bytes)
-                        Msg(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
+                        Sci.Send(SciMsg.SCI_SETLEXERLANGUAGE, IntPtr.Zero, new IntPtr(bp));
                 }
             }
         }
@@ -2054,32 +1742,32 @@ namespace _3PA {
             endPos = Clamp(endPos, 0, textLength);
             startPos = Lines.CharToBytePosition(startPos);
             endPos = Lines.CharToBytePosition(endPos);
-            Msg(SciMsg.SCI_COLOURISE, new IntPtr(startPos), new IntPtr(endPos));
+            Sci.Send(SciMsg.SCI_COLOURISE, new IntPtr(startPos), new IntPtr(endPos));
         }
 
         /// <summary>
         /// Styles the specified length of characters.
         /// </summary>
         /// <param name="length">The number of characters to style.</param>
-        /// <param name="style">The <see cref="Style" /> definition index to assign each character.</param>
+        /// <param name="style">The Style definition index to assign each character.</param>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="length" /> or <paramref name="style" /> is less than zero. -or-
-        /// The sum of a preceeding call to <see cref="StartStyling" /> or <see name="SetStyling" /> and <paramref name="length" /> is greater than the document length. -or-
+        /// The sum of a preceeding call to StartStyling or <see name="SetStyling" /> and <paramref name="length" /> is greater than the document length. -or-
         /// <paramref name="style" /> is greater than or equal to the number of style definitions.
         /// </exception>
         /// <remarks>
         /// The styling position is advanced by <paramref name="length" /> after each call allowing multiple
-        /// calls to <see cref="SetStyling" /> for a single call to <see cref="StartStyling" />.
+        /// calls to SetStyling for a single call to StartStyling.
         /// </remarks>
-        /// <seealso cref="StartStyling" />
+
         public static void SetStyling(int length, int style) {
-            var endPos = stylingPosition + length;
+            var endPos = _stylingPosition + length;
             var endBytePos = Lines.CharToBytePosition(endPos);
-            Msg(SciMsg.SCI_SETSTYLING, new IntPtr(endBytePos - stylingBytePosition), new IntPtr(style));
+            Sci.Send(SciMsg.SCI_SETSTYLING, new IntPtr(endBytePos - _stylingBytePosition), new IntPtr(style));
 
             // Track this for the next call
-            stylingPosition = endPos;
-            stylingBytePosition = endBytePos;
+            _stylingPosition = endPos;
+            _stylingBytePosition = endBytePos;
         }
 
         /// <summary>
@@ -2087,18 +1775,18 @@ namespace _3PA {
         /// </summary>
         /// <param name="position">The zero-based character position in the document to start styling.</param>
         /// <remarks>
-        /// After preparing the document for styling, use successive calls to <see cref="SetStyling" />
+        /// After preparing the document for styling, use successive calls to SetStyling
         /// to style the document.
         /// </remarks>
-        /// <seealso cref="SetStyling" />
+
         public static void StartStyling(int position) {
             position = Clamp(position, 0, TextLength);
             var pos = Lines.CharToBytePosition(position);
-            Msg(SciMsg.SCI_STARTSTYLING, new IntPtr(pos));
+            Sci.Send(SciMsg.SCI_STARTSTYLING, new IntPtr(pos));
 
             // Track this so we can validate calls to SetStyling
-            stylingPosition = position;
-            stylingBytePosition = pos;
+            _stylingPosition = position;
+            _stylingBytePosition = pos;
         }
 
         /// <summary>
@@ -2106,7 +1794,7 @@ namespace _3PA {
         /// </summary>
         /// <returns>The zero-based document position of the last styled character.</returns>
         public static int GetEndStyled() {
-            var pos = Msg(SciMsg.SCI_GETENDSTYLED).ToInt32();
+            var pos = Sci.Send(SciMsg.SCI_GETENDSTYLED).ToInt32();
             return Lines.ByteToCharPosition(pos);
         }
 
@@ -2114,317 +1802,172 @@ namespace _3PA {
         /// Gets the style of the specified document position.
         /// </summary>
         /// <param name="position">The zero-based document position of the character to get the style for.</param>
-        /// <returns>The zero-based <see cref="Style" /> index used at the specified <paramref name="position" />.</returns>
+        /// <returns>The zero-based Style index used at the specified <paramref name="position" />.</returns>
         public static int GetStyleAt(int position) {
             position = Clamp(position, 0, TextLength);
             position = Lines.CharToBytePosition(position);
-            return Msg(SciMsg.SCI_GETSTYLEAT, new IntPtr(position)).ToInt32();
-        }
-
-
-        /// <summary>
-        /// returns a boolean to know if we are currently using the container lexer
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsUsingContainerLexer() {
-            int x = Call(SciMsg.SCI_GETLEXER);
-            return (x == 0);
+            return Sci.Send(SciMsg.SCI_GETSTYLEAT, new IntPtr(position)).ToInt32();
         }
 
         /// <summary>
-        /// Sets the current lexer to container lexer
-        /// </summary>
-        public static void SetLexerToContainerLexer() {
-            Call(SciMsg.SCI_SETLEXER, 0, 2);
-            //Call(SciMsg.SCI_COLOURISE, 0, -1);
-        }
-
-
-
-        /// <summary>
-        /// Position of the starting line we need to style
-        /// </summary>
-        /// <returns></returns>
-        public static int GetSylingNeededStartPos() {
-            return PositionFromLine(LineFromPosition(GetEndStyled()));
-        }
-
-        /// <summary>
-        /// Style the text between startPos and endPos with the styleId
-        /// </summary>
-        /// <param name="styleId"></param>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        public static void StyleText(byte styleId, int startPos, int endPos) {
-            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
-            Call(SciMsg.SCI_SETSTYLING, endPos - startPos, styleId);
-        }
-
-        /// <summary>
+        /// TODO: UNTESTED
         /// set the style of a text from startPos to startPos + styleArray.Length,
         /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte
         /// </summary>
         /// <param name="startPos"></param>
         /// <param name="styleArray"></param>
-        public static void StyleTextEx(int startPos, byte[] styleArray) {
-            Call(SciMsg.SCI_STARTSTYLING, startPos, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETSTYLINGEX, styleArray.Length, styleArray);
-        }
+        public static unsafe void StyleTextEx(int startPos, byte[] styleArray) {
+            // start styling from start pos
+            Sci.Send(SciMsg.SCI_STARTSTYLING, new IntPtr(startPos));
 
+            TargetStart = startPos;
+            TargetEnd = startPos + styleArray.Length;
+
+            var length = Sci.Send(SciMsg.SCI_GETTARGETTEXT).ToInt32();
+            if (length == 0)
+                return;
+
+            var bytes = new byte[length + 1];
+            fixed (byte* bp = bytes) {
+                Sci.Send(SciMsg.SCI_GETTARGETTEXT, IntPtr.Zero, new IntPtr(bp));
+
+                var styles = CharToByteStyles(styleArray, bp, length, Encoding);
+                fixed (byte* stylePtr = styles)
+                    Sci.Send(SciMsg.SCI_SETSTYLINGEX, new IntPtr(length), new IntPtr(stylePtr));
+            }
+        }
 
         #endregion
 
-        #region set styles
-
-        /* NOTABLE STYLES :
-         * in enum SciSpecialStyles
-         * STYLE_DEFAULT	32	This style defines the attributes that all styles receive when the SCI_STYLECLEARALL message is used.
-         * STYLE_LINENUMBER	33	This style sets the attributes of the text used to display line numbers in a line number margin. 
-         * Thebackground  colour  set  for this style also sets the background colour for all margins that do not have any folding maskbits set. 
-         * Thatis  any   *margin for which    mask &  SC_MASK_FOLDERS is 0. See SCI_SETMARGINMASKN for more about masks.
-         * STYLE_BRACELIGHT	34	This style sets the attributes used when highlighting braces with the SCI_BRACEHIGHLIGHT message and  
-         * whenhighlighting  the  corresponding indentation with SCI_SETHIGHLIGHTGUIDE.
-         * STYLE_BRACEBAD	35	This style sets the display attributes used when marking an unmatched brace with the SCI_BRACEBADLIGHT message.
-         * STYLE_CONTROLCHAR	36	This style sets the font used when drawing control characters. Only the font, size, bold, italics,andcharacter 
-         * set attributes are used and not the colour attributes. See also: SCI_SETCONTROLCHARSYMBOL.
-         * STYLE_INDENTGUIDE	37	This style sets the foreground and background colours used when drawing the indentation guides.
-         * */
+        #region Set Styles
 
         /// <summary>
         /// Removes all styling from the document and resets the folding state.
         /// </summary>
         public static void ClearDocumentStyle() {
-            Msg(SciMsg.SCI_CLEARDOCUMENTSTYLE);
+            Sci.Send(SciMsg.SCI_CLEARDOCUMENTSTYLE);
         }
 
         /// <summary>
-        /// Sets a global override to the selection background color.
+        /// Resets all style properties to those currently configured for the Style.Default style.
         /// </summary>
-        /// <param name="use">true to override the selection background color; otherwise, false.</param>
-        /// <param name="color">The global selection background color.</param>
-        /// <seealso cref="SetSelectionForeColor" />
-        public static void SetSelectionBackColor(bool use, Color color) {
-            var colour = ColorTranslator.ToWin32(color);
-            var useSelectionForeColour = (use ? new IntPtr(1) : IntPtr.Zero);
-
-            Msg(SciMsg.SCI_SETSELBACK, useSelectionForeColour, new IntPtr(colour));
-        }
-
-        /// <summary>
-        /// Sets a global override to the selection foreground color.
-        /// </summary>
-        /// <param name="use">true to override the selection foreground color; otherwise, false.</param>
-        /// <param name="color">The global selection foreground color.</param>
-        /// <seealso cref="SetSelectionBackColor" />
-        public static void SetSelectionForeColor(bool use, Color color) {
-            var colour = ColorTranslator.ToWin32(color);
-            var useSelectionForeColour = (use ? new IntPtr(1) : IntPtr.Zero);
-
-            Msg(SciMsg.SCI_SETSELFORE, useSelectionForeColour, new IntPtr(colour));
-        }
-
-
-        /// <summary>
-        /// Resets all style properties to those currently configured for the <see cref="Style.Default" /> style.
-        /// </summary>
-        /// <seealso cref="StyleResetDefault" />
         public static void StyleClearAll() {
-            Msg(SciMsg.SCI_STYLECLEARALL);
+            Sci.Send(SciMsg.SCI_STYLECLEARALL);
         }
 
         /// <summary>
-        /// Resets the <see cref="Style.Default" /> style to its initial state.
+        /// Resets the Style.Default style to its initial state.
         /// </summary>
-        /// <seealso cref="StyleClearAll" />
         public static void StyleResetDefault() {
-            Msg(SciMsg.SCI_STYLERESETDEFAULT);
+            Sci.Send(SciMsg.SCI_STYLERESETDEFAULT);
         }
 
+        /// <summary>
+        /// The colour of the caret
+        /// </summary>
+        public Color CaretForeColor {
+            get { return ColorTranslator.FromWin32(Sci.Send(SciMsg.SCI_GETCARETFORE).ToInt32()); }
+            set { Sci.Send(SciMsg.SCI_STYLESETFORE, new IntPtr(ColorTranslator.ToWin32(value.IsEmpty ? Color.Black : value))); }
+        }
 
         /// <summary>
-        /// Defines a style
+        /// Sets a global override to the selection background + foreground color.
         /// </summary>
-        /// <param name="id"></param>
-        /// <param name="bg"></param>
+        /// <param name="use"></param>
+        /// <param name="bg">r</param>
         /// <param name="fg"></param>
-        public static void SetStyle(byte id, Color bg, Color fg) {
-            Call(SciMsg.SCI_STYLESETBACK, id, (int)(new Colorref(bg)).ColorDWORD);
-            Call(SciMsg.SCI_STYLESETFORE, id, (int)(new Colorref(fg)).ColorDWORD);
+        public static void SetSelectionColor(bool use, Color bg, Color fg) {
+            Sci.Send(SciMsg.SCI_SETSELBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETSELFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
-        /// Sets the SciMsg.STYLE_DEFAULT style and then
-        /// sets all styles to have the same attributes as STYLE_DEFAULT
+        /// Sets a global override to the  additional selections background + foreground color.
         /// </summary>
-        /// <param name="bg"></param>
+        /// <param name="use"></param>
+        /// <param name="bg">r</param>
         /// <param name="fg"></param>
-        public static void SetDefaultStyle(Color bg, Color fg) {
-            SetStyle((int)SciMsg.STYLE_DEFAULT, bg, fg);
-            Call(SciMsg.SCI_STYLECLEARALL);
-        }
-
-        /// <summary>
-        /// Sets the font for a particular style
-        /// </summary>
-        /// <param name="styleId"></param>
-        /// <param name="fontName"></param>
-        /// <param name="fontSizeInPoints"></param>
-        public static void SetStyleFont(byte styleId, string fontName, int fontSizeInPoints) {
-            Call(SciMsg.SCI_STYLESETSIZE, styleId, fontSizeInPoints);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_STYLESETFONT, styleId, fontName);
-        }
-
-        /// <summary>
-        /// Sets the font to bold on/off for given style
-        /// </summary>
-        /// <param name="styleIdn"></param>
-        /// <param name="state"></param>
-        public static void SetStyleFontBold(byte styleIdn, bool state) {
-            Call(SciMsg.SCI_STYLESETBOLD, styleIdn, state ? 1 : 0);
-        }
-
-        /// <summary>
-        /// Sets the font to italic on/off for given style
-        /// </summary>
-        /// <param name="styleIdn"></param>
-        /// <param name="state"></param>
-        public static void SetStyleFontItalic(byte styleIdn, bool state) {
-            Call(SciMsg.SCI_STYLESETITALIC, styleIdn, state ? 1 : 0);
-        }
-
-        /// <summary>
-        /// Sets the font to underline on/off for given style
-        /// </summary>
-        /// <param name="styleIdn"></param>
-        /// <param name="state"></param>
-        public static void SetStyleFontUnderline(byte styleIdn, bool state) {
-            Call(SciMsg.SCI_STYLESETUNDERLINE, styleIdn, state ? 1 : 0);
-        }
-
-        /// <summary>
-        /// The value of caseMode determines how text is displayed. 
-        /// You can set upper case (SC_CASE_UPPER, 1) or lower case (SC_CASE_LOWER, 2) or camel case (SC_CASE_CAMEL, 3) 
-        /// or display normally (SC_CASE_MIXED, 0). This does not change the stored text, only how it is displayed.
-        /// </summary>
-        /// <param name="styleIdn"></param>
-        /// <param name="caseMode"></param>
-        public static void SetStyleFontCase(byte styleIdn, int caseMode) {
-            Call(SciMsg.SCI_STYLESETCASE, styleIdn, caseMode);
+        public static void SetAdditionalSelectionColor(bool use, Color bg, Color fg) {
+            Sci.Send(SciMsg.SCI_SETADDITIONALSELBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETADDITIONALSELFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
         /// sets the fore/background color of the whitespaces, overriding the lexer's
         /// </summary>
+        /// <param name="use"></param>
         /// <param name="bg"></param>
         /// <param name="fg"></param>
-        public static void SetWhiteSpaceStyle(Color bg, Color fg) {
-            Call(SciMsg.SCI_SETWHITESPACEFORE, 1, (int)(new Colorref(fg)).ColorDWORD);
-            Call(SciMsg.SCI_SETWHITESPACEBACK, 1, (int)(new Colorref(bg)).ColorDWORD);
+        public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
+            Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
-        /// Set style for selection
+        /// You can choose to make the background colour of the line containing the caret different with these messages
+        /// See CaretLineVisible to activate
         /// </summary>
-        /// <param name="bgColor"></param>
-        /// <param name="fgColor"></param>
-        public static void SetSelectionStyle(Color bgColor, Color fgColor) {
-            Call(SciMsg.SCI_SETSELBACK, 1, (int)(new Colorref(bgColor)).ColorDWORD);
-            Call(SciMsg.SCI_SETSELFORE, 1, (int)(new Colorref(fgColor)).ColorDWORD);
+        public static Color CaretLineBackColor {
+            get { return ColorTranslator.FromWin32(Sci.Send(SciMsg.SCI_GETCARETLINEBACK).ToInt32()); }
+            set { Sci.Send(SciMsg.SCI_SETCARETLINEBACK, new IntPtr(ColorTranslator.ToWin32(value.IsEmpty ? Color.Black : value))); }
         }
 
         /// <summary>
-        /// Set caret style
+        /// You can choose to make the background colour of the line containing the caret different with these messages
+        /// See CaretLineBackColor to set the color
         /// </summary>
-        /// <param name="fgColor"></param>
-        public static void SetCaretStyle(Color fgColor) {
-            Call(SciMsg.SCI_SETCARETFORE, (int)(new Colorref(fgColor)).ColorDWORD);
+        public static bool CaretLineVisible {
+            get { return Sci.Send(SciMsg.SCI_GETCARETLINEVISIBLE).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETCARETLINEVISIBLE, value.ToPointer()); }
         }
 
         /// <summary>
-        /// You can choose to make the background colour of the line containing the caret different with these messages. 
-        /// To do this, set the desired background colour with SCI_SETCARETLINEBACK, then use SCI_SETCARETLINEVISIBLE(true) to enable the effect. 
-        /// You can cancel the effect with SCI_SETCARETLINEVISIBLE(false). 
-        /// This form of background colouring has highest priority when a line has markers that would otherwise change the background colour. 
         /// The caret line may also be drawn translucently which allows other background colours to show through. 
         /// This is done by setting the alpha (translucency) value by calling SCI_SETCARETLINEBACKALPHA. When the alpha is not 
         /// SC_ALPHA_NOALPHA (256), the caret line is drawn after all other features so will affect the colour of all other features. 
         /// Alpha goes from 0 (transparent) to 256 (opaque)
         /// </summary>
-        /// <param name="bgColor"></param>
-        /// <param name="alpha"></param>
-        public static void SetCaretLineStyle(Color bgColor, int alpha) {
-            Call(SciMsg.SCI_GETCARETLINEBACK, (int)(new Colorref(bgColor)).ColorDWORD);
-            Call(SciMsg.SCI_SETCARETLINEVISIBLE, 1);
-            Call(SciMsg.SCI_SETCARETLINEBACKALPHA, alpha);
-        }
-
-        /// <summary>
-        /// Sets a style for a marker
-        /// SciMsg.SC_MARK_FULLRECT
-        /// </summary>
-        /// <param name="marker"></param>
-        /// <param name="bgColor"></param>
-        /// <param name="fgColor"></param>
-        /// <param name="markerStyle"></param>
-        public static void SetMarkerStyle(byte marker, Color bgColor, Color fgColor, SciMarkerStyle markerStyle) {
-            Call(SciMsg.SCI_MARKERDEFINE, marker, (int)markerStyle);
-            Call(SciMsg.SCI_MARKERSETFORE, marker, (int)(new Colorref(fgColor)).ColorDWORD);
-            Call(SciMsg.SCI_MARKERSETBACK, marker, (int)(new Colorref(bgColor)).ColorDWORD);
-        }
-
-        /// <summary>
-        /// Gets the font size of given style
-        /// </summary>
-        /// <param name="styleId"></param>
-        /// <returns></returns>
-        public static int GetFontSize(byte styleId) {
-            return Call(SciMsg.SCI_STYLEGETSIZE, styleId);
+        public static int CaretLineBackAlpha {
+            get { return Sci.Send(SciMsg.SCI_GETCARETLINEBACKALPHA).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETCARETLINEBACKALPHA, new IntPtr(value)); }
         }
 
         /// <summary>
         /// allow changing the colour of the fold margin and fold margin highlight
         /// </summary>
+        /// <param name="use"></param>
         /// <param name="color"></param>
         /// <param name="highColor"></param>
-        public static void SetFoldMarginStyle(Color color, Color highColor) {
-            Call(SciMsg.SCI_SETFOLDMARGINCOLOUR, 1, (int)(new Colorref(color)).ColorDWORD);
-            Call(SciMsg.SCI_SETFOLDMARGINHICOLOUR, 1, (int)(new Colorref(highColor)).ColorDWORD);
+        public static void SetFoldMarginColor(bool use, Color color, Color highColor) {
+            Sci.Send(SciMsg.SCI_SETFOLDMARGINCOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(color)));
+            Sci.Send(SciMsg.SCI_SETFOLDMARGINHICOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(highColor)));
         }
 
         /// <summary>
-        /// While the cursor hovers over text in a style with the hotspot attribute set, the default colouring can be modified 
-        /// and an underline drawn with these settings
-        /// Single line mode stops a hotspot from wrapping onto next line
+        /// While the cursor hovers over text in a style with the hotspot attribute set. Single line mode stops a hotspot from wrapping onto next line.
         /// </summary>
+        public static bool HotSpotSingleLine {
+            get { return Sci.Send(SciMsg.SCI_GETHOTSPOTSINGLELINE).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETHOTSPOTSINGLELINE, value.ToPointer()); }
+        }
+
+        /// <summary>
+        /// While the cursor hovers over text in a style with the hotspot attribute set, an underline can be drawn
+        /// </summary>
+        public static bool HotSpotActiveUnderline {
+            get { return Sci.Send(SciMsg.SCI_GETHOTSPOTACTIVEUNDERLINE).IsTrue(); }
+            set { Sci.Send(SciMsg.SCI_SETHOTSPOTACTIVEUNDERLINE, value.ToPointer()); }
+        }
+
+        /// <summary>
+        /// While the cursor hovers over text in a style with the hotspot attribute set, the default colouring can be modified
+        /// </summary>
+        /// <param name="use"></param>
         /// <param name="fg"></param>
         /// <param name="bg"></param>
-        /// <param name="underline"></param>
-        /// <param name="singleLine"></param>
-        public static void SetHotSpotStyle(Color fg, Color bg, bool underline, bool singleLine) {
-            Call(SciMsg.SCI_SETHOTSPOTACTIVEFORE, 1, (int)(new Colorref(fg)).ColorDWORD);
-            Call(SciMsg.SCI_SETHOTSPOTACTIVEBACK, 1, (int)(new Colorref(bg)).ColorDWORD);
-            Call(SciMsg.SCI_SETHOTSPOTACTIVEUNDERLINE, underline ? 1 : 0);
-            Call(SciMsg.SCI_GETHOTSPOTSINGLELINE, singleLine ? 1 : 0);
-        }
-
-        /// <summary>
-        /// Sets the background color of additional selections.
-        /// </summary>
-        /// <param name="color">Additional selections background color.</param>
-        /// <remarks>Calling <see cref="SetSelectionBackColor" /> will reset the <paramref name="color" /> specified.</remarks>
-        public static void SetAdditionalSelBack(Color color) {
-            var colour = ColorTranslator.ToWin32(color);
-            Msg(SciMsg.SCI_SETADDITIONALSELBACK, new IntPtr(colour));
-        }
-
-        /// <summary>
-        /// Sets the foreground color of additional selections.
-        /// </summary>
-        /// <param name="color">Additional selections foreground color.</param>
-        /// <remarks>Calling <see cref="SetSelectionForeColor" /> will reset the <paramref name="color" /> specified.</remarks>
-        public static void SetAdditionalSelFore(Color color) {
-            var colour = ColorTranslator.ToWin32(color);
-            Msg(SciMsg.SCI_SETADDITIONALSELFORE, new IntPtr(colour));
+        public static void SetHotSpotActiveColor(bool use, Color fg, Color bg) {
+            Sci.Send(SciMsg.SCI_SETHOTSPOTACTIVEFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+            Sci.Send(SciMsg.SCI_SETHOTSPOTACTIVEBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
         }
 
         #endregion
@@ -2432,356 +1975,1599 @@ namespace _3PA {
         #region annotations
 
         /// <summary>
-        /// set the style of a text from startPos to startPos + styleArray.Length,
-        /// the styleArray is a array of bytes, each byte is the style number to the corresponding text byte    
-        /// Example :
-        /// Npp.SetAnnotationText(2, "aaaaa\nbbbbb");
-        /// Npp.SetAnnotationStyles(2, new[] { (byte)250, (byte)250, (byte)250, (byte)250, (byte)250, (byte)250, (byte)253, (byte)253, (byte)253, (byte)253, (byte)253 });
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="styleArray"></param>
-        public static void SetAnnotationStyles(int line, byte[] styleArray) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETSTYLES, line, styleArray);
-        }
-
-        /// <summary>
-        /// Set a style for an annotation
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="style"></param>
-        public static void SetAnnotationStyle(int line, byte style) {
-            Call(SciMsg.SCI_ANNOTATIONSETSTYLE, line, style);
-        }
-
-        /// <summary>
-        /// Sets the text of an annotation for a given line
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="message"></param>
-        public static void AddAnnotation(int line, string message) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, line, (IsUtf8() ? message.Utf8ToAnsi() : message));
-        }
-
-        /// <summary>
-        /// Delete annotation on given line
-        /// </summary>
-        /// <param name="line"></param>
-        public static void DeleteAnnotation(int line) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, line, (string)null);
-        }
-
-        /// <summary>
         /// Clear all annotations in one go
         /// </summary>
-        public static void DeleteAllAnnotations() {
-            Call(SciMsg.SCI_ANNOTATIONCLEARALL);
+        public static void AnnotationClearAll() {
+            Sci.Send(SciMsg.SCI_ANNOTATIONCLEARALL);
         }
 
         /// <summary>
-        /// Sets a mode of display for the annotations
-        /// ANNOTATION_HIDDEN	0	Annotations are not displayed.
-        /// ANNOTATION_STANDARD	1	Annotations are drawn left justified with no adornment.
-        /// ANNOTATION_BOXED	2	Annotations are indented to match the text and are surrounded by a box.
-        /// ANNOTATION_INDENTED	3	Annotations are indented to match the text.
+        /// Gets or sets the display of annotations.
         /// </summary>
-        /// <param name="mode"></param>
-        public static void SetAnnotationVisible(int mode = 3) {
-            Call(SciMsg.SCI_ANNOTATIONSETVISIBLE, mode);
-        }
-
-        /// <summary>
-        /// Returns the mode of display for annotation (see SetAnnotationVisible)
-        /// </summary>
-        /// <returns></returns>
-        public static int GetAnnotationVisible() {
-            return Call(SciMsg.SCI_ANNOTATIONGETVISIBLE);
+        /// <returns>One of the <see cref="Annotation" /> enumeration values. The default is <see cref="Annotation.Hidden" />.</returns>
+        public static Annotation AnnotationVisible {
+            get {
+                return (Annotation)Sci.Send(SciMsg.SCI_ANNOTATIONGETVISIBLE).ToInt32();
+            }
+            set {
+                var visible = (int)value;
+                Sci.Send(SciMsg.SCI_ANNOTATIONSETVISIBLE, new IntPtr(visible));
+            }
         }
 
         #endregion
 
-        #region Margin and Marker
+        #region Marker handle
 
         /// <summary>
-        /// for the displayType, you can use the predefined constants SC_MARGIN_SYMBOL (0) and SC_MARGIN_NUMBER (1) to set 
-        /// a margin as either a line number or a symbol margin. A margin with application defined text may use 
-        /// SC_MARGIN_TEXT (4) or SC_MARGIN_RTEXT (5) to right justify the text
+        /// A Marker handle.
         /// </summary>
-        /// <param name="marginNumber"></param>
-        /// <param name="displayType"></param>
-        /// <param name="width"></param>
-        /// <param name="sensitive"></param>
-        public static void SetMargin(int marginNumber, SciMarginType displayType, int width, int sensitive) {
-            Call(SciMsg.SCI_SETMARGINTYPEN, marginNumber, (int)displayType);
-            Call(SciMsg.SCI_SETMARGINSENSITIVEN, marginNumber, sensitive);
-            Call(SciMsg.SCI_SETMARGINWIDTHN, marginNumber, width);
-        }
+        /// <remarks>
+        /// This is an opaque type, meaning it can be used by a Scintilla control but
+        /// otherwise has no public members of its own.
+        /// </remarks>
+        public struct MarkerHandle {
+            internal IntPtr Value;
 
-        /// <summary>
-        /// Get a margin width
-        /// </summary>
-        /// <param name="marginNumber"></param>
-        /// <returns></returns>
-        public static int GetMarginWidth(int marginNumber) {
-            return Call(SciMsg.SCI_GETMARGINWIDTHN, marginNumber);
-        }
+            /// <summary>
+            /// A read-only field that represents an uninitialized handle.
+            /// </summary>
+            public static readonly MarkerHandle Zero;
 
-        public static int GetMarginSentivity(int marginNumber) {
-            return Call(SciMsg.SCI_GETMARGINSENSITIVEN, marginNumber);
-        }
+            /// <summary>
+            /// Returns a value indicating whether this instance is equal to a specified object.
+            /// </summary>
+            /// <param name="obj">An object to compare with this instance or null.</param>
+            /// <returns>true if <paramref name="obj" /> is an instance of MarkerHandle and equals the value of this instance; otherwise, false.</returns>
+            public override bool Equals(object obj) {
+                return (obj is IntPtr) && Value == ((MarkerHandle)obj).Value;
+            }
 
-        /// <summary>
-        /// Add a single marker on a single line
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="markerNumber"></param>
-        public static void AddMarker(int line, int markerNumber) {
-            Call(SciMsg.SCI_MARKERADD, line, markerNumber);
-        }
+            /// <summary>
+            /// Returns the hash code for this instance.
+            /// </summary>
+            /// <returns>A 32-bit signed integer hash code.</returns>
+            public override int GetHashCode() {
+                return Value.GetHashCode();
+            }
 
-        /// <summary>
-        /// Delete a single marker on a single line
-        /// set markerNumber to -1 to delete all markers on a line
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="markerNumber"></param>
-        public static void DeleteMarker(int line, int markerNumber) {
-            Call(SciMsg.SCI_MARKERDELETE, line, markerNumber);
-        }
+            /// <summary>
+            /// Determines whether two specified instances of MarkerHandle are equal.
+            /// </summary>
+            /// <param name="a">The first handle to compare.</param>
+            /// <param name="b">The second handle to compare.</param>
+            /// <returns>true if <paramref name="a" /> equals <paramref name="b" />; otherwise, false.</returns>
+            public static bool operator ==(MarkerHandle a, MarkerHandle b) {
+                return a.Value == b.Value;
+            }
 
-        /// <summary>
-        /// Delete all the markers of number markerNumber
-        /// </summary>
-        /// <param name="markerNumber"></param>
-        public static void DeleteAllMarker(int markerNumber) {
-            Call(SciMsg.SCI_MARKERDELETE, markerNumber);
-        }
-
-        /// <summary>
-        /// The markers that can be displayed in each margin are set with SCI_SETMARGINMASKN
-        /// Any markers not associated with a visible margin will be displayed as changes in background colour in the text
-        /// If you want marker number 5 and 3 to be displayed in margin 4 : SetMarginMask(4, 2^5 + 2^3)
-        /// </summary>
-        /// <param name="marginNumber"></param>
-        /// <param name="markerNumberMask"></param>
-        public static void SetMarginMask(int marginNumber, int markerNumberMask) {
-            Call(SciMsg.SCI_SETMARGINMASKN, marginNumber, markerNumberMask);
-        }
-
-        /// <summary>
-        /// This returns a 32-bit integer that indicates which markers were present on the line
-        /// Bit 0 is set if marker 0 is present, bit 1 for marker 1 and so on
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static int GetMarkers(int line) {
-            return Call(SciMsg.SCI_MARKERGET, line);
-        }
-
-        /// <summary>
-        /// Search the next line with the given marker, return -1 if not found
-        /// The markerMask argument should have one bit set for each marker you wish to find
-        /// Set bit 0 to find marker 0, bit 1 for marker 1 and so on
-        /// </summary>
-        /// <param name="lineStart"></param>
-        /// <param name="markerMask"></param>
-        /// <returns></returns>
-        public static int GetNextMarkerLine(int lineStart, int markerMask) {
-            return Call(SciMsg.SCI_MARKERNEXT, lineStart, markerMask);
-        }
-
-        /// <summary>
-        /// Search the previous line with the given marker, return -1 if not found
-        /// The markerMask argument should have one bit set for each marker you wish to find
-        /// Set bit 0 to find marker 0, bit 1 for marker 1 and so on
-        /// </summary>
-        /// <param name="lineStart"></param>
-        /// <param name="markerMask"></param>
-        /// <returns></returns>
-        public static int GetPreviousMarkerLine(int lineStart, int markerMask) {
-            return Call(SciMsg.SCI_MARKERPREVIOUS, lineStart, markerMask);
+            /// <summary>
+            /// Determines whether two specified instances of MarkerHandle are not equal.
+            /// </summary>
+            /// <param name="a">The first handle to compare.</param>
+            /// <param name="b">The second handle to compare.</param>
+            /// <returns>true if <paramref name="a" /> does not equal <paramref name="b" />; otherwise, false.</returns>
+            public static bool operator !=(MarkerHandle a, MarkerHandle b) {
+                return a.Value != b.Value;
+            }
         }
 
         #endregion
 
-        #region Indicators
+        #region Line Class
 
         /// <summary>
-        /// Gets or sets the indicator used in a subsequent call to <see cref="IndicatorFillRange" /> or <see cref="IndicatorClearRange" />.
+        /// Represents a line of text in a Scintilla control.
         /// </summary>
-        /// <returns>The zero-based indicator index to apply when calling <see cref="IndicatorFillRange" /> or remove when calling <see cref="IndicatorClearRange" />.</returns>
-        public static int IndicatorCurrent {
-            get {
-                return Msg(SciMsg.SCI_GETINDICATORCURRENT).ToInt32();
+        public class Line {
+
+            #region Methods
+
+            /// <summary>
+            /// Expands any parent folds to ensure the line is visible.
+            /// </summary>
+            public void EnsureVisible() {
+                Sci.Send(SciMsg.SCI_ENSUREVISIBLE, new IntPtr(Index));
             }
-            set {
-                value = Clamp(value, 0, 31);
-                Msg(SciMsg.SCI_SETINDICATORCURRENT, new IntPtr(value));
+
+            //public void ExpandChildren(int level)
+            //{
+            //}
+
+            /// <summary>
+            /// Performs the specified fold action on the current line and all child lines.
+            /// </summary>
+            /// <param name="action">One of the FoldAction enumeration values.</param>
+            public void FoldChildren(FoldAction action) {
+                Sci.Send(SciMsg.SCI_FOLDCHILDREN, new IntPtr(Index), new IntPtr((int)action));
+            }
+
+            /// <summary>
+            /// Performs the specified fold action on the current line.
+            /// </summary>
+            /// <param name="action">One of the FoldAction enumeration values.</param>
+            public void FoldLine(FoldAction action) {
+                Sci.Send(SciMsg.SCI_FOLDLINE, new IntPtr(Index), new IntPtr((int)action));
+            }
+
+            /// <summary>
+            /// Searches for the next line that has a folding level that is less than or equal to <paramref name="level" />
+            /// and returns the previous line index.
+            /// </summary>
+            /// <param name="level">The level of the line to search for. A value of -1 will use the current line FoldLevel.</param>
+            /// <returns>
+            /// The zero-based index of the next line that has a FoldLevel less than or equal
+            /// to <paramref name="level" />. If the current line is a fold point and <paramref name="level"/> is -1 the
+            /// index returned is the last line that would be made visible or hidden by toggling the fold state.
+            /// </returns>
+            public int GetLastChild(int level) {
+                return Sci.Send(SciMsg.SCI_GETLASTCHILD, new IntPtr(Index), new IntPtr(level)).ToInt32();
+            }
+
+            /// <summary>
+            /// Navigates the caret to the start of the line.
+            /// </summary>
+            /// <remarks>Any selection is discarded.</remarks>
+            public void Goto() {
+                Sci.Send(SciMsg.SCI_GOTOLINE, new IntPtr(Index));
+            }
+
+            /// <summary>
+            /// Adds the specified Marker to the line.
+            /// </summary>
+            /// <param name="marker">The zero-based index of the marker to add to the line.</param>
+            /// <returns>A MarkerHandle which can be used to track the line.</returns>
+            /// <remarks>This method does not check if the line already contains the <paramref name="marker" />.</remarks>
+            public MarkerHandle MarkerAdd(int marker) {
+                var handle = Sci.Send(SciMsg.SCI_MARKERADD, new IntPtr(Index), new IntPtr(marker));
+                return new MarkerHandle { Value = handle };
+            }
+
+            /// <summary>
+            /// Adds one or more markers to the line in a single call using a bit mask.
+            /// </summary>
+            /// <param name="markerMask">An unsigned 32-bit value with each bit cooresponding to one of the 32 zero-based Margin indexes to add.</param>
+            public void MarkerAddSet(uint markerMask) {
+                var mask = unchecked((int)markerMask);
+                Sci.Send(SciMsg.SCI_MARKERADDSET, new IntPtr(Index), new IntPtr(mask));
+            }
+
+            /// <summary>
+            /// Removes the specified Marker from the line.
+            /// </summary>
+            /// <param name="marker">The zero-based index of the marker to remove from the line or -1 to delete all markers from the line.</param>
+            /// <remarks>If the same marker has been added to the line more than once, this will delete one copy each time it is used.</remarks>
+            public void MarkerDelete(int marker) {
+                Sci.Send(SciMsg.SCI_MARKERDELETE, new IntPtr(Index), new IntPtr(marker));
+            }
+
+            /// <summary>
+            /// Returns a bit mask indicating which markers are present on the line.
+            /// </summary>
+            /// <returns>An unsigned 32-bit value with each bit cooresponding to one of the 32 zero-based Margin indexes.</returns>
+            public uint MarkerGet() {
+                var mask = Sci.Send(SciMsg.SCI_MARKERGET, new IntPtr(Index)).ToInt32();
+                return unchecked((uint)mask);
+            }
+
+            /// <summary>
+            /// Efficiently searches from the current line forward to the end of the document for the specified markers.
+            /// </summary>
+            /// <param name="markerMask">An unsigned 32-bit value with each bit cooresponding to one of the 32 zero-based Margin indexes.</param>
+            /// <returns>If found, the zero-based line index containing one of the markers in <paramref name="markerMask" />; otherwise, -1.</returns>
+            /// <remarks>For example, the mask for marker index 10 is 1 shifted left 10 times (1 &lt;&lt; 10).</remarks>
+            public int MarkerNext(uint markerMask) {
+                var mask = unchecked((int)markerMask);
+                return Sci.Send(SciMsg.SCI_MARKERNEXT, new IntPtr(Index), new IntPtr(mask)).ToInt32();
+            }
+
+            /// <summary>
+            /// Efficiently searches from the current line backward to the start of the document for the specified markers.
+            /// </summary>
+            /// <param name="markerMask">An unsigned 32-bit value with each bit cooresponding to one of the 32 zero-based Margin indexes.</param>
+            /// <returns>If found, the zero-based line index containing one of the markers in <paramref name="markerMask" />; otherwise, -1.</returns>
+            /// <remarks>For example, the mask for marker index 10 is 1 shifted left 10 times (1 &lt;&lt; 10).</remarks>
+            public int MarkerPrevious(uint markerMask) {
+                var mask = unchecked((int)markerMask);
+                return Sci.Send(SciMsg.SCI_MARKERPREVIOUS, new IntPtr(Index), new IntPtr(mask)).ToInt32();
+            }
+
+            /// <summary>
+            /// Toggles the folding state of the line; expanding or contracting all child lines.
+            /// </summary>
+            /// <remarks>The line must be set as a FoldLevelFlags.Header.</remarks>
+            public void ToggleFold() {
+                Sci.Send(SciMsg.SCI_TOGGLEFOLD, new IntPtr(Index));
+            }
+
+            #endregion Methods
+
+            #region Properties
+
+            /// <summary>
+            /// Gets the number of annotation lines of text.
+            /// </summary>
+            /// <returns>The number of annotation lines.</returns>
+            public int AnnotationLines {
+                get { return Sci.Send(SciMsg.SCI_ANNOTATIONGETLINES, new IntPtr(Index)).ToInt32(); }
+            }
+
+            /// <summary>
+            /// Gets or sets the style of the annotation text.
+            /// </summary>
+            /// <returns>
+            /// The zero-based index of the annotation text Style or 256 when AnnotationStyles
+            /// has been used to set individual character styles.
+            /// </returns>
+            public int AnnotationStyle {
+                get { return Sci.Send(SciMsg.SCI_ANNOTATIONGETSTYLE, new IntPtr(Index)).ToInt32(); }
+                set {
+                    Sci.Send(SciMsg.SCI_ANNOTATIONSETSTYLE, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets an array of style indexes corresponding to each charcter in the AnnotationText
+            /// so that each character may be individually styled.
+            /// </summary>
+            /// <returns>
+            /// An array of Style indexes corresponding with each annotation text character or an uninitialized
+            /// array when AnnotationStyle has been used to set a single style for all characters.
+            /// </returns>
+            /// <remarks>
+            /// AnnotationText must be set prior to setting this property.
+            /// The <paramref name="value" /> specified should have a length equal to the AnnotationText length to properly style all characters.
+            /// </remarks>
+            public unsafe byte[] AnnotationStyles {
+                get {
+                    var length = Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return new byte[0];
+
+                    var text = new byte[length + 1];
+                    var styles = new byte[length + 1];
+
+                    fixed (byte* textPtr = text)
+                    fixed (byte* stylePtr = styles) {
+                        Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index), new IntPtr(textPtr));
+                        Sci.Send(SciMsg.SCI_ANNOTATIONGETSTYLES, new IntPtr(Index), new IntPtr(stylePtr));
+
+                        return ByteToCharStyles(stylePtr, textPtr, length, Encoding);
+                    }
+                }
+                set {
+                    var length = Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return;
+
+                    var text = new byte[length + 1];
+                    fixed (byte* textPtr = text) {
+                        Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index), new IntPtr(textPtr));
+
+                        var styles = CharToByteStyles(value ?? new byte[0], textPtr, length, Encoding);
+                        fixed (byte* stylePtr = styles)
+                            Sci.Send(SciMsg.SCI_ANNOTATIONSETSTYLES, new IntPtr(Index), new IntPtr(stylePtr));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the line annotation text.
+            /// </summary>
+            /// <returns>A String representing the line annotation text.</returns>
+            public unsafe string AnnotationText {
+                get {
+                    var length = Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return string.Empty;
+
+                    var bytes = new byte[length + 1];
+                    fixed (byte* bp = bytes) {
+                        Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index), new IntPtr(bp));
+                        return GetString(new IntPtr(bp), length, Encoding);
+                    }
+                }
+                set {
+                    if (string.IsNullOrEmpty(value)) {
+                        // Scintilla docs suggest that setting to NULL rather than an empty string will free memory
+                        Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index), IntPtr.Zero);
+                    } else {
+                        var bytes = GetBytes(value, Encoding, true);
+                        fixed (byte* bp = bytes)
+                            Sci.Send(SciMsg.SCI_ANNOTATIONSETTEXT, new IntPtr(Index), new IntPtr(bp));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Searches from the current line to find the index of the next contracted fold header.
+            /// </summary>
+            /// <returns>The zero-based line index of the next contracted folder header.</returns>
+            /// <remarks>If the current line is contracted the current line index is returned.</remarks>
+            public int ContractedFoldNext {
+                get { return Sci.Send(SciMsg.SCI_CONTRACTEDFOLDNEXT, new IntPtr(Index)).ToInt32(); }
+            }
+
+            /// <summary>
+            /// Gets the zero-based index of the line as displayed in a Scintilla control
+            /// taking into consideration folded (hidden) lines.
+            /// </summary>
+            /// <returns>The zero-based display line index.</returns>
+
+            public int DisplayIndex {
+                get { return Sci.Send(SciMsg.SCI_VISIBLEFROMDOCLINE, new IntPtr(Index)).ToInt32(); }
+            }
+
+            /// <summary>
+            /// Gets the zero-based character position in the document where the line ends, does not include eol char
+            /// </summary>
+            /// <returns>The equivalent of Position + Length.</returns>
+            public int EndPosition {
+                get { return Lines.ByteToCharPosition(Sci.Send(SciMsg.SCI_GETLINEENDPOSITION).ToInt32()); }
+            }
+
+            /// <summary>
+            /// Gets the zero-based character position in the document where the line ends (exclusive).
+            /// includes any end of line char
+            /// </summary>
+            /// <returns>The equivalent of Position + Length.</returns>
+            public int RealEndPosition {
+                get { return Position + Length; }
+            }
+
+            /// <summary>
+            /// Gets or sets the expanded state (not the visible state) of the line.
+            /// </summary>
+            /// <remarks>
+            /// For toggling the fold state of a single line the ToggleFold method should be used.
+            /// This property is useful for toggling the state of many folds without updating the display until finished.
+            /// </remarks>
+
+            public bool Expanded {
+                get { return (Sci.Send(SciMsg.SCI_GETFOLDEXPANDED, new IntPtr(Index)) != IntPtr.Zero); }
+                set {
+                    var expanded = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_SETFOLDEXPANDED, new IntPtr(Index), expanded);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the fold level of the line.
+            /// </summary>
+            /// <returns>The fold level ranging from 0 to 4095. The default is 1024.</returns>
+            public int FoldLevel {
+                get {
+                    var level = Sci.Send(SciMsg.SCI_GETFOLDLEVEL, new IntPtr(Index)).ToInt32();
+                    return (level & (int)SciMsg.SC_FOLDLEVELNUMBERMASK);
+                }
+                set {
+                    var bits = (int)FoldLevelFlags;
+                    bits |= value;
+
+                    Sci.Send(SciMsg.SCI_SETFOLDLEVEL, new IntPtr(Index), new IntPtr(bits));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the fold level flags.
+            /// </summary>
+            /// <returns>A bitwise combination of the FoldLevelFlags enumeration.</returns>
+            public FoldLevelFlags FoldLevelFlags {
+                get {
+                    var flags = Sci.Send(SciMsg.SCI_GETFOLDLEVEL, new IntPtr(Index)).ToInt32();
+                    return (FoldLevelFlags)(flags & ~(int)SciMsg.SC_FOLDLEVELNUMBERMASK);
+                }
+                set {
+                    var bits = FoldLevel;
+                    bits |= (int)value;
+
+                    Sci.Send(SciMsg.SCI_SETFOLDLEVEL, new IntPtr(Index), new IntPtr(bits));
+                }
+            }
+
+            /// <summary>
+            /// Gets the zero-based line index of the first line before the current line that is marked as
+            /// FoldLevelFlags.Header and has a FoldLevel less than the current line.
+            /// </summary>
+            /// <returns>The zero-based line index of the fold parent if present; otherwise, -1.</returns>
+            public int FoldParent {
+                get { return Sci.Send(SciMsg.SCI_GETFOLDPARENT, new IntPtr(Index)).ToInt32(); }
+            }
+
+            /// <summary>
+            /// Gets the line index.
+            /// </summary>
+            /// <returns>The zero-based line index within the LineCollection that created it.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets the length of the line.
+            /// </summary>
+            /// <returns>The number of characters in the line including any end of line characters.</returns>
+            public int Length {
+                get { return Lines.CharLineLength(Index); }
+            }
+
+            /// <summary>
+            /// Gets or sets the style of the margin text in a MarginType.Text or MarginType.RightText margin.
+            /// </summary>
+            /// <returns>
+            /// The zero-based index of the margin text Style or 256 when MarginStyles
+            /// has been used to set individual character styles.
+            /// </returns>
+
+            public int MarginStyle {
+                get { return Sci.Send(SciMsg.SCI_MARGINGETSTYLE, new IntPtr(Index)).ToInt32(); }
+                set { Sci.Send(SciMsg.SCI_MARGINSETSTYLE, new IntPtr(Index), new IntPtr(value)); }
+            }
+
+            /// <summary>
+            /// Gets or sets an array of style indexes corresponding to each charcter in the MarginText
+            /// so that each character may be individually styled.
+            /// </summary>
+            /// <returns>
+            /// An array of Style indexes corresponding with each margin text character or an uninitialized
+            /// array when MarginStyle has been used to set a single style for all characters.
+            /// </returns>
+            /// <remarks>
+            /// MarginText must be set prior to setting this property.
+            /// The <paramref name="value" /> specified should have a length equal to the MarginText length to properly style all characters.
+            /// </remarks>
+
+            public unsafe byte[] MarginStyles {
+                get {
+                    var length = Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return new byte[0];
+
+                    var text = new byte[length + 1];
+                    var styles = new byte[length + 1];
+
+                    fixed (byte* textPtr = text)
+                    fixed (byte* stylePtr = styles) {
+                        Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index), new IntPtr(textPtr));
+                        Sci.Send(SciMsg.SCI_MARGINGETSTYLES, new IntPtr(Index), new IntPtr(stylePtr));
+
+                        return ByteToCharStyles(stylePtr, textPtr, length, Encoding);
+                    }
+                }
+                set {
+                    var length = Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return;
+
+                    var text = new byte[length + 1];
+                    fixed (byte* textPtr = text) {
+                        Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index), new IntPtr(textPtr));
+
+                        var styles = CharToByteStyles(value ?? new byte[0], textPtr, length, Encoding);
+                        fixed (byte* stylePtr = styles)
+                            Sci.Send(SciMsg.SCI_MARGINSETSTYLES, new IntPtr(Index), new IntPtr(stylePtr));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the text displayed in the line margin when the margin type is
+            /// MarginType.Text or MarginType.RightText.
+            /// </summary>
+            /// <returns>The text displayed in the line margin.</returns>
+            public unsafe string MarginText {
+                get {
+                    var length = Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index)).ToInt32();
+                    if (length == 0)
+                        return string.Empty;
+
+                    var bytes = new byte[length + 1];
+                    fixed (byte* bp = bytes) {
+                        Sci.Send(SciMsg.SCI_MARGINGETTEXT, new IntPtr(Index), new IntPtr(bp));
+                        return GetString(new IntPtr(bp), length, Encoding);
+                    }
+                }
+                set {
+                    if (string.IsNullOrEmpty(value)) {
+                        // Scintilla docs suggest that setting to NULL rather than an empty string will free memory
+                        Sci.Send(SciMsg.SCI_MARGINSETTEXT, new IntPtr(Index), IntPtr.Zero);
+                    } else {
+                        var bytes = GetBytes(value, Encoding, true);
+                        fixed (byte* bp = bytes)
+                            Sci.Send(SciMsg.SCI_MARGINSETTEXT, new IntPtr(Index), new IntPtr(bp));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets the zero-based character position in the document where the line begins.
+            /// </summary>
+            /// <returns>The document position of the first character in the line.</returns>
+            public int Position {
+                get { return Lines.CharPositionFromLine(Index); }
+            }
+
+            /// <summary>
+            /// Gets the line text. Includes any end of line char, use the extension TrimEndEol() => .TrimEnd('\r', '\n')
+            /// </summary>
+            /// <returns>A string representing the document line.</returns>
+            /// <remarks>The returned text includes any end of line characters.</remarks>
+            public unsafe string Text {
+                get {
+                    var start = Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Index));
+                    var length = Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Index));
+                    var ptr = Sci.Send(SciMsg.SCI_GETRANGEPOINTER, start, length);
+                    if (ptr == IntPtr.Zero)
+                        return string.Empty;
+
+                    var text = new string((sbyte*)ptr, 0, length.ToInt32(), Encoding);
+                    return text;
+                }
+            }
+
+            /// <summary>
+            /// Sets or gets the line indentation.
+            /// </summary>
+            /// <returns>The indentation measured in character columns, which corresponds to the width of space characters.</returns>
+            public int Indentation {
+                get { return (Sci.Send(SciMsg.SCI_GETLINEINDENTATION, new IntPtr(Index)).ToInt32()); }
+                set { Sci.Send(SciMsg.SCI_SETLINEINDENTATION, new IntPtr(Index), new IntPtr(value)); }
+            }
+
+
+            /// <summary>
+            /// This returns the position at the end of indentation of a line
+            /// </summary>
+            public int IndentationPosition {
+                get { return (Sci.Send(SciMsg.SCI_GETLINEINDENTPOSITION, new IntPtr(Index)).ToInt32()); }
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether the line is visible.
+            /// </summary>
+            /// <returns>true if the line is visible; otherwise, false.</returns>
+
+
+            public bool Visible {
+                get { return (Sci.Send(SciMsg.SCI_GETLINEVISIBLE, new IntPtr(Index)) != IntPtr.Zero); }
+            }
+
+            /// <summary>
+            /// Gets the number of display lines this line would occupy when wrapping is enabled.
+            /// </summary>
+            /// <returns>The number of display lines needed to wrap the current document line.</returns>
+            public int WrapCount {
+                get { return Sci.Send(SciMsg.SCI_WRAPCOUNT, new IntPtr(Index)).ToInt32(); }
+            }
+
+            #endregion Properties
+
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the Line class.
+            /// </summary>
+            /// <param name="index">The index of this line within the LineCollection that created it.</param>
+            public Line(int index) {
+                Index = index;
+            }
+
+            /// <summary>
+            /// New line objetc for the current line
+            /// </summary>
+            public Line() {
+                Index = CurrentLine;
+            }
+
+            #endregion Constructors
+
+            #region static
+
+            /// <summary>
+            /// Gets the current line index.
+            /// </summary>
+            /// <returns>The zero-based line index containing the CurrentPosition.</returns>
+            public static int CurrentLine {
+                get {
+                    var currentPos = Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32();
+                    var line = Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(currentPos)).ToInt32();
+                    return line;
+                }
+            }
+
+            #endregion
+
+        }
+
+        #endregion
+
+        #region Selection
+
+        /// <summary>
+        /// Represents a selection when there are multiple active selections in a Scintilla control.
+        /// </summary>
+        public class Selection {
+            /// <summary>
+            /// Gets or sets the anchor position of the selection.
+            /// </summary>
+            /// <returns>The zero-based document position of the selection anchor.</returns>
+            public int Anchor {
+                get {
+                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNANCHOR, new IntPtr(Index)).ToInt32();
+                    if (pos <= 0)
+                        return pos;
+
+                    return Lines.ByteToCharPosition(pos);
+                }
+                set {
+                    value = Clamp(value, 0, TextLength);
+                    value = Lines.CharToBytePosition(value);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNANCHOR, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the amount of anchor virtual space.
+            /// </summary>
+            /// <returns>The amount of virtual space past the end of the line offsetting the selection anchor.</returns>
+            public int AnchorVirtualSpace {
+                get { return Sci.Send(SciMsg.SCI_GETSELECTIONNANCHORVIRTUALSPACE, new IntPtr(Index)).ToInt32(); }
+                set {
+                    value = ClampMin(value, 0);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNANCHORVIRTUALSPACE, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the caret position of the selection.
+            /// </summary>
+            /// <returns>The zero-based document position of the selection caret.</returns>
+            public int Caret {
+                get {
+                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNCARET, new IntPtr(Index)).ToInt32();
+                    if (pos <= 0)
+                        return pos;
+
+                    return Lines.ByteToCharPosition(pos);
+                }
+                set {
+                    value = Clamp(value, 0, TextLength);
+                    value = Lines.CharToBytePosition(value);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNCARET, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the amount of caret virtual space.
+            /// </summary>
+            /// <returns>The amount of virtual space past the end of the line offsetting the selection caret.</returns>
+            public int CaretVirtualSpace {
+                get { return Sci.Send(SciMsg.SCI_GETSELECTIONNCARETVIRTUALSPACE, new IntPtr(Index)).ToInt32(); }
+                set {
+                    value = ClampMin(value, 0);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNCARETVIRTUALSPACE, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the end position of the selection.
+            /// </summary>
+            /// <returns>The zero-based document position where the selection ends.</returns>
+            public int End {
+                get {
+                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNEND, new IntPtr(Index)).ToInt32();
+                    if (pos <= 0)
+                        return pos;
+
+                    return Lines.ByteToCharPosition(pos);
+                }
+                set {
+                    value = Clamp(value, 0, TextLength);
+                    value = Lines.CharToBytePosition(value);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNEND, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets the selection index.
+            /// </summary>
+            /// <returns>The zero-based selection index within the SelectionCollection that created it.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets or sets the start position of the selection.
+            /// </summary>
+            /// <returns>The zero-based document position where the selection starts.</returns>
+            public int Start {
+                get {
+                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNSTART, new IntPtr(Index)).ToInt32();
+                    if (pos <= 0)
+                        return pos;
+
+                    return Lines.ByteToCharPosition(pos);
+                }
+                set {
+                    value = Clamp(value, 0, TextLength);
+                    value = Lines.CharToBytePosition(value);
+                    Sci.Send(SciMsg.SCI_SETSELECTIONNSTART, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the Selection class.
+            /// </summary>
+            /// <param name="index">The index of this selection within the SelectionCollection that created it.</param>
+            public Selection(int index) {
+                Index = index;
+            }
+
+            /// <summary>
+            /// Gets the number of active selections.
+            /// </summary>
+            /// <returns>The number of selections in the SelectionCollection.</returns>
+            public static int Count {
+                get { return Sci.Send(SciMsg.SCI_GETSELECTIONS).ToInt32(); }
+            }
+
+            /// <summary>
+            /// Gets a value indicating whether all selection ranges are empty.
+            /// </summary>
+            /// <returns>true if all selection ranges are empty; otherwise, false.</returns>
+            public static bool IsEmpty {
+                get { return Sci.Send(SciMsg.SCI_GETSELECTIONEMPTY) != IntPtr.Zero; }
             }
         }
 
+        #endregion
+
+        #region Marker Class
+
         /// <summary>
-        /// Gets or sets the user-defined value used in a subsequent call to <see cref="IndicatorFillRange" />.
+        /// Represents a margin marker in a Scintilla control.
         /// </summary>
-        /// <returns>The indicator value to apply when calling <see cref="IndicatorFillRange" />.</returns>
-        public static int IndicatorValue {
-            get {
-                return Msg(SciMsg.SCI_GETINDICATORVALUE).ToInt32();
+        public class Marker {
+            /// <summary>
+            /// An unsigned 32-bit mask of all Margin indexes where each bit cooresponds to a margin index.
+            /// </summary>
+            public const uint MaskAll = unchecked((uint)-1);
+
+            /// <summary>
+            /// An unsigned 32-bit mask of folder Margin indexes (25 through 31) where each bit cooresponds to a margin index.
+            /// </summary>
+
+            public const uint MaskFolders = 0xFE000000; // SciMsg.SC_MASK_FOLDERS;
+
+            /// <summary>
+            /// Folder end marker index. This marker is typically configured to display the MarkerSymbol.BoxPlusConnected symbol.
+            /// </summary>
+            public const int FolderEnd = (int)SciMsg.SC_MARKNUM_FOLDEREND;
+
+            /// <summary>
+            /// Folder open marker index. This marker is typically configured to display the MarkerSymbol.BoxMinusConnected symbol.
+            /// </summary>
+            public const int FolderOpenMid = (int)SciMsg.SC_MARKNUM_FOLDEROPENMID;
+
+            /// <summary>
+            /// Folder mid tail marker index. This marker is typically configured to display the MarkerSymbol.TCorner symbol.
+            /// </summary>
+            public const int FolderMidTail = (int)SciMsg.SC_MARKNUM_FOLDERMIDTAIL;
+
+            /// <summary>
+            /// Folder tail marker index. This marker is typically configured to display the MarkerSymbol.LCorner symbol.
+            /// </summary>
+            public const int FolderTail = (int)SciMsg.SC_MARKNUM_FOLDERTAIL;
+
+            /// <summary>
+            /// Folder sub marker index. This marker is typically configured to display the MarkerSymbol.VLine symbol.
+            /// </summary>
+            public const int FolderSub = (int)SciMsg.SC_MARKNUM_FOLDERSUB;
+
+            /// <summary>
+            /// Folder marker index. This marker is typically configured to display the MarkerSymbol.BoxPlus symbol.
+            /// </summary>
+            public const int Folder = (int)SciMsg.SC_MARKNUM_FOLDER;
+
+            /// <summary>
+            /// Folder open marker index. This marker is typically configured to display the MarkerSymbol.BoxMinus symbol.
+            /// </summary>
+            public const int FolderOpen = (int)SciMsg.SC_MARKNUM_FOLDEROPEN;
+
+            /// <summary>
+            /// Sets the marker symbol to a custom image.
+            /// </summary>
+            /// <param name="image">The Bitmap to use as a marker symbol.</param>
+            /// <remarks>Calling this method will also update the Symbol property to MarkerSymbol.RgbaImage.</remarks>
+            public unsafe void DefineRgbaImage(Bitmap image) {
+                if (image == null)
+                    return;
+
+                Sci.Send(SciMsg.SCI_RGBAIMAGESETWIDTH, new IntPtr(image.Width));
+                Sci.Send(SciMsg.SCI_RGBAIMAGESETHEIGHT, new IntPtr(image.Height));
+
+                var bytes = BitmapToArgb(image);
+                fixed (byte* bp = bytes)
+                    Sci.Send(SciMsg.SCI_MARKERDEFINERGBAIMAGE, new IntPtr(Index), new IntPtr(bp));
             }
-            set {
-                Msg(SciMsg.SCI_SETINDICATORVALUE, new IntPtr(value));
+
+            /// <summary>
+            /// Removes this marker from all lines.
+            /// </summary>
+            public void DeleteAll() {
+                MarkerDeleteAll(Index);
+            }
+
+            /// <summary>
+            /// Sets the foreground alpha transparency for markers that are drawn in the content area.
+            /// </summary>
+            /// <param name="alpha">The alpha transparency ranging from 0 (completely transparent) to 255 (no transparency).</param>
+            /// <remarks>See the remarks on the SetBackColor method for a full explanation of when a marker can be drawn in the content area.</remarks>
+
+            public void SetAlpha(int alpha) {
+                alpha = Clamp(alpha, 0, 255);
+                Sci.Send(SciMsg.SCI_MARKERSETALPHA, new IntPtr(Index), new IntPtr(alpha));
+            }
+
+            /// <summary>
+            /// Sets the background color of the marker.
+            /// </summary>
+            /// <param name="color">The Marker background Color. The default is White.</param>
+            /// <remarks>
+            /// The background color of the whole line will be drawn in the <paramref name="color" /> specified when the marker is not visible
+            /// because it is hidden by a Margin.Mask or the Margin.Width is zero.
+            /// </remarks>
+
+            public void SetBackColor(Color color) {
+                var colour = ColorTranslator.ToWin32(color);
+                Sci.Send(SciMsg.SCI_MARKERSETBACK, new IntPtr(Index), new IntPtr(colour));
+            }
+
+            /// <summary>
+            /// Sets the foreground color of the marker.
+            /// </summary>
+            /// <param name="color">The Marker foreground Color. The default is Black.</param>
+            public void SetForeColor(Color color) {
+                var colour = ColorTranslator.ToWin32(color);
+                Sci.Send(SciMsg.SCI_MARKERSETFORE, new IntPtr(Index), new IntPtr(colour));
+            }
+
+            /// <summary>
+            /// Gets the zero-based marker index this object represents.
+            /// </summary>
+            /// <returns>The marker index within the MarkerCollection.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets or sets the marker symbol.
+            /// </summary>
+            /// <returns>
+            /// One of the MarkerSymbol enumeration values.
+            /// The default is MarkerSymbol.Circle.
+            /// </returns>
+            public MarkerSymbol Symbol {
+                get { return (MarkerSymbol)Sci.Send(SciMsg.SCI_MARKERSYMBOLDEFINED, new IntPtr(Index)); }
+                set {
+                    var markerSymbol = (int)value;
+                    Sci.Send(SciMsg.SCI_MARKERDEFINE, new IntPtr(Index), new IntPtr(markerSymbol));
+                }
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the Marker class
+            /// There are 32 markers, numbered 0 to MARKER_MAX (31)
+            /// Marker numbers 0 to 24 have no pre-defined function; you can use them to mark syntax errors and so on..
+            /// </summary>
+            /// <param name="index">The index of this style within the MarkerCollection that created it.</param>
+            public Marker(int index) {
+                Index = index;
+            }
+
+            /// <summary>
+            /// Removes the specified marker from all lines.
+            /// </summary>
+            /// <param name="marker">The zero-based Marker index to remove from all lines, or -1 to remove all markers from all lines.</param>
+            public static void MarkerDeleteAll(int marker) {
+                Sci.Send(SciMsg.SCI_MARKERDELETEALL, new IntPtr(marker));
             }
         }
 
-        /// <summary>
-        /// Returns a bitmap representing the 32 indicators in use at the specified position.
-        /// </summary>
-        /// <param name="position">The zero-based character position within the document to test.</param>
-        /// <returns>A bitmap indicating which of the 32 indicators are in use at the specified <paramref name="position" />.</returns>
-        public uint IndicatorAllOnFor(int position) {
-            position = Clamp(position, 0, TextLength);
-            position = Lines.CharToBytePosition(position);
+        #endregion
 
-            var bitmap = Msg(SciMsg.SCI_INDICATORALLONFOR, new IntPtr(position)).ToInt32();
-            return unchecked((uint)bitmap);
-        }
+        #region Margin class
 
         /// <summary>
-        /// Removes the <see cref="IndicatorCurrent" /> indicator (and user-defined value) from the specified range of text.
+        /// Represents a margin displayed on the left edge of a Scintilla control.
         /// </summary>
-        /// <param name="position">The zero-based character position within the document to start clearing.</param>
-        /// <param name="length">The number of characters to clear.</param>
-        public static void IndicatorClearRange(int position, int length) {
-            var textLength = TextLength;
-            position = Clamp(position, 0, textLength);
-            length = Clamp(length, 0, textLength - position);
+        public class Margin {
 
-            var startPos = Lines.CharToBytePosition(position);
-            var endPos = Lines.CharToBytePosition(position + length);
-
-            Msg(SciMsg.SCI_INDICATORCLEARRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
-        }
-
-        /// <summary>
-        /// Adds the <see cref="IndicatorCurrent" /> indicator and <see cref="IndicatorValue" /> value to the specified range of text.
-        /// </summary>
-        /// <param name="position">The zero-based character position within the document to start filling.</param>
-        /// <param name="length">The number of characters to fill.</param>
-        public static void IndicatorFillRange(int position, int length) {
-            var textLength = TextLength;
-            position = Clamp(position, 0, textLength);
-            length = Clamp(length, 0, textLength - position);
-
-            var startPos = Lines.CharToBytePosition(position);
-            var endPos = Lines.CharToBytePosition(position + length);
-
-            Msg(SciMsg.SCI_INDICATORFILLRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
-        }
-
-        /// <summary>
-        /// Sets indicator style,
-        /// Range of indicator id to use is from 8=INDIC_CONTAINER .. to 31=INDIC_IME-1
-        /// Alpha is only useful for indicator type : INDIC_ROUNDBOX and INDIC_STRAIGHTBOX
-        /// and should range from 0 (invisible) to 255 (opaque)
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="sciIndicatorType"></param>
-        /// <param name="fg"></param>
-        /// <param name="alpha"></param>
-        public static void SetIndicatorStyle(byte indicatorId, SciIndicatorType sciIndicatorType, Color fg, byte alpha) {
-            Call(SciMsg.SCI_INDICSETSTYLE, indicatorId, (int)sciIndicatorType);
-            Call(SciMsg.SCI_INDICSETFORE, indicatorId, (int)(new Colorref(fg)).ColorDWORD);
-            Call(SciMsg.SCI_INDICSETALPHA, indicatorId, alpha);
-            Call(SciMsg.SCI_INDICSETOUTLINEALPHA, indicatorId, alpha);
-        }
-
-        /// <summary>
-        /// Sets the indicator style when it is hovered by mouse or when the caret is in it
-        /// Range of indicator id to use is from 8=INDIC_CONTAINER .. to 31=INDIC_IME-1
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="sciIndicatorType"></param>
-        /// <param name="fg"></param>
-        public static void SetIndicatorHoverStyle(byte indicatorId, SciIndicatorType sciIndicatorType, Color fg) {
-            Call(SciMsg.SCI_INDICSETHOVERSTYLE, indicatorId, (int)sciIndicatorType);
-            Call(SciMsg.SCI_INDICSETHOVERFORE, indicatorId, (int)(new Colorref(fg)).ColorDWORD);
-        }
-
-        /// <summary>
-        /// Delete indicatorId at given position
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        public static void DeleteIndicator(int indicatorId, int startPos, int endPos) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETINDICATORCURRENT, indicatorId, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICATORCLEARRANGE, startPos, endPos - startPos);
-        }
-
-        /// <summary>
-        /// Adds an indicator at given position
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        public static void AddIndicator(int indicatorId, int startPos, int endPos) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETINDICATORCURRENT, indicatorId, 0);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICATORFILLRANGE, startPos, endPos - startPos);
-        }
-
-        /// <summary>
-        /// returns true if given indicator is present at given position
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="pos"></param>
-        /// <returns></returns>
-        public static bool IndicatorPresentAt(int indicatorId, int pos) {
-            return (Call(SciMsg.SCI_INDICATORVALUEAT, indicatorId, pos) == 1);
-        }
-
-        /// <summary>
-        /// Find the start of an indicator range from a position
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="pos"></param>
-        /// <returns></returns>
-        public static int GetIndicatorStart(int indicatorId, int pos) {
-            return Call(SciMsg.SCI_INDICATORSTART, indicatorId, pos);
-        }
-
-        /// <summary>
-        /// Find the end of an indicator range from a position
-        /// </summary>
-        /// <param name="indicatorId"></param>
-        /// <param name="pos"></param>
-        /// <returns></returns>
-        public static int GetIndicatorEnd(int indicatorId, int pos) {
-            return Call(SciMsg.SCI_INDICATOREND, indicatorId, pos);
-        }
-
-        /// <summary>
-        /// List of points(start, end) that represents the range were the given indicator
-        /// has been found
-        /// </summary>
-        /// <param name="indicator"></param>
-        /// <returns></returns>
-        public static Point[] FindIndicatorRanges(int indicator) {
-            var ranges = new List<Point>();
-            var testPosition = 0;
-            while (true) {
-                var rangeStart = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICATORSTART, indicator, testPosition);
-                var rangeEnd = (int)Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICATOREND, indicator, testPosition);
-                if (IndicatorPresentAt(indicator, testPosition))
-                    ranges.Add(new Point(rangeStart, rangeEnd));
-                if (testPosition == rangeEnd)
-                    break;
-                testPosition = rangeEnd;
+            /// <summary>
+            /// Removes all text displayed in every MarginType.Text and MarginType.RightText margins.
+            /// </summary>
+            public void ClearAllText() {
+                Sci.Send(SciMsg.SCI_MARGINTEXTCLEARALL);
             }
-            return ranges.ToArray();
+
+            /// <summary>
+            /// Gets or sets the mouse cursor style when over the margin.
+            /// </summary>
+            /// <returns>One of the MarginCursor enumeration values. The default is MarginCursor.Arrow.</returns>
+            public MarginCursor Cursor {
+                get { return (MarginCursor)Sci.Send(SciMsg.SCI_GETMARGINCURSORN, new IntPtr(Index)); }
+                set {
+                    var cursor = (int)value;
+                    Sci.Send(SciMsg.SCI_SETMARGINCURSORN, new IntPtr(Index), new IntPtr(cursor));
+                }
+            }
+
+            /// <summary>
+            /// Gets the zero-based margin index this object represents.
+            /// </summary>
+            /// <returns>The margin index within the MarginCollection.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets or sets whether the margin is sensitive to mouse clicks.
+            /// </summary>
+            /// <returns>true if the margin is sensitive to mouse clicks; otherwise, false. The default is false.</returns>
+            public bool Sensitive {
+                get { return (Sci.Send(SciMsg.SCI_GETMARGINSENSITIVEN, new IntPtr(Index)) != IntPtr.Zero); }
+                set {
+                    var sensitive = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_SETMARGINSENSITIVEN, new IntPtr(Index), sensitive);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the margin type.
+            /// </summary>
+            /// <returns>One of the MarginType enumeration values. The default is MarginType.Symbol.</returns>
+            public MarginType Type {
+                get { return (MarginType)(Sci.Send(SciMsg.SCI_GETMARGINTYPEN, new IntPtr(Index))); }
+                set {
+                    var type = (int)value;
+                    Sci.Send(SciMsg.SCI_SETMARGINTYPEN, new IntPtr(Index), new IntPtr(type));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the width in pixels of the margin.
+            /// </summary>
+            /// <returns>The width of the margin measured in pixels.</returns>
+            /// <remarks>Scintilla assigns various default widths.</remarks>
+            public int Width {
+                get { return Sci.Send(SciMsg.SCI_GETMARGINWIDTHN, new IntPtr(Index)).ToInt32(); }
+                set {
+                    value = ClampMin(value, 0);
+                    Sci.Send(SciMsg.SCI_SETMARGINWIDTHN, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets a mask indicating which markers this margin can display.
+            /// </summary>
+            /// <returns>
+            /// An unsigned 32-bit value with each bit cooresponding to one of the 32 zero-based Margin indexes.
+            /// The default is 0x1FFFFFF, which is every marker except folder markers (i.e. 0 through 24).
+            /// </returns>
+            /// <remarks>
+            /// For example, the mask for marker index 10 is 1 shifted left 10 times (1 &lt;&lt; 10).
+            /// Marker.MaskFolders is a useful constant for working with just folder margin indexes.
+            /// </remarks>
+            public uint Mask {
+                get { return unchecked((uint)Sci.Send(SciMsg.SCI_GETMARGINMASKN, new IntPtr(Index)).ToInt32()); }
+                set {
+                    var mask = unchecked((int)value);
+                    Sci.Send(SciMsg.SCI_SETMARGINMASKN, new IntPtr(Index), new IntPtr(mask));
+                }
+            }
+
+            /// <summary>
+            /// Initializes a new instance of the Margin class.
+            /// </summary>
+            /// <param name="index">The index of this margin within the MarginCollection that created it.</param>
+            public Margin(int index) {
+                Index = index;
+            }
         }
 
-        public static void SetIndicatorStyle(int indicator, SciMsg style, Color color) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICSETSTYLE, indicator, (int)style);
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_INDICSETFORE, indicator, ColorTranslator.ToWin32(color));
+        #endregion
+
+        #region Indicator class
+
+        /// <summary>
+        /// Represents an indicator in a Scintilla control.
+        /// </summary>
+        public class Indicator {
+
+            #region Constants
+
+            /// <summary>
+            /// An OR mask to use with Scintilla.IndicatorValue and IndicatorFlags.ValueFore to indicate
+            /// that the user-defined indicator value should be treated as a RGB color.
+            /// </summary>
+            public const int ValueBit = (int)SciMsg.SC_INDICVALUEBIT;
+
+            /// <summary>
+            /// An AND mask to use with Indicator.ValueAt to retrieve the user-defined value as a RGB color when being treated as such.
+            /// </summary>
+            public const int ValueMask = (int)SciMsg.SC_INDICVALUEMASK;
+
+            #endregion Constants
+
+            #region Methods
+
+            /// <summary>
+            /// Find the end of an indicator range from a position
+            /// Can be used to iterate through the document to discover all the indicator positions.
+            /// </summary>
+            /// <param name="position">A zero-based document position using this indicator.</param>
+            /// <returns>The zero-based document position where the use of this indicator ends.</returns>
+            /// <remarks>
+            /// Specifying a <paramref name="position" /> which is not filled with this indicator will cause this method
+            /// to return the end position of the range where this indicator is not in use (the negative space). If this
+            /// indicator is not in use anywhere within the document the return value will be 0.
+            /// </remarks>
+            public int End(int position) {
+                position = Clamp(position, 0, TextLength);
+                position = Lines.CharToBytePosition(position);
+                position = Sci.Send(SciMsg.SCI_INDICATOREND, new IntPtr(Index), new IntPtr(position)).ToInt32();
+                return Lines.ByteToCharPosition(position);
+            }
+
+            /// <summary>
+            /// Find the start of an indicator range from a position
+            /// Can be used to iterate through the document to discover all the indicator positions.
+            /// </summary>
+            /// <param name="position">A zero-based document position using this indicator.</param>
+            /// <returns>The zero-based document position where the use of this indicator starts.</returns>
+            /// <remarks>
+            /// Specifying a <paramref name="position" /> which is not filled with this indicator will cause this method
+            /// to return the start position of the range where this indicator is not in use (the negative space). If this
+            /// indicator is not in use anywhere within the document the return value will be 0.
+            /// </remarks>
+            public int Start(int position) {
+                position = Clamp(position, 0, TextLength);
+                position = Lines.CharToBytePosition(position);
+                position = Sci.Send(SciMsg.SCI_INDICATORSTART, new IntPtr(Index), new IntPtr(position)).ToInt32();
+                return Lines.ByteToCharPosition(position);
+            }
+
+            /// <summary>
+            /// Returns the user-defined value for the indicator at the specified position.
+            /// </summary>
+            /// <param name="position">The zero-based document position to get the indicator value for.</param>
+            /// <returns>The user-defined value at the specified <paramref name="position" />.</returns>
+            public int ValueAt(int position) {
+                position = Clamp(position, 0, TextLength);
+                position = Lines.CharToBytePosition(position);
+                return Sci.Send(SciMsg.SCI_INDICATORVALUEAT, new IntPtr(Index), new IntPtr(position)).ToInt32();
+            }
+
+            /// <summary>
+            /// Adds the indicator and IndicatorValue value to the specified range of text.
+            /// </summary>
+            /// <param name="start"></param>
+            /// <param name="end"></param>
+            public void Add(int start, int end) {
+                IndicatorCurrent = Index;
+                IndicatorFillRange(start, end - start);
+            }
+
+            /// <summary>
+            /// Clears the indicator and IndicatorValue value from the specified range of text.
+            /// </summary>
+            /// <param name="start"></param>
+            /// <param name="end"></param>
+            public void Clear(int start, int end) {
+                IndicatorCurrent = Index;
+                IndicatorClearRange(start, end - start);
+            }
+
+            /// <summary>
+            /// List of points(start, end) that represents the range were the given indicator has been found
+            /// </summary>
+            /// <returns></returns>
+            public List<Point> FindRanges() {
+                var ranges = new List<Point>();
+                var testPosition = 0;
+                while (true) {
+                    var rangeEnd = End(testPosition);
+                    ranges.Add(new Point(Start(testPosition), rangeEnd));
+                    if (testPosition == rangeEnd) break;
+                    testPosition = rangeEnd;
+                }
+                return ranges;
+            }
+
+            /// <summary>
+            /// Returns true if the indicator is present at the given position
+            /// </summary>
+            /// <param name="pos"></param>
+            /// <returns></returns>
+            public bool DefinedAt(int pos) {
+                return ((int)IndicatorAllOnFor(pos)).IsBitSet(Index);
+            }
+
+            #endregion Methods
+
+            #region Properties
+
+            /// <summary>
+            /// Gets or sets the alpha transparency of the indicator used for drawing the fill colour of the INDIC_ROUNDBOX and INDIC_STRAIGHTBOX rectangle
+            /// </summary>
+            /// <returns>
+            /// The alpha transparency ranging from 0 (completely transparent)
+            /// to 255 (no transparency). The default is 30.
+            /// </returns>
+            public int Alpha {
+                get { return Sci.Send(SciMsg.SCI_INDICGETALPHA, new IntPtr(Index)).ToInt32(); }
+                set {
+                    value = Clamp(value, 0, 255);
+                    Sci.Send(SciMsg.SCI_INDICSETALPHA, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the indicator flags.
+            /// </summary>
+            /// <returns>
+            /// A bitwise combination of the IndicatorFlags enumeration.
+            /// The default is IndicatorFlags.None.
+            /// </returns>
+            public IndicatorFlags Flags {
+                get { return (IndicatorFlags)Sci.Send(SciMsg.SCI_INDICGETFLAGS, new IntPtr(Index)); }
+                set {
+                    int flags = (int)value;
+                    Sci.Send(SciMsg.SCI_INDICSETFLAGS, new IntPtr(Index), new IntPtr(flags));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the color used to draw an indicator.
+            /// </summary>
+            /// <returns>The Color used to draw an indicator. The default varies.</returns>
+            /// <remarks>Changing the ForeColor property will reset the HoverForeColor.</remarks>
+
+            public Color ForeColor {
+                get {
+                    var color = Sci.Send(SciMsg.SCI_INDICGETFORE, new IntPtr(Index)).ToInt32();
+                    return ColorTranslator.FromWin32(color);
+                }
+                set {
+                    var color = ColorTranslator.ToWin32(value);
+                    Sci.Send(SciMsg.SCI_INDICSETFORE, new IntPtr(Index), new IntPtr(color));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the color used to draw an indicator when the mouse or caret is over an indicator.
+            /// </summary>
+            /// <returns>
+            /// The Color used to draw an indicator.
+            /// By default, the hover style is equal to the regular ForeColor.
+            /// </returns>
+            /// <remarks>Changing the ForeColor property will reset the HoverForeColor.</remarks>
+
+            public Color HoverForeColor {
+                get {
+                    var color = Sci.Send(SciMsg.SCI_INDICGETHOVERFORE, new IntPtr(Index)).ToInt32();
+                    return ColorTranslator.FromWin32(color);
+                }
+                set {
+                    var color = ColorTranslator.ToWin32(value);
+                    Sci.Send(SciMsg.SCI_INDICSETHOVERFORE, new IntPtr(Index), new IntPtr(color));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the indicator style used when the mouse or caret is over an indicator.
+            /// </summary>
+            /// <returns>
+            /// One of the IndicatorStyle enumeration values.
+            /// By default, the hover style is equal to the regular Style.
+            /// </returns>
+            /// <remarks>Changing the Style property will reset the HoverStyle.</remarks>
+
+            public IndicatorStyle HoverStyle {
+                get { return (IndicatorStyle)Sci.Send(SciMsg.SCI_INDICGETHOVERSTYLE, new IntPtr(Index)); }
+                set {
+                    var style = (int)value;
+                    Sci.Send(SciMsg.SCI_INDICSETHOVERSTYLE, new IntPtr(Index), new IntPtr(style));
+                }
+            }
+
+            /// <summary>
+            /// Gets the zero-based indicator index this object represents.
+            /// </summary>
+            /// <returns>The indicator definition index within the IndicatorCollection.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets or sets the alpha transparency of the indicator outline used for drawing the outline colour 
+            /// of the INDIC_ROUNDBOX and INDIC_STRAIGHTBOX rectangle
+            /// </summary>
+            /// <returns>
+            /// The alpha transparency ranging from 0 (completely transparent)
+            /// to 255 (no transparency). The default is 50.
+            /// </returns>
+            public int OutlineAlpha {
+                get { return Sci.Send(SciMsg.SCI_INDICGETOUTLINEALPHA, new IntPtr(Index)).ToInt32(); }
+                set {
+                    value = Clamp(value, 0, 255);
+                    Sci.Send(SciMsg.SCI_INDICSETOUTLINEALPHA, new IntPtr(Index), new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the indicator style.
+            /// </summary>
+            /// <returns>One of the IndicatorStyle enumeration values. The default varies.</returns>
+            /// <remarks>Changing the Style property will reset the HoverStyle.</remarks>
+
+            public IndicatorStyle Style {
+                get { return (IndicatorStyle)Sci.Send(SciMsg.SCI_INDICGETSTYLE, new IntPtr(Index)); }
+                set {
+                    var style = (int)value;
+                    Sci.Send(SciMsg.SCI_INDICSETSTYLE, new IntPtr(Index), new IntPtr(style));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether indicators are drawn under or over text.
+            /// </summary>
+            /// <returns>true to draw the indicator under text; otherwise, false. The default is false.</returns>
+            /// <remarks>Drawing indicators under text requires Phases.One or Phases.Multiple drawing.</remarks>
+            public bool Under {
+                get { return (Sci.Send(SciMsg.SCI_INDICGETUNDER, new IntPtr(Index)) != IntPtr.Zero); }
+                set {
+                    var under = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_INDICSETUNDER, new IntPtr(Index), under);
+                }
+            }
+
+            #endregion Properties
+
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the Indicator class.
+            /// </summary>
+            /// <param name="index">The index of this style within the IndicatorCollection that created it.</param>
+            public Indicator(int index) {
+                Index = index;
+            }
+
+            #endregion Constructors
+
+            #region Static
+
+            /// <summary>
+            /// Gets or sets the indicator used in a subsequent call to IndicatorFillRange or IndicatorClearRange.
+            /// </summary>
+            /// <returns>The zero-based indicator index to apply when calling IndicatorFillRange or remove when calling IndicatorClearRange.</returns>
+            public static int IndicatorCurrent {
+                get { return Sci.Send(SciMsg.SCI_GETINDICATORCURRENT).ToInt32(); }
+                set {
+                    value = Clamp(value, 0, 31);
+                    Sci.Send(SciMsg.SCI_SETINDICATORCURRENT, new IntPtr(value));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the user-defined value used in a subsequent call to IndicatorFillRange.
+            /// </summary>
+            /// <returns>The indicator value to apply when calling IndicatorFillRange.</returns>
+            public static int IndicatorValue {
+                get { return Sci.Send(SciMsg.SCI_GETINDICATORVALUE).ToInt32(); }
+                set { Sci.Send(SciMsg.SCI_SETINDICATORVALUE, new IntPtr(value)); }
+            }
+
+            /// <summary>
+            /// Returns a bitmap representing the 32 indicators in use at the specified position.
+            /// </summary>
+            /// <param name="position">The zero-based character position within the document to test.</param>
+            /// <returns>A bitmap indicating which of the 32 indicators are in use at the specified <paramref name="position" />.</returns>
+            public uint IndicatorAllOnFor(int position) {
+                position = Clamp(position, 0, TextLength);
+                position = Lines.CharToBytePosition(position);
+
+                var bitmap = Sci.Send(SciMsg.SCI_INDICATORALLONFOR, new IntPtr(position)).ToInt32();
+                return unchecked((uint)bitmap);
+            }
+
+            /// <summary>
+            /// Removes the IndicatorCurrent indicator (and user-defined value) from the specified range of text.
+            /// </summary>
+            /// <param name="position">The zero-based character position within the document to start clearing.</param>
+            /// <param name="length">The number of characters to clear.</param>
+            public static void IndicatorClearRange(int position, int length) {
+                var textLength = TextLength;
+                position = Clamp(position, 0, textLength);
+                length = Clamp(length, 0, textLength - position);
+
+                var startPos = Lines.CharToBytePosition(position);
+                var endPos = Lines.CharToBytePosition(position + length);
+
+                Sci.Send(SciMsg.SCI_INDICATORCLEARRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
+            }
+
+            /// <summary>
+            /// Adds the IndicatorCurrent indicator and IndicatorValue value to the specified range of text.
+            /// </summary>
+            /// <param name="position">The zero-based character position within the document to start filling.</param>
+            /// <param name="length">The number of characters to fill.</param>
+            public static void IndicatorFillRange(int position, int length) {
+                var textLength = TextLength;
+                position = Clamp(position, 0, textLength);
+                length = Clamp(length, 0, textLength - position);
+
+                var startPos = Lines.CharToBytePosition(position);
+                var endPos = Lines.CharToBytePosition(position + length);
+
+                Sci.Send(SciMsg.SCI_INDICATORFILLRANGE, new IntPtr(startPos), new IntPtr(endPos - startPos));
+            }
+
+            #endregion
+
+        }
+
+        #endregion
+
+        #region Style class
+
+        /// <summary>
+        /// A style definition in a Scintilla control.
+        /// </summary>
+        public class Style {
+            #region Constants
+
+            /// <summary>
+            /// Default style index. This style is used to define properties that all styles receive when calling Scintilla.StyleClearAll.
+            /// </summary>
+            public const int Default = (int)SciMsg.STYLE_DEFAULT;
+
+            /// <summary>
+            /// Line number style index. This style is used for text in line number margins. The background color of this style also
+            /// sets the background color for all margins that do not have any folding mask set.
+            /// </summary>
+            public const int LineNumber = (int)SciMsg.STYLE_LINENUMBER;
+
+            /// <summary>
+            /// Call tip style index. Only font name, size, foreground color, background color, and character set attributes
+            /// can be used when displaying a call tip.
+            /// </summary>
+            public const int CallTip = (int)SciMsg.STYLE_CALLTIP;
+
+            /// <summary>
+            /// Indent guide style index. This style is used to specify the foreground and background colors of Scintilla.IndentationGuides.
+            /// </summary>
+            public const int IndentGuide = (int)SciMsg.STYLE_INDENTGUIDE;
+
+            /// <summary>
+            /// Brace highlighting style index. This style is used on a brace character when set with the Scintilla.BraceHighlight method
+            /// or the indentation guide when used with the Scintilla.HighlightGuide property.
+            /// </summary>
+            public const int BraceLight = (int)SciMsg.STYLE_BRACELIGHT;
+
+            /// <summary>
+            /// Bad brace style index. This style is used on an unmatched brace character when set with the Scintilla.BraceBadLight method.
+            /// </summary>
+            public const int BraceBad = (int)SciMsg.STYLE_BRACEBAD;
+
+            #endregion Constants
+
+            #region Properties
+
+            /// <summary>
+            /// Gets or sets the background color of the style.
+            /// </summary>
+            /// <returns>A Color object representing the style background color. The default is White.</returns>
+            /// <remarks>Alpha color values are ignored.</remarks>
+            public Color BackColor {
+                get {
+                    var color = Sci.Send(SciMsg.SCI_STYLEGETBACK, new IntPtr(Index), IntPtr.Zero).ToInt32();
+                    return ColorTranslator.FromWin32(color);
+                }
+                set {
+                    if (value.IsEmpty)
+                        value = Color.White;
+
+                    var color = ColorTranslator.ToWin32(value);
+                    Sci.Send(SciMsg.SCI_STYLESETBACK, new IntPtr(Index), new IntPtr(color));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether the style font is bold.
+            /// </summary>
+            /// <returns>true if bold; otherwise, false. The default is false.</returns>
+            /// <remarks>Setting this property affects the Weight property.</remarks>
+            public bool Bold {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETBOLD, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var bold = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETBOLD, new IntPtr(Index), bold);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the casing used to display the styled text.
+            /// </summary>
+            /// <returns>One of the StyleCase enum values. The default is StyleCase.Mixed.</returns>
+            /// <remarks>This does not affect how text is stored, only displayed.</remarks>
+            public StyleCase Case {
+                get {
+                    var @case = Sci.Send(SciMsg.SCI_STYLEGETCASE, new IntPtr(Index), IntPtr.Zero).ToInt32();
+                    return (StyleCase)@case;
+                }
+                set {
+                    // Just an excuse to use @... syntax
+                    var @case = (int)value;
+                    Sci.Send(SciMsg.SCI_STYLESETCASE, new IntPtr(Index), new IntPtr(@case));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether the remainder of the line is filled with the BackColor
+            /// when this style is used on the last character of a line.
+            /// </summary>
+            /// <returns>true to fill the line; otherwise, false. The default is false.</returns>
+            public bool FillLine {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETEOLFILLED, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var fillLine = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETEOLFILLED, new IntPtr(Index), fillLine);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the style font name.
+            /// </summary>
+            /// <returns>The style font name. The default is Verdana.</returns>
+            /// <remarks>Scintilla caches fonts by name so font names and casing should be consistent.</remarks>
+            public string Font {
+                get {
+                    var length = Sci.Send(SciMsg.SCI_STYLEGETFONT, new IntPtr(Index), IntPtr.Zero).ToInt32();
+                    var font = new byte[length];
+                    unsafe {
+                        fixed (byte* bp = font)
+                            Sci.Send(SciMsg.SCI_STYLEGETFONT, new IntPtr(Index), new IntPtr(bp));
+                    }
+
+                    var name = Encoding.UTF8.GetString(font, 0, length);
+                    return name;
+                }
+                set {
+                    if (string.IsNullOrEmpty(value))
+                        value = "Verdana";
+
+                    // Scintilla expects UTF-8
+                    var font = GetBytes(value, Encoding.UTF8, true);
+                    unsafe {
+                        fixed (byte* bp = font)
+                            Sci.Send(SciMsg.SCI_STYLESETFONT, new IntPtr(Index), new IntPtr(bp));
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the foreground color of the style.
+            /// </summary>
+            /// <returns>A Color object representing the style foreground color. The default is Black.</returns>
+            /// <remarks>Alpha color values are ignored.</remarks>
+            public Color ForeColor {
+                get {
+                    var color = Sci.Send(SciMsg.SCI_STYLEGETFORE, new IntPtr(Index), IntPtr.Zero).ToInt32();
+                    return ColorTranslator.FromWin32(color);
+                }
+                set {
+                    if (value.IsEmpty)
+                        value = Color.Black;
+
+                    var color = ColorTranslator.ToWin32(value);
+                    Sci.Send(SciMsg.SCI_STYLESETFORE, new IntPtr(Index), new IntPtr(color));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether hovering the mouse over the style text exhibits hyperlink behavior.
+            /// </summary>
+            /// <returns>true to use hyperlink behavior; otherwise, false. The default is false.</returns>
+            public bool Hotspot {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETHOTSPOT, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var hotspot = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETHOTSPOT, new IntPtr(Index), hotspot);
+                }
+            }
+
+            /// <summary>
+            /// Gets the zero-based style definition index.
+            /// </summary>
+            /// <returns>The style definition index within the StyleCollection.</returns>
+            public int Index { get; private set; }
+
+            /// <summary>
+            /// Gets or sets whether the style font is italic.
+            /// </summary>
+            /// <returns>true if italic; otherwise, false. The default is false.</returns>
+            public bool Italic {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETITALIC, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var italic = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETITALIC, new IntPtr(Index), italic);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the size of the style font in points.
+            /// </summary>
+            /// <returns>The size of the style font as a whole number of points. The default is 8.</returns>
+            public int Size {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETSIZE, new IntPtr(Index), IntPtr.Zero).ToInt32(); }
+                set { Sci.Send(SciMsg.SCI_STYLESETSIZE, new IntPtr(Index), new IntPtr(value)); }
+            }
+
+            /// <summary>
+            /// Gets or sets the size of the style font in fractoinal points.
+            /// </summary>
+            /// <returns>The size of the style font in fractional number of points. The default is 8.</returns>
+            public float SizeF {
+                get {
+                    var fraction = Sci.Send(SciMsg.SCI_STYLEGETSIZEFRACTIONAL, new IntPtr(Index), IntPtr.Zero).ToInt32();
+                    return (float)fraction / (int)SciMsg.SC_FONT_SIZE_MULTIPLIER;
+                }
+                set {
+                    var fraction = (int)(value * (int)SciMsg.SC_FONT_SIZE_MULTIPLIER);
+                    Sci.Send(SciMsg.SCI_STYLESETSIZEFRACTIONAL, new IntPtr(Index), new IntPtr(fraction));
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether the style is underlined.
+            /// </summary>
+            /// <returns>true if underlined; otherwise, false. The default is false.</returns>
+            public bool Underline {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETUNDERLINE, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var underline = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETUNDERLINE, new IntPtr(Index), underline);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets whether the style text is visible.
+            /// </summary>
+            /// <returns>true to display the style text; otherwise, false. The default is true.</returns>
+            public bool Visible {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETVISIBLE, new IntPtr(Index), IntPtr.Zero) != IntPtr.Zero; }
+                set {
+                    var visible = (value ? new IntPtr(1) : IntPtr.Zero);
+                    Sci.Send(SciMsg.SCI_STYLESETVISIBLE, new IntPtr(Index), visible);
+                }
+            }
+
+            /// <summary>
+            /// Gets or sets the style font weight.
+            /// </summary>
+            /// <returns>The font weight. The default is 400.</returns>
+            /// <remarks>Setting this property affects the Bold property.</remarks>
+            public int Weight {
+                get { return Sci.Send(SciMsg.SCI_STYLEGETWEIGHT, new IntPtr(Index), IntPtr.Zero).ToInt32(); }
+                set { Sci.Send(SciMsg.SCI_STYLESETWEIGHT, new IntPtr(Index), new IntPtr(value)); }
+            }
+
+            #endregion Properties
+
+            #region constructor
+
+            /// <summary>
+            /// Style constructor, There are 256 lexer styles that can be set, numbered 0 to STYLE_MAX (255). 
+            /// There are also some predefined numbered styles starting at 32
+            /// </summary>
+            /// <param name="index"></param>
+            public Style(byte index) {
+                Index = index;
+            }
+
+            #endregion
+
         }
 
         #endregion
@@ -2791,110 +3577,9 @@ namespace _3PA {
         internal static Encoding Encoding {
             get {
                 // Should always be UTF-8 unless someone has done an end run around us
-                int codePage = (int)Msg(SciMsg.SCI_GETCODEPAGE);
+                int codePage = (int)Sci.Send(SciMsg.SCI_GETCODEPAGE);
                 return (codePage == 0 ? Encoding.Default : Encoding.GetEncoding(codePage));
             }
-        }
-
-        /// <summary>
-        /// returns true if the document hasn't changed since the last save, false otherwise
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsDocumentSaved() {
-            return Call(SciMsg.SCI_GETMODIFY) == 0;
-        }
-
-        /// <summary>
-        ///     Mark the beginning of a set of operations that you want to undo all as one operation but that you have to generate
-        ///     as several operations. Alternatively, you can use these to mark a set of operations that you do not want to have
-        ///     combined with the preceding or following operations if they are undone.
-        /// </summary>
-        public static void BeginUndoAction() {
-            Call(SciMsg.SCI_BEGINUNDOACTION);
-        }
-
-        /// <summary>
-        ///     Mark the end of a set of operations that you want to undo all as one operation but that you have to generate
-        ///     as several operations. Alternatively, you can use these to mark a set of operations that you do not want to have
-        ///     combined with the preceding or following operations if they are undone.
-        /// </summary>
-        public static void EndUndoAction() {
-            Call(SciMsg.SCI_ENDUNDOACTION);
-        }
-
-        /// <summary>
-        ///     Returns true if the current document is displaying in unicode format or false for ANSI.
-        ///     Note that all strings marshaled to and from Scintilla come in ANSI format so need to
-        ///     be converted if using Unicode.
-        /// </summary>
-        public static bool IsUtf8() {
-            var result = Call(SciMsg.SCI_GETCODEPAGE);
-            return result == (int)SciMsg.SC_CP_UTF8;
-        }
-
-        private static int Call(SciMsg msg, int wParam, IntPtr lParam) {
-            return (int)Win32.SendMessage(HandleScintilla, msg, wParam, lParam);
-        }
-
-        private static int Call(SciMsg msg, int wParam, string lParam) {
-            return (int)Win32.SendMessage(HandleScintilla, msg, wParam, lParam);
-        }
-
-        private static int Call(SciMsg msg, int wParam, StringBuilder lParam) {
-            return (int)Win32.SendMessage(HandleScintilla, msg, wParam, lParam);
-        }
-
-        private static int Call(SciMsg msg, int wParam, int lParam) {
-            return (int)Win32.SendMessage(HandleScintilla, msg, wParam, lParam);
-        }
-
-        private static int Call(SciMsg msg, int wParam) {
-            return Call(msg, wParam, 0);
-        }
-
-        private static int Call(SciMsg msg) {
-            return Call(msg, 0, 0);
-        }
-
-
-        public static IntPtr Msg(SciMsg msg) {
-            return Msg(msg, IntPtr.Zero, IntPtr.Zero);
-        }
-
-        public static IntPtr Msg(SciMsg msg, IntPtr wParam) {
-            return Msg(msg, wParam, IntPtr.Zero);
-        }
-
-        public static IntPtr Msg(SciMsg msg, IntPtr wParam, IntPtr lParam) {
-            // If the control handle, ptr, direct function, etc... hasn't been created yet, it will be now.
-            var result = Msg(HandleScintilla, msg, wParam, lParam);
-            return result;
-        }
-
-        public static IntPtr Msg(IntPtr sciPtr, SciMsg msg, IntPtr wParam, IntPtr lParam) {
-            // Like Win32 SendMessage but directly to Scintilla
-            var result = Win32.SendMessage(sciPtr, (int)msg, wParam, lParam);
-            return result;
-        }
-
-        public static IntPtr Msg(int msg) {
-            return Msg(msg, IntPtr.Zero, IntPtr.Zero);
-        }
-
-        public static IntPtr Msg(int msg, IntPtr wParam) {
-            return Msg(msg, wParam, IntPtr.Zero);
-        }
-
-        public static IntPtr Msg(int msg, IntPtr wParam, IntPtr lParam) {
-            // If the control handle, ptr, direct function, etc... hasn't been created yet, it will be now.
-            var result = Msg(HandleScintilla, msg, wParam, lParam);
-            return result;
-        }
-
-        public static IntPtr Msg(IntPtr sciPtr, int msg, IntPtr wParam, IntPtr lParam) {
-            // Like Win32 SendMessage but directly to Scintilla
-            var result = Win32.SendMessage(sciPtr, msg, wParam, lParam);
-            return result;
         }
 
         public static unsafe byte[] GetBytes(string text, Encoding encoding, bool zeroTerminated) {
@@ -2929,6 +3614,68 @@ namespace _3PA {
             }
         }
 
+        public static byte[] BitmapToArgb(Bitmap image) {
+            // This code originally used Image.LockBits and some fast byte copying, however, the endianness
+            // of the image formats was making my brain hurt. For now I'm going to use the slow but simple
+            // GetPixel approach.
+
+            var bytes = new byte[4 * image.Width * image.Height];
+
+            var i = 0;
+            for (int y = 0; y < image.Height; y++) {
+                for (int x = 0; x < image.Width; x++) {
+                    var color = image.GetPixel(x, y);
+                    bytes[i++] = color.R;
+                    bytes[i++] = color.G;
+                    bytes[i++] = color.B;
+                    bytes[i++] = color.A;
+                }
+            }
+
+            return bytes;
+        }
+
+        public static unsafe byte[] ByteToCharStyles(byte* styles, byte* text, int length, Encoding encoding) {
+            // This is used by annotations and margins to get all the styles in one call.
+            // It converts an array of styles where each element corresponds to a BYTE
+            // to an array of styles where each element corresponds to a CHARACTER.
+
+            var bytePos = 0; // Position within text BYTES and style BYTES (should be the same)
+            var charPos = 0; // Position within style CHARACTERS
+            var decoder = encoding.GetDecoder();
+            var result = new byte[encoding.GetCharCount(text, length)];
+
+            while (bytePos < length) {
+                if (decoder.GetCharCount(text + bytePos, 1, false) > 0)
+                    result[charPos++] = *(styles + bytePos); // New char
+
+                bytePos++;
+            }
+
+            return result;
+        }
+
+        public static unsafe byte[] CharToByteStyles(byte[] styles, byte* text, int length, Encoding encoding) {
+            // This is used by annotations and margins to style all the text in one call.
+            // It converts an array of styles where each element corresponds to a CHARACTER
+            // to an array of styles where each element corresponds to a BYTE.
+
+            var bytePos = 0; // Position within text BYTES and style BYTES (should be the same)
+            var charPos = 0; // Position within style CHARACTERS
+            var decoder = encoding.GetDecoder();
+            var result = new byte[length];
+
+            while (bytePos < length && charPos < styles.Length) {
+                result[bytePos] = styles[charPos];
+                if (decoder.GetCharCount(text + bytePos, 1, false) > 0)
+                    charPos++; // Move a char
+
+                bytePos++;
+            }
+
+            return result;
+        }
+
         public static unsafe string GetString(IntPtr bytes, int length, Encoding encoding) {
             var ptr = (sbyte*)bytes;
             var str = new string(ptr, 0, length, encoding);
@@ -2956,21 +3703,73 @@ namespace _3PA {
         #endregion
     }
 
-    #region Ansi to UTF8 extensions
+    #region Scintilla interface class
 
-    public static class StringExtension {
-        /// <summary>
-        /// Converts from ANSI to UTF8
-        /// </summary>
-        public static string AnsiToUtf8(this string str) {
-            return Encoding.UTF8.GetString(Encoding.Default.GetBytes(str));
+    /// <summary>
+    /// Use this class to communicate with scintilla
+    /// </summary>
+    public class Scintilla {
+        private static Win32.Scintilla_DirectFunction _directFunction;
+        private static IntPtr _directMessagePointer;
+
+        public Scintilla(IntPtr scintillaHandle) {
+            UpdateScintillaDirectMessage(scintillaHandle);
         }
 
         /// <summary>
-        /// Converts from UT8 to ANSI
+        /// Should be called each time the current scintilla changes to send the messages to the right instance of scintilla
+        /// Instanciates the direct message function
         /// </summary>
-        public static string Utf8ToAnsi(this string str) {
-            return Encoding.Default.GetString(Encoding.UTF8.GetBytes(str));
+        public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
+            var directFunctionPointer = Win32.SendMessage(scintillaHandle, SciMsg.SCI_GETDIRECTFUNCTION, 0, 0);
+            // Create a managed callback
+            _directFunction = (Win32.Scintilla_DirectFunction)Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof(Win32.Scintilla_DirectFunction));
+            _directMessagePointer = Win32.SendMessage(scintillaHandle, SciMsg.SCI_GETDIRECTPOINTER, 0, 0);
+        }
+
+        /// <summary>
+        /// Main direct function
+        /// </summary>
+        /// <param name="msg"></param>
+        /// <param name="wParam"></param>
+        /// <param name="lParam"></param>
+        /// <returns></returns>
+        public IntPtr Send(int msg, IntPtr wParam, IntPtr lParam) {
+            // Like Win32 SendMessage but directly to Scintilla!
+            return _directFunction(_directMessagePointer, msg, wParam, lParam);
+        }
+
+        // overloads below
+
+        public IntPtr Send(int msg, IntPtr wParam) {
+            return _directFunction(_directMessagePointer, msg, wParam, IntPtr.Zero);
+        }
+
+        public IntPtr Send(int msg) {
+            return _directFunction(_directMessagePointer, msg, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {
+            return _directFunction(_directMessagePointer, (int)msg, wParam, lParam);
+        }
+
+        public IntPtr Send(SciMsg msg, IntPtr wParam) {
+            return _directFunction(_directMessagePointer, (int)msg, wParam, IntPtr.Zero);
+        }
+
+        public IntPtr Send(SciMsg msg) {
+            return _directFunction(_directMessagePointer, (int)msg, IntPtr.Zero, IntPtr.Zero);
+        }
+
+    }
+
+    public static class ScintillaExtension {
+        public static bool IsTrue(this IntPtr ptr) {
+            return (ptr != IntPtr.Zero);
+        }
+
+        public static IntPtr ToPointer(this bool myBool) {
+            return (myBool ? new IntPtr(1) : IntPtr.Zero);
         }
     }
 

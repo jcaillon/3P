@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // update position
             var point = Npp.GetPointXyFromPosition(position);
             point.Offset(Npp.GetWindowRect().Location);
-            var lineHeight = Npp.GetTextHeight(Npp.GetCaretLineNumber());
+            var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight + 5;
             _form.SetPosition(point, lineHeight + 5);
 
@@ -352,7 +352,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         // for the keywords define and create, we try to match the second keyword that goes with it
                         if (data.KeywordType == KeywordType.Statement &&
                             (keyword.EqualsCi("define") || keyword.EqualsCi("create"))) {
-                            var lineStr = Npp.GetLineText(Npp.LineFromPosition(Npp.GetPositionFromMouseLocation()));
+                                var lineStr = Npp.GetLine(Npp.LineFromPosition(Npp.GetPositionFromMouseLocation())).Text;
                             var listOfSecWords = new List<string> {"ALIAS", "BROWSE", "BUFFER", "BUTTON", "CALL", "CLIENT-PRINCIPAL", "DATA-SOURCE", "DATABASE", "DATASET", "EVENT", "FRAME", "IMAGE", "MENU", "PARAMETER", "PROPERTY", "QUERY", "RECTANGLE", "SAX-ATTRIBUTES", "SAX-READER", "SAX-WRITER", "SERVER", "SERVER-SOCKET", "SOAP-HEADER", "SOAP-HEADER-ENTRYREF", "SOCKET", "STREAM", "SUB-MENU", "TEMP-TABLE", "VARIABLE", "WIDGET-POOL", "WORK-TABLE", "WORKFILE", "X-DOCUMENT", "X-NODEREF"};
                             foreach (var word in listOfSecWords) {
                                 if (lineStr.ContainsFast(word)) {

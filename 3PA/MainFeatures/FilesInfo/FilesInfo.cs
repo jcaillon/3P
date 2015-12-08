@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
@@ -42,16 +41,47 @@ namespace _3PA.MainFeatures.FilesInfo {
 
         #endregion
 
-        #region public 
+        #region static object used
+
+        public const int MargErrorWidth = 10;
+        public static Npp.Margin MargError = new Npp.Margin(4);
+
+        /// <summary>
+        /// Mask for the first 5 markers : 1 + 2 + 4 + 8 + 16
+        /// </summary>
+        public const int EveryMarkersMask = 31;
+
+        #endregion
+
+        #region public methods
 
         public const int ErrorMarginNumber = 4;
-        public const int ErrorMarginWidth = 10;
+
         /// <summary>
         /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
         public const int ErrorAnnotStandardStyleOffset = 250;
         public const int ErrorAnnotBoldStyleOffset = 245;
         public const int ErrorAnnotItalicStyleOffset = 240;
+
+        /// <summary>
+        /// Get style index of given error + error style
+        /// </summary>
+        /// <param name="errorLevel"></param>
+        /// <param name="fontWeight"></param>
+        /// <returns></returns>
+        public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight)
+        {
+            switch (fontWeight)
+            {
+                case ErrorFontWeight.Bold:
+                    return (byte) (errorLevel + ErrorAnnotBoldStyleOffset);
+                case ErrorFontWeight.Italic:
+                    return (byte) (errorLevel + ErrorAnnotItalicStyleOffset);
+                default:
+                    return (byte) (errorLevel + ErrorAnnotStandardStyleOffset);
+            }
+        }
 
         /// <summary>
         /// Update the current operation for the file, update the state
@@ -61,16 +91,12 @@ namespace _3PA.MainFeatures.FilesInfo {
         public static void DisplayCurrentFileInfo() {
 
             // set mask so markers from 0 to 3 are displayed in this margin
-            Npp.SetMarginMask(ErrorMarginNumber, 31);
+            MargError.Mask = EveryMarkersMask;
 
             // reset margin and annotations
-            Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 0, 1);
-            Npp.DeleteAllAnnotations();
-            Npp.DeleteAllMarker((int)ErrorLevel.Information);
-            Npp.DeleteAllMarker((int)ErrorLevel.Warning);
-            Npp.DeleteAllMarker((int)ErrorLevel.StrongWarning);
-            Npp.DeleteAllMarker((int)ErrorLevel.Error);
-            Npp.DeleteAllMarker((int)ErrorLevel.Critical);
+            MargError.Width = 0;
+            Npp.AnnotationClearAll();
+            Npp.Marker.MarkerDeleteAll(-1);
 
             // default operation
 
@@ -88,8 +114,7 @@ namespace _3PA.MainFeatures.FilesInfo {
                 return;
 
             // show margin
-            Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 12, 1);
-
+            MargError.Width = MargErrorWidth;
             StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;
             StringBuilder lastMessage = new StringBuilder();
@@ -98,7 +123,7 @@ namespace _3PA.MainFeatures.FilesInfo {
                     stylerHelper.Clear();
                     lastMessage.Clear();
                     // set marker style now (the first error encountered for a given line is the highest anyway)
-                    Npp.AddMarker(fileError.Line, (int) fileError.Level);
+                    Npp.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
                     //Npp.SetAnnotationStyle(fileError.Line, ErrorAnnotationStyleOffset + (int)fileError.Level);
                 } else {
                     stylerHelper.Style("\n", (byte)fileError.Level);
@@ -122,8 +147,8 @@ namespace _3PA.MainFeatures.FilesInfo {
                 }
 
                 // set annotation
-                Npp.AddAnnotation(lastLine, lastMessage.ToString());
-                Npp.SetAnnotationStyles(lastLine, stylerHelper.GetStyleArray());
+                Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
+                Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
             }
         }
 
@@ -170,12 +195,12 @@ namespace _3PA.MainFeatures.FilesInfo {
                 // ignored
             }
             if (jobDone) {
-                Npp.DeleteAnnotation(line);
-                Npp.DeleteMarker(line, -1);
+                Npp.GetLine(line).AnnotationText = null;
+                Npp.GetLine(line).MarkerDelete(-1);
 
                 // hide margin is there is nothing to display
                 if (_sessionInfo[currentFilePath].FileErrors.Count == 0)
-                    Npp.SetMargin(ErrorMarginNumber, SciMarginType.SC_MARGIN_SYMBOL, 0, 1);
+                    MargError.Width = 0;
             }
             // hide margin if no errors
             return jobDone;
@@ -188,11 +213,11 @@ namespace _3PA.MainFeatures.FilesInfo {
             var currentFilePath = Npp.GetCurrentFilePath();
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
-            int nextLine = Npp.GetNextMarkerLine(line, 31);
+            int nextLine = Npp.GetLine(line).MarkerNext(EveryMarkersMask);
             if (nextLine == -1 && _sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == 0))
                 nextLine = 0;
             if (nextLine == -1)
-                nextLine = Npp.GetNextMarkerLine(0, 31);
+                nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
             if (nextLine != -1) {
                 try {
                     var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == nextLine);
@@ -208,14 +233,14 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// </summary>
         public static void GoToPrevError(int line) {
             var currentFilePath = Npp.GetCurrentFilePath();
-            var nbLines = Npp.GetLineCount();
+            var nbLines = Npp.Lines.Count;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
-            int prevLine = Npp.GetPreviousMarkerLine(line, 31);
+            int prevLine = Npp.GetLine(line).MarkerPrevious(EveryMarkersMask);
             if (prevLine == -1 && _sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == nbLines))
                 prevLine = nbLines;
             if (prevLine == -1)
-                prevLine = Npp.GetPreviousMarkerLine(nbLines, 31);
+                prevLine = Npp.GetLine(nbLines).MarkerPrevious(EveryMarkersMask);
             if (prevLine != -1) {
                 try {
                     var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == prevLine);
@@ -277,7 +302,6 @@ namespace _3PA.MainFeatures.FilesInfo {
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     public class FileInfoObject {
-
         public CurrentOperation CurrOperation { get; set; }
         public List<FileError> FileErrors { get; set; }
     }
@@ -334,6 +358,13 @@ namespace _3PA.MainFeatures.FilesInfo {
         StrongWarning = 2,
         Error = 3,
         Critical = 4
+    }
+
+    public enum ErrorFontWeight
+    {
+        Normal,
+        Bold,
+        Italic
     }
 
 }
