@@ -22,11 +22,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
-using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
@@ -59,10 +57,6 @@ namespace _3PA.MainFeatures {
 
         public static void Notify(string html, int duration = 0, int width = 450) {
             Notify(html, MessageImage.Logo, "debug", "?", duration, width);
-        }
-
-        public static void NotifyUserAboutNppDefaultAutoComp() {
-            
         }
 
         /// <summary>
@@ -101,7 +95,7 @@ namespace _3PA.MainFeatures {
                 StreamWriter writer = new StreamWriter(req.GetRequestStream());
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 writer.Write("{\"body\": " + serializer.Serialize(
-                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###" +
+                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
                     message
                     ) + "}");
                 writer.Close();

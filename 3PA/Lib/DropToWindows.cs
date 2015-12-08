@@ -55,14 +55,14 @@ namespace _3PA.Lib {
         #endregion
 
         public static void Do(string strToFindInCommandLine, string strToFindInCommandLine2, string filename, bool giveFocus = true) {
-            Do(strToFindInCommandLine, strToFindInCommandLine2, new List<string>(new string[] { filename }), giveFocus);
+            Do(strToFindInCommandLine, strToFindInCommandLine2, new List<string>(new[] { filename }), giveFocus);
         }
 
         public static void Do(string strToFindInCommandLine, string strToFindInCommandLine2, IList<string> filename, bool giveFocus = true) {
 
             int procID = 0;
 
-            string wmiQuery = string.Format("select ProcessId, CommandLine from Win32_Process");
+            string wmiQuery = "select ProcessId, CommandLine from Win32_Process";
             ManagementObjectSearcher search = new ManagementObjectSearcher(wmiQuery);
             ManagementObjectCollection processList = search.Get();
 
@@ -76,7 +76,7 @@ namespace _3PA.Lib {
             }
 
             if (procID != 0) {
-                IntPtr winHandle = (IntPtr)FindWindow.GetProcessWindow(procID);
+                IntPtr winHandle = FindWindow.GetProcessWindow(procID);
                 MmdDrop.DropFile(winHandle, filename.Select(x => new MmdDropFile(x)).ToList());
 
                 if (giveFocus)
@@ -150,7 +150,7 @@ namespace _3PA.Lib {
             var names = Encoding.Unicode.GetBytes(string.Join("\0", files.Select(_ => _.FullName).ToArray()) + "\0\0");
             var pipes = files.Where(_ => _.IsPipe).Select(_ => new {
                 Pipe = new NamedPipeServerStream(_.FileName, PipeDirection.Out, 1, PipeTransmissionMode.Byte, PipeOptions.Asynchronous),
-                File = _,
+                File = _
             }).ToArray();
             var dropFilesSize = Marshal.SizeOf(typeof(DropFiles));
             var hGlobal = Marshal.AllocHGlobal(dropFilesSize + names.Length);
@@ -160,7 +160,7 @@ namespace _3PA.Lib {
                 x = 0,
                 y = 0,
                 fNC = false,
-                fWide = true,
+                fWide = true
             };
 
             Marshal.StructureToPtr(dropFiles, hGlobal, true);
@@ -216,7 +216,7 @@ namespace _3PA.Lib {
 
         public string FullName {
             get {
-                return this.IsPipe ? @"\\.\pipe\" + this.FileName : this.FileName;
+                return IsPipe ? @"\\.\pipe\" + FileName : FileName;
             }
         }
 
@@ -227,7 +227,7 @@ namespace _3PA.Lib {
 
         public bool IsPipe {
             get {
-                return this.Stream != null;
+                return Stream != null;
             }
         }
 
@@ -241,9 +241,9 @@ namespace _3PA.Lib {
         }
 
         public MmdDropFile(string fileName, Stream stream) {
-            this.Timeout = -1;
-            this.FileName = stream == null ? fileName : Path.GetFileName(fileName);
-            this.Stream = stream;
+            Timeout = -1;
+            FileName = stream == null ? fileName : Path.GetFileName(fileName);
+            Stream = stream;
         }
     }
 }

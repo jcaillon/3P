@@ -24,8 +24,8 @@ using System.Runtime.InteropServices;
 // it should be : NppPlugin.DllExport
 namespace NppPlugin.DllExport
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
-    partial class DllExportAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Method)]
+    class DllExportAttribute : Attribute
     {
         public DllExportAttribute()
         {

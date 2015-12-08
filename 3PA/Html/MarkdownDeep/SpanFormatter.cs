@@ -19,7 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 using System.Text;
 
 namespace MarkdownDeep
@@ -139,7 +139,7 @@ namespace MarkdownDeep
 			}
 
 			// Now clean it using the same rules as pandoc
-			base.Reset(sb.ToString());
+			Reset(sb.ToString());
 
 			// Skip everything up to the first letter
 			while (!eof)
@@ -333,7 +333,7 @@ namespace MarkdownDeep
 		public void Tokenize(string str, int start, int len)
 		{
 			// Prepare
-			base.Reset(str, start, len);
+			Reset(str, start, len);
 			m_Tokens.Clear();
 
 			List<Token> emphasis_marks = null;
@@ -539,7 +539,6 @@ namespace MarkdownDeep
 			}
 
 			// Done!
-			return;
 		}
 
 		static bool IsEmphasisChar(char ch)
@@ -603,7 +602,7 @@ namespace MarkdownDeep
 			position = savepos + count;
 
 			// This should have been stopped by check above
-			System.Diagnostics.Debug.Assert(!bSpaceBefore || !bSpaceAfter);
+			Debug.Assert(!bSpaceBefore || !bSpaceAfter);
 
 			if (bSpaceBefore)
 			{
@@ -1072,7 +1071,7 @@ namespace MarkdownDeep
 
 				// If the link text has carriage returns, normalize
 				// to spaces
-				if (!object.ReferenceEquals(link_id, link_text))
+				if (!ReferenceEquals(link_id, link_text))
 				{
 					while (link_id.Contains(" \n"))
 						link_id = link_id.Replace(" \n", "\n");
@@ -1129,9 +1128,8 @@ namespace MarkdownDeep
 		#region Token Pooling
 
 		// CreateToken - create or re-use a token object
-		internal Token CreateToken(TokenType type, int startOffset, int length)
-		{
-			if (m_SpareTokens.Count != 0)
+		internal Token CreateToken(TokenType type, int startOffset, int length) {
+		    if (m_SpareTokens.Count != 0)
 			{
 				var t = m_SpareTokens.Pop();
 				t.type = type;
@@ -1140,25 +1138,22 @@ namespace MarkdownDeep
 				t.data = null;
 				return t;
 			}
-			else
-				return new Token(type, startOffset, length);
+		    return new Token(type, startOffset, length);
 		}
 
-		// CreateToken - create or re-use a token object
-		internal Token CreateToken(TokenType type, object data)
-		{
-			if (m_SpareTokens.Count != 0)
+	    // CreateToken - create or re-use a token object
+		internal Token CreateToken(TokenType type, object data) {
+		    if (m_SpareTokens.Count != 0)
 			{
 				var t = m_SpareTokens.Pop();
 				t.type = type;
 				t.data = data;
 				return t;
 			}
-			else
-				return new Token(type, data);
+		    return new Token(type, data);
 		}
 
-		// FreeToken - return a token to the spare token pool
+	    // FreeToken - return a token to the spare token pool
 		internal void FreeToken(Token token)
 		{
 			token.data = null;

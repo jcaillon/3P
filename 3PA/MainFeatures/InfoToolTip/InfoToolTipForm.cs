@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         //    get { return true; }
         //}
 
-        private static int _positionMode = 0;
+        private static int _positionMode;
         private static Point _position;
         private static int _lineHeight;
         private static Rectangle _rect;

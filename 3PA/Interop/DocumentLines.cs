@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// This file (DocumentLines.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -54,17 +73,15 @@ namespace _3PA.Interop {
         /// Returns the number of CHARACTERS in a line.
         /// </summary>
         internal int CharLineLength(int index) {
-
             // A line's length is calculated by subtracting its start offset from
             // the start of the line following. We keep a terminal (faux) line at
             // the end of the list so we can calculate the length of the last line.
 
             if (index + 1 <= _stepLine)
                 return _perLineData[index + 1].Start - _perLineData[index].Start;
-            else if (index <= _stepLine)
+            if (index <= _stepLine)
                 return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
-            else
-                return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
+            return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
         }
 
         /// <summary>
@@ -166,7 +183,7 @@ namespace _3PA.Interop {
 
                 if (pos == start)
                     return mid;
-                else if (start < pos)
+                if (start < pos)
                     low = mid + 1;
                 else
                     high = mid - 1;

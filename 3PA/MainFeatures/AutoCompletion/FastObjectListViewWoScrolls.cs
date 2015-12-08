@@ -21,7 +21,6 @@ using System;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     class FastObjectListViewWoScrolls : FastObjectListView {

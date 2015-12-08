@@ -121,12 +121,33 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
+        /// Returns a 16x16 pixels icon to use in the dockable panel
+        /// </summary>
+        /// <returns></returns>
+        public static Icon GetIconFromImage(Image image) {
+            Icon dockableIcon;
+            using (Bitmap newBmp = new Bitmap(16, 16)) {
+                Graphics g = Graphics.FromImage(newBmp);
+                var colorMap = new ColorMap[1];
+                colorMap[0] = new ColorMap {
+                    OldColor = Color.Transparent,
+                    NewColor = Color.FromKnownColor(KnownColor.ButtonFace)
+                };
+                ImageAttributes attr = new ImageAttributes();
+                attr.SetRemapTable(colorMap);
+                g.DrawImage(image, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
+                dockableIcon = Icon.FromHandle(newBmp.GetHicon());
+            }
+            return dockableIcon;
+        }
+
+        /// <summary>
         /// Gets the image from the resource folder and resize it
         /// </summary>
         /// <param name="imgToResize"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        private static Image ResizeImage(Image imgToResize, Size size) {
+        public static Image ResizeImage(Image imgToResize, Size size) {
 
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;

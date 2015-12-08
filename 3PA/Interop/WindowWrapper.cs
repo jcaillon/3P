@@ -18,9 +18,10 @@
 // ========================================================================
 #endregion
 using System;
+using System.Windows.Forms;
 
 namespace _3PA.Interop {
-    public class WindowWrapper : System.Windows.Forms.IWin32Window {
+    public class WindowWrapper : IWin32Window {
         public WindowWrapper(IntPtr handle) {
             _hwnd = handle;
         }

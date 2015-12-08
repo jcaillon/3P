@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages {
     partial class PageAbout {
@@ -74,6 +75,6 @@ namespace _3PA.MainFeatures.Appli.Pages {
         #endregion
 
         private YamuiPanel yamuiPanel1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel aboutHtml;
+        private HtmlLabel aboutHtml;
     }
 }

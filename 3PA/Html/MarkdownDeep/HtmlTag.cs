@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MarkdownDeep
@@ -30,7 +29,7 @@ namespace MarkdownDeep
 		Block			= 0x0001,			// Block tag
 		Inline			= 0x0002,			// Inline tag
 		NoClosing		= 0x0004,			// No closing tag (eg: <hr> and <!-- -->)
-		ContentAsSpan	= 0x0008,			// When markdown=1 treat content as span, not block
+		ContentAsSpan	= 0x0008			// When markdown=1 treat content as span, not block
 	};
 
 	public class HtmlTag
@@ -87,17 +86,17 @@ namespace MarkdownDeep
 			}
 		}
 
-		static string[] m_allowed_tags = new string [] {
+		static string[] m_allowed_tags = {
 			"b","blockquote","code","dd","dt","dl","del","em","h1","h2","h3","h4","h5","h6","i","kbd","li","ol","ul",
 			"p", "pre", "s", "sub", "sup", "strong", "strike", "img", "a"
 		};
 
-		static Dictionary<string, string[]> m_allowed_attributes = new Dictionary<string, string[]>() {
-			{ "a", new string[] { "href", "title", "class" } },
-			{ "img", new string[] { "src", "width", "height", "alt", "title", "class" } },
+		static Dictionary<string, string[]> m_allowed_attributes = new Dictionary<string, string[]> {
+			{ "a", new[] { "href", "title", "class" } },
+			{ "img", new[] { "src", "width", "height", "alt", "title", "class" } }
 		};
 
-		static Dictionary<string, HtmlTagFlags> m_tag_flags = new Dictionary<string, HtmlTagFlags>() {
+		static Dictionary<string, HtmlTagFlags> m_tag_flags = new Dictionary<string, HtmlTagFlags> {
 			{ "p", HtmlTagFlags.Block | HtmlTagFlags.ContentAsSpan }, 
 			{ "div", HtmlTagFlags.Block }, 
 			{ "h1", HtmlTagFlags.Block | HtmlTagFlags.ContentAsSpan }, 
@@ -130,7 +129,7 @@ namespace MarkdownDeep
 			{ "address", HtmlTagFlags.ContentAsSpan}, 
 			{ "hr", HtmlTagFlags.Block | HtmlTagFlags.NoClosing}, 
 			{ "!", HtmlTagFlags.Block | HtmlTagFlags.NoClosing}, 
-			{ "head", HtmlTagFlags.Block }, 
+			{ "head", HtmlTagFlags.Block } 
 		};
 
 		// Check if this tag is safe

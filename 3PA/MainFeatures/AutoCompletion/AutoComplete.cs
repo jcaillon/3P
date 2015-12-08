@@ -19,13 +19,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -133,7 +130,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (tableFound != null) {
                     var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
                     if (fieldFound != null) {
-                        RememberUseOf(new CompletionData() {
+                        RememberUseOf(new CompletionData {
                             FromParser = false,
                             DisplayText = fieldFound.Name,
                             Type = CompletionType.Field,
@@ -451,12 +448,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 switch (CurrentTypeOfList) {
                     case TypeOfList.Complete:
                         _form.SetUnActiveType(new List<CompletionType> {
-                            CompletionType.KeywordObject,
+                            CompletionType.KeywordObject
                         });
                         break;
                     case TypeOfList.KeywordObject:
                         _form.SetActiveType(new List<CompletionType> {
-                            CompletionType.KeywordObject,
+                            CompletionType.KeywordObject
                         });
                         break;
                     default:

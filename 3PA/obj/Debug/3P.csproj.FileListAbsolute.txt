@@ -16,7 +16,8 @@ C:\Work\3PA\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3PA\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
 C:\Work\3PA\3PA\obj\Debug\3P.dll
 C:\Work\3PA\3PA\obj\Debug\3P.pdb
-C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
+C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\3P.dll
+C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\3P.pdb
 C:\Work\3P\3PA\obj\Debug\3P.csprojResolveAssemblyReference.cache
 C:\Work\3P\3PA\obj\Debug\_3PA.Html.HtmlResources.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.AppliForm.resources
@@ -35,8 +36,7 @@ C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfo.FileTagsForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfo.FileTagsPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.InfoToolTip.InfoToolTipForm.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3P\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
-C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\3P.dll
-C:\LiberKey\Apps\Notepad++\App\Notepad++\plugins\3P.pdb
 C:\Work\3P\3PA\obj\Debug\3P.dll
 C:\Work\3P\3PA\obj\Debug\3P.pdb

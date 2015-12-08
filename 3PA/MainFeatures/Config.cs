@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures {
         // is the user from SOPRA?
         public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
 
-
+        public bool UserFirstUse = true;
         public bool UserGetsPreReleases = true;
 
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;

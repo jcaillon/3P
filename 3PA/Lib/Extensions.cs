@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -93,8 +92,8 @@ namespace _3PA.Lib {
                 IAsyncResult result = isi.BeginInvoke(call, new object[] {isi});
                 object endResult = isi.EndInvoke(result);
                 return (TResult) endResult;
-            } else
-                return call(isi);
+            }
+            return call(isi);
         }
 
         public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
@@ -114,9 +113,7 @@ namespace _3PA.Lib {
         /// and use the value "Value"
         /// </summary>
         [AttributeUsage(AttributeTargets.Field)]
-        public class EnumAttr : Attribute {
-            public EnumAttr() {}
-        }
+        public class EnumAttr : Attribute {}
 
         public static EnumAttr GetAttributes(this Enum value) {
             Type type = value.GetType();
@@ -334,7 +331,7 @@ namespace _3PA.Lib {
 
         #region region string misc
 
-        private static readonly string[] LineDelimiters = new string[] { "\r\n", "\n" };
+        private static readonly string[] LineDelimiters = { "\r\n", "\n" };
 
         /// <summary>
         /// Normalizes the line breaks by replacing a single-"\n" breaks with "\r\n".
@@ -423,8 +420,8 @@ namespace _3PA.Lib {
                     if (builder[i] == '\n')
                         return false;
                 return true;
-            } else
-                return false;
+            }
+            return false;
         }
 
         public static bool EndsWith(this StringBuilder builder, string pattern) {
@@ -433,8 +430,8 @@ namespace _3PA.Lib {
                     if (pattern[i] != builder[builder.Length - pattern.Length + i])
                         return false;
                 return true;
-            } else
-                return false;
+            }
+            return false;
         }
 
         public static bool EndsWithEscapeChar(this StringBuilder builder, char escapeChar) {
@@ -448,8 +445,8 @@ namespace _3PA.Lib {
                 }
 
                 return matchCount % 2 != 0;
-            } else
-                return false;
+            }
+            return false;
         }
 
         //public static bool EndsWith(this StringBuilder builder, params char[] patterns)
@@ -473,8 +470,8 @@ namespace _3PA.Lib {
                     if (pattern[i] != builder[pos + i])
                         return false;
                 return true;
-            } else
-                return false;
+            }
+            return false;
         }
 
         public static bool EndsWithWhiteSpacesLine(this StringBuilder builder) {
@@ -483,8 +480,8 @@ namespace _3PA.Lib {
                     if (!char.IsWhiteSpace(builder[i]))
                         return false;
                 return true;
-            } else
-                return false;
+            }
+            return false;
         }
 
         public static string GetLastLine(this StringBuilder builder) {
@@ -522,8 +519,8 @@ namespace _3PA.Lib {
 
                 builder.CopyTo(lineStart, chars, 0, chars.Length);
                 return new string(chars);
-            } else
-                return null;
+            }
+            return null;
         }
 
         public static StringBuilder TrimEmptyEndLines(this StringBuilder builder, int maxLineToLeave = 1) {

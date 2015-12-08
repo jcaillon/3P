@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA.Interop {

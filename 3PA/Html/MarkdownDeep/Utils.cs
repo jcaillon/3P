@@ -19,9 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 
 namespace MarkdownDeep
 {
@@ -31,24 +29,20 @@ namespace MarkdownDeep
 	static class Utils
 	{
 		// Extension method. Get the last item in a list (or null if empty)
-		public static T Last<T>(this List<T> list) where T:class
-		{
-			if (list.Count > 0)
+		public static T Last<T>(this List<T> list) where T:class {
+		    if (list.Count > 0)
 				return list[list.Count - 1];
-			else
-				return null;
+		    return null;
 		}
 
-		// Extension method. Get the first item in a list (or null if empty)
-		public static T First<T>(this List<T> list) where T : class
-		{
-			if (list.Count > 0)
+	    // Extension method. Get the first item in a list (or null if empty)
+		public static T First<T>(this List<T> list) where T : class {
+		    if (list.Count > 0)
 				return list[0];
-			else
-				return null;
+		    return null;
 		}
 
-		// Extension method.  Use a list like a stack
+	    // Extension method.  Use a list like a stack
 		public static void Push<T>(this List<T> list, T value) where T : class
 		{
 			list.Add(value);
@@ -59,12 +53,9 @@ namespace MarkdownDeep
 		{
 			if (list.Count == 0)
 				return null;
-			else
-			{
-				T val = list[list.Count - 1];
-				list.RemoveAt(list.Count - 1);
-				return val;
-			}
+		    T val = list[list.Count - 1];
+		    list.RemoveAt(list.Count - 1);
+		    return val;
 		}
 
 
@@ -364,7 +355,7 @@ namespace MarkdownDeep
 
 		// Normalize the line ends in a string to just '\n'
 		// Handles all encodings - '\r\n' (windows), '\n\r' (mac), '\n' (unix) '\r' (something?)
-		static char[] lineends = new char[] { '\r', '\n' };
+		static char[] lineends = { '\r', '\n' };
 		public static string NormalizeLineEnds(string str)
 		{
 			if (str.IndexOfAny(lineends) < 0)

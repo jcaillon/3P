@@ -18,8 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using _3PA.Images;
 using _3PA.Interop;
@@ -88,27 +86,12 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             ExplorerForm = new FileExplorerForm();
 
-            // set "transparent" color
-            Icon dockableIcon;
-            using (Bitmap newBmp = new Bitmap(16, 16)) {
-                Graphics g = Graphics.FromImage(newBmp);
-                ColorMap[] colorMap = new ColorMap[1];
-                colorMap[0] = new ColorMap {
-                    OldColor = Color.White,
-                    NewColor = Color.FromKnownColor(KnownColor.ButtonFace)
-                };
-                ImageAttributes attr = new ImageAttributes();
-                attr.SetRemapTable(colorMap);
-                g.DrawImage(ImageResources.code_explorer_logo, new Rectangle(0, 0, 16, 16), 0, 0, 16, 16, GraphicsUnit.Pixel, attr);
-                dockableIcon = Icon.FromHandle(newBmp.GetHicon());
-            }
-
             NppTbData nppTbData = new NppTbData {
                 hClient = ExplorerForm.Handle,
                 pszName = AssemblyInfo.ProductTitle + " - File explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint)dockableIcon.Handle,
+                hIconTab = (uint)Utils.GetIconFromImage(ImageResources.code_explorer_logo).Handle,
                 pszModuleName = AssemblyInfo.ProductTitle
             };
 

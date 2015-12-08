@@ -85,7 +85,7 @@ namespace _3PA.MainFeatures.Parser {
         // the procedure is EXTERNAL
         ExternalProc = 32768,
         // a proc or func was loaded in persistent
-        Persistent = 65536,
+        Persistent = 65536
     }
 
     /// <summary>
@@ -289,7 +289,7 @@ namespace _3PA.MainFeatures.Parser {
     public enum ParsedPreProcFlag {
         None = 1,
         Scope = 2,
-        Global = 4,
+        Global = 4
     }
 
     /// <summary>
@@ -402,7 +402,7 @@ namespace _3PA.MainFeatures.Parser {
         [ParseDefineTypeAttr(Value = "SUB-MENU")]
         SubMenu,
         [ParseDefineTypeAttr(Value = "NONE")]
-        None,
+        None
     }
 
     public enum ParsedPrimitiveType {
@@ -570,7 +570,7 @@ namespace _3PA.MainFeatures.Parser {
     public enum ParsedIndexFlag {
         None = 1,
         Unique = 2,
-        Primary = 4,
+        Primary = 4
     }
 
     /// <summary>

@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Run,
                 IconType = CodeExplorerIconType.RunExternal,
@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="pars"></param>
         public void Visit(ParsedFunctionCall pars) {
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.DynamicFunctionCall,
                 IconType = pars.ExternalCall ? CodeExplorerIconType.FunctionCallExternal : CodeExplorerIconType.FunctionCallInternal,
@@ -150,7 +150,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var name = pars.Name.Split('.');
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = missingDbName ? pars.Name : name[1],
                 Branch = CodeExplorerBranch.TableUsed,
                 IconType = CodeExplorerIconType.Table,
@@ -173,7 +173,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
 
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Include,
                 IsNotBlock = true,
@@ -230,7 +230,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
 
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
                 Branch = CodeExplorerBranch.OnEvent,
                 Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
@@ -250,7 +250,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Function,
                 Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
@@ -262,7 +262,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // to completion data
             pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
@@ -286,7 +286,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DefinedProcedures.Add(pars.Name, false);
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Procedure,
                 Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
@@ -297,7 +297,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
@@ -318,7 +318,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public void Visit(ParsedPreProc pars) {
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
@@ -352,7 +352,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             pars.UndefinedLine = line;
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
@@ -394,7 +394,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
 
                     // To code explorer, list buffers and associated tables
-                    ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                    ParsedExplorerItemsList.Add(new CodeExplorerItem {
                         DisplayText = foundTable.Name,
                         Branch = CodeExplorerBranch.TableUsed,
                         IconType = CodeExplorerIconType.TempTable,
@@ -416,7 +416,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                         // To code explorer, program parameters
                         if (_isBaseFile && pars.Scope == ParsedScope.File)
-                            ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                            ParsedExplorerItemsList.Add(new CodeExplorerItem {
                                 DisplayText = pars.Name,
                                 Branch = CodeExplorerBranch.ProgramParameter,
                                 IconType = CodeExplorerIconType.Parameter,
@@ -453,7 +453,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // To explorer code for browse
             if (pars.Type == ParseDefineType.Browse) {
-                ParsedExplorerItemsList.Add(new CodeExplorerItem() {
+                ParsedExplorerItemsList.Add(new CodeExplorerItem {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Browse,
                     Flag = AddExternalFlag((CodeExplorerFlag)0),
@@ -465,7 +465,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = type,
                 SubString = subString,
@@ -518,7 +518,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
             }
 
-            ParsedItemsList.Add(new CompletionData() {
+            ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = CompletionType.TempTable,
                 SubString = subStr,

@@ -17,10 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System.Collections.Generic;
 using System.Linq;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
 
@@ -37,12 +35,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         #endregion
 
         #region constructor
-
-        /// <summary>
-        /// Simple constructor
-        /// </summary>
-        public StylerHelper() {
-        }
 
         #endregion
 

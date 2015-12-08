@@ -17,11 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace MarkdownDeep
 {
 	/*
@@ -56,7 +51,7 @@ namespace MarkdownDeep
 		// These are used during construction of <em> and <strong> tokens
 		opening_mark,	// opening '*' or '_'
 		closing_mark,	// closing '*' or '_'
-		internal_mark,	// internal '*' or '_'
+		internal_mark	// internal '*' or '_'
 	}
 
 	// Token
@@ -77,19 +72,15 @@ namespace MarkdownDeep
 			this.data = data;
 		}
 
-		public override string ToString()
-		{
-			if (true || data == null)
+		public override string ToString() {
+		    if (true || data == null)
 			{
-				return string.Format("{0} - {1} - {2}", type.ToString(), startOffset, length);
+				return string.Format("{0} - {1} - {2}", type, startOffset, length);
 			}
-			else
-			{
-				return string.Format("{0} - {1} - {2} -> {3}", type.ToString(), startOffset, length, data.ToString());
-			}
+		    return string.Format("{0} - {1} - {2} -> {3}", type, startOffset, length, data);
 		}
 
-		public TokenType type;
+	    public TokenType type;
 		public int startOffset;
 		public int length;
 		public object data;

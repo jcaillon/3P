@@ -48,7 +48,7 @@ namespace _3PA.Lib
             try
             {
                 WritePrivateProfileString(section, key, value.ToString(), File);
-                MessageBox.Show(section + " > " + key + " = " + value.ToString());
+                MessageBox.Show(section + " > " + key + " = " + value);
             }
             catch { }
         }
@@ -59,7 +59,7 @@ namespace _3PA.Lib
             {
                 var retval = new StringBuilder(size);
                 GetPrivateProfileString(section, key, defaultValue.ToString(), retval, size, File);
-                MessageBox.Show(section + " > " + key + " = " + retval.ToString());
+                MessageBox.Show(section + " > " + key + " = " + retval);
                 return (T)TypeDescriptor.GetConverter(typeof(T)).ConvertFrom(retval.ToString());
             }
             catch

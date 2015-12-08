@@ -42,8 +42,7 @@ namespace _3PA.Interop
 
 	#region Enum HookType
 	// Hook Types
-	public enum HookType : int
-	{
+	public enum HookType {
 		WH_JOURNALRECORD = 0,
 		WH_JOURNALPLAYBACK = 1,
 		WH_KEYBOARD = 2,
@@ -73,7 +72,7 @@ namespace _3PA.Interop
 		// ************************************************************************
 		// Internal properties
 		protected IntPtr m_hhook = IntPtr.Zero;
-		protected HookProc m_filterFunc = null;
+		protected HookProc m_filterFunc;
 		protected HookType m_hookType;
 		// ************************************************************************
 		
@@ -97,7 +96,7 @@ namespace _3PA.Interop
 		public LocalWindowsHook(HookType hook)
 		{
 			m_hookType = hook;
-			m_filterFunc = new HookProc(this.CoreHookProc); 
+			m_filterFunc = CoreHookProc; 
 		}
 		public LocalWindowsHook(HookType hook, HookProc func)
 		{
@@ -133,7 +132,7 @@ namespace _3PA.Interop
 				m_hookType, 
 				m_filterFunc, 
 				IntPtr.Zero, 
-				(int) AppDomain.GetCurrentThreadId());
+				AppDomain.GetCurrentThreadId());
 		}
 		// ************************************************************************
 

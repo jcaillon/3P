@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Contains the current information of the statement's context (in which proc it is, which scope...)
         /// </summary>
-        private ParseContext _context = new ParseContext() {
+        private ParseContext _context = new ParseContext {
             Scope = ParsedScope.File,
             OwnerName = "",
             FirstWordToken = null,
@@ -1236,7 +1236,7 @@ namespace _3PA.MainFeatures.Parser {
 
     public enum BlockType {
         DoEnd,
-        ThenElse,
+        ThenElse
     }
 
     /// <summary>

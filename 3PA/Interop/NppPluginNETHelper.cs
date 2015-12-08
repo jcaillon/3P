@@ -86,7 +86,7 @@ namespace _3PA.Interop {
         int _sizeFuncItem;
         List<IntPtr> _shortCutKeys;
         IntPtr _nativePointer;
-        bool _disposed = false;
+        bool _disposed;
 
         public FuncItems() {
             _funcItems = new List<FuncItem>();
@@ -234,7 +234,7 @@ namespace _3PA.Interop {
     }
 
     [Flags]
-    public enum WinMsg : int {
+    public enum WinMsg {
         WM_COMMAND = 0x111
     }
 
@@ -1808,7 +1808,7 @@ namespace _3PA.Interop {
         /// <summary>
         /// 
         /// </summary>
-        MacroRunMultiDialog = (Idm.Edit + 32),
+        MacroRunMultiDialog = (Idm.Edit + 32)
         #endregion
     }
     /*
@@ -2315,7 +2315,7 @@ namespace _3PA.Interop {
     public class Sci_TextToFind : IDisposable {
         _Sci_TextToFind _sciTextToFind;
         IntPtr _ptrSciTextToFind;
-        bool _disposed = false;
+        bool _disposed;
 
         public Sci_TextToFind(Sci_CharacterRange chrRange, string searchText) {
             _sciTextToFind.chrg = chrRange;
@@ -2500,7 +2500,7 @@ namespace _3PA.Interop {
         /// Whitespace used for indentation is displayed normally but after the first visible character,
         /// it is shown as dots and arrows.
         /// </summary>
-        VisibleAfterIndent = SciMsg.SCWS_VISIBLEAFTERINDENT,
+        VisibleAfterIndent = SciMsg.SCWS_VISIBLEAFTERINDENT
     }
 
     /// <summary>
@@ -3687,7 +3687,7 @@ namespace _3PA.Interop {
         /// <summary>
         /// A left-rotated bookmark.
         /// </summary>
-        Bookmark = SciMsg.SC_MARK_BOOKMARK,
+        Bookmark = SciMsg.SC_MARK_BOOKMARK
 
         // Character = SciMsg.SC_MARK_CHARACTER
     }
@@ -3744,7 +3744,7 @@ namespace _3PA.Interop {
         SC_MARK_AVAILABLE = 28,
         SC_MARK_UNDERLINE = 29,
         SC_MARK_RGBAIMAGE = 30,
-        SC_MARK_CHARACTER = 10000,
+        SC_MARK_CHARACTER = 10000
     }
 
     [Flags]
@@ -3754,7 +3754,7 @@ namespace _3PA.Interop {
         SC_MARGIN_BACK = 2,
         SC_MARGIN_FORE = 3,
         SC_MARGIN_TEXT = 4,
-        SC_MARGIN_RTEXT = 5,
+        SC_MARGIN_RTEXT = 5
     }
 
     [Flags]
@@ -3779,7 +3779,7 @@ namespace _3PA.Interop {
     }
 
     [Flags]
-    public enum SciMsg : int {
+    public enum SciMsg {
         // Autocompletions
         SC_AC_FILLUP = 1,
         SC_AC_DOUBLECLICK = 2,
@@ -5392,7 +5392,7 @@ namespace _3PA.Interop {
         SCE_V_INPUT = 21,
         SCE_V_OUTPUT = 22,
         SCE_V_INOUT = 23,
-        SCE_V_PORT_CONNECT = 24,
+        SCE_V_PORT_CONNECT = 24
 
     }
 

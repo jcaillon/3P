@@ -59,7 +59,7 @@ namespace _3PA.Interop
         protected WinHook()
             : base(HookType.WH_DEBUG)
         {
-            m_filterFunc = this.Proc;
+            m_filterFunc = Proc;
         }
 
         ~WinHook()
@@ -78,7 +78,7 @@ namespace _3PA.Interop
 
         protected void Install(HookType type)
         {
-            base.m_hookType = type;
+            m_hookType = type;
             base.Install();
         }
 
@@ -146,9 +146,9 @@ namespace _3PA.Interop
         {
             return new Modifiers
             {
-                IsCtrl = KeyInterceptor.IsPressed(Keys.ControlKey),
-                IsShift = KeyInterceptor.IsPressed(Keys.ShiftKey),
-                IsAlt = KeyInterceptor.IsPressed(Keys.Menu)
+                IsCtrl = IsPressed(Keys.ControlKey),
+                IsShift = IsPressed(Keys.ShiftKey),
+                IsAlt = IsPressed(Keys.Menu)
             };
         }
 

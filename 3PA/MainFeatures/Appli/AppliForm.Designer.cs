@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
-using _3PA.MainFeatures.Appli.Pages;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli {
     partial class AppliForm {
@@ -166,7 +166,7 @@ namespace _3PA.MainFeatures.Appli {
         private YamuiLink yamuiLink7;
         private YamuiLink yamuiLink8;
         private YamuiLabel statusLabel;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel labelTitle;
+        private HtmlLabel labelTitle;
 
 
     }

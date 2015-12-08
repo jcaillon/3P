@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA {

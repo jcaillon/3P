@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _abbreviations.Clear();
             try {
                 foreach (var items in File.ReadAllLines(filePathAbb, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 2)) {
-                    _abbreviations.Add(new KeywordsAbbreviations() {
+                    _abbreviations.Add(new KeywordsAbbreviations {
                         CompleteText = items[1],
                         ShortText = items[0]
                     });
@@ -115,7 +115,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         listSynthax.Add(items[i]);
                         i++;
                     }
-                    _help.Add(items[0], new KeywordsHelp() {
+                    _help.Add(items[0], new KeywordsHelp {
                         Description = items[1],
                         Synthax = listSynthax
                     });
@@ -195,7 +195,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // below are the types that go into the KeywordObject category
         Attribute = 30,
         Property,
-        Method,
+        Method
     }
 
     public class KeywordsAbbreviations {

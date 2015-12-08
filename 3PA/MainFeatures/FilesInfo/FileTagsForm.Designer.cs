@@ -1,9 +1,12 @@
-﻿namespace _3PA.MainFeatures.FilesInfo {
+﻿using System.ComponentModel;
+using YamuiFramework.HtmlRenderer.WinForms;
+
+namespace _3PA.MainFeatures.FilesInfo {
     partial class FileTagsForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -70,6 +73,6 @@
         #endregion
 
         private FileTagsPage fileTagsPage1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lblTitle;
+        private HtmlLabel lblTitle;
     }
 }

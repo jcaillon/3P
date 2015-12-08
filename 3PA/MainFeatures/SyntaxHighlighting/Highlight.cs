@@ -93,6 +93,10 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             if (matches.Success) {
                 // if it already exists in the file, delete the existing one
                 fileContent = regex.Replace(fileContent, @"");
+                if (Config.Instance.UserFirstUse) {
+                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImage.Info, "Information", "Welcome!");
+                    Config.Instance.UserFirstUse = false;
+                }
             } else {
                 // if it doesn't exist in the file
                 UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImage.Info, "Information", "Installing syntax highlighting");
@@ -319,7 +323,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         Delimiter6 = 21, // 
         Delimiter7 = 22, // 
         Delimiter8 = 23, // nested comment
-        Idk = 24, // ??
+        Idk = 24 // ??
     }
 
     #endregion

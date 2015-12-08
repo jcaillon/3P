@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         [CodeExplorerTypeAttr(DisplayText = "Tables used")]
         TableUsed,
         [CodeExplorerTypeAttr(DisplayText = "Program parameters")]
-        ProgramParameter,
+        ProgramParameter
         
     }
 
@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // a run file has the keyword PERSISTENT
         LoadPersistent = 32,
         // a proc or func was loaded in persistent
-        Persistent = 64,
+        Persistent = 64
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {

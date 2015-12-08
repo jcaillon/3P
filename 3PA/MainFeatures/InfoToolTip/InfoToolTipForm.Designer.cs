@@ -1,9 +1,12 @@
-﻿namespace _3PA.MainFeatures.InfoToolTip {
+﻿using System.ComponentModel;
+using YamuiFramework.HtmlRenderer.WinForms;
+
+namespace _3PA.MainFeatures.InfoToolTip {
     partial class InfoToolTipForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -56,7 +59,7 @@
 
         #endregion
 
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel labelContent;
+        private HtmlLabel labelContent;
 
     }
 }

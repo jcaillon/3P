@@ -1,9 +1,12 @@
-﻿namespace _3PA.MainFeatures.FileExplorer {
+﻿using System.ComponentModel;
+using YamuiFramework.Controls;
+
+namespace _3PA.MainFeatures.FileExplorer {
     partial class FileExplorerPage {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -130,12 +133,12 @@
 
         #endregion
 
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel2;
-        private YamuiFramework.Controls.YamuiPanel yamuiPanel1;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel1;
-        private YamuiFramework.Controls.YamuiPanel yamuiPanel2;
-        private YamuiFramework.Controls.YamuiPanel yamuiPanel3;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel3;
+        private YamuiLabel yamuiLabel2;
+        private YamuiPanel yamuiPanel1;
+        private YamuiLabel yamuiLabel1;
+        private YamuiPanel yamuiPanel2;
+        private YamuiPanel yamuiPanel3;
+        private YamuiLabel yamuiLabel3;
 
     }
 }

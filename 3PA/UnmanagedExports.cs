@@ -19,14 +19,12 @@
 #endregion
 using System;
 using System.Runtime.InteropServices;
-using System.Windows.Forms;
 using NppPlugin.DllExport;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfo;
-using _3PA.MainFeatures.SyntaxHighlighting;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local

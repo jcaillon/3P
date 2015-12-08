@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
@@ -41,10 +42,10 @@ namespace _3PA.MainFeatures.FilesInfo {
 
         #endregion
 
-        #region static object used
+        #region const
 
-        public const int MargErrorWidth = 10;
-        public static Npp.Margin MargError = new Npp.Margin(4);
+        public const int ErrorMarginWidth = 10;
+        public const int ErrorMarginNumber = 3;
 
         /// <summary>
         /// Mask for the first 5 markers : 1 + 2 + 4 + 8 + 16
@@ -53,9 +54,7 @@ namespace _3PA.MainFeatures.FilesInfo {
 
         #endregion
 
-        #region public methods
-
-        public const int ErrorMarginNumber = 4;
+        #region public methods        
 
         /// <summary>
         /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
@@ -90,11 +89,17 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// </summary>
         public static void DisplayCurrentFileInfo() {
 
-            // set mask so markers from 0 to 3 are displayed in this margin
-            MargError.Mask = EveryMarkersMask;
+            var marginError = Npp.GetMargin(ErrorMarginNumber);
 
             // reset margin and annotations
-            MargError.Width = 0;
+            if (marginError.Width > 0)
+                marginError.Width = 0;
+            marginError.Sensitive = true;
+            marginError.Type = MarginType.Symbol;
+
+            // set mask so markers from 0 to 3 are displayed in this margin
+            marginError.Mask = EveryMarkersMask;
+
             Npp.AnnotationClearAll();
             Npp.Marker.MarkerDeleteAll(-1);
 
@@ -114,7 +119,8 @@ namespace _3PA.MainFeatures.FilesInfo {
                 return;
 
             // show margin
-            MargError.Width = MargErrorWidth;
+            marginError.Width = ErrorMarginWidth;
+
             StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;
             StringBuilder lastMessage = new StringBuilder();
@@ -200,7 +206,7 @@ namespace _3PA.MainFeatures.FilesInfo {
 
                 // hide margin is there is nothing to display
                 if (_sessionInfo[currentFilePath].FileErrors.Count == 0)
-                    MargError.Width = 0;
+                    Npp.GetMargin(ErrorMarginNumber).Width = 0;
             }
             // hide margin if no errors
             return jobDone;

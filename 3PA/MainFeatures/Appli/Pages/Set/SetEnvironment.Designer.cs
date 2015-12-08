@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetEnvironment {
@@ -540,13 +541,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiImageButton btleft3;
         private YamuiTextBox textbox3;
         private YamuiComboBox cbDatabase;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel envLabel;
+        private HtmlLabel envLabel;
         private YamuiImageButton btright6;
         private YamuiImageButton btleft6;
         private YamuiTextBox textbox6;
         private YamuiLabel yamuiLabel8;
         private YamuiButton btcontrol2;
         private YamuiButton btcontrol1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
+        private HtmlToolTip toolTip;
     }
 }

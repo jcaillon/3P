@@ -1,11 +1,15 @@
 ﻿using System;
+using System.ComponentModel;
+using BrightIdeasSoftware;
+using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     partial class AutoCompletionForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.
@@ -162,10 +166,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         private FastObjectListViewWoScrolls fastOLV;
-        private BrightIdeasSoftware.OLVColumn Keyword;
-        private BrightIdeasSoftware.OLVColumn Type;
-        private YamuiFramework.Controls.YamuiLabel nbitems;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip;
+        private OLVColumn Keyword;
+        private OLVColumn Type;
+        private YamuiLabel nbitems;
+        private YamuiLabel yamuiLabel1;
+        private HtmlToolTip htmlToolTip;
     }
 }

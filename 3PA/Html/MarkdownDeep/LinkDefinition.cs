@@ -18,8 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MarkdownDeep
@@ -291,8 +289,7 @@ namespace MarkdownDeep
 						p.position = posLineEnd;
 						return r;
 					}
-					else
-						return null;
+			        return null;
 			}
 
 			// Skip the opening title delimiter

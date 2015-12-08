@@ -81,8 +81,7 @@ namespace _3PA.Lib {
             object[] attributes = _assembly.GetCustomAttributes(typeof(TAttr), false);
             if (attributes.Length > 0)
                 return resolveFunc((TAttr)attributes[0]);
-            else
-                return defaultResult;
+            return defaultResult;
         }
     }
 }

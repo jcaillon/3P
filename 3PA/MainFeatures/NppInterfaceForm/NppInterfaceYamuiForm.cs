@@ -18,17 +18,12 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
 using System.Security;
 using System.Windows.Forms;
-using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using YamuiFramework.Themes;
 using _3PA.Interop;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     public partial class NppInterfaceYamuiForm : NppInterfaceForm {

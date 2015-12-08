@@ -29,7 +29,6 @@ using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using ContentAlignment = System.Drawing.ContentAlignment;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     public partial class CodeExplorerPage : YamuiPage {
@@ -255,8 +254,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             _rootItems.Clear();
 
             if (_displayUnSorted) {
-                _rootItems = new List<CodeExplorerItem>() {
-                    new CodeExplorerItem() {
+                _rootItems = new List<CodeExplorerItem> {
+                    new CodeExplorerItem {
                         DisplayText = "Everything in code order",
                         Branch = CodeExplorerBranch.EverythingInCodeOrder,
                         HasChildren = true
@@ -271,7 +270,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 // for each distinct type of items, create a branch (if the branchType isn't already in the root list!)
                 foreach (var type in _items.Select(x => x.Branch).Distinct()) {
                     if (_rootItems.Find(item => item.Branch == type) != null) continue;
-                    _rootItems.Add(new CodeExplorerItem() {
+                    _rootItems.Add(new CodeExplorerItem {
                         DisplayText = ((CodeExplorerTypeAttr)type.GetAttributes()).DisplayText,
                         Branch = type,
                         HasChildren = true,
@@ -298,7 +297,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     // if we found identical item, we create a branch for them
                     if (iIdentical > iItem + 1) {
                         _items[iItem].Level = 2;
-                        _items.Insert(iItem, new CodeExplorerItem() {
+                        _items.Insert(iItem, new CodeExplorerItem {
                             DisplayText = _items[iItem].DisplayText,
                             Branch = _items[iItem].Branch,
                             IconType = _items[iItem].IconType,

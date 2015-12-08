@@ -21,7 +21,7 @@ using System.Drawing;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Images;
-using _3PA.Lib;
+using _3PA.Properties;
 
 namespace _3PA.Html {
 
@@ -48,7 +48,7 @@ namespace _3PA.Html {
         /// Updates the colors of the css sheet and feeds it to the html renderer
         /// </summary>
         public static void ProvideCssSheet() {
-            var cssStyleSheet = Properties.Resources.StyleSheet;
+            var cssStyleSheet = Resources.StyleSheet;
             cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalForeColor));
             cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalBackColor));
             cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalAlternateBackColor));

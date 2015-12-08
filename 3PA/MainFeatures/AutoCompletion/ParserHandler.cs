@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
@@ -127,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _ablParser = new Parser.Parser(Npp.Text, currentFilePath, null, DataBase.GetTablesDictionary());
 
                 // visitor
-                var parserVisitor = new ParserVisitor(true, System.IO.Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
+                var parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
                 _ablParser.Accept(parserVisitor);
                 ParsedItemsList = parserVisitor.ParsedItemsList.ToList();
                 ParsedExplorerItemsList = parserVisitor.ParsedExplorerItemsList.ToList();

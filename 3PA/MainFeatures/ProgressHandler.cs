@@ -18,13 +18,11 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
-using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
 
@@ -108,14 +106,14 @@ namespace _3PA.MainFeatures {
             args.Append(" -param " + quoter(param.ToString()));
 
             // execute
-            System.Diagnostics.Process process = new System.Diagnostics.Process();
-            process.StartInfo.WindowStyle = System.Diagnostics.ProcessWindowStyle.Hidden;
+            Process process = new Process();
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.FileName = pathProgress;
             process.StartInfo.Arguments = args.ToString();
             process.StartInfo.WorkingDirectory = pathNppTool;
             process.EnableRaisingEvents = true;
-            process.Exited += new EventHandler(afterProgressExecution);
+            process.Exited += afterProgressExecution;
             process.Start();
 
             MessageBox.Show(args.ToString(), "yo", MessageBoxButtons.OK);
@@ -126,7 +124,7 @@ namespace _3PA.MainFeatures {
         }
 
         // Handle Exited event and display process information. 
-        private void afterProgressExecution(object sender, System.EventArgs e) {
+        private void afterProgressExecution(object sender, EventArgs e) {
             MessageBox.Show("ok", "yo", MessageBoxButtons.OK);
         }
     }

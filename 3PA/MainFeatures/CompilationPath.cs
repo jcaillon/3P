@@ -17,11 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace _3PA.MainFeatures {
     public class CompilationPath {
     }

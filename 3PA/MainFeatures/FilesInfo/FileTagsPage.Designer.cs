@@ -1,9 +1,12 @@
-﻿namespace _3PA.MainFeatures.FilesInfo {
+﻿using System.ComponentModel;
+using YamuiFramework.Controls;
+
+namespace _3PA.MainFeatures.FilesInfo {
     partial class FileTagsPage {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary> 
         /// Clean up any resources being used.
@@ -323,26 +326,26 @@
 
         #endregion
 
-        private YamuiFramework.Controls.YamuiComboBox yamuiComboBox1;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel2;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox1;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel3;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox2;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel4;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel5;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox3;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel6;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox4;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel7;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel8;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox5;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox6;
-        private YamuiFramework.Controls.YamuiTextBox yamuiTextBox7;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel9;
-        private YamuiFramework.Controls.YamuiButton btcancel;
-        private YamuiFramework.Controls.YamuiButton btok;
-        private YamuiFramework.Controls.YamuiButton btclear;
-        private YamuiFramework.Controls.YamuiButton btdefault;
-        private YamuiFramework.Controls.YamuiButton bttoday;
+        private YamuiComboBox yamuiComboBox1;
+        private YamuiLabel yamuiLabel2;
+        private YamuiTextBox yamuiTextBox1;
+        private YamuiLabel yamuiLabel3;
+        private YamuiTextBox yamuiTextBox2;
+        private YamuiLabel yamuiLabel4;
+        private YamuiLabel yamuiLabel5;
+        private YamuiTextBox yamuiTextBox3;
+        private YamuiLabel yamuiLabel6;
+        private YamuiTextBox yamuiTextBox4;
+        private YamuiLabel yamuiLabel7;
+        private YamuiLabel yamuiLabel8;
+        private YamuiTextBox yamuiTextBox5;
+        private YamuiTextBox yamuiTextBox6;
+        private YamuiTextBox yamuiTextBox7;
+        private YamuiLabel yamuiLabel9;
+        private YamuiButton btcancel;
+        private YamuiButton btok;
+        private YamuiButton btclear;
+        private YamuiButton btdefault;
+        private YamuiButton bttoday;
     }
 }

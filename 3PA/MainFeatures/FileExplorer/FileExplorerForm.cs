@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
 
@@ -46,6 +47,9 @@ namespace _3PA.MainFeatures.FileExplorer {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
 
+
+            StartPosition = FormStartPosition.Manual;
+            Location = new Point(-1000, -1000);
         }
 
         #endregion

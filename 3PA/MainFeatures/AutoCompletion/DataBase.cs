@@ -197,7 +197,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static List<CompletionData> GetDbList() {
             if (_dataBases.Count <= 0) return new List<CompletionData>();
-            return _dataBases.Select(@base => new CompletionData() {
+            return _dataBases.Select(@base => new CompletionData {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Database,
                 FromParser = false,
@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<CompletionData> GetTablesList(ParsedDataBase dataBase) {
             var output = new List<CompletionData>();
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
-            output.AddRange(dataBase.Tables.Select(table => new CompletionData() {
+            output.AddRange(dataBase.Tables.Select(table => new CompletionData {
                 DisplayText = table.Name,
                 SubString = dataBase.LogicalName.AutoCaseToUserLiking(),
                 Type = CompletionType.Table,
@@ -244,7 +244,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<CompletionData> GetFieldsList(ParsedTable table) {
             var output = new List<CompletionData>();
             if (table == null) return output;
-            output.AddRange(table.Fields.Select(field => new CompletionData() {
+            output.AddRange(table.Fields.Select(field => new CompletionData {
                 DisplayText = field.Name,
                 Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,

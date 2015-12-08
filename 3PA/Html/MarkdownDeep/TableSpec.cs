@@ -17,9 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace MarkdownDeep
@@ -29,15 +27,11 @@ namespace MarkdownDeep
 		NA,
 		Left,
 		Right,
-		Center,
+		Center
 	}
 	internal class TableSpec
 	{
-		public TableSpec()
-		{
-		}
-
-		public bool LeadingBar;
+	    public bool LeadingBar;
 		public bool TrailingBar;
 
 		public List<ColumnAlignment> Columns=new List<ColumnAlignment>();

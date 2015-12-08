@@ -292,7 +292,7 @@ namespace _3PA.MainFeatures {
                 startPos = LocSnippetContext.ReplacementString.IndexOf("$", endPos + 1, StringComparison.Ordinal);
             }
 
-            Npp.SetKeyword(LocSnippetContext.ReplacementString);
+            Npp.ReplaceKeywordWrapped(LocSnippetContext.ReplacementString, -1);
 
             if (LocSnippetContext.Parameters.Any())
                 LocSnippetContext.CurrentParameter = LocSnippetContext.Parameters.FirstOrDefault();

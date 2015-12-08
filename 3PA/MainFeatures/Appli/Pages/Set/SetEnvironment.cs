@@ -170,11 +170,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 // we clicked "cancel"
                 UpdateView();
                 Btcontrol2ButtonPressed(false);
-            } else {
-                // we clicked "add new"
-                
-
-            } 
+            }
         }
 
         /// <summary>

@@ -19,17 +19,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using System.Timers;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -43,7 +37,6 @@ using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.SyntaxHighlighting;
-using Timer = System.Timers.Timer;
 
 namespace _3PA {
 
@@ -89,53 +82,37 @@ namespace _3PA {
 
             int cmdIndex = 0;
             var uniqueKeys = new Dictionary<Keys, int>();
-            
-            //                                                                      " name of the shortcut in config file : keys "
+
             Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
-            //Interop.Plug.SetCommand(cmdIndex++, "Show code snippet list", AutoComplete.ShowSnippetsList, "Show_SnippetsList:Ctrl+Shift+Space", false, uniqueKeys);
             Interop.Plug.SetCommand(cmdIndex++, "Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false, uniqueKeys);
-
             Interop.Plug.SetCommand(cmdIndex++, "---", null);
-
             Interop.Plug.SetCommand(cmdIndex++, "Toggle comment", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false, uniqueKeys);
-
             Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "Test:Ctrl+D", false, uniqueKeys);
-
             Interop.Plug.SetCommand(cmdIndex++, "Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false, uniqueKeys);
-
             Interop.Plug.SetCommand(cmdIndex++, "Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
-
             Interop.Plug.SetCommand(cmdIndex++, "About", Appli.GoToAboutPage);
-            
+
             /*
             SetCommand(cmdIndex++, "---", null);
-
             SetCommand(cmdIndex++, "Open 4GL help", hello, "4GL_Help:F1", false, uniqueKeys);
             SetCommand(cmdIndex++, "Check synthax", hello, "4GL_Check_synthax:Shift+F1", false, uniqueKeys);
             SetCommand(cmdIndex++, "Compile", hello, "4GL_Compile:Alt+F1", false, uniqueKeys);
             SetCommand(cmdIndex++, "Run!", hello, "4GL_Run:Ctrl+F1", false, uniqueKeys);
             SetCommand(cmdIndex++, "Pro-lint", hello, "4GL_prolint:Ctrl+F12", false, uniqueKeys);
             SetCommand(cmdIndex++, "Code beautifier", hello);
-             
             SetCommand(cmdIndex++, "---", null);
-
             SetCommand(cmdIndex++, "Go to selection definition", hello, "Go_to_definition:Ctrl+B", false, uniqueKeys);
             SetCommand(cmdIndex++, "Open .lst file", hello);
             SetCommand(cmdIndex++, "Open in app builder", hello, "Open_in_appbuilder:F12", false, uniqueKeys);
-
             SetCommand(cmdIndex++, "---", null);
-
             SetCommand(cmdIndex++, "Insert trace", hello, "Insert_trace:Ctrl+T", false, uniqueKeys);
             SetCommand(cmdIndex++, "Insert complete traces", hello, "Insert_complete_traces:Shift+Ctrl+T", false, uniqueKeys);
             SetCommand(cmdIndex++, "Edit file info", hello, "Edit_file_info:Ctrl+Shift+M", false, uniqueKeys);
             SetCommand(cmdIndex++, "Insert title block", hello, "Insert_title_block:Ctrl+Alt+M", false, uniqueKeys);
             SetCommand(cmdIndex++, "Surround with modif tags", hello, "Surround_with_tags:Ctrl+M", false, uniqueKeys);
-            
             SetCommand(cmdIndex++, "---", null);
-
             SetCommand(cmdIndex++, "Settings", hello);
             SetCommand(cmdIndex++, "About", hello);
-
             SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
             */
 
@@ -145,12 +122,10 @@ namespace _3PA {
             Interop.Plug.SetCommand(cmdIndex++, "Toggle file explorer", FileExplorer.Toggle);
             FileExplorer.DockableCommandIndex = cmdIndex - 1;
 
-            // NPP already intercepts these shortcuts so we need to hook keyboard messages
+            // Npp already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
-
             foreach (var key in uniqueKeys.Keys)
                 KeyInterceptor.Instance.Add(key);
-
             KeyInterceptor.Instance.Add(Keys.Up);
             KeyInterceptor.Instance.Add(Keys.Down);
             KeyInterceptor.Instance.Add(Keys.Left);
@@ -165,7 +140,7 @@ namespace _3PA {
             KeyInterceptor.Instance.Add(Keys.Prior);
             KeyInterceptor.Instance.KeyDown += OnKeyDown;
         }
-        
+
         /// <summary>
         /// display images in the npp toolbar
         /// </summary>
@@ -181,15 +156,19 @@ namespace _3PA {
             try {
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
+
                 // save config (should be done but just in case)
                 CodeExplorer.UpdateMenuItemChecked();
                 Config.Save();
+
                 // remember the most used keywords
                 Keywords.Save();
+
                 // dispose of all popup
                 ForceCloseAllWindows();
                 PluginIsFullyLoaded = false;
 
+                // runs exit program if any
                 UpdateHandler.OnNotepadExit();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");
@@ -202,18 +181,21 @@ namespace _3PA {
         /// Called on npp ready
         /// </summary>
         internal static void OnNppReady() {
+            try {
+                // This allows to correctly feed the dll with dependencies
+                LibLoader.Init();
 
-            // This allows to correctly feed the dll with dependencies
-            LibLoader.Init();
+                // catch unhandled errors
+                AppDomain currentDomain = AppDomain.CurrentDomain;
+                currentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
+                Application.ThreadException += ErrorHandler.ThreadErrorHandler;
+                TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
 
-            // catch unhandled errors
-            AppDomain currentDomain = AppDomain.CurrentDomain;
-            currentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
-            Application.ThreadException += ErrorHandler.ThreadErrorHandler;
-            TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
-
-            // initialize plugin (why another method for this? because otherwise the LibLoader can't do his job...)
-            InitPlugin();
+                // initialize plugin (why another method for this? because otherwise the LibLoader can't do his job...)
+                InitPlugin();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "OnNppReady");
+            }
         }
 
         internal static void InitPlugin() {
@@ -224,7 +206,6 @@ namespace _3PA {
             ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
             ThemeManager.AccentColor = Config.Instance.AccentColor;
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            // TODO: delete when releasing! (we dont want the user to access those themes!)
             ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
             Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             LocalHtmlHandler.Init();
@@ -237,14 +218,15 @@ namespace _3PA {
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
             Appli.Init();
 
+            // code explorer
+            if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
+                CodeExplorer.Toggle();
+
+            // Try to update 3P
+            UpdateHandler.OnNotepadStart();
+
+            // Start a new task to not block the main thread
             Task.Factory.StartNew(() => {
-
-                // cool settings
-                Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
-                Npp.EndAtLastLine = false;
-                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
-                Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
-
                 Snippets.Init();
                 Keywords.Init();
                 Config.Save();
@@ -253,20 +235,11 @@ namespace _3PA {
                 // initialize the list of objects of the autocompletion form
                 AutoComplete.FillStaticItems(true);
 
-                // dockable explorer
-                if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
-                    Appli.Form.BeginInvoke((Action) CodeExplorer.Toggle);
-
                 // Fetch the info from the database, when its done, it will update the parser, if it needs
                 // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
-                Task.Factory.StartNew(DataBase.FetchCurrentDbInfo);
+                DataBase.FetchCurrentDbInfo();
 
-                //TODO: notification qui demande à l'utilisateur de désactiver l'autocompletion de base de npp
-                // ask the user to deactivate the default autocompletion of npp
-                if (Config.Instance.GlobalShowNotifAboutDefaultAutoComp)
-                    UserCommunication.NotifyUserAboutNppDefaultAutoComp();
-
-                // make sure the UDL is present
+                // make sure the UDL is present, also display the welcome message
                 Highlight.CheckUdl();
 
                 PluginIsFullyLoaded = true;
@@ -274,9 +247,6 @@ namespace _3PA {
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched();
             });
-
-            // Try to update 3P
-            UpdateHandler.OnNotepadStart();
         }
 
         #endregion
@@ -284,6 +254,9 @@ namespace _3PA {
         #endregion
 
         #region public OnEvents
+
+        #region on key down
+
         /// <summary>
         /// Called when the user presses a key
         /// </summary>
@@ -311,7 +284,7 @@ namespace _3PA {
                     if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
                         handled = AutoComplete.OnKeyDown(key);
                     else {
-                        
+
                         if ((key == Keys.Right || key == Keys.Left) && modifiers.IsAlt)
                             handled = AutoComplete.OnKeyDown(key);
                     }
@@ -339,12 +312,12 @@ namespace _3PA {
                             }
                         }
                     }
-                }                  
+                }
                 // next tooltip
                 if (modifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
-                    if (key == Keys.Up) 
+                    if (key == Keys.Up)
                         InfoToolTip.IndexToShow--;
-                    else 
+                    else
                         InfoToolTip.IndexToShow++;
                     InfoToolTip.TryToShowIndex();
                     handled = true;
@@ -353,9 +326,9 @@ namespace _3PA {
 
                 // check if the user triggered a function for which we set a shortcut (internalShortcuts)
                 foreach (var shortcut in Interop.Plug.InternalShortCuts.Keys) {
-                    if ((byte) key == shortcut._key 
-                        && modifiers.IsCtrl == shortcut.IsCtrl 
-                        && modifiers.IsShift == shortcut.IsShift 
+                    if ((byte) key == shortcut._key
+                        && modifiers.IsCtrl == shortcut.IsCtrl
+                        && modifiers.IsShift == shortcut.IsShift
                         && modifiers.IsAlt == shortcut.IsAlt) {
                         handled = true;
                         var shortcut1 = shortcut;
@@ -368,6 +341,10 @@ namespace _3PA {
                 ErrorHandler.ShowErrors(e, "Error in Instance_KeyDown");
             }
         }
+
+        #endregion
+
+        #region on char typed
 
         /// <summary>
         /// Called when the user enters any character in npp
@@ -465,13 +442,8 @@ namespace _3PA {
 
 
                 // replace semicolon by a point
-                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && isNormalContext) {
-                    curPos = Npp.CurrentPosition;
-                    Npp.BeginUndoAction();
-                    Npp.SetTextByRange(curPos - 1, curPos, ".");
-                    Npp.SetSel(curPos);
-                    Npp.EndUndoAction();
-                }
+                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && isNormalContext)
+                    Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
                 AutoComplete.UpdateAutocompletion();
@@ -480,6 +452,8 @@ namespace _3PA {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordEnd");
             }
         }
+
+        #endregion
 
         /// <summary>
         /// When the user leaves his cursor inactive on npp
@@ -525,30 +499,30 @@ namespace _3PA {
 
             // update current file .extension check
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
-            
+
             // update current scintilla
             Npp.UpdateScintilla();
-            
+
             // rebuild lines info
             Npp.RebuildLinesInfo();
-            
+
             // close popups..
             ClosePopups();
-            
+
             if (IsCurrentFileProgress) {
                 // Syntax Highlight
                 Highlight.SetCustomStyles();
 
                 // Update info on the current file
-                //FilesInfo.DisplayCurrentFileInfo();
+                FilesInfo.DisplayCurrentFileInfo();
             }
+
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyPluginSpecificOptions(false);
 
             // Parse the document
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
-
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
         }
 
         /// <summary>
@@ -556,7 +530,7 @@ namespace _3PA {
         /// </summary>
         public static void OnFileSaved() {
             // check for block that are too long and display a warning
-            
+
         }
 
         #endregion
@@ -568,48 +542,36 @@ namespace _3PA {
         private static bool _indentWithTabs;
         private static int _indentWidth;
         private static Annotation _annotationMode;
-        private static int _marginWidth;
-        private static bool _marginSensitive;
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
         /// <param name="forceToDefault"></param>
-        public static void ApplyPluginSpecificOptions(bool forceToDefault)
-        {
+        public static void ApplyPluginSpecificOptions(bool forceToDefault) {
 
             if (_indentWidth == 0) {
                 _indentWidth = Npp.IndentWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
 
-                _marginWidth = FilesInfo.MargError.Width;
-                _marginSensitive = FilesInfo.MargError.Sensitive;
+                // Extra settings at the start
+                Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
+                Npp.EndAtLastLine = false;
+                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                Npp.EventMask = (int)(SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
             }
 
             if (!IsCurrentFileProgress || forceToDefault) {
                 Npp.AutoCStops("");
                 Npp.AnnotationVisible = _annotationMode;
-
-                FilesInfo.MargError.Width = _marginWidth;
-                FilesInfo.MargError.Sensitive = _marginSensitive;
-
                 Npp.UseTabs = _indentWithTabs;
                 Npp.IndentWidth = _indentWidth;
-            }
-            else
-            {
-                // barbarian method to force the default autocompletion window to hide, 
-                // this is a very bad technique, it makes npp slows down when there is too much text!
+            } else {
+                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
-                // #$%&'()*+,-./:;<=>?[\]^_`{|}~@   
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
                 Npp.AnnotationVisible = Annotation.Boxed;
-            
-                FilesInfo.MargError.Width = 0;
-                FilesInfo.MargError.Sensitive = true;
-
                 Npp.UseTabs = false;
                 Npp.IndentWidth = Config.Instance.AutoCompleteIndentNbSpaces;
             }
@@ -640,10 +602,11 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
+            /*
             var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
             foreach (var kpv in derp) {
                 FilesInfo.UpdateFileErrors(kpv.Key, kpv.Value);
-            }
+            }*/
 
             var properties = typeof(ConfigObject).GetFields();
 
