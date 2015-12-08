@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures {
             int mode = 0; // 0: null, 1: toggle off; 2: toggle on
             var startLine = Npp.LineFromPosition(Npp.SelectionStart);
             var endLine = Npp.LineFromPosition(Npp.SelectionEnd);
-            
+            UserCommunication.Notify(startLine.ToString() + " " + endLine);
             Npp.BeginUndoAction();
 
             // for each line in the selection
