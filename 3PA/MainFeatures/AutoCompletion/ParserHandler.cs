@@ -103,6 +103,43 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget) &&
                 ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
         }
+
+        /// <summary>
+        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
+        /// </summary>
+        /// <returns></returns>
+        public static bool CanIndent() {
+            if (_ablParser == null) return false;
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
+                if (lockTaken) {
+                    return _ablParser.ParsingOk;
+                }
+            } finally {
+                if (lockTaken) Monitor.Exit(_parserLock);
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<int, LineInfo> GetLineInfo() {
+            if (_ablParser == null) return null;
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
+                if (lockTaken) {
+                    return _ablParser.GetLineInfo;
+                }
+            } finally {
+                if (lockTaken) Monitor.Exit(_parserLock);
+            }
+            return null;
+        }
+
         #endregion
 
         #region do the parsing and get the results
@@ -125,7 +162,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     SavedParserVisitors.Remove(currentFilePath);
 
                 // Parse the document
-                _ablParser = new Parser.Parser(Npp.Text, currentFilePath, null, DataBase.GetTablesDictionary());
+                _ablParser = new Parser.Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
 
                 // visitor
                 var parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);

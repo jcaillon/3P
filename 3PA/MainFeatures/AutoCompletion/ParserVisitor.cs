@@ -101,8 +101,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // try to find the file in the propath
             string fullFilePath = "";
-            if (pars.HasPersistent)
-                fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+            if (pars.HasPersistent) {
+                string procName = pars.Name;
+                if (!procName.EndsWith(".p") && !procName.EndsWith(".w")) {
+                    fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name + ".p");
+                    if (string.IsNullOrEmpty(fullFilePath))
+                        fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name + ".w");
+                } else
+                    fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+            }
 
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
@@ -513,7 +520,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         }
                     } else {
                         // if there is no "use index", the tt uses the same index as the original table
-                        pars.Fields = foundTable.Fields.ToList();
+                        pars.Fields.AddRange(foundTable.Fields.ToList());
                     }
                 }
             }

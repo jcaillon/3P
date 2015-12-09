@@ -52,10 +52,6 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// </summary>
         public const int EveryMarkersMask = 31;
 
-        #endregion
-
-        #region public methods        
-
         /// <summary>
         /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
@@ -63,22 +59,57 @@ namespace _3PA.MainFeatures.FilesInfo {
         public const int ErrorAnnotBoldStyleOffset = 245;
         public const int ErrorAnnotItalicStyleOffset = 240;
 
+        #endregion
+
+        #region public methods
+
+        /// <summary>
+        /// update errors list for a file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <param name="errorsList"></param>
+        public static void UpdateFileErrors(string fileName, List<FileError> errorsList) {
+            AddIfNew(fileName);
+            if (_sessionInfo[fileName].FileErrors != null)
+                _sessionInfo[fileName].FileErrors.Clear();
+            _sessionInfo[fileName].FileErrors = errorsList.ToList();
+            _sessionInfo[fileName].FileErrors.Sort(new FileErrorSortingClass());
+        }
+
+        /// <summary>
+        /// Returns the FileInfoObject of given file
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
+        public static FileInfoObject GetFileInfo(string fileName) {
+            AddIfNew(fileName);
+            return _sessionInfo[fileName];
+        }
+
+        /// <summary>
+        /// Returns current file FileInfoObject
+        /// </summary>
+        /// <returns></returns>
+        public static FileInfoObject GetFileInfo() {
+            return GetFileInfo(Npp.GetCurrentFilePath());
+        }
+
+        #region user interface methods
+
         /// <summary>
         /// Get style index of given error + error style
         /// </summary>
         /// <param name="errorLevel"></param>
         /// <param name="fontWeight"></param>
         /// <returns></returns>
-        public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight)
-        {
-            switch (fontWeight)
-            {
+        public static byte GetStyleOf(ErrorLevel errorLevel, ErrorFontWeight fontWeight) {
+            switch (fontWeight) {
                 case ErrorFontWeight.Bold:
-                    return (byte) (errorLevel + ErrorAnnotBoldStyleOffset);
+                    return (byte)(errorLevel + ErrorAnnotBoldStyleOffset);
                 case ErrorFontWeight.Italic:
-                    return (byte) (errorLevel + ErrorAnnotItalicStyleOffset);
+                    return (byte)(errorLevel + ErrorAnnotItalicStyleOffset);
                 default:
-                    return (byte) (errorLevel + ErrorAnnotStandardStyleOffset);
+                    return (byte)(errorLevel + ErrorAnnotStandardStyleOffset);
             }
         }
 
@@ -101,7 +132,8 @@ namespace _3PA.MainFeatures.FilesInfo {
             marginError.Mask = EveryMarkersMask;
 
             Npp.AnnotationClearAll();
-            Npp.Marker.MarkerDeleteAll(-1);
+            foreach (var errorLevelMarker in Enum.GetValues(typeof (ErrorLevel)))
+                Npp.Marker.MarkerDeleteAll((int) errorLevelMarker);
 
             // default operation
 
@@ -132,18 +164,18 @@ namespace _3PA.MainFeatures.FilesInfo {
                     Npp.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
                     //Npp.SetAnnotationStyle(fileError.Line, ErrorAnnotationStyleOffset + (int)fileError.Level);
                 } else {
-                    stylerHelper.Style("\n", (byte)fileError.Level);
+                    stylerHelper.Style("\n", (byte) fileError.Level);
                     lastMessage.Append("\n");
                 }
 
                 lastLine = fileError.Line;
 
                 var mess = (fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber + "): " : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber + "): ");
-                stylerHelper.Style(mess, (byte)(ErrorAnnotBoldStyleOffset + fileError.Level));
+                stylerHelper.Style(mess, (byte) (ErrorAnnotBoldStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
                 mess = fileError.Message.BreakText(140);
-                stylerHelper.Style(mess, (byte)(ErrorAnnotStandardStyleOffset + fileError.Level));
+                stylerHelper.Style(mess, (byte) (ErrorAnnotStandardStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
                 if (!string.IsNullOrEmpty(fileError.Help)) {
@@ -156,29 +188,6 @@ namespace _3PA.MainFeatures.FilesInfo {
                 Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
                 Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
             }
-        }
-
-        /// <summary>
-        /// update errors list for a file
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="errorsList"></param>
-        public static void UpdateFileErrors(string fileName, List<FileError> errorsList) {
-            AddIfNew(fileName);
-            if (_sessionInfo[fileName].FileErrors != null)
-                _sessionInfo[fileName].FileErrors.Clear();
-            _sessionInfo[fileName].FileErrors = errorsList.ToList();
-            _sessionInfo[fileName].FileErrors.Sort(new FileErrorSortingClass());
-        }
-
-        /// <summary>
-        /// Update current operation
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="operation"></param>
-        public static void UpdateFileOperation(string fileName, CurrentOperation operation) {
-            AddIfNew(fileName);
-            _sessionInfo[fileName].CurrOperation = operation;
         }
 
         /// <summary>
@@ -267,11 +276,11 @@ namespace _3PA.MainFeatures.FilesInfo {
         public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fileName, bool fromProlint) {
             var output = new Dictionary<string, List<FileError>>();
             foreach (var items in File.ReadAllLines(fileName, TextEncodingDetect.GetFileEncoding(fileName)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
-                
+
                 ErrorLevel errorLevel = ErrorLevel.Error;
                 var errorLevelStr = items[1];
-                foreach (var typ in Enum.GetNames(typeof(ErrorLevel)).Where(typ => errorLevelStr.EqualsCi(typ)))
-                    errorLevel = (ErrorLevel)Enum.Parse(typeof(ErrorLevel), typ, true);
+                foreach (var typ in Enum.GetNames(typeof (ErrorLevel)).Where(typ => errorLevelStr.EqualsCi(typ)))
+                    errorLevel = (ErrorLevel) Enum.Parse(typeof (ErrorLevel), typ, true);
 
                 if (!output.ContainsKey(items[0]))
                     output.Add(items[0], new List<FileError>());
@@ -290,6 +299,8 @@ namespace _3PA.MainFeatures.FilesInfo {
 
         #endregion
 
+        #endregion
+
         #region private methods
 
         /// <summary>
@@ -302,14 +313,18 @@ namespace _3PA.MainFeatures.FilesInfo {
         }
 
         #endregion
-        
+
     }
+
+    #region FileInfoObject
+
     /// <summary>
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     public class FileInfoObject {
         public CurrentOperation CurrOperation { get; set; }
         public List<FileError> FileErrors { get; set; }
+        public bool WarnedTooLong { get; set; }
     }
 
     /// <summary>
@@ -366,11 +381,13 @@ namespace _3PA.MainFeatures.FilesInfo {
         Critical = 4
     }
 
-    public enum ErrorFontWeight
-    {
+    public enum ErrorFontWeight {
         Normal,
         Bold,
         Italic
     }
+
+    #endregion
+
 
 }

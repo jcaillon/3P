@@ -237,7 +237,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _parserTimer = null;
                 }
                 //------------
-                // TODO: DELETE MEASURE
                 //var watch = Stopwatch.StartNew();
                 FillItems();
                 //watch.Stop();

@@ -111,7 +111,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         #endregion
 
         #region public methods
-
+        
         public static Npp.Style StyleDefault = Npp.GetStyle((byte)UdlStyles.Default);
         public static Npp.Style StyleComment = Npp.GetStyle((byte)UdlStyles.Comment);
         public static Npp.Style StyleCommentLine = Npp.GetStyle((byte)UdlStyles.CommentLine);
@@ -207,7 +207,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             markerStyle.SetBackColor(bgColor);
             markerStyle.SetForeColor(fgColor);
         }
-
+        
         /// <summary>
         /// Is the caret not in : an include, a string, a comment
         /// </summary>

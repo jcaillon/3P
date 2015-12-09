@@ -63,12 +63,7 @@ namespace _3PA.MainFeatures {
 
             // last resort, try to find a matching file in the propath
             // first look in the propath
-            var fullPaths = Config.Instance.GlobalProgressExtension.Split(',').Select(extension => ProgressEnv.FindFileInPropath(curWord + extension)).Where(fullPath => !string.IsNullOrEmpty(fullPath)).ToList();
-            if (Directory.Exists(ProgressEnv.Current.BaseLocalPath)) {
-                var fileList = new DirectoryInfo(ProgressEnv.Current.BaseLocalPath).GetFiles(curWord + ".*", SearchOption.AllDirectories);
-                fullPaths.AddRange(fileList.Where(info => !fullPaths.Contains(info.FullName, StringComparer.CurrentCultureIgnoreCase)).Select(fileInfo => fileInfo.FullName));
-            }
-
+            var fullPaths = ProgressEnv.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");

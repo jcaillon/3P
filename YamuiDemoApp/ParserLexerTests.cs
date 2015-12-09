@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\sacmagicinterface_s.p"), @"C:\Users\Julien\Desktop\sacmagicinterface_s.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\tt.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -117,7 +117,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedTable pars) {
-            return;
+            //return;
             Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
             foreach (var field in pars.Fields) {
                 Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");

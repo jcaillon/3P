@@ -21,7 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 
 namespace _3PA.Lib {
@@ -215,8 +217,9 @@ namespace _3PA.Lib {
 
                         /* other type */
                     } else if (property.FieldType.IsPrimitive || property.FieldType == typeof (string)) {
-                        if (valueInAttribute) property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Attribute(ValueString).Value));
-                        else property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFrom(elm.Value));
+                        var converter = TypeDescriptor.GetConverter(property.FieldType);
+                        if (valueInAttribute) property.SetValue(item, converter.ConvertFromInvariantString(elm.Attribute(ValueString).Value));
+                        else property.SetValue(item, converter.ConvertFromInvariantString(elm.Value));
                     }
                 }
             }

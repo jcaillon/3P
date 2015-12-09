@@ -22,8 +22,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -210,11 +212,9 @@ namespace _3PA {
             Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             LocalHtmlHandler.Init();
 
-            ApplyPluginSpecificOptions(false);
-
             #endregion
 
-            // Init appli form, this gives us a Form to hook into if we want to do stuff on the UI thread
+            // Init appli form, this gives us a Form to hook onto if we want to do stuff on the UI thread
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
             Appli.Init();
 
@@ -225,28 +225,29 @@ namespace _3PA {
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
-            // Start a new task to not block the main thread
-            Task.Factory.StartNew(() => {
-                Snippets.Init();
-                Keywords.Init();
-                Config.Save();
-                FileTags.Init();
+            //Task.Factory.StartNew(() => {
 
-                // initialize the list of objects of the autocompletion form
-                AutoComplete.FillStaticItems(true);
+            Snippets.Init();
+            Keywords.Init();
+            Config.Save();
+            FileTags.Init();
 
-                // Fetch the info from the database, when its done, it will update the parser, if it needs
-                // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
-                DataBase.FetchCurrentDbInfo();
+            // initialize the list of objects of the autocompletion form
+            AutoComplete.FillStaticItems(true);
 
-                // make sure the UDL is present, also display the welcome message
-                Highlight.CheckUdl();
+            // Fetch the info from the database, when its done, it will update the parser, if it needs
+            // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
+            DataBase.FetchCurrentDbInfo();
 
-                PluginIsFullyLoaded = true;
+            // make sure the UDL is present, also display the welcome message
+            Highlight.CheckUdl();
 
-                // Simulates a OnDocumentSwitched when we start this dll
-                OnDocumentSwitched();
-            });
+            PluginIsFullyLoaded = true;
+
+            // Simulates a OnDocumentSwitched when we start this dll
+            OnDocumentSwitched();
+
+            //});
         }
 
         #endregion
@@ -530,7 +531,20 @@ namespace _3PA {
         /// </summary>
         public static void OnFileSaved() {
             // check for block that are too long and display a warning
-
+            if (Abl.IsCurrentFileFromAppBuilder() && !FilesInfo.GetFileInfo().WarnedTooLong) {
+                var warningMessage = new StringBuilder();
+                foreach (var codeExplorerItem in ParserHandler.ParsedExplorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))
+                    warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
+                if (warningMessage.Length > 0) {
+                    warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
+                    warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
+                    var curPath = Npp.GetCurrentFilePath();
+                    UserCommunication.Notify(warningMessage.ToString(), MessageImage.HighImportance, "File saved", args => {
+                        Npp.Goto(curPath, int.Parse(args.Link));
+                    }, "Appbuilder limitations", 20);
+                    FilesInfo.GetFileInfo().WarnedTooLong = true;
+                }
+            }
         }
 
         #endregion
@@ -607,6 +621,20 @@ namespace _3PA {
             foreach (var kpv in derp) {
                 FilesInfo.UpdateFileErrors(kpv.Key, kpv.Value);
             }*/
+
+            var canIndent = ParserHandler.CanIndent();
+            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImage.Ok : MessageImage.Error, "Parser state", "Can indent?", 20);
+            if (!canIndent) {
+                StringBuilder x = new StringBuilder();
+                var i = 0;
+                var dic = ParserHandler.GetLineInfo();
+                while (dic.ContainsKey(i)) {
+                    x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
+                    //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
+                    i++;
+                }
+                File.WriteAllText(Path.Combine(TempDir, "lines.log"), x.ToString());
+            }
 
             var properties = typeof(ConfigObject).GetFields();
 
