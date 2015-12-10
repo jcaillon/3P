@@ -211,11 +211,7 @@ namespace _3PA.MainFeatures.Parser {
                             break;
                         case "on":
                             // parse a ON statement
-                            if (CreateParsedOnEvent(token)) {
-                                if (_context.BlockStack.Count != 0) ParsingOk = false;
-                                _context.BlockStack.Clear();
-                                PushBlockInfoToStack(BlockType.DoEnd, token.Line);
-                            }
+                            CreateParsedOnEvent(token);
                             break;
                         case "def":
                         case "define":
@@ -527,7 +523,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="onToken"></param>
         /// <returns></returns>
-        private bool CreateParsedOnEvent(Token onToken) {
+        private void CreateParsedOnEvent(Token onToken) {
             // info we will extract from the current statement :
             string name = "";
             string onType = "";
@@ -552,9 +548,9 @@ namespace _3PA.MainFeatures.Parser {
                             AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
                             _context.Scope = ParsedScope.Trigger;
                             _context.OwnerName = string.Join(" ", onType.ToUpper(), name);
-                            return true;
+                            return;
                         }
-                        if (!token.Value.EqualsCi("of")) return false;
+                        if (!token.Value.EqualsCi("of")) return;
                         state++;
                         break;
                     case 2:
@@ -565,7 +561,7 @@ namespace _3PA.MainFeatures.Parser {
                         }
                         break;
                     case 3:
-                        // matching "or"
+                        // matching "or", create another parsed item, otherwise leave to match a block start
                         if (!(token is TokenWord)) break;
                         AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
                         _context.Scope = ParsedScope.Trigger;
@@ -573,11 +569,10 @@ namespace _3PA.MainFeatures.Parser {
                         if (token.Value.EqualsCi("or"))
                             state = 0;
                         else
-                            return true;
+                            return;
                         break;
                 }
             } while (MoveNext());
-            return false;
         }
 
         /// <summary>

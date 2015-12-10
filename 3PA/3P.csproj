@@ -322,6 +322,7 @@
     <None Include="Data\keywords.data" />
     <None Include="Data\keywordsHelp.data" />
     <None Include="Data\nppTool.p" />
+    <None Include="Data\Progress\compiler.p" />
     <None Include="Data\snippets.data" />
   </ItemGroup>
   <ItemGroup>

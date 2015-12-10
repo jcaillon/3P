@@ -564,7 +564,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (compData.ParsedItem.Scope != ParsedScope.File)
                     output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);
                 // check for the definition line
-                output = output && _currentLineNumber >= compData.ParsedItem.Line;
+                output = output && _currentLineNumber >= (compData.ParsedItem.IncludeLine >= 0 ? compData.ParsedItem.IncludeLine : compData.ParsedItem.Line);
 
                 // for labels, only dislay them in the block which they label
                 if (compData.ParsedItem is ParsedLabel)

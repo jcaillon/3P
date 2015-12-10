@@ -40,11 +40,17 @@ namespace _3PA.MainFeatures.Parser {
         public int Column { get; private set; }
         public ParsedScope Scope { get; set; }
         public string OwnerName { get; set; }
+        /// <summary>
+        /// When including a file, each item parsed has a definition line that corresponds to the line in the file where the item was parsed,
+        /// but we also need to need to know where, in the current file parsed, this include is, so we can know filter the items correctly...
+        /// </summary>
+        public int IncludeLine { get; set; }
         public abstract void Accept(IParserVisitor visitor);
         protected ParsedItem(string name, int line, int column) {
             Name = name;
             Line = line;
             Column = column;
+            IncludeLine = -1;
         }
     }
 

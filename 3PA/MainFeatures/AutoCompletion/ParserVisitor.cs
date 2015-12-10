@@ -195,9 +195,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (string.IsNullOrEmpty(fullFilePath)) return;
 
             ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
+            var parserItemList = parserVisitor.ParsedItemsList.ToList();
+
+            // correct the line number of each parsed element, so we can filter the items correctly in the completion list
+            parserItemList.ForEach(data => { if (data.FromParser) data.ParsedItem.IncludeLine = pars.Line; });
 
             // add info from the parser
-            ParsedItemsList.AddRange(parserVisitor.ParsedItemsList.ToList());
+            ParsedItemsList.AddRange(parserItemList);
             if (Config.Instance.CodeExplorerDisplayExternalItems)
                 ParsedExplorerItemsList.AddRange(parserVisitor.ParsedExplorerItemsList.ToList());
 
