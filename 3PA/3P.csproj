@@ -90,6 +90,7 @@
     <Compile Include="Interop\DocumentLines.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="MainFeatures\FilesInfo\FilesInfo.cs" />
+    <Compile Include="MainFeatures\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
@@ -322,7 +323,8 @@
     <None Include="Data\keywords.data" />
     <None Include="Data\keywordsHelp.data" />
     <None Include="Data\nppTool.p" />
-    <None Include="Data\Progress\compiler.p" />
+    <None Include="Data\Progress\DumpDatabase.p" />
+    <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\snippets.data" />
   </ItemGroup>
   <ItemGroup>
