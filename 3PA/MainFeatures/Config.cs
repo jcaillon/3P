@@ -109,6 +109,8 @@ namespace _3PA.MainFeatures {
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
         public string GlobalCompilableExtension = ".p,.w,.t";
 
+        public string GlobalHelpFilePath = "";
+
         [Range(0, 1)]
         public int GlobalCurrentEnvironnement = 0;
 

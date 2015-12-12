@@ -91,12 +91,24 @@ namespace _3PA {
             menu.SetSeparator();
 
             menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
+            menu.SetCommand("Check syntax", ProgressCodeUtils.NotImplemented, "Check_syntax:Shift+F1", false);
+            menu.SetCommand("Compile", ProgressCodeUtils.NotImplemented, "Compile:Alt+F1", false);
+            menu.SetCommand("Run program", ProgressCodeUtils.NotImplemented, "Run_program:Ctrl+F1", false);
+            menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
             menu.SetSeparator();
 
-            menu.SetCommand("Toggle comment", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             menu.SetCommand("Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
+            menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
+            menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
+            menu.SetCommand("Format document", ProgressCodeUtils.NotImplemented, "Format_document:Ctrl+I", false);
+
+            menu.SetSeparator();
+
+            menu.SetCommand("Edit current file info", ProgressCodeUtils.NotImplemented, "Edit_file_info:Ctrl+Shift+M", false);
+            menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
+            menu.SetCommand("Surround with modification tags", ProgressCodeUtils.NotImplemented, "Modif_tags:Ctrl+M", false);
 
             menu.SetSeparator();
 
@@ -111,29 +123,8 @@ namespace _3PA {
 
             menu.SetSeparator();
 
+            menu.SetCommand("Options", Appli.GoToOptionPage);
             menu.SetCommand("About", Appli.GoToAboutPage);
-            /*
-            SetCommand(cmdIndex++, "---", null);
-            SetCommand(cmdIndex++, "Open 4GL help", hello, "4GL_Help:F1", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Check synthax", hello, "4GL_Check_synthax:Shift+F1", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Compile", hello, "4GL_Compile:Alt+F1", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Run!", hello, "4GL_Run:Ctrl+F1", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Pro-lint", hello, "4GL_prolint:Ctrl+F12", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Code beautifier", hello);
-            SetCommand(cmdIndex++, "---", null);
-            SetCommand(cmdIndex++, "Go to selection definition", hello, "Go_to_definition:Ctrl+B", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Open .lst file", hello);
-            SetCommand(cmdIndex++, "Open in app builder", hello, "Open_in_appbuilder:F12", false, uniqueKeys);
-            SetCommand(cmdIndex++, "---", null);
-            SetCommand(cmdIndex++, "Insert trace", hello, "Insert_trace:Ctrl+T", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Insert complete traces", hello, "Insert_complete_traces:Shift+Ctrl+T", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Edit file info", hello, "Edit_file_info:Ctrl+Shift+M", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Insert title block", hello, "Insert_title_block:Ctrl+Alt+M", false, uniqueKeys);
-            SetCommand(cmdIndex++, "Surround with modif tags", hello, "Surround_with_tags:Ctrl+M", false, uniqueKeys);
-            SetCommand(cmdIndex++, "---", null);
-            SetCommand(cmdIndex++, "Settings", hello);
-            SetCommand(cmdIndex++, "About", hello);
-            */
 
             // Npp already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
@@ -283,8 +274,10 @@ namespace _3PA {
             // only do stuff if we are in a progress file
             if (!IsCurrentFileProgress) return;
 
+            Modifiers modifiers;
+
             try {
-                Modifiers modifiers = KeyInterceptor.GetModifiers();
+                modifiers = KeyInterceptor.GetModifiers();
                 // Close interfacePopups
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                     ClosePopups();
@@ -348,7 +341,16 @@ namespace _3PA {
                 }
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in Instance_KeyDown");
+                var shortcutName = "Instance_KeyDown";
+                try {
+                    modifiers = KeyInterceptor.GetModifiers();
+                    foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key  && modifiers.IsCtrl == shortcut.IsCtrl && modifiers.IsShift == shortcut.IsShift && modifiers.IsAlt == shortcut.IsAlt)) {
+                        shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
+                    }
+                } catch (Exception) {
+                    // ignored, can't do much more
+                }
+                ErrorHandler.ShowErrors(e, "Error in " + shortcutName);
             }
         }
 

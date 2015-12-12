@@ -19,8 +19,11 @@
 #endregion
 
 using System;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using _3PA.Html;
+using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecution;
 
@@ -161,8 +164,40 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
+        #region Open help
+
+        /// <summary>
+        /// Opens the lgrfeng.chm file if it can find it in the config
+        /// </summary>
         public static void Open4GlHelp() {
-            
+            // get path
+            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
+                if (File.Exists(ProgressEnv.Current.ProwinPath)) {
+                    // Try to find the help file from the prowin32.exe location
+                    //TODO
+                    UserCommunication.Notify("Search from prowin32.exe to do!");
+
+                }
+            }
+
+            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+                UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
+                return;
+            }
+
+            Process.Start(new ProcessStartInfo {
+                FileName = "hh.exe",
+                Arguments = ("ms-its:" + Config.Instance.GlobalHelpFilePath).ProgressQuoter(), // append ::/folder/page.htm
+                UseShellExecute = true
+            });
+        }
+
+        #endregion
+
+
+
+        public static void NotImplemented() {
+            UserCommunication.Notify("<b>Oops!</b><br><br>This function is not implemented yet, come back later mate ;)<br><br><i>Sorry for the disappointment though!</i>", MessageImg.MsgSkull, "New action", "Function not implemented yet", 5);
         }
 
     }

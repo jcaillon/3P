@@ -193,7 +193,15 @@ namespace _3PA.MainFeatures {
                     File.WriteAllBytes(Path7ZipDll, Resources._7zdll);
 
                 // Extract the .zip file
-                Run(Path7ZipExe, string.Format("x -y \"-o{0}\" \"{1}\"", Path.Combine(Npp.GetConfigDir(), "Update"), PathLatestReleaseZip));
+                var process = Process.Start(new ProcessStartInfo {
+                    FileName = Path7ZipExe,
+                    Arguments = string.Format("x -y \"-o{0}\" \"{1}\"", Path.Combine(Npp.GetConfigDir(), "Update"), PathLatestReleaseZip),
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    WindowStyle = ProcessWindowStyle.Hidden
+                });
+                if (process != null)
+                    process.WaitForExit();
 
                 // check the presence of the plugin file
                 if (!File.Exists(PathDownloadedPlugin)) {
@@ -274,22 +282,6 @@ namespace _3PA.MainFeatures {
 
             // Check for new updates
             Task.Factory.StartNew(GetLatestReleaseInfo);
-        }
-
-        /// <summary>
-        /// Simply runs a process and wait for its exit...
-        /// </summary>
-        /// <param name="app"></param>
-        /// <param name="args"></param>
-        private static void Run(string app, string args) {
-            var process = Process.Start(new ProcessStartInfo {
-                FileName = app,
-                Arguments = args,
-                CreateNoWindow = true,
-                UseShellExecute = false
-            });
-            if (process != null)
-                process.WaitForExit();
         }
 
     }

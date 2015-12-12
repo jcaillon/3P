@@ -74,6 +74,17 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         /// <summary>
+        /// Opens the application window and go to the about page
+        /// </summary>
+        public static void GoToOptionPage() {
+            try {
+                GoToPage("options");
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
+            }
+        }
+
+        /// <summary>
         /// Initializes the main application, since other windows uses this Form reference, 
         /// it must be called pretty soon in the plugin initialization
         /// </summary>
