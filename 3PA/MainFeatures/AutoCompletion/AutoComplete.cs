@@ -24,6 +24,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using _3PA.Lib;
+using _3PA.MainFeatures.Parser;
 using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -319,10 +320,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Called from CTRL + Space shortcut
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
-            ParseCurrentDocument();
-            _openedFromShortCut = true;
-            _openedFromShortCutPosition = Npp.CurrentPosition;
             try {
+                ParseCurrentDocument();
+                _openedFromShortCut = true;
+                _openedFromShortCutPosition = Npp.CurrentPosition;
                 UpdateAutocompletion();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");

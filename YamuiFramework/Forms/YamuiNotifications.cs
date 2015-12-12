@@ -70,7 +70,10 @@ namespace YamuiFramework.Forms {
             // register to the panel onclicked event and propagate it as a public field of this class
             contentLabel.LinkClicked += OnLinkClicked;
 
-
+            // close all notif button
+            ShowCloseAllVisibleButton = true;
+            OnCloseAllVisible = OnCloseAllVisibleNotif;
+            
             // find max height taken by the html
             Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
             contentLabel.Text = body;
@@ -128,6 +131,14 @@ namespace YamuiFramework.Forms {
         #endregion // Methods
 
         #region Event Handlers
+        /// <summary>
+        /// The user clicked on the button to close all visible notifications
+        /// </summary>
+        private void OnCloseAllVisibleNotif() {
+            var toClose = _openNotifications.Where(openForm => openForm.Top > 0).ToList();
+            toClose.ForEach(notifications => notifications.Close());
+        }
+
         private void YamuiNotificationsOnClosing(object sender, CancelEventArgs args) {
             if ((bool)Tag) return;
             args.Cancel = true;
@@ -147,6 +158,7 @@ namespace YamuiFramework.Forms {
                 if (_closingTransition != null) {
                     _closingTransition.removeProperty(_closingTransition.TransitionedProperties.FirstOrDefault());
                     _progressPanel.Width = 0;
+                    _progressPanel.Invalidate();
                 }
             }
         }

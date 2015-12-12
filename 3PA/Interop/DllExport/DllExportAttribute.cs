@@ -20,35 +20,28 @@
 
 using System;
 using System.Runtime.InteropServices;
+// ReSharper disable All
 
-// BE CAREFUL, DONT CHANGE THE NAMESPACE HERE!!!
-// it should be : NppPlugin.DllExport
-namespace NppPlugin.DllExport
-{
+// BE CAREFUL, DONT CHANGE THE NAMESPACE HERE!!! It should be : NppPlugin.DllExport
+namespace NppPlugin.DllExport {
     [AttributeUsage(AttributeTargets.Method)]
-    class DllExportAttribute : Attribute
-    {
-        public DllExportAttribute()
-        {
+    class DllExportAttribute : Attribute {
+        public DllExportAttribute() {
         }
         public DllExportAttribute(string exportName)
-            : this(exportName, CallingConvention.StdCall)
-        {
+            : this(exportName, CallingConvention.StdCall) {
         }
-        public DllExportAttribute(string exportName, CallingConvention callingConvention)
-        {
+        public DllExportAttribute(string exportName, CallingConvention callingConvention) {
             ExportName = exportName;
             CallingConvention = callingConvention;
         }
         CallingConvention _callingConvention;
-        public CallingConvention CallingConvention
-        {
+        public CallingConvention CallingConvention {
             get { return _callingConvention; }
             set { _callingConvention = value; }
         }
         string _exportName;
-        public string ExportName
-        {
+        public string ExportName {
             get { return _exportName; }
             set { _exportName = value; }
         }

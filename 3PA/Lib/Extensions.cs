@@ -144,7 +144,7 @@ namespace _3PA.Lib {
         /// <param name="text"></param>
         /// <returns></returns>
         public static string ProgressQuoter(this string text) {
-            return "\"" + text.Replace("\"", "~\"") + "\"";
+            return "\"" + (text ?? "").Replace("\"", "~\"") + "\"";
         }
 
         /// <summary>

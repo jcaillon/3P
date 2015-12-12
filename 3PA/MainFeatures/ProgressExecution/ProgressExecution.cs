@@ -23,13 +23,25 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.ProgressExecution {
     public class ProgressExecution {
         #region public fields
+
+        private event EventHandler<ProcessOnExited> OnProcessExited;
+
+        /// <summary>
+        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// </summary>
+        public event EventHandler<ProcessOnExited> ProcessExited {
+            add { OnProcessExited += value; }
+            remove { OnProcessExited -= value; }
+        }
 
         /// <summary>
         /// Full path to the directory containing all the files needed for the execution
@@ -68,9 +80,17 @@ namespace _3PA.MainFeatures.ProgressExecution {
 
         public ExecutionType ExecutionType { get; private set; }
 
+        /// <summary>
+        /// Parameters of the .exe call
+        /// </summary>
         public string ExeParameters { get; private set; }
 
         public Process Process { get; private set; }
+
+        /// <summary>
+        /// Full file path to the output file of the DumpDatabase program
+        /// </summary>
+        public string ExtractDbOutputPath { get; private set; }
 
         #endregion
 
@@ -85,6 +105,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
         /// Path to the file to compile/run
         /// </summary>
         private string _tempFullFilePathToExecute;
+
+        private static object _lock = new object();
 
         private readonly bool _isCurrentFile;
 
@@ -124,21 +146,21 @@ namespace _3PA.MainFeatures.ProgressExecution {
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile && !Abl.IsCurrentProgressFile()) {
                     UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarningShield,
-                        "Invalid file type", duration: 10);
+                        "Invalid file type", "Progress files only", 10);
                     return false;
                 }
                 if (string.IsNullOrEmpty(FullFilePathToExecute) || !File.Exists(FullFilePathToExecute)) {
                     UserCommunication.Notify("Couldn't find the following file :<br>" + FullFilePathToExecute,
-                        MessageImg.MsgError, "Execution error", duration: 10);
+                        MessageImg.MsgError, "Execution error", "File not found", 10);
                     return false;
                 }
                 if (Config.Instance.GlobalCompilableExtension.Split().Contains(Path.GetExtension(FullFilePathToExecute))) {
-                    UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(FullFilePathToExecute).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarningShield, "Invalid file extension", duration: 10);
+                    UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(FullFilePathToExecute).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarningShield, "Invalid file extension", "Not an executable", 10);
                     return false;
                 }
             }
             if (!File.Exists(ProgressEnv.Current.ProwinPath)) {
-                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProgressEnv.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarningShield, "Invalid file extension", duration: 10);
+                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProgressEnv.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarningShield, "Execution error", "Invalid file path", 10);
                 return false;
             }
 
@@ -164,11 +186,17 @@ namespace _3PA.MainFeatures.ProgressExecution {
                 File.Copy(ProgressEnv.Current.IniPath, Path.Combine(ExecutionDir, "base.ini"));
 
             // If current file, copy Npp.Text to a temp file to be executed
+            var dumpDbProgramName = "";
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile) {
                     _tempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
                     File.WriteAllText(_tempFullFilePathToExecute, Npp.Text);
                 } else _tempFullFilePathToExecute = FullFilePathToExecute;
+            } else {
+                // for database extraction, we need the output path and to copy the DumpDatabase program
+                dumpDbProgramName = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
+                File.WriteAllBytes(Path.Combine(ExecutionDir, dumpDbProgramName), DataResources.DumpDatabase);
+                ExtractDbOutputPath = Path.Combine(ExecutionDir, DataBase.OutputFileName);
             }
 
             // set info on the execution
@@ -185,8 +213,9 @@ namespace _3PA.MainFeatures.ProgressExecution {
             programContent.AppendLine("&SCOPED-DEFINE CompilePath " + DotRPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + "".ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + ProgressEnv.Current.ProPath).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE dumbDataBaseProgram " + dumpDbProgramName.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
             // progress runner
@@ -221,25 +250,29 @@ namespace _3PA.MainFeatures.ProgressExecution {
             };
             Process.Exited += ProcessOnExited;
             Process.Start();
-
-            UserCommunication.Notify(ExeParameters);
+            UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProgressEnv.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Execution directory :</b><br><a href='" + ExecutionDir + "'>" + ExecutionDir + "</a>");
 
             return true;
         }
 
+        /// <summary>
+        /// Called by the process's thread when it is over
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
-            // special case for a database structure extraction
-            if (ExecutionType == ExecutionType.Database) {
-                // update auto-completion
-
-                return;
+            bool lockTaken = false;
+            try {
+                Monitor.TryEnter(_lock, 500, ref lockTaken);
+                if (lockTaken && OnProcessExited != null) {
+                    OnProcessExited(this, new ProcessOnExited(eventArgs, ExtractDbOutputPath));
+                    Process.Close();
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "ProcessOnExited");
+            } finally {
+                if (lockTaken) Monitor.Exit(_lock);
             }
-
-            // We just compiled/run the current file
-            if (Npp.GetCurrentFilePath().EqualsCi(FullFilePathToExecute)) {
-                
-            }
-            UserCommunication.Notify("Ended : " + LogPath);
         }
 
         /// <summary>
@@ -252,6 +285,16 @@ namespace _3PA.MainFeatures.ProgressExecution {
         }
 
         #endregion
+
+    }
+
+    public class ProcessOnExited : EventArgs {
+        public readonly object OriginalEventArgs;
+        public string ExtractDbOutputPath;
+        public ProcessOnExited(object originalEventArgs, string extractDbOutputPath) {
+            OriginalEventArgs = originalEventArgs;
+            ExtractDbOutputPath = extractDbOutputPath;
+        }
     }
 
     public enum ExecutionType {

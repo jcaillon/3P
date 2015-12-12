@@ -24,10 +24,10 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.Parser;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.Parser {
 
     class ParserHandler {
 
@@ -62,7 +62,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
 
-        private static Parser.Parser _ablParser;
+        private static MainFeatures.Parser.Parser _ablParser;
 
         /// <summary>
         /// is used to make sure that 2 different threads dont try to access
@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     SavedParserVisitors.Remove(currentFilePath);
 
                 // Parse the document
-                _ablParser = new Parser.Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
+                _ablParser = new MainFeatures.Parser.Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
 
                 // visitor
                 var parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);

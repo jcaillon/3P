@@ -115,7 +115,7 @@ namespace _3PA.MainFeatures {
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
-        public string EnvLastDbInfoUsed = "database_out.txt";
+        public string EnvLastDbInfoUsed = "";
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";

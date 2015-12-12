@@ -40,19 +40,26 @@ namespace _3PA.Lib {
             //var assPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _rootDir = Path.Combine(Npp.GetConfigDir(), "Librairies");
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
-            _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");  
-          
-            // TODO: only for debug! need to handle this when we do an update tho :/ we want to replace old files
-            if (true) {
-                try {
+            _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");
+
+            // delete existing libs so we are sure to use up to date libs
+            try {
+                if (File.Exists(_pathToYamui))
                     File.Delete(_pathToYamui);
+                if (File.Exists(_pathToOlv))
                     File.Delete(_pathToOlv);
-                } catch (Exception) {
-                    // ignored
-                }
+            } catch (Exception) {
+                // ignored
             }
         }
 
+        /// <summary>
+        /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
+        /// to the program
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
         static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
             try {
                 if (!Directory.Exists(_rootDir))

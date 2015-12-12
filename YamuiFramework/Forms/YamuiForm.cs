@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
+using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
@@ -59,6 +60,22 @@ namespace YamuiFramework.Forms {
         [DefaultValue(false)]
         public bool UseCustomBorderColor { get; set; }
 
+        /// <summary>
+        /// Set this to true to show the "close all notifications button",
+        /// to use with OnCloseAllVisible
+        /// </summary>
+        [Browsable(false)]
+        [DefaultValue(false)]
+        public bool ShowCloseAllVisibleButton { get; set; }
+
+        /// <summary>
+        /// To use with ShowCloseAllVisibleButton,
+        /// Action to do when the user click the button
+        /// </summary>
+        [Browsable(false)]
+        public Action OnCloseAllVisible { get; set; }
+
+
         public new Padding Padding {
             get { return base.Padding; }
             set {
@@ -88,6 +105,7 @@ namespace YamuiFramework.Forms {
         private const int BorderWidth = 1;
 
         private List<int[]> _formHistory = new List<int[]>();
+        private HtmlToolTip _mainFormToolTip = new HtmlToolTip();
         private YamuiGoBackButton _goBackButton;
         #endregion
 
@@ -297,7 +315,7 @@ namespace YamuiFramework.Forms {
                 Function = TabFunction.Secondary,
                 TabStop = true
             };
-            
+
             foreach (var yamuiSecMenuTab in mainTab.SecTabs) {
                 var secTabPage = new YamuiTabPage {
                     Dock = DockStyle.Fill,
@@ -363,6 +381,8 @@ namespace YamuiFramework.Forms {
                     AddWindowButton(WindowButtons.Maximize);
                 if (MinimizeBox)
                     AddWindowButton(WindowButtons.Minimize);
+                if (ShowCloseAllVisibleButton)
+                    AddWindowButton(WindowButtons.CloseAllVisible);
                 UpdateWindowButtonPosition();
             }
 
@@ -528,7 +548,8 @@ namespace YamuiFramework.Forms {
         private enum WindowButtons {
             Minimize,
             Maximize,
-            Close
+            Close,
+            CloseAllVisible
         }
 
         private Dictionary<WindowButtons, YamuiFormButton> _windowButtonList;
@@ -545,12 +566,19 @@ namespace YamuiFramework.Forms {
             switch (button) {
                 case WindowButtons.Close:
                     newButton.Text = @"r";
+                    _mainFormToolTip.SetToolTip(newButton, "<b>Close</b> this window");
                     break;
                 case WindowButtons.Minimize:
                     newButton.Text = @"0";
+                    _mainFormToolTip.SetToolTip(newButton, "<b>Minimize</b> this window");
                     break;
                 case WindowButtons.Maximize:
                     newButton.Text = WindowState == FormWindowState.Normal ? @"1" : @"2";
+                    _mainFormToolTip.SetToolTip(newButton, "<b>" + (WindowState == FormWindowState.Normal ? "Maximize" : "Restore") + "</b> this window");
+                    break;
+                case WindowButtons.CloseAllVisible:
+                    newButton.Text = ((char)(126)).ToString();
+                    _mainFormToolTip.SetToolTip(newButton, "<b>Close all visible</b> notification windows");
                     break;
             }
 
@@ -577,13 +605,13 @@ namespace YamuiFramework.Forms {
                     WindowState = FormWindowState.Minimized;
                     break;
                 case WindowButtons.Maximize:
-                    if (WindowState == FormWindowState.Normal) {
-                        WindowState = FormWindowState.Maximized;
-                        btn.Text = @"2";
-                    } else {
-                        WindowState = FormWindowState.Normal;
-                        btn.Text = @"1";
-                    }
+                    WindowState = WindowState == FormWindowState.Normal ? FormWindowState.Maximized : FormWindowState.Normal;
+                    btn.Text = WindowState == FormWindowState.Normal ? @"1" : @"2";
+                    _mainFormToolTip.SetToolTip(btn, "<b>" + (WindowState == FormWindowState.Normal ? "Maximize" : "Restore") + "</b> this window");
+                    break;
+                case WindowButtons.CloseAllVisible:
+                    if (OnCloseAllVisible != null)
+                        OnCloseAllVisible();
                     break;
             }
         }
@@ -598,25 +626,23 @@ namespace YamuiFramework.Forms {
 
             YamuiFormButton firstButton = null;
 
-            if (_windowButtonList.Count == 1) {
-                foreach (var button in _windowButtonList) {
-                    button.Value.Location = firstButtonLocation;
+            foreach (var button in priorityOrder) {
+                var buttonExists = _windowButtonList.ContainsKey(button.Value);
+
+                if (firstButton == null && buttonExists) {
+                    firstButton = _windowButtonList[button.Value];
+                    firstButton.Location = firstButtonLocation;
+                    continue;
                 }
-            } else {
-                foreach (var button in priorityOrder) {
-                    var buttonExists = _windowButtonList.ContainsKey(button.Value);
 
-                    if (firstButton == null && buttonExists) {
-                        firstButton = _windowButtonList[button.Value];
-                        firstButton.Location = firstButtonLocation;
-                        continue;
-                    }
+                if (firstButton == null || !buttonExists) continue;
 
-                    if (firstButton == null || !buttonExists) continue;
+                _windowButtonList[button.Value].Location = new Point(lastDrawedButtonPosition, BorderWidth);
+                lastDrawedButtonPosition = lastDrawedButtonPosition - 25;
+            }
 
-                    _windowButtonList[button.Value].Location = new Point(lastDrawedButtonPosition, BorderWidth);
-                    lastDrawedButtonPosition = lastDrawedButtonPosition - 25;
-                }
+            if (_windowButtonList.ContainsKey(WindowButtons.CloseAllVisible)) {
+                _windowButtonList[WindowButtons.CloseAllVisible].Location = new Point(ClientRectangle.Width - BorderWidth - 25, BorderWidth + 25);
             }
 
             Refresh();
@@ -642,7 +668,7 @@ namespace YamuiFramework.Forms {
                     e.Graphics.Clear(ThemeManager.Current.ButtonColorsHoverBackColor);
                 else
                     e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
-                    //PaintTransparentBackground(e.Graphics, DisplayRectangle);
+                //PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
                 Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, false, false, _isHovered, _isPressed, Enabled);
                 TextRenderer.DrawText(e.Graphics, Text, new Font("Webdings", 9.25f), ClientRectangle, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
@@ -740,6 +766,26 @@ namespace YamuiFramework.Forms {
             WinApi.DrawMenuBar(Handle);
         }
         #endregion
+
+        private void InitializeComponent() {
+            this._mainFormToolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.SuspendLayout();
+            // 
+            // mainFormToolTip
+            // 
+            this._mainFormToolTip.AllowLinksHandling = true;
+            this._mainFormToolTip.BaseStylesheet = null;
+            this._mainFormToolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this._mainFormToolTip.OwnerDraw = true;
+            this._mainFormToolTip.TooltipCssClass = "htmltooltip";
+            // 
+            // YamuiForm
+            // 
+            this.ClientSize = new System.Drawing.Size(284, 262);
+            this.Name = "YamuiForm";
+            this.ResumeLayout(false);
+
+        }
     }
 
     #region AutoBuild tabs

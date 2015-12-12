@@ -30,7 +30,7 @@ using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
-    class ErrorHandler {
+    public class ErrorHandler {
 
         private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
         private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }
@@ -83,26 +83,31 @@ namespace _3PA.MainFeatures {
                 });
             }
 
-            // show it to the user, conditionally
-            if (Config.Instance.UserGetsPreReleases)
-                UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                    (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
-                    "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + 
-                    "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
-                    MessageImg.MsgPoison, "An error has occured",
-                    args => {
-                        Npp.Goto(args.Link);
-                        args.Handled = true;
-                    },
-                    message, 0, 500);
-            else
-                UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>",
-                    MessageImg.MsgPoison, "An error has occured", 
-                    args => {
-                        Npp.Goto(args.Link);
-                        args.Handled = true;
-                    }, 
-                    message, 0, 500);
+            try {
+                // show it to the user, conditionally
+                if (Config.Instance.UserGetsPreReleases)
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
+                                             (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
+                                             "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + 
+                                             "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                        MessageImg.MsgPoison, "An error has occured", message,
+                        args => {
+                            Npp.Goto(args.Link);
+                            args.Handled = true;
+                        },
+                        0, 500);
+                else
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>",
+                        MessageImg.MsgPoison, "An error has occured", message,
+                        args => {
+                            Npp.Goto(args.Link);
+                            args.Handled = true;
+                        }, 
+                        0, 500);
+            } catch (Exception) {
+                // display the error message the old way
+                MessageBox.Show("An unidentified error has occured, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : https://github.com/jcaillon/3P/issues if the problem persists.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         /// <summary>

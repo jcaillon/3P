@@ -92,6 +92,7 @@ namespace _3PA.Html {
     }
 
     public enum MessageImg {
+        MsgDebug,
         MsgLogo,
         MsgError,
         MsgHighImportance,

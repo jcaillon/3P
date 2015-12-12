@@ -108,10 +108,10 @@
     <Compile Include="MainFeatures\AutoCompletion\FastObjectListViewWoScrolls.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\ParserVisitor.cs" />
+    <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\ParserHandler.cs" />
+    <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -152,7 +152,6 @@
       <DependentUpon>NppInterfaceYamuiForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
-    <Compile Include="MainFeatures\Parser\LexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
     <Compile Include="MainFeatures\ProgressCodeUtils.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
@@ -408,6 +407,7 @@
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
+    <Content Include="Images\NotifAndMessages\MsgDebug.png" />
     <Content Include="Images\NotifAndMessages\MsgError.png" />
     <Content Include="Images\NotifAndMessages\MsgHighImportance.png" />
     <Content Include="Images\NotifAndMessages\MsgInfo.png" />

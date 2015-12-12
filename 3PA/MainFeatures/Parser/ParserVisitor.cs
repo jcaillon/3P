@@ -23,11 +23,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecution;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.Parser {
 
     /// <summary>
     /// This class sustains the autocompletion list AND the code explorer list
@@ -560,7 +560,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 parserVisitor = ParserHandler.SavedParserVisitors[fileName];
             } else {
                 // Parse it
-                var ablParser = new Parser.Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName, DataBase.GetTablesDictionary());
+                var ablParser = new MainFeatures.Parser.Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName, DataBase.GetTablesDictionary());
 
                 parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.GetLineInfo);
                 ablParser.Accept(parserVisitor);

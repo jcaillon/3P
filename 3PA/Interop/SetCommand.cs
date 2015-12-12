@@ -25,17 +25,20 @@ using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Interop {
-    public class Plug {
+    public class NppMenu {
 
         /// <summary>
         /// new Tuple Action, int, string = (functionPointer, index, shortcutName)
         /// </summary>
         public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts { get; set; }
 
+        public Dictionary<Keys, int> UniqueKeys = new Dictionary<Keys, int>();
+
+        public int CmdIndex;
+
         /// <summary>
         ///     Main SetCommand
         /// </summary>
-        /// <param name="index">index of the command</param>
         /// <param name="commandName">Name</param>
         /// <param name="functionPointer">Method to call on click</param>
         /// <param name="shortcutSpec">
@@ -43,9 +46,7 @@ namespace _3PA.Interop {
         ///     Ex : "_ShowSuggestionList:Ctrl+Space"
         /// </param>
         /// <param name="checkOnInit"></param>
-        /// <param name="uniqueKeys">Dictionnary to add all the keys in the KeyInterceptor instance</param>
-        public static void SetCommand(int index, string commandName, Action functionPointer, string shortcutSpec,
-            bool checkOnInit, Dictionary<Keys, int> uniqueKeys) {
+        public void SetCommand(string commandName, Action functionPointer, string shortcutSpec, bool checkOnInit) {
             try {
                 if (InternalShortCuts == null)
                     InternalShortCuts = new Dictionary<ShortcutKey, Tuple<Action, int, string>>();
@@ -58,46 +59,61 @@ namespace _3PA.Interop {
                     thisShortcut = new ShortcutKey();
                 } else {
                     if (Config.Instance.ShortCuts.ContainsKey(shortcutName)) {
-                    // get the shortkey already defined for this shortcutName
-                    shortcutData = Config.Instance.ShortCuts[shortcutName];
-                    Config.Instance.ShortCuts.Remove(shortcutName);
+                        // get the shortkey already defined for this shortcutName
+                        shortcutData = Config.Instance.ShortCuts[shortcutName];
+                        Config.Instance.ShortCuts.Remove(shortcutName);
                     }
                     thisShortcut = new ShortcutKey(shortcutData);
                 }
-                InternalShortCuts.Add(thisShortcut, new Tuple<Action, int, string>(functionPointer, index, shortcutName));
+                InternalShortCuts.Add(thisShortcut, new Tuple<Action, int, string>(functionPointer, CmdIndex, shortcutName));
                 Config.Instance.ShortCuts.Add(shortcutName, shortcutData);
 
-                var key = (Keys) thisShortcut._key;
-                if (!uniqueKeys.ContainsKey(key))
-                    uniqueKeys.Add(key, 0);
+                var key = (Keys)thisShortcut._key;
+                if (!UniqueKeys.ContainsKey(key))
+                    UniqueKeys.Add(key, 0);
 
                 if (!String.IsNullOrWhiteSpace(commandName))
-                    SetCommand(index, commandName, functionPointer, thisShortcut, checkOnInit);
+                    SetCommand(CmdIndex++, commandName, functionPointer, thisShortcut, checkOnInit);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in SetCommand");
             }
         }
 
         /// <summary>
-        ///  Used only for separators!
+        /// Sets a menu item without shortcut
+        /// </summary>
+        /// <param name="commandName"></param>
+        /// <param name="functionPointer"></param>
+        public void SetCommand(string commandName, Action functionPointer) {
+            SetCommand(CmdIndex++, commandName, functionPointer);
+        }
+
+        /// <summary>
+        /// Inserts a sperator, will be visible as an horizontal in the npp menu
+        /// </summary>
+        public void SetSeparator() {
+            SetCommand(CmdIndex++, "---", null);
+        }
+
+        /// <summary>
+        /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu
         /// </summary>
         /// <param name="index"></param>
         /// <param name="commandName"></param>
         /// <param name="functionPointer"></param>
-        internal static void SetCommand(int index, string commandName, Action functionPointer) {
-            SetCommand(index, commandName, functionPointer, new ShortcutKey(), false);
-        }
-        
-        internal static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut, bool checkOnInit) {
-            var funcItem = new FuncItem();
-            funcItem._cmdID = index;
-            funcItem._itemName = commandName;
+        /// <param name="shortcut"></param>
+        /// <param name="checkOnInit"></param>
+        internal static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut = new ShortcutKey(), bool checkOnInit = false) {
+            var funcItem = new FuncItem {
+                _cmdID = index,
+                _itemName = commandName
+            };
             if (functionPointer != null)
                 funcItem._pFunc = functionPointer;
             if (shortcut._key != 0)
                 funcItem._pShKey = shortcut;
             funcItem._init2Check = checkOnInit;
-            _3PA.Plug.FuncItems.Add(funcItem);
+            Plug.FuncItems.Add(funcItem);
         }
 
         private static bool _alreadyWarnedUserAboutShortkey;

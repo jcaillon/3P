@@ -32,19 +32,23 @@ namespace _3PA.MainFeatures.Appli {
         /// Call this method to toggle on/off the application
         /// </summary>
         public static void ToggleView() {
-            // create the form
-            if (!_hasBeenShownOnce) {
-                _hasBeenShownOnce = true;
-                Form.Show(Npp.Win32WindowNpp);
-                Form.DoShow();
-                return;
-            }
+            try {
+                // create the form
+                if (!_hasBeenShownOnce) {
+                    _hasBeenShownOnce = true;
+                    Form.Show(Npp.Win32WindowNpp);
+                    Form.DoShow();
+                    return;
+                }
 
-            // toggle visibility
-            if (Form.Visible && !Form.HasModalOpened)
-                Form.Cloack();
-            else
-                Form.UnCloack();
+                // toggle visibility
+                if (Form.Visible && !Form.HasModalOpened)
+                    Form.Cloack();
+                else
+                    Form.UnCloack();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while loading the main window");
+            }
         }
 
         /// <summary>
@@ -62,7 +66,11 @@ namespace _3PA.MainFeatures.Appli {
         /// Opens the application window and go to the about page
         /// </summary>
         public static void GoToAboutPage() {
-            GoToPage("soft_info");
+            try {
+                GoToPage("soft_info");
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in GoToAboutPage");
+            }
         }
 
         /// <summary>

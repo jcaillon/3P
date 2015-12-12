@@ -6,6 +6,7 @@
 &SCOPED-DEFINE LstFile "D:\Work\ProgressFiles\compiler\compile\sc80lbeq.lst"
 &SCOPED-DEFINE ExtractDbOutputPath "D:\Work\ProgressFiles\compiler\compile\outdb.txt"
 &SCOPED-DEFINE propathToUse "D:\Work\ProgressFiles\compiler\compile,,"
+&SCOPED-DEFINE dumbDataBaseProgram "dumpDatabase.p"
 */
 DEFINE STREAM str_logout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
@@ -43,12 +44,11 @@ CASE {&ExecutionType} :
         END.
         RUN pi_handleCompilErrors NO-ERROR.
     END.
-    
     WHEN "DATABASE" THEN DO:
         /* for each connected db */
         REPEAT gi_db = 1 TO NUM-DBS:
             CREATE ALIAS "DICTDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
-            RUN DumpDatabase.p (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)).
+            RUN {&dumbDataBaseProgram} (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)).
             DELETE ALIAS "DICTDB".
         END.
     END.

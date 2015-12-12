@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures {
         /// <param name="width"></param>
         /// <param name="imageType"></param>
         /// <param name="title"></param>
-        public static void Notify(string html, MessageImg imageType, string title, Action<HtmlLinkClickedEventArgs> clickHandler, string subTitle = "", int duration = 0, int width = 450) {
+        public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
             if (Appli.Appli.Form != null)
                 Appli.Appli.Form.BeginInvoke((Action)delegate {
                     var toastNotification = new YamuiNotifications(
@@ -52,12 +52,12 @@ namespace _3PA.MainFeatures {
                 });
         }
 
-        public static void Notify(string html, MessageImg imageType, string title, string subTitle = "", int duration = 0, int width = 450) {
-            Notify(html, imageType, title, null, subTitle, duration, width);
+        public static void Notify(string html, MessageImg imageType, string title, string subTitle, int duration = 0, int width = 450) {
+            Notify(html, imageType, title, subTitle, null, duration, width);
         }
 
-        public static void Notify(string html, int duration = 0, int width = 450) {
-            Notify(html, MessageImg.MsgLogo, "debug", "?", duration, width);
+        public static void Notify(string html, int duration = 10, int width = 450) {
+            Notify(html, MessageImg.MsgDebug, "Debug message", "Should not appear in prod?", duration, width);
         }
 
         /// <summary>

@@ -179,9 +179,13 @@ namespace _3PA {
         /// this method allows you to navigate back to where you were
         /// </summary>
         public static void GoBackFromDefinition() {
-            if (_goToHistory.Count > 0) {
-                var lastPoint = _goToHistory.Pop();
-                Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y, false);
+            try {
+                if (_goToHistory.Count > 0) {
+                    var lastPoint = _goToHistory.Pop();
+                    Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y, false);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in GoBackFromDefinition");
             }
         }
 

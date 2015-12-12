@@ -25,9 +25,12 @@ using System.Linq;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.ProgressExecution;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     public class DataBase {
+
+        #region fields
 
         /// <summary>
         /// List of Databases (each of which contains list of tables > list of fields/indexes/triggers)
@@ -40,7 +43,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-        private static string _outputFileName;
+        public static string OutputFileName { get; private set; }
 
         /// <summary>
         /// Gets the directory where database info are stored
@@ -58,6 +61,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
         }
 
+        #endregion
+
+        #region public methods
+
         /// <summary>
         /// Tries to load the database information of the current ProgressEnv, 
         /// returns false the info is not available
@@ -66,11 +73,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static bool TryToLoadDatabaseInfo() {
             var fileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
 
+            // read
             if (File.Exists(Path.Combine(DatabaseDir, fileName))) {
-                //TODO: read, ut delay for 1s, liek auto comple
+                if (Plug.PluginIsFullyLoaded) {
+                    Config.Instance.EnvLastDbInfoUsed = fileName;
+                    Init();
+                }
                 return true;
             }
-
             return false;
         }
 
@@ -78,44 +88,72 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Should be called to extract the database info from the current environnement
         /// </summary>
         public static void FetchCurrentDbInfo() {
-            // dont extract 2 db at once
-            if (!string.IsNullOrEmpty(_outputFileName)) {
-                UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgPin, "Database info update");
-                return;
+            try {
+                // dont extract 2 db at once
+                if (!string.IsNullOrEmpty(OutputFileName)) {
+                    UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarningShield, "Database info", "Extracting database structure", 5);
+                    return;
+                }
+
+                // save the filename of the output database info file for this environment
+                OutputFileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
+
+                UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
+
+                var exec = new ProgressExecution.ProgressExecution();
+                exec.ProcessExited += ExtractionDone;
+                if (exec.Do(ExecutionType.Database))
+                    return;
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-
-            // save the filename of the output database info file for this environment
-            _outputFileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
-
-            UserCommunication.Notify("Now fetching info on all the connected databases for the current environment", MessageImg.MsgInfo, "Database info update");
-
-            //ProgressExecution
+            OutputFileName = null;
         }
 
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        /// <param name="outputFilePath"></param>
-        public static void ExtractionDone(string outputFilePath) {
-            // copy to database dir
-            File.Copy(outputFilePath, Path.Combine(DatabaseDir, _outputFileName));
+        private static void ExtractionDone(object sender, ProcessOnExited processOnExited) {
+            try {
 
-            // read
-            Config.Instance.EnvLastDbInfoUsed = _outputFileName;
-            Init();
+                if (!File.Exists(processOnExited.ExtractDbOutputPath) || new FileInfo(processOnExited.ExtractDbOutputPath).Length == 0) {
+                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again", MessageImg.MsgSkull, "Database info", "Extracting database structure");
+                } else {
+                    // copy to database dir
+                    File.Copy(processOnExited.ExtractDbOutputPath, Path.Combine(DatabaseDir, OutputFileName));
 
-            // update auto-completion
-            AutoComplete.ParseCurrentDocument();
+                    // read
+                    Config.Instance.EnvLastDbInfoUsed = OutputFileName;
+                    Init();
 
-            _outputFileName = null;
+                    UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
+            }
+            OutputFileName = null;
         }
 
         /// <summary>
         /// Read last used database info file
         /// </summary>
         public static void Init() {
+            if (string.IsNullOrEmpty(Config.Instance.EnvLastDbInfoUsed))
+                return;
+
+            // read file, extract info
             Read(Path.Combine(DatabaseDir, Config.Instance.EnvLastDbInfoUsed));
+
+            // Update autocompletion
+            AutoComplete.FillStaticItems(false);
+            AutoComplete.ParseCurrentDocument();
+
+            //UserCommunication.Notify("Read db info from : " + Config.Instance.EnvLastDbInfoUsed);
         }
+
+        #endregion
+
+        #region private methods
 
         /// <summary>
         /// This method parses the output of the .p procedure that exports the database info
@@ -214,12 +252,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (!_tablesDictionary.ContainsKey(string.Join(".", @base.LogicalName, table.Name)))
                     _tablesDictionary.Add(string.Join(".", @base.LogicalName, table.Name), false);
             }));
-
-            // Update autocompletion
-            AutoComplete.FillStaticItems(false);
-            AutoComplete.ParseCurrentDocument(true);
         }
 
+        #endregion
 
         #region get list
 
@@ -247,7 +282,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static Dictionary<string, bool> GetTablesDictionary() {
             return _tablesDictionary;
-        } 
+        }
 
         /// <summary>
         /// returns the list of databases
@@ -316,7 +351,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         #endregion
-
 
         #region find item
 

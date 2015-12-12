@@ -33,6 +33,11 @@ using _3PA.MainFeatures.FilesInfo;
 // ReSharper disable UnusedParameter.Local
 
 namespace _3PA {
+
+    /// <summary>
+    /// Main entry point for Npp,
+    /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
+    /// </summary>
     class UnmanagedExports {
         #region Other
 
@@ -181,7 +186,7 @@ namespace _3PA {
 
                     case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:
                         // notify plugins that plugin command shortcut is remapped
-                        Interop.Plug.ShortcutsUpdated((int)nc.nmhdr.idFrom, (ShortcutKey)Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof(ShortcutKey)));
+                        NppMenu.ShortcutsUpdated((int)nc.nmhdr.idFrom, (ShortcutKey)Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof(ShortcutKey)));
                         return;
 
                     case (uint) SciMsg.SCN_MODIFYATTEMPTRO:

@@ -38,6 +38,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.InfoToolTip;
+using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecution;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
@@ -83,18 +84,34 @@ namespace _3PA {
         /// </summary>
         static internal void CommandMenuInit() {
 
-            int cmdIndex = 0;
-            var uniqueKeys = new Dictionary<Keys, int>();
+            var menu = new NppMenu();
+            menu.SetCommand("Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false);
+            menu.SetCommand("Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false);
 
-            Interop.Plug.SetCommand(cmdIndex++, "Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "---", null);
-            Interop.Plug.SetCommand(cmdIndex++, "Toggle comment", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Test", Test, "Test:Ctrl+D", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false, uniqueKeys);
-            Interop.Plug.SetCommand(cmdIndex++, "About", Appli.GoToAboutPage);
+            menu.SetSeparator();
 
+            menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
+
+            menu.SetSeparator();
+
+            menu.SetCommand("Toggle comment", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
+            menu.SetCommand("Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
+            menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
+
+            menu.SetSeparator();
+
+            menu.SetCommand("Toggle code explorer", CodeExplorer.Toggle);
+            CodeExplorer.DockableCommandIndex = menu.CmdIndex - 1;
+            menu.SetCommand("Toggle file explorer", FileExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = menu.CmdIndex - 1;
+
+            menu.SetSeparator();
+
+            menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+
+            menu.SetSeparator();
+
+            menu.SetCommand("About", Appli.GoToAboutPage);
             /*
             SetCommand(cmdIndex++, "---", null);
             SetCommand(cmdIndex++, "Open 4GL help", hello, "4GL_Help:F1", false, uniqueKeys);
@@ -116,18 +133,11 @@ namespace _3PA {
             SetCommand(cmdIndex++, "---", null);
             SetCommand(cmdIndex++, "Settings", hello);
             SetCommand(cmdIndex++, "About", hello);
-            SetCommand(cmdIndex++, "Dockable Dialog Demo", DockableDlgDemo);
             */
-
-            Interop.Plug.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
-            CodeExplorer.DockableCommandIndex = cmdIndex - 1;
-
-            Interop.Plug.SetCommand(cmdIndex++, "Toggle file explorer", FileExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = cmdIndex - 1;
 
             // Npp already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
-            foreach (var key in uniqueKeys.Keys)
+            foreach (var key in menu.UniqueKeys.Keys)
                 KeyInterceptor.Instance.Add(key);
             KeyInterceptor.Instance.Add(Keys.Up);
             KeyInterceptor.Instance.Add(Keys.Down);
@@ -185,12 +195,11 @@ namespace _3PA {
         /// </summary>
         internal static void OnNppReady() {
             try {
-                // This allows to correctly feed the dll with dependencies
+                // This allows to correctly feed the dll with its dependencies
                 LibLoader.Init();
 
-                // catch unhandled errors
-                AppDomain currentDomain = AppDomain.CurrentDomain;
-                currentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
+                // catch unhandled errors to log them
+                AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
                 Application.ThreadException += ErrorHandler.ThreadErrorHandler;
                 TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
 
@@ -205,7 +214,7 @@ namespace _3PA {
 
             #region Themes
 
-            // themes
+            // themes and html
             ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
             ThemeManager.AccentColor = Config.Instance.AccentColor;
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
@@ -232,10 +241,12 @@ namespace _3PA {
             Keywords.Init();
             Config.Save();
             FileTags.Init();
-            DataBase.Init();
 
             // initialize the list of objects of the autocompletion form
             AutoComplete.FillStaticItems(true);
+
+            // init database info
+            DataBase.Init();
 
             // make sure the UDL is present, also display the welcome message
             Highlight.CheckUdl();
@@ -324,14 +335,14 @@ namespace _3PA {
 
 
                 // check if the user triggered a function for which we set a shortcut (internalShortcuts)
-                foreach (var shortcut in Interop.Plug.InternalShortCuts.Keys) {
-                    if ((byte) key == shortcut._key
+                foreach (var shortcut in NppMenu.InternalShortCuts.Keys) {
+                    if ((byte)key == shortcut._key
                         && modifiers.IsCtrl == shortcut.IsCtrl
                         && modifiers.IsShift == shortcut.IsShift
                         && modifiers.IsAlt == shortcut.IsAlt) {
                         handled = true;
                         var shortcut1 = shortcut;
-                        Interop.Plug.InternalShortCuts[shortcut1].Item1();
+                        NppMenu.InternalShortCuts[shortcut1].Item1();
                         break;
                     }
                 }
@@ -351,7 +362,7 @@ namespace _3PA {
         /// <param name="c"></param>
         public static void OnCharTyped(char c) {
             // CTRL + S : char code 19
-            if (c == (char) 19) {
+            if (c == (char)19) {
                 Npp.Undo();
                 Npp.SaveCurrentDocument();
                 return;
@@ -537,9 +548,9 @@ namespace _3PA {
                     warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                     warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                     var curPath = Npp.GetCurrentFilePath();
-                    UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", args => {
+                    UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                         Npp.Goto(curPath, int.Parse(args.Link));
-                    }, "Appbuilder limitations", 20);
+                    }, 20);
                     FilesInfo.GetFileInfo().WarnedTooLong = true;
                 }
             }
@@ -614,10 +625,15 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
+            for (int i = 0; i < 20; i++) {
+                UserCommunication.Notify("message numero " + i, MessageImg.MsgOk, "edzed", "ezfzef,", 0);
+            }
+            return;
             var progressExec = new ProgressExecution();
+            progressExec.ProcessExited += (sender, exited) => {
+                UserCommunication.Notify("Compilation done?! " + exited.ExtractDbOutputPath);
+            };
             progressExec.Do(ExecutionType.Run);
-            UserCommunication.Notify("<a href='" + progressExec.ExecutionDir + "'>" + progressExec.ExecutionDir + "</a>");
-
             return;
 
             /*
