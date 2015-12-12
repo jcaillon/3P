@@ -90,7 +90,7 @@
     <Compile Include="Interop\DocumentLines.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="MainFeatures\FilesInfo\FilesInfo.cs" />
-    <Compile Include="MainFeatures\ProgressExecution.cs" />
+    <Compile Include="MainFeatures\ProgressExecution\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
@@ -118,7 +118,7 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.Designer.cs">
       <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\CompilationPath.cs" />
+    <Compile Include="MainFeatures\ProgressExecution\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.cs">
       <SubType>UserControl</SubType>
@@ -159,7 +159,7 @@
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
-    <Compile Include="MainFeatures\ProgressEnv.cs" />
+    <Compile Include="MainFeatures\ProgressExecution\ProgressEnv.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -229,7 +229,6 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\Highlight.cs" />
-    <Compile Include="MainFeatures\ProgressHandler.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
@@ -335,6 +334,8 @@
     </Content>
     <Content Include="Html\Pages\about.html" />
     <Content Include="Html\StyleSheet.css" />
+    <Content Include="Images\Appli\DownloadDbNok.png" />
+    <Content Include="Images\Appli\DownloadDbOk.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
@@ -407,6 +408,21 @@
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
+    <Content Include="Images\NotifAndMessages\MsgError.png" />
+    <Content Include="Images\NotifAndMessages\MsgHighImportance.png" />
+    <Content Include="Images\NotifAndMessages\MsgInfo.png" />
+    <Content Include="Images\NotifAndMessages\MsgLogo.png" />
+    <Content Include="Images\NotifAndMessages\MsgOk.png" />
+    <Content Include="Images\NotifAndMessages\MsgPin.png" />
+    <Content Include="Images\NotifAndMessages\MsgPoison.png" />
+    <Content Include="Images\NotifAndMessages\MsgQuestion.png" />
+    <Content Include="Images\NotifAndMessages\MsgQuestionShield.png" />
+    <Content Include="Images\NotifAndMessages\MsgRadioActive.png" />
+    <Content Include="Images\NotifAndMessages\MsgServices.png" />
+    <Content Include="Images\NotifAndMessages\MsgSkull.png" />
+    <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
+    <Content Include="Images\NotifAndMessages\MsgWarning.png" />
+    <Content Include="Images\NotifAndMessages\MsgWarningShield.png" />
     <Content Include="Images\tooltips\Output.png" />
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />

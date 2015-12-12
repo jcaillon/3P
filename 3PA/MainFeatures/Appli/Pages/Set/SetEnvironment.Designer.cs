@@ -28,6 +28,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.mainPanel = new YamuiFramework.Controls.YamuiPanel();
+            this.btDownload = new YamuiFramework.Controls.YamuiImageButton();
             this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
             this.btcontrol1 = new YamuiFramework.Controls.YamuiButton();
             this.btright6 = new YamuiFramework.Controls.YamuiImageButton();
@@ -68,6 +69,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // mainPanel
             // 
+            this.mainPanel.Controls.Add(this.btDownload);
             this.mainPanel.Controls.Add(this.btcontrol2);
             this.mainPanel.Controls.Add(this.btcontrol1);
             this.mainPanel.Controls.Add(this.btright6);
@@ -111,6 +113,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.TabIndex = 0;
             this.mainPanel.VerticalScrollbarHighlightOnWheel = false;
             this.mainPanel.VerticalScrollbarSize = 10;
+            // 
+            // btDownload
+            // 
+            this.btDownload.BackColor = System.Drawing.Color.Transparent;
+            this.btDownload.BackGrndImage = null;
+            this.btDownload.Location = new System.Drawing.Point(452, 101);
+            this.btDownload.Margin = new System.Windows.Forms.Padding(0);
+            this.btDownload.Name = "btDownload";
+            this.btDownload.Size = new System.Drawing.Size(20, 20);
+            this.btDownload.TabIndex = 48;
+            this.btDownload.Text = "yamuiImageButtonDB";
+            this.btDownload.Click += new System.EventHandler(this.btDownload_Click);
             // 
             // btcontrol2
             // 
@@ -192,7 +206,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.cbDatabase.ItemHeight = 19;
             this.cbDatabase.Location = new System.Drawing.Point(238, 97);
             this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(234, 25);
+            this.cbDatabase.Size = new System.Drawing.Size(211, 25);
             this.cbDatabase.TabIndex = 40;
             this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
@@ -549,5 +563,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButton btcontrol2;
         private YamuiButton btcontrol1;
         private HtmlToolTip toolTip;
+        private YamuiImageButton btDownload;
     }
 }

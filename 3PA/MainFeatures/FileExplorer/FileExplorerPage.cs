@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.FileExplorer {

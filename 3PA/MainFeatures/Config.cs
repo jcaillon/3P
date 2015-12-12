@@ -17,12 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
@@ -106,6 +107,7 @@ namespace _3PA.MainFeatures {
         public bool ToolTipDeactivate = false;
 
         public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
+        public string GlobalCompilableExtension = ".p,.w,.t";
 
         [Range(0, 1)]
         public int GlobalCurrentEnvironnement = 0;
@@ -113,6 +115,7 @@ namespace _3PA.MainFeatures {
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
+        public string EnvLastDbInfoUsed = "database_out.txt";
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";
         public string EnvCurrentDatabase = "";
@@ -214,7 +217,7 @@ namespace _3PA.MainFeatures {
         }
 
         private static void configWatcher_Changed(object sender, FileSystemEventArgs e) {
-            UserCommunication.Notify("Config changed", MessageImage.Ok, "EVENT", "File changed");
+            UserCommunication.Notify("Config changed", MessageImg.MsgOk, "EVENT", "File changed");
             Init();
         }
 

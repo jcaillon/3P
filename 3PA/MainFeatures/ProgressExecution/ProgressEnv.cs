@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,7 @@ using System.Linq;
 using _3PA.Data;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures {
+namespace _3PA.MainFeatures.ProgressExecution {
     public class ProgressEnv {
 
         private static string _filePath;

@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -38,6 +38,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.InfoToolTip;
+using _3PA.MainFeatures.ProgressExecution;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA {
@@ -231,13 +232,10 @@ namespace _3PA {
             Keywords.Init();
             Config.Save();
             FileTags.Init();
+            DataBase.Init();
 
             // initialize the list of objects of the autocompletion form
             AutoComplete.FillStaticItems(true);
-
-            // Fetch the info from the database, when its done, it will update the parser, if it needs
-            // to extract the db info (and since it takes a lot of time), it will parse immediatly instead
-            DataBase.FetchCurrentDbInfo();
 
             // make sure the UDL is present, also display the welcome message
             Highlight.CheckUdl();
@@ -539,7 +537,7 @@ namespace _3PA {
                     warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                     warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                     var curPath = Npp.GetCurrentFilePath();
-                    UserCommunication.Notify(warningMessage.ToString(), MessageImage.HighImportance, "File saved", args => {
+                    UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", args => {
                         Npp.Goto(curPath, int.Parse(args.Link));
                     }, "Appbuilder limitations", 20);
                     FilesInfo.GetFileInfo().WarnedTooLong = true;
@@ -616,6 +614,12 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
+            var progressExec = new ProgressExecution();
+            progressExec.Do(ExecutionType.Run);
+            UserCommunication.Notify("<a href='" + progressExec.ExecutionDir + "'>" + progressExec.ExecutionDir + "</a>");
+
+            return;
+
             /*
             var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
             foreach (var kpv in derp) {
@@ -623,7 +627,7 @@ namespace _3PA {
             }*/
 
             var canIndent = ParserHandler.CanIndent();
-            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImage.Ok : MessageImage.Error, "Parser state", "Can indent?", 20);
+            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
             if (!canIndent) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;

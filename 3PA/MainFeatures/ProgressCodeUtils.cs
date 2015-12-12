@@ -17,12 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.IO;
-using System.Linq;
+
 using System.Text;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.ProgressExecution;
 
 namespace _3PA.MainFeatures {
     class ProgressCodeUtils {
@@ -70,7 +69,7 @@ namespace _3PA.MainFeatures {
                     foreach (var fullPath in fullPaths) {
                         output.Append("<br><a class='ToolGotoDefinition' href='" + fullPath + "'>" + fullPath + "</a>");
                     }
-                    UserCommunication.Notify(output.ToString(), MessageImage.Question, "Question", args => {
+                    UserCommunication.Notify(output.ToString(), MessageImg.MsgQuestion, "Question", args => {
                         Npp.Goto(args.Link);
                         args.Handled = true;
                     }, "Open a file", 0, 500);
@@ -79,7 +78,7 @@ namespace _3PA.MainFeatures {
                 return;
             }
 
-            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImage.Info, "information", "Failed to find an origin", 5);
+            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "information", "Failed to find an origin", 5);
         }
 
         #endregion

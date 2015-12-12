@@ -17,8 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.Drawing;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Properties;
@@ -67,7 +67,7 @@ namespace _3PA.Html {
         /// <param name="title"></param>
         /// <param name="subtitle"></param>
         /// <returns></returns>
-        public static string FormatMessage(string content, MessageImage image, string title, string subtitle) {
+        public static string FormatMessage(string content, MessageImg image, string title, string subtitle) {
             return @"
             <div style='margin-bottom: 1px;'>
             <table style='margin-bottom: 5px; width: 100%'>
@@ -89,5 +89,23 @@ namespace _3PA.Html {
         public static string GetLogo() {
             return "logo30x30";
         }
+    }
+
+    public enum MessageImg {
+        MsgLogo,
+        MsgError,
+        MsgHighImportance,
+        MsgInfo,
+        MsgOk,
+        MsgPin,
+        MsgPoison,
+        MsgQuestion,
+        MsgQuestionShield,
+        MsgRadioActive,
+        MsgServices,
+        MsgSkull,
+        MsgWarning,
+        MsgWarningShield,
+        MsgUpdate
     }
 }

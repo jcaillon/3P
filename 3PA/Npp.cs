@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,7 +25,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -150,7 +151,7 @@ namespace _3PA {
         /// <param name="saveHistoric"></param>
         public static void Goto(string document, int line, int column, bool saveHistoric) {
             if (!File.Exists(document)) {
-                UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImage.HighImportance, "Warning", "File not found", 5);
+                UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
             }
             if (saveHistoric)

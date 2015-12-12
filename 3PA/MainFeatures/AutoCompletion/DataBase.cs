@@ -17,10 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
@@ -36,28 +38,83 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// A simple dictionnary containing all the possible names for the tables defined in the database,
         /// it is used by the parser to identify used tables in a program
         /// </summary>
-        private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase); 
+        private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
-        private static string _filePath;
-        private static string _location = Npp.GetConfigDir();
-        private static string _fileName = "database_out.txt";
+        private static string _outputFileName;
 
         /// <summary>
-        /// Should be called to extract the database info from the current environnement database_out file
-        /// if the database_out file doesn't exists, start a progress program to extract it
+        /// Gets the directory where database info are stored
+        /// </summary>
+        public static string DatabaseDir {
+            get {
+                var dir = Path.Combine(Npp.GetConfigDir(), "DatabaseInfo");
+                if (!Directory.Exists(dir))
+                    try {
+                        Directory.CreateDirectory(dir);
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Permission denied when creating " + dir);
+                    }
+                return dir;
+            }
+        }
+
+        /// <summary>
+        /// Tries to load the database information of the current ProgressEnv, 
+        /// returns false the info is not available
+        /// </summary>
+        /// <returns></returns>
+        public static bool TryToLoadDatabaseInfo() {
+            var fileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
+
+            if (File.Exists(Path.Combine(DatabaseDir, fileName))) {
+                //TODO: read, ut delay for 1s, liek auto comple
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Should be called to extract the database info from the current environnement
         /// </summary>
         public static void FetchCurrentDbInfo() {
-            //TODO: read the .txt that matchs with the current db connected
-            _filePath = Path.Combine(_location, _fileName);
-
-            // if the file is already available, read it
-            if (true) {
-                Read();
-            } else {
-                // start a new thread with a progress program that export the db info, execute Read() asynchronously,
-                // meanwhile update the parser with the info we got
-                AutoComplete.ParseCurrentDocument(true);
+            // dont extract 2 db at once
+            if (!string.IsNullOrEmpty(_outputFileName)) {
+                UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgPin, "Database info update");
+                return;
             }
+
+            // save the filename of the output database info file for this environment
+            _outputFileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
+
+            UserCommunication.Notify("Now fetching info on all the connected databases for the current environment", MessageImg.MsgInfo, "Database info update");
+
+            //ProgressExecution
+        }
+
+        /// <summary>
+        /// Method called after the execution of the program extracting the db info
+        /// </summary>
+        /// <param name="outputFilePath"></param>
+        public static void ExtractionDone(string outputFilePath) {
+            // copy to database dir
+            File.Copy(outputFilePath, Path.Combine(DatabaseDir, _outputFileName));
+
+            // read
+            Config.Instance.EnvLastDbInfoUsed = _outputFileName;
+            Init();
+
+            // update auto-completion
+            AutoComplete.ParseCurrentDocument();
+
+            _outputFileName = null;
+        }
+
+        /// <summary>
+        /// Read last used database info file
+        /// </summary>
+        public static void Init() {
+            Read(Path.Combine(DatabaseDir, Config.Instance.EnvLastDbInfoUsed));
         }
 
         /// <summary>
@@ -65,13 +122,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// and fills _dataBases, _tablesDictionary
         /// It then updates the parser with the new info
         /// </summary>
-        private static void Read() {
-            if (!File.Exists(_filePath)) return;
+        private static void Read(string filePath) {
+            if (!File.Exists(filePath)) return;
             _dataBases.Clear();
             try {
                 ParsedDataBase currentDb = null;
                 ParsedTable currentTable = null;
-                foreach (var items in File.ReadAllLines(_filePath, TextEncodingDetect.GetFileEncoding(_filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
+                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
                     var splitted = items.Split('\t');
                     switch (items[0]) {
                         case 'H':
@@ -145,7 +202,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     }
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading database info!", _filePath);
+                ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
                 return;
             }
 

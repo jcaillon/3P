@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Drawing;
 using System.Linq;
@@ -26,6 +27,8 @@ using YamuiFramework.Controls;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.ProgressExecution;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     public partial class SetEnvironment : YamuiPage {
@@ -140,6 +143,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textbox6.Text = ProgressEnv.Current.LogFilePath;
 
             envLabel.Text = ProgressEnv.Current.Label;
+
+            // download database information
+            if (DataBase.TryToLoadDatabaseInfo()) {
+                btDownload.BackGrndImage = ImageResources.DownloadDbOk;
+                toolTip.SetToolTip(btDownload, "<i>The database information for this environment are available and in use in the auto-completion list</i><br><br><b>Click this button</b> to force a refresh of the database information for this environment".BreakText(40, "<br>"));
+            } else {
+                btDownload.BackGrndImage = ImageResources.DownloadDbNok;
+                toolTip.SetToolTip(btDownload, "<i>No information available for this database!</i><br><br><b>Click this button</b> to fetch the database information for this environment, they will be used in the auto-completion list to suggest database names, table names and field names.<br><br>By default, the auto-completion list uses the last environment selected where database info were available.".BreakText(40, "<br>"));
+            }
+            btDownload.Invalidate();
         }
 
         private void UpdateModel() {
@@ -277,8 +290,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 BlinkTextBox(associatedTextBox, ThemeManager.Current.GenericErrorColor);
         }
 
-        #endregion
+        private void btDownload_Click(object sender, EventArgs e) {
+            DataBase.FetchCurrentDbInfo();
+        }
 
+        #endregion
 
         #region Private Functions
 

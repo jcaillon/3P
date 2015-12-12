@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Text;
+using _3PA.MainFeatures;
 
 namespace _3PA.Interop {
 
@@ -44,6 +45,157 @@ namespace _3PA.Interop {
 
         #region Methods
 
+        public void ScnModified(SCNotification scn) {
+            if ((scn.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) > 0) {
+                TrackDeleteText(scn);
+            }
+
+            if ((scn.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) > 0) {
+                TrackInsertText(scn);
+            }
+        }
+
+        internal void RebuildLineData() {
+            _stepLine = 0;
+            _stepLength = 0;
+
+            _perLineData = new GapBuffer<PerLine> { new PerLine { Start = 0 }, new PerLine { Start = 0 } };
+            // Terminal
+
+            // Fake an insert notification
+            var scn = new SCNotification {
+                linesAdded = Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() - 1,
+                position = 0,
+                length = Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32()
+            };
+            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            TrackInsertText(scn);
+        }
+
+        /// <summary>
+        /// Returns the line index containing the CHARACTER position.
+        /// </summary>
+        internal int LineFromCharPosition(int pos) {
+            try {
+
+                // Iterative binary search
+                // http://en.wikipedia.org/wiki/Binary_search_algorithm
+                // System.Collections.Generic.ArraySortHelper.InternalBinarySearch
+
+                var low = 0;
+                var high = Count - 1;
+
+                while (low <= high) {
+                    var mid = low + ((high - low) / 2);
+                    var start = CharPositionFromLine(mid);
+
+                    if (pos == start)
+                        return mid;
+                    if (start < pos)
+                        low = mid + 1;
+                    else
+                        high = mid - 1;
+                }
+
+                // After while exit, 'low' will point to the index where 'pos' should be
+                // inserted (if we were creating a new line start). The line containing
+                // 'pos' then would be 'low - 1'.
+                return low - 1;
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "LineFromCharPosition pos" + pos + ", IsLinesInfoUpdated = " + Npp.IsLinesInfoUpdated);
+                RebuildLineData();
+                return 0;
+            }
+        }
+
+        internal int CharToBytePosition(int pos) {
+            try {
+
+                // Adjust to the nearest line start
+                var line = LineFromCharPosition(pos);
+                var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+                pos -= CharPositionFromLine(line);
+
+                // Optimization when the line contains NO multibyte characters
+                if (!LineContainsMultibyteChar(line))
+                    return (bytePos + pos);
+
+                while (pos > 0) {
+                    // Move char-by-char
+                    bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
+                    pos--;
+                }
+
+                return bytePos;
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "CharToBytePosition pos" + pos + ",  IsLinesInfoUpdated = " + Npp.IsLinesInfoUpdated);
+                RebuildLineData();
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Converts a BYTE offset to a CHARACTER offset.
+        /// </summary>
+        internal int ByteToCharPosition(int pos) {
+            try {
+
+                var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
+                var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+                var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
+                return count;
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "ByteToCharPosition pos" + pos + ",  IsLinesInfoUpdated = " + Npp.IsLinesInfoUpdated);
+                RebuildLineData();
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Returns the number of CHARACTERS in a line.
+        /// </summary>
+        internal int CharLineLength(int index) {
+            // A line's length is calculated by subtracting its start offset from
+            // the start of the line following. We keep a terminal (faux) line at
+            // the end of the list so we can calculate the length of the last line.
+            try {
+                if (index + 1 <= _stepLine)
+                    return _perLineData[index + 1].Start - _perLineData[index].Start;
+                if (index <= _stepLine)
+                    return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
+                return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "CharLineLength, index = " + index + ", _perLineData.Count = " + _perLineData + ", IsLinesInfoUpdated = " + Npp.IsLinesInfoUpdated);
+                RebuildLineData();
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Returns the CHARACTER offset where the line begins.
+        /// </summary>
+        internal int CharPositionFromLine(int index) {
+
+            int start = 0;
+            try {
+                start = _perLineData[index].Start;
+                if (index > _stepLine)
+                    start += _stepLength;
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "CharPositionFromLine, index = " + index + ", _perLineData.Count = " + _perLineData + ", IsLinesInfoUpdated = " + Npp.IsLinesInfoUpdated);
+                RebuildLineData();
+            }
+
+            return start;
+        }
+
+        #endregion Methods
+
+        #region private methods
+
         /// <summary>
         /// Adjust the number of CHARACTERS in a line.
         /// </summary>
@@ -55,65 +207,6 @@ namespace _3PA.Interop {
             var perLine = _perLineData[index];
             perLine.ContainsMultibyte = ContainsMultibyte.Unkown;
             _perLineData[index] = perLine;
-        }
-
-        /// <summary>
-        /// Converts a BYTE offset to a CHARACTER offset.
-        /// </summary>
-        internal int ByteToCharPosition(int pos) {
-
-            var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
-            var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
-
-            return count;
-        }
-
-        /// <summary>
-        /// Returns the number of CHARACTERS in a line.
-        /// </summary>
-        internal int CharLineLength(int index) {
-            // A line's length is calculated by subtracting its start offset from
-            // the start of the line following. We keep a terminal (faux) line at
-            // the end of the list so we can calculate the length of the last line.
-
-            if (index + 1 <= _stepLine)
-                return _perLineData[index + 1].Start - _perLineData[index].Start;
-            if (index <= _stepLine)
-                return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
-            return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
-        }
-
-        /// <summary>
-        /// Returns the CHARACTER offset where the line begins.
-        /// </summary>
-        internal int CharPositionFromLine(int index) {
-
-            var start = _perLineData[index].Start;
-            if (index > _stepLine)
-                start += _stepLength;
-
-            return start;
-        }
-
-        internal int CharToBytePosition(int pos) {
-
-            // Adjust to the nearest line start
-            var line = LineFromCharPosition(pos);
-            var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            pos -= CharPositionFromLine(line);
-
-            // Optimization when the line contains NO multibyte characters
-            if (!LineContainsMultibyteChar(line))
-                return (bytePos + pos);
-
-            while (pos > 0) {
-                // Move char-by-char
-                bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
-                pos--;
-            }
-
-            return bytePos;
         }
 
         private void DeletePerLine(int index) {
@@ -155,44 +248,13 @@ namespace _3PA.Interop {
             if (perLine.ContainsMultibyte == ContainsMultibyte.Unkown) {
                 perLine.ContainsMultibyte =
                     (Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(index)).ToInt32() == CharLineLength(index))
-                    ? ContainsMultibyte.No
-                    : ContainsMultibyte.Yes;
+                        ? ContainsMultibyte.No
+                        : ContainsMultibyte.Yes;
 
                 _perLineData[index] = perLine;
             }
 
             return (perLine.ContainsMultibyte == ContainsMultibyte.Yes);
-        }
-
-        /// <summary>
-        /// Returns the line index containing the CHARACTER position.
-        /// </summary>
-        internal int LineFromCharPosition(int pos) {
-            Debug.Assert(pos >= 0);
-
-            // Iterative binary search
-            // http://en.wikipedia.org/wiki/Binary_search_algorithm
-            // System.Collections.Generic.ArraySortHelper.InternalBinarySearch
-
-            var low = 0;
-            var high = Count - 1;
-
-            while (low <= high) {
-                var mid = low + ((high - low) / 2);
-                var start = CharPositionFromLine(mid);
-
-                if (pos == start)
-                    return mid;
-                if (start < pos)
-                    low = mid + 1;
-                else
-                    high = mid - 1;
-            }
-
-            // After while exit, 'low' will point to the index where 'pos' should be
-            // inserted (if we were creating a new line start). The line containing
-            // 'pos' then would be 'low - 1'.
-            return low - 1;
         }
 
         /// <summary>
@@ -233,33 +295,6 @@ namespace _3PA.Interop {
                     _perLineData[_stepLine] = data;
                     _stepLine--;
                 }
-            }
-        }
-
-        internal void RebuildLineData() {
-            _stepLine = 0;
-            _stepLength = 0;
-
-            _perLineData = new GapBuffer<PerLine> {new PerLine {Start = 0}, new PerLine {Start = 0}};
-            // Terminal
-
-            // Fake an insert notification
-            var scn = new SCNotification {
-                linesAdded = Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() - 1,
-                position = 0,
-                length = Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32()
-            };
-            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
-            TrackInsertText(scn);
-        }
-
-        public void ScnModified(SCNotification scn) {
-            if ((scn.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) > 0) {
-                TrackDeleteText(scn);
-            }
-
-            if ((scn.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) > 0) {
-                TrackInsertText(scn);
             }
         }
 
@@ -306,7 +341,7 @@ namespace _3PA.Interop {
             }
         }
 
-        #endregion Methods
+        #endregion
 
         #region Properties
 
@@ -315,13 +350,15 @@ namespace _3PA.Interop {
         /// </summary>
         /// <returns>The number of lines</returns>
         public int Count {
-get { return (_perLineData.Count - 1); } }
+            get { return (_perLineData.Count - 1); }
+        }
 
         /// <summary>
         /// Gets the number of CHARACTERS in the document.
         /// </summary>
         internal int TextLength {
-get { return CharPositionFromLine(_perLineData.Count - 1); } }
+            get { return CharPositionFromLine(_perLineData.Count - 1); }
+        }
 
         #endregion Properties
 
@@ -474,7 +511,8 @@ get { return CharPositionFromLine(_perLineData.Count - 1); } }
         }
 
         public int Count {
-get { return _buffer.Length - (_gapEnd - _gapStart); } }
+            get { return _buffer.Length - (_gapEnd - _gapStart); }
+        }
 
         public T this[int index] {
             get {

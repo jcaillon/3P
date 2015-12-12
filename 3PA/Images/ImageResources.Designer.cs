@@ -169,6 +169,26 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static Bitmap DownloadDbNok {
+            get {
+                object obj = ResourceManager.GetObject("DownloadDbNok", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap DownloadDbOk {
+            get {
+                object obj = ResourceManager.GetObject("DownloadDbOk", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static Bitmap Dynamic {
             get {
                 object obj = ResourceManager.GetObject("Dynamic", resourceCulture);
@@ -502,6 +522,156 @@ namespace _3PA.Images {
         internal static Bitmap MissingDbName {
             get {
                 object obj = ResourceManager.GetObject("MissingDbName", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgError {
+            get {
+                object obj = ResourceManager.GetObject("MsgError", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgHighImportance {
+            get {
+                object obj = ResourceManager.GetObject("MsgHighImportance", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgInfo {
+            get {
+                object obj = ResourceManager.GetObject("MsgInfo", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgLogo {
+            get {
+                object obj = ResourceManager.GetObject("MsgLogo", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgOk {
+            get {
+                object obj = ResourceManager.GetObject("MsgOk", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgPin {
+            get {
+                object obj = ResourceManager.GetObject("MsgPin", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgPoison {
+            get {
+                object obj = ResourceManager.GetObject("MsgPoison", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgQuestion {
+            get {
+                object obj = ResourceManager.GetObject("MsgQuestion", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgQuestionShield {
+            get {
+                object obj = ResourceManager.GetObject("MsgQuestionShield", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgRadioActive {
+            get {
+                object obj = ResourceManager.GetObject("MsgRadioActive", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgServices {
+            get {
+                object obj = ResourceManager.GetObject("MsgServices", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgSkull {
+            get {
+                object obj = ResourceManager.GetObject("MsgSkull", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgUpdate {
+            get {
+                object obj = ResourceManager.GetObject("MsgUpdate", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgWarning {
+            get {
+                object obj = ResourceManager.GetObject("MsgWarning", resourceCulture);
+                return ((Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static Bitmap MsgWarningShield {
+            get {
+                object obj = ResourceManager.GetObject("MsgWarningShield", resourceCulture);
                 return ((Bitmap)(obj));
             }
         }

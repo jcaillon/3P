@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -27,11 +28,12 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using MarkdownDeep;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.Properties;
 using Token = _3PA.MainFeatures.Parser.Token;
+using Utils = _3PA.Lib.Utils;
 
 namespace _3PA.MainFeatures {
 
@@ -91,7 +93,7 @@ namespace _3PA.MainFeatures {
                     try {
                         json = wc.DownloadString(Config.ReleasesUrl);
                     } catch (WebException e) {
-                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesUrl + "'>" + Config.ReleasesUrl + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImage.HighImportance, "Couldn't reach github");
+                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesUrl + "'>" + Config.ReleasesUrl + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github");
                         ErrorHandler.Log(e.ToString());
                     }
 
@@ -143,7 +145,7 @@ namespace _3PA.MainFeatures {
                     if (highestVersionInt > -1) {
                         // Update dir
                         if (Directory.Exists(PathUpdateFolder))
-                            DeleteDirectory(PathUpdateFolder, true);
+                            Utils.DeleteDirectory(PathUpdateFolder, true);
                         Directory.CreateDirectory(PathUpdateFolder);
 
                         // latest release info
@@ -169,7 +171,7 @@ namespace _3PA.MainFeatures {
                         }
 
                     } else if (alwaysGetFeedBack) {
-                        UserCommunication.Notify("You already possess the latest version of 3P!", MessageImage.Ok, "Update check", "You own the " + AssemblyInfo.Version);
+                        UserCommunication.Notify("You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the " + AssemblyInfo.Version);
                     }
                 }
             } catch (Exception e) {
@@ -195,7 +197,7 @@ namespace _3PA.MainFeatures {
 
                 // check the presence of the plugin file
                 if (!File.Exists(PathDownloadedPlugin)) {
-                    DeleteDirectory(PathUpdateFolder, true);
+                    Utils.DeleteDirectory(PathUpdateFolder, true);
                     return;
                 }
 
@@ -214,8 +216,8 @@ namespace _3PA.MainFeatures {
                 Distant version : <b>" + LatestReleaseInfo.Version + @"</b><br>
                 Release name : <b>" + LatestReleaseInfo.Name + @"</b><br>
                 Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
-                Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" + 
-                                         (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : "  + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImage.Update, "Update check", "An update is available");
+                Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
+                                         (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : " + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImg.MsgUpdate, "Update check", "An update is available");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
             }
@@ -247,13 +249,13 @@ namespace _3PA.MainFeatures {
                         Copy this file : <b><a href='" + PathDownloadedPlugin + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
                         In this folder (replacing the old file) : <b><a href='" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + "'>" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + @"</a></b><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        Thank you for your patience!<br>", MessageImage.Update, "Update", "Problem during the update!");
+                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                         return;
                     }
 
                     var md = new Markdown();
-                    UserCommunication.Message(md.Transform("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))), 
-                        MessageImage.Update, 
+                    UserCommunication.Message(md.Transform("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))),
+                        MessageImg.MsgUpdate, 
                         "A new version has been installed!",
                         "Updated to version " + AssemblyInfo.Version,
                         new List<string> { "ok" }, 
@@ -264,7 +266,7 @@ namespace _3PA.MainFeatures {
                     File.Delete(PathToVersionLog);
 
                     if (Directory.Exists(PathUpdateFolder))
-                        DeleteDirectory(PathUpdateFolder, true);
+                        Utils.DeleteDirectory(PathUpdateFolder, true);
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "OnNotepadStart");
@@ -288,42 +290,6 @@ namespace _3PA.MainFeatures {
             });
             if (process != null)
                 process.WaitForExit();
-        }
-
-        /// <summary>
-        /// Delete a dir, recursively
-        /// </summary>
-        /// <param name="path"></param>
-        /// <param name="recursive"></param>
-        public static void DeleteDirectory(string path, bool recursive) {
-            // Delete all files and sub-folders?
-            if (recursive) {
-                // Yep... Let's do this
-                var subfolders = Directory.GetDirectories(path);
-                foreach (var s in subfolders) {
-                    DeleteDirectory(s, true);
-                }
-            }
-
-            // Get all files of the folder
-            var files = Directory.GetFiles(path);
-            foreach (var f in files) {
-                // Get the attributes of the file
-                var attr = File.GetAttributes(f);
-
-                // Is this file marked as 'read-only'?
-                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
-                    // Yes... Remove the 'read-only' attribute, then
-                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
-                }
-
-                // Delete the file
-                File.Delete(f);
-            }
-
-            // When we get here, all the files of the folder were
-            // already deleted, so we just delete the empty folder
-            Directory.Delete(path);
         }
 
     }

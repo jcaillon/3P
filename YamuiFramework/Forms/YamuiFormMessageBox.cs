@@ -265,21 +265,14 @@ namespace YamuiFramework.Forms {
 
     public enum MessageImage {
         Free,
-        Logo,
-        Ant,
         Error,
         HighImportance,
         Info,
         Ok,
-        Pin,
-        Poison,
         Question,
         QuestionShield,
-        RadioActive,
         Services,
-        Skull,
         Warning,
         WarningShield,
-        Update
     }
 }

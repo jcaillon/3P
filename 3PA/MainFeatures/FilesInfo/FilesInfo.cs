@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -325,6 +326,8 @@ namespace _3PA.MainFeatures.FilesInfo {
         public CurrentOperation CurrOperation { get; set; }
         public List<FileError> FileErrors { get; set; }
         public bool WarnedTooLong { get; set; }
+        public ProgressExecution.ProgressExecution ProgressExecution { get; set; }
+        public bool SavedSinceLastCompilation { get; set; }
     }
 
     /// <summary>

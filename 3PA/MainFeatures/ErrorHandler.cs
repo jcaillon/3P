@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
@@ -88,7 +89,7 @@ namespace _3PA.MainFeatures {
                     (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
                     "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + 
                     "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
-                    MessageImage.Poison, "An error has occured",
+                    MessageImg.MsgPoison, "An error has occured",
                     args => {
                         Npp.Goto(args.Link);
                         args.Handled = true;
@@ -96,7 +97,7 @@ namespace _3PA.MainFeatures {
                     message, 0, 500);
             else
                 UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>",
-                    MessageImage.Poison, "An error has occured", 
+                    MessageImg.MsgPoison, "An error has occured", 
                     args => {
                         Npp.Goto(args.Link);
                         args.Handled = true;

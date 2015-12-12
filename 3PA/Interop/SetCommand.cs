@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
+using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Interop {
@@ -127,7 +128,7 @@ namespace _3PA.Interop {
                     Config.Instance.ShortCuts.Add(shortcutName, ShortcutKey2String(shortcut));
                     Config.Save();
                     if (!_alreadyWarnedUserAboutShortkey) {
-                        UserCommunication.Notify("You successfully changed a shortcut.<br>Your change will be taken into account at the next notepad++ restart!", MessageImage.Pin, "Information", "Shortcut modification");
+                        UserCommunication.Notify("You successfully changed a shortcut.<br>Your change will be taken into account at the next notepad++ restart!", MessageImg.MsgPin, "Information", "Shortcut modification");
                         _alreadyWarnedUserAboutShortkey = true;
                     }
                 }

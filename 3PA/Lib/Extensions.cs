@@ -17,11 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -126,7 +128,30 @@ namespace _3PA.Lib {
 
 
         #region string extensions
+        
+        /// <summary>
+        /// Replaces every forbidden char (forbidden for a filename) in the text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string ToValidFileName(this string text) {
+            return Path.GetInvalidFileNameChars().Aggregate(text, (current, c) => current.Replace(c, '-'));
+        }
 
+        /// <summary>
+        /// Replaces " by ~" and add extra " at the start and end of the string
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string ProgressQuoter(this string text) {
+            return "\"" + text.Replace("\"", "~\"") + "\"";
+        }
+
+        /// <summary>
+        /// Delete every trailing \r or\n
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public static string TrimEol(this string text) {
             return text.TrimEnd('\r', '\n');
         }
@@ -137,13 +162,14 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="text"></param>
         /// <param name="lineLength"></param>
+        /// <param name="eolString"></param>
         /// <returns></returns>
-        public static string BreakText(this string text, int lineLength) {
+        public static string BreakText(this string text, int lineLength, string eolString = "\n") {
             var charCount = 0;
             var lines = text.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries)
                 .GroupBy(w => (charCount += w.Length + 1) / lineLength)
                 .Select(g => string.Join(" ", g));
-            return string.Join("\n", lines.ToArray());
+            return string.Join(eolString, lines.ToArray());
         }
 
         /// <summary>

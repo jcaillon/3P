@@ -257,12 +257,12 @@
     <Compile Include="Helper\DwmApi.cs" />
     <Compile Include="Helper\WinApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Resources\ImageGetter.cs" />
     <Compile Include="Resources\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Resources\ImageGetter.cs" />
     <Compile Include="Themes\Class2xml.cs" />
     <Compile Include="Themes\HtmlHandler.cs" />
     <Compile Include="Themes\Theme.cs" />
@@ -291,28 +291,21 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
     <Content Include="Resources\BackGround\hellokitty.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Logo.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Ant.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Error.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\HighImportance.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Info.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Ok.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Pin.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Poison.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Question.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\QuestionShield.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\RadioActive.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Services.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Skull.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Update.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Warning.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\WarningShield.png" />
     <Content Include="Resources\themesXml.xml" />

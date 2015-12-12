@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -24,8 +25,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using YamuiFramework.Forms;
 using _3PA.Data;
+using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.FilesInfo;
@@ -94,12 +95,12 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
                 // if it already exists in the file, delete the existing one
                 fileContent = regex.Replace(fileContent, @"");
                 if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImage.Info, "Information", "Welcome!");
+                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImg.MsgInfo, "Information", "Welcome!");
                     Config.Instance.UserFirstUse = false;
                 }
             } else {
                 // if it doesn't exist in the file
-                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImage.Info, "Information", "Installing syntax highlighting");
+                UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImg.MsgInfo, "Information", "Installing syntax highlighting");
             }
             if (fileContent.ContainsFast(@"<NotepadPlus />"))
                 fileContent = fileContent.Replace(@"<NotepadPlus />", "<NotepadPlus>\r\n" + DataResources.UDL + "\r\n</NotepadPlus>");

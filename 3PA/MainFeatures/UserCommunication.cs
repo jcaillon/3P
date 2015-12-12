@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,7 +40,7 @@ namespace _3PA.MainFeatures {
         /// <param name="width"></param>
         /// <param name="imageType"></param>
         /// <param name="title"></param>
-        public static void Notify(string html, MessageImage imageType, string title, Action<HtmlLinkClickedEventArgs> clickHandler, string subTitle = "", int duration = 0, int width = 450) {
+        public static void Notify(string html, MessageImg imageType, string title, Action<HtmlLinkClickedEventArgs> clickHandler, string subTitle = "", int duration = 0, int width = 450) {
             if (Appli.Appli.Form != null)
                 Appli.Appli.Form.BeginInvoke((Action)delegate {
                     var toastNotification = new YamuiNotifications(
@@ -51,12 +52,12 @@ namespace _3PA.MainFeatures {
                 });
         }
 
-        public static void Notify(string html, MessageImage imageType, string title, string subTitle = "", int duration = 0, int width = 450) {
+        public static void Notify(string html, MessageImg imageType, string title, string subTitle = "", int duration = 0, int width = 450) {
             Notify(html, imageType, title, null, subTitle, duration, width);
         }
 
         public static void Notify(string html, int duration = 0, int width = 450) {
-            Notify(html, MessageImage.Logo, "debug", "?", duration, width);
+            Notify(html, MessageImg.MsgLogo, "debug", "?", duration, width);
         }
 
         /// <summary>
@@ -71,7 +72,7 @@ namespace _3PA.MainFeatures {
         /// <param name="waitResponse"></param>
         /// <param name="clickHandler"></param>
         /// <param name="dontWrapLines"></param>
-        public static void Message(string html, MessageImage type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler, bool dontWrapLines) {
+        public static void Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler, bool dontWrapLines) {
             if (Appli.Appli.Form != null)
                 Appli.Appli.Form.BeginInvoke((Action)delegate {
                     YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);

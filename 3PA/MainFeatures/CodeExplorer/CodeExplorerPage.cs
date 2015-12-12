@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -499,6 +500,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
             RefreshParserAndCodeExplorer();
+            Npp.GrabFocus();
         }
 
         private void buttonSort_Click(object sender, EventArgs e) {
@@ -531,18 +533,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
             RefreshParserAndCodeExplorer();
+            Npp.GrabFocus();
         }
         
         #endregion
 
         #region filter
 
-        private void RefreshParserAndCodeExplorer() {
+        public void RefreshParserAndCodeExplorer() {
             CleanFilter();
             _unsortedItems.Clear();
             ParserHandler.SavedParserVisitors.Clear();
             AutoComplete.ParseCurrentDocument(true);
-            Npp.GrabFocus();
         }
 
         public void ReapplyFilter() {

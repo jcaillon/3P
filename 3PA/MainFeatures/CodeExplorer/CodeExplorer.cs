@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Runtime.InteropServices;
 using _3PA.Images;
@@ -49,6 +50,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public static void RedrawCodeExplorer() {
             if (ExplorerForm == null) return;
             ExplorerForm.CodeExplorerPage.Redraw();
+        }
+
+        /// <summary>
+        /// Forces to refresh 
+        /// </summary>
+        public static void RefreshParserAndCodeExplorer() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.CodeExplorerPage.RefreshParserAndCodeExplorer();
         }
 
         /// <summary>

@@ -17,7 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace _3PA.MainFeatures {
+namespace _3PA.MainFeatures.ProgressExecution {
     public class CompilationPath {
     }
 

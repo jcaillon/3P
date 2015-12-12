@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {

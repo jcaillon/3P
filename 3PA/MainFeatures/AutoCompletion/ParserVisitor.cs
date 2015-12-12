@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,6 +25,7 @@ using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.ProgressExecution;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
