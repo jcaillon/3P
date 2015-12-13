@@ -21,13 +21,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Runtime.InteropServices;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.FileExplorer {
     public class FileExplorer {
@@ -67,7 +64,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
                 }
                 if (ExplorerForm == null) return;
-                //ExplorerForm.FileExplorerPage.UseAlternativeBackColor = Config.Instance.CodeExplorerUseAlternateColors;
+                ExplorerForm.FileExplorerPage.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -79,10 +76,19 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void Redraw() {
             if (IsVisible) {
-                //ExplorerForm.FileExplorerPage.StyleOvlTree();
+                ExplorerForm.FileExplorerPage.StyleOvlTree();
                 ExplorerForm.Invalidate();
                 ExplorerForm.Refresh();
             }
+        }
+
+        /// <summary>
+        /// Just redraw the file explorer ovl list, it is used to update the "selected" scope when
+        /// the user changes the current document
+        /// </summary>
+        public static void RedrawFileExplorerList() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.FileExplorerPage.Redraw();
         }
 
         /// <summary>
@@ -92,7 +98,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public static void UpdateMenuItemChecked() {
             if (ExplorerForm == null) return;
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, ExplorerForm.Visible ? 1 : 0);
-            Config.Instance.CodeExplorerVisible = ExplorerForm.Visible;
+            Config.Instance.FileExplorerVisible = ExplorerForm.Visible;
         }
 
         /// <summary>
@@ -119,9 +125,35 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        public static void Refresh() { }
+        #region public methods
 
+        /// <summary>
+        /// Refresh the files list
+        /// </summary>
+        public static void Refresh() {
+            ExplorerForm.FileExplorerPage.RefreshOvl();
+            ExplorerForm.FileExplorerPage.FilterByText = "";
+        }
 
+        /// <summary>
+        /// Start a new search for files
+        /// </summary>
+        public static void StartSearch() {
+            try {
+                ExplorerForm.FileExplorerPage.ClearFilter();
+                ExplorerForm.FileExplorerPage.GiveFocustoTextBox();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in StartSearch");
+            }
+        }
+
+        /// <summary>
+        /// Add each files/folders of a given path to the output List of FileObject,
+        /// can be set to be recursive
+        /// </summary>
+        /// <param name="dirPath"></param>
+        /// <param name="recursive"></param>
+        /// <returns></returns>
         public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true) {
             var output = new List<FileObject>();
             if (!Directory.Exists(dirPath))
@@ -133,11 +165,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             // for each file in the dir
             foreach (var fileInfo in dirInfo.GetFiles()) {
                 FileType fileType;
-                if(!Enum.TryParse(fileInfo.Extension.Replace(".",""), true, out fileType))
+                if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileType))
                     fileType = FileType.Unknow;
                 output.Add(new FileObject {
                     FileName = fileInfo.Name,
                     BasePath = fileInfo.DirectoryName,
+                    FullPath = fileInfo.FullName,
                     Flags = FileFlag.ReadOnly,
                     Size = fileInfo.Length,
                     CreateDateTime = fileInfo.CreationTime,
@@ -149,10 +182,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             // for each folder in dir
             foreach (var directoryInfo in dirInfo.GetDirectories()) {
                 // recursive
-                output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
+                if (recursive)
+                    output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
                 output.Add(new FileObject {
                     FileName = directoryInfo.Name,
                     BasePath = Path.GetPathRoot(directoryInfo.FullName),
+                    FullPath = directoryInfo.FullName,
                     CreateDateTime = directoryInfo.CreationTime,
                     ModifieDateTime = directoryInfo.LastWriteTime,
                     Type = FileType.Folder
@@ -160,7 +195,10 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
 
             return output;
-        } 
+        }
+
+        #endregion
+
     }
 
     #region FileObject
@@ -171,6 +209,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     public class FileObject {
         public string FileName { get; set; }
         public string BasePath { get; set; }
+        public string FullPath { get; set; }
         public DateTime ModifieDateTime { get; set; }
         public DateTime CreateDateTime { get; set; }
         public long Size { get; set; }
@@ -180,7 +219,9 @@ namespace _3PA.MainFeatures.FileExplorer {
     }
 
     /// <summary>
-    /// Type of an objetc file (depends on the file's extension)
+    /// Type of an object file (depends on the file's extension),
+    /// corresponds to an icon that appends "Type" to the enum name,
+    /// for example the icon for R files is named RType.png
     /// </summary>
     public enum FileType {
         Unknow,
@@ -196,7 +237,8 @@ namespace _3PA.MainFeatures.FileExplorer {
     }
 
     /// <summary>
-    /// File's flags
+    /// File's flags,
+    /// Same as other flag, corresponds to an icon with the same name as in the enumeration
     /// </summary>
     [Flags]
     public enum FileFlag {
@@ -204,7 +246,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Is the file starred by the user
         /// </summary>
         Favourite = 1,
-        ReadOnly = 2,
+        ReadOnly = 2
     }
 
     #endregion

@@ -262,8 +262,21 @@ namespace _3PA {
             Win32.SendMessage(HandleNpp, NppMsg.NPPM_SAVECURRENTFILE, 0, 0);
         }
 
+        /// <summary>
+        /// Opens given file in notepad++
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         public static bool OpenFile(string file) {
-            return ((int)Win32.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
+            if (!File.Exists(file)) {
+                UserCommunication.Notify(@"Can't find/open the following file :<br>" + file, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
+                return false;
+            }
+            if (GetOpenedFiles().Contains(file)) {
+                SwitchToDocument(file);
+                return true;
+            } 
+            return ((int) Win32.SendMessage(HandleNpp, NppMsg.NPPM_DOOPEN, 0, file)) > 0;
         }
 
         /// <summary>

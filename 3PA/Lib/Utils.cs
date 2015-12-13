@@ -124,6 +124,25 @@ namespace _3PA.Lib {
             return true;
         }
 
+        /// <summary>
+        /// Opens a file with the default shell handler
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        public static bool OpenWithDefaultShellHandler(string filePath) {
+            if (!File.Exists(filePath)) {
+                if (!Directory.Exists(filePath))
+                    return false;
+                OpenFolder(filePath);
+            } else {
+                var process = new ProcessStartInfo(filePath) {
+                    UseShellExecute = true
+                };
+                Process.Start(process);
+            }
+            return true;
+        }
+
         public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);

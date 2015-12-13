@@ -22,6 +22,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
@@ -29,10 +30,9 @@ using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 using _3PA.Images;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecution;
 
 namespace _3PA.MainFeatures.FileExplorer {
@@ -67,39 +67,23 @@ namespace _3PA.MainFeatures.FileExplorer {
             get { return cbDirectory.CheckState; }
         }
 
-
-        // the private fields below are used for the filter function
+        // List of displayed type of file
         private static Dictionary<FileType, SelectorButton<FileType>> _displayedTypes;
-        private static bool _useTypeFiltering;
-        private static string _filterString = "";
-        private static string _currentOwnerName = "";
-        private static int _currentLineNumber;
-
-        private int _currentType;
-
-        // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
-        private int _normalWidth;
 
         // remember the list that was passed to the autocomplete form when we set the items, we need this
         // because we reorder the list each time the user filters stuff, but we need the original order
         private List<FileObject> _initialObjectsList;
 
+        private int _currentType;
         #endregion
 
         #region Constructor
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public FileExplorerPage() {
             InitializeComponent();
-
-            for (int i = 0; i < 20; i++) {
-                var derp = new YamuiImageButton {
-                    Size = new Size(20,20),
-                    BackGrndImage = ImageResources.External,
-                    Margin = new Padding(0)
-                };
-                flowLayoutPanel.Controls.Add(derp);
-                if (i==2) flowLayoutPanel.SetFlowBreak(derp, true);
-            }
 
             #region object view list
 
@@ -109,18 +93,14 @@ namespace _3PA.MainFeatures.FileExplorer {
             // Style the control
             StyleOvlTree();
 
-            //buttonCleanText.BackGrndImage = ImageResources.eraser;
-            //buttonRefresh.BackGrndImage = ImageResources.refresh;
-
             // Register to events
-            //ovlCol.Click += OvlTreeOnClick;
+            ovl.DoubleClick += OvlOnDoubleClick;
+            ovl.KeyDown += OvlOnKeyDown;
+            ovl.Click += OvlOnClick;
 
             // decorate rows
             ovl.UseCellFormatEvents = true;
-            ovl.FormatCell += ovlOnFormatCell;
-
-            // tooltips
-            //toolTipHtml.SetToolTip(buttonExpandRetract, "Toggle <b>Expand/Collapse</b>");
+            ovl.FormatCell += OvlOnFormatCell;
 
             // problems with the width of the column, set here
             FileName.Width = ovl.Width - 17;
@@ -131,17 +111,49 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             #endregion
 
+            #region File explorer misc
+
+            // button images
             btErase.BackGrndImage = ImageResources.eraser;
             btRefresh.BackGrndImage = ImageResources.refresh;
 
+            // events
+            textFilter.TextChanged += TextFilterOnTextChanged;
+            textFilter.KeyDown += TextFilterOnKeyDown;
+            btRefresh.ButtonPressed += BtRefreshOnButtonPressed;
+            btErase.ButtonPressed += BtEraseOnButtonPressed;
+
+            // button tooltips
+            toolTipHtml.SetToolTip(btErase, "<b>Erase</b> the content of the text filter");
+            toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
+            toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list above");
+
             cbDirectory.ThreeState = true;
+
+            #endregion
+
+            #region Actions
+
+            for (int i = 0; i < 20; i++) {
+                var derp = new YamuiImageButton {
+                    Size = new Size(20, 20),
+                    BackGrndImage = ImageResources.External,
+                    Margin = new Padding(0)
+                };
+                flowLayoutPanel.Controls.Add(derp);
+                if (i == 2) flowLayoutPanel.SetFlowBreak(derp, true);
+            }
+
+            #endregion
+
         }
-
-
 
         #endregion
 
+        #region File explorer file list
+
         #region cell formatting and style ovl
+
         /// <summary>
         /// Return the image that needs to be display on the left of an item
         /// representing its type
@@ -149,7 +161,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="typeStr"></param>
         /// <returns></returns>
         private static Image GetImageFromStr(string typeStr) {
-            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
+            Image tryImg = (Image) ImageResources.ResourceManager.GetObject(typeStr);
             return tryImg ?? ImageResources.Error;
         }
 
@@ -161,7 +173,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private static object ImageGetter(object rowObject) {
             var obj = (FileObject) rowObject;
             if (obj == null) return ImageResources.Error;
-            return GetImageFromStr(obj.Type.ToString());
+            return GetImageFromStr(obj.Type + "Type");
         }
 
         /// <summary>
@@ -169,27 +181,27 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private static void ovlOnFormatCell(object sender, FormatCellEventArgs args) {
-            FileObject obj = (FileObject)args.Model;
+        private static void OvlOnFormatCell(object sender, FormatCellEventArgs args) {
+            FileObject obj = (FileObject) args.Model;
 
-            // currently selected block
-            //if (!obj.IsNotBlock && obj.FileName.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
-            //    RowBorderDecoration rbd = new RowBorderDecoration {
-            //        FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
-            //        BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),
-            //        BoundsPadding = new Size(-2, 0),
-            //        CornerRounding = 6.0f
-            //    };
-            //    args.SubItem.Decoration = rbd;
-            //}
+            // currently document
+            if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
+                RowBorderDecoration rbd = new RowBorderDecoration {
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),
+                    BoundsPadding = new Size(-2, 0),
+                    CornerRounding = 6.0f
+                };
+                args.SubItem.Decoration = rbd;
+            }
 
             // display the flags
             int offset = -5;
-            foreach (var name in Enum.GetNames(typeof(FileFlag))) {
-                FileFlag flag = (FileFlag)Enum.Parse(typeof(FileFlag), name);
+            foreach (var name in Enum.GetNames(typeof (FileFlag))) {
+                FileFlag flag = (FileFlag) Enum.Parse(typeof (FileFlag), name);
                 if (flag == 0) continue;
                 if (!obj.Flags.HasFlag(flag)) continue;
-                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
                 if (tryImg == null) continue;
                 ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
                     Offset = new Size(offset, 0)
@@ -252,7 +264,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                 textOverlay.Rotation = -5;
             }
         }
+
         #endregion
+
+        #region Set items and selector mechanic
 
         /// <summary>
         /// Call this method to completly refresh the object view list, 
@@ -273,61 +288,44 @@ namespace _3PA.MainFeatures.FileExplorer {
                     }
                     break;
             }
+            // apply custom sorting
+            _initialObjectsList.Sort(new FilesSortingClass());
 
-        }
-
-        /// <summary>
-        /// set the items of the object view list, correct the width and height of the form and the list
-        /// create a button for each type of completion present in the list of items
-        /// </summary>
-        /// <param name="objectsList"></param>
-        /// <param name="resetSelectorButtons"></param>
-        public void SetItems(List<FileObject> objectsList, bool resetSelectorButtons = true) {
-            objectsList.Sort(new FilesSortingClass());
-            _initialObjectsList = objectsList;
-
-            // set the default height / width
-            ovl.Height = 21 * Config.Instance.AutoCompleteShowListOfXSuggestions;
-            Height = ovl.Height + 32;
-            //Width = 280;
-
-            if (resetSelectorButtons) {
-                // delete any existing buttons
-                if (_displayedTypes != null) {
-                    foreach (var selectorButton in _displayedTypes) {
-                        selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                        if (Controls.Contains(selectorButton.Value))
-                            Controls.Remove(selectorButton.Value);
-                        selectorButton.Value.Dispose();
-                    }
-                }
-
-                // get distinct types, create a button for each
-                int xPos = 65;
-                _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
-                foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
-                    var but = new SelectorButton<FileType> {
-                        BackGrndImage = GetImageFromStr(type.ToString()),
-                        Activated = true,
-                        Size = new Size(24, 24),
-                        TabStop = false,
-                        Location = new Point(xPos, Height - 28),
-                        Type = type,
-                        AcceptsRightClick = true
-                    };
-                    but.ButtonPressed += HandleTypeClick;
-                    toolTipHtml.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                    _displayedTypes.Add(type, but);
-                    Controls.Add(but);
-                    xPos += but.Width;
+            // delete any existing buttons
+            if (_displayedTypes != null) {
+                foreach (var selectorButton in _displayedTypes) {
+                    selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                    if (yamuiPanel3.Controls.Contains(selectorButton.Value))
+                        yamuiPanel3.Controls.Remove(selectorButton.Value);
+                    selectorButton.Value.Dispose();
                 }
             }
 
-            // label for the number of items
-            TotalItems = objectsList.Count;
-            nbitems.Text = TotalItems + StrItems;
+            // get distinct types, create a button for each
+            int xPos = nbitems.Left + nbitems.Width + 10;
+            int yPox = yamuiPanel3.Height - 28;
+            _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
+            foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
+                var but = new SelectorButton<FileType> {
+                    BackGrndImage = GetImageFromStr(type + "Type"),
+                    Activated = true,
+                    Size = new Size(24, 24),
+                    TabStop = false,
+                    Location = new Point(xPos, yPox),
+                    Type = type,
+                    AcceptsRightClick = true
+                };
+                but.ButtonPressed += HandleTypeClick;
+                toolTipHtml.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                _displayedTypes.Add(type, but);
+                yamuiPanel3.Controls.Add(but);
+                xPos += but.Width;
+            }
 
-            ovl.SetObjects(objectsList);
+            // label for the number of items
+            TotalItems = _initialObjectsList.Count;
+            nbitems.Text = TotalItems + StrItems;
+            ovl.SetObjects(_initialObjectsList);
         }
 
         /// <summary>
@@ -383,8 +381,36 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (TotalItems > 0) ovl.SelectedIndex = 0;
         }
 
+        #endregion
 
         #region events
+
+        /// <summary>
+        /// Executed when the user double click an item or press enter
+        /// </summary>
+        public void OnActivateItem() {
+            var curItem = GetCurrentFile();
+            if (curItem == null)
+                return;
+
+            // open the file if it has a progress extension
+            var ext = Path.GetExtension(curItem.FileName);
+            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext))
+                Npp.OpenFile(curItem.FullPath);
+
+            // Known extension, open with npp
+            else if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalNppOpenableExtension.Contains(ext))
+                Npp.OpenFile(curItem.FullPath);
+
+            // otherwise open with windows
+            else if (curItem.Type == FileType.Folder)
+                Utils.OpenFolder(curItem.FullPath);
+
+            else
+                Utils.OpenWithDefaultShellHandler(curItem.FullPath);
+
+            
+        }
 
         /// <summary>
         /// handles click on a type
@@ -393,7 +419,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="args"></param>
         private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
             var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
-            FileType clickedType = ((SelectorButton<FileType>)sender).Type;
+            FileType clickedType = ((SelectorButton<FileType>) sender).Type;
 
             // on right click
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
@@ -411,9 +437,110 @@ namespace _3PA.MainFeatures.FileExplorer {
             ApplyFilter();
         }
 
+        /// <summary>
+        /// handles double click
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void OvlOnDoubleClick(object sender, EventArgs eventArgs) {
+            OnActivateItem();
+        }
+
+        /// <summary>
+        /// Handles keydown event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="keyEventArgs"></param>
+        private void OvlOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = OnKeyDown(keyEventArgs.KeyCode);
+        }
+
+        private void OvlOnClick(object sender, EventArgs eventArgs) {
+            if (!KeyInterceptor.GetModifiers().IsAlt)
+                return;
+            var curItem = GetCurrentFile();
+            if (curItem != null) {
+                // remove or add favourite flag
+                if (curItem.Flags.HasFlag(FileFlag.Favourite))
+                    curItem.Flags &= ~FileFlag.Favourite;
+                else
+                    curItem.Flags |= FileFlag.Favourite;
+            }
+        }
+
+        #endregion
+
+        #region on key events
+
+        public bool OnKeyDown(Keys key) {
+            bool handled = true;
+            // down and up change the selection
+            if (key == Keys.Up) {
+                if (ovl.SelectedIndex > 0)
+                    ovl.SelectedIndex--;
+                else
+                    ovl.SelectedIndex = (TotalItems - 1);
+                if (ovl.SelectedIndex >= 0)
+                    ovl.EnsureVisible(ovl.SelectedIndex);
+            } else if (key == Keys.Down) {
+                if (ovl.SelectedIndex < (TotalItems - 1))
+                    ovl.SelectedIndex++;
+                else
+                    ovl.SelectedIndex = 0;
+                if (ovl.SelectedIndex >= 0)
+                    ovl.EnsureVisible(ovl.SelectedIndex);
+
+                // escape close
+            } else if (key == Keys.Escape) {
+                Npp.GrabFocus();
+
+                // left and right keys
+            } else if (key == Keys.Left) {
+                handled = LeftRight(true);
+
+            } else if (key == Keys.Right) {
+                handled = LeftRight(false);
+
+                // enter and tab accept the current selection
+            } else if (key == Keys.Enter) {
+                OnActivateItem();
+
+            } else if (key == Keys.Tab) {
+                OnActivateItem();
+                GiveFocustoTextBox();
+
+                // else, any other key is unhandled
+            } else {
+                handled = false;
+            }
+
+            // down and up activate the display of tooltip
+            if (key == Keys.Up || key == Keys.Down) {
+                // TODO
+                //InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
+            }
+            return handled;
+        }
+
+        private bool LeftRight(bool isLeft) {
+            // Alt must be pressed
+            if (!KeyInterceptor.GetModifiers().IsAlt)
+                return false;
+
+            // only 1 type is active
+            if (_displayedTypes.Count(b => b.Value.Activated) == 1)
+                _currentType = _displayedTypes.FindIndex(pair => pair.Value.Activated) + (isLeft ? -1 : 1);
+            if (_currentType > _displayedTypes.Count - 1) _currentType = 0;
+            if (_currentType < 0) _currentType = _displayedTypes.Count - 1;
+            SetActiveType(new List<FileType> {_displayedTypes.ElementAt(_currentType).Key});
+            ApplyFilter();
+            return true;
+        }
+
         #endregion
 
         #region Filter
+
         /// <summary>
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
@@ -421,33 +548,26 @@ namespace _3PA.MainFeatures.FileExplorer {
             // order the list, first the ones that are equals to the filter, then the
             // ones that start with the filter, then the rest
             if (string.IsNullOrEmpty(_filterByText)) {
-                    ovl.SetObjects(_initialObjectsList);
+                ovl.SetObjects(_initialObjectsList);
             } else {
                 char firstChar = char.ToUpperInvariant(_filterByText[0]);
                 ovl.SetObjects(_initialObjectsList.OrderBy(
-                x => {
-                    if (x.FileName.Length < 1 || char.ToUpperInvariant(x.FileName[0]) != firstChar) return 2;
-                    return x.FileName.Equals(_filterByText, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
-                }).ToList());
+                    x => {
+                        if (x.FileName.Length < 1 || char.ToUpperInvariant(x.FileName[0]) != firstChar) return 2;
+                        return x.FileName.Equals(_filterByText, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
+                    }).ToList());
             }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
-            // + need to be in the right scope for variables
-            _currentLineNumber = Npp.Line.CurrentLine;
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
-            _filterString = _filterByText;
-            _useTypeFiltering = true;
             ovl.ModelFilter = new ModelFilter(FilterPredicate);
 
             ovl.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
 
             // update total items
-            TotalItems = ((ArrayList)ovl.FilteredObjects).Count;
+            TotalItems = ((ArrayList) ovl.FilteredObjects).Count;
             nbitems.Text = TotalItems + StrItems;
 
             // if the selected row is > to number of items, then there will be a unselect
-            if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
-                FileName.Width = _normalWidth;
             if (ovl.SelectedIndex == -1) ovl.SelectedIndex = 0;
             if (ovl.SelectedIndex >= 0)
                 ovl.EnsureVisible(ovl.SelectedIndex);
@@ -459,16 +579,78 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="o"></param>
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
-            var compData = (FileObject)o;
+            var compData = (FileObject) o;
             // check for the filter match, the activated category,
-            bool output = compData.FileName.ToLower().FullyMatchFilter(_filterString);
-            if (_useTypeFiltering && _displayedTypes.ContainsKey(compData.Type))
+            bool output = compData.FileName.ToLower().FullyMatchFilter(_filterByText);
+            if (_displayedTypes.ContainsKey(compData.Type))
                 output = output && _displayedTypes[compData.Type].Activated;
-
             return output;
         }
 
         #endregion
+
+        #region Misc
+
+        /// <summary>
+        /// Get the current selected item
+        /// </summary>
+        /// <returns></returns>
+        public FileObject GetCurrentFile() {
+            try {
+                return (FileObject) ovl.SelectedItem.RowObject;
+            } catch (Exception) {
+                //ignored
+            }
+            return null;
+        }
+
+        internal void Redraw() {
+            ovl.Invalidate();
+        }
+
+        /// <summary>
+        /// Explicit
+        /// </summary>
+        public void GiveFocustoTextBox() {
+            textFilter.Focus();
+        }
+
+        /// <summary>
+        /// Explicit
+        /// </summary>
+        public void ClearFilter() {
+            textFilter.Text = "";
+            FilterByText = "";
+        }
+
+        #endregion
+
+        #endregion
+
+
+        #region File Explorer buttons events
+
+        private void TextFilterOnTextChanged(object sender, EventArgs eventArgs) {
+            if (!string.IsNullOrWhiteSpace(textFilter.Text))
+                FilterByText = textFilter.Text;
+        }
+
+        private void BtEraseOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            textFilter.Text = "";
+            FilterByText = "";
+        }
+
+        private void BtRefreshOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            RefreshOvl();
+        }
+
+        private void TextFilterOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = OnKeyDown(keyEventArgs.KeyCode);
+        }
+
+        #endregion
+
+
     }
 
     #region sorting
@@ -477,16 +659,19 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// </summary>
     public class FilesSortingClass : IComparer<FileObject> {
         public int Compare(FileObject x, FileObject y) {
-
-            // compare first by FileType
-            int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
+            // first, the favourite
+            int compare = x.Flags.HasFlag(FileFlag.Favourite).CompareTo(y.Flags.HasFlag(FileFlag.Favourite));
             if (compare != 0) return compare;
 
-            // then by ranking
-            //compare = y.Ranking.CompareTo(x.Ranking);
-            //if (compare != 0) return compare;
+            // then the folders
+            compare = y.Type.Equals(FileType.Folder).CompareTo(x.Type.Equals(FileType.Folder));
+            if (compare != 0) return compare;
 
-            // sort by display text in last resort
+            // then the non read only
+            compare = y.Flags.HasFlag(FileFlag.ReadOnly).CompareTo(x.Flags.HasFlag(FileFlag.ReadOnly));
+            if (compare != 0) return compare;
+
+            // sort by FileName
             return string.Compare(x.FileName, y.FileName, StringComparison.CurrentCultureIgnoreCase);
         }
     }

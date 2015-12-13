@@ -403,15 +403,6 @@
   <data name="DfType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\dftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="EType" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>fileexplorer\etype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>fileexplorer\folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Itype" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>fileexplorer\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="LstType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\lsttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -421,13 +412,28 @@
   <data name="RType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\rtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Ttype" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>fileexplorer\ttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="UnknowType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\unknowtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="WType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\wtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Favourite" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\favourite.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ReadOnly" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\readonly.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FolderType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\foldertype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\ttype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\dtype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

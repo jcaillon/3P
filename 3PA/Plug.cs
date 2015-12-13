@@ -76,6 +76,11 @@ namespace _3PA {
                 return dir;
             }
         }
+
+        /// <summary>
+        /// Stores the current filename when switching document
+        /// </summary>
+        public static string CurrentFilePath { get; set; }
         #endregion
 
         #region Init and clean up
@@ -98,11 +103,12 @@ namespace _3PA {
 
             menu.SetSeparator();
 
+            menu.SetCommand("Search file", FileExplorer.StartSearch, "Search_file:Alt+Q", false);
             menu.SetCommand("Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
             menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
-            menu.SetCommand("Format document", ProgressCodeUtils.NotImplemented, "Format_document:Ctrl+I", false);
+            menu.SetCommand("Format document", FileExplorer.StartSearch, "Format_document:Ctrl+I", false);
 
             menu.SetSeparator();
 
@@ -163,6 +169,7 @@ namespace _3PA {
 
                 // save config (should be done but just in case)
                 CodeExplorer.UpdateMenuItemChecked();
+                FileExplorer.UpdateMenuItemChecked();
                 Config.Save();
 
                 // remember the most used keywords
@@ -223,6 +230,10 @@ namespace _3PA {
             if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
                 CodeExplorer.Toggle();
 
+            // File explorer
+            if (Config.Instance.FileExplorerVisible && !FileExplorer.IsVisible)
+                FileExplorer.Toggle();
+
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
@@ -247,6 +258,7 @@ namespace _3PA {
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched();
 
+            FileExplorer.Refresh();
             //});
         }
 
@@ -532,6 +544,10 @@ namespace _3PA {
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyPluginSpecificOptions(false);
 
+            // refresh filename
+            CurrentFilePath = Npp.GetCurrentFilePath();
+            FileExplorer.RedrawFileExplorerList();
+
             // Parse the document
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
@@ -626,6 +642,9 @@ namespace _3PA {
 
         #region tests
         public static void Test() {
+
+            FileExplorer.ExplorerForm.FileExplorerPage.RefreshOvl();
+            FileExplorer.ExplorerForm.FileExplorerPage.FilterByText = "";
 
             var derp = new StringBuilder();
 

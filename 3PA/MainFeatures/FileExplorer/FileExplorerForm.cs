@@ -55,7 +55,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-
         #region Paint Methods
         protected override void OnPaintBackground(PaintEventArgs e) { }
 

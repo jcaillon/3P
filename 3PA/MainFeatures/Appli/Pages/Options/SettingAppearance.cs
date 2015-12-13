@@ -152,6 +152,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // force the dockable to redraw
                 CodeExplorer.CodeExplorer.Redraw();
+                FileExplorer.FileExplorer.Redraw();
 
                 Application.DoEvents();
                 thisForm.Invalidate();

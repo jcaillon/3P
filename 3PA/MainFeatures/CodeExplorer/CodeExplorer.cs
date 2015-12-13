@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
                 }
                 if (ExplorerForm == null) return;
-                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.CodeExplorerUseAlternateColors;
+                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");

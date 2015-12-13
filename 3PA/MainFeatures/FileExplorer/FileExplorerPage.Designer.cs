@@ -32,6 +32,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel2 = new YamuiFramework.Controls.YamuiPanel();
             this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.yamuiPanel3 = new YamuiFramework.Controls.YamuiPanel();
+            this.cbDirectory = new YamuiFramework.Controls.YamuiCheckBox();
             this.btErase = new YamuiFramework.Controls.YamuiImageButton();
             this.textFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.btRefresh = new YamuiFramework.Controls.YamuiImageButton();
@@ -41,7 +42,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.FileName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.cbDirectory = new YamuiFramework.Controls.YamuiCheckBox();
             this.yamuiPanel1.SuspendLayout();
             this.yamuiPanel2.SuspendLayout();
             this.yamuiPanel3.SuspendLayout();
@@ -133,6 +133,15 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel3.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel3.VerticalScrollbarSize = 10;
             // 
+            // cbDirectory
+            // 
+            this.cbDirectory.AutoSize = true;
+            this.cbDirectory.Location = new System.Drawing.Point(5, 32);
+            this.cbDirectory.Name = "cbDirectory";
+            this.cbDirectory.Size = new System.Drawing.Size(28, 15);
+            this.cbDirectory.TabIndex = 8;
+            this.cbDirectory.Text = "?";
+            // 
             // btErase
             // 
             this.btErase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
@@ -206,6 +215,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.ovl.FullRowSelect = true;
             this.ovl.HeaderMaximumHeight = 0;
             this.ovl.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.None;
+            this.ovl.HideSelection = false;
             this.ovl.LabelWrap = false;
             this.ovl.Location = new System.Drawing.Point(0, 79);
             this.ovl.MultiSelect = false;
@@ -223,12 +233,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.ovl.UseCompatibleStateImageBehavior = false;
             this.ovl.UseFiltering = true;
             this.ovl.UseHotItem = true;
-            this.ovl.UseTabAsInput = false;
+            this.ovl.UseTabAsInput = true;
             this.ovl.View = System.Windows.Forms.View.Details;
             this.ovl.VirtualMode = true;
             // 
             // FileName
             // 
+            this.FileName.AspectName = "FileName";
             this.FileName.FillsFreeSpace = true;
             this.FileName.IsEditable = false;
             this.FileName.ShowTextInHeader = false;
@@ -252,15 +263,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.toolTipHtml.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.TooltipCssClass = "htmltooltip";
-            // 
-            // cbDirectory
-            // 
-            this.cbDirectory.AutoSize = true;
-            this.cbDirectory.Location = new System.Drawing.Point(5, 32);
-            this.cbDirectory.Name = "cbDirectory";
-            this.cbDirectory.Size = new System.Drawing.Size(28, 15);
-            this.cbDirectory.TabIndex = 8;
-            this.cbDirectory.Text = "?";
             // 
             // FileExplorerPage
             // 

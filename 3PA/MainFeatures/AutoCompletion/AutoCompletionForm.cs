@@ -493,8 +493,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         private void LeftRight(bool isLeft) {
             // only 1 type is active
-            if (_displayedTypes.Count(b => b.Value.Activated) == 1)
-                _currentType = _currentType + (isLeft ? -1 : 1);
+            if (_displayedTypes.Count(b => b.Value.Activated) == 1) {
+                _currentType = _displayedTypes.FindIndex(pair => pair.Value.Activated) + (isLeft ? -1 : 1);
+            }
             if (_currentType > _displayedTypes.Count - 1) _currentType = 0;
             if (_currentType < 0) _currentType = _displayedTypes.Count - 1;
             SetActiveType(new List<CompletionType> { _displayedTypes.ElementAt(_currentType).Key });

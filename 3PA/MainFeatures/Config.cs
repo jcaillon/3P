@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
+using System.Text;
 using _3PA.Html;
 using _3PA.Lib;
 
@@ -77,7 +78,6 @@ namespace _3PA.MainFeatures {
 
         [Range(0, 3)]
         public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
-        public bool AutoCompleteAlternateBackColor = false;
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = true;
@@ -87,8 +87,8 @@ namespace _3PA.MainFeatures {
 
         public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
+        public bool FileExplorerVisible = true;
 
-        public bool CodeExplorerUseAlternateColors = false;
         public bool CodeExplorerVisible = true;
         
         public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
@@ -106,10 +106,13 @@ namespace _3PA.MainFeatures {
 
         public bool ToolTipDeactivate = false;
 
-        public string GlobalProgressExtension = ".p,.i,.w,.t,.ds,.lst";
+        public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df";
         public string GlobalCompilableExtension = ".p,.w,.t";
+        public string GlobalNppOpenableExtension = ".txt";
 
         public string GlobalHelpFilePath = "";
+
+        public bool GlobalUseAlternateBackColorOnGrid = false;
 
         [Range(0, 1)]
         public int GlobalCurrentEnvironnement = 0;
