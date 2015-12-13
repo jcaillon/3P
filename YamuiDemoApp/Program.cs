@@ -15,6 +15,7 @@ using _3PA;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfo;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.SyntaxHighlighting;
@@ -31,12 +32,46 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
 
+
+            var curDir = @"E:\temp\sac-dev\sac\sac\src";
+
+
+            //------------
+            var watch = Stopwatch.StartNew();
+            //------------
+
+            var test = FileExplorer.ListFileOjectsInDirectory(curDir);
+
+            //--------------
+            watch.Stop();
+            MessageBox.Show(watch.ElapsedMilliseconds.ToString());
+            //------------
+
+
+
+            
+
+            return;
+
             ParserLexerTests.Run();
 
             return;
 
 
             /*
+             
+            //------------
+            var watch = Stopwatch.StartNew();
+            //------------
+
+            var test = FileExplorer.ListFileOjectsInDirectory(curDir);
+
+            //--------------
+            watch.Stop();
+            MessageBox.Show(watch.ElapsedMilliseconds.ToString());
+            //------------
+
+            
             Highlight.Init();
             return;
 

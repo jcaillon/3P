@@ -278,10 +278,9 @@ namespace _3PA.MainFeatures.FilesInfo {
             var output = new Dictionary<string, List<FileError>>();
             foreach (var items in File.ReadAllLines(fileName, TextEncodingDetect.GetFileEncoding(fileName)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
 
-                ErrorLevel errorLevel = ErrorLevel.Error;
-                var errorLevelStr = items[1];
-                foreach (var typ in Enum.GetNames(typeof (ErrorLevel)).Where(typ => errorLevelStr.EqualsCi(typ)))
-                    errorLevel = (ErrorLevel) Enum.Parse(typeof (ErrorLevel), typ, true);
+                ErrorLevel errorLevel;
+                if (!Enum.TryParse(items[1], true, out errorLevel))
+                    errorLevel = ErrorLevel.Error;
 
                 if (!output.ContainsKey(items[0]))
                     output.Add(items[0], new List<FileError>());

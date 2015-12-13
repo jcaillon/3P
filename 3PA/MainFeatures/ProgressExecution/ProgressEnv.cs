@@ -34,6 +34,7 @@ namespace _3PA.MainFeatures.ProgressExecution {
         private static ProgressEnvironnement _currentEnv;
         private static List<ProgressEnvironnement> _listOfEnv = new List<ProgressEnvironnement>();
         private static string _currentProPath;
+        
 
         /// <summary>
         /// Returns the list of all the progress envrionnements configured
@@ -71,7 +72,7 @@ namespace _3PA.MainFeatures.ProgressExecution {
                 }
 
             // need to compute the propath again
-            ResetPropath();
+            Current.ReComputeProPath();
         }
 
         /// <summary>
@@ -86,6 +87,9 @@ namespace _3PA.MainFeatures.ProgressExecution {
             }
         }
 
+        /// <summary>
+        /// Set .Current object from the values read in Config.Instance.Env...
+        /// </summary>
         public static void SetCurrent() {
             // determines the current item selected in the envList
             var envList = GetList();
@@ -101,35 +105,12 @@ namespace _3PA.MainFeatures.ProgressExecution {
             } catch (Exception) {
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
             }
-            ResetPropath();
+
+            // need to compute the propath again
+            Current.ReComputeProPath();
         }
 
-        /// <summary>
-        /// returns the content of the .ini for the current env
-        /// </summary>
-        public string GetIniContent {
-            get { return @"PROPATH=" + GetProPath; }
-        }
-
-        /// <summary>
-        /// returns the propath value for the current env
-        /// </summary>
-        public static string GetProPath {
-            get {
-                if (_currentProPath != null) return _currentProPath;
-                IniReader ini = new IniReader(Current.IniPath);
-                var propath = ini.GetValue("PROPATH", "");
-                _currentProPath = (!string.IsNullOrEmpty(propath) ? propath + "," : String.Empty) + Current.ProPath;
-                return _currentProPath;
-            }
-        }
-
-        /// <summary>
-        /// Call the is method to recompute the propath next time we need it
-        /// </summary>
-        public static void ResetPropath() {
-            _currentProPath = null;
-        }
+        #region Find file
 
         /// <summary>
         /// tries to find the specified file in the current propath
@@ -139,12 +120,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
         /// <returns></returns>
         public static string FindFileInPropath(string fileName) {
             try {
-                foreach (var item in GetProPath.Split(',', '\n', ';')) {
-                    var curPath = item.Trim();
-                    // need to take into account relative paths
-                    if (curPath.StartsWith("."))
-                        curPath = Path.GetFullPath(Path.Combine(Npp.GetCurrentFilePath(), curPath));
-                    curPath = Path.GetFullPath(Path.Combine(curPath, fileName));
+                foreach (var item in Current.GetProPathFileList) {
+                    var curPath = Path.Combine(item, fileName);
                     if (File.Exists(curPath))
                         return curPath;
                 }
@@ -152,6 +129,23 @@ namespace _3PA.MainFeatures.ProgressExecution {
                 return "";
             }
             return "";
+        }
+
+        /// <summary>
+        /// Find a file in the propath and if it can't find it, in the env base local path
+        /// </summary>
+        /// <param name="fileToFind"></param>
+        /// <returns></returns>
+        public static string FindFirstFileInEnv(string fileToFind) {
+            var propathRes = FindFileInPropath(fileToFind);
+            if (!string.IsNullOrEmpty(propathRes)) return propathRes;
+            if (!Directory.Exists(Current.BaseLocalPath)) return "";
+            try {
+                var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
+                return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
+            } catch (Exception) {
+                return "";
+            }
         }
 
         /// <summary>
@@ -208,22 +202,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
             return output;
         }
 
-        /// <summary>
-        /// Find a file in the propath and if it can't find it, in the env base local path
-        /// </summary>
-        /// <param name="fileToFind"></param>
-        /// <returns></returns>
-        public static string FindFirstFileInEnv(string fileToFind) {
-            var propathRes = FindFileInPropath(fileToFind);
-            if (!string.IsNullOrEmpty(propathRes)) return propathRes;
-            if (!Directory.Exists(Current.BaseLocalPath)) return "";
-            try {
-                var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
-                return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
-            } catch (Exception) {
-                return "";
-            }
-        }
+        #endregion
+
     }
 
     public class ProgressEnvironnement {
@@ -233,7 +213,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
         public string IniPath = "";
         public Dictionary<string, string> PfPath = new Dictionary<string, string>();
         /// <summary>
-        /// Propath for compilation time, we can find the .i there
+        /// Propath for compilation time, DONT USE THIS ONE THO, use GetProPathFileList instead,
+        /// this only returns the extra propath defined by the user!
         /// </summary>
         public string ProPath = "";
         public string DataBaseConnection = "";
@@ -256,5 +237,49 @@ namespace _3PA.MainFeatures.ProgressExecution {
                 PfPath[Config.Instance.EnvCurrentDatabase] :
                 PfPath.FirstOrDefault().Value;
         }
+
+
+        #region Get ProPath
+        /// <summary>
+        /// List the existing directories as they are listed in the .ini file + in the custom ProPath field
+        /// </summary>
+        public List<string> GetProPathFileList {
+            get {
+                if (_currentProPathDirList != null) return _currentProPathDirList;
+
+                // get full propath (from .ini + from user custom field
+                IniReader ini = new IniReader(IniPath);
+                var completeProPath = ini.GetValue("PROPATH", "");
+                completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ProPath;
+
+                _currentProPathDirList = new List<string>();
+                var curFilePath = Npp.GetCurrentFilePath();
+                foreach (var item in completeProPath.Split(',', '\n', ';')) {
+                    var propath = item.Trim();
+                    // need to take into account relative paths
+                    if (propath.StartsWith("."))
+                        try {
+                            propath = Path.GetFullPath(Path.Combine(curFilePath, propath));
+                        } catch (Exception) {
+                            // ignored
+                        }
+                    if (Directory.Exists(propath))
+                        _currentProPathDirList.Add(propath);
+                }
+                return _currentProPathDirList;
+            }
+        }
+
+        private List<string> _currentProPathDirList;
+
+        /// <summary>
+        /// Call this method to compute the propath again the next time we call GetProPathFileList
+        /// </summary>
+        public void ReComputeProPath() {
+            _currentProPathDirList = null;
+        }
+
+        #endregion
+
     }
 }

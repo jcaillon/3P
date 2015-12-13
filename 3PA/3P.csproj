@@ -403,6 +403,16 @@
     <Content Include="Images\DockableExplorer\buttons\refresh.png" />
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
+    <Content Include="Images\FileExplorer\DfType.png" />
+    <Content Include="Images\FileExplorer\EType.png" />
+    <Content Include="Images\FileExplorer\Folder.png" />
+    <Content Include="Images\FileExplorer\Itype.png" />
+    <Content Include="Images\FileExplorer\LstType.png" />
+    <Content Include="Images\FileExplorer\PType.png" />
+    <Content Include="Images\FileExplorer\RType.png" />
+    <Content Include="Images\FileExplorer\Ttype.png" />
+    <Content Include="Images\FileExplorer\UnknowType.png" />
+    <Content Include="Images\FileExplorer\WType.png" />
     <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />

@@ -65,10 +65,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 foreach (var items in File.ReadAllLines(_filePath, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
 
                     // find the KeywordType from items[1]
-                    KeywordType keywordType = KeywordType.Unknow;
-                    var keywordTypeStr = items[1];
-                    foreach (var typ in Enum.GetNames(typeof (KeywordType)).Where(typ => keywordTypeStr.EqualsCi(typ)))
-                        keywordType = (KeywordType) Enum.Parse(typeof (KeywordType), typ, true);
+                    KeywordType keywordType;
+                    if (!Enum.TryParse(items[1], true, out keywordType))
+                        keywordType = KeywordType.Unknow;
 
                     // set flags
                     var flag = (items[2] == "1") ? ParseFlag.Reserved : 0;

@@ -627,10 +627,18 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-            for (int i = 0; i < 20; i++) {
-                UserCommunication.Notify("message numero " + i, MessageImg.MsgOk, "edzed", "ezfzef,", 0);
+            var derp = new StringBuilder();
+
+            foreach (var str in ProgressEnv.Current.GetProPathFileList) {
+                derp.AppendLine(str + "<br>");
             }
+
+            UserCommunication.Notify(derp.ToString());
+
+
             return;
+
+
             var progressExec = new ProgressExecution();
             progressExec.ProcessExited += (sender, exited) => {
                 UserCommunication.Notify("Compilation done?! " + exited.ExtractDbOutputPath);

@@ -67,7 +67,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public event EventHandler<TabCompletedEventArgs> TabCompleted;
 
         // the private fields below are used for the filter function
-        private static Dictionary<CompletionType, SelectorButton> _displayedTypes;
+        private static Dictionary<CompletionType, SelectorButton<CompletionType>> _displayedTypes;
         private static bool _useTypeFiltering;
         private static string _filterString = "";
         private static string _currentOwnerName = "";
@@ -243,9 +243,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // get distinct types, create a button for each
                 int xPos = 4;
-                _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
+                _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
                 foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
-                    var but = new SelectorButton {
+                    var but = new SelectorButton<CompletionType> {
                         BackGrndImage = GetTypeImageFromStr(type.ToString()),
                         Activated = true,
                         Size = new Size(24, 24),
@@ -407,7 +407,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="args"></param>
         private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
             var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
-            CompletionType clickedType = ((SelectorButton) sender).Type;
+            CompletionType clickedType = ((SelectorButton<CompletionType>)sender).Type;
 
             // on right click
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
@@ -592,7 +592,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static List<CompletionData> ExternalFilterItems(List<CompletionData> objectsList, int line) {
             objectsList.Sort(new CompletionDataSortingClass());
             if (_displayedTypes == null)
-                _displayedTypes = new Dictionary<CompletionType, SelectorButton>();
+                _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
             _useTypeFiltering = false;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
             _currentLineNumber = line;
@@ -637,14 +637,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
     #endregion
 
     #region SelectorButtons
-    public class SelectorButton : YamuiButton {
+    public class SelectorButton<T> : YamuiButton {
 
         #region Fields
         public Image BackGrndImage { get; set; }
 
         public bool Activated { get; set; }
 
-        public CompletionType Type { get; set; }
+        public T Type { get; set; }
         #endregion
 
         #region Paint Methods
