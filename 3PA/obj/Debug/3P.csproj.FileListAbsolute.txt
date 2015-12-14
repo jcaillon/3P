@@ -56,11 +56,11 @@ D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerPage.resourc
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerPage.resources
-D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfo.FileTagsForm.resources
-D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfo.FileTagsPage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.InfoToolTip.InfoToolTipForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
 D:\Repo\3P\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
 D:\Repo\3P\3PA\obj\Debug\3P.dll
 D:\Repo\3P\3PA\obj\Debug\3P.pdb
+D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsForm.resources
+D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsPage.resources

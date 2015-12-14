@@ -33,7 +33,7 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecution;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
     public partial class FileExplorerPage : YamuiPage {
@@ -126,7 +126,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // button tooltips
             toolTipHtml.SetToolTip(btErase, "<b>Erase</b> the content of the text filter");
             toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
-            toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list above");
+            toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list below");
 
             cbDirectory.ThreeState = true;
 
@@ -316,7 +316,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     AcceptsRightClick = true
                 };
                 but.ButtonPressed += HandleTypeClick;
-                toolTipHtml.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
                 _displayedTypes.Add(type, but);
                 yamuiPanel3.Controls.Add(but);
                 xPos += but.Width;
@@ -393,23 +393,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (curItem == null)
                 return;
 
-            // open the file if it has a progress extension
-            var ext = Path.GetExtension(curItem.FileName);
-            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext))
-                Npp.OpenFile(curItem.FullPath);
-
-            // Known extension, open with npp
-            else if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalNppOpenableExtension.Contains(ext))
-                Npp.OpenFile(curItem.FullPath);
-
-            // otherwise open with windows
-            else if (curItem.Type == FileType.Folder)
-                Utils.OpenFolder(curItem.FullPath);
-
-            else
-                Utils.OpenWithDefaultShellHandler(curItem.FullPath);
-
-            
+            Utils.OpenAnyFullPath(curItem.FullPath);
         }
 
         /// <summary>

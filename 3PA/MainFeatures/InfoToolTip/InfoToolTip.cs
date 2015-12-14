@@ -28,7 +28,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecution;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.InfoToolTip {
     class InfoToolTip {

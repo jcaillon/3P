@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
@@ -879,9 +880,15 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
                 }
                 else
                 {
-                    var nfo = new ProcessStartInfo(link.HrefLink);
-                    nfo.UseShellExecute = true;
-                    Process.Start(nfo);
+                    if (!string.IsNullOrEmpty(link.HrefLink) && Directory.Exists(link.HrefLink)) {
+                        Process.Start("explorer.exe", "\"" + link.HrefLink + "\"");
+                    }
+                    else {
+                        if (!string.IsNullOrEmpty(link.HrefLink) && File.Exists(link.HrefLink)) {
+                            var process = new ProcessStartInfo(link.HrefLink) {UseShellExecute = true};
+                            Process.Start(process);
+                        }
+                    }
                 }
             }
         }

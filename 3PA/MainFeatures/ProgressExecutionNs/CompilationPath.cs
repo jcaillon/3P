@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FileTagsForm.cs) is part of 3P.
+// This file (CompilationPath.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,19 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+namespace _3PA.MainFeatures.ProgressExecutionNs {
+    public class CompilationPath {
+    }
 
-using _3PA.Html;
-using _3PA.MainFeatures.NppInterfaceForm;
-
-namespace _3PA.MainFeatures.FilesInfo {
-    public partial class FileTagsForm : NppInterfaceYamuiForm {
-        public FileTagsForm() {
-            InitializeComponent();
-            lblTitle.Text = @"<img src='" + LocalHtmlHandler.GetLogo() + @"' style='padding-right: 10px'><span class='AppliTitle'>Update file information</span>";
-        }
-
-        public void UpdateForm() {
-            fileTagsPage1.UpdateInfo();
-        }
+    public class CompilationPathItem {
+        public string InputPathPattern { get; set; }
+        public string OutputPathAppend { get; set; }
     }
 }

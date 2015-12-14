@@ -25,7 +25,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.FilesInfo;
+using _3PA.MainFeatures.FilesInfoNs;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local

@@ -25,7 +25,7 @@ using System.Linq;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecution;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     public class DataBase {
@@ -43,6 +43,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// File path to the output file of the dumpdatabase program
+        /// </summary>
         public static string OutputFileName { get; private set; }
 
         /// <summary>
@@ -61,6 +64,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
         }
 
+        /// <summary>
+        /// Action called when an extraction is done
+        /// </summary>
+        public static Action OnExtractionDone { get; set; }
+
         #endregion
 
         #region public methods
@@ -71,7 +79,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         public static bool TryToLoadDatabaseInfo() {
-            var fileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
+            var fileName = GetOutputName();
 
             // read
             if (File.Exists(Path.Combine(DatabaseDir, fileName))) {
@@ -96,11 +104,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // save the filename of the output database info file for this environment
-                OutputFileName = (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName();
+                OutputFileName = GetOutputName();
 
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
-                var exec = new ProgressExecution.ProgressExecution();
+                var exec = new ProgressExecution();
                 exec.ProcessExited += ExtractionDone;
                 if (exec.Do(ExecutionType.Database))
                     return;
@@ -116,17 +124,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static void ExtractionDone(object sender, ProcessOnExited processOnExited) {
             try {
 
-                if (!File.Exists(processOnExited.ExtractDbOutputPath) || new FileInfo(processOnExited.ExtractDbOutputPath).Length == 0) {
-                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again", MessageImg.MsgSkull, "Database info", "Extracting database structure");
+                if (!File.Exists(processOnExited.ProgressExecution.ExtractDbOutputPath) || new FileInfo(processOnExited.ProgressExecution.ExtractDbOutputPath).Length == 0) {
+                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(processOnExited.ProgressExecution.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
                 } else {
+                    var targetFile = Path.Combine(DatabaseDir, OutputFileName);
+                    if (File.Exists(targetFile))
+                        File.Delete(targetFile);
+
                     // copy to database dir
-                    File.Copy(processOnExited.ExtractDbOutputPath, Path.Combine(DatabaseDir, OutputFileName));
+                    File.Copy(processOnExited.ProgressExecution.ExtractDbOutputPath, targetFile);
 
                     // read
                     Config.Instance.EnvLastDbInfoUsed = OutputFileName;
                     Init();
+                    AutoComplete.ForceClose();
 
                     UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
+
+                    if (OnExtractionDone != null) {
+                        OnExtractionDone();
+                        OnExtractionDone = null;
+                    }
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
@@ -154,6 +172,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         #region private methods
+
+        /// <summary>
+        /// Returns the output file name for the current appli/env
+        /// </summary>
+        /// <returns></returns>
+        private static string GetOutputName() {
+            return (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName().ToLower() + ".dump";
+        }
 
         /// <summary>
         /// This method parses the output of the .p procedure that exports the database info

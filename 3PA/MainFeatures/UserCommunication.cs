@@ -26,6 +26,7 @@ using System.Web.Script.Serialization;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
@@ -48,6 +49,8 @@ namespace _3PA.MainFeatures {
                         , duration, width);
                     if (clickHandler != null)
                         toastNotification.LinkClicked += (sender, args) => clickHandler(args);
+                    else
+                        toastNotification.LinkClicked += Utils.OpenPathClickHandler;
                     toastNotification.Show();
                 });
         }
@@ -61,7 +64,7 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
-        /// 
+        /// Displays a messagebox like window
         /// new List string  { "fu", "ok" }
         /// </summary>
         /// <param name="html"></param>

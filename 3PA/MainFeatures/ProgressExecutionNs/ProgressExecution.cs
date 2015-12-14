@@ -23,14 +23,14 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
-namespace _3PA.MainFeatures.ProgressExecution {
+namespace _3PA.MainFeatures.ProgressExecutionNs {
     public class ProgressExecution {
+
         #region public fields
 
         private event EventHandler<ProcessOnExited> OnProcessExited;
@@ -49,9 +49,9 @@ namespace _3PA.MainFeatures.ProgressExecution {
         public string ExecutionDir { get; private set; }
 
         /// <summary>
-        /// Full path to the .p, .w... to compile, run..., copied in the temp execution directory
+        /// Full path to the .p, .w... to compile, run...
         /// </summary>
-        public string FullFilePathToExecute { get; private set; }
+        public string FullFilePathToExecute { get; }
 
         /// <summary>
         /// Path to the output .log file (for compilation)
@@ -102,17 +102,16 @@ namespace _3PA.MainFeatures.ProgressExecution {
         private string _runnerPath;
 
         /// <summary>
-        /// Path to the file to compile/run
+        /// Path to the file to compile/run, can either be equal to FullFilePathToExecute, or have the same file name
+        /// but be located in the temp directory (if we compile the current file for example)
         /// </summary>
-        private string _tempFullFilePathToExecute;
-
-        private static object _lock = new object();
+        public string TempFullFilePathToExecute { get; private set; }
 
         private readonly bool _isCurrentFile;
 
         #endregion
 
-        #region constructors
+        #region constructors and destructor
 
         /// <summary>
         /// Creates a progress execution environnement, to compile or run a program
@@ -129,6 +128,23 @@ namespace _3PA.MainFeatures.ProgressExecution {
         public ProgressExecution() {
             FullFilePathToExecute = Npp.GetCurrentFilePath();
             _isCurrentFile = true;
+        }
+
+        /// <summary>
+        /// Deletes temp directory and everything in it
+        /// </summary>
+        ~ProgressExecution()
+        {
+            try
+            {
+                if (Process != null)
+                    Process.Close();
+                Utils.DeleteDirectory(ExecutionDir, true);
+            }
+            catch (Exception)
+            {
+                // it's only a clean up operation, we don't care if it crashes
+            }
         }
 
         #endregion
@@ -189,9 +205,9 @@ namespace _3PA.MainFeatures.ProgressExecution {
             var dumpDbProgramName = "";
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile) {
-                    _tempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
-                    File.WriteAllText(_tempFullFilePathToExecute, Npp.Text);
-                } else _tempFullFilePathToExecute = FullFilePathToExecute;
+                    TempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
+                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text);
+                } else TempFullFilePathToExecute = FullFilePathToExecute;
             } else {
                 // for database extraction, we need the output path and to copy the DumpDatabase program
                 dumpDbProgramName = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
@@ -200,7 +216,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
             }
 
             // set info on the execution
-            var baseFileName = Path.GetFileNameWithoutExtension(_tempFullFilePathToExecute);
+            var baseFileName = Path.GetFileNameWithoutExtension(TempFullFilePathToExecute);
+            if (executionType == ExecutionType.Database) baseFileName = "dump";
             LogPath = Path.Combine(ExecutionDir, baseFileName + ".log");
             LstPath = Path.Combine(ExecutionDir, baseFileName + ".lst");
             DotRPath = Path.Combine(ExecutionDir, baseFileName + ".r");
@@ -209,8 +226,8 @@ namespace _3PA.MainFeatures.ProgressExecution {
             // prepare the preproc variable of the .p runner
             var programContent = new StringBuilder();
             programContent.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ToCompile " + _tempFullFilePathToExecute.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CompilePath " + DotRPath.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ToCompile " + TempFullFilePathToExecute.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE CompilePath " + ExecutionDir.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
@@ -229,9 +246,10 @@ namespace _3PA.MainFeatures.ProgressExecution {
 
             // Parameters
             StringBuilder Params = new StringBuilder();
+            Params.Append(" -b");
             Params.Append(" -cpinternal ISO8859-1");
-            Params.Append(" -p " + runnerFileName.ProgressQuoter());
-
+            Params.Append(" -cpstream ISO8859-1");
+            Params.Append(" -p " + Path.Combine(ExecutionDir, runnerFileName).ProgressQuoter());
             if (File.Exists(Path.Combine(ExecutionDir, "base.ini")))
                 Params.Append(" -ini " + ("base.ini").ProgressQuoter());
             ExeParameters = Params.ToString();
@@ -244,7 +262,7 @@ namespace _3PA.MainFeatures.ProgressExecution {
                     CreateNoWindow = true,
                     FileName = ProgressEnv.Current.ProwinPath,
                     Arguments = ExeParameters,
-                    WorkingDirectory = ExecutionDir
+                    WorkingDirectory = ExecutionDir,
                 },
                 EnableRaisingEvents = true
             };
@@ -256,32 +274,15 @@ namespace _3PA.MainFeatures.ProgressExecution {
         }
 
         /// <summary>
-        /// Called by the process's thread when it is over
+        /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_lock, 500, ref lockTaken);
-                if (lockTaken && OnProcessExited != null) {
-                    OnProcessExited(this, new ProcessOnExited(eventArgs, ExtractDbOutputPath));
-                    Process.Close();
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "ProcessOnExited");
-            } finally {
-                if (lockTaken) Monitor.Exit(_lock);
+            if (OnProcessExited != null) {
+                OnProcessExited(this, new ProcessOnExited(eventArgs, this));
+                Process.Close();
             }
-        }
-
-        /// <summary>
-        /// Deletes temp directory and everything in it
-        /// </summary>
-        public void CleanUp() {
-            if (!Process.HasExited)
-                Process.Kill();
-            Utils.DeleteDirectory(ExecutionDir, true);
         }
 
         #endregion
@@ -290,14 +291,15 @@ namespace _3PA.MainFeatures.ProgressExecution {
 
     public class ProcessOnExited : EventArgs {
         public readonly object OriginalEventArgs;
-        public string ExtractDbOutputPath;
-        public ProcessOnExited(object originalEventArgs, string extractDbOutputPath) {
+        public ProgressExecution ProgressExecution;
+        public ProcessOnExited(object originalEventArgs, ProgressExecution progressExecution) {
             OriginalEventArgs = originalEventArgs;
-            ExtractDbOutputPath = extractDbOutputPath;
+            ProgressExecution = progressExecution;
         }
     }
 
     public enum ExecutionType {
+        CheckSyntax,
         Compile,
         Run,
         Database

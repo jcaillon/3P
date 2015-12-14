@@ -28,7 +28,7 @@ using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecution;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     public partial class SetEnvironment : YamuiPage {
@@ -291,6 +291,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void btDownload_Click(object sender, EventArgs e) {
+            // refresh the info after the extraction
+            DataBase.OnExtractionDone = UpdateView;
             DataBase.FetchCurrentDbInfo();
         }
 

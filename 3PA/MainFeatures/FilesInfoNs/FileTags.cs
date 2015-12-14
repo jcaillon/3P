@@ -25,7 +25,7 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.FilesInfo {
+namespace _3PA.MainFeatures.FilesInfoNs {
 
     public class FileTags {
 

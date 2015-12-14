@@ -25,15 +25,14 @@ using System.Linq;
 using _3PA.Data;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.ProgressExecution {
+namespace _3PA.MainFeatures.ProgressExecutionNs {
     public class ProgressEnv {
 
         private static string _filePath;
-        private static string _location = Npp.GetConfigDir();
+        private static readonly string Location = Npp.GetConfigDir();
         private static string _fileName = "ProgressEnvironnement.xml";
         private static ProgressEnvironnement _currentEnv;
         private static List<ProgressEnvironnement> _listOfEnv = new List<ProgressEnvironnement>();
-        private static string _currentProPath;
         
 
         /// <summary>
@@ -41,7 +40,7 @@ namespace _3PA.MainFeatures.ProgressExecution {
         /// </summary>
         /// <returns></returns>
         public static List<ProgressEnvironnement> GetList() {
-            _filePath = Path.Combine(_location, _fileName);
+            _filePath = Path.Combine(Location, _fileName);
             if (_listOfEnv.Count == 0) {
                 if (!File.Exists(_filePath)) {
                     if (Config.Instance.UserFromSopra) {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.HtmlRenderer.WinForms;
 
-namespace _3PA.MainFeatures.FilesInfo {
+namespace _3PA.MainFeatures.FilesInfoNs {
     partial class FileTagsForm {
         /// <summary>
         /// Required designer variable.

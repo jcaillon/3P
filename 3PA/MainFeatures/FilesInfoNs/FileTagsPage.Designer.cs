@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.FilesInfo {
+namespace _3PA.MainFeatures.FilesInfoNs {
     partial class FileTagsPage {
         /// <summary> 
         /// Required designer variable.

@@ -11,29 +11,32 @@
 DEFINE STREAM str_logout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 
-FUNCTION fi_get_message_description RETURNS CHARACTER
-    ( INPUT piMsgNum AS INTEGER )FORWARD.
+FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT piMsgNum AS INTEGER) FORWARD.
+FUNCTION fi_output_last_error RETURNS CHARACTER ( ) FORWARD.
 
-PROPATH = PROPATH + "," + {&propathToUse}.
-
-FILE-INFORMATION:FILE-NAME = "base.pf".
-IF FILE-INFORMATION:FULL-PATHNAME <> ? THEN
-    CONNECT -pf "base.pf" NO-ERROR.
-    
-FILE-INFORMATION:FILE-NAME = "extra.pf".
-IF FILE-INFORMATION:FULL-PATHNAME <> ? THEN
-    CONNECT -pf "extra.pf" NO-ERROR.
-    
 OUTPUT STREAM str_logout TO VALUE({&LogFile}) BINARY.
 PUT STREAM str_logout UNFORMATTED "".
 
+/* Add propath directories */
+PROPATH = PROPATH + "," + {&propathToUse}.
+
+IF SEARCH("base.pf") <> ? THEN
+    CONNECT -pf "base.pf" -ct 2 NO-ERROR.
+fi_output_last_error().
+    
+IF SEARCH("extra.pf") <> ? THEN
+    CONNECT -pf "extra.pf" -ct 2 NO-ERROR.
+fi_output_last_error().
+
 CASE {&ExecutionType} :
+    WHEN "CHECKSYNTAX" OR
     WHEN "COMPILE" THEN DO:
         COMPILE VALUE({&ToCompile})
         SAVE=TRUE INTO VALUE({&CompilePath})
         DEBUG-LIST VALUE({&LstFile})
         NO-ERROR.
         RUN pi_handleCompilErrors NO-ERROR.
+        fi_output_last_error().
     END.
     WHEN "RUN" THEN DO:
         DO  ON STOP   UNDO, LEAVE
@@ -43,6 +46,7 @@ CASE {&ExecutionType} :
             RUN VALUE({&ToCompile}).
         END.
         RUN pi_handleCompilErrors NO-ERROR.
+        fi_output_last_error().
     END.
     WHEN "DATABASE" THEN DO:
         /* for each connected db */
@@ -53,6 +57,8 @@ CASE {&ExecutionType} :
         END.
     END.
 END CASE.
+
+OUTPUT STREAM str_logout CLOSE.
 
 RETURN "".
 
@@ -65,31 +71,24 @@ PROCEDURE pi_handleCompilErrors :
     DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
     DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
     DEFINE VARIABLE li_ret AS INTEGER NO-UNDO.
-    DEFINE VARIABLE lc_listerreurs AS CHARACTER NO-UNDO.
 
+    fi_output_last_error().
+        
     IF COMPILER:NUM-MESSAGES > 0 THEN DO:
         ASSIGN li_i = 1.
         DO WHILE li_i <= COMPILER:NUM-MESSAGES:
-            /* dont display general messages that do not target a specific line more than once */
-            IF COMPILER:GET-ERROR-ROW(li_i) <> ? OR LOOKUP("#" + STRING(COMPILER:GET-NUMBER(li_i)) + "#", lc_listerreurs) = 0 THEN DO:
-                /* remember the message number */
-                IF COMPILER:GET-ERROR-ROW(li_i) = ? THEN
-                    lc_listerreurs = lc_listerreurs + "#" + STRING(COMPILER:GET-NUMBER(li_i)) + "#".
-                PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
-                COMPILER:GET-FILE-NAME(li_i),
-                IF COMPILER:GET-MESSAGE-TYPE(li_i) = 2 THEN "Warning" ELSE "Critical",
-                COMPILER:GET-ERROR-ROW(li_i),
-                COMPILER:GET-ERROR-COLUMN(li_i),
-                COMPILER:GET-NUMBER(li_i),
-                TRIM(REPLACE(REPLACE(COMPILER:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(COMPILER:GET-NUMBER(li_i)) + ")", "")),
-                fi_get_message_description(INTEGER(COMPILER:GET-NUMBER(li_i)))
-                ) SKIP.
-            END.
+            PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
+            COMPILER:GET-FILE-NAME(li_i),
+            IF COMPILER:GET-MESSAGE-TYPE(li_i) = 2 THEN "Warning" ELSE "Critical",
+            COMPILER:GET-ERROR-ROW(li_i),
+            COMPILER:GET-ERROR-COLUMN(li_i),
+            COMPILER:GET-NUMBER(li_i),
+            TRIM(REPLACE(REPLACE(COMPILER:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(COMPILER:GET-NUMBER(li_i)) + ")", "")),
+            fi_get_message_description(INTEGER(COMPILER:GET-NUMBER(li_i)))
+            ) SKIP.
             ASSIGN li_i = li_i + 1.
         END.
     END.
-
-    OUTPUT STREAM str_logout CLOSE.
 
     RETURN "".
 
@@ -148,5 +147,26 @@ FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT piMsgNum AS INTEGER
     END.
 
     RETURN cDescription.
+
+END FUNCTION.
+
+FUNCTION fi_output_last_error RETURNS CHARACTER ( ) :
+/*------------------------------------------------------------------------------
+  Purpose: retourne la valeur de la dernière erreur rencontrée
+    Notes:
+------------------------------------------------------------------------------*/
+
+    IF ERROR-STATUS:ERROR THEN DO:
+        IF RETURN-VALUE > "" THEN
+            PUT STREAM str_logout UNFORMATTED "RETURN-VALUE: " + RETURN-VALUE SKIP.
+        IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
+            DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
+            DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                PUT STREAM str_logout UNFORMATTED "GET-MESSAGE(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+            END.
+        END.
+    END.
+    ERROR-STATUS:ERROR = NO.
+    RETURN "".
 
 END FUNCTION.

@@ -109,6 +109,9 @@ namespace _3PA.Lib {
 
         #region Enum extensions
 
+        //flags |= flag;// SetFlag
+        //flags &= ~flag; // ClearFlag 
+
         /// <summary>
         /// Allows to describe a field of an enum like this :
         /// [DescriptionAttribute(Value = "DATA-SOURCE")]

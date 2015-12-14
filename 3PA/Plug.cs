@@ -19,7 +19,6 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -36,10 +35,9 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.FilesInfo;
+using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecution;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA {
@@ -47,19 +45,25 @@ namespace _3PA {
     public class Plug {
 
         #region Fields
-        public static bool PluginIsFullyLoaded;
+
+        #region Npp plugin mandatory objects
+        /// <summary>
+        /// Contain information about the plugin and about the plugin items menu, info passed to Npp on startup
+        /// </summary>
         public static NppData NppData;
         public static FuncItems FuncItems = new FuncItems();
 
+        #endregion
+
         /// <summary>
-        /// this is a delegate to defined actions that must be taken after updating the ui (example is indentation)
+        /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
         public static Action ActionAfterUpdateUi { get; set; }
 
         /// <summary>
-        /// true if the current file is a progress file, false otherwise
+        /// Set to true after the plugin has been fully loaded
         /// </summary>
-        public static bool IsCurrentFileProgress { get; set; }
+        public static bool PluginIsFullyLoaded;
 
         /// <summary>
         /// Gets the temporary directory to use
@@ -77,10 +81,25 @@ namespace _3PA {
             }
         }
 
+        #region Current file info
+
+        /// <summary>
+        /// true if the current file is a progress file, false otherwise
+        /// </summary>
+        public static bool IsCurrentFileProgress { get; private set; }
+
         /// <summary>
         /// Stores the current filename when switching document
         /// </summary>
-        public static string CurrentFilePath { get; set; }
+        public static string CurrentFilePath { get; private set; }
+
+        /// <summary>
+        /// Information on the current file
+        /// </summary>
+        public static FileInfoObject CurrentFileObject { get; private set; }
+
+        #endregion
+
         #endregion
 
         #region Init and clean up
@@ -96,9 +115,9 @@ namespace _3PA {
             menu.SetSeparator();
 
             menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
-            menu.SetCommand("Check syntax", ProgressCodeUtils.NotImplemented, "Check_syntax:Shift+F1", false);
-            menu.SetCommand("Compile", ProgressCodeUtils.NotImplemented, "Compile:Alt+F1", false);
-            menu.SetCommand("Run program", ProgressCodeUtils.NotImplemented, "Run_program:Ctrl+F1", false);
+            menu.SetCommand("Check syntax", ProgressCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
+            menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
+            menu.SetCommand("Run program", ProgressCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
             menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
             menu.SetSeparator();
@@ -521,8 +540,10 @@ namespace _3PA {
         /// </summary>
         public static void OnDocumentSwitched() {
 
-            // update current file .extension check
+            // update current file info
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
+            CurrentFilePath = Npp.GetCurrentFilePath();
+            CurrentFileObject = FilesInfo.GetFileInfo(CurrentFilePath);
 
             // update current scintilla
             Npp.UpdateScintilla();
@@ -544,8 +565,7 @@ namespace _3PA {
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyPluginSpecificOptions(false);
 
-            // refresh filename
-            CurrentFilePath = Npp.GetCurrentFilePath();
+            // refresh file explorer currently opened file
             FileExplorer.RedrawFileExplorerList();
 
             // Parse the document
@@ -558,7 +578,7 @@ namespace _3PA {
         /// </summary>
         public static void OnFileSaved() {
             // check for block that are too long and display a warning
-            if (Abl.IsCurrentFileFromAppBuilder() && !FilesInfo.GetFileInfo().WarnedTooLong) {
+            if (Abl.IsCurrentFileFromAppBuilder() && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
                 foreach (var codeExplorerItem in ParserHandler.ParsedExplorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))
                     warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
@@ -569,7 +589,7 @@ namespace _3PA {
                     UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                         Npp.Goto(curPath, int.Parse(args.Link));
                     }, 20);
-                    FilesInfo.GetFileInfo().WarnedTooLong = true;
+                    CurrentFileObject.WarnedTooLong = true;
                 }
             }
         }
@@ -611,7 +631,7 @@ namespace _3PA {
             } else {
                 // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
-                Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz");
+                Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
                 Npp.AnnotationVisible = Annotation.Boxed;
                 Npp.UseTabs = false;
                 Npp.IndentWidth = Config.Instance.AutoCompleteIndentNbSpaces;
@@ -643,26 +663,8 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-            FileExplorer.ExplorerForm.FileExplorerPage.RefreshOvl();
-            FileExplorer.ExplorerForm.FileExplorerPage.FilterByText = "";
+            UserCommunication.Notify(@"<a href='D:\Work\ProgressFiles\compiler'>D:\Work\ProgressFiles\compiler</a><br><a href='D:\Work\ProgressFiles\CustomLogger.p'>D:\Work\ProgressFiles\CustomLogger.p</a>");
 
-            var derp = new StringBuilder();
-
-            foreach (var str in ProgressEnv.Current.GetProPathFileList) {
-                derp.AppendLine(str + "<br>");
-            }
-
-            UserCommunication.Notify(derp.ToString());
-
-
-            return;
-
-
-            var progressExec = new ProgressExecution();
-            progressExec.ProcessExited += (sender, exited) => {
-                UserCommunication.Notify("Compilation done?! " + exited.ExtractDbOutputPath);
-            };
-            progressExec.Do(ExecutionType.Run);
             return;
 
             /*

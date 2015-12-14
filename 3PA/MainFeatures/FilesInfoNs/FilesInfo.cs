@@ -23,11 +23,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
-namespace _3PA.MainFeatures.FilesInfo {
+namespace _3PA.MainFeatures.FilesInfoNs {
 
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
@@ -67,32 +69,24 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// <summary>
         /// update errors list for a file
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fullPath"></param>
         /// <param name="errorsList"></param>
-        public static void UpdateFileErrors(string fileName, List<FileError> errorsList) {
-            AddIfNew(fileName);
-            if (_sessionInfo[fileName].FileErrors != null)
-                _sessionInfo[fileName].FileErrors.Clear();
-            _sessionInfo[fileName].FileErrors = errorsList.ToList();
-            _sessionInfo[fileName].FileErrors.Sort(new FileErrorSortingClass());
+        public static void UpdateFileErrors(string fullPath, List<FileError> errorsList) {
+            AddIfNew(fullPath);
+            if (_sessionInfo[fullPath].FileErrors != null)
+                _sessionInfo[fullPath].FileErrors.Clear();
+            _sessionInfo[fullPath].FileErrors = errorsList.ToList();
+            _sessionInfo[fullPath].FileErrors.Sort(new FileErrorSortingClass());
         }
 
         /// <summary>
         /// Returns the FileInfoObject of given file
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fullPath"></param>
         /// <returns></returns>
-        public static FileInfoObject GetFileInfo(string fileName) {
-            AddIfNew(fileName);
-            return _sessionInfo[fileName];
-        }
-
-        /// <summary>
-        /// Returns current file FileInfoObject
-        /// </summary>
-        /// <returns></returns>
-        public static FileInfoObject GetFileInfo() {
-            return GetFileInfo(Npp.GetCurrentFilePath());
+        public static FileInfoObject GetFileInfo(string fullPath) {
+            AddIfNew(fullPath);
+            return _sessionInfo[fullPath];
         }
 
         #region user interface methods
@@ -270,21 +264,26 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// <summary>
         /// Reads an error log file, format :
         /// filepath \t ErrorLevel \t line \t column \t error number \t message \t help
+        /// fromProlint = true allows to set FromProlint to true in the object,
+        /// permutePaths allows to replace a path with another, useful when we compiled from a tempdir but we want the errors
+        /// to appear for the "real" file
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="fullPath"></param>
         /// <param name="fromProlint"></param>
+        /// <param name="permutePaths"></param>
         /// <returns></returns>
-        public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fileName, bool fromProlint) {
+        public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fullPath, bool fromProlint, Dictionary<string, string> permutePaths) {
             var output = new Dictionary<string, List<FileError>>();
-            foreach (var items in File.ReadAllLines(fileName, TextEncodingDetect.GetFileEncoding(fileName)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
+            foreach (var items in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
 
                 ErrorLevel errorLevel;
                 if (!Enum.TryParse(items[1], true, out errorLevel))
                     errorLevel = ErrorLevel.Error;
 
-                if (!output.ContainsKey(items[0]))
-                    output.Add(items[0], new List<FileError>());
-                output[items[0]].Add(new FileError {
+                var filePath = (permutePaths.ContainsKey(items[0]) ? permutePaths[items[0]] : items[0]);
+                if (!output.ContainsKey(filePath))
+                    output.Add(filePath, new List<FileError>());
+                output[filePath].Add(new FileError {
                     Level = errorLevel,
                     Line = items[2].Equals("?") ? 0 : int.Parse(items[2]) - 1,
                     Column = items[3].Equals("?") ? 0 : int.Parse(items[3]),
@@ -306,10 +305,10 @@ namespace _3PA.MainFeatures.FilesInfo {
         /// <summary>
         /// Just add the file to the session info if it doesn't exist
         /// </summary>
-        /// <param name="fileName"></param>
-        private static void AddIfNew(string fileName) {
-            if (!_sessionInfo.ContainsKey(fileName))
-                _sessionInfo.Add(fileName, new FileInfoObject());
+        /// <param name="fullPath"></param>
+        private static void AddIfNew(string fullPath) {
+            if (!_sessionInfo.ContainsKey(fullPath))
+                _sessionInfo.Add(fullPath, new FileInfoObject());
         }
 
         #endregion
@@ -322,21 +321,63 @@ namespace _3PA.MainFeatures.FilesInfo {
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     public class FileInfoObject {
-        public CurrentOperation CurrOperation { get; set; }
+        private CurrentOperation _currentOperation;
+        private static object _lock = new object();
+        public CurrentOperation CurrentOperation {
+            get {
+                CurrentOperation output = 0;
+                bool lockTaken = false;
+                try
+                {
+                    Monitor.TryEnter(_lock, 1500, ref lockTaken);
+                    if (lockTaken) output = _currentOperation;
+                }
+                catch (Exception e)
+                {
+                    ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
+                }
+                finally
+                {
+                    if (lockTaken) Monitor.Exit(_lock);
+                }
+                return output;
+            }
+            set {
+                bool lockTaken = false;
+                try
+                {
+                    Monitor.TryEnter(_lock, 1500, ref lockTaken);
+                    if (lockTaken) {
+                        _currentOperation = value;
+                        //TODO : update file info field in the FileExplorer
+                    }
+                }
+                catch (Exception e) {
+                    ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
+                }
+                finally
+                {
+                    if (lockTaken) Monitor.Exit(_lock);
+                }                
+            }
+        }
+
         public List<FileError> FileErrors { get; set; }
         public bool WarnedTooLong { get; set; }
-        public ProgressExecution.ProgressExecution ProgressExecution { get; set; }
+        public ProgressExecution ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
     }
 
     /// <summary>
     /// Current undergoing operation on the file
     /// </summary>
+    [Flags]
     public enum CurrentOperation {
-        None,
-        CheckSynthax,
-        Compile,
-        Prolint
+        CheckSyntax = 1,
+        Compile = 2,
+        Run = 4,
+        Prolint = 8,
+        
     }
 
     /// <summary>

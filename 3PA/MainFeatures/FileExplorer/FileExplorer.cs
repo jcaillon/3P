@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
                 output.Add(new FileObject {
                     FileName = directoryInfo.Name,
-                    BasePath = Path.GetPathRoot(directoryInfo.FullName),
+                    BasePath = Path.GetDirectoryName(directoryInfo.FullName),
                     FullPath = directoryInfo.FullName,
                     CreateDateTime = directoryInfo.CreationTime,
                     ModifieDateTime = directoryInfo.LastWriteTime,
@@ -226,7 +226,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     public enum FileType {
         Unknow,
         Df,
-        E,
+        D,
         Folder,
         I,
         Lst,

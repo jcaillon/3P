@@ -29,7 +29,7 @@ using _3PA.Data;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.FilesInfo;
+using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
 
@@ -183,20 +183,20 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         private static void SetAnnotationStyles(byte errorLevel, Color bgColor, Color fgColor) {
             int curFontSize = Npp.GetStyle(0).Size;
 
-            var normalStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Normal));
+            var normalStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Normal));
             normalStyle.Font = "Segoe ui";
             normalStyle.Size = (int)(curFontSize * 0.9);
             normalStyle.ForeColor = fgColor;
             normalStyle.BackColor = bgColor;
 
-            var boldStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Bold));
+            var boldStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Bold));
             boldStyle.Font = "Segoe ui";
             boldStyle.Size = (int)(curFontSize * 0.9);
             boldStyle.Bold = true;
             boldStyle.ForeColor = fgColor;
             boldStyle.BackColor = bgColor;
 
-            var italicStyle = Npp.GetStyle(FilesInfo.FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Italic));
+            var italicStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Italic));
             italicStyle.Font = "Segoe ui";
             italicStyle.Size = (int)(curFontSize * 0.9);
             italicStyle.Italic = true;

@@ -28,7 +28,7 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.FilesInfo;
+using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {

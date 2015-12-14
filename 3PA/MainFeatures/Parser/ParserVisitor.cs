@@ -25,7 +25,7 @@ using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.ProgressExecution;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Parser {
 

@@ -24,7 +24,7 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.FilesInfo {
+namespace _3PA.MainFeatures.FilesInfoNs {
     public partial class FileTagsPage : YamuiPage {
 
         #region fields

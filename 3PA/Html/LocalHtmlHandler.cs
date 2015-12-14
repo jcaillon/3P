@@ -104,7 +104,7 @@ namespace _3PA.Html {
         MsgQuestionShield,
         MsgRadioActive,
         MsgServices,
-        MsgSkull,
+        MsgRip,
         MsgWarning,
         MsgWarningShield,
         MsgUpdate

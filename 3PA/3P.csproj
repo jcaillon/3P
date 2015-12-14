@@ -89,8 +89,8 @@
     </Compile>
     <Compile Include="Interop\DocumentLines.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
-    <Compile Include="MainFeatures\FilesInfo\FilesInfo.cs" />
-    <Compile Include="MainFeatures\ProgressExecution\ProgressExecution.cs" />
+    <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
@@ -118,7 +118,7 @@
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.Designer.cs">
       <DependentUpon>CodeExplorerPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecution\CompilationPath.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.cs">
       <SubType>UserControl</SubType>
@@ -132,17 +132,17 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfo\FileTags.cs" />
-    <Compile Include="MainFeatures\FilesInfo\FileTagsForm.cs">
+    <Compile Include="MainFeatures\FilesInfoNs\FileTags.cs" />
+    <Compile Include="MainFeatures\FilesInfoNs\FileTagsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfo\FileTagsForm.Designer.cs">
+    <Compile Include="MainFeatures\FilesInfoNs\FileTagsForm.Designer.cs">
       <DependentUpon>FileTagsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfo\FileTagsPage.cs">
+    <Compile Include="MainFeatures\FilesInfoNs\FileTagsPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfo\FileTagsPage.Designer.cs">
+    <Compile Include="MainFeatures\FilesInfoNs\FileTagsPage.Designer.cs">
       <DependentUpon>FileTagsPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.cs">
@@ -158,7 +158,7 @@
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
-    <Compile Include="MainFeatures\ProgressExecution\ProgressEnv.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\ProgressEnv.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -298,10 +298,10 @@
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerPage.resx">
       <DependentUpon>FileExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FilesInfo\FileTagsForm.resx">
+    <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsForm.resx">
       <DependentUpon>FileTagsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FilesInfo\FileTagsPage.resx">
+    <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsPage.resx">
       <DependentUpon>FileTagsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
@@ -320,7 +320,6 @@
     <None Include="Data\abbreviations.data" />
     <None Include="Data\keywords.data" />
     <None Include="Data\keywordsHelp.data" />
-    <None Include="Data\nppTool.p" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\snippets.data" />
@@ -430,6 +429,7 @@
     <Content Include="Images\NotifAndMessages\MsgQuestion.png" />
     <Content Include="Images\NotifAndMessages\MsgQuestionShield.png" />
     <Content Include="Images\NotifAndMessages\MsgRadioActive.png" />
+    <Content Include="Images\NotifAndMessages\MsgRip.png" />
     <Content Include="Images\NotifAndMessages\MsgServices.png" />
     <Content Include="Images\NotifAndMessages\MsgSkull.png" />
     <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
