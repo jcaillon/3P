@@ -663,7 +663,7 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-            UserCommunication.Notify(@"<a href='D:\Work\ProgressFiles\compiler'>D:\Work\ProgressFiles\compiler</a><br><a href='D:\Work\ProgressFiles\CustomLogger.p'>D:\Work\ProgressFiles\CustomLogger.p</a>");
+            UserCommunication.Notify(@"<a href='D:\Work\ProgressFiles\compiler'>D:\Work\ProgressFiles\compiler</a><br><a href='D:\Work\ProgressFiles\CustomLogger.p'>D:\Work\ProgressFiles\CustomLogger.p</a>", MessageImg.MsgInfo, "Compilation", "Everything is ok");
 
             return;
 

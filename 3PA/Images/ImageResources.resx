@@ -352,54 +352,6 @@
   <data name="DownloadDbOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\downloaddbok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="MsgError" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgerror.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgHighImportance" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msghighimportance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msginfo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msglogo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgPin" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgpin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgPoison" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgpoison.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgQuestion" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgquestion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgQuestionShield" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgquestionshield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgRadioActive" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgradioactive.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgServices" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgservices.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgSkull" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgskull.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgUpdate" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgupdate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgwarning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgWarningShield" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgwarningshield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="MsgDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>notifandmessages\msgdebug.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="DfType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\dftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -436,7 +388,49 @@
   <data name="IType" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\itype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="MsgDebug" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgdebug.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgError" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgerror.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgHighImportance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msghighimportance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msginfo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgPoison" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgpoison.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgQuestion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgquestion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="MsgRip" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>notifandmessages\msgrip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgToolTip" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgtooltip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgUpdate" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgupdate.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>notifandmessages\msgwarning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExplorerDir0" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\explorerdir0.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExplorerDir1" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\explorerdir1.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExplorerDir2" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\explorerdir2.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ExplorerDir3" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\explorerdir3.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

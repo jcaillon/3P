@@ -93,20 +93,15 @@ namespace _3PA.Html {
 
     public enum MessageImg {
         MsgDebug,
-        MsgLogo,
         MsgError,
         MsgHighImportance,
         MsgInfo,
         MsgOk,
-        MsgPin,
         MsgPoison,
         MsgQuestion,
-        MsgQuestionShield,
-        MsgRadioActive,
-        MsgServices,
         MsgRip,
+        MsgToolTip,
+        MsgUpdate,
         MsgWarning,
-        MsgWarningShield,
-        MsgUpdate
     }
 }

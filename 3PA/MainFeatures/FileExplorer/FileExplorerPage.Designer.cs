@@ -32,7 +32,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel2 = new YamuiFramework.Controls.YamuiPanel();
             this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.yamuiPanel3 = new YamuiFramework.Controls.YamuiPanel();
-            this.cbDirectory = new YamuiFramework.Controls.YamuiCheckBox();
             this.btErase = new YamuiFramework.Controls.YamuiImageButton();
             this.textFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.btRefresh = new YamuiFramework.Controls.YamuiImageButton();
@@ -42,6 +41,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.FileName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.btDirectory = new YamuiFramework.Controls.YamuiImageButton();
+            this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
+            this.btNextError = new YamuiFramework.Controls.YamuiImageButton();
+            this.lbStatus = new YamuiFramework.Controls.YamuiLabel();
+            this.yamuiLabel6 = new YamuiFramework.Controls.YamuiLabel();
+            this.btGotoDir = new YamuiFramework.Controls.YamuiImageButton();
             this.yamuiPanel1.SuspendLayout();
             this.yamuiPanel2.SuspendLayout();
             this.yamuiPanel3.SuspendLayout();
@@ -61,6 +66,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // yamuiPanel1
             // 
+            this.yamuiPanel1.Controls.Add(this.yamuiLabel6);
+            this.yamuiPanel1.Controls.Add(this.lbStatus);
+            this.yamuiPanel1.Controls.Add(this.btNextError);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel1);
             this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
@@ -68,7 +76,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiPanel1.Margin = new System.Windows.Forms.Padding(0);
             this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(412, 82);
+            this.yamuiPanel1.Size = new System.Drawing.Size(412, 72);
             this.yamuiPanel1.TabIndex = 2;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
@@ -93,7 +101,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel2.Dock = System.Windows.Forms.DockStyle.Top;
             this.yamuiPanel2.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel2.HorizontalScrollbarSize = 10;
-            this.yamuiPanel2.Location = new System.Drawing.Point(0, 82);
+            this.yamuiPanel2.Location = new System.Drawing.Point(0, 72);
             this.yamuiPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.yamuiPanel2.Name = "yamuiPanel2";
             this.yamuiPanel2.Size = new System.Drawing.Size(412, 41);
@@ -114,7 +122,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // yamuiPanel3
             // 
-            this.yamuiPanel3.Controls.Add(this.cbDirectory);
+            this.yamuiPanel3.Controls.Add(this.btGotoDir);
+            this.yamuiPanel3.Controls.Add(this.lbDirectory);
+            this.yamuiPanel3.Controls.Add(this.btDirectory);
             this.yamuiPanel3.Controls.Add(this.btErase);
             this.yamuiPanel3.Controls.Add(this.textFilter);
             this.yamuiPanel3.Controls.Add(this.btRefresh);
@@ -125,22 +135,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.yamuiPanel3.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel3.HorizontalScrollbarSize = 10;
-            this.yamuiPanel3.Location = new System.Drawing.Point(0, 123);
+            this.yamuiPanel3.Location = new System.Drawing.Point(0, 113);
             this.yamuiPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.yamuiPanel3.Name = "yamuiPanel3";
-            this.yamuiPanel3.Size = new System.Drawing.Size(412, 361);
+            this.yamuiPanel3.Size = new System.Drawing.Size(412, 371);
             this.yamuiPanel3.TabIndex = 4;
             this.yamuiPanel3.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel3.VerticalScrollbarSize = 10;
-            // 
-            // cbDirectory
-            // 
-            this.cbDirectory.AutoSize = true;
-            this.cbDirectory.Location = new System.Drawing.Point(5, 32);
-            this.cbDirectory.Name = "cbDirectory";
-            this.cbDirectory.Size = new System.Drawing.Size(28, 15);
-            this.cbDirectory.TabIndex = 8;
-            this.cbDirectory.Text = "?";
             // 
             // btErase
             // 
@@ -181,7 +182,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.nbitems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nbitems.AutoSize = true;
             this.nbitems.Function = YamuiFramework.Fonts.LabelFunction.Small;
-            this.nbitems.Location = new System.Drawing.Point(2, 347);
+            this.nbitems.Location = new System.Drawing.Point(2, 357);
             this.nbitems.Margin = new System.Windows.Forms.Padding(3);
             this.nbitems.Name = "nbitems";
             this.nbitems.Size = new System.Drawing.Size(43, 12);
@@ -194,7 +195,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiLabel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.yamuiLabel4.AutoSize = true;
             this.yamuiLabel4.Function = YamuiFramework.Fonts.LabelFunction.Small;
-            this.yamuiLabel4.Location = new System.Drawing.Point(2, 334);
+            this.yamuiLabel4.Location = new System.Drawing.Point(2, 344);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(0);
             this.yamuiLabel4.Name = "yamuiLabel4";
             this.yamuiLabel4.Size = new System.Drawing.Size(43, 12);
@@ -226,7 +227,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.ovl.ShowGroups = false;
             this.ovl.ShowHeaderInAllViews = false;
             this.ovl.ShowSortIndicators = false;
-            this.ovl.Size = new System.Drawing.Size(412, 252);
+            this.ovl.Size = new System.Drawing.Size(412, 262);
             this.ovl.SortGroupItemsByPrimaryColumn = false;
             this.ovl.TabIndex = 2;
             this.ovl.UseCellFormatEvents = true;
@@ -263,6 +264,60 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.toolTipHtml.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.TooltipCssClass = "htmltooltip";
+            // 
+            // btDirectory
+            // 
+            this.btDirectory.BackGrndImage = null;
+            this.btDirectory.Location = new System.Drawing.Point(5, 27);
+            this.btDirectory.Name = "btDirectory";
+            this.btDirectory.Size = new System.Drawing.Size(20, 20);
+            this.btDirectory.TabIndex = 8;
+            this.btDirectory.Text = "yamuiImageButton1";
+            // 
+            // lbDirectory
+            // 
+            this.lbDirectory.Location = new System.Drawing.Point(31, 29);
+            this.lbDirectory.Name = "lbDirectory";
+            this.lbDirectory.Size = new System.Drawing.Size(350, 18);
+            this.lbDirectory.TabIndex = 9;
+            this.lbDirectory.Text = "yamuiLabel5";
+            // 
+            // btNextError
+            // 
+            this.btNextError.BackGrndImage = null;
+            this.btNextError.Location = new System.Drawing.Point(5, 45);
+            this.btNextError.Name = "btNextError";
+            this.btNextError.Size = new System.Drawing.Size(20, 20);
+            this.btNextError.TabIndex = 9;
+            this.btNextError.Text = "yamuiImageButton1";
+            // 
+            // lbStatus
+            // 
+            this.lbStatus.AutoSize = true;
+            this.lbStatus.Location = new System.Drawing.Point(59, 27);
+            this.lbStatus.Name = "lbStatus";
+            this.lbStatus.Size = new System.Drawing.Size(74, 15);
+            this.lbStatus.TabIndex = 10;
+            this.lbStatus.Text = "yamuiLabel5";
+            // 
+            // yamuiLabel6
+            // 
+            this.yamuiLabel6.AutoSize = true;
+            this.yamuiLabel6.Location = new System.Drawing.Point(5, 27);
+            this.yamuiLabel6.Name = "yamuiLabel6";
+            this.yamuiLabel6.Size = new System.Drawing.Size(48, 15);
+            this.yamuiLabel6.TabIndex = 11;
+            this.yamuiLabel6.Text = "Status : ";
+            // 
+            // btGotoDir
+            // 
+            this.btGotoDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btGotoDir.BackGrndImage = null;
+            this.btGotoDir.Location = new System.Drawing.Point(387, 27);
+            this.btGotoDir.Name = "btGotoDir";
+            this.btGotoDir.Size = new System.Drawing.Size(20, 20);
+            this.btGotoDir.TabIndex = 10;
+            this.btGotoDir.Text = "yamuiImageButton2";
             // 
             // FileExplorerPage
             // 
@@ -302,7 +357,12 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiImageButton btRefresh;
         private YamuiImageButton btErase;
         private YamuiTextBox textFilter;
-        private YamuiCheckBox cbDirectory;
+        private YamuiLabel lbDirectory;
+        private YamuiImageButton btDirectory;
+        private YamuiImageButton btNextError;
+        private YamuiLabel yamuiLabel6;
+        private YamuiLabel lbStatus;
+        private YamuiImageButton btGotoDir;
 
     }
 }

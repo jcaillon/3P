@@ -36,6 +36,20 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// </summary>
     public static class FilesInfo {
 
+        #region event
+
+        private static event EventHandler<UpdatedOperationEventArgs> OnUpdatedOperation;
+
+        /// <summary>
+        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// </summary>
+        public static event EventHandler<UpdatedOperationEventArgs> UpdatedOperation {
+            add { OnUpdatedOperation += value; }
+            remove { OnUpdatedOperation -= value; }
+        }
+
+        #endregion
+
         #region fields
 
         /// <summary>
@@ -127,19 +141,20 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             marginError.Mask = EveryMarkersMask;
 
             Npp.AnnotationClearAll();
-            foreach (var errorLevelMarker in Enum.GetValues(typeof (ErrorLevel)))
-                Npp.Marker.MarkerDeleteAll((int) errorLevelMarker);
-
-            // default operation
-
+            foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
+                Npp.Marker.MarkerDeleteAll((int)errorLevelMarker);
 
             // check if current file is a progress and if we got info on it
             var currentFilePath = Npp.GetCurrentFilePath();
             if (!Abl.IsCurrentProgressFile() || !_sessionInfo.ContainsKey(currentFilePath))
                 return;
 
-            // update current operation
-
+            // UpdatedOperation event
+            if (OnUpdatedOperation != null) {
+                if (_sessionInfo.ContainsKey(currentFilePath))
+                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(_sessionInfo[currentFilePath].CurrentOperation));
+                else
+                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(0));}
 
             // got error info on it?
             if (_sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0)
@@ -156,26 +171,26 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     stylerHelper.Clear();
                     lastMessage.Clear();
                     // set marker style now (the first error encountered for a given line is the highest anyway)
-                    Npp.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
+                    Npp.GetLine(fileError.Line).MarkerAdd((int)fileError.Level);
                     //Npp.SetAnnotationStyle(fileError.Line, ErrorAnnotationStyleOffset + (int)fileError.Level);
                 } else {
-                    stylerHelper.Style("\n", (byte) fileError.Level);
+                    stylerHelper.Style("\n", (byte)fileError.Level);
                     lastMessage.Append("\n");
                 }
 
                 lastLine = fileError.Line;
 
                 var mess = (fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber + "): " : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber + "): ");
-                stylerHelper.Style(mess, (byte) (ErrorAnnotBoldStyleOffset + fileError.Level));
+                stylerHelper.Style(mess, (byte)(ErrorAnnotBoldStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
                 mess = fileError.Message.BreakText(140);
-                stylerHelper.Style(mess, (byte) (ErrorAnnotStandardStyleOffset + fileError.Level));
+                stylerHelper.Style(mess, (byte)(ErrorAnnotStandardStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
                 if (!string.IsNullOrEmpty(fileError.Help)) {
                     mess = "\nDetailed help: " + fileError.Help.BreakText(140);
-                    stylerHelper.Style(mess, (byte) (ErrorAnnotItalicStyleOffset + fileError.Level));
+                    stylerHelper.Style(mess, (byte)(ErrorAnnotItalicStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
                 }
 
@@ -312,7 +327,6 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         #endregion
-
     }
 
     #region FileInfoObject
@@ -321,44 +335,54 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
     public class FileInfoObject {
+
+        #region event
+
+        private static event EventHandler<UpdatedOperationEventArgs> OnUpdatedOperation;
+
+        /// <summary>
+        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// </summary>
+        public static event EventHandler<UpdatedOperationEventArgs> UpdatedOperation {
+            add { OnUpdatedOperation += value; }
+            remove { OnUpdatedOperation -= value; }
+        }
+
+        #endregion
+
         private CurrentOperation _currentOperation;
         private static object _lock = new object();
         public CurrentOperation CurrentOperation {
             get {
                 CurrentOperation output = 0;
                 bool lockTaken = false;
-                try
-                {
+                try {
                     Monitor.TryEnter(_lock, 1500, ref lockTaken);
                     if (lockTaken) output = _currentOperation;
-                }
-                catch (Exception e)
-                {
+                } catch (Exception e) {
                     ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
-                }
-                finally
-                {
+                } finally {
                     if (lockTaken) Monitor.Exit(_lock);
                 }
                 return output;
             }
             set {
                 bool lockTaken = false;
-                try
-                {
+                try {
                     Monitor.TryEnter(_lock, 1500, ref lockTaken);
                     if (lockTaken) {
                         _currentOperation = value;
-                        //TODO : update file info field in the FileExplorer
+
+                        // publish UpdatedOperation event
+                        if (OnUpdatedOperation != null && Plug.CurrentFilePath.EqualsCi(FileFullPath)) {
+                            OnUpdatedOperation(this, new UpdatedOperationEventArgs(_currentOperation));
+                        }
                     }
-                }
-                catch (Exception e) {
+                } catch (Exception e) {
                     ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
-                }
-                finally
-                {
+                } finally {
                     if (lockTaken) Monitor.Exit(_lock);
-                }                
+                }
             }
         }
 
@@ -366,6 +390,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public bool WarnedTooLong { get; set; }
         public ProgressExecution ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
+        public string FileFullPath { get; set; }
     }
 
     /// <summary>
@@ -377,7 +402,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         Compile = 2,
         Run = 4,
         Prolint = 8,
-        
+
     }
 
     /// <summary>
@@ -432,5 +457,15 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
     #endregion
 
+    #region UpdateOperationEventArgs
+
+    public class UpdatedOperationEventArgs : EventArgs {
+        public CurrentOperation CurrentOperation { get; private set; }
+        public UpdatedOperationEventArgs(CurrentOperation currentOperation) {
+            CurrentOperation = currentOperation;
+        }
+    }
+
+    #endregion
 
 }

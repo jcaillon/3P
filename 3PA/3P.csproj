@@ -404,6 +404,10 @@
     <Content Include="Images\DockableExplorer\Type\Run.png" />
     <Content Include="Images\FileExplorer\DfType.png" />
     <Content Include="Images\FileExplorer\DType.png" />
+    <Content Include="Images\FileExplorer\ExplorerDir0.png" />
+    <Content Include="Images\FileExplorer\ExplorerDir1.png" />
+    <Content Include="Images\FileExplorer\ExplorerDir2.png" />
+    <Content Include="Images\FileExplorer\ExplorerDir3.png" />
     <Content Include="Images\FileExplorer\FolderType.png" />
     <Content Include="Images\FileExplorer\IType.png" />
     <Content Include="Images\FileExplorer\Favourite.png" />
@@ -422,19 +426,13 @@
     <Content Include="Images\NotifAndMessages\MsgError.png" />
     <Content Include="Images\NotifAndMessages\MsgHighImportance.png" />
     <Content Include="Images\NotifAndMessages\MsgInfo.png" />
-    <Content Include="Images\NotifAndMessages\MsgLogo.png" />
     <Content Include="Images\NotifAndMessages\MsgOk.png" />
-    <Content Include="Images\NotifAndMessages\MsgPin.png" />
     <Content Include="Images\NotifAndMessages\MsgPoison.png" />
     <Content Include="Images\NotifAndMessages\MsgQuestion.png" />
-    <Content Include="Images\NotifAndMessages\MsgQuestionShield.png" />
-    <Content Include="Images\NotifAndMessages\MsgRadioActive.png" />
     <Content Include="Images\NotifAndMessages\MsgRip.png" />
-    <Content Include="Images\NotifAndMessages\MsgServices.png" />
-    <Content Include="Images\NotifAndMessages\MsgSkull.png" />
+    <Content Include="Images\NotifAndMessages\MsgToolTip.png" />
     <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
     <Content Include="Images\NotifAndMessages\MsgWarning.png" />
-    <Content Include="Images\NotifAndMessages\MsgWarningShield.png" />
     <Content Include="Images\tooltips\Output.png" />
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />
@@ -469,6 +467,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Images\FunctionsIcons\" />
     <Folder Include="Images\Html\" />
     <Folder Include="MainFeatures\SmallMenu\" />
   </ItemGroup>

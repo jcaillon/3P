@@ -33,12 +33,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #region public fields
 
-        private event EventHandler<ProcessOnExited> OnProcessExited;
+        private event EventHandler<ProcessOnExitEventArgs> OnProcessExited;
 
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
         /// </summary>
-        public event EventHandler<ProcessOnExited> ProcessExited {
+        public event EventHandler<ProcessOnExitEventArgs> ProcessExited {
             add { OnProcessExited += value; }
             remove { OnProcessExited -= value; }
         }
@@ -51,7 +51,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Full path to the .p, .w... to compile, run...
         /// </summary>
-        public string FullFilePathToExecute { get; }
+        public string FullFilePathToExecute { get; private set; }
 
         /// <summary>
         /// Path to the output .log file (for compilation)
@@ -161,7 +161,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // check info
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile && !Abl.IsCurrentProgressFile()) {
-                    UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarningShield,
+                    UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning,
                         "Invalid file type", "Progress files only", 10);
                     return false;
                 }
@@ -171,12 +171,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     return false;
                 }
                 if (Config.Instance.GlobalCompilableExtension.Split().Contains(Path.GetExtension(FullFilePathToExecute))) {
-                    UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(FullFilePathToExecute).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarningShield, "Invalid file extension", "Not an executable", 10);
+                    UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(FullFilePathToExecute).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                     return false;
                 }
             }
             if (!File.Exists(ProgressEnv.Current.ProwinPath)) {
-                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProgressEnv.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarningShield, "Execution error", "Invalid file path", 10);
+                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProgressEnv.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", 10);
                 return false;
             }
 
@@ -280,7 +280,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <param name="eventArgs"></param>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
             if (OnProcessExited != null) {
-                OnProcessExited(this, new ProcessOnExited(eventArgs, this));
+                OnProcessExited(this, new ProcessOnExitEventArgs(this));
                 Process.Close();
             }
         }
@@ -289,11 +289,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     }
 
-    public class ProcessOnExited : EventArgs {
-        public readonly object OriginalEventArgs;
+    public class ProcessOnExitEventArgs : EventArgs {
         public ProgressExecution ProgressExecution;
-        public ProcessOnExited(object originalEventArgs, ProgressExecution progressExecution) {
-            OriginalEventArgs = originalEventArgs;
+        public ProcessOnExitEventArgs(ProgressExecution progressExecution) {
             ProgressExecution = progressExecution;
         }
     }

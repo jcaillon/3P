@@ -22,10 +22,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
+using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
@@ -33,6 +35,7 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
@@ -41,6 +44,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region Fields
         private const string StrEmptyList = "No files found!";
         private const string StrItems = " items";
+
+        private string[] _explorerDirStr;
 
         /// <summary>
         /// The filter to apply to the autocompletion form
@@ -61,11 +66,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         public int TotalItems { get; set; }
 
         /// <summary>
-        /// Returns the value of the directory type checkbox
+        /// The value ranging from 0 to 3 and indicating which folder we are exploring
         /// </summary>
-        public CheckState CheckBoxDirState {
-            get { return cbDirectory.CheckState; }
-        }
+        public int DirectoryToExplorer { get; private set; }
 
         // List of displayed type of file
         private static Dictionary<FileType, SelectorButton<FileType>> _displayedTypes;
@@ -75,6 +78,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         private List<FileObject> _initialObjectsList;
 
         private int _currentType;
+
+        private static bool _isListing;
         #endregion
 
         #region Constructor
@@ -128,21 +133,41 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
             toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list below");
 
-            cbDirectory.ThreeState = true;
+            btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
+            btDirectory.BackGrndImage = ImageResources.ExplorerDir0;
+            _explorerDirStr = new[] {"Local path ", "Compilation path", "Propath", "Everywhere"};
+            lbDirectory.Text = _explorerDirStr[0];
+            btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
+            btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
+            lbDirectory.Click += (sender, args) => BtDirectoryOnButtonPressed(sender, new ButtonPressedEventArgs(args));
 
             #endregion
 
             #region Actions
 
-            for (int i = 0; i < 20; i++) {
-                var derp = new YamuiImageButton {
+            // Builds a list of buttons
+            var buttonList = new List<Tuple<Image, Action>> {
+                new Tuple<Image, Action>(ImageResources.External, () => { })
+            };
+            foreach (var buttonSpec in buttonList) {
+                var button = new YamuiImageButton {
                     Size = new Size(20, 20),
-                    BackGrndImage = ImageResources.External,
-                    Margin = new Padding(0)
+                    BackGrndImage = buttonSpec.Item1,
+                    Margin = new Padding(0),
                 };
-                flowLayoutPanel.Controls.Add(derp);
-                if (i == 2) flowLayoutPanel.SetFlowBreak(derp, true);
+                var spec = buttonSpec;
+                button.ButtonPressed += (sender, args) => { spec.Item2(); };
+                flowLayoutPanel.Controls.Add(button);
+                //flowLayoutPanel.SetFlowBreak(button, true);
             }
+
+            #endregion
+
+            #region Current file
+
+            // register to Updated Operation events
+            FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
+            FileInfoObject.UpdatedOperation += FilesInfoOnUpdatedOperation;
 
             #endregion
 
@@ -273,59 +298,80 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Call this method to completly refresh the object view list, 
         /// </summary>
         public void RefreshOvl() {
-            // get the list of FileObjects
-            _initialObjectsList = new List<FileObject>();
-            switch (CheckBoxDirState) {
-                case CheckState.Checked:
-                    _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseLocalPath);
-                    break;
-                case CheckState.Unchecked:
-                    _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseCompilationPath);
-                    break;
-                default:
-                    foreach (var dir in ProgressEnv.Current.GetProPathFileList) {
-                        _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(dir, false));
+            _isListing = true;
+            Task.Factory.StartNew(() => {
+                try {
+                    // get the list of FileObjects
+                    _initialObjectsList = new List<FileObject>();
+                    switch (DirectoryToExplorer) {
+                        case 0:
+                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseLocalPath);
+                            break;
+                        case 1:
+                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseCompilationPath);
+                            break;
+                        case 2:
+                            foreach (var dir in ProgressEnv.Current.GetProPathFileList) {
+                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(dir, false));
+                            }
+                            break;
+                        default:
+                            // List everey folder, must all be unique, then feed to ListFileOjectsInDirectory
+                            break;
                     }
-                    break;
-            }
-            // apply custom sorting
-            _initialObjectsList.Sort(new FilesSortingClass());
 
-            // delete any existing buttons
-            if (_displayedTypes != null) {
-                foreach (var selectorButton in _displayedTypes) {
-                    selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                    if (yamuiPanel3.Controls.Contains(selectorButton.Value))
-                        yamuiPanel3.Controls.Remove(selectorButton.Value);
-                    selectorButton.Value.Dispose();
+                    // apply custom sorting
+                    _initialObjectsList.Sort(new FilesSortingClass());
+
+                    // invoke on ui thread
+                    BeginInvoke((Action) delegate {
+                        try {
+                            // delete any existing buttons
+                            if (_displayedTypes != null) {
+                                foreach (var selectorButton in _displayedTypes) {
+                                    selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                                    if (yamuiPanel3.Controls.Contains(selectorButton.Value))
+                                        yamuiPanel3.Controls.Remove(selectorButton.Value);
+                                    selectorButton.Value.Dispose();
+                                }
+                            }
+
+                            // get distinct types, create a button for each
+                            int xPos = nbitems.Left + nbitems.Width + 10;
+                            int yPox = yamuiPanel3.Height - 28;
+                            _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
+                            foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
+                                var but = new SelectorButton<FileType> {
+                                    BackGrndImage = GetImageFromStr(type + "Type"),
+                                    Activated = true,
+                                    Size = new Size(24, 24),
+                                    TabStop = false,
+                                    Location = new Point(xPos, yPox),
+                                    Type = type,
+                                    AcceptsRightClick = true
+                                };
+                                but.ButtonPressed += HandleTypeClick;
+                                toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                                _displayedTypes.Add(type, but);
+                                yamuiPanel3.Controls.Add(but);
+                                xPos += but.Width;
+                            }
+
+                            // label for the number of items
+                            TotalItems = _initialObjectsList.Count;
+                            nbitems.Text = TotalItems + StrItems;
+                            ovl.SetObjects(_initialObjectsList);
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error while showing the list of files");
+                        } finally {
+                            _isListing = false;
+                        }
+                    });
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error while listing files");
+                    _isListing = false;
                 }
-            }
-
-            // get distinct types, create a button for each
-            int xPos = nbitems.Left + nbitems.Width + 10;
-            int yPox = yamuiPanel3.Height - 28;
-            _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
-            foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                var but = new SelectorButton<FileType> {
-                    BackGrndImage = GetImageFromStr(type + "Type"),
-                    Activated = true,
-                    Size = new Size(24, 24),
-                    TabStop = false,
-                    Location = new Point(xPos, yPox),
-                    Type = type,
-                    AcceptsRightClick = true
-                };
-                but.ButtonPressed += HandleTypeClick;
-                toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                _displayedTypes.Add(type, but);
-                yamuiPanel3.Controls.Add(but);
-                xPos += but.Width;
-            }
-
-            // label for the number of items
-            TotalItems = _initialObjectsList.Count;
-            nbitems.Text = TotalItems + StrItems;
-            ovl.SetObjects(_initialObjectsList);
+            });
         }
 
         /// <summary>
@@ -611,8 +657,28 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-
         #region File Explorer buttons events
+
+        private void BtGotoDirOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            if (DirectoryToExplorer == 0)
+                Utils.OpenFolder(ProgressEnv.Current.BaseLocalPath);
+            else if (DirectoryToExplorer == 1)
+                Utils.OpenFolder(ProgressEnv.Current.BaseCompilationPath);
+        }
+
+        private void BtDirectoryOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            if (_isListing) return;
+            DirectoryToExplorer++;
+            if (DirectoryToExplorer > 3) DirectoryToExplorer = 0;
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + DirectoryToExplorer);
+            btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
+            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
+            if (DirectoryToExplorer > 1)
+                btGotoDir.Hide();
+            else 
+                btGotoDir.Show();
+            RefreshOvl();
+        }
 
         private void TextFilterOnTextChanged(object sender, EventArgs eventArgs) {
             if (!string.IsNullOrWhiteSpace(textFilter.Text))
@@ -634,6 +700,21 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
+        #region Current file
+
+        private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
+            lbStatus.UseCustomForeColor = true;
+            lbStatus.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
+            var t = new Transition(new TransitionType_Linear(600));
+            t.add(lbStatus, "Text", updatedOperationEventArgs.CurrentOperation.ToString());
+            t.add(lbStatus, "ForeColor", ThemeManager.AccentColor);
+            t.TransitionCompletedEvent += (o, args) => {
+                Transition.run(lbStatus, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(500));
+            };
+            t.run();
+        }
+
+        #endregion
 
     }
 

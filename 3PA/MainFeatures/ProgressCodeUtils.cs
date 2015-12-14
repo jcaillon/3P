@@ -280,13 +280,13 @@ namespace _3PA.MainFeatures
         /// Called after the compilation
         /// </summary>
         /// <param name="sender"></param>
-        /// <param name="processOnExited"></param>
-        public static void OnCompileEnded(object sender, ProcessOnExited processOnExited)
+        /// <param name="processOnExitEventArgs"></param>
+        public static void OnCompileEnded(object sender, ProcessOnExitEventArgs processOnExitEventArgs)
         {
             try {
                 CurrentOperation currentOperation;
                 string actionDescription;
-                switch (processOnExited.ProgressExecution.ExecutionType)
+                switch (processOnExitEventArgs.ProgressExecution.ExecutionType)
                 {
                     case ExecutionType.CheckSyntax:
                         actionDescription = "checking the syntax of";
@@ -306,9 +306,9 @@ namespace _3PA.MainFeatures
                 Plug.CurrentFileObject.CurrentOperation &= ~currentOperation;
 
                 // if log not found then something is messed up!
-                if (string.IsNullOrEmpty(processOnExited.ProgressExecution.LogPath) ||
-                    !File.Exists(processOnExited.ProgressExecution.LogPath)) {
-                    UserCommunication.Notify("Something went terribly wrong while " + actionDescription + " the following file:<br><br><a href='" + processOnExited.ProgressExecution.FullFilePathToExecute + "'>" + processOnExited.ProgressExecution.FullFilePathToExecute + "</a><br><br>I do not have any log so i'm kind of lost... Sorry pal!<br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+                if (string.IsNullOrEmpty(processOnExitEventArgs.ProgressExecution.LogPath) ||
+                    !File.Exists(processOnExitEventArgs.ProgressExecution.LogPath)) {
+                    UserCommunication.Notify("Something went terribly wrong while " + actionDescription + " the following file:<br><br><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a><br><br>I do not have any log so i'm kind of lost... Sorry pal!<br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
                 }
 
@@ -318,21 +318,21 @@ namespace _3PA.MainFeatures
                 // Read log info
                 // correct file path...
                 var changePaths = new Dictionary<string, string> {
-                    { processOnExited.ProgressExecution.TempFullFilePathToExecute, processOnExited.ProgressExecution.FullFilePathToExecute }
+                    { processOnExitEventArgs.ProgressExecution.TempFullFilePathToExecute, processOnExitEventArgs.ProgressExecution.FullFilePathToExecute }
                 };
-                var errorList = FilesInfo.ReadErrorsFromFile(processOnExited.ProgressExecution.LogPath, false, changePaths);
+                var errorList = FilesInfo.ReadErrorsFromFile(processOnExitEventArgs.ProgressExecution.LogPath, false, changePaths);
 
                 if (!errorList.Any()) {
                     // the compiler messages are empty
-                    var fileInfo = new FileInfo(processOnExited.ProgressExecution.LogPath);
+                    var fileInfo = new FileInfo(processOnExitEventArgs.ProgressExecution.LogPath);
                     if (fileInfo.Length > 0) {
                         // the .log is not empty, maybe something went wrong in the runner, display errors
                         UserCommunication.Notify(
                             "Something went wrong while " + actionDescription + " the following file:<br><br><a href='" +
-                            processOnExited.ProgressExecution.FullFilePathToExecute + "'>" +
-                            processOnExited.ProgressExecution.FullFilePathToExecute +
+                            processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" +
+                            processOnExitEventArgs.ProgressExecution.FullFilePathToExecute +
                             "</a><br><br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
-                            Utils.ReadAndFormatLogToHtml(processOnExited.ProgressExecution.LogPath), MessageImg.MsgError,
+                            Utils.ReadAndFormatLogToHtml(processOnExitEventArgs.ProgressExecution.LogPath), MessageImg.MsgError,
                             "Critical error", "Action failed");
                         return;
                     }
@@ -350,16 +350,16 @@ namespace _3PA.MainFeatures
                 }
 
                 // Prepare the notification content
-                var notifTitle = (processOnExited.ProgressExecution.ExecutionType == ExecutionType.CheckSyntax)
+                var notifTitle = (processOnExitEventArgs.ProgressExecution.ExecutionType == ExecutionType.CheckSyntax)
                     ? "Checking syntax"
-                    : ((processOnExited.ProgressExecution.ExecutionType == ExecutionType.Compile)
+                    : ((processOnExitEventArgs.ProgressExecution.ExecutionType == ExecutionType.Compile)
                         ? "Compiling" : "Executing");
                 var notifImg = (nbErrors > 0)
                     ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (errorList.Any()) ? 0 : 7;
                 var notifSubtitle = (nbErrors > 0)
                     ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder("<h3>Initial source file :</h3><div><a href='" + processOnExited.ProgressExecution.FullFilePathToExecute + "'>" + processOnExited.ProgressExecution.FullFilePathToExecute + "</a>");
+                var notifMessage = new StringBuilder("<h3>Initial source file :</h3><div><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a>");
                 var notifWidth = (errorList.Any()) ? 800 : 450;
 
                 // has errors
@@ -379,7 +379,7 @@ namespace _3PA.MainFeatures
                 FilesInfo.DisplayCurrentFileInfo();
 
                 // when compiling
-                if (processOnExited.ProgressExecution.ExecutionType == ExecutionType.Compile) {
+                if (processOnExitEventArgs.ProgressExecution.ExecutionType == ExecutionType.Compile) {
                     // copy to compilation dir
                 }
             }

@@ -144,7 +144,7 @@ namespace _3PA.Interop {
                     Config.Instance.ShortCuts.Add(shortcutName, ShortcutKey2String(shortcut));
                     Config.Save();
                     if (!_alreadyWarnedUserAboutShortkey) {
-                        UserCommunication.Notify("You successfully changed a shortcut.<br>Your change will be taken into account at the next notepad++ restart!", MessageImg.MsgPin, "Information", "Shortcut modification");
+                        UserCommunication.Notify("You successfully changed a shortcut.<br>Your change will be taken into account at the next notepad++ restart!", MessageImg.MsgInfo, "Information", "Shortcut modification");
                         _alreadyWarnedUserAboutShortkey = true;
                     }
                 }

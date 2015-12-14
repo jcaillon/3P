@@ -99,7 +99,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 // dont extract 2 db at once
                 if (!string.IsNullOrEmpty(OutputFileName)) {
-                    UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarningShield, "Database info", "Extracting database structure", 5);
+                    UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarning, "Database info", "Extracting database structure", 5);
                     return;
                 }
 
@@ -121,18 +121,18 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private static void ExtractionDone(object sender, ProcessOnExited processOnExited) {
+        private static void ExtractionDone(object sender, ProcessOnExitEventArgs processOnExitEventArgs) {
             try {
 
-                if (!File.Exists(processOnExited.ProgressExecution.ExtractDbOutputPath) || new FileInfo(processOnExited.ProgressExecution.ExtractDbOutputPath).Length == 0) {
-                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(processOnExited.ProgressExecution.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
+                if (!File.Exists(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath) || new FileInfo(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath).Length == 0) {
+                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(processOnExitEventArgs.ProgressExecution.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
                 } else {
                     var targetFile = Path.Combine(DatabaseDir, OutputFileName);
                     if (File.Exists(targetFile))
                         File.Delete(targetFile);
 
                     // copy to database dir
-                    File.Copy(processOnExited.ProgressExecution.ExtractDbOutputPath, targetFile);
+                    File.Copy(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath, targetFile);
 
                     // read
                     Config.Instance.EnvLastDbInfoUsed = OutputFileName;
