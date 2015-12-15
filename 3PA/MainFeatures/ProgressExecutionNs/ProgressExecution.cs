@@ -270,7 +270,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             };
             Process.Exited += ProcessOnExited;
             Process.Start();
-            UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProgressEnv.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Execution directory :</b><br><a href='" + ExecutionDir + "'>" + ExecutionDir + "</a>");
+            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProgressEnv.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Execution directory :</b><br><a href='" + ExecutionDir + "'>" + ExecutionDir + "</a>");
 
             return true;
         }

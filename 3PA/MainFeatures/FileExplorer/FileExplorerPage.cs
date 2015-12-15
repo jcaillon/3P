@@ -136,7 +136,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
             btDirectory.BackGrndImage = ImageResources.ExplorerDir0;
-            _explorerDirStr = new[] {"Local path ", "Compilation path", "Propath", "Everywhere"};
+            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
             lbDirectory.Text = _explorerDirStr[0];
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
@@ -170,11 +170,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
             FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
 
-            lbNbErrors.UseCustomBackColor = true;
-            lbNbErrors.UseCustomForeColor = true;
-
-            lbStatus.UseCustomBackColor = true;
-            lbStatus.UseCustomForeColor = true;
+            btPrevError.BackGrndImage = ImageResources.Previous;
+            btNextError.BackGrndImage = ImageResources.Next;
+            btClearAllErrors.BackGrndImage = ImageResources.ClearAll;
 
             #endregion
 
@@ -193,7 +191,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="typeStr"></param>
         /// <returns></returns>
         private static Image GetImageFromStr(string typeStr) {
-            Image tryImg = (Image) ImageResources.ResourceManager.GetObject(typeStr);
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
             return tryImg ?? ImageResources.Error;
         }
 
@@ -203,7 +201,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="rowObject"></param>
         /// <returns></returns>
         private static object ImageGetter(object rowObject) {
-            var obj = (FileObject) rowObject;
+            var obj = (FileObject)rowObject;
             if (obj == null) return ImageResources.Error;
             return GetImageFromStr(obj.Type + "Type");
         }
@@ -214,7 +212,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private static void OvlOnFormatCell(object sender, FormatCellEventArgs args) {
-            FileObject obj = (FileObject) args.Model;
+            FileObject obj = (FileObject)args.Model;
 
             // currently document
             if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
@@ -229,11 +227,11 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // display the flags
             int offset = -5;
-            foreach (var name in Enum.GetNames(typeof (FileFlag))) {
-                FileFlag flag = (FileFlag) Enum.Parse(typeof (FileFlag), name);
+            foreach (var name in Enum.GetNames(typeof(FileFlag))) {
+                FileFlag flag = (FileFlag)Enum.Parse(typeof(FileFlag), name);
                 if (flag == 0) continue;
                 if (!obj.Flags.HasFlag(flag)) continue;
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
                 if (tryImg == null) continue;
                 ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
                     Offset = new Size(offset, 0)
@@ -331,7 +329,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     _initialObjectsList.Sort(new FilesSortingClass());
 
                     // invoke on ui thread
-                    BeginInvoke((Action) delegate {
+                    BeginInvoke((Action)delegate {
                         try {
                             // delete any existing buttons
                             if (_displayedTypes != null) {
@@ -456,7 +454,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="args"></param>
         private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
             var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
-            FileType clickedType = ((SelectorButton<FileType>) sender).Type;
+            FileType clickedType = ((SelectorButton<FileType>)sender).Type;
 
             // on right click
             if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
@@ -464,10 +462,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                 if (_displayedTypes.Count(b => b.Value.Activated) == 1 && _displayedTypes.First(b => b.Value.Activated).Key == clickedType) {
                     SetUnActiveType(null);
                 } else {
-                    SetActiveType(new List<FileType> {clickedType});
+                    SetActiveType(new List<FileType> { clickedType });
                 }
             } else
-            // left click is only a toggle
+                // left click is only a toggle
                 _displayedTypes[clickedType].Activated = !_displayedTypes[clickedType].Activated;
 
             _displayedTypes[clickedType].Invalidate();
@@ -569,7 +567,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 _currentType = _displayedTypes.FindIndex(pair => pair.Value.Activated) + (isLeft ? -1 : 1);
             if (_currentType > _displayedTypes.Count - 1) _currentType = 0;
             if (_currentType < 0) _currentType = _displayedTypes.Count - 1;
-            SetActiveType(new List<FileType> {_displayedTypes.ElementAt(_currentType).Key});
+            SetActiveType(new List<FileType> { _displayedTypes.ElementAt(_currentType).Key });
             ApplyFilter();
             return true;
         }
@@ -601,7 +599,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             ovl.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
 
             // update total items
-            TotalItems = ((ArrayList) ovl.FilteredObjects).Count;
+            TotalItems = ((ArrayList)ovl.FilteredObjects).Count;
             nbitems.Text = TotalItems + StrItems;
 
             // if the selected row is > to number of items, then there will be a unselect
@@ -616,7 +614,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="o"></param>
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
-            var compData = (FileObject) o;
+            var compData = (FileObject)o;
             // check for the filter match, the activated category,
             bool output = compData.FileName.ToLower().FullyMatchFilter(_filterByText);
             if (_displayedTypes.ContainsKey(compData.Type))
@@ -634,7 +632,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <returns></returns>
         public FileObject GetCurrentFile() {
             try {
-                return (FileObject) ovl.SelectedItem.RowObject;
+                return (FileObject)ovl.SelectedItem.RowObject;
             } catch (Exception) {
                 //ignored
             }
@@ -683,14 +681,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
             if (DirectoryToExplorer > 1)
                 btGotoDir.Hide();
-            else 
+            else
                 btGotoDir.Show();
             RefreshOvl();
         }
 
         private void TextFilterOnTextChanged(object sender, EventArgs eventArgs) {
-            if (!string.IsNullOrWhiteSpace(textFilter.Text))
-                FilterByText = textFilter.Text;
+            FilterByText = textFilter.Text;
         }
 
         private void BtEraseOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
@@ -710,21 +707,28 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region Current file
 
+        private CurrentOperation _currentOperation;
+
         private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
-            lbStatus.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
-            lbStatus.BackColor = ThemeManager.Current.ButtonColorsNormalBackColor;
 
-            Transition.run(lbStatus, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => {
-                lbStatus.BackColor = ThemeManager.Current.ButtonColorsNormalBackColor;
-            });
+            // blink back color
+            if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
+                lbStatus.UseCustomBackColor = true;
+                lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
+                Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormColorBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => {
+                    lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
+                });
+            }
 
-            //var t = new Transition(new TransitionType_Linear(600));
-            //t.add(lbStatus, "Text", updatedOperationEventArgs.CurrentOperation.ToString());
-            //t.add(lbStatus, "ForeColor", ThemeManager.AccentColor);
-            //t.TransitionCompletedEvent += (o, args) => {
-            //    Transition.run(lbStatus, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(500));
-            //};
-            //t.run();
+            // text
+            foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
+                CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
+                if (!updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) continue;
+                lbStatus.Text = ((CurrentOperationAttr)flag.GetAttributes()).DisplayText;
+            }
+
+            _currentOperation = updatedOperationEventArgs.CurrentOperation;
+
         }
 
         /// <summary>
@@ -733,9 +737,20 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="sender"></param>
         /// <param name="updatedErrorsEventArgs"></param>
         private void FilesInfoOnUpdatedErrors(object sender, UpdatedErrorsEventArgs updatedErrorsEventArgs) {
-            lbNbErrors.Text = updatedErrorsEventArgs.NbErrors.ToString();
-            lbNbErrors.ForeColor = Style.FgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel];
-            lbNbErrors.BackColor = Style.BgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel];
+
+            lbNbErrors.UseCustomBackColor = true;
+            lbNbErrors.UseCustomForeColor = true;
+            var t = new Transition(new TransitionType_Linear(500));
+
+            // colors
+            t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
+            t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
+
+            // text
+            t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
+            t.add(lbErrorText, "Text", ((ErrorLevelAttr)updatedErrorsEventArgs.ErrorLevel.GetAttributes()).DisplayText);
+
+            t.run();
         }
 
         #endregion

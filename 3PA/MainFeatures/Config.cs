@@ -141,7 +141,6 @@ namespace _3PA.MainFeatures {
 
     #endregion
 
-
     /// <summary>
     /// Holds the configuration of the application, this class is a singleton and
     /// you should call it like this : Config.Instance.myparam

@@ -11,25 +11,21 @@ namespace _3pUpdater {
     /// </summary>
     class Program {
 
-        private const string DllName = "3P.dll";
         static void Main(string[] args) {
+
+            var from = args[0].Trim('"');
+            var to = args[1].Trim('"');
 
             // wait till notepad++ is closed
             while (IsProcessOpen("notepad++"))
                 Thread.Sleep(200);
 
-            var assPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (assPath == null)
-                return;
+            // delete current plugin
+            if (File.Exists(to))
+                File.Delete(to);
 
-            if (File.Exists(Path.Combine(assPath, DllName))) {
-                // delete current plugin
-                if (File.Exists(Path.Combine(assPath, "..\\..\\..\\", DllName)))
-                    File.Delete(Path.Combine(assPath, "..\\..\\..\\", DllName));
-
-                // replace with update
-                File.Move(Path.Combine(assPath, DllName), Path.Combine(assPath, "..\\..\\..\\", DllName));
-            }
+            // replace with update
+            File.Move(from, to);
         }
 
         private static bool IsProcessOpen(string name) {

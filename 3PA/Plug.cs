@@ -20,8 +20,10 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -38,6 +40,7 @@ using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA {
@@ -563,10 +566,10 @@ namespace _3PA {
             if (IsCurrentFileProgress) {
                 // Syntax Style
                 Style.SetCustomStyles();
-
-                // Update info on the current file
-                FilesInfo.DisplayCurrentFileInfo();
             }
+
+            // Update info on the current file
+            FilesInfo.DisplayCurrentFileInfo();
 
             // Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyPluginSpecificOptions(false);
@@ -670,7 +673,8 @@ namespace _3PA {
         public static void Test() {
 
 
-            UserCommunication.Notify("Something went terribly wrong while " + "compiling" + " the following file:<div><a href='fzer'>" + @"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log" + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + @"C:\Work\3PA_side\ProgressFiles\compile\priwin32.exe" + " " + "-b -p 'herpder'" + "</div><b>Execution directory :</b><br><a href='" + @"" + "'>" + @"C:\zrfrefe^egg\erger\erer" + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+
+
             return;
 
 

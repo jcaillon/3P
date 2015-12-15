@@ -31,16 +31,18 @@
     <FgDelimiters6 Value="#000000" />
     <FgDelimiters7 Value="#000000" />
     <FgDelimiters8 Value="#408080" />
-    <FgAnnotation0 Value="#3F3F3F" />
-    <BgAnnotation0 Value="#F2F2F2" />
-    <FgAnnotation1 Value="#9C6500" />
-    <BgAnnotation1 Value="#FFEB9C" />
-    <FgAnnotation2 Value="#833C0C" />
-    <BgAnnotation2 Value="#FFCC99" />
-    <FgAnnotation3 Value="#9C0006" />
-    <BgAnnotation3 Value="#FFC7CE" />
-    <FgAnnotation4 Value="#58267E" />
-    <BgAnnotation4 Value="#CC99FF" />
+    <FgNoError Value="#007B74" />
+    <BgNoError Value="#C6EFCE" />
+    <FgError0 Value="#3F3F3F" />
+    <BgError0 Value="#F2F2F2" />
+    <FgError1 Value="#9C6500" />
+    <BgError1 Value="#FFEB9C" />
+    <FgError2 Value="#833C0C" />
+    <BgError2 Value="#FFCC99" />
+    <FgError3 Value="#9C0006" />
+    <BgError3 Value="#FFC7CE" />
+    <FgError4 Value="#58267E" />
+    <BgError4 Value="#CC99FF" />
   </StyleTheme>
   <StyleTheme>
     <Name Value="Tomorrow" />
@@ -73,15 +75,17 @@
     <FgDelimiters6 Value="#000000" />
     <FgDelimiters7 Value="#000000" />
     <FgDelimiters8 Value="#8E908C" />
-    <FgAnnotation0 Value="#3F3F3F" />
-    <BgAnnotation0 Value="#F2F2F2" />
-    <FgAnnotation1 Value="#9C6500" />
-    <BgAnnotation1 Value="#FFEB9C" />
-    <FgAnnotation2 Value="#833C0C" />
-    <BgAnnotation2 Value="#FFCC99" />
-    <FgAnnotation3 Value="#9C0006" />
-    <BgAnnotation3 Value="#FFC7CE" />
-    <FgAnnotation4 Value="#58267E" />
-    <BgAnnotation4 Value="#CC99FF" />
+    <FgNoError Value="#007B74" />
+    <BgNoError Value="#C6EFCE" />
+    <FgError0 Value="#3F3F3F" />
+    <BgError0 Value="#F2F2F2" />
+    <FgError1 Value="#9C6500" />
+    <BgError1 Value="#FFEB9C" />
+    <FgError2 Value="#833C0C" />
+    <BgError2 Value="#FFCC99" />
+    <FgError3 Value="#9C0006" />
+    <BgError3 Value="#FFC7CE" />
+    <FgError4 Value="#58267E" />
+    <BgError4 Value="#CC99FF" />
   </StyleTheme>
 </Root>

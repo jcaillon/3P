@@ -25,6 +25,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using MarkdownDeep;
@@ -236,8 +237,17 @@ namespace _3PA.MainFeatures {
         /// check if there is an update to make
         /// </summary>
         public static void OnNotepadExit() {
-            if (File.Exists(PathUpdaterExe))
-                Process.Start(PathUpdaterExe);
+            if (File.Exists(PathUpdaterExe)) {
+                var process = new Process {
+                    StartInfo = {
+                        FileName = PathUpdaterExe,
+                        Arguments = PathDownloadedPlugin.ProgressQuoter() + " " + Assembly.GetExecutingAssembly().Location.ProgressQuoter(),
+                        UseShellExecute = true,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    },
+                };
+                process.Start();
+            }
         }
 
         /// <summary>

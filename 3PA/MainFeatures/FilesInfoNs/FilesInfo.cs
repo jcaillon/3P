@@ -133,6 +133,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// </summary>
         public static void DisplayCurrentFileInfo() {
 
+            var currentFilePath = Plug.CurrentFilePath;
             var marginError = Npp.GetMargin(ErrorMarginNumber);
 
             // reset margin and annotations
@@ -151,21 +152,16 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             foreach (var errlvl in Enum.GetValues(typeof(ErrorLevel)))
                 Npp.GetIndicator((int)errlvl).Clear(0, Npp.TextLength);
 
-            // check if current file is a progress and if we got info on it
-                var currentFilePath = Npp.GetCurrentFilePath();
-            if (!Abl.IsCurrentProgressFile() || !_sessionInfo.ContainsKey(currentFilePath))
-                return;
-
             // UpdatedOperation event
             if (OnUpdatedOperation != null) {
                 if (_sessionInfo.ContainsKey(currentFilePath))
                     OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(_sessionInfo[currentFilePath].CurrentOperation));
                 else
-                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(0));}
+                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(0));
+            }
 
             // UpdatedErrors event
-            if (OnUpdatedErrors != null)
-            {
+            if (OnUpdatedErrors != null) {
                 if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
                     // find max error
                     ErrorLevel maxLvl;
@@ -176,10 +172,13 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     else
                         maxLvl = ErrorLevel.Error;
                     OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(maxLvl, _sessionInfo[currentFilePath].FileErrors.Count));
-                }
-                else
-                    OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(ErrorLevel.Warning, 0));
+                } else
+                    OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
             }
+
+            // check if current file is a progress and if we got info on it 
+            if (!Plug.IsCurrentFileProgress || !_sessionInfo.ContainsKey(currentFilePath))
+                return;
 
             // got error info on it?
             if (_sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0)
@@ -248,14 +247,17 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         /// <summary>
-        /// Clear all the errors for the current document and then update the view
+        /// Clear all the errors for the current document and then update the view,
+        /// returns true if it actually cleared something, false it there was no errors
         /// </summary>
-        public static void ClearAllErrors() {
+        public static bool ClearAllErrors() {
             var currentFilePath = Npp.GetCurrentFilePath();
             if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
                 _sessionInfo[currentFilePath].FileErrors.Clear();
                 DisplayCurrentFileInfo();
+                return true;
             }
+            return false;
         }
 
         /// <summary>
@@ -457,16 +459,32 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public string FileFullPath { get; set; }
     }
 
+    public class CurrentOperationAttr : Extensions.EnumAttr {
+        public string DisplayText { get; set; }
+        /// <summary>
+        /// used like : error while "ActionText" the file...
+        /// </summary>
+        public string ActionText { get; set; }
+    }
+
     /// <summary>
     /// Current undergoing operation on the file
+    /// Retrieve the DisplayText value with ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText
     /// </summary>
     [Flags]
     public enum CurrentOperation {
-        CheckSyntax = 1,
-        Compile = 2,
-        Run = 4,
-        Prolint = 8,
-
+        [CurrentOperationAttr(DisplayText = "Editing")]
+        Default = 0,
+        [CurrentOperationAttr(DisplayText = "Appbuilder section!")]
+        AppbuilderSection = 32,
+        [CurrentOperationAttr(DisplayText = "Linting")]
+        Prolint = 64,
+        [CurrentOperationAttr(DisplayText = "Checking syntax", ActionText = "checking the syntax of")]
+        CheckSyntax = 128,
+        [CurrentOperationAttr(DisplayText = "Compiling", ActionText = "compiling")]
+        Compile = 216,
+        [CurrentOperationAttr(DisplayText = "Executing", ActionText = "executing")]
+        Run = 512,
     }
 
     /// <summary>
@@ -505,15 +523,26 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
     }
 
+    public class ErrorLevelAttr : Extensions.EnumAttr {
+        public string DisplayText { get; set; }
+    }
+
     /// <summary>
     /// Describes the error level, the num is also used for MARKERS in scintilla
     /// and thus must start at 0
     /// </summary>
     public enum ErrorLevel {
+        [ErrorLevelAttr(DisplayText = "Error(s), good!")]
+        NoErrors,
+        [ErrorLevelAttr(DisplayText = "Info")]
         Information,
+        [ErrorLevelAttr(DisplayText = "Warning(s)")]
         Warning,
+        [ErrorLevelAttr(DisplayText = "Huge warning(s)")]
         StrongWarning,
+        [ErrorLevelAttr(DisplayText = "Error(s)")]
         Error,
+        [ErrorLevelAttr(DisplayText = "Critical error(s)!")]
         Critical
     }
 

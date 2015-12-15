@@ -76,7 +76,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         #region const
 
         /// <summary>
-        /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
+        /// for the Errors we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
         public const int ErrorAnnotStandardStyleOffset = 250;
         public const int ErrorAnnotBoldStyleOffset = 245;
@@ -180,36 +180,38 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             StyleInclude.BackColor = curTheme.BgDelimiters3;
 
             // Setting styles for errors 
-            SetAnnotationStyles((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
-            SetAnnotationStyles((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
-            SetAnnotationStyles((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
-            SetAnnotationStyles((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
-            SetAnnotationStyles((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
+            SetErrorStyles((byte)ErrorLevel.Information, curTheme.BgError0, curTheme.FgError0);
+            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.BgError1, curTheme.FgError1);
+            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.BgError2, curTheme.FgError2);
+            SetErrorStyles((byte)ErrorLevel.Error, curTheme.BgError3, curTheme.FgError3);
+            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.BgError4, curTheme.FgError4);
             BgErrorLevelColors = new List<Color> {
-                curTheme.BgAnnotation0,
-                curTheme.BgAnnotation1,
-                curTheme.BgAnnotation2,
-                curTheme.BgAnnotation3,
-                curTheme.BgAnnotation4
+                curTheme.BgNoError,
+                curTheme.BgError0,
+                curTheme.BgError1,
+                curTheme.BgError2,
+                curTheme.BgError3,
+                curTheme.BgError4
             };
             FgErrorLevelColors = new List<Color> {
-                curTheme.FgAnnotation0,
-                curTheme.FgAnnotation1,
-                curTheme.FgAnnotation2,
-                curTheme.FgAnnotation3,
-                curTheme.FgAnnotation4
+                curTheme.FgNoError,
+                curTheme.FgError0,
+                curTheme.FgError1,
+                curTheme.FgError2,
+                curTheme.FgError3,
+                curTheme.FgError4
             };
 
             // set style 33 for the margin with line numbers
         }
 
         /// <summary>
-        /// Sets a style for an annotation (reduced font + segoe ui)
+        /// Sets a style for an Error annotation (reduced font + segoe ui) and for markers
         /// </summary>
         /// <param name="errorLevel"></param>
         /// <param name="bgColor"></param>
         /// <param name="fgColor"></param>
-        private static void SetAnnotationStyles(byte errorLevel, Color bgColor, Color fgColor) {
+        private static void SetErrorStyles(byte errorLevel, Color bgColor, Color fgColor) {
             int curFontSize = Npp.GetStyle(0).Size;
 
             var normalStyle = Npp.GetStyle(FilesInfo.GetStyleOf((ErrorLevel)errorLevel, ErrorFontWeight.Normal));
@@ -396,16 +398,18 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public Color FgDelimiters7 = ColorTranslator.FromHtml("#000000");
         public Color FgDelimiters8 = ColorTranslator.FromHtml("#8E908C");
 
-        public Color FgAnnotation0 = ColorTranslator.FromHtml("#3F3F3F");
-        public Color BgAnnotation0 = ColorTranslator.FromHtml("#F2F2F2");
-        public Color FgAnnotation1 = ColorTranslator.FromHtml("#9C6500");
-        public Color BgAnnotation1 = ColorTranslator.FromHtml("#FFEB9C");
-        public Color FgAnnotation2 = ColorTranslator.FromHtml("#833C0C");
-        public Color BgAnnotation2 = ColorTranslator.FromHtml("#FFCC99");
-        public Color FgAnnotation3 = ColorTranslator.FromHtml("#9C0006");
-        public Color BgAnnotation3 = ColorTranslator.FromHtml("#FFC7CE");
-        public Color FgAnnotation4 = ColorTranslator.FromHtml("#58267E");
-        public Color BgAnnotation4 = ColorTranslator.FromHtml("#CC99FF");
+        public Color FgNoError = ColorTranslator.FromHtml("#007B74");
+        public Color BgNoError = ColorTranslator.FromHtml("#C6EFCE");
+        public Color FgError0 = ColorTranslator.FromHtml("#3F3F3F");
+        public Color BgError0 = ColorTranslator.FromHtml("#F2F2F2");
+        public Color FgError1 = ColorTranslator.FromHtml("#9C6500");
+        public Color BgError1 = ColorTranslator.FromHtml("#FFEB9C");
+        public Color FgError2 = ColorTranslator.FromHtml("#833C0C");
+        public Color BgError2 = ColorTranslator.FromHtml("#FFCC99");
+        public Color FgError3 = ColorTranslator.FromHtml("#9C0006");
+        public Color BgError3 = ColorTranslator.FromHtml("#FFC7CE");
+        public Color FgError4 = ColorTranslator.FromHtml("#58267E");
+        public Color BgError4 = ColorTranslator.FromHtml("#CC99FF");
     }
 
     #endregion

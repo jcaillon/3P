@@ -402,6 +402,7 @@
     <Content Include="Images\DockableExplorer\buttons\refresh.png" />
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
+    <Content Include="Images\FileExplorer\ClearAll.png" />
     <Content Include="Images\FileExplorer\DfType.png" />
     <Content Include="Images\FileExplorer\DType.png" />
     <Content Include="Images\FileExplorer\ExplorerDir0.png" />
@@ -411,6 +412,8 @@
     <Content Include="Images\FileExplorer\FolderType.png" />
     <Content Include="Images\FileExplorer\IType.png" />
     <Content Include="Images\FileExplorer\Favourite.png" />
+    <Content Include="Images\FileExplorer\Next.png" />
+    <Content Include="Images\FileExplorer\Previous.png" />
     <Content Include="Images\FileExplorer\ReadOnly.png" />
     <Content Include="Images\FileExplorer\LstType.png" />
     <Content Include="Images\FileExplorer\PType.png" />
