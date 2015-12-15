@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (Highlight.cs) is part of 3P.
+// This file (Style.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
     /// <summary>
     /// This class handles the STYLENEEDED notification of scintilla
     /// </summary>
-    public class Highlight {
+    public class Style {
 
         #region fields
 
@@ -49,9 +49,9 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// <summary>
         /// List of themes
         /// </summary>
-        private static List<HighlightTheme> _listOfThemes = new List<HighlightTheme>();
+        private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();
 
-        private static HighlightTheme _currentTheme;
+        private static StyleTheme _currentTheme;
 
         #endregion
 
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// <summary>
         /// handles the current theme
         /// </summary>
-        public static HighlightTheme CurrentTheme {
+        public static StyleTheme CurrentTheme {
             set { _currentTheme = value; }
             get {
                 if (_currentTheme != null)
@@ -70,6 +70,17 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
                 return _currentTheme;
             }
         }
+
+        #endregion
+
+        #region const
+
+        /// <summary>
+        /// for the annotations we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
+        /// </summary>
+        public const int ErrorAnnotStandardStyleOffset = 250;
+        public const int ErrorAnnotBoldStyleOffset = 245;
+        public const int ErrorAnnotItalicStyleOffset = 240;
 
         #endregion
 
@@ -134,10 +145,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         public static Npp.Style StyleStrSimpleComm = Npp.GetStyle((byte)UdlStyles.Delimiter5);
         public static Npp.Style StyleNestedComment = Npp.GetStyle((byte)UdlStyles.Delimiter8);
 
+        public static List<Color> BgErrorLevelColors;
+        public static List<Color> FgErrorLevelColors;
+
         public static void SetCustomStyles() {
 
             var curTheme = CurrentTheme;
 
+            // setting styles for the syntax highlighting
             StyleDefault.ForeColor = curTheme.FgDefault;
             StyleComment.ForeColor = curTheme.FgComment;
             StyleCommentLine.ForeColor = curTheme.FgLineComment;
@@ -164,12 +179,26 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             StyleTrigram.BackColor = curTheme.BgKeyword8;
             StyleInclude.BackColor = curTheme.BgDelimiters3;
 
-            // for annotations :
+            // Setting styles for errors 
             SetAnnotationStyles((byte)ErrorLevel.Information, curTheme.BgAnnotation0, curTheme.FgAnnotation0);
             SetAnnotationStyles((byte)ErrorLevel.Warning, curTheme.BgAnnotation1, curTheme.FgAnnotation1);
             SetAnnotationStyles((byte)ErrorLevel.StrongWarning, curTheme.BgAnnotation2, curTheme.FgAnnotation2);
             SetAnnotationStyles((byte)ErrorLevel.Error, curTheme.BgAnnotation3, curTheme.FgAnnotation3);
             SetAnnotationStyles((byte)ErrorLevel.Critical, curTheme.BgAnnotation4, curTheme.FgAnnotation4);
+            BgErrorLevelColors = new List<Color> {
+                curTheme.BgAnnotation0,
+                curTheme.BgAnnotation1,
+                curTheme.BgAnnotation2,
+                curTheme.BgAnnotation3,
+                curTheme.BgAnnotation4
+            };
+            FgErrorLevelColors = new List<Color> {
+                curTheme.FgAnnotation0,
+                curTheme.FgAnnotation1,
+                curTheme.FgAnnotation2,
+                curTheme.FgAnnotation3,
+                curTheme.FgAnnotation4
+            };
 
             // set style 33 for the margin with line numbers
         }
@@ -243,14 +272,14 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// Returns the list of all available themes
         /// </summary>
         /// <returns></returns>
-        public static List<HighlightTheme> GetThemesList() {
+        public static List<StyleTheme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
-                if (string.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
-                    Object2Xml<HighlightTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
-                    if (!string.IsNullOrEmpty(ThemeXmlPath))
-                        Object2Xml<HighlightTheme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
+                if (String.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
+                    Object2Xml<StyleTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
+                    if (!String.IsNullOrEmpty(ThemeXmlPath))
+                        Object2Xml<StyleTheme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
                 } else
-                    Object2Xml<HighlightTheme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
+                    Object2Xml<StyleTheme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
             }
 
             if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
@@ -331,7 +360,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
     #region Theme class
 
-    public class HighlightTheme {
+    public class StyleTheme {
         public string Name = "Default";
         public int UniqueId = 0;
 

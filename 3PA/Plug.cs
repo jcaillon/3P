@@ -116,9 +116,9 @@ namespace _3PA {
 
             menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
             menu.SetCommand("Check syntax", ProgressCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
-            menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
+            //menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
             menu.SetCommand("Run program", ProgressCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
-            menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
+            //menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
             menu.SetSeparator();
 
@@ -126,14 +126,20 @@ namespace _3PA {
             menu.SetCommand("Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
             menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
-            menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
+            //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
             menu.SetCommand("Format document", FileExplorer.StartSearch, "Format_document:Ctrl+I", false);
+            //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
 
             menu.SetSeparator();
 
-            menu.SetCommand("Edit current file info", ProgressCodeUtils.NotImplemented, "Edit_file_info:Ctrl+Shift+M", false);
-            menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
-            menu.SetCommand("Surround with modification tags", ProgressCodeUtils.NotImplemented, "Modif_tags:Ctrl+M", false);
+            //menu.SetCommand("Edit current file info", ProgressCodeUtils.NotImplemented, "Edit_file_info:Ctrl+Shift+M", false);
+            //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
+            //menu.SetCommand("Surround with modification tags", ProgressCodeUtils.NotImplemented, "Modif_tags:Ctrl+M", false);
+
+            menu.SetSeparator();
+
+            //menu.SetCommand("Insert new function", ProgressCodeUtils.NotImplemented);
+            //menu.SetCommand("Insert new internal procedure", ProgressCodeUtils.NotImplemented);
 
             menu.SetSeparator();
 
@@ -236,7 +242,7 @@ namespace _3PA {
             ThemeManager.AccentColor = Config.Instance.AccentColor;
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
-            Highlight.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
+            Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             LocalHtmlHandler.Init();
 
             #endregion
@@ -270,7 +276,7 @@ namespace _3PA {
             DataBase.Init();
 
             // make sure the UDL is present, also display the welcome message
-            Highlight.CheckUdl();
+            Style.CheckUdl();
 
             PluginIsFullyLoaded = true;
 
@@ -422,7 +428,7 @@ namespace _3PA {
         public static void OnCharAddedWordContinue(char c) {
             try {
                 // dont show in string/comments..?
-                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Highlight.IsCarretInNormalContext(Npp.CurrentPosition)) {
+                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition)) {
                     AutoComplete.Close();
                 } else {
                     // handles the autocompletion
@@ -451,7 +457,7 @@ namespace _3PA {
                     offset = 1;
                 var searchWordAt = curPos - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
-                var isNormalContext = Highlight.IsCarretInNormalContext(searchWordAt);
+                var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
                 if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
                     string replacementWord = null;
@@ -555,8 +561,8 @@ namespace _3PA {
             ClosePopups();
 
             if (IsCurrentFileProgress) {
-                // Syntax Highlight
-                Highlight.SetCustomStyles();
+                // Syntax Style
+                Style.SetCustomStyles();
 
                 // Update info on the current file
                 FilesInfo.DisplayCurrentFileInfo();
@@ -663,15 +669,10 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-            UserCommunication.Notify(@"<a href='D:\Work\ProgressFiles\compiler'>D:\Work\ProgressFiles\compiler</a><br><a href='D:\Work\ProgressFiles\CustomLogger.p'>D:\Work\ProgressFiles\CustomLogger.p</a>", MessageImg.MsgInfo, "Compilation", "Everything is ok");
 
+            UserCommunication.Notify("Something went terribly wrong while " + "compiling" + " the following file:<div><a href='fzer'>" + @"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log" + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + @"C:\Work\3PA_side\ProgressFiles\compile\priwin32.exe" + " " + "-b -p 'herpder'" + "</div><b>Execution directory :</b><br><a href='" + @"" + "'>" + @"C:\zrfrefe^egg\erger\erer" + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
             return;
 
-            /*
-            var derp = FilesInfo.ReadErrorsFromFile(@"C:\Work\3PA_side\ProgressFiles\compile\sc80lbeq.log", false);
-            foreach (var kpv in derp) {
-                FilesInfo.UpdateFileErrors(kpv.Key, kpv.Value);
-            }*/
 
             var canIndent = ParserHandler.CanIndent();
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);

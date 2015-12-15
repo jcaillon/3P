@@ -71,7 +71,7 @@ namespace YamuiDemoApp {
             //------------
 
             
-            Highlight.Init();
+            Style.Init();
             return;
 
             CreateHelpConfigFile.Do();

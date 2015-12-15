@@ -227,7 +227,7 @@
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
-    <Compile Include="MainFeatures\SyntaxHighlighting\Highlight.cs" />
+    <Compile Include="MainFeatures\SyntaxHighlighting\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>

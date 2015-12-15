@@ -167,6 +167,7 @@ namespace _3PA {
                 if (column >= 0)
                     SetSel(GetPosFromLineColumn(line, column));
             }
+            GrabFocus();
         }
 
         /// <summary>

@@ -170,7 +170,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         MessageImg.MsgError, "Execution error", "File not found", 10);
                     return false;
                 }
-                if (Config.Instance.GlobalCompilableExtension.Split().Contains(Path.GetExtension(FullFilePathToExecute))) {
+                if (!Config.Instance.GlobalCompilableExtension.Split(',').Contains(Path.GetExtension(FullFilePathToExecute))) {
                     UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(FullFilePathToExecute).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                     return false;
                 }
@@ -246,7 +246,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Parameters
             StringBuilder Params = new StringBuilder();
-            Params.Append(" -b");
+            //if (executionType != ExecutionType.Run)
+            //    Params.Append(" -b");
+            if (!string.IsNullOrWhiteSpace(ProgressEnv.Current.CmdLineParameters))
+                Params.Append(" " + ProgressEnv.Current.CmdLineParameters.Trim());
             Params.Append(" -cpinternal ISO8859-1");
             Params.Append(" -cpstream ISO8859-1");
             Params.Append(" -p " + Path.Combine(ExecutionDir, runnerFileName).ProgressQuoter());
@@ -255,14 +258,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             ExeParameters = Params.ToString();
 
             // Start a process
-            // execute
             Process = new Process {
                 StartInfo = {
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                    CreateNoWindow = true,
+                    //WindowStyle = (executionType != ExecutionType.Run) ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                    //CreateNoWindow = (executionType != ExecutionType.Run),
                     FileName = ProgressEnv.Current.ProwinPath,
                     Arguments = ExeParameters,
-                    WorkingDirectory = ExecutionDir,
+                    WorkingDirectory = ExecutionDir
                 },
                 EnableRaisingEvents = true
             };

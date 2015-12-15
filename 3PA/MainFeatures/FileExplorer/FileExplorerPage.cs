@@ -37,6 +37,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.FileExplorer {
     public partial class FileExplorerPage : YamuiPage {
@@ -167,7 +168,13 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // register to Updated Operation events
             FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
-            FileInfoObject.UpdatedOperation += FilesInfoOnUpdatedOperation;
+            FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
+
+            lbNbErrors.UseCustomBackColor = true;
+            lbNbErrors.UseCustomForeColor = true;
+
+            lbStatus.UseCustomBackColor = true;
+            lbStatus.UseCustomForeColor = true;
 
             #endregion
 
@@ -672,6 +679,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (DirectoryToExplorer > 3) DirectoryToExplorer = 0;
             Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + DirectoryToExplorer);
             btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
+            btDirectory.Invalidate();
             lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
             if (DirectoryToExplorer > 1)
                 btGotoDir.Hide();
@@ -703,15 +711,31 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region Current file
 
         private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
-            lbStatus.UseCustomForeColor = true;
             lbStatus.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
-            var t = new Transition(new TransitionType_Linear(600));
-            t.add(lbStatus, "Text", updatedOperationEventArgs.CurrentOperation.ToString());
-            t.add(lbStatus, "ForeColor", ThemeManager.AccentColor);
-            t.TransitionCompletedEvent += (o, args) => {
-                Transition.run(lbStatus, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(500));
-            };
-            t.run();
+            lbStatus.BackColor = ThemeManager.Current.ButtonColorsNormalBackColor;
+
+            Transition.run(lbStatus, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => {
+                lbStatus.BackColor = ThemeManager.Current.ButtonColorsNormalBackColor;
+            });
+
+            //var t = new Transition(new TransitionType_Linear(600));
+            //t.add(lbStatus, "Text", updatedOperationEventArgs.CurrentOperation.ToString());
+            //t.add(lbStatus, "ForeColor", ThemeManager.AccentColor);
+            //t.TransitionCompletedEvent += (o, args) => {
+            //    Transition.run(lbStatus, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(500));
+            //};
+            //t.run();
+        }
+
+        /// <summary>
+        /// This method is called each time the user switches document or start a compile or ends a compile...
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="updatedErrorsEventArgs"></param>
+        private void FilesInfoOnUpdatedErrors(object sender, UpdatedErrorsEventArgs updatedErrorsEventArgs) {
+            lbNbErrors.Text = updatedErrorsEventArgs.NbErrors.ToString();
+            lbNbErrors.ForeColor = Style.FgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel];
+            lbNbErrors.BackColor = Style.BgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel];
         }
 
         #endregion

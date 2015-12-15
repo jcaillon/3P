@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Root>
-  <HighlightTheme>
+  <StyleTheme>
     <Name Value="Default" />
     <UniqueId Value="0" />
     <BgDefault Value="#FFFFFF" />
@@ -41,8 +41,8 @@
     <BgAnnotation3 Value="#FFC7CE" />
     <FgAnnotation4 Value="#58267E" />
     <BgAnnotation4 Value="#CC99FF" />
-  </HighlightTheme>
-  <HighlightTheme>
+  </StyleTheme>
+  <StyleTheme>
     <Name Value="Tomorrow" />
     <UniqueId Value="1" />
     <BgDefault Value="#FFFFFF" />
@@ -83,5 +83,5 @@
     <BgAnnotation3 Value="#FFC7CE" />
     <FgAnnotation4 Value="#58267E" />
     <BgAnnotation4 Value="#CC99FF" />
-  </HighlightTheme>
+  </StyleTheme>
 </Root>

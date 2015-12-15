@@ -2216,8 +2216,7 @@ namespace _3PA {
                 }
                 set {
                     if (string.IsNullOrEmpty(value)) {
-                        // Scintilla docs suggest that setting to NULL rather than an empty string will free memory
-                        Sci.Send(SciMsg.SCI_ANNOTATIONGETTEXT, new IntPtr(Index), IntPtr.Zero);
+                        Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, (string) null);
                     } else {
                         var bytes = GetBytes(value, Encoding, true);
                         fixed (byte* bp = bytes)

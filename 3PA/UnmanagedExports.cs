@@ -163,7 +163,7 @@ namespace _3PA {
 
                     case (uint) SciMsg.SCN_STYLENEEDED:
                         // if we use the contained lexer, we will receive this notification and we will have to style the text
-                        //Highlight.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
+                        //Style.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
                         return;
 
                     case (uint)SciMsg.SCN_MARGINCLICK:

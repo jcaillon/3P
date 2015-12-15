@@ -154,7 +154,7 @@ namespace _3PA.Data {
         /// <summary>
         ///   Recherche une chaîne localisée semblable à &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;Root&gt;
-        ///  &lt;HighlightTheme&gt;
+        ///  &lt;StyleTheme&gt;
         ///    &lt;Name Value=&quot;Default&quot; /&gt;
         ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
         ///    &lt;BgDefault Value=&quot;#FFFFFF&quot; /&gt;

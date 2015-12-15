@@ -108,9 +108,11 @@ namespace _3PA.MainFeatures {
 
         public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df";
         public string GlobalCompilableExtension = ".p,.w,.t";
-        public string GlobalNppOpenableExtension = ".txt";
+        public string GlobalNppOpenableExtension = ".txt,.boi";
 
         public string GlobalHelpFilePath = "";
+
+        public bool CompileAlwaysShowNotification = false;
 
         public bool GlobalUseAlternateBackColorOnGrid = false;
 

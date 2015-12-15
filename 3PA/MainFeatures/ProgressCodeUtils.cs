@@ -24,7 +24,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
@@ -303,12 +302,18 @@ namespace _3PA.MainFeatures
                 }
 
                 // Clear flag or we can't do any other actions on this file
-                Plug.CurrentFileObject.CurrentOperation &= ~currentOperation;
+                FilesInfo.GetFileInfo(processOnExitEventArgs.ProgressExecution.FullFilePathToExecute).CurrentOperation &= ~currentOperation;
+
+                var isCurrentFile =
+                    processOnExitEventArgs.ProgressExecution.FullFilePathToExecute.EqualsCi(Plug.CurrentFilePath);
+
+                if (isCurrentFile)
+                    FilesInfo.DisplayCurrentFileInfo();
 
                 // if log not found then something is messed up!
                 if (string.IsNullOrEmpty(processOnExitEventArgs.ProgressExecution.LogPath) ||
                     !File.Exists(processOnExitEventArgs.ProgressExecution.LogPath)) {
-                    UserCommunication.Notify("Something went terribly wrong while " + actionDescription + " the following file:<br><br><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a><br><br>I do not have any log so i'm kind of lost... Sorry pal!<br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+                    UserCommunication.Notify("Something went terribly wrong while " + actionDescription + " the following file:<div><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + processOnExitEventArgs.ProgressExecution.ProgressWin32 + " " + processOnExitEventArgs.ProgressExecution.ExeParameters + "</div><b>Execution directory :</b><br><a href='" + processOnExitEventArgs.ProgressExecution.ExecutionDir + "'>" + processOnExitEventArgs.ProgressExecution.ExecutionDir + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
                 }
 
@@ -359,29 +364,35 @@ namespace _3PA.MainFeatures
                 var notifTimeOut = (errorList.Any()) ? 0 : 7;
                 var notifSubtitle = (nbErrors > 0)
                     ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder("<h3>Initial source file :</h3><div><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a>");
-                var notifWidth = (errorList.Any()) ? 800 : 450;
+                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "#-1'>" + processOnExitEventArgs.ProgressExecution.FullFilePathToExecute + "</a>" : string.Empty);
+                var notifWidth = (errorList.Any()) ? 550 : 450;
 
                 // has errors
                 if (errorList.Any()) {
-                    notifMessage.Append("<br><br><h3>Find the incriminated files below :</h3>");
+                    notifMessage.Append("<b>Find the incriminated files below :</b>");
                     foreach (var keyValue in errorList) {
-                        notifMessage.Append("<div><b>[" + keyValue.Value.Count() + "]</b> <a href='" + keyValue.Key + "'>" + keyValue.Key + "</a></div>");
+                        notifMessage.Append("<div><b>[x" + keyValue.Value.Count() + "]</b> <a href='" + keyValue.Key + "#" + keyValue.Value.First().Line + "'>" + keyValue.Key + "</a></div>");
 
                         // feed FilesInfo
                         FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
                     }
                 }
-                // TODO: only display the notification at least 1 error is not in the currently displayed file?
-                UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, notifTimeOut, notifWidth);
 
                 // Update info on the current file
-                FilesInfo.DisplayCurrentFileInfo();
+                if (isCurrentFile)
+                    FilesInfo.DisplayCurrentFileInfo();
 
                 // when compiling
                 if (processOnExitEventArgs.ProgressExecution.ExecutionType == ExecutionType.Compile) {
                     // copy to compilation dir
                 }
+
+                // Notify the user, or not
+                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile)
+                    UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
+                        var splitted = args.Link.Split('#');
+                        Npp.Goto(splitted[0], int.Parse(splitted[1]));
+                    }, notifTimeOut, notifWidth);
             }
             catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCompileEnded");
@@ -418,6 +429,9 @@ namespace _3PA.MainFeatures
             Plug.CurrentFileObject.ProgressExecution.ProcessExited += OnCompileEnded;
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
                 return;
+
+            // clear current errors (updates the current file info)
+            FilesInfo.ClearAllErrors();
 
             // change file object current operation, set flag
             Plug.CurrentFileObject.CurrentOperation |= currentOperation;

@@ -28,10 +28,20 @@ namespace _3PA.MainFeatures.FileExplorer {
         private void InitializeComponent() {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.lbNbErrors = new YamuiFramework.Controls.YamuiLabel();
+            this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
+            this.btClearAllErrors = new YamuiFramework.Controls.YamuiImageButton();
+            this.btNextError = new YamuiFramework.Controls.YamuiImageButton();
+            this.yamuiLabel6 = new YamuiFramework.Controls.YamuiLabel();
+            this.lbStatus = new YamuiFramework.Controls.YamuiLabel();
+            this.btPrevError = new YamuiFramework.Controls.YamuiImageButton();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiPanel2 = new YamuiFramework.Controls.YamuiPanel();
             this.flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.yamuiPanel3 = new YamuiFramework.Controls.YamuiPanel();
+            this.btGotoDir = new YamuiFramework.Controls.YamuiImageButton();
+            this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
+            this.btDirectory = new YamuiFramework.Controls.YamuiImageButton();
             this.btErase = new YamuiFramework.Controls.YamuiImageButton();
             this.textFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.btRefresh = new YamuiFramework.Controls.YamuiImageButton();
@@ -41,12 +51,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.FileName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.btDirectory = new YamuiFramework.Controls.YamuiImageButton();
-            this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
-            this.btNextError = new YamuiFramework.Controls.YamuiImageButton();
-            this.lbStatus = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel6 = new YamuiFramework.Controls.YamuiLabel();
-            this.btGotoDir = new YamuiFramework.Controls.YamuiImageButton();
             this.yamuiPanel1.SuspendLayout();
             this.yamuiPanel2.SuspendLayout();
             this.yamuiPanel3.SuspendLayout();
@@ -66,9 +70,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // yamuiPanel1
             // 
+            this.yamuiPanel1.Controls.Add(this.lbNbErrors);
+            this.yamuiPanel1.Controls.Add(this.yamuiLabel5);
+            this.yamuiPanel1.Controls.Add(this.btClearAllErrors);
+            this.yamuiPanel1.Controls.Add(this.btNextError);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel6);
             this.yamuiPanel1.Controls.Add(this.lbStatus);
-            this.yamuiPanel1.Controls.Add(this.btNextError);
+            this.yamuiPanel1.Controls.Add(this.btPrevError);
             this.yamuiPanel1.Controls.Add(this.yamuiLabel1);
             this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Top;
             this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
@@ -80,6 +88,66 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel1.TabIndex = 2;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
+            // 
+            // lbNbErrors
+            // 
+            this.lbNbErrors.Location = new System.Drawing.Point(64, 45);
+            this.lbNbErrors.Name = "lbNbErrors";
+            this.lbNbErrors.Size = new System.Drawing.Size(29, 20);
+            this.lbNbErrors.TabIndex = 15;
+            this.lbNbErrors.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // yamuiLabel5
+            // 
+            this.yamuiLabel5.Location = new System.Drawing.Point(99, 45);
+            this.yamuiLabel5.Name = "yamuiLabel5";
+            this.yamuiLabel5.Size = new System.Drawing.Size(308, 20);
+            this.yamuiLabel5.TabIndex = 14;
+            this.yamuiLabel5.Text = "errors";
+            this.yamuiLabel5.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btClearAllErrors
+            // 
+            this.btClearAllErrors.BackGrndImage = null;
+            this.btClearAllErrors.Location = new System.Drawing.Point(45, 45);
+            this.btClearAllErrors.Name = "btClearAllErrors";
+            this.btClearAllErrors.Size = new System.Drawing.Size(20, 20);
+            this.btClearAllErrors.TabIndex = 13;
+            this.btClearAllErrors.Text = "yamuiImageButton1";
+            // 
+            // btNextError
+            // 
+            this.btNextError.BackGrndImage = null;
+            this.btNextError.Location = new System.Drawing.Point(25, 45);
+            this.btNextError.Name = "btNextError";
+            this.btNextError.Size = new System.Drawing.Size(20, 20);
+            this.btNextError.TabIndex = 12;
+            this.btNextError.Text = "yamuiImageButton1";
+            // 
+            // yamuiLabel6
+            // 
+            this.yamuiLabel6.AutoSize = true;
+            this.yamuiLabel6.Location = new System.Drawing.Point(5, 27);
+            this.yamuiLabel6.Name = "yamuiLabel6";
+            this.yamuiLabel6.Size = new System.Drawing.Size(55, 15);
+            this.yamuiLabel6.TabIndex = 11;
+            this.yamuiLabel6.Text = "STATUS :";
+            // 
+            // lbStatus
+            // 
+            this.lbStatus.Location = new System.Drawing.Point(64, 27);
+            this.lbStatus.Name = "lbStatus";
+            this.lbStatus.Size = new System.Drawing.Size(343, 15);
+            this.lbStatus.TabIndex = 10;
+            // 
+            // btPrevError
+            // 
+            this.btPrevError.BackGrndImage = null;
+            this.btPrevError.Location = new System.Drawing.Point(5, 45);
+            this.btPrevError.Name = "btPrevError";
+            this.btPrevError.Size = new System.Drawing.Size(20, 20);
+            this.btPrevError.TabIndex = 9;
+            this.btPrevError.Text = "yamuiImageButton1";
             // 
             // yamuiLabel1
             // 
@@ -142,6 +210,34 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel3.TabIndex = 4;
             this.yamuiPanel3.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel3.VerticalScrollbarSize = 10;
+            // 
+            // btGotoDir
+            // 
+            this.btGotoDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btGotoDir.BackGrndImage = null;
+            this.btGotoDir.Location = new System.Drawing.Point(387, 27);
+            this.btGotoDir.Name = "btGotoDir";
+            this.btGotoDir.Size = new System.Drawing.Size(20, 20);
+            this.btGotoDir.TabIndex = 10;
+            this.btGotoDir.Text = "yamuiImageButton2";
+            // 
+            // lbDirectory
+            // 
+            this.lbDirectory.Location = new System.Drawing.Point(31, 29);
+            this.lbDirectory.Name = "lbDirectory";
+            this.lbDirectory.Size = new System.Drawing.Size(350, 18);
+            this.lbDirectory.TabIndex = 9;
+            this.lbDirectory.Text = "yamuiLabel5";
+            this.lbDirectory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btDirectory
+            // 
+            this.btDirectory.BackGrndImage = null;
+            this.btDirectory.Location = new System.Drawing.Point(5, 27);
+            this.btDirectory.Name = "btDirectory";
+            this.btDirectory.Size = new System.Drawing.Size(20, 20);
+            this.btDirectory.TabIndex = 8;
+            this.btDirectory.Text = "yamuiImageButton1";
             // 
             // btErase
             // 
@@ -265,60 +361,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.TooltipCssClass = "htmltooltip";
             // 
-            // btDirectory
-            // 
-            this.btDirectory.BackGrndImage = null;
-            this.btDirectory.Location = new System.Drawing.Point(5, 27);
-            this.btDirectory.Name = "btDirectory";
-            this.btDirectory.Size = new System.Drawing.Size(20, 20);
-            this.btDirectory.TabIndex = 8;
-            this.btDirectory.Text = "yamuiImageButton1";
-            // 
-            // lbDirectory
-            // 
-            this.lbDirectory.Location = new System.Drawing.Point(31, 29);
-            this.lbDirectory.Name = "lbDirectory";
-            this.lbDirectory.Size = new System.Drawing.Size(350, 18);
-            this.lbDirectory.TabIndex = 9;
-            this.lbDirectory.Text = "yamuiLabel5";
-            // 
-            // btNextError
-            // 
-            this.btNextError.BackGrndImage = null;
-            this.btNextError.Location = new System.Drawing.Point(5, 45);
-            this.btNextError.Name = "btNextError";
-            this.btNextError.Size = new System.Drawing.Size(20, 20);
-            this.btNextError.TabIndex = 9;
-            this.btNextError.Text = "yamuiImageButton1";
-            // 
-            // lbStatus
-            // 
-            this.lbStatus.AutoSize = true;
-            this.lbStatus.Location = new System.Drawing.Point(59, 27);
-            this.lbStatus.Name = "lbStatus";
-            this.lbStatus.Size = new System.Drawing.Size(74, 15);
-            this.lbStatus.TabIndex = 10;
-            this.lbStatus.Text = "yamuiLabel5";
-            // 
-            // yamuiLabel6
-            // 
-            this.yamuiLabel6.AutoSize = true;
-            this.yamuiLabel6.Location = new System.Drawing.Point(5, 27);
-            this.yamuiLabel6.Name = "yamuiLabel6";
-            this.yamuiLabel6.Size = new System.Drawing.Size(48, 15);
-            this.yamuiLabel6.TabIndex = 11;
-            this.yamuiLabel6.Text = "Status : ";
-            // 
-            // btGotoDir
-            // 
-            this.btGotoDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btGotoDir.BackGrndImage = null;
-            this.btGotoDir.Location = new System.Drawing.Point(387, 27);
-            this.btGotoDir.Name = "btGotoDir";
-            this.btGotoDir.Size = new System.Drawing.Size(20, 20);
-            this.btGotoDir.TabIndex = 10;
-            this.btGotoDir.Text = "yamuiImageButton2";
-            // 
             // FileExplorerPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -359,10 +401,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiTextBox textFilter;
         private YamuiLabel lbDirectory;
         private YamuiImageButton btDirectory;
-        private YamuiImageButton btNextError;
+        private YamuiImageButton btPrevError;
         private YamuiLabel yamuiLabel6;
         private YamuiLabel lbStatus;
         private YamuiImageButton btGotoDir;
-
+        private YamuiImageButton btNextError;
+        private YamuiImageButton btClearAllErrors;
+        private YamuiLabel lbNbErrors;
+        private YamuiLabel yamuiLabel5;
     }
 }

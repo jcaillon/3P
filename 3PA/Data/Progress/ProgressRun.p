@@ -14,6 +14,10 @@ DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT piMsgNum AS INTEGER) FORWARD.
 FUNCTION fi_output_last_error RETURNS CHARACTER ( ) FORWARD.
 
+/* Critical options!! */
+SESSION:SYSTEM-ALERT-BOXES = YES.
+SESSION:APPL-ALERT-BOXES = YES.
+
 OUTPUT STREAM str_logout TO VALUE({&LogFile}) BINARY.
 PUT STREAM str_logout UNFORMATTED "".
 
@@ -43,7 +47,7 @@ CASE {&ExecutionType} :
             ON ERROR  UNDO, LEAVE
             ON ENDKEY UNDO, LEAVE
             ON QUIT   UNDO, LEAVE:
-            RUN VALUE({&ToCompile}).
+            RUN VALUE({&ToCompile}) NO-ERROR.
         END.
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
@@ -60,7 +64,8 @@ END CASE.
 
 OUTPUT STREAM str_logout CLOSE.
 
-RETURN "".
+/* Must be QUIT or prowin32.exe opens an empty editor! */
+QUIT.
 
 PROCEDURE pi_handleCompilErrors :
 /*------------------------------------------------------------------------------

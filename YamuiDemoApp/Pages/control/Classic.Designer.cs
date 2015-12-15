@@ -191,7 +191,7 @@ namespace YamuiDemoApp.Pages.control {
             this.yamuiButton4.Name = "yamuiButton4";
             this.yamuiButton4.Size = new System.Drawing.Size(110, 36);
             this.yamuiButton4.TabIndex = 32;
-            this.yamuiButton4.Text = "Highlight button";
+            this.yamuiButton4.Text = "Style button";
             this.yamuiButton4.Click += new System.EventHandler(this.yamuiButton4_Click);
             // 
             // yamuiLabel8

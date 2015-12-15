@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
 
             // syntax combo
-            cbSyntax.DataSource = Highlight.GetThemesList().Select(theme => theme.Name).ToList();
+            cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
 
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
@@ -99,12 +99,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <param name="eventArgs"></param>
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
-                Highlight.CurrentTheme = Highlight.GetThemesList()[cbSyntax.SelectedIndex];
+                Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
             } catch (Exception) {
                 // ignored
             } finally {
                 Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-                Highlight.SetCustomStyles();
+                Style.SetCustomStyles();
             }
         }
 
@@ -129,6 +129,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void PlsRefresh() {
             var thisForm = FindForm();
             if (thisForm != null) {
+                Style.SetCustomStyles();
+
                 // Refresh panels and labels (html)
                 LocalHtmlHandler.ProvideCssSheet();
 
