@@ -364,8 +364,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public CompletionData GetCurrentSuggestion() {
             try {
                 return (CompletionData)fastOLV.SelectedItem.RowObject;
-            } catch (Exception) {
-                //ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return null;
         }

@@ -134,7 +134,7 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FileTags.cs" />
+    <Compile Include="MainFeatures\FilesInfoNs\FileTag.cs" />
     <Compile Include="MainFeatures\FilesInfoNs\FileTagsForm.cs">
       <SubType>Form</SubType>
     </Compile>

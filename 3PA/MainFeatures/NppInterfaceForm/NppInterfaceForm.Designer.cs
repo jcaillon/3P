@@ -22,8 +22,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 _timerCheckNppRect.Dispose();
                 _timerCheckNppRect = null;
                 Closing -= OnClosing;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
 

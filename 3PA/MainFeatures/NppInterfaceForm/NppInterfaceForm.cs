@@ -180,8 +180,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 if (_nppRect.HasValue && _nppRect.Value != rect)
                     Close();
                 _nppRect = rect;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
 

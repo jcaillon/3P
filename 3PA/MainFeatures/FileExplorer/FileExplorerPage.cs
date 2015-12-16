@@ -649,8 +649,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         public FileObject GetCurrentFile() {
             try {
                 return (FileObject)ovl.SelectedItem.RowObject;
-            } catch (Exception) {
-                //ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return null;
         }

@@ -192,8 +192,8 @@ namespace _3PA.Lib {
                         return true;
                     i++;
                 }
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return false;
         }

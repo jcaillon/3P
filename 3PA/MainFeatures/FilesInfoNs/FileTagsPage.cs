@@ -29,7 +29,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #region fields
 
-        public FileTag LocFileTag;
+        public FileTagObject LocFileTagObject;
         public string Filename;
 
         #endregion
@@ -67,20 +67,20 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
             // populate combobox
             var lst = new List<ItemCombo> {
-                new ItemCombo {DisplayText = "Last info", Nb = "last_tag"},
-                new ItemCombo {DisplayText = "Default info", Nb = "default_tag"}
+                new ItemCombo {DisplayText = "Last info", Nb = FileTag.LastTag},
+                new ItemCombo {DisplayText = "Default info", Nb = FileTag.DefaultTag}
             };
             yamuiComboBox1.DisplayMember = "DisplayText";
             yamuiComboBox1.ValueMember = "Nb";
 
-            if (FileTags.Contains(Filename)) {
+            if (FileTag.Contains(Filename)) {
 
-                var lastItem = FileTags.GetLastFileTag(Filename);
-                LocFileTag = lastItem;
+                var lastItem = FileTag.GetLastFileTag(Filename);
+                LocFileTagObject = lastItem;
 
                 var i = 2;
                 var lastItemPos = 0;
-                foreach (var fileTag in FileTags.GetFileTagsList(Filename)) {
+                foreach (var fileTag in FileTag.GetFileTagsList(Filename)) {
                     lst.Add(new ItemCombo { DisplayText = Filename + " #" + fileTag.Nb, Nb = fileTag.Nb });
                     if (fileTag.Nb == lastItem.Nb) lastItemPos = i;
                     i++;
@@ -89,10 +89,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 yamuiComboBox1.DataSource = lst;
                 yamuiComboBox1.SelectedIndex = lastItemPos;
 
-                var itemsOfFile = FileTags.GetFileTagsList(Filename);
+                var itemsOfFile = FileTag.GetFileTagsList(Filename);
                 lst.AddRange(itemsOfFile.Select(item => new ItemCombo { DisplayText = item.Nb, Nb = item.Nb }));
             } else {
-                LocFileTag = FileTags.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? "default_tag" : "last_tag", "");
+                LocFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
 
                 yamuiComboBox1.DataSource = lst;
                 yamuiComboBox1.SelectedIndex = Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? 1 : 0;
@@ -108,23 +108,23 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         private void BtokOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             Save(Filename);
-            Save("last_tag");
-            FileTags.Save();
-            FileTags.Cloak();
+            Save(FileTag.LastTag);
+            FileTag.Export();
+            FileTag.Cloak();
         }
 
         private void BtcancelOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             UpdateView();
-            FileTags.Cloak();
+            FileTag.Cloak();
         }
 
         private void BtclearOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
-            LocFileTag = new FileTag();
+            LocFileTagObject = new FileTagObject();
             UpdateView();
         }
 
         private void BtdefaultOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
-            Save("default_tag");
+            Save(FileTag.DefaultTag);
         }
 
         private void BttodayOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
@@ -133,7 +133,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
             if (keyEventArgs.KeyCode == Keys.Escape)
-                FileTags.Cloak();
+                FileTag.Cloak();
         }
 
         #endregion
@@ -146,27 +146,27 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <param name="filename"></param>
         private void Save(string filename) {
             UpdateModel();
-            FileTags.SetFileTags(filename, LocFileTag.Nb, LocFileTag.Date, LocFileTag.Text, LocFileTag.NomAppli, LocFileTag.Version, LocFileTag.Chantier, LocFileTag.Jira);
+            FileTag.SetFileTags(filename, LocFileTagObject.Nb, LocFileTagObject.Date, LocFileTagObject.Text, LocFileTagObject.NomAppli, LocFileTagObject.Version, LocFileTagObject.Chantier, LocFileTagObject.Jira);
         }
 
         private void UpdateModel() {
-            LocFileTag.NomAppli = yamuiTextBox1.Text;
-            LocFileTag.Version = yamuiTextBox2.Text;
-            LocFileTag.Chantier = yamuiTextBox4.Text;
-            LocFileTag.Jira = yamuiTextBox3.Text;
-            LocFileTag.Nb = yamuiTextBox5.Text;
-            LocFileTag.Text = yamuiTextBox7.Text;
-            LocFileTag.Date = yamuiTextBox6.Text;
+            LocFileTagObject.NomAppli = yamuiTextBox1.Text;
+            LocFileTagObject.Version = yamuiTextBox2.Text;
+            LocFileTagObject.Chantier = yamuiTextBox4.Text;
+            LocFileTagObject.Jira = yamuiTextBox3.Text;
+            LocFileTagObject.Nb = yamuiTextBox5.Text;
+            LocFileTagObject.Text = yamuiTextBox7.Text;
+            LocFileTagObject.Date = yamuiTextBox6.Text;
         }
 
         private void UpdateView() {
-            yamuiTextBox1.Text = LocFileTag.NomAppli;
-            yamuiTextBox2.Text = LocFileTag.Version;
-            yamuiTextBox4.Text = LocFileTag.Chantier;
-            yamuiTextBox3.Text = LocFileTag.Jira;
-            yamuiTextBox5.Text = LocFileTag.Nb;
-            yamuiTextBox7.Text = LocFileTag.Text;
-            yamuiTextBox6.Text = LocFileTag.Date;
+            yamuiTextBox1.Text = LocFileTagObject.NomAppli;
+            yamuiTextBox2.Text = LocFileTagObject.Version;
+            yamuiTextBox4.Text = LocFileTagObject.Chantier;
+            yamuiTextBox3.Text = LocFileTagObject.Jira;
+            yamuiTextBox5.Text = LocFileTagObject.Nb;
+            yamuiTextBox7.Text = LocFileTagObject.Text;
+            yamuiTextBox6.Text = LocFileTagObject.Date;
         }
 
         /// <summary>
@@ -176,10 +176,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <param name="e"></param>
         private void SelectedIndexChanged(object sender, EventArgs e) {
             var val = yamuiComboBox1.SelectedValue.ToString();
-            if (val == "last_tag" || val == "default_tag")
-                LocFileTag = FileTags.GetFileTags(val, "");
+            if (val == FileTag.LastTag || val == FileTag.DefaultTag)
+                LocFileTagObject = FileTag.GetFileTags(val, "");
             else
-                LocFileTag = FileTags.GetFileTags(Filename, val);
+                LocFileTagObject = FileTag.GetFileTags(Filename, val);
             UpdateView();
         }
 

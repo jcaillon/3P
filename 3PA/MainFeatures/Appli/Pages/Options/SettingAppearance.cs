@@ -82,8 +82,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 ThemeManager.Current = ThemeManager.GetThemesList()[comboTheme.SelectedIndex];
                 if (!ThemeManager.Current.UseCurrentAccentColor)
                     _checkButton.Checked = false;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             } finally {
                 ThemeManager.ImageName = ThemeManager.Current.PageBackGroundImage;
                 Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
@@ -100,8 +100,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
                 Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             } finally {
                 Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
                 Style.SetCustomStyles();
@@ -145,8 +145,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         foreach (var y in x) {
                             y.Text = y.Text;
                         }
-                } catch (Exception) {
-                    //ignored
+                } catch (Exception x) {
+                    ErrorHandler.DirtyLog(x);
                 }
 
                 // force the autocomplete to redraw
@@ -166,7 +166,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Appli.Form.UpdateTitle();
 
                 // file tags
-                FileTags.ForceClose();
+                FileTag.ForceClose();
             }
         }
     }

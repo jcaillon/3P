@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
@@ -132,7 +133,7 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            //menu.SetCommand("Edit current file info", ProgressCodeUtils.NotImplemented, "Edit_file_info:Ctrl+Shift+M", false);
+            menu.SetCommand("Edit current file info", FileTag.UnCloak, "Edit_file_info:Ctrl+Shift+M", false);
             //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
             //menu.SetCommand("Surround with modification tags", ProgressCodeUtils.NotImplemented, "Modif_tags:Ctrl+M", false);
 
@@ -198,7 +199,7 @@ namespace _3PA {
                 Config.Save();
 
                 // remember the most used keywords
-                Keywords.Save();
+                Keywords.Export();
 
                 // dispose of all popup
                 ForceCloseAllWindows();
@@ -265,9 +266,9 @@ namespace _3PA {
             //Task.Factory.StartNew(() => {
 
             Snippets.Init();
-            Keywords.Init();
+            Keywords.Import();
             Config.Save();
-            FileTags.Init();
+            FileTag.Import();
             CompilationPath.Import();
 
             // initialize the list of objects of the autocompletion form
@@ -385,7 +386,8 @@ namespace _3PA {
                     foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key  && modifiers.IsCtrl == shortcut.IsCtrl && modifiers.IsShift == shortcut.IsShift && modifiers.IsAlt == shortcut.IsAlt)) {
                         shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
                     }
-                } catch (Exception) {
+                } catch (Exception x) {
+                    ErrorHandler.DirtyLog(x);
                     // ignored, can't do much more
                 }
                 ErrorHandler.ShowErrors(e, "Error in " + shortcutName);
@@ -662,15 +664,14 @@ namespace _3PA {
             AutoComplete.ForceClose();
             InfoToolTip.ForceClose();
             Appli.ForceClose();
-            FileTags.ForceClose();
+            FileTag.ForceClose();
         }
 
         #endregion
 
         #region tests
-        public static void Test() {
 
-            UserCommunication.Notify(CompilationPath.GetCompilationDirectory(@"herp\derp.html"));
+        public static void Test() {
 
             return;
 
@@ -701,7 +702,7 @@ namespace _3PA {
                 }
             }
 
-            FileTags.UnCloak();
+            FileTag.UnCloak();
 
             //var x = 0;
             //var y = 1/x;

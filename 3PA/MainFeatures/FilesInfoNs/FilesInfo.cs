@@ -260,7 +260,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     _sessionInfo[currentFilePath].FileErrors.RemoveAll(error => error.Line == line);
                     jobDone = true;
                 }
-            } catch (Exception) {
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
                 return false;
             }
             if (jobDone) {
@@ -286,7 +287,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 try {
                     var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == nextLine);
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
-                } catch (Exception) {
+                } catch (Exception x) {
+                    ErrorHandler.DirtyLog(x);
                     Npp.GoToLine(nextLine);
                 }
             }
@@ -309,7 +311,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 try {
                     var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == prevLine);
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
-                } catch (Exception) {
+                } catch (Exception x) {
+                    ErrorHandler.DirtyLog(x);
                     Npp.GoToLine(prevLine);
                 }
             }

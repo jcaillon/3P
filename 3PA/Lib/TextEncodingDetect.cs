@@ -21,6 +21,7 @@
 using System;
 using System.IO;
 using System.Text;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -96,7 +97,8 @@ namespace _3PA.Lib {
 
             try {
                 buffer = File.ReadAllBytes(srcFile);
-            } catch (Exception) {
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
                 return encoding;
             }
 

@@ -35,6 +35,7 @@ namespace _3PA.MainFeatures {
         private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
         private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }
         public static string PathErrorToSend { get { return Path.Combine(PathLogFolder, "error_.log"); } }
+        private static string PathDirtyErrorsfile { get { return Path.Combine(PathLogFolder, "dirty_errors.log"); } }
 
         /// <summary>
         /// Allows to keep track of the messages already displayed to the user
@@ -103,7 +104,8 @@ namespace _3PA.MainFeatures {
                             args.Handled = true;
                         },
                         0, 500);
-            } catch (Exception) {
+            } catch (Exception x) {
+                DirtyLog(x);
                 // display the error message the old way
                 MessageBox.Show("An unidentified error has occured, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : https://github.com/jcaillon/3P/issues if the problem persists.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -134,7 +136,8 @@ namespace _3PA.MainFeatures {
                 toAppend.AppendLine("```\r\n");
 
                 File.AppendAllText(PathErrorfile, toAppend.ToString());
-            } catch (Exception) {
+            } catch (Exception x) {
+                DirtyLog(x);
                 success = false;
             }
 
@@ -145,6 +148,38 @@ namespace _3PA.MainFeatures {
             }
 
             return success;
+        }
+
+        /// <summary>
+        /// Log a piece of information
+        /// </summary>
+        public static void DirtyLog(Exception e) {
+            if (File.Exists(PathDirtyErrorsfile)) {
+                FileInfo f = new FileInfo(PathDirtyErrorsfile);
+                if (f.Length > 10000000)
+                    return;
+            }
+            var toAppend = new StringBuilder("***************************\r\n");
+            try {
+                StackFrame frame = new StackFrame(1);
+                var method = frame.GetMethod();
+                var callingClass = method.DeclaringType;
+                var callingMethod = method.Name;
+
+                if (!Directory.Exists(PathLogFolder))
+                    Directory.CreateDirectory(PathLogFolder);
+
+                toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
+                if (method.DeclaringType != null)
+                    toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
+                toAppend.AppendLine("```");
+                toAppend.AppendLine(e.ToString());
+                toAppend.AppendLine("```\r\n");
+
+                File.AppendAllText(PathDirtyErrorsfile, toAppend.ToString());
+            } catch (Exception) {
+                // ok
+            }
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {

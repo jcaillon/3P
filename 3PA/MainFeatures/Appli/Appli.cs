@@ -100,10 +100,11 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ForceClose() {
             try {
-                Form.ForceClose();
+                if (Form != null)
+                    Form.ForceClose();
                 Form = null;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
     }

@@ -160,8 +160,8 @@ namespace _3PA.MainFeatures {
                                 releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("draft")).Item2.EqualsCi("true"),
                                 releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("updated_at")).Item2.Substring(0, 10)
                                 );
-                        } catch (Exception) {
-                            // ignored
+                        } catch (Exception x) {
+                            ErrorHandler.DirtyLog(x);
                         }
 
                         // Hookup DownloadFileCompleted Event, download the release .zip

@@ -97,11 +97,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     _currentEnv = envList.First(environnement =>
                         environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli) &&
                         environnement.EnvLetter.EqualsCi(Config.Instance.EnvCurrentEnvLetter));
-                } catch (Exception) {
+                } catch (Exception x) {
+                    if (!(x is InvalidOperationException))
+                        ErrorHandler.DirtyLog(x);
                     _currentEnv = envList.First(environnement =>
                         environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli));
                 }
-            } catch (Exception) {
+            } catch (Exception x) {
+                if (!(x is InvalidOperationException))
+                    ErrorHandler.DirtyLog(x);
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
             }
 
@@ -124,8 +128,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     if (File.Exists(curPath))
                         return curPath;
                 }
-            } catch (Exception) {
-                return "";
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return "";
         }
@@ -142,9 +146,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             try {
                 var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
                 return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
-            } catch (Exception) {
-                return "";
+            } catch (Exception x) {
+                if (!(x is InvalidOperationException || x is ArgumentNullException))
+                    ErrorHandler.DirtyLog(x);
             }
+            return "";
         }
 
         /// <summary>
@@ -168,8 +174,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     output.AddRange(extensions.Split(',').Select(s => FindFileInPropath(fileName + s)).Where(s => !string.IsNullOrEmpty(s)).ToList());
                 }
                 output.AddRange(FindAllFiles(Current.BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return output;
         }
@@ -195,8 +201,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     var filesInfo = extensions.Split(',').SelectMany(s => dirInfo.GetFiles(fileName + s, SearchOption.AllDirectories));
                     output.AddRange(filesInfo.Select(info => info.FullName));
                 }
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
             return output;
         }
@@ -252,15 +258,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ProPath;
 
                 _currentProPathDirList = new List<string>();
-                var curFilePath = Npp.GetCurrentFilePath();
+                var curFilePath = Npp.GetCurrentFileFolder();
                 foreach (var item in completeProPath.Split(',', '\n', ';')) {
                     var propath = item.Trim();
                     // need to take into account relative paths
                     if (propath.StartsWith("."))
                         try {
                             propath = Path.GetFullPath(Path.Combine(curFilePath, propath));
-                        } catch (Exception) {
-                            // ignored
+                        } catch (Exception x) {
+                            ErrorHandler.DirtyLog(x);
                         }
                     if (Directory.Exists(propath))
                         _currentProPathDirList.Add(propath);

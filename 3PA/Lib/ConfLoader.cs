@@ -19,6 +19,7 @@ namespace _3PA.Lib {
         /// <param name="toApplyOnEachLine"></param>
         /// <param name="encoding"></param>
         public static void ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
+            // TODO: check file size
             try {
                 using (StringReader reader = new StringReader((!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) ? File.ReadAllText(filePath, encoding) : encoding.GetString(dataResources))) {
                     string line;

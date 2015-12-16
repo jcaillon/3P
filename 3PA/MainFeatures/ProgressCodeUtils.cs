@@ -173,28 +173,32 @@ namespace _3PA.MainFeatures {
         /// Opens the lgrfeng.chm file if it can find it in the config
         /// </summary>
         public static void Open4GlHelp() {
-            // get path
-            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
-                if (File.Exists(ProgressEnv.Current.ProwinPath)) {
-                    // Try to find the help file from the prowin32.exe location
-                    var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProgressEnv.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
-                    if (File.Exists(helpPath)) {
-                        Config.Instance.GlobalHelpFilePath = helpPath;
-                        UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
+            try {
+                // get path
+                if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
+                    if (File.Exists(ProgressEnv.Current.ProwinPath)) {
+                        // Try to find the help file from the prowin32.exe location
+                        var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProgressEnv.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
+                        if (File.Exists(helpPath)) {
+                            Config.Instance.GlobalHelpFilePath = helpPath;
+                            UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
+                        }
                     }
                 }
-            }
 
-            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
-                UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
-                return;
-            }
+                if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+                    UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
+                    return;
+                }
 
-            Process.Start(new ProcessStartInfo {
-                FileName = "hh.exe",
-                Arguments = ("ms-its:" + Config.Instance.GlobalHelpFilePath).ProgressQuoter(), // append ::/folder/page.htm
-                UseShellExecute = true
-            });
+                Process.Start(new ProcessStartInfo {
+                    FileName = "hh.exe",
+                    Arguments = ("ms-its:" + Config.Instance.GlobalHelpFilePath).ProgressQuoter(), // append ::/folder/page.htm
+                    UseShellExecute = true
+                });
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error Open4GlHelp");
+            }
         }
 
         #endregion
@@ -324,7 +328,8 @@ namespace _3PA.MainFeatures {
                         try {
                             File.Delete(targetFile);
                             File.Move(lastExec.DotRPath, targetFile);
-                        } catch (Exception) {
+                        } catch (Exception x) {
+                            ErrorHandler.DirtyLog(x);
                             UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
                             success = false;
                         }
@@ -332,7 +337,8 @@ namespace _3PA.MainFeatures {
                             targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.LstPath));
                             File.Delete(targetFile);
                             File.Move(lastExec.LstPath, targetFile);
-                        } catch (Exception) {
+                        } catch (Exception x) {
+                            ErrorHandler.DirtyLog(x);
                             UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
                             success = false;
                         }
@@ -381,7 +387,6 @@ namespace _3PA.MainFeatures {
 
 
         #endregion
-
 
         public static void NotImplemented() {
             UserCommunication.Notify(

@@ -522,13 +522,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
         public static void Close(bool calledFromDwellEnd = false) {
             try {
                 if (calledFromDwellEnd && !_openedFromDwell) return;
-                _form.Cloack();
+                if (_form != null)
+                    _form.Cloack();
                 _openedFromDwell = false;
                 _openedForCompletion = false;
                 _currentCompletionList = null;
                 GoToDefinitionFile = null;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
 
@@ -545,10 +546,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         public static void ForceClose() {
             try {
-                _form.ForceClose();
+                if (_form != null)
+                    _form.ForceClose();
                 _form = null;
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
 

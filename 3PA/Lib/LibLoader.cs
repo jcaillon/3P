@@ -48,8 +48,8 @@ namespace _3PA.Lib {
                     File.Delete(_pathToYamui);
                 if (File.Exists(_pathToOlv))
                     File.Delete(_pathToOlv);
-            } catch (Exception) {
-                // ignored
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
             }
         }
 

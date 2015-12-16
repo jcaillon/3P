@@ -49,12 +49,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
         
-        #region init
+        #region Import / Export
 
         /// <summary>
         /// To call in order to read all the keywords to the private List CompletionData
         /// </summary>
-        public static void Init() {
+        public static void Import() {
             // reads keywords
             _keywords.Clear();
             ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), DataResources.Keywords, Encoding.Default, s => {
@@ -109,14 +109,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
         }
 
-        #endregion
-
-        #region public methods
-
         /// <summary>
         /// Save the keywords data into the file (to remember the ranking of each keyword)
         /// </summary>
-        public static void Save() {
+        public static void Export() {
             if (_keywords.Count == 0) return;
             var strBuilder = new StringBuilder();
             foreach (var keyword in _keywords) {
@@ -124,6 +120,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
             File.WriteAllText(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), strBuilder.ToString());
         }
+
+        #endregion
+
+        #region public methods
 
         /// <summary>
         /// returns the list of keywords
