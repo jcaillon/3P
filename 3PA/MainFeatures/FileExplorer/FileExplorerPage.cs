@@ -23,7 +23,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
@@ -37,7 +36,6 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
-using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.FileExplorer {
     public partial class FileExplorerPage : YamuiPage {
@@ -103,6 +101,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             ovl.DoubleClick += OvlOnDoubleClick;
             ovl.KeyDown += OvlOnKeyDown;
             ovl.Click += OvlOnClick;
+            ovl.CellRightClick += OvlOnCellRightClick;
 
             // decorate rows
             ovl.UseCellFormatEvents = true;
@@ -114,6 +113,47 @@ namespace _3PA.MainFeatures.FileExplorer {
                 FileName.Width = ovl.Width - 17;
                 ovl.Invalidate();
             };
+
+            #endregion
+
+            #region Current file
+
+            // register to Updated Operation events
+            FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
+            FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
+
+            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowErrorHelp) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            UpdateErrorButtons(false);
+
+            btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
+            btPrevError.ButtonPressed += BtPrevErrorOnButtonPressed;
+            btNextError.ButtonPressed += BtNextErrorOnButtonPressed;
+            btClearAllErrors.ButtonPressed += BtClearAllErrorsOnButtonPressed;
+
+            toolTipHtml.SetToolTip(btGetHelp, "Toggle on/off the <b>detailed help</b> for compilation errors and warnings");
+            toolTipHtml.SetToolTip(btPrevError, "<b>Move the caret</b> to the previous error");
+            toolTipHtml.SetToolTip(btNextError, "<b>Move the caret</b> to the next error");
+            toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
+
+            #endregion
+
+            #region Actions
+
+            // Builds a list of buttons
+            var buttonList = new List<Tuple<Image, Action>> {
+                new Tuple<Image, Action>(ImageResources.External, () => { })
+            };
+            foreach (var buttonSpec in buttonList) {
+                var button = new YamuiImageButton {
+                    Size = new Size(20, 20),
+                    BackGrndImage = buttonSpec.Item1,
+                    Margin = new Padding(0)
+                };
+                var spec = buttonSpec;
+                button.ButtonPressed += (sender, args) => { spec.Item2(); };
+                flowLayoutPanel.Controls.Add(button);
+                //flowLayoutPanel.SetFlowBreak(button, true);
+            }
 
             #endregion
 
@@ -141,38 +181,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
             lbDirectory.Click += (sender, args) => BtDirectoryOnButtonPressed(sender, new ButtonPressedEventArgs(args));
-
-            #endregion
-
-            #region Actions
-
-            // Builds a list of buttons
-            var buttonList = new List<Tuple<Image, Action>> {
-                new Tuple<Image, Action>(ImageResources.External, () => { })
-            };
-            foreach (var buttonSpec in buttonList) {
-                var button = new YamuiImageButton {
-                    Size = new Size(20, 20),
-                    BackGrndImage = buttonSpec.Item1,
-                    Margin = new Padding(0),
-                };
-                var spec = buttonSpec;
-                button.ButtonPressed += (sender, args) => { spec.Item2(); };
-                flowLayoutPanel.Controls.Add(button);
-                //flowLayoutPanel.SetFlowBreak(button, true);
-            }
-
-            #endregion
-
-            #region Current file
-
-            // register to Updated Operation events
-            FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
-            FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
-
-            btPrevError.BackGrndImage = ImageResources.Previous;
-            btNextError.BackGrndImage = ImageResources.Next;
-            btClearAllErrors.BackGrndImage = ImageResources.ClearAll;
 
             #endregion
 
@@ -321,7 +329,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                             }
                             break;
                         default:
-                            // List everey folder, must all be unique, then feed to ListFileOjectsInDirectory
+                            // List every folder, must all be unique, then feed to ListFileOjectsInDirectory
                             break;
                     }
 
@@ -500,6 +508,14 @@ namespace _3PA.MainFeatures.FileExplorer {
                     curItem.Flags &= ~FileFlag.Favourite;
                 else
                     curItem.Flags |= FileFlag.Favourite;
+            }
+        }
+
+        private void OvlOnCellRightClick(object sender, CellRightClickEventArgs cellRightClickEventArgs) {
+            var fileObj = (FileObject) cellRightClickEventArgs.Model;
+            if (fileObj != null) {
+                Utils.OpenFileInFolder(fileObj.FullPath);
+                cellRightClickEventArgs.Handled = true;
             }
         }
 
@@ -711,12 +727,19 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
 
+            Color endingColor;
+
+            if (updatedOperationEventArgs.CurrentOperation == 0) {
+                endingColor = ThemeManager.Current.FormColorBackColor;
+            } else {
+                endingColor = ThemeManager.AccentColor;
+            }
+
             // blink back color
             if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
                 lbStatus.UseCustomBackColor = true;
-                lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
-                Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormColorBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => {
-                    lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => {
+                    lbStatus.BackColor = endingColor;
                 });
             }
 
@@ -742,6 +765,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             lbNbErrors.UseCustomForeColor = true;
             var t = new Transition(new TransitionType_Linear(500));
 
+            // disable/enable buttons
+            UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
+
             // colors
             t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
             t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
@@ -751,6 +777,36 @@ namespace _3PA.MainFeatures.FileExplorer {
             t.add(lbErrorText, "Text", ((ErrorLevelAttr)updatedErrorsEventArgs.ErrorLevel.GetAttributes()).DisplayText);
 
             t.run();
+        }
+
+        private void UpdateErrorButtons(bool activate) {
+            btPrevError.Enabled = activate;
+            btNextError.Enabled = activate;
+            btClearAllErrors.Enabled = activate;
+            btPrevError.BackGrndImage = activate ? ImageResources.Previous : Utils.MakeGrayscale3(ImageResources.Previous);
+            btNextError.BackGrndImage = activate ? ImageResources.Next : Utils.MakeGrayscale3(ImageResources.Next);
+            btClearAllErrors.BackGrndImage = activate ? ImageResources.ClearAll : Utils.MakeGrayscale3(ImageResources.ClearAll);
+            btPrevError.Invalidate();
+            btNextError.Invalidate();
+            btClearAllErrors.Invalidate();
+        }
+
+        private void BtClearAllErrorsOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            FilesInfo.ClearAllErrors();
+        }
+
+        private void BtNextErrorOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            FilesInfo.GoToNextError(Npp.Line.CurrentLine + 1);
+        }
+
+        private void BtPrevErrorOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            FilesInfo.GoToPrevError(Npp.Line.CurrentLine - 1);
+        }
+
+        private void BtGetHelpOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            Config.Instance.GlobalShowErrorHelp = !Config.Instance.GlobalShowErrorHelp;
+            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowErrorHelp) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            FilesInfo.DisplayCurrentFileInfo();
         }
 
         #endregion

@@ -122,6 +122,8 @@ namespace _3PA.MainFeatures {
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
+        public bool GlobalShowErrorHelp = true;
+
         public string EnvLastDbInfoUsed = "";
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";

@@ -545,7 +545,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             CleanFilter();
             _unsortedItems.Clear();
             ParserHandler.SavedParserVisitors.Clear();
-            AutoComplete.ParseCurrentDocument(true);
+            Plug.OnDocumentSwitched();
         }
 
         public void ReapplyFilter() {

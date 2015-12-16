@@ -359,13 +359,17 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetConfigDir() {
-            var buffer = new StringBuilder(Win32.MaxPath);
-            Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MaxPath, buffer);
-            var configDir = Path.Combine(buffer.ToString(), AssemblyInfo.ProductTitle);
-            if (!Directory.Exists(configDir))
-                Directory.CreateDirectory(configDir);
-            return configDir;
+            if (string.IsNullOrEmpty(_configDir)) {
+                var buffer = new StringBuilder(Win32.MaxPath);
+                Win32.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, Win32.MaxPath, buffer);
+                _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.ProductTitle);
+                if (!Directory.Exists(_configDir))
+                    Directory.CreateDirectory(_configDir);
+            }
+            return _configDir;
         }
+
+        private static string _configDir;
 
         /// <summary>
         /// Leaves npp

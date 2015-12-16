@@ -20,10 +20,8 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -41,7 +39,6 @@ using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
-using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA {
 
@@ -119,7 +116,7 @@ namespace _3PA {
 
             menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
             menu.SetCommand("Check syntax", ProgressCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
-            //menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
+            menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
             menu.SetCommand("Run program", ProgressCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
             //menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
@@ -244,13 +241,13 @@ namespace _3PA {
             ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
             ThemeManager.AccentColor = Config.Instance.AccentColor;
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
-            Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
-            LocalHtmlHandler.Init();
+            //ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
+            //Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
+            LocalHtmlHandler.RegisterToYamui();
 
             #endregion
 
-            // Init appli form, this gives us a Form to hook onto if we want to do stuff on the UI thread
+            // init appli form, this gives us a Form to hook onto if we want to do stuff on the UI thread
             // from a back groundthread, use : Appli.Form.BeginInvoke() for this
             Appli.Init();
 
@@ -271,6 +268,7 @@ namespace _3PA {
             Keywords.Init();
             Config.Save();
             FileTags.Init();
+            CompilationPath.Import();
 
             // initialize the list of objects of the autocompletion form
             AutoComplete.FillStaticItems(true);
@@ -672,8 +670,7 @@ namespace _3PA {
         #region tests
         public static void Test() {
 
-
-
+            UserCommunication.Notify(CompilationPath.GetCompilationDirectory(@"herp\derp.html"));
 
             return;
 

@@ -33,9 +33,8 @@ namespace _3PA.Html {
         /// <summary>
         /// Call this when initializing the plugin feed the html renderer
         /// </summary>
-        public static void Init() {
+        public static void RegisterToYamui() {
             ProvideCssSheet();
-
             HtmlHandler.ImageNeeded += (sender, args) => {
                 Image tryImg = (Image)ImageResources.ResourceManager.GetObject(args.Src);
                 if (tryImg == null) return;

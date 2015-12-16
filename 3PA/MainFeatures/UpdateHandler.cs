@@ -277,8 +277,6 @@ namespace _3PA.MainFeatures {
                         "A new version has been installed!",
                         "Updated to version " + AssemblyInfo.Version,
                         new List<string> { "ok" }, 
-                        false,
-                        null,
                         false);
 
                     File.Delete(PathToVersionLog);

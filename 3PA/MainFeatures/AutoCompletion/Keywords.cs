@@ -42,28 +42,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static List<CompletionData> _keywords = new List<CompletionData>();
         private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
         private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.OrdinalIgnoreCase);
-        private static string _filePath;
-        private static string _location = Npp.GetConfigDir();
-        private static string _fileNameKeywords = "keywords.data";
-        private static string _fileNameKeywordsHelp = "keywordsHelp.data";
-        private static string _fileNameAbbrev = "abbreviations.data";
+
+        private const string FileNameKeywords = "_Keywords.conf";
+        private const string FileNameKeywordsHelp = "_KeywordsHelp.conf";
+        private const string FileNameAbbrev = "_Abbreviations.conf";
 
         #endregion
-
-        #region Init
+        
+        #region init
 
         /// <summary>
         /// To call in order to read all the keywords to the private List CompletionData
         /// </summary>
         public static void Init() {
-            /* keywords */
-            _filePath = Path.Combine(_location, _fileNameKeywords);
-            if (!File.Exists(_filePath))
-                File.WriteAllBytes(_filePath, DataResources.keywords);
+            // reads keywords
             _keywords.Clear();
-            try {
-                foreach (var items in File.ReadAllLines(_filePath, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
-
+            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), DataResources.Keywords, Encoding.Default, s => {
+                var items = s.Split('\t');
+                if (items.Count() == 4) {
                     // find the KeywordType from items[1]
                     KeywordType keywordType;
                     if (!Enum.TryParse(items[1], true, out keywordType))
@@ -75,54 +71,42 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                     _keywords.Add(new CompletionData {
                         DisplayText = items[0],
-                        Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
+                        Type = ((int)keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                         Ranking = int.Parse(items[3]),
                         SubString = keywordType.ToString(),
                         Flag = flag,
                         KeywordType = keywordType
                     });
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading keywords!", _filePath);
-            }
+            });
 
-            /* abbreviations */
-            var filePathAbb = Path.Combine(_location, _fileNameAbbrev);
-            if (!File.Exists(filePathAbb))
-                File.WriteAllBytes(filePathAbb, DataResources.abbreviations);
+            // reads abbreviations
             _abbreviations.Clear();
-            try {
-                foreach (var items in File.ReadAllLines(filePathAbb, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 2)) {
+            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameAbbrev), DataResources.Abbreviations, Encoding.Default, s => {
+                var items = s.Split('\t');
+                if (items.Count() == 2) {
                     _abbreviations.Add(new KeywordsAbbreviations {
                         CompleteText = items[1],
                         ShortText = items[0]
                     });
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading abbreviations!", filePathAbb);
-            }
+            });
 
-            /* keyword Help */
-            var filePathHelp = Path.Combine(_location, _fileNameKeywordsHelp);
-            if (!File.Exists(filePathHelp))
-                File.WriteAllBytes(filePathHelp, DataResources.keywordsHelp);
+            // reads keywords help
             _help.Clear();
-            try {
-                foreach (var items in File.ReadAllLines(filePathHelp, Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Length > 2)) {
+            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameKeywordsHelp), DataResources.KeywordsHelp, Encoding.Default, s => {
+                var items = s.Split('\t');
+                if (items.Count() > 2) {
                     var listSynthax = new List<string>();
-                    var i = 2;
-                    while (i < items.Length) {
+                    for (int i = 2; i < items.Length; i++) {
                         listSynthax.Add(items[i]);
-                        i++;
                     }
                     _help.Add(items[0], new KeywordsHelp {
                         Description = items[1],
                         Synthax = listSynthax
                     });
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading keywords help!", filePathHelp);
-            }
+            });
         }
 
         #endregion
@@ -138,7 +122,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             foreach (var keyword in _keywords) {
                 strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubString + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
             }
-            File.WriteAllText(_filePath, strBuilder.ToString());
+            File.WriteAllText(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), strBuilder.ToString());
         }
 
         /// <summary>
@@ -192,6 +176,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Abbreviation,
         Appbuilder,
         Unknow,
+
         // below are the types that go into the KeywordObject category
         Attribute = 30,
         Property,

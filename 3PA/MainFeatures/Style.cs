@@ -31,7 +31,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.FilesInfoNs;
 
-namespace _3PA.MainFeatures.SyntaxHighlighting {
+namespace _3PA.MainFeatures {
 
     /// <summary>
     /// This class handles the STYLENEEDED notification of scintilla
@@ -78,9 +78,9 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// <summary>
         /// for the Errors we use scintilla's styles, we offset the ErrorLevel by this amount to get the style ID
         /// </summary>
-        public const int ErrorAnnotStandardStyleOffset = 250;
-        public const int ErrorAnnotBoldStyleOffset = 245;
-        public const int ErrorAnnotItalicStyleOffset = 240;
+        public const int ErrorAnnotStandardStyleOffset = 240;
+        public const int ErrorAnnotBoldStyleOffset = 230;
+        public const int ErrorAnnotItalicStyleOffset = 220;
 
         #endregion
 
@@ -122,8 +122,8 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
         #endregion
 
-        #region public methods
-        
+        #region set styles
+
         public static Npp.Style StyleDefault = Npp.GetStyle((byte)UdlStyles.Default);
         public static Npp.Style StyleComment = Npp.GetStyle((byte)UdlStyles.Comment);
         public static Npp.Style StyleCommentLine = Npp.GetStyle((byte)UdlStyles.CommentLine);
@@ -239,7 +239,11 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             markerStyle.SetBackColor(bgColor);
             markerStyle.SetForeColor(fgColor);
         }
-        
+
+        #endregion
+
+        #region public methods
+
         /// <summary>
         /// Is the caret not in : an include, a string, a comment
         /// </summary>
@@ -276,9 +280,9 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         /// <returns></returns>
         public static List<StyleTheme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
-                if (String.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
+                if (string.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
                     Object2Xml<StyleTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
-                    if (!String.IsNullOrEmpty(ThemeXmlPath))
+                    if (!string.IsNullOrEmpty(ThemeXmlPath))
                         Object2Xml<StyleTheme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
                 } else
                     Object2Xml<StyleTheme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
@@ -289,38 +293,6 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
             return _listOfThemes;
         }
-
-        #endregion
-
-        #region real colorization todo
-        /*
-        /// <summary>
-        /// Called on STYLENEEDED notification
-        /// </summary>
-        /// <param name="endPos"></param>
-        public static void Colorize(int startPos, int endPos) {
-            //------------
-            var watch = Stopwatch.StartNew();
-            //------------
-
-            // redefine the styles
-            SetCustomStyles();
-
-            Lexer tok = new Lexer(Npp.GetDocumentText());
-            tok.Tokenize();
-            SynthaxHighlightVisitor vis = new SynthaxHighlightVisitor {
-                FromLine = Npp.LineFromPosition(startPos),
-                ToLine = Npp.LineFromPosition(endPos)
-            };
-            tok.Accept(vis);
-
-            //--------------
-            watch.Stop();
-            Npp.SetStatusbarLabel("derp = " + derp + "startPos = " + startPos + ", endPos = " + endPos + ", done in " + watch.ElapsedMilliseconds + " ms");
-            //------------
-            derp++;
-        }
-        */
 
         #endregion
     }
@@ -360,7 +332,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
 
     #endregion
 
-    #region Theme class
+    #region StyleTheme class
 
     public class StyleTheme {
         public string Name = "Default";

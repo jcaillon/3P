@@ -72,7 +72,7 @@ namespace _3PA {
         /// <summary>
         ///     This is critical for a correct behavior when using any scintilla function that involves a position
         /// </summary>
-        public static DocumentLines Lines {
+        private static DocumentLines Lines {
             get { return _lines ?? (_lines = new DocumentLines()); }
         }
 
@@ -2486,6 +2486,7 @@ namespace _3PA {
             /// </summary>
             /// <param name="index">The index of this line within the LineCollection that created it.</param>
             public Line(int index) {
+                index = Clamp(index, 0, Count);
                 Index = index;
             }
 
@@ -2510,6 +2511,13 @@ namespace _3PA {
                     var line = Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(currentPos)).ToInt32();
                     return line;
                 }
+            }
+
+            /// <summary>
+            /// Get the total number of lines
+            /// </summary>
+            public static int Count {
+                get { return Lines.Count; }
             }
 
             #endregion
@@ -3545,6 +3553,9 @@ namespace _3PA {
 
         #region helper
 
+        /// <summary>
+        /// Returns scintilla's encoding
+        /// </summary>
         internal static Encoding Encoding {
             get {
                 // Should always be UTF-8 unless someone has done an end run around us
@@ -3553,6 +3564,13 @@ namespace _3PA {
             }
         }
 
+        /// <summary>
+        /// Returns a string's bytes array with given encoding
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="encoding"></param>
+        /// <param name="zeroTerminated"></param>
+        /// <returns></returns>
         public static unsafe byte[] GetBytes(string text, Encoding encoding, bool zeroTerminated) {
             if (string.IsNullOrEmpty(text))
                 return new byte[0];
@@ -3571,6 +3589,14 @@ namespace _3PA {
             return buffer;
         }
 
+        /// <summary>
+        /// Returns char array's bytes array with given encoding
+        /// </summary>
+        /// <param name="text"></param>
+        /// <param name="length"></param>
+        /// <param name="encoding"></param>
+        /// <param name="zeroTerminated"></param>
+        /// <returns></returns>
         public static unsafe byte[] GetBytes(char[] text, int length, Encoding encoding, bool zeroTerminated) {
             fixed (char* cp = text) {
                 var count = encoding.GetByteCount(cp, length);
@@ -3586,12 +3612,7 @@ namespace _3PA {
         }
 
         public static byte[] BitmapToArgb(Bitmap image) {
-            // This code originally used Image.LockBits and some fast byte copying, however, the endianness
-            // of the image formats was making my brain hurt. For now I'm going to use the slow but simple
-            // GetPixel approach.
-
             var bytes = new byte[4*image.Width*image.Height];
-
             var i = 0;
             for (var y = 0; y < image.Height; y++) {
                 for (var x = 0; x < image.Width; x++) {
@@ -3602,7 +3623,6 @@ namespace _3PA {
                     bytes[i++] = color.A;
                 }
             }
-
             return bytes;
         }
 
@@ -3647,13 +3667,26 @@ namespace _3PA {
             return result;
         }
 
+        /// <summary>
+        /// Get string from pointer
+        /// </summary>
+        /// <param name="bytes"></param>
+        /// <param name="length"></param>
+        /// <param name="encoding"></param>
+        /// <returns></returns>
         public static unsafe string GetString(IntPtr bytes, int length, Encoding encoding) {
             var ptr = (sbyte*) bytes;
             var str = new string(ptr, 0, length, encoding);
-
             return str;
         }
 
+        /// <summary>
+        /// Forces a value between a minimum and a maximum
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <param name="max"></param>
+        /// <returns></returns>
         public static int Clamp(int value, int min, int max) {
             if (value < min)
                 return min;
@@ -3664,6 +3697,12 @@ namespace _3PA {
             return value;
         }
 
+        /// <summary>
+        /// Forces a value to a minimum
+        /// </summary>
+        /// <param name="value"></param>
+        /// <param name="min"></param>
+        /// <returns></returns>
         public static int ClampMin(int value, int min) {
             if (value < min)
                 return min;

@@ -53,14 +53,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
-        /// Forces to refresh 
-        /// </summary>
-        public static void RefreshParserAndCodeExplorer() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.RefreshParserAndCodeExplorer();
-        }
-
-        /// <summary>
         /// Clear tree data
         /// </summary>
         public static void ClearTree() {

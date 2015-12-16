@@ -24,46 +24,43 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Data;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
-namespace _3PA.Lib
-{
+namespace _3PA.Lib {
     /// <summary>
     /// </summary>
-    public static class Utils
-    {
+    public static class Utils {
 
         /// <summary>
         /// Delete a dir, recursively
         /// </summary>
         /// <param name="path"></param>
         /// <param name="recursive"></param>
-        public static void DeleteDirectory(string path, bool recursive)
-        {
+        public static void DeleteDirectory(string path, bool recursive) {
             // Delete all files and sub-folders?
-            if (recursive)
-            {
+            if (recursive) {
                 // Yep... Let's do this
                 var subfolders = Directory.GetDirectories(path);
-                foreach (var s in subfolders)
-                {
+                foreach (var s in subfolders) {
                     DeleteDirectory(s, true);
                 }
             }
 
             // Get all files of the folder
             var files = Directory.GetFiles(path);
-            foreach (var f in files)
-            {
+            foreach (var f in files) {
                 // Get the attributes of the file
                 var attr = File.GetAttributes(f);
 
                 // Is this file marked as 'read-only'?
-                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-                {
+                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
                     // Yes... Remove the 'read-only' attribute, then
                     File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
                 }
@@ -83,10 +80,8 @@ namespace _3PA.Lib
         /// <param name="initialFile"></param>
         /// <param name="filter">txt files (*.txt)|*.txt|All files (*.*)|*.*</param>
         /// <returns></returns>
-        public static string ShowFileSelection(string initialFile, string filter)
-        {
-            OpenFileDialog dialog = new OpenFileDialog
-            {
+        public static string ShowFileSelection(string initialFile, string filter) {
+            OpenFileDialog dialog = new OpenFileDialog {
                 Multiselect = false,
                 Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter
             };
@@ -104,8 +99,7 @@ namespace _3PA.Lib
         /// </summary>
         /// <param name="initialFolder"></param>
         /// <returns></returns>
-        public static string ShowFolderSelection(string initialFolder)
-        {
+        public static string ShowFolderSelection(string initialFolder) {
             var fbd = new FolderBrowserDialog();
             if (Directory.Exists(initialFolder))
                 fbd.SelectedPath = initialFolder;
@@ -116,8 +110,7 @@ namespace _3PA.Lib
         /// Opens a file's folder and select the file in it
         /// </summary>
         /// <param name="filePath"></param>
-        public static bool OpenFileInFolder(string filePath)
-        {
+        public static bool OpenFileInFolder(string filePath) {
             if (!File.Exists(filePath))
                 return false;
             string argument = "/select, \"" + filePath + "\"";
@@ -129,8 +122,7 @@ namespace _3PA.Lib
         /// Opens a folder in the explorer
         /// </summary>
         /// <param name="folderPath"></param>
-        public static bool OpenFolder(string folderPath)
-        {
+        public static bool OpenFolder(string folderPath) {
             if (!Directory.Exists(folderPath))
                 return false;
             string argument = "\"" + folderPath + "\"";
@@ -143,18 +135,13 @@ namespace _3PA.Lib
         /// </summary>
         /// <param name="filePath"></param>
         /// <returns></returns>
-        public static bool OpenWithDefaultShellHandler(string filePath)
-        {
-            if (!File.Exists(filePath))
-            {
+        public static bool OpenWithDefaultShellHandler(string filePath) {
+            if (!File.Exists(filePath)) {
                 if (!Directory.Exists(filePath))
                     return false;
                 OpenFolder(filePath);
-            }
-            else
-            {
-                var process = new ProcessStartInfo(filePath)
-                {
+            } else {
+                var process = new ProcessStartInfo(filePath) {
                     UseShellExecute = true
                 };
                 Process.Start(process);
@@ -162,8 +149,12 @@ namespace _3PA.Lib
             return true;
         }
 
-        public static Bitmap MakeGrayscale3(Bitmap original)
-        {
+        /// <summary>
+        /// Returns the given image... but in grayscale
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);
 
@@ -200,15 +191,12 @@ namespace _3PA.Lib
         /// Returns a 16x16 pixels icon to use in the dockable panel
         /// </summary>
         /// <returns></returns>
-        public static Icon GetIconFromImage(Image image)
-        {
+        public static Icon GetIconFromImage(Image image) {
             Icon dockableIcon;
-            using (Bitmap newBmp = new Bitmap(16, 16))
-            {
+            using (Bitmap newBmp = new Bitmap(16, 16)) {
                 Graphics g = Graphics.FromImage(newBmp);
                 var colorMap = new ColorMap[1];
-                colorMap[0] = new ColorMap
-                {
+                colorMap[0] = new ColorMap {
                     OldColor = Color.Transparent,
                     NewColor = Color.FromKnownColor(KnownColor.ButtonFace)
                 };
@@ -226,8 +214,7 @@ namespace _3PA.Lib
         /// <param name="imgToResize"></param>
         /// <param name="size"></param>
         /// <returns></returns>
-        public static Image ResizeImage(Image imgToResize, Size size)
-        {
+        public static Image ResizeImage(Image imgToResize, Size size) {
 
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
@@ -255,11 +242,9 @@ namespace _3PA.Lib
         /// </summary>
         /// <param name="logFullPath"></param>
         /// <returns></returns>
-        public static string ReadAndFormatLogToHtml(string logFullPath)
-        {
+        public static string ReadAndFormatLogToHtml(string logFullPath) {
             string output = "";
-            if (!string.IsNullOrEmpty(logFullPath) && File.Exists(logFullPath))
-            {
+            if (!string.IsNullOrEmpty(logFullPath) && File.Exists(logFullPath)) {
                 output = File.ReadAllText(logFullPath, TextEncodingDetect.GetFileEncoding(logFullPath)).Replace("\n", "<br>");
                 output = "<div class='ToolTipcodeSnippet'>" + output + "</div>";
             }
@@ -272,30 +257,26 @@ namespace _3PA.Lib
         /// using shell extension)
         /// </summary>
         /// <param name="fullPath"></param>
-        public static bool OpenAnyFullPath(string fullPath)
-        {
+        public static bool OpenAnyFullPath(string fullPath) {
             if (string.IsNullOrEmpty(fullPath)) return false;
 
             // open the file if it has a progress extension
             var ext = Path.GetExtension(fullPath);
-            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext))
-            {
+            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext)) {
                 Npp.Goto(fullPath);
                 return true;
 
             }
 
             // Known extension, open with npp
-            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalNppOpenableExtension.Contains(ext))
-            {
+            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalNppOpenableExtension.Contains(ext)) {
                 Npp.Goto(fullPath);
                 return true;
 
             }
 
             // otherwise open with windows
-            if (Directory.Exists(fullPath))
-            {
+            if (Directory.Exists(fullPath)) {
                 OpenFolder(fullPath);
             }
             return OpenWithDefaultShellHandler(fullPath);
@@ -307,35 +288,30 @@ namespace _3PA.Lib
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="htmlLinkClickedEventArgs"></param>
-        public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs)
-        {
+        public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
             htmlLinkClickedEventArgs.Handled = OpenAnyFullPath(htmlLinkClickedEventArgs.Link);
         }
 
 
-        private static DateTime Str2Date(string str)
-        {
+        private static DateTime Str2Date(string str) {
             DateTime MyDateTime;
             MyDateTime = new DateTime();
             MyDateTime = DateTime.ParseExact(str, "yyyy-MM-dd HH:mm:ss", null);
             return MyDateTime;
         }
 
-        private static string Date2Str(DateTime mdate)
-        {
+        private static string Date2Str(DateTime mdate) {
             return mdate.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
-        public static void SerializeToXml<T>(T obj, string fileName)
-        {
+        public static void SerializeToXml<T>(T obj, string fileName) {
             var fileStream = new FileStream(fileName, FileMode.Create);
             var ser = new XmlSerializer(typeof(T));
             ser.Serialize(fileStream, obj);
             fileStream.Close();
         }
 
-        public static T DeserializeFromXml<T>(string fileName)
-        {
+        public static T DeserializeFromXml<T>(string fileName) {
             var deserializer = new XmlSerializer(typeof(T));
             TextReader reader = new StreamReader(fileName);
             var obj = deserializer.Deserialize(reader);

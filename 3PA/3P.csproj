@@ -88,10 +88,12 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\DocumentLines.cs" />
+    <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
     <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
     <Compile Include="MainFeatures\ProgressExecutionNs\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
+    <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.cs">
       <SubType>UserControl</SubType>
@@ -227,7 +229,7 @@
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
-    <Compile Include="MainFeatures\SyntaxHighlighting\Style.cs" />
+    <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
@@ -317,12 +319,13 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Data\abbreviations.data" />
-    <None Include="Data\keywords.data" />
-    <None Include="Data\keywordsHelp.data" />
+    <None Include="Data\Abbreviations" />
+    <None Include="Data\ConfSopra\_CompilationPath.conf" />
+    <None Include="Data\Keywords" />
+    <None Include="Data\KeywordsHelp" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />
-    <None Include="Data\snippets.data" />
+    <None Include="Data\Snippets" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\ProgressEnvironnement.xml" />
@@ -410,6 +413,7 @@
     <Content Include="Images\FileExplorer\ExplorerDir2.png" />
     <Content Include="Images\FileExplorer\ExplorerDir3.png" />
     <Content Include="Images\FileExplorer\FolderType.png" />
+    <Content Include="Images\FileExplorer\GetHelp.png" />
     <Content Include="Images\FileExplorer\IType.png" />
     <Content Include="Images\FileExplorer\Favourite.png" />
     <Content Include="Images\FileExplorer\Next.png" />

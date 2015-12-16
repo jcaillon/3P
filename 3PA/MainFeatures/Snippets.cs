@@ -63,7 +63,7 @@ namespace _3PA.MainFeatures {
         public static void Init() {
             lock (Map) {
                 if (!File.Exists(ConfigFile))
-                    File.WriteAllBytes(ConfigFile, DataResources.snippets);
+                    File.WriteAllBytes(ConfigFile, DataResources.Snippets);
                 try {
                     Read(ConfigFile);
                 } catch (Exception e) {

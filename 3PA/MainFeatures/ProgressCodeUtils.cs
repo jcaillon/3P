@@ -295,10 +295,9 @@ namespace _3PA.MainFeatures {
                 // Prepare the notification content
                 var notifTitle = ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
-                var notifTimeOut = (errorList.Any()) ? 0 : 7;
+                var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = (nbErrors > 0) ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a>" : string.Empty);
-                var notifWidth = (errorList.Any()) ? 550 : 450;
+                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : string.Empty);
 
                 // has errors
                 if (errorList.Any()) {
@@ -315,9 +314,33 @@ namespace _3PA.MainFeatures {
                 if (isCurrentFile)
                     FilesInfo.DisplayCurrentFileInfo();
 
-                // when compiling
-                if (lastExec.ExecutionType == ExecutionType.Compile) {
+                // when compiling, if no errors, move .r to compilation dir
+                if (lastExec.ExecutionType == ExecutionType.Compile && !errorList.Any()) {
                     // copy to compilation dir
+                    if (!string.IsNullOrEmpty(lastExec.DotRPath) && !string.IsNullOrEmpty(lastExec.LstPath)) {
+                        var success = true;
+                        var targetDir = CompilationPath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
+                        var targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.DotRPath));
+                        try {
+                            File.Delete(targetFile);
+                            File.Move(lastExec.DotRPath, targetFile);
+                        } catch (Exception) {
+                            UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
+                            success = false;
+                        }
+                        try {
+                            targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.LstPath));
+                            File.Delete(targetFile);
+                            File.Move(lastExec.LstPath, targetFile);
+                        } catch (Exception) {
+                            UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
+                            success = false;
+                        }
+                        if (success) {
+                            // TODO notif?
+
+                        }
+                    }
                 }
 
                 // Notify the user, or not
@@ -325,7 +348,7 @@ namespace _3PA.MainFeatures {
                     UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
                         var splitted = args.Link.Split('#');
                         Npp.Goto(splitted[0], int.Parse(splitted[1]));
-                    }, notifTimeOut, notifWidth);
+                    }, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCompileEnded");
             }
@@ -352,7 +375,7 @@ namespace _3PA.MainFeatures {
             Plug.CurrentFileObject.CurrentOperation |= currentOperation;
 
             // clear current errors (updates the current file info)
-            if(!FilesInfo.ClearAllErrors())
+            if (!FilesInfo.ClearAllErrors())
                 FilesInfo.DisplayCurrentFileInfo();
         }
 

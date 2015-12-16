@@ -17,6 +17,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace YamuiDemoApp {
@@ -30,25 +31,22 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
-
-
-            var curDir = @"E:\temp\sac-dev\sac\sac\src";
-
+            
 
             //------------
             var watch = Stopwatch.StartNew();
             //------------
 
-            var test = FileExplorer.ListFileOjectsInDirectory(curDir);
+            CompilationPath.Import();
 
             //--------------
             watch.Stop();
             MessageBox.Show(watch.ElapsedMilliseconds.ToString());
             //------------
 
+            var derp = CompilationPath.GetCompilationDirectory(@"D:\Repo\3P\3PA\Data\ProgressEnvironnement.xml");
 
 
-            
 
             return;
 

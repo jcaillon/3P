@@ -28,6 +28,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private void InitializeComponent() {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.btGetHelp = new YamuiFramework.Controls.YamuiImageButton();
             this.lbNbErrors = new YamuiFramework.Controls.YamuiLabel();
             this.lbErrorText = new YamuiFramework.Controls.YamuiLabel();
             this.btClearAllErrors = new YamuiFramework.Controls.YamuiImageButton();
@@ -69,6 +70,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // yamuiPanel1
             // 
+            this.yamuiPanel1.Controls.Add(this.btGetHelp);
             this.yamuiPanel1.Controls.Add(this.lbNbErrors);
             this.yamuiPanel1.Controls.Add(this.lbErrorText);
             this.yamuiPanel1.Controls.Add(this.btClearAllErrors);
@@ -87,6 +89,16 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
             // 
+            // btGetHelp
+            // 
+            this.btGetHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btGetHelp.BackGrndImage = null;
+            this.btGetHelp.Location = new System.Drawing.Point(387, 25);
+            this.btGetHelp.Name = "btGetHelp";
+            this.btGetHelp.Size = new System.Drawing.Size(20, 20);
+            this.btGetHelp.TabIndex = 16;
+            this.btGetHelp.Text = "yamuiImageButton1";
+            // 
             // lbNbErrors
             // 
             this.lbNbErrors.Function = YamuiFramework.Fonts.LabelFunction.Small;
@@ -99,11 +111,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // lbErrorText
             // 
+            this.lbErrorText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbErrorText.Function = YamuiFramework.Fonts.LabelFunction.Small;
             this.lbErrorText.Location = new System.Drawing.Point(94, 25);
             this.lbErrorText.Margin = new System.Windows.Forms.Padding(3);
             this.lbErrorText.Name = "lbErrorText";
-            this.lbErrorText.Size = new System.Drawing.Size(308, 20);
+            this.lbErrorText.Size = new System.Drawing.Size(287, 20);
             this.lbErrorText.TabIndex = 14;
             this.lbErrorText.Text = "errors";
             this.lbErrorText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -408,5 +422,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiImageButton btClearAllErrors;
         private YamuiLabel lbNbErrors;
         private YamuiLabel lbErrorText;
+        private YamuiImageButton btGetHelp;
     }
 }

@@ -118,20 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-  <data name="keywords" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywords.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ProgressEnvironnement" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>progressenvironnement.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
-  </data>
-  <data name="snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>snippets.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="abbreviations" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>abbreviations.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
-  <data name="keywordsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywordshelp.data;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
   <data name="UDL" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>udl.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
@@ -144,5 +132,17 @@
   </data>
   <data name="DumpDatabase" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>progress\dumpdatabase.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Abbreviations" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>abbreviations;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Keywords" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>keywords;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="KeywordsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>keywordshelp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="Snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>snippets;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

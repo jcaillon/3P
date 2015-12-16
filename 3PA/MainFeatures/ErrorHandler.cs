@@ -87,9 +87,8 @@ namespace _3PA.MainFeatures {
                 // show it to the user, conditionally
                 if (Config.Instance.UserGetsPreReleases)
                     UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                                             (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
-                                             "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + 
-                                             "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                        (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
+                        "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
                         MessageImg.MsgPoison, "An error has occured", message,
                         args => {
                             Npp.Goto(args.Link);
@@ -102,7 +101,7 @@ namespace _3PA.MainFeatures {
                         args => {
                             Npp.Goto(args.Link);
                             args.Handled = true;
-                        }, 
+                        },
                         0, 500);
             } catch (Exception) {
                 // display the error message the old way
@@ -149,7 +148,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
-            ShowErrors((Exception) args.ExceptionObject, "Unhandled error!");
+            ShowErrors((Exception)args.ExceptionObject, "Unhandled error!");
         }
 
         public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {

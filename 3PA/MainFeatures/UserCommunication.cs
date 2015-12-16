@@ -75,11 +75,18 @@ namespace _3PA.MainFeatures {
         /// <param name="waitResponse"></param>
         /// <param name="clickHandler"></param>
         /// <param name="dontWrapLines"></param>
-        public static void Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler, bool dontWrapLines) {
-            if (Appli.Appli.Form != null)
-                Appli.Appli.Form.BeginInvoke((Action)delegate {
-                    YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);
+        /// <returns>returns an integer (-1 if closed, or from 0 to x = buttons.count - 1)</returns>
+        public static int Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler = null, bool dontWrapLines = false) {
+            var clickedButton = -1;
+            if (Appli.Appli.Form != null) {
+                if (clickHandler == null) {
+                    clickHandler = Utils.OpenPathClickHandler;
+                }
+                Appli.Appli.Form.BeginInvoke((Action) delegate {
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);
                 });
+            }
+            return clickedButton;
         }
 
         /// <summary>
