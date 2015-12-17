@@ -10,3 +10,8 @@ C:\Work\3P\3PA\Lib\3pUpdater\3pUpdater\obj\Debug\3pUpdater.pdb
 C:\Work\3P\3PA\Lib\3pUpdater\3pUpdater\bin\Debug\3pUpdater.exe
 C:\Work\3P\3PA\Lib\3pUpdater\3pUpdater\bin\Debug\3pUpdater.pdb
 C:\Work\3P\3PA\Lib\3pUpdater\3pUpdater\obj\Debug\3pUpdater.csprojResolveAssemblyReference.cache
+D:\Repo\3P\3PA\Lib\3pUpdater\3pUpdater\bin\Debug\3pUpdater.exe
+D:\Repo\3P\3PA\Lib\3pUpdater\3pUpdater\bin\Debug\3pUpdater.pdb
+D:\Repo\3P\3PA\Lib\3pUpdater\3pUpdater\obj\Debug\3pUpdater.csprojResolveAssemblyReference.cache
+D:\Repo\3P\3PA\Lib\3pUpdater\3pUpdater\obj\Debug\3pUpdater.exe
+D:\Repo\3P\3PA\Lib\3pUpdater\3pUpdater\obj\Debug\3pUpdater.pdb

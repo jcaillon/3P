@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -149,12 +150,14 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         /// <summary>
         /// Add each files/folders of a given path to the output List of FileObject,
-        /// can be set to be recursive
+        /// can be set to be recursive,
+        /// can be set to not add the subfolders in the results
         /// </summary>
         /// <param name="dirPath"></param>
         /// <param name="recursive"></param>
+        /// <param name="includeFolders"></param>
         /// <returns></returns>
-        public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true) {
+        public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true) {
             var output = new List<FileObject>();
             if (!Directory.Exists(dirPath))
                 return output;
@@ -180,18 +183,23 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
 
             // for each folder in dir
-            foreach (var directoryInfo in dirInfo.GetDirectories()) {
-                // recursive
-                if (recursive)
-                    output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
-                output.Add(new FileObject {
-                    FileName = directoryInfo.Name,
-                    BasePath = Path.GetDirectoryName(directoryInfo.FullName),
-                    FullPath = directoryInfo.FullName,
-                    CreateDateTime = directoryInfo.CreationTime,
-                    ModifieDateTime = directoryInfo.LastWriteTime,
-                    Type = FileType.Folder
-                });
+            if (includeFolders) {
+                Regex regex = new Regex(@"\\\.");
+                foreach (var directoryInfo in dirInfo.GetDirectories()) {
+                    if (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directoryInfo.FullName)) {
+                        // recursive
+                        if (recursive)
+                            output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
+                        output.Add(new FileObject {
+                            FileName = directoryInfo.Name,
+                            BasePath = Path.GetDirectoryName(directoryInfo.FullName),
+                            FullPath = directoryInfo.FullName,
+                            CreateDateTime = directoryInfo.CreationTime,
+                            ModifieDateTime = directoryInfo.LastWriteTime,
+                            Type = FileType.Folder
+                        });
+                    }
+                }
             }
 
             return output;

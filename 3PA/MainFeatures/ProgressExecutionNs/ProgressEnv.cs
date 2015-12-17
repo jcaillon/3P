@@ -92,23 +92,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public static void SetCurrent() {
             // determines the current item selected in the envList
             var envList = GetList();
-            try {
-                try {
-                    _currentEnv = envList.First(environnement =>
-                        environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli) &&
-                        environnement.EnvLetter.EqualsCi(Config.Instance.EnvCurrentEnvLetter));
-                } catch (Exception x) {
-                    if (!(x is InvalidOperationException))
-                        ErrorHandler.DirtyLog(x);
-                    _currentEnv = envList.First(environnement =>
-                        environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli));
-                }
-            } catch (Exception x) {
-                if (!(x is InvalidOperationException))
-                    ErrorHandler.DirtyLog(x);
+            _currentEnv = envList.FirstOrDefault(environnement =>
+                environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli) &&
+                environnement.EnvLetter.EqualsCi(Config.Instance.EnvCurrentEnvLetter));
+            if (_currentEnv == null) {
+                _currentEnv = envList.FirstOrDefault(environnement =>
+                    environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli));
+            }
+            if (_currentEnv == null) {
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
             }
-
             // need to compute the propath again
             Current.ReComputeProPath();
         }
@@ -147,8 +140,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
                 return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
             } catch (Exception x) {
-                if (!(x is InvalidOperationException || x is ArgumentNullException))
-                    ErrorHandler.DirtyLog(x);
+                ErrorHandler.DirtyLog(x);
             }
             return "";
         }
@@ -242,7 +234,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 PfPath[Config.Instance.EnvCurrentDatabase] :
                 PfPath.FirstOrDefault().Value;
         }
-
 
         #region Get ProPath
         /// <summary>

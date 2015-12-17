@@ -196,7 +196,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 File.Copy(ProgressEnv.Current.GetCurrentPfPath(), Path.Combine(ExecutionDir, "base.pf"));
 
             if (!string.IsNullOrEmpty(ProgressEnv.Current.DataBaseConnection))
-                File.WriteAllText(Path.Combine(ExecutionDir, "extra.pf"), ProgressEnv.Current.DataBaseConnection);
+                File.WriteAllText(Path.Combine(ExecutionDir, "extra.pf"), ProgressEnv.Current.DataBaseConnection, Encoding.Default);
 
             if (File.Exists(ProgressEnv.Current.IniPath))
                 File.Copy(ProgressEnv.Current.IniPath, Path.Combine(ExecutionDir, "base.ini"));
@@ -206,7 +206,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile) {
                     TempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
-                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text);
+                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Npp.Encoding);
                 } else TempFullFilePathToExecute = FullFilePathToExecute;
             } else {
                 // for database extraction, we need the output path and to copy the DumpDatabase program
@@ -238,7 +238,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // progress runner
             var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             _runnerPath = Path.Combine(ExecutionDir, runnerFileName);
-            File.WriteAllText(_runnerPath, programContent.ToString());
+            File.WriteAllText(_runnerPath, programContent.ToString(),Encoding.Default);
 
             // misc
             ProgressWin32 = ProgressEnv.Current.ProwinPath;
@@ -250,11 +250,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             //    Params.Append(" -b");
             if (!string.IsNullOrWhiteSpace(ProgressEnv.Current.CmdLineParameters))
                 Params.Append(" " + ProgressEnv.Current.CmdLineParameters.Trim());
-            Params.Append(" -cpinternal ISO8859-1");
-            Params.Append(" -cpstream ISO8859-1");
-            Params.Append(" -p " + Path.Combine(ExecutionDir, runnerFileName).ProgressQuoter());
             if (File.Exists(Path.Combine(ExecutionDir, "base.ini")))
                 Params.Append(" -ini " + ("base.ini").ProgressQuoter());
+            //Params.Append(" -cpinternal ISO8859-1");
+            //Params.Append(" -cpstream ISO8859-1");
+            //Params.Append(" -inp 20000");  /* Max char per instruction */
+            //Params.Append(" -tok 2048");  /* Max token per instruction    */
+            Params.Append(" -p " + Path.Combine(ExecutionDir, runnerFileName).ProgressQuoter());
             ExeParameters = Params.ToString();
 
             // Start a process

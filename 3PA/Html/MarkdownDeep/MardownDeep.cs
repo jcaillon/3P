@@ -408,7 +408,7 @@ namespace MarkdownDeep {
                 }
 
                 return true;
-            } catch (Exception x) {
+            } catch (Exception) {
                 return false;
             }
         }

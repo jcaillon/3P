@@ -22,7 +22,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
@@ -122,7 +124,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
             FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
 
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowErrorHelp) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
             UpdateErrorButtons(false);
 
             btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
@@ -134,6 +136,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btPrevError, "<b>Move the caret</b> to the previous error");
             toolTipHtml.SetToolTip(btNextError, "<b>Move the caret</b> to the next error");
             toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
+            toolTipHtml.SetToolTip(lbStatus, "Provides information on the current status of the file");
 
             #endregion
 
@@ -173,6 +176,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btErase, "<b>Erase</b> the content of the text filter");
             toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
             toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list below");
+            toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
+            toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
+            toolTipHtml.SetToolTip(lbDirectory, "Click to <b>change</b> the directory to explore");
 
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
             btDirectory.BackGrndImage = ImageResources.ExplorerDir0;
@@ -325,11 +331,38 @@ namespace _3PA.MainFeatures.FileExplorer {
                             break;
                         case 2:
                             foreach (var dir in ProgressEnv.Current.GetProPathFileList) {
-                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(dir, false));
+                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(dir, false, false));
                             }
                             break;
                         default:
-                            // List every folder, must all be unique, then feed to ListFileOjectsInDirectory
+                            // get the list of FileObjects
+                            Regex regex = new Regex(@"\\\.");
+                            var fullList = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
+                            fullList.Add(ProgressEnv.Current.BaseLocalPath, false);
+                            if (!fullList.ContainsKey(ProgressEnv.Current.BaseCompilationPath))
+                                fullList.Add(ProgressEnv.Current.BaseCompilationPath, false);
+                            // base local path
+                            if (Directory.Exists(ProgressEnv.Current.BaseLocalPath)) {
+                                foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
+                                    if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                        fullList.Add(directory, false);
+                                }
+                            }
+                            // base compilation path
+                            if (Directory.Exists(ProgressEnv.Current.BaseCompilationPath)) {
+                                foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseCompilationPath, "*", SearchOption.AllDirectories)) {
+                                    if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                        fullList.Add(directory, false);
+                                }
+                            }
+                            // for each dir in propath
+                            foreach (var directory in ProgressEnv.Current.GetProPathFileList) {
+                                if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                    fullList.Add(directory, false);
+                            }
+                            foreach (var kvp in fullList) {
+                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(kvp.Key, false));
+                            }
                             break;
                     }
 
@@ -769,8 +802,10 @@ namespace _3PA.MainFeatures.FileExplorer {
             UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
 
             // colors
-            t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
-            t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
+            if (Style.BgErrorLevelColors != null && Style.BgErrorLevelColors.Count > 0) {
+                t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
+                t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
+            }
 
             // text
             t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
@@ -804,8 +839,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtGetHelpOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
-            Config.Instance.GlobalShowErrorHelp = !Config.Instance.GlobalShowErrorHelp;
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowErrorHelp) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
+            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
             FilesInfo.DisplayCurrentFileInfo();
         }
 

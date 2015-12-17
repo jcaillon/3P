@@ -24,6 +24,7 @@ using System.ComponentModel.DataAnnotations;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -565,8 +566,10 @@ namespace _3PA {
 
             if (IsCurrentFileProgress) {
                 // Syntax Style
-                Style.SetCustomStyles();
+                Style.SetSyntaxStyles();
             }
+
+            Style.SetGeneralStyles();
 
             // Update info on the current file
             FilesInfo.DisplayCurrentFileInfo();
@@ -673,6 +676,38 @@ namespace _3PA {
 
         public static void Test() {
 
+            try {
+                // get the list of FileObjects
+                Regex regex = new Regex(@"\\\.");
+                var fullList = new Dictionary<string, bool>();
+                // base local path
+                if (Directory.Exists(ProgressEnv.Current.BaseLocalPath)) {
+                    foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
+                        if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                            fullList.Add(directory, false);
+                    }
+                }
+                // base compilation path
+                if (Directory.Exists(ProgressEnv.Current.BaseCompilationPath)) {
+                    foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseCompilationPath, "*", SearchOption.AllDirectories)) {
+                        if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                            fullList.Add(directory, false);
+                    }
+                }
+                // for each dir in propath
+                foreach (var directory in ProgressEnv.Current.GetProPathFileList) {
+                    if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                        fullList.Add(directory, false);
+                }
+                var derp = new StringBuilder();
+                foreach (var b in fullList) {
+                    derp.AppendLine(b.Key);
+                }
+                File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\out.txt", derp.ToString(), Encoding.Default);
+            } catch (Exception e) {
+                UserCommunication.Notify(e.ToString());
+            }
+
             return;
 
 
@@ -698,7 +733,7 @@ namespace _3PA {
 
                 var listCustomAttr = property.GetCustomAttributes(typeof(DisplayAttribute), false);
                 if (listCustomAttr.Any()) {
-                    var displayAttr = (DisplayAttribute)listCustomAttr.First();
+                    var displayAttr = (DisplayAttribute)listCustomAttr.FirstOrDefault();
                 }
             }
 

@@ -20,7 +20,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting
             //------------
 
             // redefine the styles
-            SetCustomStyles();
+            SetGeneralStyles();
 
             Lexer tok = new Lexer(Npp.GetDocumentText());
             tok.Tokenize();

@@ -53,8 +53,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
         /// </summary>
-        public static event EventHandler<UpdatedErrorsEventArgs> UpdatedErrors
-        {
+        public static event EventHandler<UpdatedErrorsEventArgs> UpdatedErrors {
             add { OnUpdatedErrors += value; }
             remove { OnUpdatedErrors -= value; }
         }
@@ -160,13 +159,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             if (OnUpdatedErrors != null) {
                 if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
                     // find max error
-                    ErrorLevel maxLvl;
-                    if (_sessionInfo[currentFilePath].FileErrors.Any())
-                        maxLvl =
-                        _sessionInfo[currentFilePath].FileErrors.OrderByDescending(error => error.ErrorNumber).First()
-                            .Level;
-                    else
-                        maxLvl = ErrorLevel.NoErrors;
+                    ErrorLevel maxLvl = ErrorLevel.NoErrors;
+                    if (_sessionInfo[currentFilePath].FileErrors.Any()) {
+                        maxLvl = _sessionInfo[currentFilePath].FileErrors.OrderByDescending(error => error.ErrorNumber).First().Level;
+                    }
                     OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(maxLvl, _sessionInfo[currentFilePath].FileErrors.Count));
                 } else
                     OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
@@ -205,14 +201,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
                 var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber;
                 mess += ", col " + fileError.Column + "): ";
-                stylerHelper.Style(mess, (byte) (Style.ErrorAnnotBoldStyleOffset + fileError.Level));
+                stylerHelper.Style(mess, (byte)(Style.ErrorAnnotBoldStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
                 mess = fileError.Message.BreakText(140);
                 stylerHelper.Style(mess, (byte)(Style.ErrorAnnotStandardStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
-                if (Config.Instance.GlobalShowErrorHelp && !string.IsNullOrEmpty(fileError.Help)) {
+                if (Config.Instance.GlobalShowDetailedHelpForErrors && !string.IsNullOrEmpty(fileError.Help)) {
                     mess = "\nDetailed help: " + fileError.Help.BreakText(140);
                     stylerHelper.Style(mess, (byte)(Style.ErrorAnnotItalicStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
@@ -284,13 +280,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             if (nextLine == -1)
                 nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
             if (nextLine != -1) {
-                try {
-                    var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == nextLine);
+                var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == nextLine);
+                if (errInfo != null)
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
-                } catch (Exception x) {
-                    ErrorHandler.DirtyLog(x);
-                    Npp.GoToLine(nextLine);
-                }
             }
         }
 
@@ -308,13 +300,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             if (prevLine == -1)
                 prevLine = Npp.GetLine(nbLines).MarkerPrevious(EveryMarkersMask);
             if (prevLine != -1) {
-                try {
-                    var errInfo = _sessionInfo[currentFilePath].FileErrors.First(error => error.Line == prevLine);
+                var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == prevLine);
+                if (errInfo != null)
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
-                } catch (Exception x) {
-                    ErrorHandler.DirtyLog(x);
-                    Npp.GoToLine(prevLine);
-                }
             }
         }
 
@@ -332,7 +320,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fullPath, bool fromProlint, Dictionary<string, string> permutePaths) {
             var output = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
 
-            var lastLineNbCouple = new [] {-10, -10};
+            var lastLineNbCouple = new[] { -10, -10 };
             foreach (var items in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
 
                 // new file
@@ -345,7 +333,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 ErrorLevel errorLevel;
                 if (!Enum.TryParse(items[1], true, out errorLevel))
                     errorLevel = ErrorLevel.Error;
-                
+
                 // we store the line/error number couple because we don't want two identical messages to appear
                 var thisLineNbCouple = new[] { items[2].Equals("?") ? 0 : int.Parse(items[2]) - 1, items[4].Equals("?") ? 0 : int.Parse(items[4]) };
 
@@ -353,7 +341,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     // same line/error number as previously
                     if (output[filePath].Count > 0) {
                         var lastFileError = output[filePath].Last();
-                        if (lastFileError != null) lastFileError.Times ++;
+                        if (lastFileError != null) lastFileError.Times++;
                     }
                     continue;
                 }
@@ -543,8 +531,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
     }
 
-    public class UpdatedErrorsEventArgs : EventArgs
-    {
+    public class UpdatedErrorsEventArgs : EventArgs {
         public ErrorLevel ErrorLevel { get; private set; }
         public int NbErrors { get; private set; }
         public UpdatedErrorsEventArgs(ErrorLevel errorLevel, int nbErrors) {

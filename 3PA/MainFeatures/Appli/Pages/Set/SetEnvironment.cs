@@ -109,6 +109,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     cbAppli.DataSource = appliList;
                     var selectedIdx = appliList.FindIndex(str => str.EqualsCi(ProgressEnv.Current.Appli));
                     cbAppli.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                    Config.Instance.EnvCurrentAppli = cbAppli.SelectedItem.ToString();
 
                     // Combo box env letter
                     var envLetterList = envList.Where(environnement => environnement.Appli.EqualsCi(cbAppli.SelectedItem.ToString())).Select(environnement => environnement.EnvLetter).ToList();
@@ -116,17 +117,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         cbEnvLetter.DataSource = envLetterList;
                         selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProgressEnv.Current.EnvLetter));
                         cbEnvLetter.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                        Config.Instance.EnvCurrentEnvLetter = cbEnvLetter.SelectedItem.ToString();
 
                         // Combo box database
-                        var databaseList = envList.First(environnement => environnement.Appli.EqualsCi(cbAppli.SelectedItem.ToString()) && environnement.EnvLetter.EqualsCi(cbEnvLetter.SelectedItem.ToString())).PfPath.Keys.ToList();
-                        if (databaseList.Count > 0) {
-                            cbDatabase.DataSource = databaseList;
-                            selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvCurrentDatabase));
-                            cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                        var dic = envList.FirstOrDefault(environnement => environnement.Appli.EqualsCi(cbAppli.SelectedItem.ToString()) && environnement.EnvLetter.EqualsCi(cbEnvLetter.SelectedItem.ToString()));
+                        if (dic != null) {
+                            var databaseList = dic.PfPath.Keys.ToList();
+                            if (databaseList.Count > 0) {
+                                cbDatabase.DataSource = databaseList;
+                                selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvCurrentDatabase));
+                                cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                                Config.Instance.EnvCurrentDatabase = cbDatabase.SelectedItem.ToString();
 
+                            }
                         }
                     }
-                }
+                }                
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when filling comboboxes");
             }

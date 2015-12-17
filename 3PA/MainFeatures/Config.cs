@@ -82,12 +82,13 @@ namespace _3PA.MainFeatures {
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = true;
         public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = false;
-        public bool AutoCompleteHideScrollBar = true;
+        public bool AutoCompleteHideScrollBar = false;
         public bool AutocompleteReplaceAbbreviations = true;
 
         public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
         public bool FileExplorerVisible = true;
+        public bool FileExplorerIgnoreUnixHiddenFolders = true;
 
         public bool CodeExplorerVisible = true;
         
@@ -95,14 +96,14 @@ namespace _3PA.MainFeatures {
         public bool CodeExplorerDisplayExternalItems = false;
 
         [Range(0, 1)]
-        public double AppliOpacityUnfocused = 0.5;
+        public double AppliOpacityUnfocused = 1;
         public bool AppliAllowTabAnimation = true;
 
         [Range(0, 5000)]
-        public int ToolTipmsBeforeShowing = 1000;
+        public int ToolTipmsBeforeShowing = 500;
 
         [Range(0, 1)]
-        public double ToolTipOpacity = 0.9;
+        public double ToolTipOpacity = 0.92;
 
         public bool ToolTipDeactivate = false;
 
@@ -122,7 +123,8 @@ namespace _3PA.MainFeatures {
         public int GlobalMaxNbCharInBlock = 31190;
         public bool GlobalShowNotifAboutDefaultAutoComp = true;
 
-        public bool GlobalShowErrorHelp = true;
+
+        public bool GlobalShowDetailedHelpForErrors = true;
 
         public string EnvLastDbInfoUsed = "";
         public string EnvCurrentAppli = "";
@@ -133,9 +135,9 @@ namespace _3PA.MainFeatures {
         public bool LogError = true;
 
         // THEMES
-        public int ThemeId = 1;
-        public Color AccentColor = Color.DarkOrange;
-        public int SyntaxHighlightThemeId = 0;       
+        public int ThemeId = 0;
+        public Color AccentColor = ColorTranslator.FromHtml("#647687");
+        public int SyntaxHighlightThemeId = 1;       
 
         // SHORTCUTS
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
@@ -171,7 +173,7 @@ namespace _3PA.MainFeatures {
         /// Url to post logs
         /// </summary>
         public static string SendLogUrl {
-            get { return @"https://000api.github.com/repos/jcaillon/3p/issues/2/comments"; }
+            get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; }
         }
 
         /// <summary>

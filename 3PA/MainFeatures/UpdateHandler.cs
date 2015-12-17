@@ -215,7 +215,7 @@ namespace _3PA.MainFeatures {
                     File.WriteAllBytes(PathUpdaterExe, Resources._3pUpdater);
 
                 // write the version log
-                File.WriteAllText(PathToVersionLog, LatestReleaseInfo.Body);
+                File.WriteAllText(PathToVersionLog, LatestReleaseInfo.Body, Encoding.Default);
 
                 UserCommunication.Notify(@"Dear user, <br>
                 <br>

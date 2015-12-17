@@ -148,7 +148,7 @@ namespace _3PA.MainFeatures {
         public static List<Color> BgErrorLevelColors;
         public static List<Color> FgErrorLevelColors;
 
-        public static void SetCustomStyles() {
+        public static void SetSyntaxStyles() {
 
             var curTheme = CurrentTheme;
 
@@ -178,7 +178,14 @@ namespace _3PA.MainFeatures {
             StyleJumpInCode.BackColor = curTheme.BgKeyword1;
             StyleTrigram.BackColor = curTheme.BgKeyword8;
             StyleInclude.BackColor = curTheme.BgDelimiters3;
+            
+            // set style 33 for the margin with line numbers
+        }
 
+        public static void SetGeneralStyles() {
+
+            var curTheme = CurrentTheme;
+            
             // Setting styles for errors 
             SetErrorStyles((byte)ErrorLevel.Information, curTheme.BgError0, curTheme.FgError0);
             SetErrorStyles((byte)ErrorLevel.Warning, curTheme.BgError1, curTheme.FgError1);
@@ -201,8 +208,6 @@ namespace _3PA.MainFeatures {
                 curTheme.FgError3,
                 curTheme.FgError4
             };
-
-            // set style 33 for the margin with line numbers
         }
 
         /// <summary>

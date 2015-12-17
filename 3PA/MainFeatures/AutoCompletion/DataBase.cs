@@ -137,7 +137,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     // read
                     Config.Instance.EnvLastDbInfoUsed = OutputFileName;
                     Init();
-                    AutoComplete.ForceClose();
 
                     UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
 
@@ -145,6 +144,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         OnExtractionDone();
                         OnExtractionDone = null;
                     }
+
+                    AutoComplete.ParseCurrentDocument(true);
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
@@ -165,8 +166,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Update autocompletion
             AutoComplete.FillStaticItems(false);
             AutoComplete.ParseCurrentDocument();
-
-            //UserCommunication.Notify("Read db info from : " + Config.Instance.EnvLastDbInfoUsed);
         }
 
         #endregion
@@ -298,7 +297,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="name"></param>
         /// <returns></returns>
         public static ParsedDataBase GetDb(string name) {
-            return _dataBases.First(@base => @base.LogicalName.EqualsCi(name));
+            return _dataBases.FirstOrDefault(@base => @base.LogicalName.EqualsCi(name));
         }
 
         /// <summary>

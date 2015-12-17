@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 ErrorHandler.DirtyLog(x);
             } finally {
                 Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-                Style.SetCustomStyles();
+                Style.SetSyntaxStyles();
             }
         }
 
@@ -129,7 +129,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void PlsRefresh() {
             var thisForm = FindForm();
             if (thisForm != null) {
-                Style.SetCustomStyles();
+                Style.SetSyntaxStyles();
+                Style.SetGeneralStyles();
 
                 // Refresh panels and labels (html)
                 LocalHtmlHandler.ProvideCssSheet();

@@ -62,7 +62,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
 
-        private static MainFeatures.Parser.Parser _ablParser;
+        private static Parser _ablParser;
 
         /// <summary>
         /// is used to make sure that 2 different threads dont try to access
@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures.Parser {
                     SavedParserVisitors.Remove(currentFilePath);
 
                 // Parse the document
-                _ablParser = new MainFeatures.Parser.Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
+                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
 
                 // visitor
                 var parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);

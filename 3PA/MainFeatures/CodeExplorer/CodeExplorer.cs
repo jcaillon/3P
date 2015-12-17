@@ -61,6 +61,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
+        /// Apply the onDocumentChange
+        /// </summary>
+        public static void RefreshParserAndCodeExplorer() {
+            if (ExplorerForm == null) return;
+            ExplorerForm.CodeExplorerPage.RefreshParserAndCodeExplorer();
+        }
+
+        /// <summary>
         /// Toggle the docked form on and off, can be called first and will initialize the form
         /// </summary>
         public static void Toggle() {
