@@ -138,6 +138,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
             toolTipHtml.SetToolTip(lbStatus, "Provides information on the current status of the file");
 
+            lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
+
             #endregion
 
             #region Actions
@@ -771,9 +773,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // blink back color
             if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
                 lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => {
-                    lbStatus.BackColor = endingColor;
-                });
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.BackColor = endingColor; });
             }
 
             // text

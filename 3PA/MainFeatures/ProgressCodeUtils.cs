@@ -304,10 +304,13 @@ namespace _3PA.MainFeatures {
                 var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : string.Empty);
 
                 // has errors
+                var otherFilesInError = false;
                 if (errorList.Any()) {
                     notifMessage.Append("<b>Find the incriminated files below :</b>");
                     foreach (var keyValue in errorList) {
                         notifMessage.Append("<div><b>[x" + keyValue.Value.Count() + "]</b> <a href='" + keyValue.Key + "#" + keyValue.Value.First().Line + "'>" + keyValue.Key + "</a></div>");
+
+                        otherFilesInError = otherFilesInError || !lastExec.FullFilePathToExecute.EqualsCi(keyValue.Key);
 
                         // feed FilesInfo
                         FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
@@ -350,7 +353,7 @@ namespace _3PA.MainFeatures {
                 }
 
                 // Notify the user, or not
-                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus())
+                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
                     UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
                         var splitted = args.Link.Split('#');
                         Npp.Goto(splitted[0], int.Parse(splitted[1]));

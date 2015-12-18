@@ -132,6 +132,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Refresh the files list
         /// </summary>
         public static void Refresh() {
+            if (ExplorerForm == null) return;
             ExplorerForm.FileExplorerPage.RefreshOvl();
             ExplorerForm.FileExplorerPage.FilterByText = "";
         }
@@ -141,6 +142,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void StartSearch() {
             try {
+                if (ExplorerForm == null) return;
                 ExplorerForm.FileExplorerPage.ClearFilter();
                 ExplorerForm.FileExplorerPage.GiveFocustoTextBox();
             } catch (Exception e) {

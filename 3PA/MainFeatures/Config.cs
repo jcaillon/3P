@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures {
 
         public bool AutoCompleteOnKeyInputShowSuggestions = true;
         public bool AutoCompleteOnKeyInputHideIfEmpty = true;
-        public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = false;
+        public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
         public bool AutoCompleteHideScrollBar = false;
         public bool AutocompleteReplaceAbbreviations = true;
 

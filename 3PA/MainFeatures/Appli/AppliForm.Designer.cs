@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.Appli {
             this.Controls.Add(this.yamuiPanel3);
             this.IsMainForm = true;
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(50, 50);
+            this.MinimumSize = new System.Drawing.Size(850, 750);
             this.Name = "AppliForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
