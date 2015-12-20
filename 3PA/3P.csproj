@@ -98,6 +98,12 @@
     </Compile>
     <Compile Include="MainFeatures\CodeBeautifier.cs" />
     <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
@@ -121,20 +127,8 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerPage.Designer.cs">
-      <DependentUpon>CodeExplorerPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
-    <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\FileExplorer\FileExplorerPage.Designer.cs">
-      <DependentUpon>FileExplorerPage.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -228,12 +222,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
-      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\Style.cs" />
@@ -298,23 +286,17 @@
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerPage.resx">
-      <DependentUpon>CodeExplorerPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
-      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerPage.resx">
-      <DependentUpon>FileExplorerPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsForm.resx">
       <DependentUpon>FileTagsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsPage.resx">
       <DependentUpon>FileTagsPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
       <DependentUpon>NppInterfaceForm.cs</DependentUpon>

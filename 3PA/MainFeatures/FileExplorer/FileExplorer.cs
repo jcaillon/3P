@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
                 }
                 if (ExplorerForm == null) return;
-                ExplorerForm.FileExplorerPage.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+                ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void Redraw() {
             if (IsVisible) {
-                ExplorerForm.FileExplorerPage.StyleOvlTree();
+                ExplorerForm.StyleOvlTree();
                 ExplorerForm.Invalidate();
                 ExplorerForm.Refresh();
             }
@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void RedrawFileExplorerList() {
             if (ExplorerForm == null) return;
-            ExplorerForm.FileExplorerPage.Redraw();
+            ExplorerForm.Redraw();
         }
 
         /// <summary>
@@ -133,8 +133,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void Refresh() {
             if (ExplorerForm == null) return;
-            ExplorerForm.FileExplorerPage.RefreshOvl();
-            ExplorerForm.FileExplorerPage.FilterByText = "";
+            ExplorerForm.RefreshOvl();
+            ExplorerForm.FilterByText = "";
         }
 
         /// <summary>
@@ -146,8 +146,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                     return;
 
                 if (ExplorerForm == null) return;
-                ExplorerForm.FileExplorerPage.ClearFilter();
-                ExplorerForm.FileExplorerPage.GiveFocustoTextBox();
+                ExplorerForm.ClearFilter();
+                ExplorerForm.GiveFocustoTextBox();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in StartSearch");
             }

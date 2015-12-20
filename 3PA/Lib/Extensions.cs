@@ -28,6 +28,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using MarkdownDeep;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -131,7 +132,17 @@ namespace _3PA.Lib {
 
 
         #region string extensions
-        
+
+        /// <summary>
+        /// Transforms an md formatted string into an html text
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static string MdToHtml(this string text) {
+            var md = new Markdown();
+            return md.ConvertToHtml(text);
+        }
+
         /// <summary>
         /// Replaces every forbidden char (forbidden for a filename) in the text
         /// </summary>

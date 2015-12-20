@@ -271,8 +271,7 @@ namespace _3PA.MainFeatures {
                         return;
                     }
 
-                    var md = new Markdown();
-                    UserCommunication.Message(md.Transform("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))),
+                    UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))).MdToHtml(),
                         MessageImg.MsgUpdate, 
                         "A new version has been installed!",
                         "Updated to version " + AssemblyInfo.Version,

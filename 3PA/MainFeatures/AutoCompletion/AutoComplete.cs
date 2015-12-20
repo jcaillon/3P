@@ -342,6 +342,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
                     return;
 
+                // dont show in string/comments..?
+                if (!IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+                    return;
+
                 // get current word, current previous word (table or database name)
                 int nbPoints;
                 string previousWord = "";

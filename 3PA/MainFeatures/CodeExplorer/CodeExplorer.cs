@@ -40,16 +40,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public static void UpdateCodeExplorer() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.UpdateTreeData();
+            ExplorerForm.UpdateTreeData();
         }
 
         /// <summary>
         /// Just redraw the code explorer, it is used to update the "selected" scope when
         /// the user click in scintilla
         /// </summary>
-        public static void RedrawCodeExplorer() {
+        public static void RedrawCodeExplorerList() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.Redraw();
+            ExplorerForm.Redraw();
         }
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public static void ClearTree() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.ClearTree();
+            ExplorerForm.ClearTree();
         }
 
         /// <summary>
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public static void RefreshParserAndCodeExplorer() {
             if (ExplorerForm == null) return;
-            ExplorerForm.CodeExplorerPage.RefreshParserAndCodeExplorer();
+            ExplorerForm.RefreshParserAndCodeExplorer();
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
                 }
                 if (ExplorerForm == null) return;
-                ExplorerForm.CodeExplorerPage.UseAlternativeBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+                ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public static void Redraw() {
             if (IsVisible) {
                 //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
-                ExplorerForm.CodeExplorerPage.StyleOvlTree();
+                ExplorerForm.StyleOvlTree();
                 ExplorerForm.Invalidate();
                 ExplorerForm.Refresh();
             }

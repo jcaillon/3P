@@ -47,7 +47,7 @@ namespace _3PA.MainFeatures {
 
                 // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
                 if (InfoToolTip.InfoToolTip.IsVisible) {
-                    if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
+                    if (!String.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
                         Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
                         InfoToolTip.InfoToolTip.Close();
                         return;
@@ -163,8 +163,8 @@ namespace _3PA.MainFeatures {
             // line is surrounded by /* */
             if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
                 // delete /* */
-                Npp.SetTextByRange(endPos - 2, endPos, string.Empty);
-                Npp.SetTextByRange(startPos, startPos + 2, string.Empty);
+                Npp.SetTextByRange(endPos - 2, endPos, String.Empty);
+                Npp.SetTextByRange(startPos, startPos + 2, String.Empty);
                 return 1;
             }
 
@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures {
                     return;
 
                 // get path
-                if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
+                if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
                     if (File.Exists(ProgressEnv.Current.ProwinPath)) {
                         // Try to find the help file from the prowin32.exe location
                         var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProgressEnv.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
@@ -197,7 +197,7 @@ namespace _3PA.MainFeatures {
                     }
                 }
 
-                if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+                if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
                     UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
                     return;
                 }
@@ -280,7 +280,7 @@ namespace _3PA.MainFeatures {
                     FilesInfo.DisplayCurrentFileInfo();
 
                 // if log not found then something is messed up!
-                if (string.IsNullOrEmpty(lastExec.LogPath) ||
+                if (String.IsNullOrEmpty(lastExec.LogPath) ||
                     !File.Exists(lastExec.LogPath)) {
                     UserCommunication.Notify("Something went terribly wrong while " + ((CurrentOperationAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div><a href='" + lastExec.FullFilePathToExecute + "'>" + lastExec.FullFilePathToExecute + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Execution directory :</b><br><a href='" + lastExec.ExecutionDir + "'>" + lastExec.ExecutionDir + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
@@ -327,7 +327,7 @@ namespace _3PA.MainFeatures {
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = (nbErrors > 0) ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : string.Empty);
+                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : String.Empty);
 
                 // has errors
                 var otherFilesInError = false;
@@ -350,7 +350,7 @@ namespace _3PA.MainFeatures {
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && !errorList.Any()) {
                     // copy to compilation dir
-                    if (!string.IsNullOrEmpty(lastExec.DotRPath) && !string.IsNullOrEmpty(lastExec.LstPath)) {
+                    if (!String.IsNullOrEmpty(lastExec.DotRPath) && !String.IsNullOrEmpty(lastExec.LstPath)) {
                         var success = true;
                         var targetDir = CompilationPath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
 
@@ -388,7 +388,7 @@ namespace _3PA.MainFeatures {
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
                     UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
                         var splitted = args.Link.Split('#');
-                        Npp.Goto(splitted[0], int.Parse(splitted[1]));
+                        Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
                     }, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCompileEnded");
@@ -420,6 +420,66 @@ namespace _3PA.MainFeatures {
                 FilesInfo.DisplayCurrentFileInfo();
         }
 
+
+        #endregion
+
+        #region Modification tags
+
+        public static void SurroundSelectionWithTag() {
+            try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
+                var output = new StringBuilder();
+                var filename = Path.GetFileName(Plug.CurrentFilePath);
+
+                if (FileTag.Contains(filename)) {
+                    var fileInfo = FileTag.GetLastFileTag(filename);
+
+                    Npp.BeginUndoAction();
+
+                    Npp.TargetFromSelection();
+                    var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
+
+                    var opener = ReplaceTokens(fileInfo, Config.Instance.CodeModifTagOpener);
+                    var eol = Npp.GetEolString;
+                    output.Append(opener);
+                    output.Append(eol);
+                    output.Append(indent);
+                    output.Append(Npp.SelectedText);
+                    output.Append(eol);
+                    output.Append(indent);
+                    output.Append(ReplaceTokens(fileInfo, Config.Instance.CodeModifTagCloser));
+
+                    Npp.TargetFromSelection();
+                    Npp.ReplaceTarget(output.ToString());
+
+                    Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
+                    
+                    Npp.EndUndoAction();
+
+                } else {
+
+                    UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
+                    FileTag.UnCloak();
+                    return;
+                }
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in SurroundSelectionWithTag");
+            }
+        }
+
+        private static string ReplaceTokens(FileTagObject fileTagObject, string tagString) {
+            var output = tagString.Replace("{&appli}", fileTagObject.ApplicationName);
+            output = output.Replace("{&version}", fileTagObject.ApplicationVersion);
+            output = output.Replace("{&workpackage}", fileTagObject.WorkPackage);
+            output = output.Replace("{&bugid}", fileTagObject.BugId);
+            output = output.Replace("{&number}", fileTagObject.CorrectionNumber);
+            output = output.Replace("{&date}", fileTagObject.CorrectionDate);
+            output = output.Replace("{&username}", Config.Instance.UserName);
+            return output;
+        }
 
         #endregion
 

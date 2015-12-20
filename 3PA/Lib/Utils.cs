@@ -39,6 +39,13 @@ namespace _3PA.Lib {
 
         private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
 
+        /// <summary>
+        /// register a feature's last execution datetime and prevent the user from using it too often 
+        /// by setting a minimum amount of time to wait between two calls
+        /// </summary>
+        /// <param name="featureName"></param>
+        /// <param name="minIntervalInMilliseconds"></param>
+        /// <returns></returns>
         public static bool IsSpamming(string featureName, int minIntervalInMilliseconds) {
             // first use, no problem
             if (!_registeredEvents.ContainsKey(featureName)) {

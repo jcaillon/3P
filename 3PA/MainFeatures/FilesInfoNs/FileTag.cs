@@ -103,6 +103,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #endregion
 
+        #region handle data
+
         /// <summary>
         /// Load the dictionnary of file info
         /// </summary>
@@ -114,16 +116,16 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     if (items.Count() == 8) {
                         var fileName = items[0].Trim();
                         var fileInfo = new FileTagObject() {
-                            Nb = items[1],
-                            Date = items[2],
-                            Text = items[3],
-                            NomAppli = items[4],
-                            Version = items[5],
-                            Chantier = items[6],
-                            Jira = items[7]
+                            CorrectionNumber = items[1],
+                            CorrectionDate = items[2],
+                            CorrectionDecription = items[3],
+                            ApplicationName = items[4],
+                            ApplicationVersion = items[5],
+                            WorkPackage = items[6],
+                            BugId = items[7]
                         };
                         // add to dictionnary
-                        if (_filesInfo.ContainsKey(FilePath)) {
+                        if (_filesInfo.ContainsKey(fileName)) {
                             _filesInfo[fileName].Add(fileInfo);
                         } else {
                             _filesInfo.Add(fileName, new List<FileTagObject>() {
@@ -133,9 +135,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     }
                 });
                 if (!_filesInfo.ContainsKey(DefaultTag))
-                    SetFileTags(DefaultTag, "", "", "", "AFC", "", "", "");
+                    SetFileTags(DefaultTag, "", "", "", "", "", "", "");
                 if (!_filesInfo.ContainsKey(LastTag))
-                    SetFileTags(LastTag, "", "", "", "AFC", "", "", "");
+                    SetFileTags(LastTag, "", "", "", "", "", "", "");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "", FilePath);
             }
@@ -149,7 +151,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 using (var writer = new StreamWriter(FilePath, false)) {
                     foreach (var kpv in _filesInfo) {
                         foreach (var obj in kpv.Value) {
-                            writer.WriteLine(string.Join("\t", kpv.Key, obj.Nb, obj.Date, obj.Text, obj.NomAppli, obj.Version, obj.Chantier, obj.Jira));
+                            writer.WriteLine(string.Join("\t", kpv.Key, obj.CorrectionNumber, obj.CorrectionDate, obj.CorrectionDecription, obj.ApplicationName, obj.ApplicationVersion, obj.WorkPackage, obj.BugId));
                         }
                     }
                 }
@@ -163,7 +165,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         public static List<FileTagObject> GetFileTagsList(string filename) {
-            return Contains(filename) ? _filesInfo[filename].OrderByDescending(o => o.Nb).ToList() : new List<FileTagObject>();
+            return Contains(filename) ? _filesInfo[filename].OrderByDescending(o => o.CorrectionNumber).ToList() : new List<FileTagObject> ();
         }
 
         public static FileTagObject GetLastFileTag(string filename) {
@@ -173,7 +175,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public static FileTagObject GetFileTags(string filename, string nb) {
             return (filename == LastTag || filename == DefaultTag)
                 ? GetFileTagsList(filename).First()
-                : GetFileTagsList(filename).Find(x => (x.Nb.Equals(nb)));
+                : GetFileTagsList(filename).Find(x => (x.CorrectionNumber.Equals(nb)));
         }
 
         public static void SetFileTags(string filename, string nb, string date, string text, string nomAppli,
@@ -181,48 +183,25 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             if (string.IsNullOrWhiteSpace(filename)) return;
 
             try {
+                var obj = new FileTagObject {
+                    CorrectionNumber = nb,
+                    CorrectionDate = date,
+                    CorrectionDecription = text,
+                    ApplicationName = nomAppli,
+                    ApplicationVersion = version,
+                    WorkPackage = chantier,
+                    BugId = jira
+                };
                 // filename exists
-                lock (_filesInfo) {
-                    if (Contains(filename)) {
-                        if (filename == LastTag || filename == DefaultTag)
-                            _filesInfo[filename].Clear();
+                if (Contains(filename)) {
+                    if (filename == LastTag || filename == DefaultTag)
+                        _filesInfo[filename].Clear();
 
-                        // modif number exists
-                        var found = false;
-                        var idk = 0;
-                        foreach (var item in _filesInfo[filename]) {
-                            if (item.Nb == nb) {
-                                found = true;
-                                break;
-                            }
-                            idk++;
-                        }
-                        if (found)
-                            _filesInfo[filename].RemoveAt(idk);
-
-                        _filesInfo[filename].Add(new FileTagObject {
-                            Nb = nb,
-                            Date = date,
-                            Text = text,
-                            NomAppli = nomAppli,
-                            Version = version,
-                            Chantier = chantier,
-                            Jira = jira
-                        });
-                    } else {
-                        var newlist = new List<FileTagObject> {
-                            new FileTagObject {
-                                Nb = nb,
-                                Date = date,
-                                Text = text,
-                                NomAppli = nomAppli,
-                                Version = version,
-                                Chantier = chantier,
-                                Jira = jira
-                            }
-                        };
-                        _filesInfo.Add(filename, newlist);
-                    }
+                    // modif number exists
+                    _filesInfo[filename].RemoveAll(o => o.CorrectionNumber == nb);
+                    _filesInfo[filename].Add(obj);
+                } else {
+                    _filesInfo.Add(filename, new List<FileTagObject> { obj });
                 }
                 Export();
             } catch (Exception e) {
@@ -230,16 +209,22 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             }
         }
 
+        #endregion
     }
 
+    #region File tag object
+
     public struct FileTagObject {
-        public string Nb { get; set; }
-        public string Date { get; set; }
-        public string Text { get; set; }
-        public string NomAppli { get; set; }
-        public string Version { get; set; }
-        public string Chantier { get; set; }
-        public string Jira { get; set; }
+        public string CorrectionNumber { get; set; }
+        public string CorrectionDate { get; set; }
+        public string CorrectionDecription { get; set; }
+        public string ApplicationName { get; set; }
+        public string ApplicationVersion { get; set; }
+        public string WorkPackage { get; set; }
+        public string BugId { get; set; }
     }
+
+    #endregion
+
 
 }

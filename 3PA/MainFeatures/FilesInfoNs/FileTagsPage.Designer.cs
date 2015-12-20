@@ -133,9 +133,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.yamuiLabel5.Location = new System.Drawing.Point(273, 130);
             this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(5, 13, 5, 3);
             this.yamuiLabel5.Name = "yamuiLabel5";
-            this.yamuiLabel5.Size = new System.Drawing.Size(56, 19);
+            this.yamuiLabel5.Size = new System.Drawing.Size(53, 19);
             this.yamuiLabel5.TabIndex = 10;
-            this.yamuiLabel5.Text = "JIRA ID";
+            this.yamuiLabel5.Text = "Bug ID";
             this.yamuiLabel5.TextAlign = System.Drawing.ContentAlignment.TopRight;
             // 
             // yamuiTextBox3

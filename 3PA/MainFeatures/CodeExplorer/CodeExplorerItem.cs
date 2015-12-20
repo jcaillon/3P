@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public List<CodeExplorerItem> Items {
             get {
                 if (_items == null)
-                    _items = CodeExplorerPage.GetItemsFor(this);
+                    _items = CodeExplorerForm.GetItemsFor(this);
                 return _items;
             }
         }

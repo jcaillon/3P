@@ -19,9 +19,8 @@
 #endregion
 
 using System;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -137,7 +136,7 @@ namespace _3PA {
 
             menu.SetCommand("Edit current file info", FileTag.UnCloak, "Edit_file_info:Ctrl+Shift+M", false);
             //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
-            //menu.SetCommand("Surround with modification tags", ProgressCodeUtils.NotImplemented, "Modif_tags:Ctrl+M", false);
+            menu.SetCommand("Surround with modification tags", ProgressCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
 
             menu.SetSeparator();
 
@@ -154,6 +153,7 @@ namespace _3PA {
             menu.SetSeparator();
 
             menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+            menu.SetCommand("Test2", Test2, "Test2:Alt+D", false);
 
             //menu.SetSeparator();
 
@@ -430,13 +430,8 @@ namespace _3PA {
         /// <param name="c"></param>
         public static void OnCharAddedWordContinue(char c) {
             try {
-                // dont show in string/comments..?
-                if (!Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition)) {
-                    AutoComplete.Close();
-                } else {
-                    // handles the autocompletion
-                    AutoComplete.UpdateAutocompletion();
-                }
+                // handles the autocompletion
+                AutoComplete.UpdateAutocompletion();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCharAddedWordContinue");
             }
@@ -482,8 +477,8 @@ namespace _3PA {
                     }
 
                     // replace the last keyword by the correct case
-                    if (replacementWord == null && Config.Instance.CodeChangeCaseMode != 0) {
-                        var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
+                    if (Config.Instance.CodeChangeCaseMode != 0) {
+                        var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
                         if (casedKeyword != null)
                             replacementWord = casedKeyword;
                     }
@@ -534,7 +529,7 @@ namespace _3PA {
             Snippets.FinalizeCurrent();
 
             // update scope of code explorer (the selection img)
-            CodeExplorer.RedrawCodeExplorer();
+            CodeExplorer.RedrawCodeExplorerList();
         }
 
         /// <summary>
@@ -595,7 +590,7 @@ namespace _3PA {
                 if (warningMessage.Length > 0) {
                     warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                     warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
-                    var curPath = Plug.CurrentFilePath;
+                    var curPath = CurrentFilePath;
                     UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                         Npp.Goto(curPath, int.Parse(args.Link));
                     }, 20);
@@ -698,8 +693,20 @@ namespace _3PA {
 
         #region tests
 
+        public static void Test2() {
+  
+        }
+
         public static void Test() {
 
+            File.WriteAllText(@"C:\Users\Julien\Desktop\ansi.p", File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md")).MdToHtml());
+
+            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+                MessageImg.MsgUpdate,
+                "A new version has been installed!",
+                "Updated to version " + AssemblyInfo.Version,
+                new List<string> { "ok" },
+                false);
 
             var canIndent = ParserHandler.CanIndent();
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
@@ -714,9 +721,6 @@ namespace _3PA {
                 }
                 File.WriteAllText(Path.Combine(TempDir, "lines.log"), x.ToString());
             }
-
-
-
 
             //var x = 0;
             //var y = 1/x;

@@ -190,6 +190,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override void SetVisibleCore(bool value) {
             base.SetVisibleCore(_allowInitialdisplay ? value : _allowInitialdisplay);
         }
+
         #region Paint Methods
 
         protected override void OnPaintBackground(PaintEventArgs e) { }

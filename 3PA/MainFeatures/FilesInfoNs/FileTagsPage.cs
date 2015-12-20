@@ -42,7 +42,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public FileTagsPage() {
             InitializeComponent();
 
-            UpdateInfo();
+            if (!DesignMode)
+                UpdateInfo();
 
             // add event handlers
             yamuiComboBox1.SelectedIndexChanged += SelectedIndexChanged;
@@ -53,6 +54,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             btdefault.ButtonPressed += BtdefaultOnButtonPressed;
             bttoday.ButtonPressed += BttodayOnButtonPressed;
             bttoday.Click += (sender, args) => { yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy"); };
+
+            yamuiComboBox1.KeyDown += YamuiComboBox1OnKeyDown;
         }
 
         #endregion
@@ -81,8 +84,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 var i = 2;
                 var lastItemPos = 0;
                 foreach (var fileTag in FileTag.GetFileTagsList(Filename)) {
-                    lst.Add(new ItemCombo { DisplayText = Filename + " #" + fileTag.Nb, Nb = fileTag.Nb });
-                    if (fileTag.Nb == lastItem.Nb) lastItemPos = i;
+                    lst.Add(new ItemCombo { DisplayText = Filename + " #" + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber });
+                    if (fileTag.CorrectionNumber == lastItem.CorrectionNumber) lastItemPos = i;
                     i++;
                 }
 
@@ -90,7 +93,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 yamuiComboBox1.SelectedIndex = lastItemPos;
 
                 var itemsOfFile = FileTag.GetFileTagsList(Filename);
-                lst.AddRange(itemsOfFile.Select(item => new ItemCombo { DisplayText = item.Nb, Nb = item.Nb }));
+                lst.AddRange(itemsOfFile.Select(item => new ItemCombo { DisplayText = item.CorrectionNumber, Nb = item.CorrectionNumber }));
             } else {
                 LocFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
 
@@ -105,6 +108,18 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         #endregion
 
         #region private event
+
+        private void YamuiComboBox1OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            if (keyEventArgs.KeyCode == Keys.Escape) {
+                UpdateView();
+                FileTag.Cloak();
+            } else if (keyEventArgs.KeyCode == Keys.Enter) {
+                Save(Filename);
+                Save(FileTag.LastTag);
+                FileTag.Export();
+                FileTag.Cloak();
+            }
+        }
 
         private void BtokOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             Save(Filename);
@@ -146,27 +161,27 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <param name="filename"></param>
         private void Save(string filename) {
             UpdateModel();
-            FileTag.SetFileTags(filename, LocFileTagObject.Nb, LocFileTagObject.Date, LocFileTagObject.Text, LocFileTagObject.NomAppli, LocFileTagObject.Version, LocFileTagObject.Chantier, LocFileTagObject.Jira);
+            FileTag.SetFileTags(filename, LocFileTagObject.CorrectionNumber, LocFileTagObject.CorrectionDate, LocFileTagObject.CorrectionDecription, LocFileTagObject.ApplicationName, LocFileTagObject.ApplicationVersion, LocFileTagObject.WorkPackage, LocFileTagObject.BugId);
         }
 
         private void UpdateModel() {
-            LocFileTagObject.NomAppli = yamuiTextBox1.Text;
-            LocFileTagObject.Version = yamuiTextBox2.Text;
-            LocFileTagObject.Chantier = yamuiTextBox4.Text;
-            LocFileTagObject.Jira = yamuiTextBox3.Text;
-            LocFileTagObject.Nb = yamuiTextBox5.Text;
-            LocFileTagObject.Text = yamuiTextBox7.Text;
-            LocFileTagObject.Date = yamuiTextBox6.Text;
+            LocFileTagObject.ApplicationName = yamuiTextBox1.Text;
+            LocFileTagObject.ApplicationVersion = yamuiTextBox2.Text;
+            LocFileTagObject.WorkPackage = yamuiTextBox4.Text;
+            LocFileTagObject.BugId = yamuiTextBox3.Text;
+            LocFileTagObject.CorrectionNumber = yamuiTextBox5.Text;
+            LocFileTagObject.CorrectionDecription = yamuiTextBox7.Text;
+            LocFileTagObject.CorrectionDate = yamuiTextBox6.Text;
         }
 
         private void UpdateView() {
-            yamuiTextBox1.Text = LocFileTagObject.NomAppli;
-            yamuiTextBox2.Text = LocFileTagObject.Version;
-            yamuiTextBox4.Text = LocFileTagObject.Chantier;
-            yamuiTextBox3.Text = LocFileTagObject.Jira;
-            yamuiTextBox5.Text = LocFileTagObject.Nb;
-            yamuiTextBox7.Text = LocFileTagObject.Text;
-            yamuiTextBox6.Text = LocFileTagObject.Date;
+            yamuiTextBox1.Text = LocFileTagObject.ApplicationName;
+            yamuiTextBox2.Text = LocFileTagObject.ApplicationVersion;
+            yamuiTextBox4.Text = LocFileTagObject.WorkPackage;
+            yamuiTextBox3.Text = LocFileTagObject.BugId;
+            yamuiTextBox5.Text = LocFileTagObject.CorrectionNumber;
+            yamuiTextBox7.Text = LocFileTagObject.CorrectionDecription;
+            yamuiTextBox6.Text = LocFileTagObject.CorrectionDate;
         }
 
         /// <summary>

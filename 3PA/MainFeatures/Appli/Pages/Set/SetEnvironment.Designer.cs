@@ -237,7 +237,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.multibox3.PasswordChar = '\0';
             this.multibox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multibox3.SelectedText = "";
-            this.multibox3.Size = new System.Drawing.Size(499, 45);
+            this.multibox3.Size = new System.Drawing.Size(438, 45);
             this.multibox3.TabIndex = 51;
             this.multibox3.WaterMark = "Appended to the prowin command line when running or compiling";
             // 
@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(692, 128);
+            this.btDownload.Location = new System.Drawing.Point(631, 128);
             this.btDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDownload.Name = "btDownload";
             this.btDownload.Size = new System.Drawing.Size(20, 20);
@@ -284,7 +284,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(692, 465);
+            this.btright6.Location = new System.Drawing.Point(631, 465);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -311,7 +311,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6.PasswordChar = '\0';
             this.textbox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox6.SelectedText = "";
-            this.textbox6.Size = new System.Drawing.Size(499, 20);
+            this.textbox6.Size = new System.Drawing.Size(438, 20);
             this.textbox6.TabIndex = 43;
             this.textbox6.Tag = "log file (*.log)|*.log";
             // 
@@ -340,7 +340,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(672, 128);
+            this.btright1.Location = new System.Drawing.Point(611, 128);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
@@ -367,7 +367,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox1.PasswordChar = '\0';
             this.textbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox1.SelectedText = "";
-            this.textbox1.Size = new System.Drawing.Size(479, 20);
+            this.textbox1.Size = new System.Drawing.Size(418, 20);
             this.textbox1.TabIndex = 37;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
             // 
@@ -375,7 +375,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(692, 378);
+            this.btright5.Location = new System.Drawing.Point(631, 378);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -402,7 +402,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox5.PasswordChar = '\0';
             this.textbox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox5.SelectedText = "";
-            this.textbox5.Size = new System.Drawing.Size(499, 20);
+            this.textbox5.Size = new System.Drawing.Size(438, 20);
             this.textbox5.TabIndex = 34;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             // 
@@ -410,7 +410,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(692, 323);
+            this.btright4.Location = new System.Drawing.Point(631, 323);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -437,7 +437,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4.PasswordChar = '\0';
             this.textbox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox4.SelectedText = "";
-            this.textbox4.Size = new System.Drawing.Size(499, 20);
+            this.textbox4.Size = new System.Drawing.Size(438, 20);
             this.textbox4.TabIndex = 31;
             this.textbox4.Tag = "true";
             // 
@@ -445,7 +445,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(692, 292);
+            this.btright3.Location = new System.Drawing.Point(631, 292);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -472,7 +472,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3.PasswordChar = '\0';
             this.textbox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox3.SelectedText = "";
-            this.textbox3.Size = new System.Drawing.Size(499, 20);
+            this.textbox3.Size = new System.Drawing.Size(438, 20);
             this.textbox3.TabIndex = 28;
             this.textbox3.Tag = "true";
             // 
@@ -480,7 +480,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(692, 210);
+            this.btright2.Location = new System.Drawing.Point(631, 210);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -509,7 +509,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.multitextbox1.PasswordChar = '\0';
             this.multitextbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multitextbox1.SelectedText = "";
-            this.multitextbox1.Size = new System.Drawing.Size(499, 45);
+            this.multitextbox1.Size = new System.Drawing.Size(438, 45);
             this.multitextbox1.TabIndex = 15;
             this.multitextbox1.WaterMark = "Appended to the .pf file";
             // 
@@ -524,7 +524,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.multibox2.PasswordChar = '\0';
             this.multibox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multibox2.SelectedText = "";
-            this.multibox2.Size = new System.Drawing.Size(499, 45);
+            this.multibox2.Size = new System.Drawing.Size(438, 45);
             this.multibox2.TabIndex = 11;
             this.multibox2.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
             // 
@@ -537,7 +537,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.PasswordChar = '\0';
             this.textbox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox2.SelectedText = "";
-            this.textbox2.Size = new System.Drawing.Size(499, 20);
+            this.textbox2.Size = new System.Drawing.Size(438, 20);
             this.textbox2.TabIndex = 9;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
             // 

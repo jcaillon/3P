@@ -43,6 +43,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public NppInterfaceYamuiForm() {
             InitializeComponent();
 
+            if (DesignMode) return;
+
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
 
@@ -53,7 +55,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         #endregion
-
 
         #region events
         protected override void OnLoad(EventArgs e) {

@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Appli {
                 }),
                 new YamuiMainMenuTab("Options", "options", false, new List<YamuiSecMenuTab> {
                     new YamuiSecMenuTab("FEATURES", "features", new OptionPage()),
-                    new YamuiSecMenuTab("APPEARANCES", "appearances", new SettingAppearance())
+                    new YamuiSecMenuTab("APPEARANCE", "appearance", new SettingAppearance())
                 }),
                 new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
                     new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
@@ -180,7 +180,7 @@ namespace _3PA.MainFeatures.Appli {
         }      
 
         private void yamuiLink6_Click(object sender, EventArgs e) {
-            GoToPage("appearances");
+            GoToPage("features");
         }
 
         private void yamuiLink7_Click(object sender, EventArgs e) {

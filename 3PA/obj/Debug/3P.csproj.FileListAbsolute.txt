@@ -28,10 +28,7 @@ C:\Work\3P\3PA\obj\Debug\_3PA.Data.DataResources.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Images.ImageResources.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetEnvironment.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerPage.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerForm.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.InfoToolTip.InfoToolTipForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
@@ -65,3 +62,4 @@ D:\Repo\3P\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
 D:\Repo\3P\3PA\obj\Debug\3P.dll
 D:\Repo\3P\3PA\obj\Debug\3P.pdb
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources

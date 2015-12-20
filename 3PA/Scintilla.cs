@@ -372,6 +372,22 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns a string representing the current eol used
+        /// </summary>
+        public static string GetEolString {
+            get {
+                switch (EolMode) {
+                    case Eol.Cr:
+                        return "\r";
+                    case Eol.CrLf:
+                        return "\r\n";
+                    default:
+                        return "\n";
+                }
+            }
+        }
+
+        /// <summary>
         ///     Gets the number of lines that can be shown on screen given a constant
         ///     line height and the space available.
         /// </summary>

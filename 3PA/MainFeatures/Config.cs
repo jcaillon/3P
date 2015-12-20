@@ -36,7 +36,6 @@ namespace _3PA.MainFeatures {
     /// </summary>
 
     public class ConfigObject {
-        // https://msdn.microsoft.com/en-us/library/dd901590(VS.95).aspx
 
         //[StringLength(15)]
         //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
@@ -50,12 +49,12 @@ namespace _3PA.MainFeatures {
         [Display(Name = "Application focused opacity",
             Description = "Set the opacity that the main application window will have when activated",
             GroupName = "General",
-            AutoGenerateField = true)]
+            AutoGenerateField = false)]
         [Range(0, 1)]
         public double AppliOpacityUnfocused = 1;
 
         [Display(Name = "Use default values in file info",
-            Description = "Set to true and the <b>default</b> option will be selected when you open a new file info, set to false and the option <b>last values</b> will be selected",
+            Description = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
             GroupName = "General",
             AutoGenerateField = false)]
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
@@ -99,11 +98,11 @@ namespace _3PA.MainFeatures {
         [Display(Name = "Use alternate back color for lists",
             Description = "Use alternate back color for the autocompletion, the code explorer, the file explorer and so on...",
             GroupName = "General",
-            AutoGenerateField = false)]
+            AutoGenerateField = true)]
         public bool GlobalUseAlternateBackColorOnGrid = false;
 
         [Display(Name = "Max number of characters in a block",
-            Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This limit allows to show a warning when you overpass the limite in notepad++",
+            Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This value allows to show a warning when you overpass the limit in notepad++",
             GroupName = "General",
             AutoGenerateField = false)]
         public int GlobalMaxNbCharInBlock = 31190;
@@ -215,7 +214,7 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Code edition
+        #region CODE EDITION
 
         /// <summary>
         /// CODE EDITION
@@ -230,7 +229,7 @@ namespace _3PA.MainFeatures {
         [Display(Name = "Indentation width",
             Description = "The number of spaces that will be inserted when you press TAB and re-indent the code",
             GroupName = "Code edition",
-            AutoGenerateField = false)]
+            AutoGenerateField = true)]
         [Range(0, 10)]
         public int CodeIndentNb = 4;
 
@@ -246,6 +245,18 @@ namespace _3PA.MainFeatures {
             GroupName = "Code edition",
             AutoGenerateField = false)]
         public bool CodeReplaceAbbreviations = true;
+
+        [Display(Name = "Modification tag : opener",
+            Description = "You can set your custom modification tag here,<br>this part will be added before your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",
+            GroupName = "Code edition",
+            AutoGenerateField = false)]
+        public string CodeModifTagOpener = "/* --- Modif #{&number} --- {&date} --- CS PROGRESS SOPRA ({&username}) --- [{&workpackage} - {&bugid}] --- */";
+
+        [Display(Name = "Modification tag : closer",
+            Description = "You can set your custom modification tag here,<br>this part will be appended to your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",
+            GroupName = "Code edition",
+            AutoGenerateField = false)]
+        public string CodeModifTagCloser = "/* --- Fin modif #{&number} --- */";
 
         #endregion
 
@@ -331,15 +342,6 @@ namespace _3PA.MainFeatures {
     /// </summary>
     public static class Config {
 
-        #region private fields
-
-        private static ConfigObject _instance;
-        private static string _filePath;
-        private static string _location = Npp.GetConfigDir();
-        private static string _fileName = "settings.xml";
-
-        #endregion
-
         #region public fields
 
         /// <summary>
@@ -362,6 +364,15 @@ namespace _3PA.MainFeatures {
         public static ConfigObject Instance {
             get { return _instance ?? (_instance = Init()); }
         }
+
+        #endregion
+
+        #region private fields
+
+        private static ConfigObject _instance;
+        private static string _filePath;
+        private static string _location = Npp.GetConfigDir();
+        private static string _fileName = "settings.xml";
 
         #endregion
 
