@@ -220,7 +220,7 @@ namespace _3PA.Lib {
         /// <param name="keyword"></param>
         /// <returns></returns>
         public static string AutoCaseToUserLiking(this string keyword) {
-            switch (Config.Instance.AutoCompleteChangeCaseMode) {
+            switch (Config.Instance.CodeChangeCaseMode) {
                 case 1:
                     return keyword.ToUpper();
                 case 2:

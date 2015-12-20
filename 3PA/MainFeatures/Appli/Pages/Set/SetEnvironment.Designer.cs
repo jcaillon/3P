@@ -28,13 +28,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.mainPanel = new YamuiFramework.Controls.YamuiPanel();
+            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
+            this.multibox3 = new YamuiFramework.Controls.YamuiTextBox();
+            this.tgCompilLocl = new YamuiFramework.Controls.YamuiToggle();
             this.btDownload = new YamuiFramework.Controls.YamuiImageButton();
             this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
             this.btcontrol1 = new YamuiFramework.Controls.YamuiButton();
             this.btright6 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft6 = new YamuiFramework.Controls.YamuiImageButton();
             this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiLabel8 = new YamuiFramework.Controls.YamuiLabel();
             this.envLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.cbDatabase = new YamuiFramework.Controls.YamuiComboBox();
             this.btright1 = new YamuiFramework.Controls.YamuiImageButton();
@@ -51,11 +60,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright2 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft2 = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiLabel7 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel6 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.multitextbox1 = new YamuiFramework.Controls.YamuiTextBox();
             this.multibox2 = new YamuiFramework.Controls.YamuiTextBox();
             this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
@@ -69,13 +73,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // mainPanel
             // 
+            this.mainPanel.Controls.Add(this.htmlLabel7);
+            this.mainPanel.Controls.Add(this.htmlLabel6);
+            this.mainPanel.Controls.Add(this.htmlLabel5);
+            this.mainPanel.Controls.Add(this.htmlLabel4);
+            this.mainPanel.Controls.Add(this.htmlLabel3);
+            this.mainPanel.Controls.Add(this.htmlLabel2);
+            this.mainPanel.Controls.Add(this.htmlLabel1);
+            this.mainPanel.Controls.Add(this.lblLocally);
+            this.mainPanel.Controls.Add(this.multibox3);
+            this.mainPanel.Controls.Add(this.tgCompilLocl);
             this.mainPanel.Controls.Add(this.btDownload);
             this.mainPanel.Controls.Add(this.btcontrol2);
             this.mainPanel.Controls.Add(this.btcontrol1);
             this.mainPanel.Controls.Add(this.btright6);
             this.mainPanel.Controls.Add(this.btleft6);
             this.mainPanel.Controls.Add(this.textbox6);
-            this.mainPanel.Controls.Add(this.yamuiLabel8);
             this.mainPanel.Controls.Add(this.envLabel);
             this.mainPanel.Controls.Add(this.cbDatabase);
             this.mainPanel.Controls.Add(this.btright1);
@@ -92,11 +105,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.Controls.Add(this.textbox3);
             this.mainPanel.Controls.Add(this.btright2);
             this.mainPanel.Controls.Add(this.btleft2);
-            this.mainPanel.Controls.Add(this.yamuiLabel7);
-            this.mainPanel.Controls.Add(this.yamuiLabel6);
-            this.mainPanel.Controls.Add(this.yamuiLabel5);
-            this.mainPanel.Controls.Add(this.yamuiLabel3);
-            this.mainPanel.Controls.Add(this.yamuiLabel2);
             this.mainPanel.Controls.Add(this.multitextbox1);
             this.mainPanel.Controls.Add(this.multibox2);
             this.mainPanel.Controls.Add(this.textbox2);
@@ -109,16 +117,144 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.HorizontalScrollbarSize = 10;
             this.mainPanel.Location = new System.Drawing.Point(0, 0);
             this.mainPanel.Name = "mainPanel";
-            this.mainPanel.Size = new System.Drawing.Size(750, 600);
+            this.mainPanel.Size = new System.Drawing.Size(720, 550);
             this.mainPanel.TabIndex = 0;
             this.mainPanel.VerticalScrollbarHighlightOnWheel = false;
             this.mainPanel.VerticalScrollbarSize = 10;
+            // 
+            // htmlLabel7
+            // 
+            this.htmlLabel7.AutoSize = false;
+            this.htmlLabel7.AutoSizeHeightOnly = true;
+            this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 465);
+            this.htmlLabel7.Name = "htmlLabel7";
+            this.htmlLabel7.Size = new System.Drawing.Size(122, 15);
+            this.htmlLabel7.TabIndex = 59;
+            this.htmlLabel7.Text = "<b>Path to server.log file</b>";
+            // 
+            // htmlLabel6
+            // 
+            this.htmlLabel6.AutoSize = false;
+            this.htmlLabel6.AutoSizeHeightOnly = true;
+            this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel6.BaseStylesheet = null;
+            this.htmlLabel6.IsSelectionEnabled = false;
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 409);
+            this.htmlLabel6.Name = "htmlLabel6";
+            this.htmlLabel6.Size = new System.Drawing.Size(122, 30);
+            this.htmlLabel6.TabIndex = 58;
+            this.htmlLabel6.Text = "<b>Command line extra parameters</b>";
+            // 
+            // htmlLabel5
+            // 
+            this.htmlLabel5.AutoSize = false;
+            this.htmlLabel5.AutoSizeHeightOnly = true;
+            this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel5.BaseStylesheet = null;
+            this.htmlLabel5.IsSelectionEnabled = false;
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 378);
+            this.htmlLabel5.Name = "htmlLabel5";
+            this.htmlLabel5.Size = new System.Drawing.Size(122, 15);
+            this.htmlLabel5.TabIndex = 57;
+            this.htmlLabel5.Text = "<b>Prowin32.exe path</b>";
+            // 
+            // htmlLabel4
+            // 
+            this.htmlLabel4.AutoSize = false;
+            this.htmlLabel4.AutoSizeHeightOnly = true;
+            this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel4.BaseStylesheet = null;
+            this.htmlLabel4.IsSelectionEnabled = false;
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 324);
+            this.htmlLabel4.Name = "htmlLabel4";
+            this.htmlLabel4.Size = new System.Drawing.Size(122, 30);
+            this.htmlLabel4.TabIndex = 56;
+            this.htmlLabel4.Text = "<b>Compilation base directory</b>";
+            // 
+            // htmlLabel3
+            // 
+            this.htmlLabel3.AutoSize = false;
+            this.htmlLabel3.AutoSizeHeightOnly = true;
+            this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel3.BaseStylesheet = null;
+            this.htmlLabel3.IsSelectionEnabled = false;
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 292);
+            this.htmlLabel3.Name = "htmlLabel3";
+            this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
+            this.htmlLabel3.TabIndex = 55;
+            this.htmlLabel3.Text = "<b>Project local directory</b>";
+            // 
+            // htmlLabel2
+            // 
+            this.htmlLabel2.AutoSize = false;
+            this.htmlLabel2.AutoSizeHeightOnly = true;
+            this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel2.BaseStylesheet = null;
+            this.htmlLabel2.IsSelectionEnabled = false;
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 211);
+            this.htmlLabel2.Name = "htmlLabel2";
+            this.htmlLabel2.Size = new System.Drawing.Size(122, 60);
+            this.htmlLabel2.TabIndex = 54;
+            this.htmlLabel2.Text = "<b>ProPath</b><br>Reads the value from the .ini file and adds the directories lis" +
+    "ted";
+            // 
+            // htmlLabel1
+            // 
+            this.htmlLabel1.AutoSize = false;
+            this.htmlLabel1.AutoSizeHeightOnly = true;
+            this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 106);
+            this.htmlLabel1.Name = "htmlLabel1";
+            this.htmlLabel1.Size = new System.Drawing.Size(122, 30);
+            this.htmlLabel1.TabIndex = 53;
+            this.htmlLabel1.Text = "<b>Database connection</b> informations";
+            // 
+            // lblLocally
+            // 
+            this.lblLocally.AutoSize = true;
+            this.lblLocally.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lblLocally.Location = new System.Drawing.Point(223, 347);
+            this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
+            this.lblLocally.Name = "lblLocally";
+            this.lblLocally.Size = new System.Drawing.Size(90, 12);
+            this.lblLocally.TabIndex = 52;
+            this.lblLocally.Text = "Compile files locally";
+            this.lblLocally.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // multibox3
+            // 
+            this.multibox3.DisplayIcon = false;
+            this.multibox3.Lines = new string[0];
+            this.multibox3.Location = new System.Drawing.Point(190, 409);
+            this.multibox3.MaxLength = 32767;
+            this.multibox3.Multiline = true;
+            this.multibox3.Name = "multibox3";
+            this.multibox3.PasswordChar = '\0';
+            this.multibox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.multibox3.SelectedText = "";
+            this.multibox3.Size = new System.Drawing.Size(499, 45);
+            this.multibox3.TabIndex = 51;
+            this.multibox3.WaterMark = "Appended to the prowin command line when running or compiling";
+            // 
+            // tgCompilLocl
+            // 
+            this.tgCompilLocl.AutoSize = true;
+            this.tgCompilLocl.Location = new System.Drawing.Point(190, 346);
+            this.tgCompilLocl.Name = "tgCompilLocl";
+            this.tgCompilLocl.Size = new System.Drawing.Size(52, 15);
+            this.tgCompilLocl.TabIndex = 49;
+            this.tgCompilLocl.Text = " ";
             // 
             // btDownload
             // 
             this.btDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(452, 101);
+            this.btDownload.Location = new System.Drawing.Point(692, 128);
             this.btDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDownload.Name = "btDownload";
             this.btDownload.Size = new System.Drawing.Size(20, 20);
@@ -129,7 +265,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btcontrol2
             // 
             this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol2.Location = new System.Drawing.Point(551, 574);
+            this.btcontrol2.Location = new System.Drawing.Point(521, 524);
             this.btcontrol2.Name = "btcontrol2";
             this.btcontrol2.Size = new System.Drawing.Size(94, 23);
             this.btcontrol2.TabIndex = 47;
@@ -138,7 +274,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btcontrol1
             // 
             this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol1.Location = new System.Drawing.Point(651, 574);
+            this.btcontrol1.Location = new System.Drawing.Point(621, 524);
             this.btcontrol1.Name = "btcontrol1";
             this.btcontrol1.Size = new System.Drawing.Size(94, 23);
             this.btcontrol1.TabIndex = 46;
@@ -148,7 +284,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(452, 495);
+            this.btright6.Location = new System.Drawing.Point(692, 465);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -159,7 +295,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
-            this.btleft6.Location = new System.Drawing.Point(18, 495);
+            this.btleft6.Location = new System.Drawing.Point(167, 465);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
@@ -169,25 +305,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox6
             // 
             this.textbox6.Lines = new string[0];
-            this.textbox6.Location = new System.Drawing.Point(41, 495);
+            this.textbox6.Location = new System.Drawing.Point(190, 465);
             this.textbox6.MaxLength = 32767;
             this.textbox6.Name = "textbox6";
             this.textbox6.PasswordChar = '\0';
             this.textbox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox6.SelectedText = "";
-            this.textbox6.Size = new System.Drawing.Size(408, 20);
+            this.textbox6.Size = new System.Drawing.Size(499, 20);
             this.textbox6.TabIndex = 43;
             this.textbox6.Tag = "log file (*.log)|*.log";
-            // 
-            // yamuiLabel8
-            // 
-            this.yamuiLabel8.AutoSize = true;
-            this.yamuiLabel8.Location = new System.Drawing.Point(41, 477);
-            this.yamuiLabel8.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
-            this.yamuiLabel8.Name = "yamuiLabel8";
-            this.yamuiLabel8.Size = new System.Drawing.Size(73, 15);
-            this.yamuiLabel8.TabIndex = 42;
-            this.yamuiLabel8.Text = "Log file path";
             // 
             // envLabel
             // 
@@ -195,18 +321,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.envLabel.AutoSizeHeightOnly = true;
             this.envLabel.BackColor = System.Drawing.Color.Transparent;
             this.envLabel.BaseStylesheet = null;
-            this.envLabel.Location = new System.Drawing.Point(210, 30);
+            this.envLabel.Location = new System.Drawing.Point(269, 30);
             this.envLabel.Name = "envLabel";
-            this.envLabel.Size = new System.Drawing.Size(313, 15);
+            this.envLabel.Size = new System.Drawing.Size(506, 15);
             this.envLabel.TabIndex = 41;
             this.envLabel.Text = "?";
             // 
             // cbDatabase
             // 
             this.cbDatabase.ItemHeight = 19;
-            this.cbDatabase.Location = new System.Drawing.Point(238, 97);
+            this.cbDatabase.Location = new System.Drawing.Point(190, 97);
             this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(211, 25);
+            this.cbDatabase.Size = new System.Drawing.Size(242, 25);
             this.cbDatabase.TabIndex = 40;
             this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
@@ -214,7 +340,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(452, 129);
+            this.btright1.Location = new System.Drawing.Point(672, 128);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
@@ -225,7 +351,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft1.BackColor = System.Drawing.Color.Transparent;
             this.btleft1.BackGrndImage = null;
-            this.btleft1.Location = new System.Drawing.Point(18, 128);
+            this.btleft1.Location = new System.Drawing.Point(167, 128);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
             this.btleft1.Size = new System.Drawing.Size(20, 20);
@@ -235,13 +361,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox1
             // 
             this.textbox1.Lines = new string[0];
-            this.textbox1.Location = new System.Drawing.Point(41, 128);
+            this.textbox1.Location = new System.Drawing.Point(190, 128);
             this.textbox1.MaxLength = 32767;
             this.textbox1.Name = "textbox1";
             this.textbox1.PasswordChar = '\0';
             this.textbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox1.SelectedText = "";
-            this.textbox1.Size = new System.Drawing.Size(408, 20);
+            this.textbox1.Size = new System.Drawing.Size(479, 20);
             this.textbox1.TabIndex = 37;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
             // 
@@ -249,7 +375,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(452, 447);
+            this.btright5.Location = new System.Drawing.Point(692, 378);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -260,7 +386,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
-            this.btleft5.Location = new System.Drawing.Point(18, 446);
+            this.btleft5.Location = new System.Drawing.Point(167, 378);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
@@ -270,13 +396,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox5
             // 
             this.textbox5.Lines = new string[0];
-            this.textbox5.Location = new System.Drawing.Point(41, 446);
+            this.textbox5.Location = new System.Drawing.Point(190, 378);
             this.textbox5.MaxLength = 32767;
             this.textbox5.Name = "textbox5";
             this.textbox5.PasswordChar = '\0';
             this.textbox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox5.SelectedText = "";
-            this.textbox5.Size = new System.Drawing.Size(408, 20);
+            this.textbox5.Size = new System.Drawing.Size(499, 20);
             this.textbox5.TabIndex = 34;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             // 
@@ -284,7 +410,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(452, 398);
+            this.btright4.Location = new System.Drawing.Point(692, 323);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -295,7 +421,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
-            this.btleft4.Location = new System.Drawing.Point(18, 397);
+            this.btleft4.Location = new System.Drawing.Point(167, 323);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
@@ -305,13 +431,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox4
             // 
             this.textbox4.Lines = new string[0];
-            this.textbox4.Location = new System.Drawing.Point(41, 397);
+            this.textbox4.Location = new System.Drawing.Point(190, 323);
             this.textbox4.MaxLength = 32767;
             this.textbox4.Name = "textbox4";
             this.textbox4.PasswordChar = '\0';
             this.textbox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox4.SelectedText = "";
-            this.textbox4.Size = new System.Drawing.Size(408, 20);
+            this.textbox4.Size = new System.Drawing.Size(499, 20);
             this.textbox4.TabIndex = 31;
             this.textbox4.Tag = "true";
             // 
@@ -319,7 +445,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(452, 349);
+            this.btright3.Location = new System.Drawing.Point(692, 292);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -330,7 +456,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
-            this.btleft3.Location = new System.Drawing.Point(18, 348);
+            this.btleft3.Location = new System.Drawing.Point(167, 292);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
@@ -340,13 +466,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // textbox3
             // 
             this.textbox3.Lines = new string[0];
-            this.textbox3.Location = new System.Drawing.Point(41, 348);
+            this.textbox3.Location = new System.Drawing.Point(190, 292);
             this.textbox3.MaxLength = 32767;
             this.textbox3.Name = "textbox3";
             this.textbox3.PasswordChar = '\0';
             this.textbox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox3.SelectedText = "";
-            this.textbox3.Size = new System.Drawing.Size(408, 20);
+            this.textbox3.Size = new System.Drawing.Size(499, 20);
             this.textbox3.TabIndex = 28;
             this.textbox3.Tag = "true";
             // 
@@ -354,7 +480,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(452, 239);
+            this.btright2.Location = new System.Drawing.Point(692, 210);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -365,74 +491,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
-            this.btleft2.Location = new System.Drawing.Point(18, 238);
+            this.btleft2.Location = new System.Drawing.Point(167, 210);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
             this.btleft2.Size = new System.Drawing.Size(20, 20);
             this.btleft2.TabIndex = 26;
             this.btleft2.Text = "yamuiImageButton1";
             // 
-            // yamuiLabel7
-            // 
-            this.yamuiLabel7.AutoSize = true;
-            this.yamuiLabel7.Location = new System.Drawing.Point(41, 428);
-            this.yamuiLabel7.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
-            this.yamuiLabel7.Name = "yamuiLabel7";
-            this.yamuiLabel7.Size = new System.Drawing.Size(103, 15);
-            this.yamuiLabel7.TabIndex = 25;
-            this.yamuiLabel7.Text = "Prowin32.exe path";
-            // 
-            // yamuiLabel6
-            // 
-            this.yamuiLabel6.AutoSize = true;
-            this.yamuiLabel6.Location = new System.Drawing.Point(41, 379);
-            this.yamuiLabel6.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
-            this.yamuiLabel6.Name = "yamuiLabel6";
-            this.yamuiLabel6.Size = new System.Drawing.Size(157, 15);
-            this.yamuiLabel6.TabIndex = 23;
-            this.yamuiLabel6.Text = "Compilation target directory";
-            // 
-            // yamuiLabel5
-            // 
-            this.yamuiLabel5.AutoSize = true;
-            this.yamuiLabel5.Location = new System.Drawing.Point(41, 330);
-            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
-            this.yamuiLabel5.Name = "yamuiLabel5";
-            this.yamuiLabel5.Size = new System.Drawing.Size(122, 15);
-            this.yamuiLabel5.TabIndex = 22;
-            this.yamuiLabel5.Text = "Project local directory";
-            // 
-            // yamuiLabel3
-            // 
-            this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Location = new System.Drawing.Point(41, 101);
-            this.yamuiLabel3.Name = "yamuiLabel3";
-            this.yamuiLabel3.Size = new System.Drawing.Size(189, 15);
-            this.yamuiLabel3.TabIndex = 21;
-            this.yamuiLabel3.Text = "Database connection informations";
-            // 
-            // yamuiLabel2
-            // 
-            this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Location = new System.Drawing.Point(41, 220);
-            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3, 8, 3, 0);
-            this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(213, 15);
-            this.yamuiLabel2.TabIndex = 20;
-            this.yamuiLabel2.Text = "PROPATH (read from .ini then append)";
-            // 
             // multitextbox1
             // 
             this.multitextbox1.DisplayIcon = false;
             this.multitextbox1.Lines = new string[0];
-            this.multitextbox1.Location = new System.Drawing.Point(41, 154);
+            this.multitextbox1.Location = new System.Drawing.Point(190, 154);
             this.multitextbox1.MaxLength = 32767;
             this.multitextbox1.Multiline = true;
             this.multitextbox1.Name = "multitextbox1";
             this.multitextbox1.PasswordChar = '\0';
             this.multitextbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multitextbox1.SelectedText = "";
-            this.multitextbox1.Size = new System.Drawing.Size(431, 55);
+            this.multitextbox1.Size = new System.Drawing.Size(499, 45);
             this.multitextbox1.TabIndex = 15;
             this.multitextbox1.WaterMark = "Appended to the .pf file";
             // 
@@ -440,27 +517,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.multibox2.DisplayIcon = false;
             this.multibox2.Lines = new string[0];
-            this.multibox2.Location = new System.Drawing.Point(41, 264);
+            this.multibox2.Location = new System.Drawing.Point(190, 236);
             this.multibox2.MaxLength = 32767;
             this.multibox2.Multiline = true;
             this.multibox2.Name = "multibox2";
             this.multibox2.PasswordChar = '\0';
             this.multibox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.multibox2.SelectedText = "";
-            this.multibox2.Size = new System.Drawing.Size(431, 55);
+            this.multibox2.Size = new System.Drawing.Size(499, 45);
             this.multibox2.TabIndex = 11;
-            this.multibox2.WaterMark = "Appended to the .ini PROPATH";
+            this.multibox2.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
             // 
             // textbox2
             // 
             this.textbox2.Lines = new string[0];
-            this.textbox2.Location = new System.Drawing.Point(41, 238);
+            this.textbox2.Location = new System.Drawing.Point(190, 210);
             this.textbox2.MaxLength = 32767;
             this.textbox2.Name = "textbox2";
             this.textbox2.PasswordChar = '\0';
             this.textbox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.textbox2.SelectedText = "";
-            this.textbox2.Size = new System.Drawing.Size(408, 20);
+            this.textbox2.Size = new System.Drawing.Size(499, 20);
             this.textbox2.TabIndex = 9;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
             // 
@@ -478,18 +555,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbEnvLetter
             // 
             this.cbEnvLetter.ItemHeight = 19;
-            this.cbEnvLetter.Location = new System.Drawing.Point(141, 25);
+            this.cbEnvLetter.Location = new System.Drawing.Point(205, 25);
             this.cbEnvLetter.Name = "cbEnvLetter";
-            this.cbEnvLetter.Size = new System.Drawing.Size(62, 25);
+            this.cbEnvLetter.Size = new System.Drawing.Size(51, 25);
             this.cbEnvLetter.TabIndex = 6;
             this.cbEnvLetter.SelectionChangeCommitted += new System.EventHandler(this.cbEnvLetter_SelectedIndexChanged);
             // 
             // cbAppli
             // 
             this.cbAppli.ItemHeight = 19;
-            this.cbAppli.Location = new System.Drawing.Point(41, 25);
+            this.cbAppli.Location = new System.Drawing.Point(30, 25);
             this.cbAppli.Name = "cbAppli";
-            this.cbAppli.Size = new System.Drawing.Size(94, 25);
+            this.cbAppli.Size = new System.Drawing.Size(169, 25);
             this.cbAppli.TabIndex = 3;
             this.cbAppli.SelectionChangeCommitted += new System.EventHandler(this.cbAppli_SelectedIndexChanged);
             // 
@@ -518,7 +595,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.mainPanel);
             this.Name = "SetEnvironment";
-            this.Size = new System.Drawing.Size(750, 600);
+            this.Size = new System.Drawing.Size(720, 550);
             this.mainPanel.ResumeLayout(false);
             this.mainPanel.PerformLayout();
             this.ResumeLayout(false);
@@ -535,11 +612,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiTextBox textbox2;
         private YamuiTextBox multibox2;
         private YamuiTextBox multitextbox1;
-        private YamuiLabel yamuiLabel3;
-        private YamuiLabel yamuiLabel2;
-        private YamuiLabel yamuiLabel7;
-        private YamuiLabel yamuiLabel6;
-        private YamuiLabel yamuiLabel5;
         private YamuiImageButton btright2;
         private YamuiImageButton btleft2;
         private YamuiImageButton btright1;
@@ -559,10 +631,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiImageButton btright6;
         private YamuiImageButton btleft6;
         private YamuiTextBox textbox6;
-        private YamuiLabel yamuiLabel8;
         private YamuiButton btcontrol2;
         private YamuiButton btcontrol1;
         private HtmlToolTip toolTip;
         private YamuiImageButton btDownload;
+        private YamuiToggle tgCompilLocl;
+        private YamuiTextBox multibox3;
+        private YamuiLabel lblLocally;
+        private HtmlLabel htmlLabel1;
+        private HtmlLabel htmlLabel2;
+        private HtmlLabel htmlLabel3;
+        private HtmlLabel htmlLabel4;
+        private HtmlLabel htmlLabel5;
+        private HtmlLabel htmlLabel6;
+        private HtmlLabel htmlLabel7;
     }
 }

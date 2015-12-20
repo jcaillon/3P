@@ -32,6 +32,10 @@ namespace YamuiFramework.Controls
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
+
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public bool NoTransparentBackground { get; set; }
         #endregion
 
         #region Paint
@@ -57,7 +61,7 @@ namespace YamuiFramework.Controls
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                if (DesignMode) {
+                if (NoTransparentBackground || DesignMode) {
                     e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
                     return;
                 }

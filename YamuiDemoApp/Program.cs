@@ -33,22 +33,22 @@ namespace YamuiDemoApp {
         static void Main() {
             
 
-            //------------
-            var watch = Stopwatch.StartNew();
-            //------------
+            ////------------
+            //var watch = Stopwatch.StartNew();
+            ////------------
 
-            CompilationPath.Import();
+            //CompilationPath.Import();
 
-            //--------------
-            watch.Stop();
-            MessageBox.Show(watch.ElapsedMilliseconds.ToString());
-            //------------
+            ////--------------
+            //watch.Stop();
+            //MessageBox.Show(watch.ElapsedMilliseconds.ToString());
+            ////------------
 
-            var derp = CompilationPath.GetCompilationDirectory(@"D:\Repo\3P\3PA\Data\ProgressEnvironnement.xml");
+            //var derp = CompilationPath.GetCompilationDirectory(@"D:\Repo\3P\3PA\Data\ProgressEnvironnement.xml");
 
 
 
-            return;
+            //return;
 
             ParserLexerTests.Run();
 

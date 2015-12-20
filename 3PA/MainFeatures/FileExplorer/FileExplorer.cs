@@ -114,7 +114,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 pszName = AssemblyInfo.ProductTitle + " - File explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.code_explorer_logo).Handle,
+                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
                 pszModuleName = AssemblyInfo.ProductTitle
             };
 
@@ -142,6 +142,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void StartSearch() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 if (ExplorerForm == null) return;
                 ExplorerForm.FileExplorerPage.ClearFilter();
                 ExplorerForm.FileExplorerPage.GiveFocustoTextBox();

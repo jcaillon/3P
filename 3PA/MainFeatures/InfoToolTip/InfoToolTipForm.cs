@@ -55,28 +55,42 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (Visible)
                 Cloack();
 
+            var screen = Npp.GetNppScreen();
+
             // find max height taken by the html
-            Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
+            labelContent.Width = screen.WorkingArea.Width / 2;
             labelContent.Text = content;
-            var prefHeight = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 2) + 10;
+            var prefHeight = Math.Min(labelContent.Height, (screen.WorkingArea.Height / 2) - 10) + 10;
 
             // now we got the final height, resize width until height changes
             int j = 0;
-            int detla = 100;
-            int curWidth = Width;
+            int detla = 50;
+            int curWidth = labelContent.Width;
             do {
                 curWidth -= detla;
-                Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 2, curWidth);
+                labelContent.Width = Math.Min(screen.WorkingArea.Width / 2, curWidth);
                 labelContent.Text = content;
                 if (labelContent.Height > prefHeight) {
-                //if (labelContent.Height > curWidth * 2 / 3) {
                     curWidth += detla;
                     detla /= 2;
                 }
                 j++;
-            } while (j < 10);
-            Width = curWidth < 50 ? 150 : curWidth;
-            Height = Math.Min(labelContent.Height, Screen.PrimaryScreen.WorkingArea.Height / 2) + 10;
+            } while (j < 20);
+            labelContent.Width = curWidth < 50 ? 150 : curWidth;
+            var neededHeight = labelContent.Height;
+
+            Width = labelContent.Width + 10;
+            Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 10) + 10;
+
+            // Too tall?
+            if (neededHeight > (screen.WorkingArea.Height / 2) - 10) {
+                panel.AutoScroll = true;
+                panel.VerticalScrollbar = true;
+                panel.HorizontalScrollbar = false;
+                Width = Width + 10;
+            } else {
+                panel.AutoScroll = false;
+            }
         }
 
         /// <summary>
@@ -89,10 +103,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _position = position;
             _lineHeight = lineHeight;
 
+            var screen = Npp.GetNppScreen();
+
             // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + Screen.PrimaryScreen.WorkingArea.Width / 2)
+            if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
                 position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + Screen.PrimaryScreen.WorkingArea.Height / 2)
+            if (position.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2)
                 position.Y = position.Y - Height - lineHeight;
             Location = position;
         }
@@ -108,13 +124,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _rect = rect;
             _reversed = reversed;
 
+            var screen = Npp.GetNppScreen();
+
             var position = new Point(0, 0);
             // position the window smartly
             if (reversed)
                 position.Y = (rect.Y + rect.Height) - Height;
             else
                 position.Y = rect.Y;
-            if (rect.X > (Screen.PrimaryScreen.WorkingArea.Width - (rect.X + rect.Width)))
+            if (rect.X > (screen.WorkingArea.Width - (rect.X + rect.Width)))
                 position.X = rect.X - Width;
             else
                 position.X = rect.X + rect.Width;

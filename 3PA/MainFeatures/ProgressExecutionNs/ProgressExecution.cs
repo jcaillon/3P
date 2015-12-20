@@ -126,7 +126,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Creates a progress execution environnement, to compile or run the current program
         /// </summary>
         public ProgressExecution() {
-            FullFilePathToExecute = Npp.GetCurrentFilePath();
+            FullFilePathToExecute = Plug.CurrentFilePath;
             _isCurrentFile = true;
         }
 
@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public bool Do(ExecutionType executionType) {
             // check info
             if (executionType != ExecutionType.Database) {
-                if (_isCurrentFile && !Abl.IsCurrentProgressFile()) {
+                if (_isCurrentFile && !Abl.IsCurrentFileFromAppBuilder()) {
                     UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning,
                         "Invalid file type", "Progress files only", 10);
                     return false;

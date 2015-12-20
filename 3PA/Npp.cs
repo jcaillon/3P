@@ -116,6 +116,16 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns the screen on which npp is displayed
+        /// </summary>
+        /// <returns></returns>
+        public static Screen GetNppScreen() {
+            Rectangle output = new Rectangle();
+            Win32.GetWindowRect(HandleNpp, ref output);
+            return Screen.FromPoint(output.Location);
+        }
+
+        /// <summary>
         ///     Get the IWin32Window of the Npp window
         ///     Must be used as an input for forms.Show() in order to link the create form to the Npp window
         ///     if the user switches applications, the dialog hides with Notepad++
@@ -181,6 +191,9 @@ namespace _3PA {
         /// </summary>
         public static void GoBackFromDefinition() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 if (_goToHistory.Count > 0) {
                     var lastPoint = _goToHistory.Pop();
                     Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y, false);

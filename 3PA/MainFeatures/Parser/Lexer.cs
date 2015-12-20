@@ -45,6 +45,7 @@ namespace _3PA.MainFeatures.Parser {
         private int _tokenPos;
         private List<Token> _tokenList = new List<Token>();
         private bool _forceCreateEos;
+        private bool _previousTokenIsString;
 
         /// <summary>
         /// constructor, data is the input string to tokenize
@@ -85,6 +86,8 @@ namespace _3PA.MainFeatures.Parser {
             do {
                 token = GetNext();
                 _tokenList.Add(token);
+
+                _previousTokenIsString = token is TokenString;
 
                 // in certain cases, we want to add an extra end of statement token!
                 if (_forceCreateEos)
@@ -270,10 +273,16 @@ namespace _3PA.MainFeatures.Parser {
                 case '\'':
                     // quoted string (read until unescaped ' or ")
                     return CreateStringToken(ch);
-                
                 case ':':
-                    // end of statement (: or . followed by any space/new line char)
-                    return (char.IsWhiteSpace(PeekAt(1))) ? CreateEosToken() : CreateSymbolToken();
+                    // end of statement (if followed by any space/new line char) or a string descriptor
+                    if (_previousTokenIsString) {
+                        // EOS
+                        if (char.IsWhiteSpace(PeekAt(1)))
+                            return CreateEosToken();
+                        // Descriptor
+                        return CreateStringDescriptorToken();
+                    }
+                    return CreateSymbolToken();
                 case '.':
                     return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
 
@@ -493,7 +502,26 @@ namespace _3PA.MainFeatures.Parser {
                     Read();
                 Read();
             }
-            return new TokenQuotedString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+        }
+
+        /// <summary>
+        /// A character-string in progress can be described with different properties :
+        /// "characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]
+        /// </summary>
+        /// <returns></returns>
+        private Token CreateStringDescriptorToken() {
+            Read();
+            while (true) {
+                var ch = PeekAt(0);
+                if (ch == Eof)
+                    break;
+                // we don't care if the descriptor is valid or not, just read while it's a letter or digit
+                if (!char.IsLetterOrDigit(ch))
+                    break;
+                Read();
+            }
+            return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
     }
 }

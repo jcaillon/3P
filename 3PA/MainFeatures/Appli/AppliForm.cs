@@ -55,6 +55,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenuTab("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
                 new YamuiMainMenuTab("Options", "options", false, new List<YamuiSecMenuTab> {
+                    new YamuiSecMenuTab("FEATURES", "features", new OptionPage()),
                     new YamuiSecMenuTab("APPEARANCES", "appearances", new SettingAppearance())
                 }),
                 new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {

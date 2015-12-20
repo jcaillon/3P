@@ -19,24 +19,43 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Data;
 using _3PA.MainFeatures;
-using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.Lib {
     /// <summary>
     /// </summary>
     public static class Utils {
+
+        #region Prevent spam! That's for CCL
+
+        private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
+
+        public static bool IsSpamming(string featureName, int minIntervalInMilliseconds) {
+            // first use, no problem
+            if (!_registeredEvents.ContainsKey(featureName)) {
+                _registeredEvents.Add(featureName, DateTime.Now);
+                return false;
+            }
+            // minimum interval not respected
+            if (DateTime.Now.Subtract(_registeredEvents[featureName]).Milliseconds < minIntervalInMilliseconds) {
+                _registeredEvents[featureName] = DateTime.Now;
+                return true;
+            }
+            _registeredEvents[featureName] = DateTime.Now;
+            return false;
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Delete a dir, recursively

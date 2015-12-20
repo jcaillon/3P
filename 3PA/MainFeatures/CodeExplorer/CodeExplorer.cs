@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 pszName = AssemblyInfo.ProductTitle + " - Code explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint)Utils.GetIconFromImage(ImageResources.code_explorer_logo).Handle,
+                hIconTab = (uint)Utils.GetIconFromImage(ImageResources.CodeExplorerLogo).Handle,
                 pszModuleName = AssemblyInfo.ProductTitle
             };
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));

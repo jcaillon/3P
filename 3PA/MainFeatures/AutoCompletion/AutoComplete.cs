@@ -321,6 +321,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 ParseCurrentDocument();
                 _openedFromShortCut = true;
                 _openedFromShortCutPosition = Npp.CurrentPosition;
@@ -498,7 +501,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
-                if (Config.Instance.AutocompleteReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
+                if (Config.Instance.CodeReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
                     var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
                     replacementText = fullKeyword ?? data.DisplayText;
                 }

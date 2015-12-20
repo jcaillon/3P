@@ -158,7 +158,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 // if this document is in the Saved parsed visitors, we remove it because it might change so
                 // we want to re parse it later
-                var currentFilePath = Npp.GetCurrentFilePath();
+                var currentFilePath = Plug.CurrentFilePath;
                 if (SavedParserVisitors.ContainsKey(currentFilePath))
                     SavedParserVisitors.Remove(currentFilePath);
 

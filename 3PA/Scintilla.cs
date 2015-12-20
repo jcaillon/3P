@@ -2603,21 +2603,20 @@ namespace _3PA {
             }
 
             /// <summary>
-            ///     Gets or sets the end position of the selection.
+            ///     Gets or sets the end position of the selection, regardeless of wheter it's the anchor or the caret
             /// </summary>
             /// <returns>The zero-based document position where the selection ends.</returns>
             public int End {
                 get {
-                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNEND, new IntPtr(Index)).ToInt32();
-                    if (pos <= 0)
-                        return pos;
-
-                    return Lines.ByteToCharPosition(pos);
+                    var carPos = Caret;
+                    var ancPos = Anchor;
+                    return carPos < ancPos ? ancPos : carPos;
                 }
                 set {
-                    value = Clamp(value, 0, TextLength);
-                    value = Lines.CharToBytePosition(value);
-                    Sci.Send(SciMsg.SCI_SETSELECTIONNEND, new IntPtr(Index), new IntPtr(value));
+                    if (Caret > Anchor)
+                        Caret = value;
+                    else
+                        Anchor = value;
                 }
             }
 
@@ -2633,16 +2632,15 @@ namespace _3PA {
             /// <returns>The zero-based document position where the selection starts.</returns>
             public int Start {
                 get {
-                    var pos = Sci.Send(SciMsg.SCI_GETSELECTIONNSTART, new IntPtr(Index)).ToInt32();
-                    if (pos <= 0)
-                        return pos;
-
-                    return Lines.ByteToCharPosition(pos);
+                    var carPos = Caret;
+                    var ancPos = Anchor;
+                    return carPos > ancPos ? ancPos : carPos;
                 }
                 set {
-                    value = Clamp(value, 0, TextLength);
-                    value = Lines.CharToBytePosition(value);
-                    Sci.Send(SciMsg.SCI_SETSELECTIONNSTART, new IntPtr(Index), new IntPtr(value));
+                    if (Caret < Anchor)
+                        Caret = value;
+                    else
+                        Anchor = value;
                 }
             }
 

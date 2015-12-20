@@ -441,7 +441,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         /// <param name="elementId">the id of the element to get its rectangle</param>
         /// <returns>the rectangle of the element or null if not found</returns>
-        public virtual RectangleF? GetElementRectangle(string elementId)
+        public RectangleF? GetElementRectangle(string elementId)
         {
             return _htmlContainer != null ? _htmlContainer.GetElementRectangle(elementId) : null;
         }

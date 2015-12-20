@@ -176,7 +176,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // a run file has the keyword PERSISTENT
         LoadPersistent = 32,
         // a proc or func was loaded in persistent
-        Persistent = 64
+        Persistent = 64,
+        // private proc
+        Private = 128,
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {

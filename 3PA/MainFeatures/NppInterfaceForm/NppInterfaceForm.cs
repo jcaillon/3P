@@ -107,9 +107,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             // move this to an invisible part of the screen, otherwise we can see this window
             // if another window with Opacity <1 is in front Oo
-            var pt = Screen.PrimaryScreen.WorkingArea.Location;
-            pt.Offset(new Point(-Width, -Height));
-            Location = pt;
+            Location = new Point(-10000, 0);
         }
 
         /// <summary>

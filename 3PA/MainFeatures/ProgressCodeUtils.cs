@@ -42,6 +42,9 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void GoToDefinition() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
                 if (InfoToolTip.InfoToolTip.IsVisible) {
                     if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
@@ -97,72 +100,77 @@ namespace _3PA.MainFeatures {
         #region Toggle comment
 
         /// <summary>
-        /// Toggle comments on and off on selected lines
+        /// If no selection, comment the line of the caret
+        /// If selection, comment the selection as a block
         /// </summary>
         public static void ToggleComment() {
             try {
-                int mode = 0; // 0: null, 1: toggle off; 2: toggle on
-                var startLine = Npp.LineFromPosition(Npp.SelectionStart);
-                var endLine = Npp.LineFromPosition(Npp.SelectionEnd);
+                if (!Plug.AllowFeatureExecution())
+                    return;
 
                 Npp.BeginUndoAction();
 
-                // for each line in the selection
-                for (int iLine = startLine; iLine <= endLine; iLine++) {
-                    var thisLine = new Npp.Line(iLine);
-                    var startPos = thisLine.IndentationPosition;
-                    var endPos = thisLine.EndPosition;
+                // for each selection (limit selection number)
+                for (var i = 0; i < Npp.Selection.Count; i++) {
+                    var selection = Npp.GetSelection(i);
 
-                    // the line is essentially empty
-                    if ((endPos - startPos) == 0) {
-                        // only one line selected, 
-                        if (startLine == endLine) {
-                            Npp.SetTextByRange(startPos, startPos, "/*  */");
-                            Npp.SetSel(startPos + 3);
-                        }
-                        continue;
-                    }
-
-                    // line is surrounded by /* */
-                    if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
-                        if (mode == 0) mode = 1; // toggle off
-
-                        // add /* */ ?
-                        if (mode == 2 && (endPos - 4 - startPos) > 0) {
-
-                            Npp.SetTextByRange(endPos, endPos, "*/");
-                            Npp.SetTextByRange(startPos, startPos, "/*");
-                        } else {
-                            // delete /* */
-                            Npp.SetTextByRange(endPos - 2, endPos, string.Empty);
-                            Npp.SetTextByRange(startPos, startPos + 2, string.Empty);
-                        }
-
+                    int startPos;
+                    int endPos;
+                    bool singleLineComm = false;
+                    if (selection.Caret == selection.Anchor) {
+                        // comment line
+                        var thisLine = new Npp.Line(Npp.LineFromPosition(selection.Caret));
+                        startPos = thisLine.IndentationPosition;
+                        endPos = thisLine.EndPosition;
+                        singleLineComm = true;
                     } else {
-                        if (mode == 0) mode = 2; // toggle on
+                        startPos = selection.Start;
+                        endPos = selection.End;
+                    }
 
-                        // there are no /* */ but we need to put some
-                        if (mode == 2) {
-                            Npp.SetTextByRange(endPos, endPos, "*/");
-                            Npp.SetTextByRange(startPos, startPos, "/*");
-                        }
+                    var toggleMode = ToggleCommentOnRange(startPos, endPos);
+                    if (toggleMode == 3)
+                        selection.SetPosition(startPos + 3);
+
+                    // correct selection...
+                    if (!singleLineComm && toggleMode == 2) {
+                        selection.End += 2;
                     }
                 }
 
-                // correct selection...
-                if (mode == 2) {
-                    if (Npp.SelectionEnd - Npp.SelectionStart > 0) {
-                        if (Npp.AnchorPosition > Npp.CurrentPosition)
-                            Npp.SetSel(Npp.SelectionEnd + 2, Npp.SelectionStart);
-                        else
-                            Npp.SetSel(Npp.SelectionStart, Npp.SelectionEnd + 2);
-                    }
-                }
+
 
                 Npp.EndUndoAction();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when commenting");
             }
+        }
+
+        /// <summary>
+        /// Toggle comment on the specified range, returns a value indicating what has been done
+        /// 0: null, 1: toggle off; 2: toggle on, 3: added
+        /// </summary>
+        /// <param name="startPos"></param>
+        /// <param name="endPos"></param>
+        /// <returns></returns>
+        private static int ToggleCommentOnRange(int startPos, int endPos) {
+            // the line is essentially empty
+            if ((endPos - startPos) == 0) {
+                Npp.SetTextByRange(startPos, startPos, "/*  */");
+                return 3;
+            }
+
+            // line is surrounded by /* */
+            if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
+                // delete /* */
+                Npp.SetTextByRange(endPos - 2, endPos, string.Empty);
+                Npp.SetTextByRange(startPos, startPos + 2, string.Empty);
+                return 1;
+            }
+
+            Npp.SetTextByRange(endPos, endPos, "*/");
+            Npp.SetTextByRange(startPos, startPos, "/*");
+            return 2;
         }
 
         #endregion
@@ -174,6 +182,9 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void Open4GlHelp() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 // get path
                 if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
                     if (File.Exists(ProgressEnv.Current.ProwinPath)) {
@@ -209,7 +220,12 @@ namespace _3PA.MainFeatures {
         /// Check current file syntax
         /// </summary>
         public static void CheckSyntaxCurrent() {
-            try { StartProgressExec(ExecutionType.CheckSyntax); } catch (Exception e) {
+            try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
+                StartProgressExec(ExecutionType.CheckSyntax);
+            } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in CheckSyntaxCurrent");
             }
         }
@@ -218,7 +234,12 @@ namespace _3PA.MainFeatures {
         /// Compile the current file
         /// </summary>
         public static void CompileCurrent() {
-            try { StartProgressExec(ExecutionType.Compile); } catch (Exception e) {
+            try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
+                StartProgressExec(ExecutionType.Compile);
+            } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in CompileCurrent");
             }
         }
@@ -227,7 +248,12 @@ namespace _3PA.MainFeatures {
         /// Run the current file
         /// </summary>
         public static void RunCurrent() {
-            try { StartProgressExec(ExecutionType.Run); } catch (Exception e) {
+            try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
+                StartProgressExec(ExecutionType.Run);
+            } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RunCurrent");
             }
         }
@@ -327,6 +353,12 @@ namespace _3PA.MainFeatures {
                     if (!string.IsNullOrEmpty(lastExec.DotRPath) && !string.IsNullOrEmpty(lastExec.LstPath)) {
                         var success = true;
                         var targetDir = CompilationPath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
+
+                        // compile locally?
+                        if (Config.Instance.GlobalCompileFilesLocally) {
+                            targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
+                        }
+
                         var targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.DotRPath));
                         try {
                             File.Delete(targetFile);

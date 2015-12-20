@@ -95,6 +95,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (position < 0)
                 return;
 
+            // check caret context, dont display a tooltip for comments
+            var curContext = (UdlStyles) Npp.GetStyleAt(position);
+            if (curContext == UdlStyles.Comment || curContext == UdlStyles.Delimiter8)
+                return;
+
             // sets the tooltip content
             var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
             if (data != null && data.Count > 0)
@@ -220,7 +225,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             //if (data == null) return;
 
             // general stuff
-            toDisplay.Append("<div class='InfoToolTip'>");
+            toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
             toDisplay.Append(@"
                 <table width='100%' class='ToolTipName'>
                     <tr style='vertical-align: top;'>
@@ -372,7 +377,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
                             // synthax
                             if (dataHelp.Synthax.Count >= 1 && !string.IsNullOrEmpty(dataHelp.Synthax[0])) {
-                                toDisplay.Append(FormatSubtitle("SYNTHAX"));
+                                toDisplay.Append(FormatSubtitle("SYNTAX"));
                                 toDisplay.Append(@"<div class='ToolTipcodeSnippet'>");
                                 var i = 0;
                                 foreach (var synthax in dataHelp.Synthax) {
@@ -434,7 +439,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (data.FromParser) {
                 toDisplay.Append(FormatSubtitle("ORIGINS"));
                 toDisplay.Append(FormatRow("Scope name", data.ParsedItem.OwnerName));
-                if (!Npp.GetCurrentFilePath().Equals(data.ParsedItem.FilePath))
+                if (!Plug.CurrentFilePath.Equals(data.ParsedItem.FilePath))
                     toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + data.ParsedItem.FilePath + "'>" + data.ParsedItem.FilePath + "</a>"));
             }
 

@@ -43,16 +43,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             _filePath = Path.Combine(Location, _fileName);
             if (_listOfEnv.Count == 0) {
                 if (!File.Exists(_filePath)) {
-                    if (Config.Instance.UserFromSopra) {
-                        try {
-                            Object2Xml<ProgressEnvironnement>.LoadFromString(_listOfEnv, DataResources.ProgressEnvironnement);
-                        } catch (Exception e) {
-                            ErrorHandler.ShowErrors(e, "Error when loading ProgressEnvironnement.xml", _filePath);
-                        }
-                    }
-                    if (_listOfEnv == null || _listOfEnv.Count == 0) {
-                        _listOfEnv = new List<ProgressEnvironnement>();
-                    }
+                    _listOfEnv = new List<ProgressEnvironnement>();
                 } else
                     Object2Xml<ProgressEnvironnement>.LoadFromFile(_listOfEnv, _filePath);
             }

@@ -20,6 +20,8 @@
 
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -82,6 +84,7 @@ namespace _3PA {
         }
 
         #region Current file info
+        // We don't want to recompute those values all the time so we store them when the buffer (document) changes
 
         /// <summary>
         /// true if the current file is a progress file, false otherwise
@@ -127,7 +130,7 @@ namespace _3PA {
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
             menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
-            menu.SetCommand("Format document", FileExplorer.StartSearch, "Format_document:Ctrl+I", false);
+            menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
             //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
 
             menu.SetSeparator();
@@ -150,7 +153,7 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            //menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+            menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
 
             //menu.SetSeparator();
 
@@ -307,10 +310,8 @@ namespace _3PA {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
-            if (!PluginIsFullyLoaded) return;
-
-            // only do stuff if we are in a progress file
-            if (!IsCurrentFileProgress) return;
+            if(!AllowFeatureExecution(0))
+                return;
 
             Modifiers modifiers;
 
@@ -474,14 +475,14 @@ namespace _3PA {
                     }
 
                     // replace abbreviation by completekeyword
-                    if (Config.Instance.AutocompleteReplaceAbbreviations) {
+                    if (Config.Instance.CodeReplaceAbbreviations) {
                         var fullKeyword = Keywords.GetFullKeyword(keyword);
                         if (fullKeyword != null)
                             replacementWord = fullKeyword;
                     }
 
                     // replace the last keyword by the correct case
-                    if (replacementWord == null && Config.Instance.AutoCompleteChangeCaseMode != 0) {
+                    if (replacementWord == null && Config.Instance.CodeChangeCaseMode != 0) {
                         var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
                         if (casedKeyword != null)
                             replacementWord = casedKeyword;
@@ -493,7 +494,7 @@ namespace _3PA {
 
 
                 // replace semicolon by a point
-                if (c == ';' && Config.Instance.AutoCompleteReplaceSemicolon && isNormalContext)
+                if (c == ';' && Config.Instance.CodeReplaceSemicolon && isNormalContext)
                     Npp.ModifyTextAroundCaret(-1, 0, ".");
 
                 // handles the autocompletion
@@ -547,7 +548,6 @@ namespace _3PA {
         /// Called when the user switches tab document
         /// </summary>
         public static void OnDocumentSwitched() {
-
             // update current file info
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
             CurrentFilePath = Npp.GetCurrentFilePath();
@@ -595,7 +595,7 @@ namespace _3PA {
                 if (warningMessage.Length > 0) {
                     warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                     warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
-                    var curPath = Npp.GetCurrentFilePath();
+                    var curPath = Plug.CurrentFilePath;
                     UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                         Npp.Goto(curPath, int.Parse(args.Link));
                     }, 20);
@@ -644,11 +644,33 @@ namespace _3PA {
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
                 Npp.AnnotationVisible = Annotation.Boxed;
                 Npp.UseTabs = false;
-                Npp.IndentWidth = Config.Instance.AutoCompleteIndentNbSpaces;
+                Npp.IndentWidth = Config.Instance.CodeIndentNb;
             }
         }
 
         #endregion
+
+        /// <summary>
+        /// This method needs to be called by each function that the user can trigger, to check if he has the possibility to execute it,n
+        /// Set "spamInterval" to a value in milliseconds, if the user called this feature less that x ms ago, it will
+        /// not allow the execution and return false (set to 0 to disable spam check)
+        /// </summary>
+        /// <returns></returns>
+        public static bool AllowFeatureExecution(int spamInterval = 100) {
+
+            // Prevent the user from spamming the keys
+            if (spamInterval > 0) {
+                var method = new StackFrame(1).GetMethod();
+                if (Utils.IsSpamming(method.DeclaringType + method.Name, spamInterval))
+                    return false;
+            }
+
+            // correct info since it doesn't cost too much here (can be wrong when creating a new file, saving as .p, since the buffer didn't change we didn't execute the OnDocumentSwitched method)
+            if (!CurrentFilePath.EqualsCi(Npp.GetCurrentFilePath()))
+                OnDocumentSwitched();
+
+            return PluginIsFullyLoaded && IsCurrentFileProgress;
+        }
 
         /// <summary>
         /// Call this method to close all popup/autocompletion form and alike
@@ -670,12 +692,13 @@ namespace _3PA {
 
         #endregion
 
+        #region private
+
+        #endregion
+
         #region tests
 
         public static void Test() {
-
-
-            return;
 
 
             var canIndent = ParserHandler.CanIndent();
@@ -692,19 +715,8 @@ namespace _3PA {
                 File.WriteAllText(Path.Combine(TempDir, "lines.log"), x.ToString());
             }
 
-            var properties = typeof(ConfigObject).GetFields();
 
-            /* loop through fields */
-            foreach (var property in properties) {
-                if (property.IsPrivate) continue;
 
-                var listCustomAttr = property.GetCustomAttributes(typeof(DisplayAttribute), false);
-                if (listCustomAttr.Any()) {
-                    var displayAttr = (DisplayAttribute)listCustomAttr.FirstOrDefault();
-                }
-            }
-
-            FileTag.UnCloak();
 
             //var x = 0;
             //var y = 1/x;

@@ -54,9 +54,13 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
-        public void Visit(TokenQuotedString tok) {
+        public void Visit(TokenString tok) {
             if (tok.Line < FromLine || tok.Line > ToLine) return;
             //Npp.StyleText((int)TextStyle.String, tok.StartPosition, tok.EndPosition);
+        }
+
+        public void Visit(TokenStringDescriptor tok) {
+            throw new System.NotImplementedException();
         }
 
         public void Visit(TokenSymbol tok) {

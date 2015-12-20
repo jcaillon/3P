@@ -33,6 +33,9 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ToggleView() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 // create the form
                 if (!_hasBeenShownOnce) {
                     _hasBeenShownOnce = true;
@@ -78,7 +81,7 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void GoToOptionPage() {
             try {
-                GoToPage("options");
+                GoToPage("features");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
             }

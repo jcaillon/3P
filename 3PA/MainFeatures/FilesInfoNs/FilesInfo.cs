@@ -231,7 +231,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// returns true if it actually cleared something, false it there was no errors
         /// </summary>
         public static bool ClearAllErrors() {
-            var currentFilePath = Npp.GetCurrentFilePath();
+            var currentFilePath = Plug.CurrentFilePath;
             if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
                 _sessionInfo[currentFilePath].FileErrors.Clear();
                 DisplayCurrentFileInfo();
@@ -247,7 +247,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// </summary>
         /// <param name="line"></param>
         public static bool ClearError(int line) {
-            var currentFilePath = Npp.GetCurrentFilePath();
+            var currentFilePath = Plug.CurrentFilePath;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return false;
             bool jobDone = false;
@@ -271,7 +271,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// When the user click the error margin but no error is cleaned, it goes to the next line with error instead
         /// </summary>
         public static void GoToNextError(int line) {
-            var currentFilePath = Npp.GetCurrentFilePath();
+            var currentFilePath = Plug.CurrentFilePath;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;
             int nextLine = Npp.GetLine(line).MarkerNext(EveryMarkersMask);
@@ -290,7 +290,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// Go to the previous error
         /// </summary>
         public static void GoToPrevError(int line) {
-            var currentFilePath = Npp.GetCurrentFilePath();
+            var currentFilePath = Plug.CurrentFilePath;
             var nbLines = Npp.Line.Count;
             if (!_sessionInfo.ContainsKey(currentFilePath))
                 return;

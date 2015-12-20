@@ -76,8 +76,12 @@ namespace _3PA.MainFeatures {
             if (Log(message + "\r\n" + e)) {
                 Task.Factory.StartNew(() => {
                     try {
-                        if (Config.Instance.LogError)
-                            UserCommunication.SendIssue(File.ReadAllText(PathErrorToSend), Config.SendLogUrl);
+                        if (Config.Instance.LogError) {
+                            if (UserCommunication.SendIssue(File.ReadAllText(PathErrorToSend), Config.SendLogUrl)) {
+                                if (File.Exists(PathErrorToSend))
+                                    File.Delete(PathErrorToSend);
+                            }
+                        }
                     } catch (Exception exception) {
                         Log(exception.ToString());
                     }

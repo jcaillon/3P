@@ -23,9 +23,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
-using System.Text;
 using _3PA.Html;
 using _3PA.Lib;
+// ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
 
@@ -41,91 +41,271 @@ namespace _3PA.MainFeatures {
         //[StringLength(15)]
         //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
 
-        [Display(
-            Name = "User trigram", 
-            Description = "This is your user trigram duh", 
-            GroupName = "")]
-        public string UserTrigram = LocalEnv.Instance.GetTrigramFromPa();
+        #region GENERAL
 
-        // is the user from SOPRA?
-        public bool UserFromSopra = !string.IsNullOrEmpty(LocalEnv.Instance.GetTrigramFromPa());
+        /// <summary>
+        /// GENERAL
+        /// </summary>
 
-        public bool UserFirstUse = true;
-        public bool UserGetsPreReleases = true;
+        [Display(Name = "Application focused opacity",
+            Description = "Set the opacity that the main application window will have when activated",
+            GroupName = "General",
+            AutoGenerateField = true)]
+        [Range(0, 1)]
+        public double AppliOpacityUnfocused = 1;
 
+        [Display(Name = "Use default values in file info",
+            Description = "Set to true and the <b>default</b> option will be selected when you open a new file info, set to false and the option <b>last values</b> will be selected",
+            GroupName = "General",
+            AutoGenerateField = false)]
         public bool UseDefaultValuesInsteadOfLastValuesInEditTags = false;
 
+        [Display(Name = "Allow tab animation",
+            Description = "Allow the main application window to animate the transition between pages with a fade in / fade out animation",
+            GroupName = "General",
+            AutoGenerateField = true)]
+        public bool AppliAllowTabAnimation = true;
+
+        [Display(Name = "Progress 4GL files extension list",
+            Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df";
+
+        [Display(Name = "Compilable files extension list",
+            Description = "A comma separated list of progress file extensions that can be compiled : <br>It is used to check if you can compile / check syntax / execute the current file",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public string GlobalCompilableExtension = ".p,.w,.t";
+
+        [Display(Name = "Npp openable extension",
+            Description = "A comma separated list of file extensions, describes the type of files that should be opened with notepad++ from the file explorer<br>If a file is associated to npp in the shell, it will also be opened with npp, no worries!",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public string GlobalNppOpenableExtension = ".txt,.boi";
+
+        [Display(Name = "Path to the help file",
+            Description = "Should point to the progress documentation file (lgrfeng.chm)",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public string GlobalHelpFilePath = "";
+
+        [Display(Name = "Always show a notification after a compilation",
+            Description = "Explicit",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public bool CompileAlwaysShowNotification = false;
+
+        [Display(Name = "Use alternate back color for lists",
+            Description = "Use alternate back color for the autocompletion, the code explorer, the file explorer and so on...",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public bool GlobalUseAlternateBackColorOnGrid = false;
+
+        [Display(Name = "Max number of characters in a block",
+            Description = "The appbuilder is limited in the number of character that a block (procedure, function...) can contain<br>This limit allows to show a warning when you overpass the limite in notepad++",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public int GlobalMaxNbCharInBlock = 31190;
+
+        public bool GlobalShowDetailedHelpForErrors = true;
+        public bool GlobalCompileFilesLocally = false;
+
+        #endregion
+
+        #region USER
+
+        /// <summary>
+        /// USER
+        /// </summary>
+
+        [Display(Name = "User name",
+            Description = "Used for modification tags",
+            GroupName = "User",
+            AutoGenerateField = false)]
+        public string UserName = LocalEnv.Instance.GetTrigramFromPa();
+
+        [Display(Name = "Get pre-release builds",
+            Description = "Check this option if you want to update 3P with the latest pre-release <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
+            GroupName = "User",
+            AutoGenerateField = false)]
+        public bool UserGetsPreReleases = true;
+
+        public bool UserFirstUse = true;
+
+        #endregion
+
+        #region AUTOCOMPLETION
+
+        /// <summary>
+        /// AUTOCOMPLETION
+        /// </summary>
+
+        [Display(Name = "Show autocompletion on key input",
+            Description = "Automatically show the autocompletion list when you start entering characters",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
+        public bool AutoCompleteOnKeyInputShowSuggestions = true;
+
+        [Display(Name = "Hide autocompletion if empty",
+            Description = "If the list was displayed automatically and there are no suggestions matching your input,<br>this option will automatically hide the list instead of showing it empty",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
+        public bool AutoCompleteOnKeyInputHideIfEmpty = true;
+
+        [Display(Name = "Start showing after X char",
+            Description = "If you chose to display the list on key input,<br> you can set the minimum number of char necessary before showing the list ",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
+        [Range(1, 99)]
         public int AutoCompleteStartShowingListAfterXChar = 1;
+
+        [Display(Name = "Use TAB to accept a suggestion",
+            Description = "Explicit",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         public bool AutoCompleteUseTabToAccept = true;
+
+        [Display(Name = "User ENTER to accept a suggestion",
+            Description = "Explicit",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         public bool AutoCompleteUseEnterToAccept = false;
 
-        public bool AutoCompleteReplaceSemicolon = true;
-        public bool AutoCompleteInsertEndAfterDo = true;
-
+        [Display(Name = "Show list in comments and strings",
+            Description = "Explicit",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         public bool AutoCompleteShowInCommentsAndStrings = false;
-        
-        [Range(0, 10)]
-        public int AutoCompleteIndentNbSpaces = 4;
 
+        [Display(Name = "Number of suggestions",
+            Description = "The number of suggestions shown in the list",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         [Range(3, 20)]
         public int AutoCompleteShowListOfXSuggestions = 12;
 
+        [Display(Name = "Unfocused opacity",
+            Description = "The opacity of the list when unfocused",
+            GroupName = "Auto-completion",
+            AutoGenerateField = true)]
         [Range(0, 1)]
         public double AutoCompleteUnfocusedOpacity = 0.92;
 
+        [Display(Name = "Focused opacity",
+            Description = "The opacity of the list when focused",
+            GroupName = "Auto-completion",
+            AutoGenerateField = true)]
         [Range(0, 1)]
         public double AutoCompleteFocusedOpacity = 0.92;
 
-        [Range(0, 3)]
-        public int AutoCompleteChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
-
-        public bool AutoCompleteOnKeyInputShowSuggestions = true;
-        public bool AutoCompleteOnKeyInputHideIfEmpty = true;
+        [Display(Name = "Insert current suggestion on word end",
+            Description = "You can check this option to automatically insert the currently selected suggestion<br>(if the list is opened)<br>when you enter any character that is not a letter/digit/_/-",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         public bool AutoCompleteInsertSelectedSuggestionOnWordEnd = true;
+
+        [Display(Name = "Hide list scroll bar",
+            Description = "Check to remove the scrollbar, you can still move up/down with arrow keys<br>and next/previous pages, this is only to have a prettier list in dark themes",
+            GroupName = "Auto-completion",
+            AutoGenerateField = false)]
         public bool AutoCompleteHideScrollBar = false;
-        public bool AutocompleteReplaceAbbreviations = true;
 
         public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
 
+        #endregion
+
+        #region Code edition
+
+        /// <summary>
+        /// CODE EDITION
+        /// </summary>
+
+        [Display(Name = "Auto replace semicolon",
+            Description = "Check to replace automatically ; by . <br><i>useful if you come from any other language!!!</i>",
+            GroupName = "Code edition",
+            AutoGenerateField = false)] 
+        public bool CodeReplaceSemicolon = true;
+
+        [Display(Name = "Indentation width",
+            Description = "The number of spaces that will be inserted when you press TAB and re-indent the code",
+            GroupName = "Code edition",
+            AutoGenerateField = false)]
+        [Range(0, 10)]
+        public int CodeIndentNb = 4;
+
+        [Display(Name = "Auto-case mode",
+            Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
+            GroupName = "Code edition",
+            AutoGenerateField = false)]
+        [Range(0, 3)]
+        public int CodeChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+
+        [Display(Name = "Auto replace abbreviations",
+            Description = "Automatically replaces abbreviations by their full lenght counterparts",
+            GroupName = "Code edition",
+            AutoGenerateField = false)]
+        public bool CodeReplaceAbbreviations = true;
+
+        #endregion
+
+
+        #region FILE EXPLORER
+
+        /// <summary>
+        /// FILE EXPLORER
+        /// </summary>
         public bool FileExplorerVisible = true;
+
+        [Display(Name = "Ignore unix hidden folder",
+            Description = "Check to ignore all the files/folders starting with a dot '.'",
+            GroupName = "File explorer",
+            AutoGenerateField = false)]
         public bool FileExplorerIgnoreUnixHiddenFolders = true;
 
+        #endregion
+
+        #region CODE EXPLORER
+
+        /// <summary>
+        /// CODE EXPLORER
+        /// </summary>
+
         public bool CodeExplorerVisible = true;
-        
         public string CodeExplorerPriorityList = "0,1,2,12,6,3,4,5,7,8,9,10,11";
         public bool CodeExplorerDisplayExternalItems = false;
 
-        [Range(0, 1)]
-        public double AppliOpacityUnfocused = 1;
-        public bool AppliAllowTabAnimation = true;
+        #endregion
 
+        #region TOOLTIP
+
+        /// <summary>
+        /// TOOLTIPS
+        /// </summary>
+
+        [Display(Name = "Idle time to spawn",
+            Description = "The amount of time in milliseconds that you have to left your<br>mouse over a word before it shows its tooltip",
+            GroupName = "Tooltip",
+            AutoGenerateField = true)]
         [Range(0, 5000)]
         public int ToolTipmsBeforeShowing = 500;
 
+        [Display(Name = "Opacity",
+            Description = "The tooltip opacity",
+            GroupName = "Tooltip",
+            AutoGenerateField = true)]
         [Range(0, 1)]
         public double ToolTipOpacity = 0.92;
 
+        [Display(Name = "Deactivate all tooltips",
+            Description = "Don't do that, it would be a shame to not use them!",
+            GroupName = "Tooltip",
+            AutoGenerateField = false)]
         public bool ToolTipDeactivate = false;
 
-        public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df";
-        public string GlobalCompilableExtension = ".p,.w,.t";
-        public string GlobalNppOpenableExtension = ".txt,.boi";
+        #endregion
 
-        public string GlobalHelpFilePath = "";
-
-        public bool CompileAlwaysShowNotification = false;
-
-        public bool GlobalUseAlternateBackColorOnGrid = false;
-
-        [Range(0, 1)]
-        public int GlobalCurrentEnvironnement = 0;
-
-        public int GlobalMaxNbCharInBlock = 31190;
-        public bool GlobalShowNotifAboutDefaultAutoComp = true;
-
-
-        public bool GlobalShowDetailedHelpForErrors = true;
-
+        // ENV
         public string EnvLastDbInfoUsed = "";
         public string EnvCurrentAppli = "";
         public string EnvCurrentEnvLetter = "";
@@ -137,7 +317,7 @@ namespace _3PA.MainFeatures {
         // THEMES
         public int ThemeId = 0;
         public Color AccentColor = ColorTranslator.FromHtml("#647687");
-        public int SyntaxHighlightThemeId = 1;       
+        public int SyntaxHighlightThemeId = 1;
 
         // SHORTCUTS
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
@@ -222,7 +402,7 @@ namespace _3PA.MainFeatures {
         private static FileSystemWatcher _configWatcher;
 
         private static void SetupFileWatcher() {
-            _configWatcher = new FileSystemWatcher(_location, _fileName) {NotifyFilter = NotifyFilters.LastWrite};
+            _configWatcher = new FileSystemWatcher(_location, _fileName) { NotifyFilter = NotifyFilters.LastWrite };
             _configWatcher.Changed += configWatcher_Changed;
         }
 

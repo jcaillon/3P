@@ -39,7 +39,6 @@ namespace _3PA.Lib {
         private const string RootString = "Root";
         private const string KeyString = "Key";
         private const string ValueString = "Value";
-        private const string PrefixToParentOfList = "List";
         private const string PrefixToParentOfDico = "Dico";
 
         #endregion

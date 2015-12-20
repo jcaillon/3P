@@ -26,40 +26,58 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
+            this.panel = new YamuiFramework.Controls.YamuiPanel();
             this.labelContent = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.panel.SuspendLayout();
             this.SuspendLayout();
+            // 
+            // panel
+            // 
+            this.panel.Controls.Add(this.labelContent);
+            this.panel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel.HorizontalScrollbarHighlightOnWheel = false;
+            this.panel.HorizontalScrollbarSize = 10;
+            this.panel.Location = new System.Drawing.Point(5, 5);
+            this.panel.Margin = new System.Windows.Forms.Padding(5);
+            this.panel.Name = "panel";
+            this.panel.Padding = new System.Windows.Forms.Padding(5);
+            this.panel.Size = new System.Drawing.Size(190, 190);
+            this.panel.TabIndex = 1;
+            this.panel.VerticalScrollbarHighlightOnWheel = false;
+            this.panel.VerticalScrollbarSize = 10;
             // 
             // labelContent
             // 
-            this.labelContent.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.labelContent.AutoSize = false;
             this.labelContent.AutoSizeHeightOnly = true;
-            this.labelContent.BackColor = System.Drawing.Color.Transparent;
+            this.labelContent.BackColor = System.Drawing.SystemColors.Window;
             this.labelContent.BaseStylesheet = null;
-            this.labelContent.Location = new System.Drawing.Point(5, 5);
+            this.labelContent.Location = new System.Drawing.Point(0, 0);
             this.labelContent.Name = "labelContent";
             this.labelContent.Size = new System.Drawing.Size(190, 15);
-            this.labelContent.TabIndex = 0;
-            this.labelContent.Text = "ok";
+            this.labelContent.TabIndex = 2;
+            this.labelContent.Text = "labelContent";
             // 
             // InfoToolTipForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(200, 200);
-            this.Controls.Add(this.labelContent);
+            this.Controls.Add(this.panel);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "InfoToolTipForm";
-            this.Padding = new System.Windows.Forms.Padding(1);
+            this.Padding = new System.Windows.Forms.Padding(5);
             this.Text = "";
+            this.panel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
+        private YamuiFramework.Controls.YamuiPanel panel;
         private HtmlLabel labelContent;
+
 
     }
 }

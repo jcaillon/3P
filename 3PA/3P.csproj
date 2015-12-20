@@ -90,6 +90,13 @@
     <Compile Include="Interop\DocumentLines.cs" />
     <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
+    <Compile Include="MainFeatures\Appli\Pages\Options\OptionPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\OptionPage.Designer.cs">
+      <DependentUpon>OptionPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\CodeBeautifier.cs" />
     <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
     <Compile Include="MainFeatures\ProgressExecutionNs\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
@@ -263,6 +270,9 @@
     <EmbeddedResource Include="MainFeatures\Appli\AppliForm.resx">
       <DependentUpon>AppliForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OptionPage.resx">
+      <DependentUpon>OptionPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\PageAbout.resx">
       <DependentUpon>PageAbout.cs</DependentUpon>
     </EmbeddedResource>
@@ -320,7 +330,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\ConfSopra\_CompilationPath.conf" />
     <None Include="Data\Keywords" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\Progress\DumpDatabase.p" />
@@ -328,7 +337,6 @@
     <None Include="Data\Snippets" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\ProgressEnvironnement.xml" />
     <Content Include="Data\SyntaxHighlighting.xml" />
     <Content Include="Data\UDL.xml">
       <SubType>Designer</SubType>
@@ -337,7 +345,9 @@
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
+    <Content Include="Images\Appli\Help.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
+    <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
@@ -370,7 +380,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
-    <Content Include="Images\DockableExplorer\code_explorer_logo.png" />
+    <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
     <Content Include="Images\DockableExplorer\Flag\LoadPersistent.png" />
@@ -412,6 +422,7 @@
     <Content Include="Images\FileExplorer\ExplorerDir1.png" />
     <Content Include="Images\FileExplorer\ExplorerDir2.png" />
     <Content Include="Images\FileExplorer\ExplorerDir3.png" />
+    <Content Include="Images\FileExplorer\FileExplorerLogo.png" />
     <Content Include="Images\FileExplorer\FolderType.png" />
     <Content Include="Images\FileExplorer\GetHelp.png" />
     <Content Include="Images\FileExplorer\IType.png" />

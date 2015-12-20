@@ -40,6 +40,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private const string AddNewStr = "Add new";
         private const string CancelStr = "Cancel";
 
+        private const string CompileLocallyTrue = "Compile to source directory";
+        private const string CompileLocallyFalse = "Compile to distant directory";
+
         private bool _isModifying;
 
         #endregion
@@ -77,11 +80,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             btcontrol2.ButtonPressed += (sender, args) => Btcontrol2ButtonPressed();
             btcontrol1.ButtonPressed += Btcontrol1ButtonPressed;
+            tgCompilLocl.CheckedChanged += TgCompilLoclOnCheckedChanged;
 
             // tooltips
             toolTip.SetToolTip(cbAppli, "<b>Select</b> the application to use");
             toolTip.SetToolTip(cbEnvLetter, "<b>Select</b> the environment letter to use");
             toolTip.SetToolTip(cbDatabase, "<b>Select</b> the database to use");
+            toolTip.SetToolTip(tgCompilLocl, "<b>TOGGLE ON</b> to move .r and .lst files to the source folder after the compilation<br>Or <b>TOGGLE OFF</b> to move .r and .lst files to the above distant folder after the compilation");
 
             UpdateView();
         }
@@ -140,6 +145,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // fill details
             multitextbox1.Text = ProgressEnv.Current.DataBaseConnection;
             multibox2.Text = ProgressEnv.Current.ProPath;
+            multibox3.Text = ProgressEnv.Current.CmdLineParameters;
 
             textbox1.Text = ProgressEnv.Current.GetCurrentPfPath();
             textbox2.Text = ProgressEnv.Current.IniPath;
@@ -147,8 +153,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textbox4.Text = ProgressEnv.Current.BaseCompilationPath;
             textbox5.Text = ProgressEnv.Current.ProwinPath;
             textbox6.Text = ProgressEnv.Current.LogFilePath;
-
+            
             envLabel.Text = ProgressEnv.Current.Label;
+
+            tgCompilLocl.Checked = Config.Instance.GlobalCompileFilesLocally;
+            lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
 
             // download database information
             if (DataBase.TryToLoadDatabaseInfo()) {
@@ -171,6 +180,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             ProgressEnv.Current.ProwinPath = textbox5.Text;
             ProgressEnv.Current.LogFilePath = textbox6.Text;
             ProgressEnv.Current.Label = envLabel.Text;
+            ProgressEnv.Current.CmdLineParameters = multibox3.Text;
 
             ProgressEnv.Save();
         }
@@ -178,6 +188,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         #region Events
+
+        /// <summary>
+        /// On change of compile locally
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="eventArgs"></param>
+        private void TgCompilLoclOnCheckedChanged(object sender, EventArgs eventArgs) {
+            Config.Instance.GlobalCompileFilesLocally = tgCompilLocl.Checked;
+            lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
+        }
+
 
         /// <summary>
         ///  Click on "CANCEL" or "ADD NEW"

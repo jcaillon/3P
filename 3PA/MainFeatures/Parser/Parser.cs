@@ -155,8 +155,8 @@ namespace _3PA.MainFeatures.Parser {
         /// Peek forward (or backward if goBackWard = true) until we match a token that is not a space token
         /// return found token
         /// </summary>
-        private Token PeekAtNextNonSpace(bool goBackward = false) {
-            int x = goBackward ? -1 : 1;
+        private Token PeekAtNextNonSpace(int start, bool goBackward = false) {
+            int x = start + (goBackward ? -1 : 1);
             var tok = _lexer.PeekAtToken(x);
             while (tok is TokenWhiteSpace)
                 tok = _lexer.PeekAtToken(goBackward ? x-- : x++);
@@ -186,8 +186,20 @@ namespace _3PA.MainFeatures.Parser {
 
             // matching a word
             if (token is TokenWord) {
+
                 _context.StatementWordCount++;
                 var lowerTok = token.Value.ToLower();
+
+                // Match splitted keywords...
+                var nextToken = PeekAt(1);
+                while (nextToken is TokenSymbol && nextToken.Value.Equals("~")) {
+                    MoveNext(); // ~
+                    MoveNext(); // Eol
+                    MoveNext(); // the keyword part
+                    token = PeekAt(0);
+                    lowerTok += token.Value.ToLower();
+                    nextToken = PeekAt(1);
+                }
 
                 // first word of a statement
                 if (_context.StatementWordCount == 1) {
@@ -203,6 +215,7 @@ namespace _3PA.MainFeatures.Parser {
                             }
                             break;
                         case "procedure":
+                        case "proce":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
                                 if (_context.BlockStack.Count != 0) ParsingOk = false;
@@ -289,7 +302,7 @@ namespace _3PA.MainFeatures.Parser {
                             PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "triggers":
-                            if (PeekAtNextNonSpace() is TokenEos)
+                            if (PeekAtNextNonSpace(0) is TokenEos)
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;
                         case "then":
@@ -323,7 +336,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // potential function call
             else if (token is TokenSymbol && token.Value.Equals("(")) {
-                var prevToken = PeekAtNextNonSpace(true);
+                var prevToken = PeekAtNextNonSpace(0, true);
                 if (prevToken is TokenWord && _functionPrototype.ContainsKey(prevToken.Value))
                     AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken.Line, prevToken.Column, false));
             }
@@ -444,8 +457,8 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 1:
                         // matching proc name (or VALUE)
-                        if (token is TokenQuotedString) {
-                            name = token.Value.Substring(1, token.Value.Length - 2);
+                        if (token is TokenString) {
+                            name = GetTokenStrippedValue(token);
                             state++;
                         }
                         break;
@@ -487,7 +500,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (token is TokenSymbol && token.Value.Equals(")")) {
                             state++;
                         } else if (isValue && !(token is TokenWhiteSpace || token is TokenSymbol)) {
-                            name += (token is TokenQuotedString) ? token.Value.Substring(1, token.Value.Length - 2) : token.Value;
+                            name += GetTokenStrippedValue(token);
                         } else if (token is TokenWord) {
                             if (token.Value.ToLower().Equals("value"))
                                 isValue = true;
@@ -526,8 +539,8 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         private void CreateParsedOnEvent(Token onToken) {
             // info we will extract from the current statement :
-            string name = "";
-            string onType = "";
+            var name = new StringBuilder();
+            var onType = new StringBuilder();
 
             int state = 0;
             do {
@@ -537,18 +550,20 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         // matching event type
-                        if (!(token is TokenWord)) break;
-                        onType = token.Value;
+                        if (!(token is TokenWord) && !(token is TokenString)) break;
+                        onType.Append((onType.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
                         state++;
                         break;
                     case 1:
                         // matching "of"
+                        if (token is TokenSymbol && token.Value.Equals(","))
+                            state--;
                         if (!(token is TokenWord)) break;
                         if (token.Value.EqualsCi("anywhere")) {
-                            name = "anywhere";
-                            AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
+                            name.Append("anywhere");
+                            AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
                             _context.Scope = ParsedScope.Trigger;
-                            _context.OwnerName = string.Join(" ", onType.ToUpper(), name);
+                            _context.OwnerName = string.Join(" ", onType.ToString().ToUpper(), name);
                             return;
                         }
                         if (!token.Value.EqualsCi("of")) return;
@@ -556,17 +571,20 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 2:
                         // matching widget name
-                        if (token is TokenWord || token is TokenInclude) {
-                            name = token.Value;
-                            state++;
+                        if (token is TokenWord || token is TokenInclude || token is TokenString) {
+                            name.Append((name.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
+                            // we can match several widget name separated by a comma or resume to next state
+                            var nextNonSpace = PeekAtNextNonSpace(1);
+                            if (!(nextNonSpace is TokenSymbol && nextNonSpace.Value.Equals(",")))
+                                state++;
                         }
                         break;
                     case 3:
                         // matching "or", create another parsed item, otherwise leave to match a block start
                         if (!(token is TokenWord)) break;
-                        AddParsedItem(new ParsedOnEvent(name, onToken.Line, onToken.Column, onType));
+                        AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
                         _context.Scope = ParsedScope.Trigger;
-                        _context.OwnerName = string.Join(" ", onType.ToUpper(), name);
+                        _context.OwnerName = string.Join(" ", onType.ToString().ToUpper(), name.ToString());
                         if (token.Value.EqualsCi("or"))
                             state = 0;
                         else
@@ -1196,6 +1214,14 @@ namespace _3PA.MainFeatures.Parser {
             AddParsedItem(new ParsedIncludeFile(toParse, token.Line, token.Column));
         }
 
+        /// <summary>
+        /// Returns token value or token value minus starting/ending quote of the token is a string
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        private string GetTokenStrippedValue(Token token) {
+            return (token is TokenString) ? token.Value.Substring(1, token.Value.Length - 2) : token.Value;
+        }
     }
 
     /// <summary>

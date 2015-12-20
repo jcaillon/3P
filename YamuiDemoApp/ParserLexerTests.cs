@@ -12,7 +12,7 @@ namespace YamuiDemoApp {
     class ParserLexerTests {
 
         public static void Run() {
-
+            
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -32,7 +32,7 @@ namespace YamuiDemoApp {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
 
             // OUTPUT INFO ON EACH LINE
@@ -49,7 +49,7 @@ namespace YamuiDemoApp {
             }
 
             return;
-
+            
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,7 +58,7 @@ namespace YamuiDemoApp {
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Users\Julien\Desktop\in.p"));
+            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -102,7 +102,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedPreProc pars) {
@@ -111,17 +111,18 @@ namespace YamuiDemoApp {
 
         public void Visit(ParsedDefine pars) {
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
-            if (pars.Type == ParseDefineType.Parameter)
+            //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
                 Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
         }
 
         public void Visit(ParsedTable pars) {
             //return;
-            Output.Append("\r\n" + pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
             foreach (var field in pars.Fields) {
                 Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
             }
+            Output.AppendLine("");
         }
 
         public void Visit(ParsedRun pars) {
@@ -143,19 +144,23 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenEos tok) {
-            Output.AppendLine("EOS");
+            //Output.AppendLine("EOS");
         }
 
         public void Visit(TokenInclude tok) {
-            Output.AppendLine(tok.Value);
+            //Output.AppendLine(tok.Value);
         }
 
         public void Visit(TokenNumber tok) {
             
         }
 
-        public void Visit(TokenQuotedString tok) {
-            //output.AppendLine(tok.Value);
+        public void Visit(TokenString tok) {
+            Output.AppendLine("S  " + tok.Value);
+        }
+
+        public void Visit(TokenStringDescriptor tok) {
+            Output.AppendLine("D  " + tok.Value);
         }
 
         public void Visit(TokenSymbol tok) {
@@ -167,7 +172,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenWord tok) {
-            Output.AppendLine(tok.Value);
+            Output.AppendLine("W  " + tok.Value);
         }
 
         public void Visit(TokenEof tok) {
@@ -179,7 +184,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenPreProcStatement tok) {
-            Output.AppendLine(tok.Value);
+            //Output.AppendLine(tok.Value);
         }
     }
 }

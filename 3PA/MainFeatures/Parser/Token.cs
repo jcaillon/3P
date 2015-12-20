@@ -93,8 +93,20 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public class TokenQuotedString : Token {
-        public TokenQuotedString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+    public class TokenString : Token {
+        public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public override void Accept(ILexerVisitor visitor) {
+            visitor.Visit(this);
+        }
+    }
+
+    /// <summary>
+    /// A character-string in progress can be described with different properties :
+    /// "characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]
+    /// This matches the properties of the string
+    /// </summary>
+    public class TokenStringDescriptor : Token {
+        public TokenStringDescriptor(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }

@@ -40,6 +40,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// </summary>
         public static void UnCloak() {
             try {
+                if (!Plug.AllowFeatureExecution())
+                    return;
+
                 if (Form != null && Form.Visible)
                     ForceClose();
 

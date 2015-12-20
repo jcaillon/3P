@@ -46,6 +46,7 @@ namespace YamuiFramework.Forms {
         private int _duration;
         private YamuiPanel _progressPanel;
         private Transition _closingTransition;
+        private Screen _screen;
 
         //Very important to keep it. It prevents the form from stealing the focus
         protected override bool ShowWithoutActivation {
@@ -59,8 +60,11 @@ namespace YamuiFramework.Forms {
         /// <param name="body">content of the notification</param>
         /// <param name="duration">life time in seconds, if 0 then it's a sticky notif</param>
         /// <param name="defaultWidth"></param>
-        public YamuiNotifications(string body, int duration, int defaultWidth = 300) {
+        /// <param name="screenToUse">Specify the screen on which you want to dispaly the notif</param>
+        public YamuiNotifications(string body, int duration, int defaultWidth = 300, Screen screenToUse = null) {
             InitializeComponent();
+
+            _screen = screenToUse ?? Screen.PrimaryScreen;
 
             Load += YamuiNotificationsLoad;
             Activated += YamuiNotificationsActivated;
@@ -75,9 +79,9 @@ namespace YamuiFramework.Forms {
             OnCloseAllVisible = OnCloseAllVisibleNotif;
             
             // find max height taken by the html
-            Width = Screen.PrimaryScreen.WorkingArea.Width / 2;
+            Width = _screen.WorkingArea.Width / 2;
             contentLabel.Text = body;
-            var prefHeight = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
+            var prefHeight = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), _screen.WorkingArea.Height / 3);
 
             // now we got the final height, resize width until height changes
             int j = 0;
@@ -85,7 +89,7 @@ namespace YamuiFramework.Forms {
             int curWidth = Width;
             do {
                 curWidth -= detla;
-                Width = Math.Min(Screen.PrimaryScreen.WorkingArea.Width / 2, curWidth);
+                Width = Math.Min(_screen.WorkingArea.Width / 2, curWidth);
                 contentLabel.Text = body;
                 if (contentLabel.Height > prefHeight) {
                     curWidth += detla;
@@ -94,7 +98,7 @@ namespace YamuiFramework.Forms {
                 j++;
             } while (j < 10);
             Width = Math.Max(curWidth, defaultWidth);
-            Height = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), Screen.PrimaryScreen.WorkingArea.Height / 3);
+            Height = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), _screen.WorkingArea.Height / 3);
 
 
             // do we need to animate a panel on the bottom to visualise time left
@@ -157,6 +161,7 @@ namespace YamuiFramework.Forms {
             } else {
                 if (_closingTransition != null) {
                     _closingTransition.removeProperty(_closingTransition.TransitionedProperties.FirstOrDefault());
+                    _closingTransition = null;
                     _progressPanel.Width = 0;
                     _progressPanel.Invalidate();
                 }
@@ -165,8 +170,7 @@ namespace YamuiFramework.Forms {
 
         private void YamuiNotificationsLoad(object sender, EventArgs e) {
             // Display the form just above the system tray.
-            Location = new Point(Screen.PrimaryScreen.WorkingArea.Width - Width,
-                                      Screen.PrimaryScreen.WorkingArea.Height - Height - 5);
+            Location = new Point(_screen.WorkingArea.X + _screen.WorkingArea.Width - Width - 5, _screen.WorkingArea.Y + _screen.WorkingArea.Height - Height - 5);
 
             // be sure it always stay on top of every window
             WinApi.SetWindowPos(Handle, WinApi.HWND_TOPMOST, 0, 0, 0, 0, WinApi.TOPMOST_FLAGS);

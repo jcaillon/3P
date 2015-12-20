@@ -337,10 +337,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="position"></param>
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
+            var screen = Npp.GetNppScreen();
             // position the window smartly
-            if (position.X > Screen.PrimaryScreen.WorkingArea.X + Screen.PrimaryScreen.WorkingArea.Width/2)
+            if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
                 position.X = position.X - Width;
-            if (position.Y > Screen.PrimaryScreen.WorkingArea.Y + Screen.PrimaryScreen.WorkingArea.Height/2) {
+            if (position.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2) {
                 position.Y = position.Y - Height - lineHeight;
                 _isReversed = true;
             } else

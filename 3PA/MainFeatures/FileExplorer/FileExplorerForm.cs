@@ -71,7 +71,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         /// <param name="e"></param>
         protected override void OnVisibleChanged(EventArgs e) {
-            CodeExplorer.CodeExplorer.UpdateMenuItemChecked();
+            FileExplorer.UpdateMenuItemChecked();
             base.OnVisibleChanged(e);
         }
 

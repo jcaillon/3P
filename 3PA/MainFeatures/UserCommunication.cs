@@ -20,12 +20,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
+using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
+using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
@@ -42,17 +45,19 @@ namespace _3PA.MainFeatures {
         /// <param name="imageType"></param>
         /// <param name="title"></param>
         public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
-            if (Appli.Appli.Form != null)
-                Appli.Appli.Form.BeginInvoke((Action)delegate {
+            if (Appli.Appli.Form != null) {
+                // get npp's screen
+                Appli.Appli.Form.BeginInvoke((Action) delegate {
                     var toastNotification = new YamuiNotifications(
                         LocalHtmlHandler.FormatMessage(html, imageType, title, subTitle)
-                        , duration, width);
+                        , duration, width, Npp.GetNppScreen());
                     if (clickHandler != null)
                         toastNotification.LinkClicked += (sender, args) => clickHandler(args);
                     else
                         toastNotification.LinkClicked += Utils.OpenPathClickHandler;
                     toastNotification.Show();
                 });
+            }
         }
 
         public static void Notify(string html, MessageImg imageType, string title, string subTitle, int duration = 0, int width = 450) {
@@ -90,15 +95,19 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
-        /// Sends an issue for debug purposes
+        /// Sends an comment to a given GITHUB issue url
         /// </summary>
         /// <param name="message"></param>
         /// <param name="url"></param>
-        public static void SendIssue(string message, string url) {
+        public static bool SendIssue(string message, string url) {
             try {
+                // handle spam (50s min between 2 posts)
+                if (Utils.IsSpamming("SendIssue", 50000))
+                    return false;
+
                 HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
                 if (req == null)
-                    return;
+                    return false;
                 req.Method = "POST";
                 req.ContentType = "application/json";
                 req.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)";
@@ -119,11 +128,12 @@ namespace _3PA.MainFeatures {
                     }
                 }
                 if (result != null) {
-                    File.Delete(ErrorHandler.PathErrorToSend);
+                    return true;
                 }
             } catch (Exception ex) {
                 ErrorHandler.Log(ex.ToString());
             }
+            return false;
         }
     }
 }
