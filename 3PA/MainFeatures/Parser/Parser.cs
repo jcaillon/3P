@@ -541,7 +541,6 @@ namespace _3PA.MainFeatures.Parser {
             // info we will extract from the current statement :
             var name = new StringBuilder();
             var onType = new StringBuilder();
-
             int state = 0;
             do {
                 var token = PeekAt(1); // next token
@@ -585,9 +584,11 @@ namespace _3PA.MainFeatures.Parser {
                         AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
                         _context.Scope = ParsedScope.Trigger;
                         _context.OwnerName = string.Join(" ", onType.ToString().ToUpper(), name.ToString());
-                        if (token.Value.EqualsCi("or"))
+                        if (token.Value.EqualsCi("or")) {
                             state = 0;
-                        else
+                            name.Clear();
+                            onType.Clear();
+                        } else
                             return;
                         break;
                 }

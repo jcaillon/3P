@@ -274,11 +274,11 @@ namespace _3PA.MainFeatures.Parser {
                     // quoted string (read until unescaped ' or ")
                     return CreateStringToken(ch);
                 case ':':
+                    // EOS
+                    if (char.IsWhiteSpace(PeekAt(1)))
+                        return CreateEosToken();
                     // end of statement (if followed by any space/new line char) or a string descriptor
                     if (_previousTokenIsString) {
-                        // EOS
-                        if (char.IsWhiteSpace(PeekAt(1)))
-                            return CreateEosToken();
                         // Descriptor
                         return CreateStringDescriptorToken();
                     }

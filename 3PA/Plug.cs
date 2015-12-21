@@ -153,7 +153,6 @@ namespace _3PA {
             menu.SetSeparator();
 
             menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
-            menu.SetCommand("Test2", Test2, "Test2:Alt+D", false);
 
             //menu.SetSeparator();
 
@@ -310,13 +309,34 @@ namespace _3PA {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
-            if(!AllowFeatureExecution(0))
-                return;
-
             Modifiers modifiers;
-
             try {
                 modifiers = KeyInterceptor.GetModifiers();
+
+                // check if the user triggered a function for which we set a shortcut (internalShortcuts)
+                Tuple<Action, int, string> commandUsed = null;
+                foreach (var kpv in NppMenu.InternalShortCuts) {
+                    if ((byte) key == kpv.Key._key && 
+                        modifiers.IsCtrl == kpv.Key.IsCtrl &&
+                        modifiers.IsShift == kpv.Key.IsShift &&
+                        modifiers.IsAlt == kpv.Key.IsAlt) {
+                        commandUsed = kpv.Value;
+                    }
+                }
+
+                // For the main window, we make an exception because we want to display no matter what
+                if (commandUsed != null && commandUsed.Item3.Equals("Open_main_window")) {
+                    if (Utils.IsSpamming("Open_main_window", 100))
+                        return;
+                    commandUsed.Item1();
+                    handled = true;
+                    return;
+                }
+
+                // check if allowed to execute
+                if (!AllowFeatureExecution(0))
+                    return;
+
                 // Close interfacePopups
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                     ClosePopups();
@@ -355,6 +375,7 @@ namespace _3PA {
                         }
                     }
                 }
+
                 // next tooltip
                 if (modifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
                     if (key == Keys.Up)
@@ -366,17 +387,11 @@ namespace _3PA {
                 }
 
 
-                // check if the user triggered a function for which we set a shortcut (internalShortcuts)
-                foreach (var shortcut in NppMenu.InternalShortCuts.Keys) {
-                    if ((byte)key == shortcut._key
-                        && modifiers.IsCtrl == shortcut.IsCtrl
-                        && modifiers.IsShift == shortcut.IsShift
-                        && modifiers.IsAlt == shortcut.IsAlt) {
-                        handled = true;
-                        var shortcut1 = shortcut;
-                        NppMenu.InternalShortCuts[shortcut1].Item1();
-                        break;
-                    }
+                // we matched a shortcut, execute it
+                if (commandUsed != null) {
+                    commandUsed.Item1();
+                    handled = true;
+                    return;
                 }
 
             } catch (Exception e) {
@@ -693,20 +708,7 @@ namespace _3PA {
 
         #region tests
 
-        public static void Test2() {
-  
-        }
-
         public static void Test() {
-
-            File.WriteAllText(@"C:\Users\Julien\Desktop\ansi.p", File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md")).MdToHtml());
-
-            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
-                MessageImg.MsgUpdate,
-                "A new version has been installed!",
-                "Updated to version " + AssemblyInfo.Version,
-                new List<string> { "ok" },
-                false);
 
             var canIndent = ParserHandler.CanIndent();
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);

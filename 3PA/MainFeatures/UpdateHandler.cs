@@ -288,7 +288,8 @@ namespace _3PA.MainFeatures {
             }
 
             // Check for new updates
-            Task.Factory.StartNew(GetLatestReleaseInfo);
+            if (!Config.Instance.GlobalDontCheckUpdates)
+                Task.Factory.StartNew(GetLatestReleaseInfo);
         }
 
     }

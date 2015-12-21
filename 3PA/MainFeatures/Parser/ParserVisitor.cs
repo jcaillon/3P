@@ -123,7 +123,7 @@ namespace _3PA.MainFeatures.Parser {
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(null)
+                SubString = SetExternalInclude(pars.OwnerName)
             });
 
             // if the run is PERSISTENT, we need to load the functions/proc of the program
@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.Parser {
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(null)
+                SubString = SetExternalInclude(pars.OwnerName)
             });
         }
 

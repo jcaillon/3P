@@ -334,6 +334,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Call this method to completly refresh the object view list, 
         /// </summary>
         public void RefreshOvl() {
+            if (_isListing) return;
             _isListing = true;
             Task.Factory.StartNew(() => {
                 try {

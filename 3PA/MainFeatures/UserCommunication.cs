@@ -116,6 +116,7 @@ namespace _3PA.MainFeatures {
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 writer.Write("{\"body\": " + serializer.Serialize(
                     "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
+                    "#### 3P version : " + AssemblyInfo.Version + " ####\r\n" +
                     message
                     ) + "}");
                 writer.Close();

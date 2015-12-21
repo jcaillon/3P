@@ -107,6 +107,18 @@ namespace _3PA.MainFeatures {
             AutoGenerateField = false)]
         public int GlobalMaxNbCharInBlock = 31190;
 
+        [Display(Name = "Do not check for updates",
+            Description = "Check this option to prevent 3P from fetching the latest version on github<br><b>You will not have access to the latest features and will not enjoy bug corrections!</b>",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public bool GlobalDontCheckUpdates = false;
+
+        [Display(Name = "Do not automatically post .log file",
+            Description = "Check this option to prevent 3P from sending your error.log file automatically on github<br><b>Doing this slows the debugging process for 3P's developpers as bugs are not detected if you don't create an issue!</b>",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public bool GlobalDontAutoPostLog = false;
+
         public bool GlobalShowDetailedHelpForErrors = true;
         public bool GlobalCompileFilesLocally = false;
 

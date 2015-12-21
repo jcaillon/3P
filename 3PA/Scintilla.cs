@@ -3689,6 +3689,8 @@ namespace _3PA {
         /// <param name="encoding"></param>
         /// <returns></returns>
         public static unsafe string GetString(IntPtr bytes, int length, Encoding encoding) {
+            if (length <= 0)
+                return string.Empty;
             var ptr = (sbyte*) bytes;
             var str = new string(ptr, 0, length, encoding);
             return str;

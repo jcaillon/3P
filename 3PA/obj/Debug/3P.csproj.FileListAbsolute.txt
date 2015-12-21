@@ -49,10 +49,8 @@ D:\Repo\3P\3PA\obj\Debug\_3PA.Data.DataResources.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.Images.ImageResources.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetEnvironment.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources
-D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerPage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerForm.resources
-D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerPage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsPage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
@@ -63,3 +61,4 @@ D:\Repo\3P\3PA\obj\Debug\3P.dll
 D:\Repo\3P\3PA\obj\Debug\3P.pdb
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
+D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources

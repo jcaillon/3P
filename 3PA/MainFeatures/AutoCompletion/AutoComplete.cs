@@ -343,7 +343,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     return;
 
                 // dont show in string/comments..?
-                if (!IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+                if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
                     return;
 
                 // get current word, current previous word (table or database name)

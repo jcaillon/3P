@@ -17,7 +17,7 @@
       <Keywords name="Folders in code1, open"></Keywords>
       <Keywords name="Folders in code1, middle"></Keywords>
       <Keywords name="Folders in code1, close"></Keywords>
-      <Keywords name="Folders in code2, open">CASE CATCH CLASS CONSTRUCTOR DESTRUCTOR FINALLY FUNCTION INTERFACE METHOD PROCEDURE TRIGGERS: &quot;FOR EACH&quot; &quot;FOR FIRST&quot; &quot;FOR LAST&quot; DO REPEAT</Keywords>
+      <Keywords name="Folders in code2, open">EDITING CASE CATCH CLASS CONSTRUCTOR DESTRUCTOR FINALLY FUNCTION INTERFACE METHOD PROCEDURE TRIGGERS: &quot;FOR EACH&quot; &quot;FOR FIRST&quot; &quot;FOR LAST&quot; DO REPEAT</Keywords>
       <Keywords name="Folders in code2, middle"></Keywords>
       <Keywords name="Folders in code2, close">&quot;END CASE&quot; &quot;END CATCH&quot; &quot;END CLASS&quot; &quot;END CONSTRUCTOR&quot; &quot;END DESTRUCTOR&quot; &quot;END FINALLY&quot; &quot;END FUNCTION&quot; &quot;END GET&quot; &quot;END INTERFACE&quot; &quot;END METHOD&quot; &quot;END PROCEDURE&quot; &quot;END SET&quot; &quot;END TRIGGERS&quot; END</Keywords>
       <Keywords name="Folders in comment, open"></Keywords>

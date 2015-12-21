@@ -12,7 +12,7 @@ namespace YamuiDemoApp {
     class ParserLexerTests {
 
         public static void Run() {
-            
+            /*
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"), @"C:\Users\Julien\Desktop\tt.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\blabla.p"), @"d:\Profiles\jcaillon\Desktop\blabla.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -32,7 +32,7 @@ namespace YamuiDemoApp {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
 
             // OUTPUT INFO ON EACH LINE
@@ -49,7 +49,7 @@ namespace YamuiDemoApp {
             }
 
             return;
-            
+            */
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -58,7 +58,7 @@ namespace YamuiDemoApp {
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Users\Julien\Desktop\tt.p"));
+            Lexer tok2 = new Lexer(File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\blabla.p"));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -66,7 +66,7 @@ namespace YamuiDemoApp {
             //--------------
             watch2.Stop();
 
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\test.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
             
         }
     }
@@ -77,7 +77,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedLabel pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedFunctionCall pars) {
@@ -140,11 +140,11 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenEol tok) {
-            
+           
         }
 
         public void Visit(TokenEos tok) {
-            //Output.AppendLine("EOS");
+            Output.AppendLine("EOS " + tok.Value);
         }
 
         public void Visit(TokenInclude tok) {
@@ -164,7 +164,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(TokenSymbol tok) {
-            
+            Output.AppendLine("S  " + tok.Value);
         }
 
         public void Visit(TokenWhiteSpace tok) {
