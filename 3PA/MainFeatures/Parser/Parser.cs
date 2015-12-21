@@ -247,6 +247,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "for":
                         case "do":
                         case "repeat":
+                        case "editing":
                             // increase block depth
                             PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             break;

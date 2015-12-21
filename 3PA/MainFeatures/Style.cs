@@ -84,32 +84,27 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Check UDL
+        #region Install UDL
 
         /// <summary>
-        /// The role of this method is to make sure that the User Defined Language for "OpenEdgeABL" exists in the
+        /// check if the User Defined Language for "OpenEdgeABL" exists in the
         /// userDefineLang.xml file, if it does it updates it, if it doesn't exists it creates it and asks the user
         /// to restart Notepad++
+        /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
-        public static void CheckUdl() {
+        public static bool InstallUdl(bool onlyCheckInstall = false) {
             var udlFilePath = Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml");
-
-            if (!File.Exists(udlFilePath)) {
-                File.WriteAllText(udlFilePath, @"<NotepadPlus />", Encoding.Default);
-            }
-
-            var fileContent = File.ReadAllText(udlFilePath, Encoding.Default);
-
+            var fileContent = File.Exists(udlFilePath) ? File.ReadAllText(udlFilePath, Encoding.Default) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
+                if (onlyCheckInstall)
+                    return true;
                 // if it already exists in the file, delete the existing one
                 fileContent = regex.Replace(fileContent, @"");
-                if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImg.MsgInfo, "Information", "Welcome!");
-                    Config.Instance.UserFirstUse = false;
-                }
             } else {
+                if (onlyCheckInstall)
+                    return false;
                 // if it doesn't exist in the file
                 UserCommunication.Notify("It seems to be the first time that you use this plugin.<br>In order to activate the syntax highlighting, you must restart notepad++.<br><br><i>Please note that if a document is opened at the next start, you will have to manually close/reopen it to see the changes.</i><br><br><b>Sorry for the inconvenience</b>!", MessageImg.MsgInfo, "Information", "Installing syntax highlighting");
             }
@@ -117,7 +112,7 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus />", "<NotepadPlus>\r\n" + DataResources.UDL + "\r\n</NotepadPlus>");
             else
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
-
+            // write to userDefinedLang.xml
             try {
                 File.WriteAllText(udlFilePath, fileContent, Encoding.Default);
             } catch (Exception e) {
@@ -125,7 +120,9 @@ namespace _3PA.MainFeatures {
                     UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + udlFilePath + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
                 else
                     ErrorHandler.ShowErrors(e, "Error while accessing userDefineLang.xml");
+                return false;
             }
+            return true;
         }
 
         #endregion

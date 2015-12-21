@@ -268,7 +268,6 @@ namespace _3PA {
 
             Snippets.Init();
             Keywords.Import();
-            Config.Save();
             FileTag.Import();
             CompilationPath.Import();
 
@@ -277,9 +276,6 @@ namespace _3PA {
 
             // init database info
             DataBase.Init();
-
-            // make sure the UDL is present, also display the welcome message
-            Style.CheckUdl();
 
             PluginIsFullyLoaded = true;
 

@@ -86,7 +86,7 @@ namespace _3PA.MainFeatures {
                 wc.Proxy = proxy;
                 */
 
-                    wc.Headers.Add ("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
+                    wc.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                     //wc.Proxy = null;
 
                     // Download release list from GITHUB API 
@@ -255,12 +255,22 @@ namespace _3PA.MainFeatures {
         /// check if an update has been done since the last time notepad was closed
         /// </summary>
         public static void OnNotepadStart() {
-            try {
-                // an update has been done
-                if (File.Exists(PathToVersionLog)) {
 
-                    if (File.Exists(PathDownloadedPlugin)) {
-                        UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
+            // if the UDL is not installed
+            if (!Style.InstallUdl(true)) {
+                Style.InstallUdl();
+            } else {
+                // first use message?
+                if (Config.Instance.UserFirstUse) {
+                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImg.MsgInfo, "Information", "Welcome!");
+                    Config.Instance.UserFirstUse = false;
+                }
+            }
+
+            // an update has been done
+            if (File.Exists(PathToVersionLog)) {
+                if (File.Exists(PathDownloadedPlugin)) {
+                    UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
                         You will have to manually copy the new file and delete the old file :<br><br>
@@ -268,23 +278,27 @@ namespace _3PA.MainFeatures {
                         In this folder (replacing the old file) : <b><a href='" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + "'>" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + @"</a></b><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
                         Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
-                        return;
-                    }
+                    return;
+                }
 
-                    UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))).MdToHtml(),
-                        MessageImg.MsgUpdate, 
-                        "A new version has been installed!",
-                        "Updated to version " + AssemblyInfo.Version,
-                        new List<string> { "ok" }, 
-                        false);
+                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok" },
+                    false);
 
+                try {
                     File.Delete(PathToVersionLog);
-
                     if (Directory.Exists(PathUpdateFolder))
                         Utils.DeleteDirectory(PathUpdateFolder, true);
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error when deleting a file/folder");
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "OnNotepadStart");
+
+                // update UDL
+                if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
+                    Style.InstallUdl();
             }
 
             // Check for new updates

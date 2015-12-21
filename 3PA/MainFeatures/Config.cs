@@ -119,6 +119,12 @@ namespace _3PA.MainFeatures {
             AutoGenerateField = false)]
         public bool GlobalDontAutoPostLog = false;
 
+        [Display(Name = "Do not install syntax highlighting on update",
+            Description = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        public bool GlobalDontUpdateUdlOnUpdate = false;
+
         public bool GlobalShowDetailedHelpForErrors = true;
         public bool GlobalCompileFilesLocally = false;
 
@@ -271,7 +277,6 @@ namespace _3PA.MainFeatures {
         public string CodeModifTagCloser = "/* --- Fin modif #{&number} --- */";
 
         #endregion
-
 
         #region FILE EXPLORER
 
