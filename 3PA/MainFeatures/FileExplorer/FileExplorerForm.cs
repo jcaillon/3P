@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -504,7 +503,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (curItem == null)
                 return;
 
-            Utils.OpenAnyFullPath(curItem.FullPath);
+            Utils.OpenAnyLink(curItem.FullPath);
         }
 
         /// <summary>

@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Drawing;
 using System.Linq;
@@ -29,7 +28,6 @@ using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
-using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     public partial class SettingAppearance : YamuiPage {

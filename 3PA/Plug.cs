@@ -17,9 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -152,7 +150,8 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            //menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+            if (Config.Instance.UserName.Equals("JCA"))
+                menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
 
             //menu.SetSeparator();
 
@@ -387,7 +386,6 @@ namespace _3PA {
                 if (commandUsed != null) {
                     commandUsed.Item1();
                     handled = true;
-                    return;
                 }
 
             } catch (Exception e) {
@@ -706,6 +704,8 @@ namespace _3PA {
 
         public static void Test() {
 
+            UserCommunication.Notify("<a href='" + AssemblyInfo.Location.ProgressQuoter() + "'>" + AssemblyInfo.Location.ProgressQuoter() + "</a><br>" + AssemblyInfo.IsPreRelease + "<br><a href='" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "'>" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "</a>" + "<br><a href='" + @"C:\Work\3P\3PA\Interop" + "'>" + @"C:\Work\3P\3PA\Interop" + "</a>" + "<br><a href='" + @"https://github.com/jcaillon/3P/releases" + "'>" + @" https://github.com/jcaillon/3P/releases" + "</a>");
+       
             var canIndent = ParserHandler.CanIndent();
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
             if (!canIndent) {

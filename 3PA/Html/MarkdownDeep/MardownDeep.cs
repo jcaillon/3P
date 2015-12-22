@@ -17,12 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
-using _3PA.MainFeatures;
 
 namespace MarkdownDeep {
 

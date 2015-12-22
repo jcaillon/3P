@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -449,7 +448,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         [CurrentOperationAttr(DisplayText = "Compiling", ActionText = "compiling")]
         Compile = 216,
         [CurrentOperationAttr(DisplayText = "Executing", ActionText = "executing")]
-        Run = 512,
+        Run = 512
     }
 
     /// <summary>

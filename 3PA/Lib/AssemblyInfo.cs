@@ -17,9 +17,9 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 namespace _3PA.Lib {
@@ -43,8 +43,19 @@ namespace _3PA.Lib {
         /// </summary>
         public static string Version {
             get {
-                Version version = _assembly.GetName().Version;
-                return version != null ? "v" + version : "???";
+                var v = _assembly.GetName().Version.ToString();
+                return "v" + v.Substring(0, v.LastIndexOf(".", StringComparison.CurrentCultureIgnoreCase));
+            }
+        }
+
+        /// <summary>
+        /// Last digit of the assembly allows to tell if the soft is in a pre-release build (1) or
+        /// stable build (0)
+        /// returns true if the soft is in a pre-release build
+        /// </summary>
+        public static bool IsPreRelease {
+            get {
+                return _assembly.GetName().Version.ToString().Split('.').Last().Equals("1");
             }
         }
 
@@ -75,6 +86,13 @@ namespace _3PA.Lib {
         /// </summary>
         public static string Company {
             get { return GetAttributeValue<AssemblyCompanyAttribute>(a => a.Company); }
+        }
+
+        /// <summary>
+        /// Returns the path of the executing assembly
+        /// </summary>
+        public static string Location {
+            get { return _assembly.Location; }
         }
 
         protected static string GetAttributeValue<TAttr>(Func<TAttr,

@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -462,7 +461,6 @@ namespace _3PA.MainFeatures {
 
                     UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
                     FileTag.UnCloak();
-                    return;
                 }
 
             } catch (Exception e) {

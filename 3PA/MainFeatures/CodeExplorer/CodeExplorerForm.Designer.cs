@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using BrightIdeasSoftware;
+using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     partial class CodeExplorerForm {
@@ -180,15 +183,15 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        private YamuiFramework.Controls.YamuiImageButton buttonSort;
-        private YamuiFramework.Controls.YamuiImageButton buttonRefresh;
-        private YamuiFramework.Controls.YamuiImageButton buttonCleanText;
-        private YamuiFramework.Controls.YamuiImageButton buttonExpandRetract;
-        private BrightIdeasSoftware.TreeListView ovlTree;
-        private BrightIdeasSoftware.OLVColumn DisplayText;
-        private YamuiFramework.Controls.YamuiTextBox textBoxFilter;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTipHtml;
-        private YamuiFramework.Controls.YamuiImageButton buttonIncludeExternal;
+        private YamuiImageButton buttonSort;
+        private YamuiImageButton buttonRefresh;
+        private YamuiImageButton buttonCleanText;
+        private YamuiImageButton buttonExpandRetract;
+        private TreeListView ovlTree;
+        private OLVColumn DisplayText;
+        private YamuiTextBox textBoxFilter;
+        private HtmlToolTip toolTipHtml;
+        private YamuiImageButton buttonIncludeExternal;
 
     }
 }

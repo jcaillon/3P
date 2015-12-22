@@ -17,9 +17,9 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Runtime.InteropServices;
+
 // ReSharper disable All
 
 // BE CAREFUL, DONT CHANGE THE NAMESPACE HERE!!! It should be : NppPlugin.DllExport

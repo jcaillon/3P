@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class OptionPage {
@@ -74,6 +75,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         private YamuiPanel dockedPanel;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip tooltip;
+        private HtmlToolTip tooltip;
     }
 }

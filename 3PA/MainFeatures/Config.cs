@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -25,6 +24,7 @@ using System.Drawing;
 using System.IO;
 using _3PA.Html;
 using _3PA.Lib;
+
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures {
             Description = "Check this option if you want to update 3P with the latest pre-release <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
             GroupName = "User",
             AutoGenerateField = false)]
-        public bool UserGetsPreReleases = true;
+        public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
 
         public bool UserFirstUse = true;
 

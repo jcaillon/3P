@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -25,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -461,7 +461,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append(@"<br>[" + Interop.NppMenu.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
+                toDisplay.Append(@"<br>[" + NppMenu.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
                 GoToDefinitionFile = data.ParsedItem.FilePath;
             }

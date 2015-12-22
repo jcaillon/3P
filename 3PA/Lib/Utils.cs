@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -157,25 +157,6 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Opens a file with the default shell handler
-        /// </summary>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static bool OpenWithDefaultShellHandler(string filePath) {
-            if (!File.Exists(filePath)) {
-                if (!Directory.Exists(filePath))
-                    return false;
-                OpenFolder(filePath);
-            } else {
-                var process = new ProcessStartInfo(filePath) {
-                    UseShellExecute = true
-                };
-                Process.Start(process);
-            }
-            return true;
-        }
-
-        /// <summary>
         /// Returns the given image... but in grayscale
         /// </summary>
         /// <param name="original"></param>
@@ -278,34 +259,46 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Open the given fullpath either in notepad++ (if the file extension is know)
+        /// Open the given link either in notepad++ (if the file extension is know)
         /// or with window (opens a folder if it is a folder, or open a file with correct program
         /// using shell extension)
+        /// also works for urls
         /// </summary>
-        /// <param name="fullPath"></param>
-        public static bool OpenAnyFullPath(string fullPath) {
-            if (string.IsNullOrEmpty(fullPath)) return false;
+        /// <param name="link"></param>
+        public static bool OpenAnyLink(string link) {
+            if (string.IsNullOrEmpty(link)) return false;
 
-            // open the file if it has a progress extension
-            var ext = Path.GetExtension(fullPath);
-            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext)) {
-                Npp.Goto(fullPath);
+            // open the file if it has a progress extension or Known extension
+            string ext = null;
+            try {
+                ext = Path.GetExtension(link);
+            } catch (Exception e) {
+                if (!(e is ArgumentException))
+                    ErrorHandler.DirtyLog(e);
+            }
+            if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.GlobalProgressExtension.Contains(ext)) && File.Exists(link)) {
+                Npp.Goto(link);
                 return true;
-
             }
 
-            // Known extension, open with npp
-            if (!string.IsNullOrEmpty(ext) && Config.Instance.GlobalNppOpenableExtension.Contains(ext)) {
-                Npp.Goto(fullPath);
+            // url?
+            if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link).Success) {
+                Process.Start(link);
                 return true;
-
             }
 
-            // otherwise open with windows
-            if (Directory.Exists(fullPath)) {
-                OpenFolder(fullPath);
+            // open with default shell action
+            if (!File.Exists(link)) {
+                if (!Directory.Exists(link))
+                    return false;
+                OpenFolder(link);
             }
-            return OpenWithDefaultShellHandler(fullPath);
+
+            var process = new ProcessStartInfo(link) {
+                UseShellExecute = true
+            };
+            Process.Start(process);
+            return true;
         }
 
         /// <summary>
@@ -315,7 +308,7 @@ namespace _3PA.Lib {
         /// <param name="sender"></param>
         /// <param name="htmlLinkClickedEventArgs"></param>
         public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            htmlLinkClickedEventArgs.Handled = OpenAnyFullPath(htmlLinkClickedEventArgs.Link);
+            htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
         }
 
 

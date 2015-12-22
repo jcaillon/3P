@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.InfoToolTip {
@@ -75,7 +76,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #endregion
 
-        private YamuiFramework.Controls.YamuiPanel panel;
+        private YamuiPanel panel;
         private HtmlLabel labelContent;
 
 

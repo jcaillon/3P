@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -125,8 +124,8 @@ namespace _3PA.Interop {
         /// <param name="shortcut"></param>
         public static void ShortcutsUpdated(int cmdId, ShortcutKey shortcut) {
             int index = 0;
-            foreach (var item in _3PA.Plug.FuncItems.Items) {
-                if (cmdId == _3PA.Plug.FuncItems.Items[index]._cmdID) {
+            foreach (var item in Plug.FuncItems.Items) {
+                if (cmdId == Plug.FuncItems.Items[index]._cmdID) {
                     break;
                 }
                 index++;

@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using YamuiFramework.Controls;
 using _3PA.Html;
 using _3PA.Lib;
@@ -33,7 +32,7 @@ namespace _3PA.MainFeatures.Appli.Pages {
         public PageAbout() {
             InitializeComponent();
 
-            aboutHtml.Text = HtmlResources.about.Replace("%version%", AssemblyInfo.Version);
+            aboutHtml.Text = HtmlResources.about.Replace("%version%", AssemblyInfo.Version).Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "");
         }
         #endregion
 

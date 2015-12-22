@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.IO;
 using System.Reflection;
@@ -37,7 +36,6 @@ namespace _3PA.Lib {
         public static void Init() {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
-            //var assPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             _rootDir = Path.Combine(Npp.GetConfigDir(), "Librairies");
             _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
             _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");

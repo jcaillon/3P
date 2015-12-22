@@ -17,7 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
+using System;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.SyntaxHighlighting {
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
         }
 
         public void Visit(TokenStringDescriptor tok) {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public void Visit(TokenSymbol tok) {

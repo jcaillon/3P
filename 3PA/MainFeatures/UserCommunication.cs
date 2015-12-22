@@ -17,18 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
-using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
-using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {

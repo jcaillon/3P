@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FileTags.cs) is part of 3P.
+// This file (FileTag.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,14 +17,13 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using _3PA.Lib;
 using System.Text;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
 
@@ -115,7 +114,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     var items = s.Split('\t');
                     if (items.Count() == 8) {
                         var fileName = items[0].Trim();
-                        var fileInfo = new FileTagObject() {
+                        var fileInfo = new FileTagObject {
                             CorrectionNumber = items[1],
                             CorrectionDate = items[2],
                             CorrectionDecription = items[3],
@@ -128,7 +127,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                         if (_filesInfo.ContainsKey(fileName)) {
                             _filesInfo[fileName].Add(fileInfo);
                         } else {
-                            _filesInfo.Add(fileName, new List<FileTagObject>() {
+                            _filesInfo.Add(fileName, new List<FileTagObject> {
                                 fileInfo
                             });
                         }

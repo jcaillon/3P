@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,16 +24,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using MarkdownDeep;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.Properties;
-using Token = _3PA.MainFeatures.Parser.Token;
-using Utils = _3PA.Lib.Utils;
 
 namespace _3PA.MainFeatures {
 
@@ -241,10 +236,10 @@ namespace _3PA.MainFeatures {
                 var process = new Process {
                     StartInfo = {
                         FileName = PathUpdaterExe,
-                        Arguments = PathDownloadedPlugin.ProgressQuoter() + " " + Assembly.GetExecutingAssembly().Location.ProgressQuoter(),
+                        Arguments = PathDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
                         UseShellExecute = true,
                         WindowStyle = ProcessWindowStyle.Hidden
-                    },
+                    }
                 };
                 process.Start();
             }

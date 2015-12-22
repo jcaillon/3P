@@ -1,4 +1,7 @@
 ﻿using System.ComponentModel;
+using BrightIdeasSoftware;
+using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.FileExplorer {
     partial class FileExplorerForm {
@@ -341,28 +344,28 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTipHtml;
-        private YamuiFramework.Controls.YamuiImageButton btGetHelp;
-        private YamuiFramework.Controls.YamuiLabel lbNbErrors;
-        private YamuiFramework.Controls.YamuiLabel lbErrorText;
-        private YamuiFramework.Controls.YamuiImageButton btClearAllErrors;
-        private YamuiFramework.Controls.YamuiImageButton btNextError;
-        private YamuiFramework.Controls.YamuiLabel lbStatus;
-        private YamuiFramework.Controls.YamuiImageButton btPrevError;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel1;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel2;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel3;
-        private BrightIdeasSoftware.OLVColumn FileName;
-        private BrightIdeasSoftware.FastObjectListView ovl;
-        private YamuiFramework.Controls.YamuiLabel yamuiLabel4;
-        private YamuiFramework.Controls.YamuiLabel nbitems;
-        private YamuiFramework.Controls.YamuiImageButton btRefresh;
-        private YamuiFramework.Controls.YamuiTextBox textFilter;
-        private YamuiFramework.Controls.YamuiImageButton btErase;
-        private YamuiFramework.Controls.YamuiImageButton btDirectory;
-        private YamuiFramework.Controls.YamuiLabel lbDirectory;
-        private YamuiFramework.Controls.YamuiImageButton btGotoDir;
-        private YamuiFramework.Controls.YamuiImageButton yamuiImageButton1;
+        private HtmlToolTip toolTipHtml;
+        private YamuiImageButton btGetHelp;
+        private YamuiLabel lbNbErrors;
+        private YamuiLabel lbErrorText;
+        private YamuiImageButton btClearAllErrors;
+        private YamuiImageButton btNextError;
+        private YamuiLabel lbStatus;
+        private YamuiImageButton btPrevError;
+        private YamuiLabel yamuiLabel1;
+        private YamuiLabel yamuiLabel2;
+        private YamuiLabel yamuiLabel3;
+        private OLVColumn FileName;
+        private FastObjectListView ovl;
+        private YamuiLabel yamuiLabel4;
+        private YamuiLabel nbitems;
+        private YamuiImageButton btRefresh;
+        private YamuiTextBox textFilter;
+        private YamuiImageButton btErase;
+        private YamuiImageButton btDirectory;
+        private YamuiLabel lbDirectory;
+        private YamuiImageButton btGotoDir;
+        private YamuiImageButton yamuiImageButton1;
 
 
     }

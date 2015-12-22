@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System.Drawing;
 using YamuiFramework.Themes;
 using _3PA.Images;
@@ -101,6 +100,6 @@ namespace _3PA.Html {
         MsgRip,
         MsgToolTip,
         MsgUpdate,
-        MsgWarning,
+        MsgWarning
     }
 }

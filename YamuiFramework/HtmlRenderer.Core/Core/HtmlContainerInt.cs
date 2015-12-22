@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Text.RegularExpressions;
 using YamuiFramework.HtmlRenderer.Core.Adapters;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Dom;
@@ -887,6 +888,10 @@ namespace YamuiFramework.HtmlRenderer.Core.Core
                         if (!string.IsNullOrEmpty(link.HrefLink) && File.Exists(link.HrefLink)) {
                             var process = new ProcessStartInfo(link.HrefLink) {UseShellExecute = true};
                             Process.Start(process);
+                        } else {
+                            if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link.HrefLink).Success) {
+                                Process.Start(link.HrefLink);
+                            }
                         }
                     }
                 }

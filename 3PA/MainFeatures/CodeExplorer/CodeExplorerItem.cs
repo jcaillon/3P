@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using _3PA.Lib;
@@ -178,7 +177,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // a proc or func was loaded in persistent
         Persistent = 64,
         // private proc
-        Private = 128,
+        Private = 128
     }
 
     public class CodeExplorerTypeAttr : Extensions.EnumAttr {
