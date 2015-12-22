@@ -152,7 +152,7 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+            //menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
 
             //menu.SetSeparator();
 

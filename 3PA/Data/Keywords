@@ -852,7 +852,8 @@ FIELDS	Option	1	1
 FILE	Option	0	3
 FILE-CREATE-DATE	Attribute	0	1
 FILE-CREATE-TIME	Attribute	0	1
-FILE-INFO	Handle	0	2
+FILE-INFO	Abbreviation	0	2
+FILE-INFORMATION	Handle	0	2
 FILE-INFORMATION	Option	1	1
 FileListId	Property	0	0
 FILE-MOD-DATE	Attribute	0	1

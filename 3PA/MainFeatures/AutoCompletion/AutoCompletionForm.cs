@@ -337,7 +337,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="position"></param>
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
-            var screen = Npp.GetNppScreen();
+            var screen = Screen.FromPoint(position);
             // position the window smartly
             if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
                 position.X = position.X - Width;

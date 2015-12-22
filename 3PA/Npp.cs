@@ -121,7 +121,7 @@ namespace _3PA {
         /// <returns></returns>
         public static Screen GetNppScreen() {
             Rectangle output = new Rectangle();
-            Win32.GetWindowRect(HandleNpp, ref output);
+            Win32.GetWindowRect(HandleScintilla, ref output);
             return Screen.FromPoint(output.Location);
         }
 

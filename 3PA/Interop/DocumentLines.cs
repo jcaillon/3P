@@ -72,6 +72,74 @@ namespace _3PA.Interop {
             TrackInsertText(scn);
         }
 
+        internal int CharToBytePosition(int pos) {
+            pos = Npp.Clamp(pos, 0, TextLength);
+
+            // Adjust to the nearest line start
+            var line = LineFromCharPosition(pos);
+            var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+            pos -= CharPositionFromLine(line);
+
+            // Optimization when the line contains NO multibyte characters
+            if (!LineContainsMultibyteChar(line))
+                return (bytePos + pos);
+
+            while (pos > 0) {
+                // Move char-by-char
+                bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
+                pos--;
+            }
+
+            return bytePos;
+        }
+
+        /// <summary>
+        /// Converts a BYTE offset to a CHARACTER offset.
+        /// </summary>
+        internal int ByteToCharPosition(int pos) {
+            pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
+            var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
+            var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+            var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
+            return count;
+        }
+
+        /// <summary>
+        /// Returns the number of CHARACTERS in a line.
+        /// </summary>
+        internal int CharLineLength(int index) {
+            // A line's length is calculated by subtracting its start offset from
+            // the start of the line following. We keep a terminal (faux) line at
+            // the end of the list so we can calculate the length of the last line.
+            index = Npp.Clamp(index, 0, Count);
+
+            if (index + 1 <= _stepLine)
+                return _perLineData[index + 1].Start - _perLineData[index].Start;
+            if (index <= _stepLine)
+                return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
+            return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
+        }
+
+        /// <summary>
+        /// Returns the CHARACTER offset where the line begins.
+        /// </summary>
+        internal int CharPositionFromLine(int index) {
+            index = Npp.Clamp(index, 0, _perLineData.Count);
+            var start = _perLineData[index].Start;
+            if (index > _stepLine)
+                start += _stepLength;
+
+            // The check below ensure we correct our info if we failed to find the char position
+            if (start == 0 && index > 0) {
+                RebuildLineData();
+                start = _perLineData[index].Start;
+                if (index > _stepLine)
+                    start += _stepLength;
+            }
+
+            return start;
+        }
+
         /// <summary>
         /// Returns the line index containing the CHARACTER position.
         /// </summary>
@@ -101,67 +169,6 @@ namespace _3PA.Interop {
             // inserted (if we were creating a new line start). The line containing
             // 'pos' then would be 'low - 1'.
             return low - 1;
-        }
-
-        internal int CharToBytePosition(int pos) {
-            pos = Npp.Clamp(pos, 0, TextLength);
-
-            // Adjust to the nearest line start
-            var line = LineFromCharPosition(pos);
-            var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            pos -= CharPositionFromLine(line);
-
-            // Optimization when the line contains NO multibyte characters
-            if (!LineContainsMultibyteChar(line))
-                return (bytePos + pos);
-
-            while (pos > 0) {
-                // Move char-by-char
-                bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
-                pos--;
-            }
-
-            return bytePos;
-        }
-
-        /// <summary>
-        /// Converts a BYTE offset to a CHARACTER offset.
-        /// </summary>
-        internal int ByteToCharPosition(int pos) {
-            pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
-
-            var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
-            var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
-            return count;
-        }
-
-        /// <summary>
-        /// Returns the number of CHARACTERS in a line.
-        /// </summary>
-        internal int CharLineLength(int index) {
-            // A line's length is calculated by subtracting its start offset from
-            // the start of the line following. We keep a terminal (faux) line at
-            // the end of the list so we can calculate the length of the last line.
-            index = Npp.Clamp(index, 0, Count);
-
-            if (index + 1 <= _stepLine)
-                return _perLineData[index + 1].Start - _perLineData[index].Start;
-            if (index <= _stepLine)
-                return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
-            return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
-        }
-
-        /// <summary>
-        /// Returns the CHARACTER offset where the line begins.
-        /// </summary>
-        internal int CharPositionFromLine(int index) {
-            index = Npp.Clamp(index, 0, _perLineData.Count);
-
-            var start = _perLineData[index].Start;
-            if (index > _stepLine)
-                start += _stepLength;
-            return start;
         }
 
         #endregion Methods

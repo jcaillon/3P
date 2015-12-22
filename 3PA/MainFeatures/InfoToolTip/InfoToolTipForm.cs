@@ -103,7 +103,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _position = position;
             _lineHeight = lineHeight;
 
-            var screen = Npp.GetNppScreen();
+            var screen = Screen.FromPoint(position);
 
             // position the window smartly
             if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _rect = rect;
             _reversed = reversed;
 
-            var screen = Npp.GetNppScreen();
+            var screen = Screen.FromPoint(rect.Location);
 
             var position = new Point(0, 0);
             // position the window smartly

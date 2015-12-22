@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
@@ -22,6 +23,12 @@ using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace YamuiDemoApp {
 
+    public class ColorScheme {
+        public string Name = "Default";
+        public int UniqueId = 0;
+    }
+
+
     static class Program {
 
         public static YamuiForm MainForm;
@@ -31,7 +38,14 @@ namespace YamuiDemoApp {
         /// </summary>
         [STAThread]
         static void Main() {
-            
+
+
+            /*
+            Ship ship = new Ship();
+            string value = "5.5";
+            PropertyInfo propertyInfo = ship.GetType().GetProperty("Latitude");
+            propertyInfo.SetValue(ship, Convert.ChangeType(value, propertyInfo.PropertyType), null);
+            */
 
             ////------------
             //var watch = Stopwatch.StartNew();

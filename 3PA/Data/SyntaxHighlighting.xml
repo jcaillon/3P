@@ -88,4 +88,48 @@
     <FgError4 Value="#58267E" />
     <BgError4 Value="#CC99FF" />
   </StyleTheme>
+  <StyleTheme>
+    <Name Value="Michael Knight" />
+    <UniqueId Value="2" />
+    <BgDefault Value="#1D1F21" />
+    <FgDefault Value="#C5C8C6" />
+    <FgComment Value="#969896" />
+    <FgLineComment Value="#DE935F" />
+    <FgNumbers Value="#CC6666" />
+    <FgKeyword1 Value="#81A2BE" />
+    <BgKeyword1 Value="#81A2BE" />
+    <FgKeyword2 Value="#B294BB" />
+    <FgKeyword3 Value="#B294BB" />
+    <FgKeyword4 Value="#2F5E9B" />
+    <FgKeyword5 Value="#DE935F" />
+    <FgKeyword6 Value="#CC6666" />
+    <FgKeyword7 Value="#F5871F" />
+    <FgKeyword8 Value="#000000" />
+    <BgKeyword8 Value="#ADFF2F" />
+    <FgOperators Value="#8ABEB7" />
+    <FgFoldInCode1 Value="#183E56" />
+    <FgFoldInCode2 Value="#183E56" />
+    <FgFoldInComment Value="#000000" />
+    <FgDelimiters1 Value="#B5BD68" />
+    <FgDelimiters2 Value="#73EC0F" />
+    <FgDelimiters3 Value="#4D4D4C" />
+    <BgDelimiters3 Value="#C5C8C6" />
+    <FgDelimiters4 Value="#B5BD68" />
+    <FgDelimiters5 Value="#73EC0F" />
+    <FgDelimiters6 Value="#000000" />
+    <FgDelimiters7 Value="#000000" />
+    <FgDelimiters8 Value="#969896" />
+    <FgNoError Value="#007B74" />
+    <BgNoError Value="#C6EFCE" />
+    <FgError0 Value="#3F3F3F" />
+    <BgError0 Value="#F2F2F2" />
+    <FgError1 Value="#9C6500" />
+    <BgError1 Value="#FFEB9C" />
+    <FgError2 Value="#833C0C" />
+    <BgError2 Value="#FFCC99" />
+    <FgError3 Value="#9C0006" />
+    <BgError3 Value="#FFC7CE" />
+    <FgError4 Value="#58267E" />
+    <BgError4 Value="#CC99FF" />
+  </StyleTheme>
 </Root>

@@ -1,0 +1,56 @@
+# This allows to configure styles for the syntax highlighting feature 
+# follow the format below : (tab separated values)
+#
+# > Style name
+# keyword type	bg color	fg color	font style (0 normal, 1 bold, 2 italic)
+#
+> The classic
+Default	#000000	#FFFFFF	1
+Comment	#008000	#FFFFFF	0
+NestedComment	#408080	#FFFFFF	0
+PreProcessed	#804000	#FFFFFF	2
+JumpStatement	#000080	#FCD54B	1
+Statement	#000080	#FFFFFF	1
+VarType	#0075EA	#FFFFFF	1
+OtherKeywords	#005EBB	#FFFFFF	1
+Operators	#408080	#FFFFFF	1
+Abbreviations	#EC4D00	#FFFFFF	1
+Includes	#0000A0	#FFFFAA	2
+DoubleQuote	#FF42FF	#FFFFFF	0
+SimpleQuote	#CE00CE	#FFFFFF	0
+NormedVariables	#2D2DFF	#FFFFFF	0
+UserName	#000000	#9EE41B	1
+
+> Mono-kawaaiii
+Default	#000000	#FFFFFF	1
+Comment	#008000	#FFFFFF	0
+NestedComment	#408080	#FFFFFF	0
+PreProcessed	#804000	#FFFFFF	2
+JumpStatement	#000080	#FCD54B	1
+Statement	#000080	#FFFFFF	1
+VarType	#0075EA	#FFFFFF	1
+OtherKeywords	#005EBB	#FFFFFF	1
+Operators	#408080	#FFFFFF	1
+Abbreviations	#EC4D00	#FFFFFF	1
+Includes	#0000A0	#FFFFAA	2
+DoubleQuote	#FF42FF	#FFFFFF	0
+SimpleQuote	#CE00CE	#FFFFFF	0
+NormedVariables	#2D2DFF	#FFFFFF	0
+UserName	#000000	#9EE41B	1
+
+> Michael Knight
+Default	#000000	#FFFFFF	1
+Comment	#008000	#FFFFFF	0
+NestedComment	#408080	#FFFFFF	0
+PreProcessed	#804000	#FFFFFF	2
+JumpStatement	#000080	#FCD54B	1
+Statement	#000080	#FFFFFF	1
+VarType	#0075EA	#FFFFFF	1
+OtherKeywords	#005EBB	#FFFFFF	1
+Operators	#408080	#FFFFFF	1
+Abbreviations	#EC4D00	#FFFFFF	1
+Includes	#0000A0	#FFFFAA	2
+DoubleQuote	#FF42FF	#FFFFFF	0
+SimpleQuote	#CE00CE	#FFFFFF	0
+NormedVariables	#2D2DFF	#FFFFFF	0
+UserName	#000000	#9EE41B	1

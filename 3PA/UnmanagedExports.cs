@@ -146,9 +146,10 @@ namespace _3PA {
                         Npp.UpdateLinesInfo(nc);
 
                         // if the text has changed, parse
-                        if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 ||
-                            (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0)
+                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 || 
+                            (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
                             AutoComplete.ParseCurrentDocument();
+                        }
 
                         // did the user supress 1 char?
                         if ((nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
