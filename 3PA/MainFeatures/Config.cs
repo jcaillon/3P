@@ -125,6 +125,13 @@ namespace _3PA.MainFeatures {
             AutoGenerateField = false)]
         public bool GlobalDontUpdateUdlOnUpdate = false;
 
+        [Display(Name = "Panels refresh rate",
+            Description = "3P ensures the stability of its 2 panels (code/file explorer) by handling them directly<br>(instead of letting notepad++ do the job), this option allows to set the refresh rate (in milliseconds)<br>of the position/size of the 2 panels<br><br><b>Set a low value for a better visual rendering when moving/resizing notepad++<br>Set a higher value for better performances</b><br><i>If you are on a laptop, setting a higher value is a good idea to preserve your battery<br><br><b>This option is only applied when restarting notepad++!!</b></i>",
+            GroupName = "General",
+            AutoGenerateField = false)]
+        [Range(16, 500)]
+        public int GlobalRefreshRate = 30;
+
         public bool GlobalShowDetailedHelpForErrors = true;
         public bool GlobalCompileFilesLocally = false;
 

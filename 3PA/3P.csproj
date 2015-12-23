@@ -98,12 +98,24 @@
       <DependentUpon>OptionPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\CodeBeautifier.cs" />
+    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
+      <DependentUpon>EmptyForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.Designer.cs">
+      <DependentUpon>NppDockableDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProgressExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
@@ -286,6 +298,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
+      <DependentUpon>EmptyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>

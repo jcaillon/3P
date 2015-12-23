@@ -62,3 +62,4 @@ D:\Repo\3P\3PA\obj\Debug\3P.pdb
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.EmptyForm.resources

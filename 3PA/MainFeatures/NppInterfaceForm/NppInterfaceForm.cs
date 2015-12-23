@@ -85,7 +85,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // timer to check if the npp window changed
             _timerCheckNppRect = new Timer {
                 Enabled = true,
-                Interval = 500
+                Interval = 800
             };
             _timerCheckNppRect.Tick += TimerCheckNppRectTick;
 

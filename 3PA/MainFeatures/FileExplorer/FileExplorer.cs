@@ -25,6 +25,8 @@ using System.Text.RegularExpressions;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.CodeExplorer;
+using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
     public class FileExplorer {
@@ -32,20 +34,15 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region fields
 
         /// <summary>
-        /// Index command that activates this dockable window
-        /// </summary>
-        public static int DockableCommandIndex;
-
-        /// <summary>
         /// Form accessor
         /// </summary>
-        public static FileExplorerForm ExplorerForm { get; private set; }
+        public static FileExplorerForm Form { get; private set; }
 
         /// <summary>
         /// Does the form exists and is visible?
         /// </summary>
         public static bool IsVisible {
-            get { return ExplorerForm != null && ExplorerForm.Visible; }
+            get { return Form != null && Form.Visible; }
         }
 
         #endregion
@@ -53,32 +50,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region handling form
 
         /// <summary>
-        /// Toggle the docked form on and off, can be called first and will initialize the form
-        /// </summary>
-        public static void Toggle() {
-            try {
-                // initialize if not done
-                if (ExplorerForm == null) {
-                    Init();
-                } else {
-                    Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
-                }
-                if (ExplorerForm == null) return;
-                ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-                UpdateMenuItemChecked();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
-            }
-        }
-
-        /// <summary>
         /// Use this to redraw the docked form
         /// </summary>
         public static void Redraw() {
             if (IsVisible) {
-                ExplorerForm.StyleOvlTree();
-                ExplorerForm.Invalidate();
-                ExplorerForm.Refresh();
+                Form.StyleOvlTree();
+                Form.Invalidate();
+                Form.Refresh();
             }
         }
 
@@ -87,40 +65,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// the user changes the current document
         /// </summary>
         public static void RedrawFileExplorerList() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.Redraw();
-        }
-
-        /// <summary>
-        /// Either check or uncheck the menu, depending on the visibility of the form
-        /// (does it both on the menu and toolbar)
-        /// </summary>
-        public static void UpdateMenuItemChecked() {
-            if (ExplorerForm == null) return;
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, ExplorerForm.Visible ? 1 : 0);
-            Config.Instance.FileExplorerVisible = ExplorerForm.Visible;
-        }
-
-        /// <summary>
-        /// Initialize the form
-        /// </summary>
-        public static void Init() {
-
-            ExplorerForm = new FileExplorerForm();
-
-            NppTbData nppTbData = new NppTbData {
-                hClient = ExplorerForm.Handle,
-                pszName = AssemblyInfo.ProductTitle + " - File explorer",
-                dlgID = DockableCommandIndex,
-                uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
-                pszModuleName = AssemblyInfo.ProductTitle
-            };
-
-            IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
-            Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+            if (Form == null) return;
+            Form.Redraw();
         }
 
         #endregion
@@ -131,9 +77,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Refresh the files list
         /// </summary>
         public static void Refresh() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.RefreshOvl();
-            ExplorerForm.FilterByText = "";
+            if (Form == null) return;
+            Form.RefreshOvl();
+            Form.FilterByText = "";
         }
 
         /// <summary>
@@ -144,9 +90,9 @@ namespace _3PA.MainFeatures.FileExplorer {
                 if (!Plug.AllowFeatureExecution())
                     return;
 
-                if (ExplorerForm == null) return;
-                ExplorerForm.ClearFilter();
-                ExplorerForm.GiveFocustoTextBox();
+                if (Form == null) return;
+                Form.ClearFilter();
+                Form.GiveFocustoTextBox();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in StartSearch");
             }
@@ -211,6 +157,62 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #endregion
 
+        #region Dockable dialog
+        public static EmptyForm FakeForm { get; private set; }
+        public static int DockableCommandIndex;
+
+        /// <summary>
+        /// Toggle the docked form on and off, can be called first and will initialize the form
+        /// </summary>
+        public static void Toggle() {
+            try {
+                // initialize if not done
+                if (FakeForm == null) {
+                    Init();
+                } else {
+                    Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
+                }
+                if (FakeForm == null) return;
+                Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+                UpdateMenuItemChecked();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
+            }
+        }
+
+        /// <summary>
+        /// Either check or uncheck the menu, depending on the visibility of the form
+        /// (does it both on the menu and toolbar)
+        /// </summary>
+        public static void UpdateMenuItemChecked() {
+            if (FakeForm == null) return;
+            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
+            Config.Instance.FileExplorerVisible = FakeForm.Visible;
+        }
+
+        /// <summary>
+        /// Initialize the form
+        /// </summary>
+        public static void Init() {
+            // register fake form to Npp
+            FakeForm = new EmptyForm();
+            NppTbData nppTbData = new NppTbData {
+                hClient = FakeForm.Handle,
+                pszName = AssemblyInfo.ProductTitle + " - File explorer",
+                dlgID = DockableCommandIndex,
+                uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
+                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
+                pszModuleName = AssemblyInfo.ProductTitle
+            };
+
+            IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
+            Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
+            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+
+            Form = new FileExplorerForm(FakeForm);
+        }
+
+        #endregion
     }
 
     #region FileObject

@@ -264,8 +264,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void ApplySettings() {
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            CodeExplorer.CodeExplorer.ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-            FileExplorer.FileExplorer.ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+            CodeExplorer.CodeExplorer.Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+            FileExplorer.FileExplorer.Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
             CodeExplorer.CodeExplorer.RedrawCodeExplorerList();
             FileExplorer.FileExplorer.RedrawFileExplorerList();
             AutoComplete.ForceClose();

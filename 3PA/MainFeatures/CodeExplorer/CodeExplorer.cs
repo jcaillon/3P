@@ -22,24 +22,29 @@ using System.Runtime.InteropServices;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.CodeExplorer {
     public class CodeExplorer {
 
-        public static int DockableCommandIndex;
+        #region Fields
 
-        public static CodeExplorerForm ExplorerForm { get; private set; }
+        public static CodeExplorerForm Form { get; private set; }
 
         public static bool IsVisible {
-            get { return ExplorerForm != null && ExplorerForm.Visible; }
+            get { return Form != null && Form.Visible; }
         }
+
+        #endregion
+
+        #region public methods
 
         /// <summary>
         /// Call this method to update the code explorer tree with the data from the Parser Handler
         /// </summary>
         public static void UpdateCodeExplorer() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.UpdateTreeData();
+            if (Form == null) return;
+            Form.UpdateTreeData();
         }
 
         /// <summary>
@@ -47,45 +52,26 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// the user click in scintilla
         /// </summary>
         public static void RedrawCodeExplorerList() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.Redraw();
+            if (Form == null) return;
+            Form.Redraw();
         }
 
         /// <summary>
         /// Clear tree data
         /// </summary>
         public static void ClearTree() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.ClearTree();
+            if (Form == null) return;
+            Form.ClearTree();
         }
 
         /// <summary>
         /// Apply the onDocumentChange
         /// </summary>
         public static void RefreshParserAndCodeExplorer() {
-            if (ExplorerForm == null) return;
-            ExplorerForm.RefreshParserAndCodeExplorer();
+            if (Form == null) return;
+            Form.RefreshParserAndCodeExplorer();
         }
 
-        /// <summary>
-        /// Toggle the docked form on and off, can be called first and will initialize the form
-        /// </summary>
-        public static void Toggle() {
-            try {
-                // initialize if not done
-                if (ExplorerForm == null) {
-                    Init();
-                    UpdateCodeExplorer();
-                } else {
-                    Win32.SendMessage(Npp.HandleNpp, !ExplorerForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, ExplorerForm.Handle);
-                }
-                if (ExplorerForm == null) return;
-                ExplorerForm.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-                UpdateMenuItemChecked();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
-            }
-        }
 
         /// <summary>
         /// Use this to redraw the docked form
@@ -93,9 +79,37 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public static void Redraw() {
             if (IsVisible) {
                 //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
-                ExplorerForm.StyleOvlTree();
-                ExplorerForm.Invalidate();
-                ExplorerForm.Refresh();
+                Form.StyleOvlTree();
+                Form.Invalidate();
+                Form.Refresh();
+            }
+        }
+
+        #endregion
+
+
+        #region DockableDialog
+
+        public static EmptyForm FakeForm { get; private set; }
+        public static int DockableCommandIndex;
+
+        /// <summary>
+        /// Toggle the docked form on and off, can be called first and will initialize the form
+        /// </summary>
+        public static void Toggle() {
+            try {
+                // initialize if not done
+                if (FakeForm == null) {
+                    Init();
+                    UpdateCodeExplorer();
+                } else {
+                    Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
+                }
+                if (FakeForm == null) return;
+                Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+                UpdateMenuItemChecked();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
             }
         }
 
@@ -104,27 +118,31 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// (does it both on the menu and toolbar)
         /// </summary>
         public static void UpdateMenuItemChecked() {
-            if (ExplorerForm == null) return;
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, ExplorerForm.Visible ? 1 : 0);
-            Config.Instance.CodeExplorerVisible = ExplorerForm.Visible;
+            if (FakeForm == null) return;
+            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
+            Config.Instance.CodeExplorerVisible = FakeForm.Visible;
         }
 
         /// <summary>
         /// Initialize the form
         /// </summary>
         public static void Init() {
-            ExplorerForm = new CodeExplorerForm();
+            FakeForm = new EmptyForm();
             NppTbData nppTbData = new NppTbData {
-                hClient = ExplorerForm.Handle,
+                hClient = FakeForm.Handle,
                 pszName = AssemblyInfo.ProductTitle + " - Code explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
-                hIconTab = (uint)Utils.GetIconFromImage(ImageResources.CodeExplorerLogo).Handle,
+                hIconTab = (uint) Utils.GetIconFromImage(ImageResources.CodeExplorerLogo).Handle,
                 pszModuleName = AssemblyInfo.ProductTitle
             };
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
             Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+            Form = new CodeExplorerForm(FakeForm);
         }
+
+        #endregion
+
     }
 }

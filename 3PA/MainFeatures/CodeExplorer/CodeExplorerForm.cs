@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -29,10 +30,11 @@ using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-    public partial class CodeExplorerForm : Form {
+    public partial class CodeExplorerForm : NppDockableDialog {
 
         #region fields
 
@@ -87,7 +89,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region constructor
 
-        public CodeExplorerForm() {
+        public CodeExplorerForm(EmptyForm formToCover)
+            : base(formToCover) {
             InitializeComponent();
 
             SetStyle(
@@ -95,9 +98,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
-            
-            StartPosition = FormStartPosition.Manual;
-            Location = new Point(-1000,-1000);
 
             // Can the given object be expanded?
             ovlTree.CanExpandGetter = x => ((CodeExplorerItem)x).HasChildren;
@@ -144,10 +144,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
             // problems with the width of the column, set here
             DisplayText.Width = ovlTree.Width - 17;
-            ovlTree.SizeChanged += (sender, args) => {
-                DisplayText.Width = ovlTree.Width - 17;
-                ovlTree.Invalidate();
-            };
+            ClientSizeChanged += (sender, args) => DisplayText.Width = ovlTree.Width - 17;
         }
 
         #endregion

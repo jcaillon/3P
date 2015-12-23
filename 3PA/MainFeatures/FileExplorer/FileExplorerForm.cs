@@ -36,10 +36,11 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
+using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
-    public partial class FileExplorerForm : Form {
+    public partial class FileExplorerForm : NppDockableDialog {
 
         #region Fields
         private const string StrEmptyList = "No files found!";
@@ -84,7 +85,8 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region constructor
 
-        public FileExplorerForm() {
+        public FileExplorerForm(EmptyForm formToCover)
+            : base(formToCover) {
             InitializeComponent();
 
             SetStyle(
@@ -118,10 +120,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // problems with the width of the column, set here
             FileName.Width = ovl.Width - 17;
-            ovl.SizeChanged += (sender, args) => {
-                FileName.Width = ovl.Width - 17;
-                ovl.Invalidate();
-            };
+            ovl.ClientSizeChanged += (sender, args) => FileName.Width = ovl.Width - 17;
 
             #endregion
 

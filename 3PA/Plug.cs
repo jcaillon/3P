@@ -127,7 +127,7 @@ namespace _3PA {
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
             menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
-            menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
+            //menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
             //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
 
             menu.SetSeparator();
