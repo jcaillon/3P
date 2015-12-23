@@ -137,8 +137,6 @@ namespace _3PA.MainFeatures {
                     }
                 }
 
-
-
                 Npp.EndUndoAction();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when commenting");
@@ -161,9 +159,14 @@ namespace _3PA.MainFeatures {
 
             // line is surrounded by /* */
             if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
-                // delete /* */
-                Npp.SetTextByRange(endPos - 2, endPos, String.Empty);
-                Npp.SetTextByRange(startPos, startPos + 2, String.Empty);
+                if (Npp.GetTextByRange(startPos, endPos).Equals("/*  */")) {
+                    // delete an empty comment
+                    Npp.SetTextByRange(startPos, endPos, String.Empty);
+                } else {
+                    // delete /* */
+                    Npp.SetTextByRange(endPos - 2, endPos, String.Empty);
+                    Npp.SetTextByRange(startPos, startPos + 2, String.Empty);
+                }
                 return 1;
             }
 

@@ -96,6 +96,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="procedureData"></param>
         /// <returns></returns>
         public static List<CompletionData> FindProcedureParameters(CompletionData procedureData) {
+
             var parserVisitor = ParserVisitor.ParseFile(procedureData.ParsedItem.FilePath, "");
             return parserVisitor.ParsedItemsList.Where(data =>
                 data.FromParser &&

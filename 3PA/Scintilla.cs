@@ -1923,7 +1923,8 @@ namespace _3PA {
         ///     Clear all annotations in one go
         /// </summary>
         public static void AnnotationClearAll() {
-            Sci.Send(SciMsg.SCI_ANNOTATIONCLEARALL);
+            //Sci.Send(SciMsg.SCI_ANNOTATIONCLEARALL);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
         }
 
         /// <summary>

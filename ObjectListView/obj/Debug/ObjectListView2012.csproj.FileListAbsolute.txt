@@ -36,4 +36,3 @@ D:\Repo\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.ColumnSelectionForm.reso
 D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView2012.csproj.GenerateResource.Cache
 D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.dll
 D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.pdb
-D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView2012.csprojResolveAssemblyReference.cache

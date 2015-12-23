@@ -704,6 +704,15 @@ namespace _3PA {
 
         public static void Test() {
 
+            UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
+                        The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
+                        It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
+                        You will have to manually copy the new file and delete the old file :<br><br>
+                        Copy this file : <a href='" + Path.GetDirectoryName(@"L:\cnaf 2014\Production\BAO\BOI\65.100\325-2\04-Développement\BOI 325-2 - Liste des composants.xls") + "'>" + @"L:\cnaf 2014\Production\BAO\BOI\65.100\325-2\04-Développement\BOI 325-2 - Liste des composants.xls" + @"</a></b><br>" + @"
+                        In this folder (replacing the old file) : <b><a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a></b><br>
+                        Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
+                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
+
             UserCommunication.Notify("<a href='" + AssemblyInfo.Location.ProgressQuoter() + "'>" + AssemblyInfo.Location.ProgressQuoter() + "</a><br>" + AssemblyInfo.IsPreRelease + "<br><a href='" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "'>" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "</a>" + "<br><a href='" + @"C:\Work\3P\3PA\Interop" + "'>" + @"C:\Work\3P\3PA\Interop" + "</a>" + "<br><a href='" + @"https://github.com/jcaillon/3P/releases" + "'>" + @" https://github.com/jcaillon/3P/releases" + "</a>");
        
             var canIndent = ParserHandler.CanIndent();

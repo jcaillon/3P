@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures {
         public string GlobalHelpFilePath = "";
 
         [Display(Name = "Always show a notification after a compilation",
-            Description = "Explicit",
+            Description = "Whether or not to systematically show a notification after a compilation<br>By default, a notification is shown if notepad++ doesn't have the focus or if they are errors",
             GroupName = "General",
             AutoGenerateField = false)]
         public bool CompileAlwaysShowNotification = false;
@@ -178,19 +178,19 @@ namespace _3PA.MainFeatures {
         public int AutoCompleteStartShowingListAfterXChar = 1;
 
         [Display(Name = "Use TAB to accept a suggestion",
-            Description = "Explicit",
+            Description = "Whether or not to allow the TAB key to accept the suggestion",
             GroupName = "Auto-completion",
             AutoGenerateField = false)]
         public bool AutoCompleteUseTabToAccept = true;
 
         [Display(Name = "User ENTER to accept a suggestion",
-            Description = "Explicit",
+            Description = "Whether or not to allow the ENTER key to accept the suggestion",
             GroupName = "Auto-completion",
             AutoGenerateField = false)]
         public bool AutoCompleteUseEnterToAccept = false;
 
         [Display(Name = "Show list in comments and strings",
-            Description = "Explicit",
+            Description = "By default, the autocompletion list is hidden in comments and strings<br>you can still show the completion list manually!",
             GroupName = "Auto-completion",
             AutoGenerateField = false)]
         public bool AutoCompleteShowInCommentsAndStrings = false;

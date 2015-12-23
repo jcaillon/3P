@@ -269,8 +269,8 @@ namespace _3PA.MainFeatures {
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
                         You will have to manually copy the new file and delete the old file :<br><br>
-                        Copy this file : <b><a href='" + PathDownloadedPlugin + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
-                        In this folder (replacing the old file) : <b><a href='" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + "'>" + Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), "../")) + @"</a></b><br>
+                        Copy this file : <a href='" + Path.GetDirectoryName(PathDownloadedPlugin) + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
+                        In this folder (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
                         Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                     return;

@@ -72,6 +72,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
 
+        /// <summary>
+        /// We keep tracks of the parsed files, to avoid parsing the same file twice
+        /// </summary>
+        private static Dictionary<string, bool> _parsedFiles = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+
         #endregion
 
         #region constructor
@@ -86,6 +91,10 @@ namespace _3PA.MainFeatures.Parser {
             _isBaseFile = isBaseFile;
             _currentParsedFile = currentParsedFile;
             _lineInfo = lineInfo;
+
+            // reset the parsed files for the session
+            if (isBaseFile)
+                _parsedFiles.Clear();
         }
 
         #endregion
@@ -126,8 +135,15 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // if the run is PERSISTENT, we need to load the functions/proc of the program
-            if (pars.HasPersistent && !string.IsNullOrEmpty(fullFilePath))
+            if (pars.HasPersistent && !string.IsNullOrEmpty(fullFilePath)) {
+
+                // ensure to not parse the same file twice in a parser session!
+                if (_parsedFiles.ContainsKey(fullFilePath))
+                    return;
+                _parsedFiles.Add(fullFilePath, false);
+
                 LoadProcPersistent(fullFilePath, pars.OwnerName, true);
+            }
         }
 
         /// <summary>
@@ -192,8 +208,13 @@ namespace _3PA.MainFeatures.Parser {
                 SubString = SetExternalInclude(null)
             });
 
-            // Parse the include file
+            // Parse the include file ?
             if (string.IsNullOrEmpty(fullFilePath)) return;
+
+            // ensure to not parse the same file twice in a parser session!
+            if (_parsedFiles.ContainsKey(fullFilePath))
+                return;
+            _parsedFiles.Add(fullFilePath, false);
 
             ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
             var parserItemList = parserVisitor.ParsedItemsList.ToList();
@@ -554,7 +575,7 @@ namespace _3PA.MainFeatures.Parser {
         public static ParserVisitor ParseFile(string fileName, string ownerName) {
             ParserVisitor parserVisitor;
 
-            // did we already parsed this file?
+            // did we already parsed this file in a previous parse session?
             if (ParserHandler.SavedParserVisitors.ContainsKey(fileName)) {
                 parserVisitor = ParserHandler.SavedParserVisitors[fileName];
             } else {
@@ -580,6 +601,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="ownerName"></param>
         /// <param name="runPersistentIsInFile"></param>
         public void LoadProcPersistent(string fileName, string ownerName, bool runPersistentIsInFile = false) {
+
             ParserVisitor parserVisitor = ParseFile(fileName, ownerName);
 
             // add info to the completion list

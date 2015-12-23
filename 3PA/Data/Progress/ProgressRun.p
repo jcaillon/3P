@@ -12,7 +12,7 @@ DEFINE STREAM str_logout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 
 FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT piMsgNum AS INTEGER) FORWARD.
-FUNCTION fi_output_last_error RETURNS CHARACTER ( ) FORWARD.
+FUNCTION fi_output_last_error RETURNS LOGICAL ( ) FORWARD.
 
 /* Critical options!! */
 SESSION:SYSTEM-ALERT-BOXES = YES.
@@ -39,6 +39,7 @@ CASE {&ExecutionType} :
         SAVE=TRUE INTO VALUE({&CompilePath})
         DEBUG-LIST VALUE({&LstFile})
         NO-ERROR.
+        fi_output_last_error().
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
     END.
@@ -49,6 +50,7 @@ CASE {&ExecutionType} :
             ON QUIT   UNDO, LEAVE:
             RUN VALUE({&ToCompile}) NO-ERROR.
         END.
+        fi_output_last_error().
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
     END.
@@ -76,8 +78,6 @@ PROCEDURE pi_handleCompilErrors :
     DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
     DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
     DEFINE VARIABLE li_ret AS INTEGER NO-UNDO.
-
-    fi_output_last_error().
         
     IF COMPILER:NUM-MESSAGES > 0 THEN DO:
         ASSIGN li_i = 1.
@@ -155,7 +155,7 @@ FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT piMsgNum AS INTEGER
 
 END FUNCTION.
 
-FUNCTION fi_output_last_error RETURNS CHARACTER ( ) :
+FUNCTION fi_output_last_error RETURNS LOGICAL ( ) :
 /*------------------------------------------------------------------------------
   Purpose: retourne la valeur de la dernière erreur rencontrée
     Notes:
@@ -170,8 +170,9 @@ FUNCTION fi_output_last_error RETURNS CHARACTER ( ) :
                 PUT STREAM str_logout UNFORMATTED "GET-MESSAGE(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
+        RETURN TRUE.
     END.
     ERROR-STATUS:ERROR = NO.
-    RETURN "".
+    RETURN FALSE.
 
 END FUNCTION.

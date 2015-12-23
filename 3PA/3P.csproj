@@ -316,6 +316,7 @@
     <None Include="Data\Keywords" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\Progress\DumpDatabase.p" />
+    <None Include="Data\Progress\handleCompilErrors_forv10.1.p" />
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\Snippets" />
     <None Include="Data\SyntaxHighlighting" />
