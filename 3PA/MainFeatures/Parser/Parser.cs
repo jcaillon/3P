@@ -262,16 +262,6 @@ namespace _3PA.MainFeatures.Parser {
                                     _context.BlockStack.Pop();
                             } else
                                 ParsingOk = false;
-
-                            if (_context.BlockStack.Count == 0) {
-                                // end of a proc, func or on event block
-                                if (_context.Scope != ParsedScope.File) {
-                                    var parsedScope = (ParsedScopeItem)_parsedItemList.FindLast(item => item is ParsedScopeItem);
-                                    if (parsedScope != null) parsedScope.EndLine = token.Line;
-                                    _context.OwnerName = RootScopeName;
-                                }
-                                _context.Scope = ParsedScope.File;
-                            }
                             break;
                         case "else":
                             // add a one time indent after a then or else
@@ -374,6 +364,17 @@ namespace _3PA.MainFeatures.Parser {
                     if (_context.BlockStack.Count == 0)
                         break;
                 }
+
+            // This statement made the BlockState count go to 0
+            if (_context.BlockStack.Count == 0) {
+                // did we match an end of a proc, func or on event block?
+                if (_context.Scope != ParsedScope.File) {
+                    var parsedScope = (ParsedScopeItem)_parsedItemList.FindLast(item => item is ParsedScopeItem);
+                    if (parsedScope != null) parsedScope.EndLine = token.Line;
+                    _context.OwnerName = RootScopeName;
+                    _context.Scope = ParsedScope.File;
+                }
+            }
 
             _context.StatementCount++;
             _context.StatementWordCount = 0;

@@ -214,14 +214,14 @@ namespace _3PA.MainFeatures {
 
                 UserCommunication.Notify(@"Dear user, <br>
                 <br>
-                a new version of 3P is available on github and will be automatically installed the next time you restart notepad++<br>
+                A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
                 <br>
                 Your version : <b>" + AssemblyInfo.Version + @"</b><br>
                 Distant version : <b>" + LatestReleaseInfo.Version + @"</b><br>
                 Release name : <b>" + LatestReleaseInfo.Name + @"</b><br>
                 Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
                 Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
-                                         (!Config.Instance.UserGetsPreReleases ? "" : "Is it a pre-release : " + LatestReleaseInfo.IsPreRelease) + "<br>", MessageImg.MsgUpdate, "Update check", "An update is available");
+                                         ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
             }

@@ -28,6 +28,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -70,34 +71,42 @@ namespace _3PA.Lib {
         /// <param name="path"></param>
         /// <param name="recursive"></param>
         public static void DeleteDirectory(string path, bool recursive) {
-            // Delete all files and sub-folders?
-            if (recursive) {
-                // Yep... Let's do this
-                var subfolders = Directory.GetDirectories(path);
-                foreach (var s in subfolders) {
-                    DeleteDirectory(s, true);
-                }
-            }
+            try {
+                if (!Directory.Exists(path))
+                    return;
 
-            // Get all files of the folder
-            var files = Directory.GetFiles(path);
-            foreach (var f in files) {
-                // Get the attributes of the file
-                var attr = File.GetAttributes(f);
-
-                // Is this file marked as 'read-only'?
-                if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
-                    // Yes... Remove the 'read-only' attribute, then
-                    File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                // Delete all files and sub-folders?
+                if (recursive) {
+                    // Yep... Let's do this
+                    var subfolders = Directory.GetDirectories(path);
+                    foreach (var s in subfolders) {
+                        DeleteDirectory(s, true);
+                    }
                 }
 
-                // Delete the file
-                File.Delete(f);
-            }
+                // Get all files of the folder
+                var files = Directory.GetFiles(path);
+                foreach (var f in files) {
+                    // Get the attributes of the file
+                    var attr = File.GetAttributes(f);
 
-            // When we get here, all the files of the folder were
-            // already deleted, so we just delete the empty folder
-            Directory.Delete(path);
+                    // Is this file marked as 'read-only'?
+                    if ((attr & FileAttributes.ReadOnly) == FileAttributes.ReadOnly) {
+                        // Yes... Remove the 'read-only' attribute, then
+                        File.SetAttributes(f, attr ^ FileAttributes.ReadOnly);
+                    }
+
+                    // Delete the file
+                    File.Delete(f);
+                }
+
+                // When we get here, all the files of the folder were
+                // already deleted, so we just delete the empty folder
+                Directory.Delete(path);
+            } catch (Exception e) {
+                ErrorHandler.DirtyLog(e);
+                UserCommunication.Notify("Failed to delete the following directory :<br>" + path, MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder");
+            }
         }
 
         /// <summary>
@@ -111,7 +120,7 @@ namespace _3PA.Lib {
                 Multiselect = false,
                 Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter
             };
-            var initialFolder = Path.GetDirectoryName(initialFile);
+            var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
             if (initialFolder != null && Directory.Exists(initialFolder))
                 dialog.InitialDirectory = initialFolder;
             if (File.Exists(initialFile))

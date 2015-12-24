@@ -12,7 +12,7 @@ namespace YamuiDemoApp {
     class ParserLexerTests {
 
         public static void Run() {
-            /*
+            
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -21,7 +21,7 @@ namespace YamuiDemoApp {
             var watch = Stopwatch.StartNew();
             //------------
 
-            Parser tok = new Parser(File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\blabla.p"), @"d:\Profiles\jcaillon\Desktop\blabla.p", null);
+            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\saxo2jira.p"), @"d:\Profiles\jcaillon\Desktop\blabla.p", null);
             //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
 
             OutputVis vis = new OutputVis();
@@ -32,11 +32,11 @@ namespace YamuiDemoApp {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
 
 
             // OUTPUT INFO ON EACH LINE
-            if (false) {
+            if (true) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
                 var dic = tok.GetLineInfo;
@@ -49,7 +49,7 @@ namespace YamuiDemoApp {
             }
 
             return;
-            */
+            
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -77,7 +77,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedLabel pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedFunctionCall pars) {
@@ -94,7 +94,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunction pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
 
         public void Visit(ParsedProcedure pars) {
@@ -110,6 +110,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedDefine pars) {
+            return;
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
@@ -117,7 +118,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedTable pars) {
-            //return;
+            return;
             Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
             foreach (var field in pars.Fields) {
                 Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
