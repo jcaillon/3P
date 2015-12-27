@@ -54,6 +54,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public NppDockableDialog(EmptyForm formToCover) {
             InitializeComponent();
 
+            // register to Npp
+            FormIntegration.RegisterToNpp(Handle);
+
             FormBorderStyle = FormBorderStyle.None;
             ControlBox = false;
             ShowInTaskbar = false;
@@ -64,6 +67,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             ClientSize = _masterForm.ClientSize;
 
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
+            _masterForm.Closed += MasterFormOnClosed;
 
             Show(_masterForm);
             // Disable Aero transitions, the plexiglass gets too visible
@@ -77,9 +81,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 Enabled = true,
                 Interval = Config.Instance.GlobalRefreshRate
             };
+
             _masterRectangle = new Rectangle(0, 0, 0, 0);
             _timerCheck.Tick += TimerTick;
-
         }
 
         #endregion
@@ -107,13 +111,25 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             if (!Visible) {
                 // get it out of the screen or it might be visible through low opacity... trust me
                 Location = new Point(-10000, -10000);
+                _timerCheck.Stop();
             } else {
                 Location = Owner.PointToScreen(Point.Empty);
+                _timerCheck.Start();
             }
         }
 
+        private void MasterFormOnClosed(object sender, EventArgs eventArgs) {
+            Close();
+        }
+
         #endregion
-
-
+        /*
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= 0x80;
+                return Params;
+            }
+        }*/
     }
 }

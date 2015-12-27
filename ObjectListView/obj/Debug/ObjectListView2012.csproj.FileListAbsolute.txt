@@ -19,6 +19,14 @@ C:\Work\3PA\ObjectListView\obj\Debug\ObjectListView.pdb
 C:\Work\3P\3P\Lib\ObjectListView\ObjectListView.dll
 C:\Work\3P\3P\Lib\ObjectListView\ObjectListView.pdb
 C:\Work\3P\3P\Lib\ObjectListView\ObjectListView.XML
+D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.dll
+D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.pdb
+D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.XML
+D:\Repo\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.Properties.Resources.resources
+D:\Repo\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.ColumnSelectionForm.resources
+D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView2012.csproj.GenerateResource.Cache
+D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.dll
+D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.pdb
 C:\Work\3P\3PA\Lib\ObjectListView\ObjectListView.dll
 C:\Work\3P\3PA\Lib\ObjectListView\ObjectListView.pdb
 C:\Work\3P\3PA\Lib\ObjectListView\ObjectListView.XML
@@ -28,11 +36,3 @@ C:\Work\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.ColumnSelectionForm.reso
 C:\Work\3P\ObjectListView\obj\Debug\ObjectListView2012.csproj.GenerateResource.Cache
 C:\Work\3P\ObjectListView\obj\Debug\ObjectListView.dll
 C:\Work\3P\ObjectListView\obj\Debug\ObjectListView.pdb
-D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.dll
-D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.pdb
-D:\Repo\3P\3PA\Lib\ObjectListView\ObjectListView.XML
-D:\Repo\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.Properties.Resources.resources
-D:\Repo\3P\ObjectListView\obj\Debug\BrightIdeasSoftware.ColumnSelectionForm.resources
-D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView2012.csproj.GenerateResource.Cache
-D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.dll
-D:\Repo\3P\ObjectListView\obj\Debug\ObjectListView.pdb

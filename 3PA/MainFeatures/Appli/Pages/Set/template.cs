@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (EmptyForm.cs) is part of 3P.
+// This file (template.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,24 +17,20 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using System.Windows.Forms;
-using _3PA.Interop;
-using _3PA.MainFeatures.FilesInfoNs;
+using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.NppInterfaceForm {
+namespace _3PA.MainFeatures.Appli.Pages {
+    public partial class FuckingPage : YamuiPage {
 
-    /// <summary>
-    /// An empty form that does absolutely nothing
-    /// </summary>
-    public partial class EmptyForm : Form {
+        #region fields
 
-        public EmptyForm() {
+        #endregion
+
+        #region constructor
+        public FuckingPage() {
             InitializeComponent();
-
-            // register to Npp
-            FormIntegration.RegisterToNpp(Handle);
         }
+        #endregion
 
     }
 }

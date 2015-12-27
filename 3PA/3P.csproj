@@ -97,6 +97,12 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OptionPage.Designer.cs">
       <DependentUpon>OptionPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\template.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\template.Designer.cs">
+      <DependentUpon>template.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\CodeBeautifier.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
       <SubType>Form</SubType>
@@ -276,6 +282,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\PageAbout.resx">
       <DependentUpon>PageAbout.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\template.resx">
+      <DependentUpon>template.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\template.resx">
       <DependentUpon>template.cs</DependentUpon>

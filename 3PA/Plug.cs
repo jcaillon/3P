@@ -149,7 +149,7 @@ namespace _3PA {
             FileExplorer.DockableCommandIndex = menu.CmdIndex - 1;
 
             menu.SetSeparator();
-
+            
             if (Config.Instance.UserName.Equals("JCA"))
                 menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
 
@@ -157,7 +157,7 @@ namespace _3PA {
 
             menu.SetCommand("Options", Appli.GoToOptionPage);
             menu.SetCommand("About", Appli.GoToAboutPage);
-
+            
             // Npp already intercepts these shortcuts so we need to hook keyboard messages
             KeyInterceptor.Instance.Install();
             foreach (var key in menu.UniqueKeys.Keys)
@@ -175,6 +175,7 @@ namespace _3PA {
             KeyInterceptor.Instance.Add(Keys.Next);
             KeyInterceptor.Instance.Add(Keys.Prior);
             KeyInterceptor.Instance.KeyDown += OnKeyDown;
+             
         }
 
         /// <summary>
@@ -201,8 +202,14 @@ namespace _3PA {
                 // remember the most used keywords
                 Keywords.Export();
 
-                // dispose of all popup
-                ForceCloseAllWindows();
+                // close every form
+                AutoComplete.ForceClose();
+                InfoToolTip.ForceClose();
+                Appli.ForceClose();
+                FileTag.ForceClose();
+                FileExplorer.ForceClose();
+                CodeExplorer.ForceClose();
+
                 PluginIsFullyLoaded = false;
 
                 // runs exit program if any
@@ -682,16 +689,6 @@ namespace _3PA {
         public static void ClosePopups() {
             AutoComplete.Close();
             InfoToolTip.Close();
-        }
-
-        /// <summary>
-        /// Call this method to force close all popup/autocompletion form and alike
-        /// </summary>
-        public static void ForceCloseAllWindows() {
-            AutoComplete.ForceClose();
-            InfoToolTip.ForceClose();
-            Appli.ForceClose();
-            FileTag.ForceClose();
         }
 
         #endregion

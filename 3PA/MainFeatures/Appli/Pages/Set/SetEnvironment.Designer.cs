@@ -129,7 +129,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
             this.htmlLabel7.IsSelectionEnabled = false;
-            this.htmlLabel7.Location = new System.Drawing.Point(30, 465);
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 457);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel7.TabIndex = 59;
@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
             this.htmlLabel6.IsSelectionEnabled = false;
-            this.htmlLabel6.Location = new System.Drawing.Point(30, 409);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 401);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel6.TabIndex = 58;
@@ -155,7 +155,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
             this.htmlLabel5.IsSelectionEnabled = false;
-            this.htmlLabel5.Location = new System.Drawing.Point(30, 378);
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 370);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel5.TabIndex = 57;
@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
             this.htmlLabel4.IsSelectionEnabled = false;
-            this.htmlLabel4.Location = new System.Drawing.Point(30, 324);
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 316);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel4.TabIndex = 56;
@@ -181,7 +181,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
             this.htmlLabel3.IsSelectionEnabled = false;
-            this.htmlLabel3.Location = new System.Drawing.Point(30, 292);
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 284);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel3.TabIndex = 55;
@@ -194,7 +194,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
             this.htmlLabel2.IsSelectionEnabled = false;
-            this.htmlLabel2.Location = new System.Drawing.Point(30, 211);
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 203);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(122, 60);
             this.htmlLabel2.TabIndex = 54;
@@ -208,7 +208,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
             this.htmlLabel1.IsSelectionEnabled = false;
-            this.htmlLabel1.Location = new System.Drawing.Point(30, 106);
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 102);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel1.TabIndex = 53;
@@ -218,7 +218,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.lblLocally.AutoSize = true;
             this.lblLocally.Function = YamuiFramework.Fonts.LabelFunction.Small;
-            this.lblLocally.Location = new System.Drawing.Point(223, 347);
+            this.lblLocally.Location = new System.Drawing.Point(223, 339);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";
             this.lblLocally.Size = new System.Drawing.Size(90, 12);
@@ -228,15 +228,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // multibox3
             // 
-            this.multibox3.DisplayIcon = false;
-            this.multibox3.Lines = new string[0];
-            this.multibox3.Location = new System.Drawing.Point(190, 409);
-            this.multibox3.MaxLength = 32767;
-            this.multibox3.Multiline = true;
+            this.multibox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.multibox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.multibox3.CustomBackColor = System.Drawing.Color.Empty;
+            this.multibox3.CustomForeColor = System.Drawing.Color.Empty;
+            this.multibox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.multibox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.multibox3.Location = new System.Drawing.Point(190, 401);
+            this.multibox3.MultiLines = true;
             this.multibox3.Name = "multibox3";
-            this.multibox3.PasswordChar = '\0';
-            this.multibox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.multibox3.SelectedText = "";
             this.multibox3.Size = new System.Drawing.Size(438, 45);
             this.multibox3.TabIndex = 51;
             this.multibox3.WaterMark = "Appended to the prowin command line when running or compiling";
@@ -244,7 +244,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // tgCompilLocl
             // 
             this.tgCompilLocl.AutoSize = true;
-            this.tgCompilLocl.Location = new System.Drawing.Point(190, 346);
+            this.tgCompilLocl.Location = new System.Drawing.Point(190, 338);
             this.tgCompilLocl.Name = "tgCompilLocl";
             this.tgCompilLocl.Size = new System.Drawing.Size(52, 15);
             this.tgCompilLocl.TabIndex = 49;
@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(631, 128);
+            this.btDownload.Location = new System.Drawing.Point(631, 120);
             this.btDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDownload.Name = "btDownload";
             this.btDownload.Size = new System.Drawing.Size(20, 20);
@@ -284,7 +284,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(631, 465);
+            this.btright6.Location = new System.Drawing.Point(631, 457);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -295,7 +295,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
-            this.btleft6.Location = new System.Drawing.Point(167, 465);
+            this.btleft6.Location = new System.Drawing.Point(167, 457);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
@@ -304,16 +304,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox6
             // 
-            this.textbox6.Lines = new string[0];
-            this.textbox6.Location = new System.Drawing.Point(190, 465);
-            this.textbox6.MaxLength = 32767;
+            this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox6.Location = new System.Drawing.Point(190, 457);
             this.textbox6.Name = "textbox6";
-            this.textbox6.PasswordChar = '\0';
-            this.textbox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox6.SelectedText = "";
             this.textbox6.Size = new System.Drawing.Size(438, 20);
             this.textbox6.TabIndex = 43;
             this.textbox6.Tag = "log file (*.log)|*.log";
+            this.textbox6.WaterMark = null;
             // 
             // envLabel
             // 
@@ -329,10 +331,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbDatabase
             // 
-            this.cbDatabase.ItemHeight = 19;
-            this.cbDatabase.Location = new System.Drawing.Point(190, 97);
+            this.cbDatabase.ItemHeight = 15;
+            this.cbDatabase.Location = new System.Drawing.Point(190, 93);
             this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(242, 25);
+            this.cbDatabase.Size = new System.Drawing.Size(242, 21);
             this.cbDatabase.TabIndex = 40;
             this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
@@ -340,7 +342,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(611, 128);
+            this.btright1.Location = new System.Drawing.Point(611, 120);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
@@ -351,7 +353,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft1.BackColor = System.Drawing.Color.Transparent;
             this.btleft1.BackGrndImage = null;
-            this.btleft1.Location = new System.Drawing.Point(167, 128);
+            this.btleft1.Location = new System.Drawing.Point(167, 120);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
             this.btleft1.Size = new System.Drawing.Size(20, 20);
@@ -360,22 +362,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox1
             // 
-            this.textbox1.Lines = new string[0];
-            this.textbox1.Location = new System.Drawing.Point(190, 128);
-            this.textbox1.MaxLength = 32767;
+            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox1.Location = new System.Drawing.Point(190, 120);
             this.textbox1.Name = "textbox1";
-            this.textbox1.PasswordChar = '\0';
-            this.textbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox1.SelectedText = "";
             this.textbox1.Size = new System.Drawing.Size(418, 20);
             this.textbox1.TabIndex = 37;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
+            this.textbox1.WaterMark = null;
             // 
             // btright5
             // 
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(631, 378);
+            this.btright5.Location = new System.Drawing.Point(631, 370);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -386,7 +390,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
-            this.btleft5.Location = new System.Drawing.Point(167, 378);
+            this.btleft5.Location = new System.Drawing.Point(167, 370);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
@@ -395,22 +399,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox5
             // 
-            this.textbox5.Lines = new string[0];
-            this.textbox5.Location = new System.Drawing.Point(190, 378);
-            this.textbox5.MaxLength = 32767;
+            this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox5.Location = new System.Drawing.Point(190, 370);
             this.textbox5.Name = "textbox5";
-            this.textbox5.PasswordChar = '\0';
-            this.textbox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox5.SelectedText = "";
             this.textbox5.Size = new System.Drawing.Size(438, 20);
             this.textbox5.TabIndex = 34;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
+            this.textbox5.WaterMark = null;
             // 
             // btright4
             // 
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(631, 323);
+            this.btright4.Location = new System.Drawing.Point(631, 315);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -421,7 +427,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
-            this.btleft4.Location = new System.Drawing.Point(167, 323);
+            this.btleft4.Location = new System.Drawing.Point(167, 315);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
@@ -430,22 +436,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox4
             // 
-            this.textbox4.Lines = new string[0];
-            this.textbox4.Location = new System.Drawing.Point(190, 323);
-            this.textbox4.MaxLength = 32767;
+            this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox4.Location = new System.Drawing.Point(190, 315);
             this.textbox4.Name = "textbox4";
-            this.textbox4.PasswordChar = '\0';
-            this.textbox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox4.SelectedText = "";
             this.textbox4.Size = new System.Drawing.Size(438, 20);
             this.textbox4.TabIndex = 31;
             this.textbox4.Tag = "true";
+            this.textbox4.WaterMark = null;
             // 
             // btright3
             // 
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(631, 292);
+            this.btright3.Location = new System.Drawing.Point(631, 284);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -456,7 +464,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
-            this.btleft3.Location = new System.Drawing.Point(167, 292);
+            this.btleft3.Location = new System.Drawing.Point(167, 284);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
@@ -465,22 +473,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox3
             // 
-            this.textbox3.Lines = new string[0];
-            this.textbox3.Location = new System.Drawing.Point(190, 292);
-            this.textbox3.MaxLength = 32767;
+            this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox3.Location = new System.Drawing.Point(190, 284);
             this.textbox3.Name = "textbox3";
-            this.textbox3.PasswordChar = '\0';
-            this.textbox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox3.SelectedText = "";
             this.textbox3.Size = new System.Drawing.Size(438, 20);
             this.textbox3.TabIndex = 28;
             this.textbox3.Tag = "true";
+            this.textbox3.WaterMark = null;
             // 
             // btright2
             // 
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(631, 210);
+            this.btright2.Location = new System.Drawing.Point(631, 202);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -491,7 +501,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
-            this.btleft2.Location = new System.Drawing.Point(167, 210);
+            this.btleft2.Location = new System.Drawing.Point(167, 202);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
             this.btleft2.Size = new System.Drawing.Size(20, 20);
@@ -500,52 +510,54 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // multitextbox1
             // 
-            this.multitextbox1.DisplayIcon = false;
-            this.multitextbox1.Lines = new string[0];
-            this.multitextbox1.Location = new System.Drawing.Point(190, 154);
-            this.multitextbox1.MaxLength = 32767;
-            this.multitextbox1.Multiline = true;
+            this.multitextbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.multitextbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.multitextbox1.CustomBackColor = System.Drawing.Color.Empty;
+            this.multitextbox1.CustomForeColor = System.Drawing.Color.Empty;
+            this.multitextbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.multitextbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.multitextbox1.Location = new System.Drawing.Point(190, 146);
+            this.multitextbox1.MultiLines = true;
             this.multitextbox1.Name = "multitextbox1";
-            this.multitextbox1.PasswordChar = '\0';
-            this.multitextbox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.multitextbox1.SelectedText = "";
             this.multitextbox1.Size = new System.Drawing.Size(438, 45);
             this.multitextbox1.TabIndex = 15;
             this.multitextbox1.WaterMark = "Appended to the .pf file";
             // 
             // multibox2
             // 
-            this.multibox2.DisplayIcon = false;
-            this.multibox2.Lines = new string[0];
-            this.multibox2.Location = new System.Drawing.Point(190, 236);
-            this.multibox2.MaxLength = 32767;
-            this.multibox2.Multiline = true;
+            this.multibox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.multibox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.multibox2.CustomBackColor = System.Drawing.Color.Empty;
+            this.multibox2.CustomForeColor = System.Drawing.Color.Empty;
+            this.multibox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.multibox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.multibox2.Location = new System.Drawing.Point(190, 228);
+            this.multibox2.MultiLines = true;
             this.multibox2.Name = "multibox2";
-            this.multibox2.PasswordChar = '\0';
-            this.multibox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.multibox2.SelectedText = "";
             this.multibox2.Size = new System.Drawing.Size(438, 45);
             this.multibox2.TabIndex = 11;
             this.multibox2.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
             // 
             // textbox2
             // 
-            this.textbox2.Lines = new string[0];
-            this.textbox2.Location = new System.Drawing.Point(190, 210);
-            this.textbox2.MaxLength = 32767;
+            this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox2.Location = new System.Drawing.Point(190, 202);
             this.textbox2.Name = "textbox2";
-            this.textbox2.PasswordChar = '\0';
-            this.textbox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textbox2.SelectedText = "";
             this.textbox2.Size = new System.Drawing.Size(438, 20);
             this.textbox2.TabIndex = 9;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
+            this.textbox2.WaterMark = null;
             // 
             // yamuiLabel4
             // 
             this.yamuiLabel4.AutoSize = true;
             this.yamuiLabel4.Function = YamuiFramework.Fonts.LabelFunction.Heading;
-            this.yamuiLabel4.Location = new System.Drawing.Point(0, 71);
+            this.yamuiLabel4.Location = new System.Drawing.Point(0, 67);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel4.Name = "yamuiLabel4";
             this.yamuiLabel4.Size = new System.Drawing.Size(63, 19);
@@ -554,19 +566,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // cbEnvLetter
             // 
-            this.cbEnvLetter.ItemHeight = 19;
+            this.cbEnvLetter.ItemHeight = 15;
             this.cbEnvLetter.Location = new System.Drawing.Point(205, 25);
             this.cbEnvLetter.Name = "cbEnvLetter";
-            this.cbEnvLetter.Size = new System.Drawing.Size(51, 25);
+            this.cbEnvLetter.Size = new System.Drawing.Size(51, 21);
             this.cbEnvLetter.TabIndex = 6;
             this.cbEnvLetter.SelectionChangeCommitted += new System.EventHandler(this.cbEnvLetter_SelectedIndexChanged);
             // 
             // cbAppli
             // 
-            this.cbAppli.ItemHeight = 19;
+            this.cbAppli.ItemHeight = 15;
             this.cbAppli.Location = new System.Drawing.Point(30, 25);
             this.cbAppli.Name = "cbAppli";
-            this.cbAppli.Size = new System.Drawing.Size(169, 25);
+            this.cbAppli.Size = new System.Drawing.Size(169, 21);
             this.cbAppli.TabIndex = 3;
             this.cbAppli.SelectionChangeCommitted += new System.EventHandler(this.cbAppli_SelectedIndexChanged);
             // 

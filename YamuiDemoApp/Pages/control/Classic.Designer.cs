@@ -86,6 +86,7 @@ namespace YamuiDemoApp.Pages.control {
             this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
+            this.yamuiPanel1.MinimumSize = new System.Drawing.Size(100, 20);
             this.yamuiPanel1.Name = "yamuiPanel1";
             this.yamuiPanel1.Size = new System.Drawing.Size(709, 327);
             this.yamuiPanel1.TabIndex = 0;

@@ -212,6 +212,10 @@ namespace _3PA.MainFeatures.FileExplorer {
             Form = new FileExplorerForm(FakeForm);
         }
 
+        public static void ForceClose() {
+            Form.Close();
+        }
+
         #endregion
     }
 

@@ -72,18 +72,19 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";
             this.yamuiLabel2.Size = new System.Drawing.Size(103, 19);
-            this.yamuiLabel2.TabIndex = 2;
+            this.yamuiLabel2.TabIndex = 10;
             this.yamuiLabel2.Text = "Pre-selections";
             // 
             // yamuiTextBox1
             // 
-            this.yamuiTextBox1.Lines = new string[0];
+            this.yamuiTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox1.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox1.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox1.Location = new System.Drawing.Point(0, 91);
-            this.yamuiTextBox1.MaxLength = 32767;
             this.yamuiTextBox1.Name = "yamuiTextBox1";
-            this.yamuiTextBox1.PasswordChar = '\0';
-            this.yamuiTextBox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox1.SelectedText = "";
             this.yamuiTextBox1.Size = new System.Drawing.Size(154, 23);
             this.yamuiTextBox1.TabIndex = 1;
             this.yamuiTextBox1.WaterMark = "Ex: BOI";
@@ -101,13 +102,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             // 
             // yamuiTextBox2
             // 
-            this.yamuiTextBox2.Lines = new string[0];
+            this.yamuiTextBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox2.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox2.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox2.Location = new System.Drawing.Point(175, 91);
-            this.yamuiTextBox2.MaxLength = 32767;
             this.yamuiTextBox2.Name = "yamuiTextBox2";
-            this.yamuiTextBox2.PasswordChar = '\0';
-            this.yamuiTextBox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox2.SelectedText = "";
             this.yamuiTextBox2.Size = new System.Drawing.Size(154, 23);
             this.yamuiTextBox2.TabIndex = 2;
             this.yamuiTextBox2.WaterMark = "Ex: 65.000";
@@ -140,13 +142,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             // 
             // yamuiTextBox3
             // 
-            this.yamuiTextBox3.Lines = new string[0];
+            this.yamuiTextBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox3.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox3.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox3.Location = new System.Drawing.Point(175, 155);
-            this.yamuiTextBox3.MaxLength = 32767;
             this.yamuiTextBox3.Name = "yamuiTextBox3";
-            this.yamuiTextBox3.PasswordChar = '\0';
-            this.yamuiTextBox3.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox3.SelectedText = "";
             this.yamuiTextBox3.Size = new System.Drawing.Size(154, 23);
             this.yamuiTextBox3.TabIndex = 4;
             this.yamuiTextBox3.WaterMark = "Ex: INC0999999";
@@ -164,13 +167,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             // 
             // yamuiTextBox4
             // 
-            this.yamuiTextBox4.Lines = new string[0];
+            this.yamuiTextBox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox4.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox4.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox4.Location = new System.Drawing.Point(0, 155);
-            this.yamuiTextBox4.MaxLength = 32767;
             this.yamuiTextBox4.Name = "yamuiTextBox4";
-            this.yamuiTextBox4.PasswordChar = '\0';
-            this.yamuiTextBox4.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox4.SelectedText = "";
             this.yamuiTextBox4.Size = new System.Drawing.Size(154, 23);
             this.yamuiTextBox4.TabIndex = 3;
             this.yamuiTextBox4.WaterMark = "Ex: 101-33";
@@ -201,42 +205,45 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             // 
             // yamuiTextBox5
             // 
-            this.yamuiTextBox5.Lines = new string[0];
+            this.yamuiTextBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox5.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox5.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox5.Location = new System.Drawing.Point(0, 219);
-            this.yamuiTextBox5.MaxLength = 32767;
             this.yamuiTextBox5.Name = "yamuiTextBox5";
-            this.yamuiTextBox5.PasswordChar = '\0';
-            this.yamuiTextBox5.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox5.SelectedText = "";
             this.yamuiTextBox5.Size = new System.Drawing.Size(154, 23);
             this.yamuiTextBox5.TabIndex = 5;
             this.yamuiTextBox5.WaterMark = "Ex: 9";
             // 
             // yamuiTextBox6
             // 
-            this.yamuiTextBox6.Lines = new string[0];
+            this.yamuiTextBox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox6.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox6.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox6.Location = new System.Drawing.Point(226, 219);
-            this.yamuiTextBox6.MaxLength = 32767;
             this.yamuiTextBox6.Name = "yamuiTextBox6";
-            this.yamuiTextBox6.PasswordChar = '\0';
-            this.yamuiTextBox6.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox6.SelectedText = "";
             this.yamuiTextBox6.Size = new System.Drawing.Size(103, 23);
-            this.yamuiTextBox6.TabIndex = 8;
+            this.yamuiTextBox6.TabIndex = 6;
             this.yamuiTextBox6.WaterMark = "22/11/2015";
             // 
             // yamuiTextBox7
             // 
-            this.yamuiTextBox7.Lines = new string[0];
+            this.yamuiTextBox7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.yamuiTextBox7.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.yamuiTextBox7.CustomBackColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox7.CustomForeColor = System.Drawing.Color.Empty;
+            this.yamuiTextBox7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.yamuiTextBox7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.yamuiTextBox7.Location = new System.Drawing.Point(2, 283);
-            this.yamuiTextBox7.MaxLength = 32767;
-            this.yamuiTextBox7.Multiline = true;
+            this.yamuiTextBox7.MultiLines = true;
             this.yamuiTextBox7.Name = "yamuiTextBox7";
-            this.yamuiTextBox7.PasswordChar = '\0';
-            this.yamuiTextBox7.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.yamuiTextBox7.SelectedText = "";
             this.yamuiTextBox7.Size = new System.Drawing.Size(324, 80);
-            this.yamuiTextBox7.TabIndex = 9;
+            this.yamuiTextBox7.TabIndex = 7;
             this.yamuiTextBox7.WaterMark = "Ex: Fixing a small bug";
             // 
             // yamuiLabel9
@@ -255,7 +262,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.btcancel.Location = new System.Drawing.Point(267, 369);
             this.btcancel.Name = "btcancel";
             this.btcancel.Size = new System.Drawing.Size(59, 23);
-            this.btcancel.TabIndex = 11;
+            this.btcancel.TabIndex = 9;
             this.btcancel.Text = "&Cancel";
             // 
             // btok
@@ -263,7 +270,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.btok.Location = new System.Drawing.Point(223, 369);
             this.btok.Name = "btok";
             this.btok.Size = new System.Drawing.Size(38, 23);
-            this.btok.TabIndex = 10;
+            this.btok.TabIndex = 8;
             this.btok.Text = "&Ok";
             // 
             // btclear
@@ -271,7 +278,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.btclear.Location = new System.Drawing.Point(2, 369);
             this.btclear.Name = "btclear";
             this.btclear.Size = new System.Drawing.Size(46, 23);
-            this.btclear.TabIndex = 19;
+            this.btclear.TabIndex = 11;
             this.btclear.TabStop = false;
             this.btclear.Text = "Clear";
             // 
@@ -280,7 +287,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.btdefault.Location = new System.Drawing.Point(54, 369);
             this.btdefault.Name = "btdefault";
             this.btdefault.Size = new System.Drawing.Size(84, 23);
-            this.btdefault.TabIndex = 20;
+            this.btdefault.TabIndex = 12;
             this.btdefault.TabStop = false;
             this.btdefault.Text = "Set as default";
             // 
@@ -289,7 +296,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             this.bttoday.Location = new System.Drawing.Point(175, 219);
             this.bttoday.Name = "bttoday";
             this.bttoday.Size = new System.Drawing.Size(45, 23);
-            this.bttoday.TabIndex = 7;
+            this.bttoday.TabIndex = 10;
+            this.bttoday.TabStop = false;
             this.bttoday.Text = "&Today";
             // 
             // FileTagsPage

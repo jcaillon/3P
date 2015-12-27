@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             this.buttonExpandRetract = new YamuiFramework.Controls.YamuiImageButton();
             this.ovlTree = new BrightIdeasSoftware.TreeListView();
             this.DisplayText = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBox();
+            this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBoxAlt();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiImageButton();
             ((System.ComponentModel.ISupportInitialize)(this.ovlTree)).BeginInit();
@@ -191,7 +191,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private YamuiImageButton buttonExpandRetract;
         private TreeListView ovlTree;
         private OLVColumn DisplayText;
-        private YamuiTextBox textBoxFilter;
+        private YamuiTextBoxAlt textBoxFilter;
         private HtmlToolTip toolTipHtml;
         private YamuiImageButton buttonIncludeExternal;
 

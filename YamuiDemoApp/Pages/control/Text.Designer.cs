@@ -207,7 +207,7 @@ namespace YamuiDemoApp.Pages.control {
         "Multiline"};
             this.yamuiTextBox3.Location = new System.Drawing.Point(0, 80);
             this.yamuiTextBox3.MaxLength = 32767;
-            this.yamuiTextBox3.Multiline = true;
+            this.yamuiTextBox3.MultiLines = true;
             this.yamuiTextBox3.Name = "yamuiTextBox3";
             this.yamuiTextBox3.PasswordChar = '\0';
             this.yamuiTextBox3.ScrollBars = System.Windows.Forms.ScrollBars.None;

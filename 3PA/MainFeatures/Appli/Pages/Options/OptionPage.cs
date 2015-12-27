@@ -98,10 +98,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 if (valObj is string) {
                     // string
                     var strControl = new YamuiTextBox {
-                        Lines = new string[0],
                         Location = new Point(240, yPos),
-                        ScrollBars = ScrollBars.None,
-                        SelectedText = (string)property.GetValue(configInstance),
+                        Text = (string)property.GetValue(configInstance),
                         Size = new Size(300, 20),
                         Tag = attribute.Name
                     };
@@ -119,10 +117,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 } if (valObj is int || valObj is double) {
                     // number
                     var numControl = new YamuiTextBox {
-                        Lines = new string[0],
                         Location = new Point(240, yPos),
-                        ScrollBars = ScrollBars.None,
-                        SelectedText = ((valObj is int) ? ((int)property.GetValue(configInstance)).ToString() : ((double)property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
+                        Text = ((valObj is int) ? ((int)property.GetValue(configInstance)).ToString() : ((double)property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
                         Size = new Size(300, 20),
                         Tag = attribute.Name
                     };

@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
     public partial class FileTagsPage : YamuiPage {

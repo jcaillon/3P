@@ -17,6 +17,7 @@
 // // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
+
 using System;
 using System.Collections;
 using System.ComponentModel;
@@ -24,531 +25,219 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-    [Designer("YamuiFramework.Controls.YamuiTextBoxDesigner")]
-    public class YamuiTextBox : Control {
+
+    [Designer("YamuiFramework.Controls.YamuiTextBox2Designer")]
+    public sealed class YamuiTextBox : TextBox {
+
         #region Fields
+
+        /// <summary>
+        /// Designed to be used with CustomBackColor
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
 
+        /// <summary>
+        /// set UseCustomBackColor to true or it won't do anything
+        /// </summary>
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public Color CustomBackColor { get; set; }
+
+        /// <summary>
+        /// Designed to be used with CustomForeColor
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomForeColor { get; set; }
 
+        /// <summary>
+        /// Set UseCustomForeColor to true or it won't do anything
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool Highlight { get; set; }
-
-        private PromptedTextBox _baseTextBox;
+        public Color CustomForeColor { get; set; }
 
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
         [DefaultValue("")]
         [Category("Yamui")]
-        public string WaterMark {
-            get { return _baseTextBox.WaterMark; }
-            set { _baseTextBox.WaterMark = value; }
-        }
-
-        private Image _textBoxIcon;
-        [Browsable(true)]
-        [EditorBrowsable(EditorBrowsableState.Always)]
-        [DefaultValue(null)]
-        [Category("Yamui")]
-        public Image Icon {
-            get { return _textBoxIcon; }
-            set {
-                _textBoxIcon = value;
-                Refresh();
-            }
-        }
-
-        private bool _textBoxIconRight;
-        [Browsable(true)]
-        [EditorBrowsable(EditorBrowsableState.Always)]
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool IconRight {
-            get { return _textBoxIconRight; }
-            set {
-                _textBoxIconRight = value;
-                Refresh();
-            }
-        }
-
-        private bool _displayIcon = true;
-        [Browsable(true)]
-        [EditorBrowsable(EditorBrowsableState.Always)]
-        [DefaultValue(true)]
-        [Category("Yamui")]
-        public bool DisplayIcon {
-            get { return _displayIcon; }
-            set {
-                _displayIcon = value;
-                Refresh();
-            }
-        }
-
-        protected Size IconSize {
-            get {
-                if (_displayIcon && _textBoxIcon != null) {
-                    Size originalSize = _textBoxIcon.Size;
-                    double resizeFactor = (ClientRectangle.Height - 2) / (double)originalSize.Height;
-
-                    Point iconLocation = new Point(1, 1);
-                    return new Size((int)(originalSize.Width * resizeFactor), (int)(originalSize.Height * resizeFactor));
-                }
-
-                return new Size(-1, -1);
-            }
-        }
+        public string WaterMark { get; set; }
 
         private bool _isHovered;
         private bool _isFocused;
 
-        #endregion
-
-        #region Routing Fields
-
-        public override ContextMenu ContextMenu {
-            get { return _baseTextBox.ContextMenu; }
-            set {
-                ContextMenu = value;
-                _baseTextBox.ContextMenu = value;
-            }
-        }
-
-        public override ContextMenuStrip ContextMenuStrip {
-            get { return _baseTextBox.ContextMenuStrip; }
-            set {
-                ContextMenuStrip = value;
-                _baseTextBox.ContextMenuStrip = value;
-            }
-        }
-
+        /// <summary>
+        /// Use this propety instead of the multiLine property!
+        /// </summary>
         [DefaultValue(false)]
-        public bool Multiline {
-            get { return _baseTextBox.Multiline; }
-            set { _baseTextBox.Multiline = value; }
-        }
-
-        [DefaultValue(true)]
-        public bool WordWrap {
-            get { return _baseTextBox.WordWrap; }
-            set { _baseTextBox.WordWrap = value; }
-        }
-
-        public override string Text {
-            get { return _baseTextBox.Text; }
-            set { _baseTextBox.Text = value; }
-        }
-
-        public string[] Lines {
-            get { return _baseTextBox.Lines; }
-            set { _baseTextBox.Lines = value; }
-        }
-
-        [Browsable(false)]
-        public string SelectedText {
-            get { return _baseTextBox.SelectedText; }
-            set { _baseTextBox.Text = value; }
-        }
-
-        [DefaultValue(false)]
-        public bool ReadOnly {
-            get { return _baseTextBox.ReadOnly; }
-            set { _baseTextBox.ReadOnly = value; }
-        }
-
-        public char PasswordChar {
-            get { return _baseTextBox.PasswordChar; }
-            set { _baseTextBox.PasswordChar = value; }
-        }
-
-        [DefaultValue(false)]
-        public bool UseSystemPasswordChar {
-            get { return _baseTextBox.UseSystemPasswordChar; }
-            set { _baseTextBox.UseSystemPasswordChar = value; }
-        }
-
-        [DefaultValue(HorizontalAlignment.Left)]
-        public HorizontalAlignment TextAlign {
-            get { return _baseTextBox.TextAlign; }
-            set { _baseTextBox.TextAlign = value; }
-        }
-
-        [DefaultValue(true)]
-        public new bool TabStop {
-            get { return _baseTextBox.TabStop; }
-            set { _baseTextBox.TabStop = value; }
-        }
-
-        public int MaxLength {
-            get { return _baseTextBox.MaxLength; }
-            set { _baseTextBox.MaxLength = value; }
-        }
-
-        public ScrollBars ScrollBars {
-            get { return _baseTextBox.ScrollBars; }
-            set { _baseTextBox.ScrollBars = value; }
-        }
+        [Category("Yamui")]
+        public bool MultiLines { get; set; }
 
         #endregion
 
         #region Constructor
 
         public YamuiTextBox() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint, true);
-
-            base.TabStop = false;
-            GotFocus += YamuiTextBox_GotFocus;
-            CreateBaseTextBox();
-            UpdateBaseTextBox();
-            AddEventHandler();
-        }
-
-        void YamuiTextBox_GotFocus(object sender, EventArgs e) {
-            _baseTextBox.Focus();
+            BorderStyle = BorderStyle.None;
+            Font = FontManager.GetStandardFont();
+            BackColor = ThemeManager.ButtonColors.BackGround(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
+            ForeColor = ThemeManager.ButtonColors.ForeGround(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
+            Multiline = true;
+            Size = new Size(100, 20);
+            MinimumSize = new Size(20, 20);
         }
 
         #endregion
 
-        #region Routing Methods
+        #region Handle MultiLines
 
-        public event EventHandler AcceptsTabChanged;
-        private void BaseTextBoxAcceptsTabChanged(object sender, EventArgs e) {
-            if (AcceptsTabChanged != null)
-                AcceptsTabChanged(this, e);
-        }
-
-        private void BaseTextBoxSizeChanged(object sender, EventArgs e) {
-            OnSizeChanged(e);
-        }
-
-        private void BaseTextBoxCursorChanged(object sender, EventArgs e) {
-            OnCursorChanged(e);
-        }
-
-        private void BaseTextBoxContextMenuStripChanged(object sender, EventArgs e) {
-            OnContextMenuStripChanged(e);
-        }
-
-        private void BaseTextBoxContextMenuChanged(object sender, EventArgs e) {
-            OnContextMenuChanged(e);
-        }
-
-        private void BaseTextBoxClientSizeChanged(object sender, EventArgs e) {
-            OnClientSizeChanged(e);
-        }
-
-        private void BaseTextBoxClick(object sender, EventArgs e) {
-            OnClick(e);
-        }
-
-        private void BaseTextBoxChangeUiCues(object sender, UICuesEventArgs e) {
-            OnChangeUICues(e);
-        }
-
-        private void BaseTextBoxCausesValidationChanged(object sender, EventArgs e) {
-            OnCausesValidationChanged(e);
-        }
-
-        private void BaseTextBoxKeyUp(object sender, KeyEventArgs e) {
-            OnKeyUp(e);
-        }
-
-        private void BaseTextBoxKeyPress(object sender, KeyPressEventArgs e) {
-            OnKeyPress(e);
-        }
-
-        private void BaseTextBoxKeyDown(object sender, KeyEventArgs e) {
-            OnKeyDown(e);
-        }
-
-        private void BaseTextBoxTextChanged(object sender, EventArgs e) {
-            OnTextChanged(e);
-        }
-
-        public void Select(int start, int length) {
-            _baseTextBox.Select(start, length);
-        }
-
-        public void SelectAll() {
-            _baseTextBox.SelectAll();
-        }
-
-        public void Clear() {
-            _baseTextBox.Clear();
-        }
-
-        public void AppendText(string text) {
-            _baseTextBox.AppendText(text);
+        protected override void OnTextChanged(EventArgs e) {
+            if (!MultiLines && Text.Contains("\n")) {
+                Text = Text.Replace("\n", "").Replace("\r", "");
+                SelectionStart = TextLength;
+            }
+            base.OnTextChanged(e);
         }
 
         #endregion
 
-        #region Paint Methods
+        #region Custom paint
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+        private const int OcmCommand = 0x2111;
+        private const int WmPaint = 15;
+        private bool _appliedPadding;
 
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
-                _baseTextBox.BackColor = backColor;
-                e.Graphics.Clear(backColor);
-            } catch {
-                Invalidate();
-            }
-        }
-
-        protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
-            }
-        }
-
-        protected virtual void OnPaintForeground(PaintEventArgs e) {
-            _baseTextBox.ForeColor = ThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
-            Color borderColor = ThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, false, Enabled);
-
-            using (Pen p = new Pen(borderColor)) {
-                e.Graphics.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));
-            }
-
-            DrawIcon(e.Graphics);
-        }
-
-        private void DrawIcon(Graphics g) {
-            if (_displayIcon && _textBoxIcon != null) {
-                Point iconLocation = new Point(1, 1);
-                if (_textBoxIconRight) {
-                    iconLocation = new Point(ClientRectangle.Width - IconSize.Width - 1, 1);
+        protected override void WndProc(ref Message m) {
+            base.WndProc(ref m);
+            if (((m.Msg == WmPaint) || (m.Msg == OcmCommand)) && !GetStyle(ControlStyles.UserPaint)) {
+                // Apply a padding INSIDE the textbox (so we can draw the border!)
+                if (!_appliedPadding) {
+                    WinApi.RECT rc = new WinApi.RECT(4, 2, ClientSize.Width - 8, ClientSize.Height - 3);
+                    WinApi.SendMessageRefRect(Handle, WinApi.EM_SETRECT, 0, ref rc);
+                    _appliedPadding = true;
+                } else {
+                    using (Graphics graphics = CreateGraphics()) {
+                        CustomPaint(graphics);
+                    }
                 }
 
-                g.DrawImage(_textBoxIcon, new Rectangle(iconLocation, IconSize));
-
-                UpdateBaseTextBox();
-            }
-        }
-        #endregion
-
-        #region Overridden Methods
-
-        public override void Refresh() {
-            base.Refresh();
-            UpdateBaseTextBox();
-        }
-
-        protected override void OnResize(EventArgs e) {
-            base.OnResize(e);
-            UpdateBaseTextBox();
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private void CreateBaseTextBox() {
-            if (_baseTextBox != null) return;
-
-            _baseTextBox = new PromptedTextBox();
-
-            _baseTextBox.BorderStyle = BorderStyle.None;
-            _baseTextBox.Font = FontManager.GetStandardFont();
-            _baseTextBox.Location = new Point(3, 3);
-            _baseTextBox.Size = new Size(Width - 6, Height - 6);
-
-            Size = new Size(_baseTextBox.Width + 6, _baseTextBox.Height + 6);
-
-            _baseTextBox.TabStop = true;
-            //baseTextBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
-
-            Controls.Add(_baseTextBox);
-        }
-
-        private void AddEventHandler() {
-            _baseTextBox.AcceptsTabChanged += BaseTextBoxAcceptsTabChanged;
-
-            _baseTextBox.CausesValidationChanged += BaseTextBoxCausesValidationChanged;
-            _baseTextBox.ChangeUICues += BaseTextBoxChangeUiCues;
-            _baseTextBox.Click += BaseTextBoxClick;
-            _baseTextBox.ClientSizeChanged += BaseTextBoxClientSizeChanged;
-            _baseTextBox.ContextMenuChanged += BaseTextBoxContextMenuChanged;
-            _baseTextBox.ContextMenuStripChanged += BaseTextBoxContextMenuStripChanged;
-            _baseTextBox.CursorChanged += BaseTextBoxCursorChanged;
-
-            _baseTextBox.KeyDown += BaseTextBoxKeyDown;
-            _baseTextBox.KeyPress += BaseTextBoxKeyPress;
-            _baseTextBox.KeyUp += BaseTextBoxKeyUp;
-
-            _baseTextBox.SizeChanged += BaseTextBoxSizeChanged;
-
-            _baseTextBox.TextChanged += BaseTextBoxTextChanged;
-
-            _baseTextBox.Enter += (sender, args) => {
-                _isFocused = true;
-                Invalidate();
-            };
-            _baseTextBox.Leave += (sender, args) => {
-                _isFocused = false;
-                Invalidate();
-            };
-            _baseTextBox.MouseEnter += (sender, args) => {
-                _isHovered = true;
-                Invalidate();
-            };
-            _baseTextBox.MouseLeave += (sender, args) => {
-                _isHovered = false;
-                Invalidate();
-            };
-        }
-
-        private void UpdateBaseTextBox() {
-            if (_baseTextBox == null) return;
-
-            _baseTextBox.Font = FontManager.GetStandardFont();
-
-            if (_displayIcon) {
-                Point textBoxLocation = new Point(IconSize.Width + 4, 3);
-                if (_textBoxIconRight) {
-                    textBoxLocation = new Point(3, 3);
-                }
-
-                _baseTextBox.Location = textBoxLocation;
-                _baseTextBox.Size = new Size(Width - 7 - IconSize.Width, Height - 6);
-            } else {
-                _baseTextBox.Location = new Point(3, 3);
-                _baseTextBox.Size = new Size(Width - 6, Height - 6);
             }
         }
 
-        #endregion
+        public void ApplyInternalPadding() {
+            WinApi.RECT rc = new WinApi.RECT(4, 1, ClientSize.Width - 8, ClientSize.Height - 2);
+            WinApi.SendMessageRefRect(Handle, WinApi.EM_SETRECT, 0, ref rc);
+        }
 
-        #region PromptedTextBox
-
-        private class PromptedTextBox : TextBox {
-            #region fields
-            private const int OcmCommand = 0x2111;
-            private const int WM_PAINT = 15;
-
-            private bool _drawPrompt;
-
-            private string _waterMark = "";
-
-            public string WaterMark {
-                get { return _waterMark; }
-                set {
-                    _waterMark = value.Trim();
-                    Invalidate();
-                }
-            }
-            #endregion
-
-            #region constructor
-
-            public PromptedTextBox() {
-                _drawPrompt = (Text.Trim().Length == 0);
-            }
-
-            #endregion
-
-            #region Paint
-            private void DrawTextPrompt() {
-                using (Graphics graphics = CreateGraphics()) {
-                    DrawTextPrompt(graphics);
-                }
-            }
-
-            private void DrawTextPrompt(Graphics g) {
+        private void CustomPaint(Graphics g) {
+            if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark)) {
                 TextFormatFlags flags = TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis;
                 Rectangle clientRectangle = ClientRectangle;
-
                 switch (TextAlign) {
                     case HorizontalAlignment.Left:
-                        clientRectangle.Offset(1, 1);
+                        clientRectangle.Offset(4, 2);
                         break;
 
                     case HorizontalAlignment.Right:
                         flags |= TextFormatFlags.Right;
-                        clientRectangle.Offset(0, 1);
+                        clientRectangle.Offset(0, 2);
+                        clientRectangle.Inflate(-4, 0);
                         break;
 
                     case HorizontalAlignment.Center:
                         flags |= TextFormatFlags.HorizontalCenter;
-                        clientRectangle.Offset(0, 1);
+                        clientRectangle.Offset(0, 2);
                         break;
                 }
-
-                TextRenderer.DrawText(g, _waterMark, FontManager.GetStandardWaterMarkFont(), clientRectangle, ThemeManager.Current.ButtonColorsDisabledForeColor, flags);
+                TextRenderer.DrawText(g, WaterMark, FontManager.GetStandardWaterMarkFont(), clientRectangle, ThemeManager.Current.ButtonColorsDisabledForeColor, flags);
             }
 
-            protected override void OnTextAlignChanged(EventArgs e) {
-                base.OnTextAlignChanged(e);
-                Invalidate();
+            // Modify colors
+            BackColor = ThemeManager.ButtonColors.BackGround(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
+            ForeColor = ThemeManager.ButtonColors.ForeGround(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
+
+            // draw border
+            Color borderColor = ThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, false, Enabled);
+            using (Pen p = new Pen(borderColor)) {
+                g.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));
             }
-
-            protected override void OnTextChanged(EventArgs e) {
-                base.OnTextChanged(e);
-                _drawPrompt = (Text.Trim().Length == 0);
-            }
-
-            #endregion
-
-
-            protected override void WndProc(ref Message m) {
-                base.WndProc(ref m);
-                if (((m.Msg == WM_PAINT) || (m.Msg == OcmCommand)) && (_drawPrompt && !GetStyle(ControlStyles.UserPaint))) {
-                    DrawTextPrompt();
-                }
-            }
-
         }
+
+        #endregion
+
+        #region Managing isHovered, isPressed, isFocused
+
+        #region Focus Methods
+
+        protected override void OnGotFocus(EventArgs e) {
+            _isFocused = true;
+            SelectAll();
+            Invalidate();
+
+            base.OnGotFocus(e);
+        }
+
+        protected override void OnLostFocus(EventArgs e) {
+            _isFocused = false;
+            Invalidate();
+
+            base.OnLostFocus(e);
+        }
+
+        protected override void OnEnter(EventArgs e) {
+            _isFocused = true;
+            SelectAll();
+            Invalidate();
+
+            base.OnEnter(e);
+        }
+
+        protected override void OnLeave(EventArgs e) {
+            _isFocused = false;
+            Invalidate();
+
+            base.OnLeave(e);
+        }
+
+        #endregion
+
+        #region Mouse Methods
+
+        protected override void OnMouseEnter(EventArgs e) {
+            _isHovered = true;
+            Invalidate();
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e) {
+            _isHovered = false;
+            Invalidate();
+            base.OnMouseLeave(e);
+        }
+
+        protected override void OnClick(EventArgs e) {
+            if (!_isFocused) {
+                SelectAll();
+            }
+            base.OnClick(e);
+        }
+
+        #endregion
 
         #endregion
     }
 
-    #region Designer
-
-    internal class YamuiTextBoxDesigner : ControlDesigner {
-        public override SelectionRules SelectionRules {
-            get {
-                PropertyDescriptor propDescriptor = TypeDescriptor.GetProperties(Component)["Multiline"];
-
-                if (propDescriptor != null) {
-                    bool isMultiline = (bool) propDescriptor.GetValue(Component);
-
-                    if (isMultiline) {
-                        return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.AllSizeable;
-                    }
-
-                    return SelectionRules.Visible | SelectionRules.Moveable | SelectionRules.LeftSizeable | SelectionRules.RightSizeable;
-                }
-
-                return base.SelectionRules;
-            }
-        }
-
+    internal class YamuiTextBox2Designer : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("BackgroundImage");
-            properties.Remove("ImeMode");
-            properties.Remove("Padding");
-            properties.Remove("BackgroundImageLayout");
-            properties.Remove("Font");
-
+            properties.Remove("Multiline");
+            properties.Remove("MinimumSize");
             base.PreFilterProperties(properties);
         }
     }
-
-    #endregion
 }

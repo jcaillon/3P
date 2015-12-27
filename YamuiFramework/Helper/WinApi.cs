@@ -57,6 +57,12 @@ namespace YamuiFramework.Helper {
             public int Top;
             public int Right;
             public int Bottom;
+            public RECT(int left, int top, int right, int bottom) {
+                Left = left;
+                Top = top;
+                Right = right;
+                Bottom = bottom;
+            }
         }
 
         [StructLayout(LayoutKind.Sequential)]
@@ -369,10 +375,17 @@ namespace YamuiFramework.Helper {
         public const UInt32 SWP_NOMOVE = 0x0002;
         public const UInt32 TOPMOST_FLAGS = SWP_NOMOVE | SWP_NOSIZE;
 
+        // Changes the client size of a control
+        public const int EM_SETRECT = 0xB3;
         #endregion
 
         #region API Calls
-        /* will be used to set a window to always stay on top */
+        // Changes the client size of a control
+        [DllImport(@"User32.dll", EntryPoint = @"SendMessage", CharSet = CharSet.Auto)]
+        public static extern int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
+
+
+        // will be used to set a window to always stay on top
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool SetWindowPos(IntPtr hWnd, IntPtr hWndInsertAfter, int X, int Y, int cx, int cy, uint uFlags);

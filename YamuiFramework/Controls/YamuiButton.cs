@@ -219,7 +219,6 @@ namespace YamuiFramework.Controls {
         protected override void OnKeyDown(KeyEventArgs e) {
             e.Handled = true;
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
-                HandlePressedButton(e);
                 IsPressed = true;
                 Invalidate();
             }
@@ -227,7 +226,9 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
-            //Remove this code cause this prevents the focus color
+            if (IsPressed) {
+                HandlePressedButton(e);
+            }
             IsPressed = false;
             Invalidate();
             base.OnKeyUp(e);
@@ -245,7 +246,6 @@ namespace YamuiFramework.Controls {
 
         protected override void OnMouseDown(MouseEventArgs e) {
             if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
-                HandlePressedButton(e);
                 IsPressed = true;
                 Invalidate();
             }
@@ -253,6 +253,9 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
+            if (IsPressed) {
+                HandlePressedButton(e);
+            }
             IsPressed = false;
             Invalidate();
             base.OnMouseUp(e);

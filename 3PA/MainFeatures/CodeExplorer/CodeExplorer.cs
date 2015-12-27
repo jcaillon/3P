@@ -142,6 +142,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Form = new CodeExplorerForm(FakeForm);
         }
 
+        public static void ForceClose() {
+            Form.Close();
+        }
+
         #endregion
 
     }

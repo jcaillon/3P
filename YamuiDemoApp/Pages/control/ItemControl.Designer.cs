@@ -57,10 +57,10 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiComboBox2
             // 
             this.yamuiComboBox2.Enabled = false;
-            this.yamuiComboBox2.ItemHeight = 19;
+            this.yamuiComboBox2.ItemHeight = 20;
             this.yamuiComboBox2.Location = new System.Drawing.Point(0, 140);
             this.yamuiComboBox2.Name = "yamuiComboBox2";
-            this.yamuiComboBox2.Size = new System.Drawing.Size(121, 25);
+            this.yamuiComboBox2.Size = new System.Drawing.Size(121, 26);
             this.yamuiComboBox2.TabIndex = 21;
             // 
             // yamuiLabel11
@@ -76,7 +76,7 @@ namespace YamuiDemoApp.Pages.control {
             // 
             // yamuiComboBox1
             // 
-            this.yamuiComboBox1.ItemHeight = 19;
+            this.yamuiComboBox1.ItemHeight = 20;
             this.yamuiComboBox1.Items.AddRange(new object[] {
             "test1",
             "test2",
@@ -94,7 +94,7 @@ namespace YamuiDemoApp.Pages.control {
             "test2"});
             this.yamuiComboBox1.Location = new System.Drawing.Point(0, 109);
             this.yamuiComboBox1.Name = "yamuiComboBox1";
-            this.yamuiComboBox1.Size = new System.Drawing.Size(121, 25);
+            this.yamuiComboBox1.Size = new System.Drawing.Size(121, 26);
             this.yamuiComboBox1.TabIndex = 20;
             this.yamuiComboBox1.WaterMark = "Water mark !";
             // 

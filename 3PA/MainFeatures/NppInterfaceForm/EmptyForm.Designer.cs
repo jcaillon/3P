@@ -1,4 +1,6 @@
-﻿namespace _3PA.MainFeatures.NppInterfaceForm {
+﻿using _3PA.Interop;
+
+namespace _3PA.MainFeatures.NppInterfaceForm {
     partial class EmptyForm {
         /// <summary>
         /// Required designer variable.
@@ -10,6 +12,10 @@
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing) {
+
+            // register to Npp
+            FormIntegration.UnRegisterToNpp(Handle);
+
             if (disposing && (components != null)) {
                 components.Dispose();
             }
@@ -25,12 +31,17 @@
         private void InitializeComponent() {
             this.SuspendLayout();
             // 
-            // FakeCodeExplorerForm
+            // EmptyForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(282, 395);
+            this.ControlBox = false;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "EmptyForm";
+            this.ShowIcon = false;
+            this.ShowInTaskbar = false;
             this.Text = "FakeCodeExplorerForm";
             this.ResumeLayout(false);
 
