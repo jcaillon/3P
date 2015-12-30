@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using NppPlugin.DllExport;
 using _3PA.Interop;
@@ -25,6 +26,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local
@@ -38,6 +40,7 @@ namespace _3PA {
     /// Allows Npp to manipulate our plugin, ask for info, execute functions that we declared in the menu...
     /// </summary>
     class UnmanagedExports {
+
         #region Other
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -217,6 +220,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

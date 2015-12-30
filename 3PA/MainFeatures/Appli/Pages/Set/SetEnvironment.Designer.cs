@@ -28,6 +28,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.mainPanel = new YamuiFramework.Controls.YamuiPanel();
+            this.btDeleteDownload = new YamuiFramework.Controls.YamuiImageButton();
+            this.btDbDelete = new YamuiFramework.Controls.YamuiImageButton();
+            this.btDbAdd = new YamuiFramework.Controls.YamuiImageButton();
+            this.btDbEdit = new YamuiFramework.Controls.YamuiImageButton();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -36,43 +40,65 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
-            this.multibox3 = new YamuiFramework.Controls.YamuiTextBox();
             this.tgCompilLocl = new YamuiFramework.Controls.YamuiToggle();
             this.btDownload = new YamuiFramework.Controls.YamuiImageButton();
-            this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
-            this.btcontrol1 = new YamuiFramework.Controls.YamuiButton();
             this.btright6 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft6 = new YamuiFramework.Controls.YamuiImageButton();
-            this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
-            this.envLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.cbDatabase = new YamuiFramework.Controls.YamuiComboBox();
             this.btright1 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft1 = new YamuiFramework.Controls.YamuiImageButton();
-            this.textbox1 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright5 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft5 = new YamuiFramework.Controls.YamuiImageButton();
-            this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright4 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft4 = new YamuiFramework.Controls.YamuiImageButton();
-            this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright3 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft3 = new YamuiFramework.Controls.YamuiImageButton();
-            this.textbox3 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright2 = new YamuiFramework.Controls.YamuiImageButton();
             this.btleft2 = new YamuiFramework.Controls.YamuiImageButton();
-            this.multitextbox1 = new YamuiFramework.Controls.YamuiTextBox();
-            this.multibox2 = new YamuiFramework.Controls.YamuiTextBox();
-            this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
             this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
-            this.cbEnvLetter = new YamuiFramework.Controls.YamuiComboBox();
-            this.cbAppli = new YamuiFramework.Controls.YamuiComboBox();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.txLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.btDelete = new YamuiFramework.Controls.YamuiButton();
+            this.btcontrol1 = new YamuiFramework.Controls.YamuiButton();
+            this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
+            this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
+            this.flCmdLine = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox3 = new YamuiFramework.Controls.YamuiTextBox();
+            this.flExtraProPath = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
+            this.flExtraPf = new YamuiFramework.Controls.YamuiTextBox();
+            this.textbox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.cbDatabase = new YamuiFramework.Controls.YamuiComboBox();
+            this.flDatabase = new YamuiFramework.Controls.YamuiTextBox();
+            this.flLabel = new YamuiFramework.Controls.YamuiTextBox();
+            this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
+            this.flSuffix = new YamuiFramework.Controls.YamuiTextBox();
+            this.cbName = new YamuiFramework.Controls.YamuiComboBox();
+            this.flName = new YamuiFramework.Controls.YamuiTextBox();
             this.mainPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainPanel
             // 
+            this.mainPanel.Controls.Add(this.flLabel);
+            this.mainPanel.Controls.Add(this.textbox1);
+            this.mainPanel.Controls.Add(this.flExtraPf);
+            this.mainPanel.Controls.Add(this.textbox2);
+            this.mainPanel.Controls.Add(this.flExtraProPath);
+            this.mainPanel.Controls.Add(this.textbox3);
+            this.mainPanel.Controls.Add(this.textbox4);
+            this.mainPanel.Controls.Add(this.textbox5);
+            this.mainPanel.Controls.Add(this.flCmdLine);
+            this.mainPanel.Controls.Add(this.textbox6);
+            this.mainPanel.Controls.Add(this.btcontrol2);
+            this.mainPanel.Controls.Add(this.btcontrol1);
+            this.mainPanel.Controls.Add(this.btDelete);
+            this.mainPanel.Controls.Add(this.btDeleteDownload);
+            this.mainPanel.Controls.Add(this.btDbDelete);
+            this.mainPanel.Controls.Add(this.btDbAdd);
+            this.mainPanel.Controls.Add(this.btDbEdit);
             this.mainPanel.Controls.Add(this.htmlLabel7);
             this.mainPanel.Controls.Add(this.htmlLabel6);
             this.mainPanel.Controls.Add(this.htmlLabel5);
@@ -81,37 +107,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.Controls.Add(this.htmlLabel2);
             this.mainPanel.Controls.Add(this.htmlLabel1);
             this.mainPanel.Controls.Add(this.lblLocally);
-            this.mainPanel.Controls.Add(this.multibox3);
             this.mainPanel.Controls.Add(this.tgCompilLocl);
             this.mainPanel.Controls.Add(this.btDownload);
-            this.mainPanel.Controls.Add(this.btcontrol2);
-            this.mainPanel.Controls.Add(this.btcontrol1);
             this.mainPanel.Controls.Add(this.btright6);
             this.mainPanel.Controls.Add(this.btleft6);
-            this.mainPanel.Controls.Add(this.textbox6);
-            this.mainPanel.Controls.Add(this.envLabel);
-            this.mainPanel.Controls.Add(this.cbDatabase);
             this.mainPanel.Controls.Add(this.btright1);
             this.mainPanel.Controls.Add(this.btleft1);
-            this.mainPanel.Controls.Add(this.textbox1);
             this.mainPanel.Controls.Add(this.btright5);
             this.mainPanel.Controls.Add(this.btleft5);
-            this.mainPanel.Controls.Add(this.textbox5);
             this.mainPanel.Controls.Add(this.btright4);
             this.mainPanel.Controls.Add(this.btleft4);
-            this.mainPanel.Controls.Add(this.textbox4);
             this.mainPanel.Controls.Add(this.btright3);
             this.mainPanel.Controls.Add(this.btleft3);
-            this.mainPanel.Controls.Add(this.textbox3);
             this.mainPanel.Controls.Add(this.btright2);
             this.mainPanel.Controls.Add(this.btleft2);
-            this.mainPanel.Controls.Add(this.multitextbox1);
-            this.mainPanel.Controls.Add(this.multibox2);
-            this.mainPanel.Controls.Add(this.textbox2);
             this.mainPanel.Controls.Add(this.yamuiLabel4);
-            this.mainPanel.Controls.Add(this.cbEnvLetter);
-            this.mainPanel.Controls.Add(this.cbAppli);
             this.mainPanel.Controls.Add(this.yamuiLabel1);
+            this.mainPanel.Controls.Add(this.cbDatabase);
+            this.mainPanel.Controls.Add(this.flDatabase);
+            this.mainPanel.Controls.Add(this.txLabel);
+            this.mainPanel.Controls.Add(this.cbSuffix);
+            this.mainPanel.Controls.Add(this.flSuffix);
+            this.mainPanel.Controls.Add(this.cbName);
+            this.mainPanel.Controls.Add(this.flName);
             this.mainPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.mainPanel.HorizontalScrollbarHighlightOnWheel = false;
             this.mainPanel.HorizontalScrollbarSize = 10;
@@ -121,6 +139,48 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.TabIndex = 0;
             this.mainPanel.VerticalScrollbarHighlightOnWheel = false;
             this.mainPanel.VerticalScrollbarSize = 10;
+            // 
+            // btDeleteDownload
+            // 
+            this.btDeleteDownload.BackColor = System.Drawing.Color.Transparent;
+            this.btDeleteDownload.BackGrndImage = null;
+            this.btDeleteDownload.Location = new System.Drawing.Point(588, 93);
+            this.btDeleteDownload.Margin = new System.Windows.Forms.Padding(0);
+            this.btDeleteDownload.Name = "btDeleteDownload";
+            this.btDeleteDownload.Size = new System.Drawing.Size(20, 20);
+            this.btDeleteDownload.TabIndex = 68;
+            this.btDeleteDownload.TabStop = false;
+            this.btDeleteDownload.Text = "yamuiImageButtonDB";
+            // 
+            // btDbDelete
+            // 
+            this.btDbDelete.BackGrndImage = null;
+            this.btDbDelete.Location = new System.Drawing.Point(508, 93);
+            this.btDbDelete.Name = "btDbDelete";
+            this.btDbDelete.Size = new System.Drawing.Size(20, 20);
+            this.btDbDelete.TabIndex = 67;
+            this.btDbDelete.TabStop = false;
+            this.btDbDelete.Text = "yamuiImageButton2";
+            // 
+            // btDbAdd
+            // 
+            this.btDbAdd.BackGrndImage = null;
+            this.btDbAdd.Location = new System.Drawing.Point(489, 93);
+            this.btDbAdd.Name = "btDbAdd";
+            this.btDbAdd.Size = new System.Drawing.Size(20, 20);
+            this.btDbAdd.TabIndex = 66;
+            this.btDbAdd.TabStop = false;
+            this.btDbAdd.Text = "yamuiImageButton2";
+            // 
+            // btDbEdit
+            // 
+            this.btDbEdit.BackGrndImage = null;
+            this.btDbEdit.Location = new System.Drawing.Point(469, 93);
+            this.btDbEdit.Name = "btDbEdit";
+            this.btDbEdit.Size = new System.Drawing.Size(20, 20);
+            this.btDbEdit.TabIndex = 65;
+            this.btDbEdit.TabStop = false;
+            this.btDbEdit.Text = "yamuiImageButton1";
             // 
             // htmlLabel7
             // 
@@ -226,21 +286,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lblLocally.Text = "Compile files locally";
             this.lblLocally.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // multibox3
-            // 
-            this.multibox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.multibox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.multibox3.CustomBackColor = System.Drawing.Color.Empty;
-            this.multibox3.CustomForeColor = System.Drawing.Color.Empty;
-            this.multibox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.multibox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.multibox3.Location = new System.Drawing.Point(190, 401);
-            this.multibox3.MultiLines = true;
-            this.multibox3.Name = "multibox3";
-            this.multibox3.Size = new System.Drawing.Size(438, 45);
-            this.multibox3.TabIndex = 51;
-            this.multibox3.WaterMark = "Appended to the prowin command line when running or compiling";
-            // 
             // tgCompilLocl
             // 
             this.tgCompilLocl.AutoSize = true;
@@ -254,31 +299,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(631, 120);
+            this.btDownload.Location = new System.Drawing.Point(608, 93);
             this.btDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDownload.Name = "btDownload";
             this.btDownload.Size = new System.Drawing.Size(20, 20);
             this.btDownload.TabIndex = 48;
+            this.btDownload.TabStop = false;
             this.btDownload.Text = "yamuiImageButtonDB";
             this.btDownload.Click += new System.EventHandler(this.btDownload_Click);
-            // 
-            // btcontrol2
-            // 
-            this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol2.Location = new System.Drawing.Point(521, 524);
-            this.btcontrol2.Name = "btcontrol2";
-            this.btcontrol2.Size = new System.Drawing.Size(94, 23);
-            this.btcontrol2.TabIndex = 47;
-            this.btcontrol2.Text = "Modify";
-            // 
-            // btcontrol1
-            // 
-            this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol1.Location = new System.Drawing.Point(621, 524);
-            this.btcontrol1.Name = "btcontrol1";
-            this.btcontrol1.Size = new System.Drawing.Size(94, 23);
-            this.btcontrol1.TabIndex = 46;
-            this.btcontrol1.Text = "Add new";
             // 
             // btright6
             // 
@@ -289,6 +317,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
             this.btright6.TabIndex = 45;
+            this.btright6.TabStop = false;
             this.btright6.Text = "yamuiImageButton11";
             // 
             // btleft6
@@ -300,53 +329,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
             this.btleft6.TabIndex = 44;
+            this.btleft6.TabStop = false;
             this.btleft6.Text = "yamuiImageButton12";
-            // 
-            // textbox6
-            // 
-            this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox6.Location = new System.Drawing.Point(190, 457);
-            this.textbox6.Name = "textbox6";
-            this.textbox6.Size = new System.Drawing.Size(438, 20);
-            this.textbox6.TabIndex = 43;
-            this.textbox6.Tag = "log file (*.log)|*.log";
-            this.textbox6.WaterMark = null;
-            // 
-            // envLabel
-            // 
-            this.envLabel.AutoSize = false;
-            this.envLabel.AutoSizeHeightOnly = true;
-            this.envLabel.BackColor = System.Drawing.Color.Transparent;
-            this.envLabel.BaseStylesheet = null;
-            this.envLabel.Location = new System.Drawing.Point(269, 30);
-            this.envLabel.Name = "envLabel";
-            this.envLabel.Size = new System.Drawing.Size(506, 15);
-            this.envLabel.TabIndex = 41;
-            this.envLabel.Text = "?";
-            // 
-            // cbDatabase
-            // 
-            this.cbDatabase.ItemHeight = 15;
-            this.cbDatabase.Location = new System.Drawing.Point(190, 93);
-            this.cbDatabase.Name = "cbDatabase";
-            this.cbDatabase.Size = new System.Drawing.Size(242, 21);
-            this.cbDatabase.TabIndex = 40;
-            this.cbDatabase.SelectionChangeCommitted += new System.EventHandler(this.cbDatabase_SelectedIndexChanged);
             // 
             // btright1
             // 
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(611, 120);
+            this.btright1.Location = new System.Drawing.Point(631, 120);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
             this.btright1.TabIndex = 39;
+            this.btright1.TabStop = false;
             this.btright1.Text = "yamuiImageButton9";
             // 
             // btleft1
@@ -358,22 +353,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft1.Name = "btleft1";
             this.btleft1.Size = new System.Drawing.Size(20, 20);
             this.btleft1.TabIndex = 38;
+            this.btleft1.TabStop = false;
             this.btleft1.Text = "yamuiImageButton10";
-            // 
-            // textbox1
-            // 
-            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox1.Location = new System.Drawing.Point(190, 120);
-            this.textbox1.Name = "textbox1";
-            this.textbox1.Size = new System.Drawing.Size(418, 20);
-            this.textbox1.TabIndex = 37;
-            this.textbox1.Tag = "pf file (*.pf)|*.pf";
-            this.textbox1.WaterMark = null;
             // 
             // btright5
             // 
@@ -384,6 +365,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
             this.btright5.TabIndex = 36;
+            this.btright5.TabStop = false;
             this.btright5.Text = "yamuiImageButton7";
             // 
             // btleft5
@@ -395,22 +377,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
             this.btleft5.TabIndex = 35;
+            this.btleft5.TabStop = false;
             this.btleft5.Text = "yamuiImageButton8";
-            // 
-            // textbox5
-            // 
-            this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox5.Location = new System.Drawing.Point(190, 370);
-            this.textbox5.Name = "textbox5";
-            this.textbox5.Size = new System.Drawing.Size(438, 20);
-            this.textbox5.TabIndex = 34;
-            this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
-            this.textbox5.WaterMark = null;
             // 
             // btright4
             // 
@@ -421,6 +389,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
             this.btright4.TabIndex = 33;
+            this.btright4.TabStop = false;
             this.btright4.Text = "yamuiImageButton5";
             // 
             // btleft4
@@ -432,22 +401,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
             this.btleft4.TabIndex = 32;
+            this.btleft4.TabStop = false;
             this.btleft4.Text = "yamuiImageButton6";
-            // 
-            // textbox4
-            // 
-            this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox4.Location = new System.Drawing.Point(190, 315);
-            this.textbox4.Name = "textbox4";
-            this.textbox4.Size = new System.Drawing.Size(438, 20);
-            this.textbox4.TabIndex = 31;
-            this.textbox4.Tag = "true";
-            this.textbox4.WaterMark = null;
             // 
             // btright3
             // 
@@ -458,6 +413,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
             this.btright3.TabIndex = 30;
+            this.btright3.TabStop = false;
             this.btright3.Text = "yamuiImageButton3";
             // 
             // btleft3
@@ -469,22 +425,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
             this.btleft3.TabIndex = 29;
+            this.btleft3.TabStop = false;
             this.btleft3.Text = "yamuiImageButton4";
-            // 
-            // textbox3
-            // 
-            this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox3.Location = new System.Drawing.Point(190, 284);
-            this.textbox3.Name = "textbox3";
-            this.textbox3.Size = new System.Drawing.Size(438, 20);
-            this.textbox3.TabIndex = 28;
-            this.textbox3.Tag = "true";
-            this.textbox3.WaterMark = null;
             // 
             // btright2
             // 
@@ -495,6 +437,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
             this.btright2.TabIndex = 27;
+            this.btright2.TabStop = false;
             this.btright2.Text = "yamuiImageButton2";
             // 
             // btleft2
@@ -506,52 +449,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft2.Name = "btleft2";
             this.btleft2.Size = new System.Drawing.Size(20, 20);
             this.btleft2.TabIndex = 26;
+            this.btleft2.TabStop = false;
             this.btleft2.Text = "yamuiImageButton1";
-            // 
-            // multitextbox1
-            // 
-            this.multitextbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.multitextbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.multitextbox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.multitextbox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.multitextbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.multitextbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.multitextbox1.Location = new System.Drawing.Point(190, 146);
-            this.multitextbox1.MultiLines = true;
-            this.multitextbox1.Name = "multitextbox1";
-            this.multitextbox1.Size = new System.Drawing.Size(438, 45);
-            this.multitextbox1.TabIndex = 15;
-            this.multitextbox1.WaterMark = "Appended to the .pf file";
-            // 
-            // multibox2
-            // 
-            this.multibox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.multibox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.multibox2.CustomBackColor = System.Drawing.Color.Empty;
-            this.multibox2.CustomForeColor = System.Drawing.Color.Empty;
-            this.multibox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.multibox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.multibox2.Location = new System.Drawing.Point(190, 228);
-            this.multibox2.MultiLines = true;
-            this.multibox2.Name = "multibox2";
-            this.multibox2.Size = new System.Drawing.Size(438, 45);
-            this.multibox2.TabIndex = 11;
-            this.multibox2.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
-            // 
-            // textbox2
-            // 
-            this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox2.Location = new System.Drawing.Point(190, 202);
-            this.textbox2.Name = "textbox2";
-            this.textbox2.Size = new System.Drawing.Size(438, 20);
-            this.textbox2.TabIndex = 9;
-            this.textbox2.Tag = "ini file (*.ini)|*.ini";
-            this.textbox2.WaterMark = null;
             // 
             // yamuiLabel4
             // 
@@ -564,24 +463,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel4.TabIndex = 7;
             this.yamuiLabel4.Text = "DETAILS";
             // 
-            // cbEnvLetter
-            // 
-            this.cbEnvLetter.ItemHeight = 15;
-            this.cbEnvLetter.Location = new System.Drawing.Point(205, 25);
-            this.cbEnvLetter.Name = "cbEnvLetter";
-            this.cbEnvLetter.Size = new System.Drawing.Size(51, 21);
-            this.cbEnvLetter.TabIndex = 6;
-            this.cbEnvLetter.SelectionChangeCommitted += new System.EventHandler(this.cbEnvLetter_SelectedIndexChanged);
-            // 
-            // cbAppli
-            // 
-            this.cbAppli.ItemHeight = 15;
-            this.cbAppli.Location = new System.Drawing.Point(30, 25);
-            this.cbAppli.Name = "cbAppli";
-            this.cbAppli.Size = new System.Drawing.Size(169, 21);
-            this.cbAppli.TabIndex = 3;
-            this.cbAppli.SelectionChangeCommitted += new System.EventHandler(this.cbAppli_SelectedIndexChanged);
-            // 
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
@@ -593,13 +474,272 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel1.TabIndex = 2;
             this.yamuiLabel1.Text = "SELECTION";
             // 
+            // txLabel
+            // 
+            this.txLabel.AutoSize = false;
+            this.txLabel.AutoSizeHeightOnly = true;
+            this.txLabel.BackColor = System.Drawing.Color.Transparent;
+            this.txLabel.BaseStylesheet = null;
+            this.txLabel.Location = new System.Drawing.Point(269, 28);
+            this.txLabel.Name = "txLabel";
+            this.txLabel.Size = new System.Drawing.Size(446, 15);
+            this.txLabel.TabIndex = 41;
+            this.txLabel.TabStop = false;
+            this.txLabel.Text = "?";
+            // 
             // toolTip
             // 
             this.toolTip.AllowLinksHandling = true;
+            this.toolTip.AutomaticDelay = 100;
+            this.toolTip.AutoPopDelay = 90000;
             this.toolTip.BaseStylesheet = null;
+            this.toolTip.InitialDelay = 100;
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
+            this.toolTip.ReshowDelay = 20;
             this.toolTip.TooltipCssClass = "htmltooltip";
+            // 
+            // btDelete
+            // 
+            this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btDelete.Location = new System.Drawing.Point(621, 524);
+            this.btDelete.Name = "btDelete";
+            this.btDelete.Size = new System.Drawing.Size(94, 23);
+            this.btDelete.TabIndex = 69;
+            this.btDelete.Text = "Delete";
+            // 
+            // btcontrol1
+            // 
+            this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btcontrol1.Location = new System.Drawing.Point(521, 524);
+            this.btcontrol1.Name = "btcontrol1";
+            this.btcontrol1.Size = new System.Drawing.Size(94, 23);
+            this.btcontrol1.TabIndex = 70;
+            this.btcontrol1.Text = "Add new";
+            // 
+            // btcontrol2
+            // 
+            this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.btcontrol2.Location = new System.Drawing.Point(421, 524);
+            this.btcontrol2.Name = "btcontrol2";
+            this.btcontrol2.Size = new System.Drawing.Size(94, 23);
+            this.btcontrol2.TabIndex = 71;
+            this.btcontrol2.Text = "Modify";
+            // 
+            // textbox6
+            // 
+            this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox6.Location = new System.Drawing.Point(190, 457);
+            this.textbox6.Name = "textbox6";
+            this.textbox6.Size = new System.Drawing.Size(438, 20);
+            this.textbox6.TabIndex = 72;
+            this.textbox6.Tag = "log file (*.log)|*.log";
+            this.textbox6.WaterMark = null;
+            // 
+            // flCmdLine
+            // 
+            this.flCmdLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flCmdLine.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flCmdLine.CustomBackColor = System.Drawing.Color.Empty;
+            this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
+            this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flCmdLine.Location = new System.Drawing.Point(190, 401);
+            this.flCmdLine.MultiLines = true;
+            this.flCmdLine.Name = "flCmdLine";
+            this.flCmdLine.Size = new System.Drawing.Size(438, 45);
+            this.flCmdLine.TabIndex = 73;
+            this.flCmdLine.WaterMark = "Appended to the prowin command line when running or compiling";
+            // 
+            // textbox5
+            // 
+            this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox5.Location = new System.Drawing.Point(190, 370);
+            this.textbox5.Name = "textbox5";
+            this.textbox5.Size = new System.Drawing.Size(438, 20);
+            this.textbox5.TabIndex = 74;
+            this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
+            this.textbox5.WaterMark = null;
+            // 
+            // textbox4
+            // 
+            this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox4.Location = new System.Drawing.Point(190, 315);
+            this.textbox4.Name = "textbox4";
+            this.textbox4.Size = new System.Drawing.Size(438, 20);
+            this.textbox4.TabIndex = 75;
+            this.textbox4.Tag = "true";
+            this.textbox4.WaterMark = null;
+            // 
+            // textbox3
+            // 
+            this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox3.Location = new System.Drawing.Point(190, 284);
+            this.textbox3.Name = "textbox3";
+            this.textbox3.Size = new System.Drawing.Size(438, 20);
+            this.textbox3.TabIndex = 76;
+            this.textbox3.Tag = "true";
+            this.textbox3.WaterMark = null;
+            // 
+            // flExtraProPath
+            // 
+            this.flExtraProPath.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flExtraProPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flExtraProPath.CustomBackColor = System.Drawing.Color.Empty;
+            this.flExtraProPath.CustomForeColor = System.Drawing.Color.Empty;
+            this.flExtraProPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flExtraProPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flExtraProPath.Location = new System.Drawing.Point(190, 228);
+            this.flExtraProPath.MultiLines = true;
+            this.flExtraProPath.Name = "flExtraProPath";
+            this.flExtraProPath.Size = new System.Drawing.Size(438, 45);
+            this.flExtraProPath.TabIndex = 77;
+            this.flExtraProPath.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
+            // 
+            // textbox2
+            // 
+            this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox2.Location = new System.Drawing.Point(190, 203);
+            this.textbox2.Name = "textbox2";
+            this.textbox2.Size = new System.Drawing.Size(438, 20);
+            this.textbox2.TabIndex = 78;
+            this.textbox2.Tag = "ini file (*.ini)|*.ini";
+            this.textbox2.WaterMark = null;
+            // 
+            // flExtraPf
+            // 
+            this.flExtraPf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flExtraPf.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flExtraPf.CustomBackColor = System.Drawing.Color.Empty;
+            this.flExtraPf.CustomForeColor = System.Drawing.Color.Empty;
+            this.flExtraPf.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flExtraPf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flExtraPf.Location = new System.Drawing.Point(190, 146);
+            this.flExtraPf.MultiLines = true;
+            this.flExtraPf.Name = "flExtraPf";
+            this.flExtraPf.Size = new System.Drawing.Size(438, 45);
+            this.flExtraPf.TabIndex = 79;
+            this.flExtraPf.WaterMark = "Extra connection info";
+            // 
+            // textbox1
+            // 
+            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
+            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
+            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.textbox1.Location = new System.Drawing.Point(190, 120);
+            this.textbox1.Name = "textbox1";
+            this.textbox1.Size = new System.Drawing.Size(438, 20);
+            this.textbox1.TabIndex = 80;
+            this.textbox1.Tag = "pf file (*.pf)|*.pf";
+            this.textbox1.WaterMark = "Path to your .pf file (containing database connection info)";
+            // 
+            // cbDatabase
+            // 
+            this.cbDatabase.ItemHeight = 15;
+            this.cbDatabase.Location = new System.Drawing.Point(190, 93);
+            this.cbDatabase.Name = "cbDatabase";
+            this.cbDatabase.Size = new System.Drawing.Size(273, 21);
+            this.cbDatabase.TabIndex = 81;
+            // 
+            // flDatabase
+            // 
+            this.flDatabase.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flDatabase.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flDatabase.CustomBackColor = System.Drawing.Color.Empty;
+            this.flDatabase.CustomForeColor = System.Drawing.Color.Empty;
+            this.flDatabase.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flDatabase.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flDatabase.Location = new System.Drawing.Point(190, 93);
+            this.flDatabase.Name = "flDatabase";
+            this.flDatabase.Size = new System.Drawing.Size(273, 21);
+            this.flDatabase.TabIndex = 82;
+            this.flDatabase.WaterMark = "Set a name for this database connection";
+            // 
+            // flLabel
+            // 
+            this.flLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flLabel.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flLabel.CustomBackColor = System.Drawing.Color.Empty;
+            this.flLabel.CustomForeColor = System.Drawing.Color.Empty;
+            this.flLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flLabel.Location = new System.Drawing.Point(262, 25);
+            this.flLabel.Name = "flLabel";
+            this.flLabel.Size = new System.Drawing.Size(453, 21);
+            this.flLabel.TabIndex = 83;
+            this.flLabel.WaterMark = "Label for this environment";
+            // 
+            // cbSuffix
+            // 
+            this.cbSuffix.ItemHeight = 15;
+            this.cbSuffix.Location = new System.Drawing.Point(205, 25);
+            this.cbSuffix.Name = "cbSuffix";
+            this.cbSuffix.Size = new System.Drawing.Size(51, 21);
+            this.cbSuffix.TabIndex = 84;
+            // 
+            // flSuffix
+            // 
+            this.flSuffix.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flSuffix.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flSuffix.CustomBackColor = System.Drawing.Color.Empty;
+            this.flSuffix.CustomForeColor = System.Drawing.Color.Empty;
+            this.flSuffix.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flSuffix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flSuffix.Location = new System.Drawing.Point(205, 25);
+            this.flSuffix.Name = "flSuffix";
+            this.flSuffix.Size = new System.Drawing.Size(51, 21);
+            this.flSuffix.TabIndex = 85;
+            this.flSuffix.WaterMark = "Suffix";
+            // 
+            // cbName
+            // 
+            this.cbName.ItemHeight = 15;
+            this.cbName.Location = new System.Drawing.Point(30, 25);
+            this.cbName.Name = "cbName";
+            this.cbName.Size = new System.Drawing.Size(169, 21);
+            this.cbName.TabIndex = 86;
+            // 
+            // flName
+            // 
+            this.flName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flName.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flName.CustomBackColor = System.Drawing.Color.Empty;
+            this.flName.CustomForeColor = System.Drawing.Color.Empty;
+            this.flName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flName.Location = new System.Drawing.Point(30, 25);
+            this.flName.Name = "flName";
+            this.flName.Size = new System.Drawing.Size(169, 21);
+            this.flName.TabIndex = 87;
+            this.flName.WaterMark = "Application name";
             // 
             // SetEnvironment
             // 
@@ -618,37 +758,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private YamuiPanel mainPanel;
         private YamuiLabel yamuiLabel1;
-        private YamuiComboBox cbEnvLetter;
-        private YamuiComboBox cbAppli;
         private YamuiLabel yamuiLabel4;
-        private YamuiTextBox textbox2;
-        private YamuiTextBox multibox2;
-        private YamuiTextBox multitextbox1;
         private YamuiImageButton btright2;
         private YamuiImageButton btleft2;
         private YamuiImageButton btright1;
         private YamuiImageButton btleft1;
-        private YamuiTextBox textbox1;
         private YamuiImageButton btright5;
         private YamuiImageButton btleft5;
-        private YamuiTextBox textbox5;
         private YamuiImageButton btright4;
         private YamuiImageButton btleft4;
-        private YamuiTextBox textbox4;
         private YamuiImageButton btright3;
         private YamuiImageButton btleft3;
-        private YamuiTextBox textbox3;
-        private YamuiComboBox cbDatabase;
-        private HtmlLabel envLabel;
+        private HtmlLabel txLabel;
         private YamuiImageButton btright6;
         private YamuiImageButton btleft6;
-        private YamuiTextBox textbox6;
-        private YamuiButton btcontrol2;
-        private YamuiButton btcontrol1;
         private HtmlToolTip toolTip;
         private YamuiImageButton btDownload;
         private YamuiToggle tgCompilLocl;
-        private YamuiTextBox multibox3;
         private YamuiLabel lblLocally;
         private HtmlLabel htmlLabel1;
         private HtmlLabel htmlLabel2;
@@ -657,5 +783,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel5;
         private HtmlLabel htmlLabel6;
         private HtmlLabel htmlLabel7;
+        private YamuiImageButton btDbAdd;
+        private YamuiImageButton btDbEdit;
+        private YamuiImageButton btDbDelete;
+        private YamuiImageButton btDeleteDownload;
+        private YamuiTextBox textbox1;
+        private YamuiTextBox flExtraPf;
+        private YamuiTextBox textbox2;
+        private YamuiTextBox flExtraProPath;
+        private YamuiTextBox textbox3;
+        private YamuiTextBox textbox4;
+        private YamuiTextBox textbox5;
+        private YamuiTextBox flCmdLine;
+        private YamuiTextBox textbox6;
+        private YamuiButton btcontrol2;
+        private YamuiButton btcontrol1;
+        private YamuiButton btDelete;
+        private YamuiComboBox cbDatabase;
+        private YamuiTextBox flDatabase;
+        private YamuiTextBox flLabel;
+        private YamuiComboBox cbSuffix;
+        private YamuiTextBox flSuffix;
+        private YamuiComboBox cbName;
+        private YamuiTextBox flName;
     }
 }

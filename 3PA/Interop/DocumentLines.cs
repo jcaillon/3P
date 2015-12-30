@@ -18,326 +18,36 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Text;
+using _3PA.Lib;
 
 namespace _3PA.Interop {
 
-    /// <summary>
-    /// This class is a rip off from https://github.com/jacobslusser/ScintillaNET/!
-    /// Freaking awesome work, i just adapted it to make it work with Npp's scintilla
-    /// </summary>
     public class DocumentLines {
 
         #region Fields
 
-        private GapBuffer<PerLine> _perLineData;
+        /// <summary>
+        /// This is basically an array of int (except that we don't a List or Array, see GapBuffer for more details)
+        /// We store the starting CHAR position of each line of the document 
+        /// A line's length is calculated by subtracting its start position from the start of the following line
+        /// thus, a 'phantom' line is added at the end of the document so we can know the lenght of the last line as well
+        /// </summary>
+        private GapBuffer<int> _linesList;
 
-        // The 'step' is a break in the continuity of our line starts. It allows us
-        // to delay the updating of every line start when text is inserted/deleted.
-        private int _stepLine;
-        private int _stepLength;
-
-        #endregion Fields
-
-        #region Methods
-
-        public void ScnModified(SCNotification scn) {
-            if ((scn.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) > 0) {
-                TrackDeleteText(scn);
-            }
-
-            if ((scn.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) > 0) {
-                TrackInsertText(scn);
-            }
-        }
-
-        internal void RebuildLineData() {
-            _stepLine = 0;
-            _stepLength = 0;
-
-            _perLineData = new GapBuffer<PerLine> { new PerLine { Start = 0 }, new PerLine { Start = 0 } };
-            // Terminal
-
-            // Fake an insert notification
-            var scn = new SCNotification {
-                linesAdded = Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32() - 1,
-                position = 0,
-                length = Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32()
-            };
-            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
-            TrackInsertText(scn);
-        }
-
-        internal int CharToBytePosition(int pos) {
-            pos = Npp.Clamp(pos, 0, TextLength);
-
-            // Adjust to the nearest line start
-            var line = LineFromCharPosition(pos);
-            var bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            pos -= CharPositionFromLine(line);
-
-            // Optimization when the line contains NO multibyte characters
-            if (!LineContainsMultibyteChar(line))
-                return (bytePos + pos);
-
-            while (pos > 0) {
-                // Move char-by-char
-                bytePos = Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(bytePos), new IntPtr(1)).ToInt32();
-                pos--;
-            }
-
-            return bytePos;
-        }
+        private Encoding _lastEncoding;
+        private bool _oneByteCharEncoding;
 
         /// <summary>
-        /// Converts a BYTE offset to a CHARACTER offset.
+        /// When we insert/delete 1 or x char in a given line, we don't want to immediatly update the 
+        /// starting char position of all the following lines (because adding 1 char is called everytime we press
+        /// a key!!), so instead we allow to have a 'hole' in our lines info, we remember on which the hole is
+        /// and its lenght, so we can compute everything accordingdly
         /// </summary>
-        internal int ByteToCharPosition(int pos) {
-            pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
-            var line = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
-            var byteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
-            var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
-            return count;
-        }
-
-        /// <summary>
-        /// Returns the number of CHARACTERS in a line.
-        /// </summary>
-        internal int CharLineLength(int index) {
-            // A line's length is calculated by subtracting its start offset from
-            // the start of the line following. We keep a terminal (faux) line at
-            // the end of the list so we can calculate the length of the last line.
-            index = Npp.Clamp(index, 0, Count);
-
-            if (index + 1 <= _stepLine)
-                return _perLineData[index + 1].Start - _perLineData[index].Start;
-            if (index <= _stepLine)
-                return (_perLineData[index + 1].Start + _stepLength) - _perLineData[index].Start;
-            return (_perLineData[index + 1].Start + _stepLength) - (_perLineData[index].Start + _stepLength);
-        }
-
-        /// <summary>
-        /// Returns the CHARACTER offset where the line begins.
-        /// </summary>
-        internal int CharPositionFromLine(int index) {
-            index = Npp.Clamp(index, 0, _perLineData.Count);
-            var start = _perLineData[index].Start;
-            if (index > _stepLine)
-                start += _stepLength;
-
-            // The check below ensure we correct our info if we failed to find the char position
-            if (start == 0 && index > 0) {
-                RebuildLineData();
-                start = _perLineData[index].Start;
-                if (index > _stepLine)
-                    start += _stepLength;
-            }
-
-            return start;
-        }
-
-        /// <summary>
-        /// Returns the line index containing the CHARACTER position.
-        /// </summary>
-        internal int LineFromCharPosition(int pos) {
-            pos = Npp.ClampMin(pos, 0);
-
-            // Iterative binary search
-            // http://en.wikipedia.org/wiki/Binary_search_algorithm
-            // System.Collections.Generic.ArraySortHelper.InternalBinarySearch
-
-            var low = 0;
-            var high = Count - 1;
-
-            while (low <= high) {
-                var mid = low + ((high - low) / 2);
-                var start = CharPositionFromLine(mid);
-
-                if (pos == start)
-                    return mid;
-                if (start < pos)
-                    low = mid + 1;
-                else
-                    high = mid - 1;
-            }
-
-            // After while exit, 'low' will point to the index where 'pos' should be
-            // inserted (if we were creating a new line start). The line containing
-            // 'pos' then would be 'low - 1'.
-            return low - 1;
-        }
-
-        #endregion Methods
-
-        #region private methods
-
-        /// <summary>
-        /// Adjust the number of CHARACTERS in a line.
-        /// </summary>
-        private void AdjustLineLength(int index, int delta) {
-            MoveStep(index);
-            _stepLength += delta;
-
-            // Invalidate multibyte flag
-            var perLine = _perLineData[index];
-            perLine.ContainsMultibyte = ContainsMultibyte.Unkown;
-            _perLineData[index] = perLine;
-        }
-
-        private void DeletePerLine(int index) {
-
-            MoveStep(index);
-
-            // Subtract the line length
-            _stepLength -= CharLineLength(index);
-
-            // Remove the line
-            _perLineData.RemoveAt(index);
-
-            // Move the step to the line before the one removed
-            _stepLine--;
-        }
-
-        /// <summary>
-        /// Gets the number of CHARACTERS int a BYTE range.
-        /// </summary>
-        private int GetCharCount(int pos, int length) {
-            var ptr = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
-            return GetCharCount(ptr, length, Npp.Encoding);
-        }
-
-        /// <summary>
-        /// Gets the number of CHARACTERS in a BYTE range.
-        /// </summary>
-        private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
-            if (text == IntPtr.Zero || length == 0)
-                return 0;
-
-            // Never use SCI_COUNTCHARACTERS. It counts CRLF as 1 char!
-            var count = encoding.GetCharCount((byte*)text, length);
-            return count;
-        }
-
-        private bool LineContainsMultibyteChar(int index) {
-            var perLine = _perLineData[index];
-            if (perLine.ContainsMultibyte == ContainsMultibyte.Unkown) {
-                perLine.ContainsMultibyte =
-                    (Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(index)).ToInt32() == CharLineLength(index))
-                        ? ContainsMultibyte.No
-                        : ContainsMultibyte.Yes;
-
-                _perLineData[index] = perLine;
-            }
-
-            return (perLine.ContainsMultibyte == ContainsMultibyte.Yes);
-        }
-
-        /// <summary>
-        /// Tracks a new line with the given CHARACTER length.
-        /// </summary>
-        private void InsertPerLine(int index, int length = 0) {
-            MoveStep(index);
-
-            // Add the new line length to the existing line start
-            var data = _perLineData[index];
-            var lineStart = data.Start;
-            data.Start += length;
-            _perLineData[index] = data;
-
-            // Insert the new line
-            data = new PerLine { Start = lineStart };
-            _perLineData.Insert(index, data);
-
-            // Move the step
-            _stepLength += length;
-            _stepLine++;
-        }
-
-        private void MoveStep(int line) {
-            if (_stepLength == 0) {
-                _stepLine = line;
-            } else if (_stepLine < line) {
-                while (_stepLine < line) {
-                    _stepLine++;
-                    var data = _perLineData[_stepLine];
-                    data.Start += _stepLength;
-                    _perLineData[_stepLine] = data;
-                }
-            } else if (_stepLine > line) {
-                while (_stepLine > line) {
-                    var data = _perLineData[_stepLine];
-                    data.Start -= _stepLength;
-                    _perLineData[_stepLine] = data;
-                    _stepLine--;
-                }
-            }
-        }
-
-        private void TrackDeleteText(SCNotification scn) {
-            var startLine = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
-            if (scn.linesAdded == 0) {
-                // That was easy
-                var delta = GetCharCount(scn.text, scn.length, Npp.Encoding);
-                AdjustLineLength(startLine, delta * -1);
-            } else {
-                // Adjust the existing line
-                var lineByteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
-                var lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
-                AdjustLineLength(startLine, GetCharCount(lineByteStart, lineByteLength) - CharLineLength(startLine));
-
-                var linesRemoved = scn.linesAdded * -1;
-                for (int i = 0; i < linesRemoved; i++) {
-                    // Deleted line
-                    DeletePerLine(startLine + 1);
-                }
-            }
-        }
-
-        private void TrackInsertText(SCNotification scn) {
-            var startLine = Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(scn.position)).ToInt32();
-            if (scn.linesAdded == 0) {
-                // That was easy
-                var delta = GetCharCount(scn.position, scn.length);
-                AdjustLineLength(startLine, delta);
-            } else {
-                // Adjust existing line
-                var lineByteStart = Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(startLine)).ToInt32();
-                var lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(startLine)).ToInt32();
-                AdjustLineLength(startLine, GetCharCount(lineByteStart, lineByteLength) - CharLineLength(startLine));
-
-                for (int i = 1; i <= scn.linesAdded; i++) {
-                    var line = startLine + i;
-
-                    // Insert new line
-                    lineByteStart += lineByteLength;
-                    lineByteLength = Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
-                    InsertPerLine(line, GetCharCount(lineByteStart, lineByteLength));
-                }
-            }
-        }
+        private int _holeLine;
+        private int _holeLenght;
 
         #endregion
-
-        #region Properties
-
-        /// <summary>
-        /// Gets the number of lines.
-        /// </summary>
-        /// <returns>The number of lines</returns>
-        public int Count {
-            get { return (_perLineData.Count - 1); }
-        }
-
-        /// <summary>
-        /// Gets the number of CHARACTERS in the document.
-        /// </summary>
-        internal int TextLength {
-            get { return CharPositionFromLine(_perLineData.Count - 1); }
-        }
-
-        #endregion Properties
 
         #region Constructors
 
@@ -345,171 +55,305 @@ namespace _3PA.Interop {
         /// Initializes a new instance
         /// </summary>
         public DocumentLines() {
-            _perLineData = new GapBuffer<PerLine> { new PerLine { Start = 0 }, new PerLine { Start = 0 } };
-            // Terminal
+            _linesList = new GapBuffer<int> {0, 0};
         }
 
-        #endregion Constructors
+        #endregion
 
-        #region Types
+        #region Register document modifications
 
         /// <summary>
-        /// Stuff we track for each line.
+        /// When receiving a modification notification by scintilla
         /// </summary>
-        private struct PerLine {
-            /// <summary>
-            /// The CHARACTER position where the line begins.
-            /// </summary>
-            public int Start;
-
-            /// <summary>
-            /// 1 if the line contains multibyte (Unicode) characters; -1 if not; 0 if undetermined.
-            /// </summary>
-            /// <remarks>Using an enum instead of Nullable because it uses less memory per line...</remarks>
-            public ContainsMultibyte ContainsMultibyte;
+        /// <param name="scn"></param>
+        public void OnScnModified(SCNotification scn) {
+            if ((scn.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) > 0) {
+                OnDeletedText(scn);
+            } 
+            if ((scn.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) > 0) {
+                OnInsertedText(scn);
+            }
         }
 
-        private enum ContainsMultibyte {
-            No = -1,
-            Unkown,
-            Yes
+        /// <summary>
+        /// Simulates the insertion of the whole text, use this to reset the lines info 
+        /// (when switching document for instance)
+        /// </summary>
+        internal void Reset() {
+            _linesList = new GapBuffer<int> { 0, 0 };
+            var scn = new SCNotification {
+                linesAdded = SciGetLineCount() - 1,
+                position = 0,
+                length = SciGetLength()
+            };
+            scn.text = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(scn.position), new IntPtr(scn.length));
+            OnInsertedText(scn);
         }
 
-        #endregion Types
+        /// <summary>
+        /// updates the line info when deleting text
+        /// </summary>
+        /// <param name="scn"></param>
+        private void OnDeletedText(SCNotification scn) {
+            _lastEncoding = Npp.Encoding;
+            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
 
-    }
-
-    /// <summary>
-    /// This class is a rip off from https://github.com/jacobslusser/ScintillaNET/!
-    /// Freaking awesome work, i just adapted it to make it work with Npp's scintilla
-    /// </summary>
-    internal sealed class GapBuffer<T> : IEnumerable<T> {
-        private T[] _buffer;
-        private int _gapStart;
-        private int _gapEnd;
-
-        public void Add(T item) {
-            Insert(Count, item);
-        }
-
-        public void AddRange(ICollection<T> collection) {
-            InsertRange(Count, collection);
-        }
-
-        private void EnsureGapCapacity(int length) {
-            if (length > (_gapEnd - _gapStart)) {
-                // How much to grow the buffer is a tricky question.
-                // Our current algo will double the capacity unless that's not enough.
-                var minCapacity = Count + length;
-                var newCapacity = (_buffer.Length * 2);
-                if (newCapacity < minCapacity) {
-                    newCapacity = minCapacity;
+            var startLine = SciLineFromPosition(scn.position);
+            if (scn.linesAdded == 0) {
+                var delCharLenght = GetCharCount(scn.text, scn.length, _lastEncoding);
+                SetHoleInLine(startLine, -delCharLenght);
+            } else {
+                var lineByteStart = SciPositionFromLine(startLine);
+                var lineByteLength = SciLineLength(startLine);
+                var delCharLenght = -(GetCharCount(lineByteStart, lineByteLength) - LineCharLength(startLine));
+                FillTheHole();
+                for (int i = 0; i < -scn.linesAdded; i++) {
+                    delCharLenght += LineCharLength(startLine + 1);
+                    _linesList.RemoveAt(startLine + 1);
                 }
-
-                var newBuffer = new T[newCapacity];
-                var newGapEnd = newBuffer.Length - (_buffer.Length - _gapEnd);
-
-                Array.Copy(_buffer, 0, newBuffer, 0, _gapStart);
-                Array.Copy(_buffer, _gapEnd, newBuffer, newGapEnd, newBuffer.Length - newGapEnd);
-                _buffer = newBuffer;
-                _gapEnd = newGapEnd;
+                SetHoleInLine(startLine, -delCharLenght);
+                FillTheHole();
             }
         }
 
-        public IEnumerator<T> GetEnumerator() {
-            var count = Count;
-            for (int i = 0; i < count; i++)
-                yield return this[i];
-        }
+        /// <summary>
+        /// Updates the line info when inserting text
+        /// </summary>
+        /// <param name="scn"></param>
+        private void OnInsertedText(SCNotification scn) {
+            _lastEncoding = Npp.Encoding;
+            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
 
-        IEnumerator IEnumerable.GetEnumerator() {
-            return GetEnumerator();
-        }
+            var startLine = SciLineFromPosition(scn.position);
+            if (scn.linesAdded == 0) {
+                var insCharLenght = GetCharCount(scn.position, scn.length);
+                SetHoleInLine(startLine, insCharLenght);
+            } else {
+                var startCharPos = CharPositionFromLine(startLine);
+                var lineByteStart = SciPositionFromLine(startLine);
+                var lineByteLength = SciLineLength(startLine);
+                var lineCharLenght = GetCharCount(lineByteStart, lineByteLength);
+                var insCharLenght = lineCharLenght - LineCharLength(startLine);
+                FillTheHole();
+                for (int i = 0; i < scn.linesAdded; i++) {
+                    startCharPos += lineCharLenght;
+                    var line = startLine + i + 1;
+                    lineByteStart += lineByteLength;
+                    lineByteLength = SciLineLength(line);
+                    lineCharLenght = GetCharCount(lineByteStart, lineByteLength);
+                    insCharLenght += lineCharLenght;
+                    _linesList.Insert(line, startCharPos);
+                }
+                SetHoleInLine(startLine + scn.linesAdded, insCharLenght);
+                FillTheHole();
 
-        public void Insert(int index, T item) {
-            PlaceGapStart(index);
-            EnsureGapCapacity(1);
-
-            _buffer[index] = item;
-            _gapStart++;
-        }
-
-        public void InsertRange(int index, ICollection<T> collection) {
-            var count = collection.Count;
-            if (count > 0) {
-                PlaceGapStart(index);
-                EnsureGapCapacity(count);
-
-                collection.CopyTo(_buffer, _gapStart);
-                _gapStart += count;
-            }
-        }
-
-        private void PlaceGapStart(int index) {
-            if (index != _gapStart) {
-                if ((_gapEnd - _gapStart) == 0) {
-                    // There is no gap
-                    _gapStart = index;
-                    _gapEnd = index;
-                } else if (index < _gapStart) {
-                    // Move gap left (copy contents right)
-                    var length = (_gapStart - index);
-                    var deltaLength = (_gapEnd - _gapStart < length ? _gapEnd - _gapStart : length);
-                    Array.Copy(_buffer, index, _buffer, _gapEnd - length, length);
-                    _gapStart -= length;
-                    _gapEnd -= length;
-
-                    Array.Clear(_buffer, index, deltaLength);
-                } else {
-                    // Move gap right (copy contents left)
-                    var length = (index - _gapStart);
-                    var deltaIndex = (index > _gapEnd ? index : _gapEnd);
-                    Array.Copy(_buffer, _gapEnd, _buffer, _gapStart, length);
-                    _gapStart += length;
-                    _gapEnd += length;
-
-                    Array.Clear(_buffer, deltaIndex, _gapEnd - deltaIndex);
+                // We should not have a null lenght, but we actually can :
+                // when a file is modified outside npp, npp suggests to reload it, a modified notification is sent
+                // but is it sent BEFORE the text is actually put into scintilla! So what we do here doesn't work at all
+                // so in that case, we need to refresh the info when the text is acutally inserted, that is after updateui
+                if (TextLength == 0) {
+                    Plug.ActionAfterUpdateUi = Reset;
                 }
             }
         }
 
-        public void RemoveAt(int index) {
-            PlaceGapStart(index);
-            _buffer[_gapEnd] = default(T);
-            _gapEnd++;
-        }
-
-        public void RemoveRange(int index, int count) {
-            if (count > 0) {
-                PlaceGapStart(index);
-                Array.Clear(_buffer, _gapEnd, count);
-                _gapEnd += count;
+        /// <summary>
+        /// Creates a hole in a given line (charLength is added to the existing _holeLenght)
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="charLength"></param>
+        private void SetHoleInLine(int line, int charLength) {
+            // since a hole is only for one line and there can be only one hole, fill the previous hole if it exists
+            if (line != _holeLine) {
+                FillTheHole();
             }
+            _holeLine = line;
+            _holeLenght += charLength;
         }
 
+        /// <summary>
+        /// Fixes the hole we created in a line by correcting the start char position or all the following lines
+        /// (by the amount of _holeLenght) and then rests the _holeLenght
+        /// </summary>
+        private void FillTheHole() {
+            // is there even a hole?
+            if (_holeLenght == 0) return;
+            var totalNbLines = _linesList.Count;
+            for (int i = _holeLine + 1; i < totalNbLines; i++) {
+                _linesList[i] += _holeLenght;
+            }
+            _holeLenght = 0;
+        }
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Gets the number of lines.
+        /// </summary>
+        /// <returns>The number of lines</returns>
         public int Count {
-            get { return _buffer.Length - (_gapEnd - _gapStart); }
+            get { return (_linesList.Count - 1); }
         }
 
-        public T this[int index] {
-            get {
-                if (index < _gapStart)
-                    return _buffer[index];
+        /// <summary>
+        /// Gets the number of CHAR in the document.
+        /// </summary>
+        internal int TextLength {
+            get { return CharPositionFromLine(_linesList.Count - 1); }
+        }
 
-                return _buffer[index + (_gapEnd - _gapStart)];
+        /// <summary>
+        /// Returns the CHAR position where the line begins,
+        /// this is THE method of this class (since it is the only info we keep on the lines!)
+        /// </summary>
+        public int CharPositionFromLine(int index) {
+            if (_holeLenght != 0 && index > _holeLine) {
+                return _linesList[index] + _holeLenght;
             }
-            set {
-                if (index >= _gapStart)
-                    index += (_gapEnd - _gapStart);
+            return _linesList[index];
+        }
 
-                _buffer[index] = value;
+        /// <summary>
+        /// Returns the number of CHAR in a line.
+        /// </summary>
+        public int LineCharLength(int index) {
+            //index = Npp.Clamp(index, 0, Count);
+            return CharPositionFromLine(index + 1) - CharPositionFromLine(index);
+        }
+
+        /// <summary>
+        /// Returns the line index containing the CHAR position.
+        /// </summary>
+        public int LineFromCharPosition(int pos) {
+            // Dichotomic algo to find the line containing the char pos
+            var low = 0;
+            var high = Count - 1;
+            while (low <= high) {
+                var mid = low + ((high - low) / 2);
+                var start = CharPositionFromLine(mid);
+                if (pos == start)
+                    return mid;
+                if (start < pos)
+                    low = mid + 1;
+                else
+                    high = mid - 1;
             }
+            return low - 1;
         }
 
-        public GapBuffer(int capacity = 0) {
-            _buffer = new T[capacity];
-            _gapEnd = _buffer.Length;
+        /// <summary>
+        /// Converts a CHAR position to a BYTE position
+        /// </summary>
+        public int CharToBytePosition(int pos) {
+            // pos = Npp.Clamp(pos, 0, TextLenght);
+            // nearest line start
+            var line = LineFromCharPosition(pos);
+            var byteStartPos = SciPositionFromLine(line);
+            var posInLine = pos - CharPositionFromLine(line);
+
+            // The lines contains as much BYTES as CHAR
+            if (SciLineLength(line) == LineCharLength(line))
+                return (byteStartPos + posInLine);
+
+            while (posInLine > 0) {
+                // Move char-by-char, Count a number of whole CHAR before or after the argument position and return that position
+                byteStartPos = SciPositionRelative(byteStartPos, 1);
+                posInLine--;
+            }
+
+            return byteStartPos;
         }
+
+        /// <summary>
+        /// Converts a BYTE position to a CHAR position.
+        /// </summary>
+        public int ByteToCharPosition(int pos) {
+            //pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
+            var line = SciLineFromPosition(pos);
+            var byteStart = SciPositionFromLine(line);
+            var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);
+            return count;
+        }
+
+        #endregion Methods
+
+        #region private methods
+
+        /// <summary>
+        /// Returns the document lenght in BYTES
+        /// </summary>
+        /// <returns></returns>
+        private int SciGetLength() {
+            return Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32();
+        }
+
+        /// <summary>
+        /// Count a number of whole characters before or after the argument position and return that position
+        /// The minimum position returned is 0 and the maximum is the last position in the document
+        /// </summary>
+        /// <returns></returns>
+        private int SciPositionRelative(int position, int nb) {
+            return Npp.Sci.Send(SciMsg.SCI_POSITIONRELATIVE, new IntPtr(position), new IntPtr(nb)).ToInt32();
+        }
+
+        /// <summary>
+        /// returns the number of lines in the document
+        /// </summary>
+        /// <returns></returns>
+        private int SciGetLineCount() {
+            return Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32();
+        }
+
+        /// <summary>
+        /// returns the length (nb of BYTE) of the line, including any line end CHARs
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        private int SciLineLength(int line) {
+            return Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(line)).ToInt32();
+        }
+
+        /// <summary>
+        /// returns the line that contains the BYTE position pos in the document
+        /// </summary>
+        /// <param name="pos"></param>
+        /// <returns></returns>
+        private int SciLineFromPosition(int pos) {
+            return pos == 0 ? 0 : Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(pos)).ToInt32();
+        }
+
+        /// <summary>
+        /// returns the document BYTE position that corresponds with the start of the line
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        private int SciPositionFromLine(int line) {
+            return line == 0 ? 0 : Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(line)).ToInt32();
+        }
+
+        /// <summary>
+        /// Gets the number of CHAR int a BYTE range
+        /// </summary>
+        private int GetCharCount(int pos, int length) {
+            // don't use SCI_COUNTCHAR, it counts CRLF as 1 char
+            var ptr = Npp.Sci.Send(SciMsg.SCI_GETRANGEPOINTER, new IntPtr(pos), new IntPtr(length));
+            return GetCharCount(ptr, length, _lastEncoding);
+        }
+
+        /// <summary>
+        /// Gets the number of CHAR in a BYTE range
+        /// </summary>
+        private static unsafe int GetCharCount(IntPtr text, int length, Encoding encoding) {
+            if (text == IntPtr.Zero || length == 0)
+                return 0;
+            var count = encoding.GetCharCount((byte*)text, length);
+            return count;
+        }
+
+        #endregion
+
     }
 }
 

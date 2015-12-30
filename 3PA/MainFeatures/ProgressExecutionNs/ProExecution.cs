@@ -28,7 +28,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class ProgressExecution {
+    public class ProExecution {
 
         #region public fields
 
@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Creates a progress execution environnement, to compile or run a program
         /// </summary>
         /// <param name="tempFullFilePathToExecute"></param>
-        public ProgressExecution(string tempFullFilePathToExecute) {
+        public ProExecution(string tempFullFilePathToExecute) {
             FullFilePathToExecute = tempFullFilePathToExecute;
             _isCurrentFile = false;
         }
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Creates a progress execution environnement, to compile or run the current program
         /// </summary>
-        public ProgressExecution() {
+        public ProExecution() {
             FullFilePathToExecute = Plug.CurrentFilePath;
             _isCurrentFile = true;
         }
@@ -132,7 +132,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Deletes temp directory and everything in it
         /// </summary>
-        ~ProgressExecution()
+        ~ProExecution()
         {
             try
             {
@@ -174,8 +174,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     return false;
                 }
             }
-            if (!File.Exists(ProgressEnv.Current.ProwinPath)) {
-                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProgressEnv.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", 10);
+            if (!File.Exists(ProEnvironment.Current.ProwinPath)) {
+                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProEnvironment.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", 10);
                 return false;
             }
 
@@ -191,21 +191,21 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             // Move context files into the execution dir
-            if (File.Exists(ProgressEnv.Current.GetCurrentPfPath()))
-                File.Copy(ProgressEnv.Current.GetCurrentPfPath(), Path.Combine(ExecutionDir, "base.pf"));
+            if (File.Exists(ProEnvironment.Current.GetPfPath()))
+                File.Copy(ProEnvironment.Current.GetPfPath(), Path.Combine(ExecutionDir, "base.pf"));
 
-            if (!string.IsNullOrEmpty(ProgressEnv.Current.DataBaseConnection))
-                File.WriteAllText(Path.Combine(ExecutionDir, "extra.pf"), ProgressEnv.Current.DataBaseConnection, Encoding.Default);
+            if (!string.IsNullOrEmpty(ProEnvironment.Current.ExtraPf))
+                File.WriteAllText(Path.Combine(ExecutionDir, "extra.pf"), ProEnvironment.Current.ExtraPf, Encoding.Default);
 
-            if (File.Exists(ProgressEnv.Current.IniPath))
-                File.Copy(ProgressEnv.Current.IniPath, Path.Combine(ExecutionDir, "base.ini"));
+            if (File.Exists(ProEnvironment.Current.IniPath))
+                File.Copy(ProEnvironment.Current.IniPath, Path.Combine(ExecutionDir, "base.ini"));
 
             // If current file, copy Npp.Text to a temp file to be executed
             var dumpDbProgramName = "";
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile) {
                     TempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
-                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Npp.Encoding);
+                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
                 } else TempFullFilePathToExecute = FullFilePathToExecute;
             } else {
                 // for database extraction, we need the output path and to copy the DumpDatabase program
@@ -230,25 +230,25 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + ProgressEnv.Current.ProPath).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + ProEnvironment.Current.ExtraProPath).ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE dumbDataBaseProgram " + dumpDbProgramName.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
             // progress runner
             var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             _runnerPath = Path.Combine(ExecutionDir, runnerFileName);
-            File.WriteAllText(_runnerPath, programContent.ToString(),Encoding.Default);
+            File.WriteAllText(_runnerPath, programContent.ToString(), Encoding.Default);
 
             // misc
-            ProgressWin32 = ProgressEnv.Current.ProwinPath;
-            CompilationDir = ProgressEnv.Current.BaseCompilationPath; //TODO : compilationPath!
+            ProgressWin32 = ProEnvironment.Current.ProwinPath;
+            CompilationDir = ProEnvironment.Current.BaseCompilationPath; //TODO : compilationPath!
 
             // Parameters
             StringBuilder Params = new StringBuilder();
-            //if (executionType != ExecutionType.Run)
-            //    Params.Append(" -b");
-            if (!string.IsNullOrWhiteSpace(ProgressEnv.Current.CmdLineParameters))
-                Params.Append(" " + ProgressEnv.Current.CmdLineParameters.Trim());
+            if (executionType != ExecutionType.Run)
+                Params.Append(" -b");
+            if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
+                Params.Append(" " + ProEnvironment.Current.CmdLineParameters.Trim());
             if (File.Exists(Path.Combine(ExecutionDir, "base.ini")))
                 Params.Append(" -ini " + ("base.ini").ProgressQuoter());
             //Params.Append(" -cpinternal ISO8859-1");
@@ -263,7 +263,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 StartInfo = {
                     //WindowStyle = (executionType != ExecutionType.Run) ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
                     //CreateNoWindow = (executionType != ExecutionType.Run),
-                    FileName = ProgressEnv.Current.ProwinPath,
+                    FileName = ProEnvironment.Current.ProwinPath,
                     Arguments = ExeParameters,
                     WorkingDirectory = ExecutionDir
                 },
@@ -293,8 +293,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     }
 
     public class ProcessOnExitEventArgs : EventArgs {
-        public ProgressExecution ProgressExecution;
-        public ProcessOnExitEventArgs(ProgressExecution progressExecution) {
+        public ProExecution ProgressExecution;
+        public ProcessOnExitEventArgs(ProExecution progressExecution) {
             ProgressExecution = progressExecution;
         }
     }

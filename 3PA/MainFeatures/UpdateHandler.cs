@@ -64,22 +64,35 @@ namespace _3PA.MainFeatures {
             GetLatestReleaseInfo(false);
         }
 
+        private static bool _alwaysGetFeedBack;
+        private static bool _checkStarted;
+
         /// <summary>
         /// Gets an object with the latest release info
         /// </summary>
         public static void GetLatestReleaseInfo(bool alwaysGetFeedBack) {
+            _alwaysGetFeedBack = alwaysGetFeedBack;
 
+            if (_checkStarted) {
+                return;
+            } else if (LatestReleaseInfo != null) {
+                // we already checked and there is a new version
+                NotifyUpdateAvailable();
+                return;
+            }
+
+            _checkStarted = true;
             try {
                 using (WebClient wc = new WebClient()) {
 
-                    /* Need a proxy for sopra?
-                WebProxy proxy = new WebProxy();
-                proxy.Address = new Uri("mywebproxyserver.com");
-                proxy.Credentials = new NetworkCredential("usernameHere", "pa****rdHere"); 
-                proxy.UseDefaultCredentials = false;
-                proxy.BypassProxyOnLocal = false;
-                wc.Proxy = proxy;
-                */
+                    /* TODO: Need a proxy ?
+                    WebProxy proxy = new WebProxy();
+                    proxy.Address = new Uri("mywebproxyserver.com");
+                    proxy.Credentials = new NetworkCredential("usernameHere", "pa****rdHere"); 
+                    proxy.UseDefaultCredentials = false;
+                    proxy.BypassProxyOnLocal = false;
+                    wc.Proxy = proxy;
+                    */
 
                     wc.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                     //wc.Proxy = null;
@@ -99,8 +112,10 @@ namespace _3PA.MainFeatures {
                     var releasesList = parser.GetList();
 
                     // Releases list empty?
-                    if (releasesList == null)
+                    if (releasesList == null) {
+                        _checkStarted = false;
                         return;
+                    }
 
                     var localVersion = AssemblyInfo.Version;
 
@@ -166,13 +181,15 @@ namespace _3PA.MainFeatures {
                             wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), PathLatestReleaseZip);
                         }
 
-                    } else if (alwaysGetFeedBack) {
-                        UserCommunication.Notify("You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the " + AssemblyInfo.Version);
+                    } else if (_alwaysGetFeedBack) {
+                        UserCommunication.Notify("Congratulations! You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version);
                     }
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "GetLatestReleaseInfo");
             }
+
+            _checkStarted = false;
         }
 
         /// <summary>
@@ -212,7 +229,15 @@ namespace _3PA.MainFeatures {
                 // write the version log
                 File.WriteAllText(PathToVersionLog, LatestReleaseInfo.Body, Encoding.Default);
 
-                UserCommunication.Notify(@"Dear user, <br>
+                NotifyUpdateAvailable();
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
+            }
+        }
+
+        private static void NotifyUpdateAvailable() {
+            UserCommunication.Notify(@"Dear user, <br>
                 <br>
                 A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
                 <br>
@@ -221,10 +246,7 @@ namespace _3PA.MainFeatures {
                 Release name : <b>" + LatestReleaseInfo.Name + @"</b><br>
                 Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
                 Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
-                                         ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
-            }
+                ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
         }
 
         /// <summary>

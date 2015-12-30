@@ -342,9 +342,9 @@ namespace _3PA.MainFeatures {
 
         // ENV
         public string EnvLastDbInfoUsed = "";
-        public string EnvCurrentAppli = "";
-        public string EnvCurrentEnvLetter = "";
-        public string EnvCurrentDatabase = "";
+        public string EnvName = "";
+        public string EnvSuffix = "";
+        public string EnvDatabase = "";
 
         // TECHNICAL
         public bool LogError = true;

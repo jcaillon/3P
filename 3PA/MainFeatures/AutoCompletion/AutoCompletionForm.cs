@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         AcceptsRightClick = true
                     };
                     but.ButtonPressed += HandleTypeClick;
-                    htmlToolTip.SetToolTip(but, "<b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                    htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
                     _displayedTypes.Add(type, but);
                     Controls.Add(but);
                     xPos += but.Width;

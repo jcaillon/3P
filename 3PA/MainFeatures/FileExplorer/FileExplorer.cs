@@ -25,7 +25,6 @@ using System.Text.RegularExpressions;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
@@ -52,12 +51,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Use this to redraw the docked form
         /// </summary>
-        public static void Redraw() {
-            if (IsVisible) {
-                Form.StyleOvlTree();
-                Form.Invalidate();
-                Form.Refresh();
-            }
+        public static void ApplyColorSettings() {
+            if (Form == null) return;
+            Form.StyleOvlTree();
+            Form.Refresh();
         }
 
         /// <summary>
@@ -76,8 +73,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Refresh the files list
         /// </summary>
-        public static void Refresh() {
-            if (Form == null) return;
+        public static void RebuildItemList() {
+            if (!IsVisible) return;
             Form.RefreshOvl();
             Form.FilterByText = "";
         }
@@ -87,9 +84,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void StartSearch() {
             try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
                 if (Form == null) return;
                 Form.ClearFilter();
                 Form.GiveFocustoTextBox();
@@ -173,7 +167,6 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
                 if (FakeForm == null) return;
-                Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -213,7 +206,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         public static void ForceClose() {
-            Form.Close();
+            if (Form != null)
+                Form.Close();
         }
 
         #endregion

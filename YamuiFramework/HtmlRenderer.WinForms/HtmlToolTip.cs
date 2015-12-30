@@ -119,6 +119,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
 
             _htmlContainer.LinkClicked += OnLinkClicked;
 #endif
+            AutoPopDelay = 90000;
         }
 
 #if !MONO

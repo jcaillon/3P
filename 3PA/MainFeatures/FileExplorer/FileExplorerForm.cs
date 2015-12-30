@@ -57,10 +57,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
         private static string _filterByText = "";
 
-        public bool UseAlternateBackColor {
-            set { ovl.UseAlternatingBackColors = value; }
-        }
-
         /// <summary>
         ///  gets or sets the total items currently displayed in the form
         /// </summary>
@@ -322,6 +318,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;
             }
+
+            ovl.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
         }
 
         #endregion
@@ -329,7 +327,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region Set items and selector mechanic
 
         /// <summary>
-        /// Call this method to completly refresh the object view list, 
+        /// Call this method to completly refresh the object view list (recompute the items of the list)
         /// </summary>
         public void RefreshOvl() {
             if (_isListing) return;
@@ -340,13 +338,13 @@ namespace _3PA.MainFeatures.FileExplorer {
                     _initialObjectsList = new List<FileObject>();
                     switch (DirectoryToExplorer) {
                         case 0:
-                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseLocalPath);
+                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProEnvironment.Current.BaseLocalPath);
                             break;
                         case 1:
-                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProgressEnv.Current.BaseCompilationPath);
+                            _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProEnvironment.Current.BaseCompilationPath);
                             break;
                         case 2:
-                            foreach (var dir in ProgressEnv.Current.GetProPathFileList) {
+                            foreach (var dir in ProEnvironment.Current.GetProPathDirList) {
                                 _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(dir, false, false));
                             }
                             break;
@@ -354,25 +352,25 @@ namespace _3PA.MainFeatures.FileExplorer {
                             // get the list of FileObjects
                             Regex regex = new Regex(@"\\\.");
                             var fullList = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
-                            fullList.Add(ProgressEnv.Current.BaseLocalPath, false);
-                            if (!fullList.ContainsKey(ProgressEnv.Current.BaseCompilationPath))
-                                fullList.Add(ProgressEnv.Current.BaseCompilationPath, false);
+                            fullList.Add(ProEnvironment.Current.BaseLocalPath, false);
+                            if (!fullList.ContainsKey(ProEnvironment.Current.BaseCompilationPath))
+                                fullList.Add(ProEnvironment.Current.BaseCompilationPath, false);
                             // base local path
-                            if (Directory.Exists(ProgressEnv.Current.BaseLocalPath)) {
-                                foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
+                            if (Directory.Exists(ProEnvironment.Current.BaseLocalPath)) {
+                                foreach (var directory in Directory.GetDirectories(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
                                     if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
                                         fullList.Add(directory, false);
                                 }
                             }
                             // base compilation path
-                            if (Directory.Exists(ProgressEnv.Current.BaseCompilationPath)) {
-                                foreach (var directory in Directory.GetDirectories(ProgressEnv.Current.BaseCompilationPath, "*", SearchOption.AllDirectories)) {
+                            if (Directory.Exists(ProEnvironment.Current.BaseCompilationPath)) {
+                                foreach (var directory in Directory.GetDirectories(ProEnvironment.Current.BaseCompilationPath, "*", SearchOption.AllDirectories)) {
                                     if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
                                         fullList.Add(directory, false);
                                 }
                             }
                             // for each dir in propath
-                            foreach (var directory in ProgressEnv.Current.GetProPathFileList) {
+                            foreach (var directory in ProEnvironment.Current.GetProPathDirList) {
                                 if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
                                     fullList.Add(directory, false);
                             }
@@ -735,9 +733,9 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtGotoDirOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             if (DirectoryToExplorer == 0)
-                Utils.OpenFolder(ProgressEnv.Current.BaseLocalPath);
+                Utils.OpenFolder(ProEnvironment.Current.BaseLocalPath);
             else if (DirectoryToExplorer == 1)
-                Utils.OpenFolder(ProgressEnv.Current.BaseCompilationPath);
+                Utils.OpenFolder(ProEnvironment.Current.BaseCompilationPath);
         }
 
         private void BtDirectoryOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {

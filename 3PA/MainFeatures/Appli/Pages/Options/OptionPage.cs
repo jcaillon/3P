@@ -89,11 +89,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
                 var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute)listRangeAttr.FirstOrDefault() : null;
-                if (rangeAttr != null && ((valObj is int || valObj is double)))
-                    tooltip.SetToolTip(label, attribute.Description + "<br><br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b>");
-                else
-                    tooltip.SetToolTip(label, attribute.Description);
-
 
                 if (valObj is string) {
                     // string
@@ -108,11 +103,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
                         Location = new Point(545, yPos),
-                        Tag = strControl
+                        Tag = strControl,
+                        TabStop = false
                     };
                     strButton.ButtonPressed += NumButtonOnButtonPressed;
-                    tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
+                    
                     dockedPanel.Controls.Add(strButton);
+
+                    // tooltip
+                    tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
+                    tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
                 } if (valObj is int || valObj is double) {
                     // number
@@ -127,11 +127,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
                         Location = new Point(545, yPos),
-                        Tag = numControl
+                        Tag = numControl,
+                        TabStop = false
                     };
                     numButton.ButtonPressed += NumButtonOnButtonPressed;
-                    tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
                     dockedPanel.Controls.Add(numButton);
+
+                    // tooltip
+                    tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
+                    if (rangeAttr != null)
+                        tooltip.SetToolTip(numControl, attribute.Description + "<br><br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
+                    else
+                        tooltip.SetToolTip(numControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
 
                 } else if (valObj is bool) {
                     // bool
@@ -143,10 +150,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Tag = attribute.Name
                     };
                     toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
-                    tooltip.SetToolTip(toggleControl, "Click to <b>toggle on/off</b> this feature<br>Your choice is automatically applied");
                     dockedPanel.Controls.Add(toggleControl);
-                }
 
+                    // tooltip
+                    tooltip.SetToolTip(toggleControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click to <b>toggle on/off</b> this feature<br>Your choice is automatically applied</div>");
+                }
 
                 yPos += label.Height + 20;
             });
@@ -260,10 +268,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void ApplySettings() {
             ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            CodeExplorer.CodeExplorer.Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-            FileExplorer.FileExplorer.Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-            CodeExplorer.CodeExplorer.RedrawCodeExplorerList();
-            FileExplorer.FileExplorer.RedrawFileExplorerList();
+            CodeExplorer.CodeExplorer.ApplyColorSettings();
+            FileExplorer.FileExplorer.ApplyColorSettings();
             AutoComplete.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
             Plug.ApplyPluginSpecificOptions(false);
@@ -278,7 +284,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
 
         /// <summary>

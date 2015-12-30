@@ -152,8 +152,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 AutoComplete.ForceClose();
 
                 // force the dockable to redraw
-                CodeExplorer.CodeExplorer.Redraw();
-                FileExplorer.FileExplorer.Redraw();
+                CodeExplorer.CodeExplorer.ApplyColorSettings();
+                FileExplorer.FileExplorer.ApplyColorSettings();
 
                 Application.DoEvents();
                 thisForm.Invalidate();

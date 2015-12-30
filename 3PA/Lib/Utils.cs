@@ -32,7 +32,27 @@ using _3PA.Html;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
+
+    /*        
+       #region Events
+
+        private static event EventHandler<EventArgs> OnUpdatedUi;
+
+        public static event EventHandler<EventArgs> UpdatedUi {
+            add { OnUpdatedUi += value; }
+            remove { OnUpdatedUi -= value; }
+        }
+
+        // execute events
+        if (OnUpdatedUi != null) {
+            OnUpdatedUi(null, new EventArgs());
+        }
+
+        #endregion
+     */
+
     /// <summary>
+    /// Class that exposes utility methods
     /// </summary>
     public static class Utils {
 
@@ -54,7 +74,7 @@ namespace _3PA.Lib {
                 return false;
             }
             // minimum interval not respected
-            if (DateTime.Now.Subtract(_registeredEvents[featureName]).Milliseconds < minIntervalInMilliseconds) {
+            if (DateTime.Now.Subtract(_registeredEvents[featureName]).TotalMilliseconds < minIntervalInMilliseconds) {
                 _registeredEvents[featureName] = DateTime.Now;
                 return true;
             }

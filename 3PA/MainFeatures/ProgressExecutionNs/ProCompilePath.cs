@@ -24,7 +24,7 @@ using System.Text;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class CompilationPath {
+    public class ProCompilePath {
 
         #region fields
 
@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (string.IsNullOrEmpty(sourcePath))
                 return null;
 
-            var baseComp = ProgressEnv.Current.BaseCompilationPath;
+            var baseComp = ProEnvironment.Current.BaseCompilationPath;
 
             // filter and sort the list
             var filteredList = _compilationPathList.Where(Predicate).ToList();
@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         private static bool Predicate(CompilationPathItem compilationPathItem) {
             // returns true if (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
-            return string.IsNullOrWhiteSpace(compilationPathItem.ApplicationFilter) || (compilationPathItem.ApplicationFilter.EqualsCi(Config.Instance.EnvCurrentAppli) && (compilationPathItem.EnvLetterFilter.EqualsCi(Config.Instance.EnvCurrentEnvLetter) || string.IsNullOrWhiteSpace(compilationPathItem.EnvLetterFilter)));
+            return string.IsNullOrWhiteSpace(compilationPathItem.ApplicationFilter) || (compilationPathItem.ApplicationFilter.EqualsCi(Config.Instance.EnvName) && (compilationPathItem.EnvLetterFilter.EqualsCi(Config.Instance.EnvSuffix) || string.IsNullOrWhiteSpace(compilationPathItem.EnvLetterFilter)));
         }
 
         #endregion

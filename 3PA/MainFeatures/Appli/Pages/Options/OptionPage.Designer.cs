@@ -35,7 +35,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.dockedPanel.AutoScroll = true;
             this.dockedPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dockedPanel.HorizontalScrollbar = true;
             this.dockedPanel.HorizontalScrollbarHighlightOnWheel = false;
             this.dockedPanel.HorizontalScrollbarSize = 10;
             this.dockedPanel.Location = new System.Drawing.Point(0, 0);
@@ -43,14 +42,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             this.dockedPanel.VerticalScrollbar = true;
-            this.dockedPanel.VerticalScrollbarHighlightOnWheel = false;
+            this.dockedPanel.VerticalScrollbarHighlightOnWheel = true;
             this.dockedPanel.VerticalScrollbarSize = 10;
             // 
             // tooltip
             // 
             this.tooltip.AllowLinksHandling = true;
             this.tooltip.AutomaticDelay = 50;
-            this.tooltip.AutoPopDelay = 0;
+            this.tooltip.AutoPopDelay = 90000;
             this.tooltip.BaseStylesheet = null;
             this.tooltip.InitialDelay = 50;
             this.tooltip.MaximumSize = new System.Drawing.Size(0, 0);

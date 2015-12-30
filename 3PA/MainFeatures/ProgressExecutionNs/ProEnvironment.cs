@@ -24,49 +24,83 @@ using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class ProgressEnv {
+    public class ProEnvironment {
 
-        private static string _filePath;
-        private static readonly string Location = Npp.GetConfigDir();
-        private static string _fileName = "ProgressEnvironnement.xml";
-        private static ProgressEnvironnement _currentEnv;
-        private static List<ProgressEnvironnement> _listOfEnv = new List<ProgressEnvironnement>();
-        
+        private static string _fileName = "_ProgressEnvironnement.xml";
+        private static ProEnvironmentObject _currentEnv;
+        private static List<ProEnvironmentObject> _listOfEnv = new List<ProEnvironmentObject>();
 
         /// <summary>
         /// Returns the list of all the progress envrionnements configured
         /// </summary>
         /// <returns></returns>
-        public static List<ProgressEnvironnement> GetList() {
-            _filePath = Path.Combine(Location, _fileName);
-            if (_listOfEnv.Count == 0) {
-                if (!File.Exists(_filePath)) {
-                    _listOfEnv = new List<ProgressEnvironnement>();
-                } else
-                    Object2Xml<ProgressEnvironnement>.LoadFromFile(_listOfEnv, _filePath);
+        public static List<ProEnvironmentObject> GetList {
+            get {
+                if (_listOfEnv.Count == 0) {
+                    var filePath = Path.Combine(Npp.GetConfigDir(), _fileName);
+                    if (!File.Exists(filePath)) {
+                        _listOfEnv = new List<ProEnvironmentObject> { new ProEnvironmentObject { Name = "Default", Label = "A default environment (empty)" } };
+                    } else
+                        Object2Xml<ProEnvironmentObject>.LoadFromFile(_listOfEnv, filePath);
+                }
+                return _listOfEnv;
             }
-            return _listOfEnv;
         }
 
         /// <summary>
         /// Saves the list of environnement
         /// </summary>
-        public static void Save() {
-            if (!string.IsNullOrEmpty(_filePath))
+        public static void SaveList() {
+            var filePath = Path.Combine(Npp.GetConfigDir(), _fileName);
+
+            // sort by appli then envletter
+            _listOfEnv.Sort((env1, env2) => {
+                var comp = string.Compare(env1.Name, env2.Name, StringComparison.CurrentCultureIgnoreCase);
+                return comp == 0 ? string.Compare(env1.Suffix, env2.Suffix, StringComparison.CurrentCultureIgnoreCase) : comp;
+            });
+            if (!string.IsNullOrEmpty(filePath)) {
                 try {
-                    Object2Xml<ProgressEnvironnement>.SaveToFile(_listOfEnv, _filePath);
+                    Object2Xml<ProEnvironmentObject>.SaveToFile(_listOfEnv, filePath);
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when saving ProgressEnvironnement.xml");
                 }
+            }
+        }
 
-            // need to compute the propath again
-            Current.ReComputeProPath();
+        /// <summary>
+        /// Saves an environment either by creating a new one (before == null) or 
+        /// replacing an old one
+        /// </summary>
+        /// <param name="before"></param>
+        /// <param name="after"></param>
+        public static void SaveEnv(ProEnvironmentObject before, ProEnvironmentObject after) {
+            if (before != null) {
+                var index = _listOfEnv.FindIndex(environnement =>
+                    environnement.Name.EqualsCi(before.Name) &&
+                    environnement.Suffix.EqualsCi(before.Suffix));
+                if (index > -1) {
+                    _listOfEnv.RemoveAt(index);
+                }
+            }
+            _listOfEnv.Add(after);
+        }
+
+        /// <summary>
+        /// Deletes the current environment from the list
+        /// </summary>
+        public static void DeleteCurrentEnv() {
+            var index = _listOfEnv.FindIndex(environnement =>
+                environnement.Name.EqualsCi(Current.Name) &&
+                environnement.Suffix.EqualsCi(Current.Suffix));
+            if (index > -1) {
+                _listOfEnv.RemoveAt(index);
+            }
         }
 
         /// <summary>
         /// Return the current ProgressEnvironnement object (null if the list is empty!)
         /// </summary>
-        public static ProgressEnvironnement Current {
+        public static ProEnvironmentObject Current {
             get {
                 if (_currentEnv != null)
                     return _currentEnv;
@@ -80,16 +114,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void SetCurrent() {
             // determines the current item selected in the envList
-            var envList = GetList();
+            var envList = GetList;
             _currentEnv = envList.FirstOrDefault(environnement =>
-                environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli) &&
-                environnement.EnvLetter.EqualsCi(Config.Instance.EnvCurrentEnvLetter));
+                environnement.Name.EqualsCi(Config.Instance.EnvName) &&
+                environnement.Suffix.EqualsCi(Config.Instance.EnvSuffix));
             if (_currentEnv == null) {
                 _currentEnv = envList.FirstOrDefault(environnement =>
-                    environnement.Appli.EqualsCi(Config.Instance.EnvCurrentAppli));
+                    environnement.Name.EqualsCi(Config.Instance.EnvName));
             }
             if (_currentEnv == null) {
-                _currentEnv = envList.Count > 0 ? envList[0] : new ProgressEnvironnement();
+                _currentEnv = envList.Count > 0 ? envList[0] : new ProEnvironmentObject();
             }
             // need to compute the propath again
             Current.ReComputeProPath();
@@ -105,7 +139,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <returns></returns>
         public static string FindFileInPropath(string fileName) {
             try {
-                foreach (var item in Current.GetProPathFileList) {
+                foreach (var item in Current.GetProPathDirList) {
                     var curPath = Path.Combine(item, fileName);
                     if (File.Exists(curPath))
                         return curPath;
@@ -189,53 +223,77 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         }
 
         #endregion
-
     }
 
-    public class ProgressEnvironnement {
+    public class ProEnvironmentObject {
+
+        // prim key
+        public string Name = "";
+        public string Suffix = "";
+
+        // label
         public string Label = "";
-        public string Appli = "";
-        public string EnvLetter = "";
+
+        // pf
+        public Dictionary<string, string> DbConnectionInfo = new Dictionary<string, string>();
+        public string ExtraPf = "";
+
+        // propath
         public string IniPath = "";
-        public Dictionary<string, string> PfPath = new Dictionary<string, string>();
-        /// <summary>
-        /// Propath for compilation time, DONT USE THIS ONE THO, use GetProPathFileList instead,
-        /// this only returns the extra propath defined by the user!
-        /// </summary>
-        public string ProPath = "";
-        public string DataBaseConnection = "";
+        public string ExtraProPath = "";
+
         public string CmdLineParameters = "";
         /// <summary>
         /// Path to the workarea, we can find the .p, .t, .w there
         /// </summary>
         public string BaseLocalPath = "";
         public string BaseCompilationPath = "";
-        public string LogFilePath = "";
-        public string VersionId = "";
         public string ProwinPath = "";
+        public string LogFilePath = "";
 
         /// <summary>
+
+        #region Handle pf
+
         /// Returns the currently selected database's .pf for the current environment
         /// </summary>
         /// <returns></returns>
-        public string GetCurrentPfPath() {
-            return PfPath.ContainsKey(Config.Instance.EnvCurrentDatabase) ?
-                PfPath[Config.Instance.EnvCurrentDatabase] :
-                PfPath.FirstOrDefault().Value;
+        public string GetPfPath() {
+            return DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase) ?
+                DbConnectionInfo[Config.Instance.EnvDatabase] :
+                string.Empty;
         }
+
+        public bool RemoveCurrentPfPath() {
+            if (DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
+                DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
+                return true;
+            }
+            return false;
+        }
+
+        public bool AddPfPath(string name, string path) {
+            if (!DbConnectionInfo.ContainsKey(name)) {
+                DbConnectionInfo.Add(name, path);
+                return true;
+            }
+            return false;
+        }
+
+        #endregion
 
         #region Get ProPath
         /// <summary>
         /// List the existing directories as they are listed in the .ini file + in the custom ProPath field
         /// </summary>
-        public List<string> GetProPathFileList {
+        public List<string> GetProPathDirList {
             get {
                 if (_currentProPathDirList != null) return _currentProPathDirList;
 
                 // get full propath (from .ini + from user custom field
                 IniReader ini = new IniReader(IniPath);
                 var completeProPath = ini.GetValue("PROPATH", "");
-                completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ProPath;
+                completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ExtraProPath;
 
                 _currentProPathDirList = new List<string>();
                 var curFilePath = Npp.GetCurrentFileFolder();
@@ -254,7 +312,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return _currentProPathDirList;
             }
         }
-
         private List<string> _currentProPathDirList;
 
         /// <summary>

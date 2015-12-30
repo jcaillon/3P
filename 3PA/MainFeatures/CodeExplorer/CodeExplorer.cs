@@ -57,32 +57,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         /// <summary>
-        /// Clear tree data
-        /// </summary>
-        public static void ClearTree() {
-            if (Form == null) return;
-            Form.ClearTree();
-        }
-
-        /// <summary>
-        /// Apply the onDocumentChange
-        /// </summary>
-        public static void RefreshParserAndCodeExplorer() {
-            if (Form == null) return;
-            Form.RefreshParserAndCodeExplorer();
-        }
-
-
-        /// <summary>
         /// Use this to redraw the docked form
         /// </summary>
-        public static void Redraw() {
-            if (IsVisible) {
-                //Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMUPDATEDISPINFO, 0, ExplorerForm.Handle);
-                Form.StyleOvlTree();
-                Form.Invalidate();
-                Form.Refresh();
-            }
+        public static void ApplyColorSettings() {
+            if (Form == null) return;
+            Form.StyleOvlTree();
+            Form.Refresh();
         }
 
         #endregion
@@ -106,7 +86,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
                 if (FakeForm == null) return;
-                Form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in Dockable explorer");
@@ -143,7 +122,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         public static void ForceClose() {
-            Form.Close();
+            if (Form != null)
+                Form.Close();
         }
 
         #endregion

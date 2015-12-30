@@ -114,18 +114,18 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            menu.SetCommand("Open 4GL help", ProgressCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
-            menu.SetCommand("Check syntax", ProgressCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
-            menu.SetCommand("Compile", ProgressCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
-            menu.SetCommand("Run program", ProgressCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
+            menu.SetCommand("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
+            menu.SetCommand("Check syntax", ProCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
+            menu.SetCommand("Compile", ProCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
+            menu.SetCommand("Run program", ProCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
             //menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
             menu.SetSeparator();
 
             menu.SetCommand("Search file", FileExplorer.StartSearch, "Search_file:Alt+Q", false);
-            menu.SetCommand("Go to definition", ProgressCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
+            menu.SetCommand("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
             menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
-            menu.SetCommand("Toggle comment line", ProgressCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
+            menu.SetCommand("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
             //menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
             //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
@@ -134,7 +134,7 @@ namespace _3PA {
 
             menu.SetCommand("Edit current file info", FileTag.UnCloak, "Edit_file_info:Ctrl+Shift+M", false);
             //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
-            menu.SetCommand("Surround with modification tags", ProgressCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
+            menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
 
             menu.SetSeparator();
 
@@ -152,6 +152,9 @@ namespace _3PA {
             
             if (Config.Instance.UserName.Equals("JCA"))
                 menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+
+            if (Config.Instance.UserName.Equals("JCA"))
+                menu.SetCommand("DEBUG", StartDebug, "DEBUG:Ctrl+F12", false);
 
             //menu.SetSeparator();
 
@@ -275,7 +278,7 @@ namespace _3PA {
             Snippets.Init();
             Keywords.Import();
             FileTag.Import();
-            CompilationPath.Import();
+            ProCompilePath.Import();
 
             // initialize the list of objects of the autocompletion form
             AutoComplete.FillStaticItems(true);
@@ -288,7 +291,7 @@ namespace _3PA {
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched();
 
-            FileExplorer.Refresh();
+            FileExplorer.RebuildItemList();
             //});
         }
 
@@ -699,8 +702,15 @@ namespace _3PA {
 
         #region tests
 
+        public static void StartDebug() {
+            Debug.Assert(false);
+        }
+
         public static void Test() {
 
+            UserCommunication.Notify(Npp.GetLine().Position + " vs " + Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.GetLine().Length + " vs " + Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.LineFromPosition(Npp.GetLine().Position) + " vs " + Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(Npp.Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32())).ToInt32() + " and " + Npp.Line.Count + " vs " + Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32());
+
+            return;
             UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>

@@ -47,7 +47,11 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public Color CustomBackColor { get; set; }
+        public Color CustomBackColor {
+            get { return _customBackColor; }
+            set { _customBackColor = value; Invalidate(); }
+        }
+        private Color _customBackColor;
 
         /// <summary>
         /// Designed to be used with CustomForeColor
@@ -61,7 +65,11 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public Color CustomForeColor { get; set; }
+        public Color CustomForeColor {
+            get { return _customForeColor; }
+            set { _customForeColor = value; Invalidate(); }
+        }
+        private Color _customForeColor;
 
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
@@ -115,7 +123,7 @@ namespace YamuiFramework.Controls {
 
         protected override void WndProc(ref Message m) {
             base.WndProc(ref m);
-            if (((m.Msg == WmPaint) || (m.Msg == OcmCommand)) && !GetStyle(ControlStyles.UserPaint)) {
+            if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
                     WinApi.RECT rc = new WinApi.RECT(4, 2, ClientSize.Width - 8, ClientSize.Height - 3);
@@ -136,7 +144,7 @@ namespace YamuiFramework.Controls {
         }
 
         private void CustomPaint(Graphics g) {
-            if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark)) {
+            if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
                 TextFormatFlags flags = TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis;
                 Rectangle clientRectangle = ClientRectangle;
                 switch (TextAlign) {

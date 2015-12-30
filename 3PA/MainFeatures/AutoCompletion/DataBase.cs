@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Action called when an extraction is done
         /// </summary>
-        public static Action OnExtractionDone { get; set; }
+        private static Action _onExtractionDone;
 
         #endregion
 
@@ -92,9 +92,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
+        /// Deletes the file corresponding to the current database (if it exists)
+        /// </summary>
+        public static void DeleteCurrentDbInfo() {
+            var filePath = Path.Combine(DatabaseDir, GetOutputName());
+            if (File.Exists(filePath)) {
+                try {
+                    File.Delete(filePath);
+                } catch (Exception) {
+                    UserCommunication.Notify("Couldn't delete the following files:<br><a href='" + filePath + "'>" + filePath + "</a>", MessageImg.MsgError, "Delete failed", "Current database info");
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
         /// Should be called to extract the database info from the current environnement
         /// </summary>
-        public static void FetchCurrentDbInfo() {
+        public static void FetchCurrentDbInfo(Action onExtractionDone) {
             try {
                 // dont extract 2 db at once
                 if (!string.IsNullOrEmpty(OutputFileName)) {
@@ -107,8 +122,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
-                var exec = new ProgressExecution();
+                var exec = new ProExecution();
                 exec.ProcessExited += ExtractionDone;
+                _onExtractionDone = onExtractionDone;
                 if (exec.Do(ExecutionType.Database))
                     return;
             } catch (Exception e) {
@@ -139,9 +155,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                     UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
 
-                    if (OnExtractionDone != null) {
-                        OnExtractionDone();
-                        OnExtractionDone = null;
+                    if (_onExtractionDone != null) {
+                        _onExtractionDone();
+                        _onExtractionDone = null;
                     }
 
                     AutoComplete.ParseCurrentDocument(true);
@@ -176,7 +192,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         private static string GetOutputName() {
-            return (Config.Instance.EnvCurrentAppli + "_" + Config.Instance.EnvCurrentEnvLetter + "_" + Config.Instance.EnvCurrentDatabase).ToValidFileName().ToLower() + ".dump";
+            return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump";
         }
 
         /// <summary>

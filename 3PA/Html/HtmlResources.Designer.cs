@@ -8,15 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace _3PA.Html {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -24,27 +19,27 @@ namespace _3PA.Html {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class HtmlResources {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal HtmlResources() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        internal static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("_3PA.Html.HtmlResources", typeof(HtmlResources).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("_3PA.Html.HtmlResources", typeof(HtmlResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -55,8 +50,8 @@ namespace _3PA.Html {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        internal static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -66,29 +61,27 @@ namespace _3PA.Html {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;table style=&quot;margin-bottom: 10px; width: 100%;&quot;&gt;
-        ///    &lt;tr&gt;
-        ///        &lt;td rowspan=&quot;2&quot; style=&quot;width: 220px&quot;&gt;&lt;img src=&quot;logo200x200&quot; width=&quot;200&quot; height=&quot;200&quot; /&gt;&lt;/td&gt;
-        ///        &lt;td style=&quot;font-weight: bold; font-size: 35px;&quot;&gt;&lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;rogress &lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;rogrammers &lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;al&lt;/td&gt;
-        ///    &lt;/tr&gt;
-        ///    &lt;tr&gt;
-        ///        &lt;td style=&quot;font-size: 18px;&quot; class=&quot;SubTextColor&quot;&gt;Progress Programmers Pal (3P), is an OpenEdge ABL (formerly 4GL Progress) code edito [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string about {
-            get {
-                return ResourceManager.GetString("about", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;div class=&apos;AlternatBackColor&apos; style=&apos;margin: 10px; padding: 10px;&apos;&gt;
-        ///    &lt;span&gt;&lt;b class=&apos;SubTextColor&apos;&gt;This is an alpha version of the software&lt;/b&gt;&lt;/span&gt;&lt;br&gt;&lt;br&gt;
-        ///    As such, the software and all its content are provided on an &lt;i&gt;&quot; as is &quot;&lt;/i&gt; and &lt;i&gt;&quot; as available &quot;&lt;/i&gt; basis. I do not give any warranties, whether express or implied, as to the suitability or usability of the 3P.&lt;br&gt;&lt;br&gt;
-        ///    Should you encounter any bugs, glitches, lack of functionality or other problems on the software, please let me k [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to &lt;div class=&quot;AlternatBackColor&quot; style=&quot;margin: 10px 20px; padding: 10px;&quot;&gt;
+        ///    &lt;b class=&quot;SubTextColor&quot; style=&quot;font-size: 16px;&quot;&gt;This is an alpha version of the software&lt;/b&gt;&lt;br&gt;&lt;br&gt;
+        ///    As such, the software and all its content are provided on an &lt;i&gt;&quot; as is &quot;&lt;/i&gt; and &lt;i&gt;&quot; as available &quot;&lt;/i&gt; basis. I do not give any warranties, whether express or implied, as to the suitability or usability of this software.&lt;br&gt;&lt;br&gt;
+        ///    Should you encounter any bugs, glitches, lack of functionality or other problems on the s [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string disclaimer {
             get {
                 return ResourceManager.GetString("disclaimer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;table style=&quot;margin: 0px; width: 100%;&quot;&gt;
+        ///    &lt;tr&gt;
+        ///        &lt;td rowspan=&quot;2&quot; style=&quot;width: 200px&quot;&gt;&lt;img src=&quot;logo200x200&quot; width=&quot;150&quot; height=&quot;150&quot;/&gt;&lt;/td&gt;
+        ///        &lt;td style=&quot;font-weight: bold; font-size: 35px;&quot;&gt;&lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;rogress &lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;rogrammers &lt;span class=&quot;AccentColor&quot;&gt;P&lt;/span&gt;al &lt;span style=&quot;font-size: 20px;&quot; class=&quot;SubTextColor&quot;&gt;%version%&lt;/span&gt;&lt;a href=&quot;&quot;&gt;&lt;img src=&quot;Update26x26&quot; style=&quot;margin-left: 10px;&quot; title=&quot;Click to check for updates&quot; /&gt;&lt;/a&gt;&lt;/td&gt;
+        ///  [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string home {
+            get {
+                return ResourceManager.GetString("home", resourceCulture);
             }
         }
     }

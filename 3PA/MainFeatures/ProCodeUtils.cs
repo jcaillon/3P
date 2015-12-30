@@ -30,7 +30,7 @@ using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
-    class ProgressCodeUtils {
+    class ProCodeUtils {
 
         #region Go to definition
 
@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures {
 
                 // last resort, try to find a matching file in the propath
                 // first look in the propath
-                var fullPaths = ProgressEnv.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
+                var fullPaths = ProEnvironment.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
                 if (fullPaths.Count > 0) {
                     if (fullPaths.Count > 1) {
                         var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");
@@ -189,9 +189,9 @@ namespace _3PA.MainFeatures {
 
                 // get path
                 if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
-                    if (File.Exists(ProgressEnv.Current.ProwinPath)) {
+                    if (File.Exists(ProEnvironment.Current.ProwinPath)) {
                         // Try to find the help file from the prowin32.exe location
-                        var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProgressEnv.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
+                        var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
                         if (File.Exists(helpPath)) {
                             Config.Instance.GlobalHelpFilePath = helpPath;
                             UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
@@ -204,11 +204,9 @@ namespace _3PA.MainFeatures {
                     return;
                 }
 
-                Process.Start(new ProcessStartInfo {
-                    FileName = "hh.exe",
-                    Arguments = ("ms-its:" + Config.Instance.GlobalHelpFilePath).ProgressQuoter(), // append ::/folder/page.htm
-                    UseShellExecute = true
-                });
+                HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, 
+                    (Math.Abs(Npp.SelectionEnd - Npp.SelectionStart) < 15) ? Npp.SelectedText : "");
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error Open4GlHelp");
             }
@@ -354,7 +352,7 @@ namespace _3PA.MainFeatures {
                     // copy to compilation dir
                     if (!String.IsNullOrEmpty(lastExec.DotRPath) && !String.IsNullOrEmpty(lastExec.LstPath)) {
                         var success = true;
-                        var targetDir = CompilationPath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
+                        var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
 
                         // compile locally?
                         if (Config.Instance.GlobalCompileFilesLocally) {
@@ -409,7 +407,7 @@ namespace _3PA.MainFeatures {
             }
 
             // launch the compile process for the current file
-            Plug.CurrentFileObject.ProgressExecution = new ProgressExecution();
+            Plug.CurrentFileObject.ProgressExecution = new ProExecution();
             Plug.CurrentFileObject.ProgressExecution.ProcessExited += OnCompileEnded;
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
                 return;

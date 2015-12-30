@@ -53,13 +53,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private string _filterText;
 
-        /// <summary>
-        /// Use alternative back color... or not
-        /// </summary>
-        public bool UseAlternateBackColor {
-            set { ovlTree.UseAlternatingBackColors = value; }
-        }
-
         private Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>();
         private int _topItemIndex;
 
@@ -445,6 +438,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;
             }
+
+            ovlTree.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
 
             CleanFilter();
         }

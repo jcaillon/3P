@@ -17,23 +17,39 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Appli.Pages {
-    public partial class PageAbout : YamuiPage {
+namespace _3PA.MainFeatures.Appli.Pages.Home {
+    public partial class HomePage : YamuiPage {
 
         #region fields
 
         #endregion
 
         #region constructor
-        public PageAbout() {
+        public HomePage() {
             InitializeComponent();
 
-            aboutHtml.Text = HtmlResources.about.Replace("%version%", AssemblyInfo.Version).Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "");
+            html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version).Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "");
+
+            html.LinkClicked += HtmlOnLinkClicked;
         }
+
+        private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
+            if (htmlLinkClickedEventArgs.Link.Equals("update")) {
+                if (!Utils.IsSpamming("updates", 1000)) {
+                    UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
+                    UpdateHandler.GetLatestReleaseInfo(true);
+                }
+                htmlLinkClickedEventArgs.Handled = true;
+            }
+        }
+
         #endregion
 
     }

@@ -418,7 +418,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         public List<FileError> FileErrors { get; set; }
         public bool WarnedTooLong { get; set; }
-        public ProgressExecution ProgressExecution { get; set; }
+        public ProExecution ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
         public string FileFullPath { get; set; }
     }

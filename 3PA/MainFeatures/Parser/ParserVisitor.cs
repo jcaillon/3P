@@ -114,11 +114,11 @@ namespace _3PA.MainFeatures.Parser {
             if (pars.HasPersistent) {
                 string procName = pars.Name;
                 if (!procName.EndsWith(".p") && !procName.EndsWith(".w")) {
-                    fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name + ".p");
+                    fullFilePath = ProEnvironment.FindFirstFileInEnv(pars.Name + ".p");
                     if (string.IsNullOrEmpty(fullFilePath))
-                        fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name + ".w");
+                        fullFilePath = ProEnvironment.FindFirstFileInEnv(pars.Name + ".w");
                 } else
-                    fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+                    fullFilePath = ProEnvironment.FindFirstFileInEnv(pars.Name);
             }
 
             // to code explorer
@@ -194,7 +194,7 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedIncludeFile pars) {
 
             // try to find the file in the propath
-            var fullFilePath = ProgressEnv.FindFirstFileInEnv(pars.Name);
+            var fullFilePath = ProEnvironment.FindFirstFileInEnv(pars.Name);
 
             // To code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {

@@ -28,6 +28,7 @@ using YamuiFramework.Helper;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.MainFeatures.Appli.Pages;
+using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
 
@@ -50,6 +51,9 @@ namespace _3PA.MainFeatures.Appli {
 
             // create the tabs / content
             var content = new List<YamuiMainMenuTab> {
+                new YamuiMainMenuTab("Home", "home", false, new List<YamuiSecMenuTab> {
+                    new YamuiSecMenuTab("WELCOME", "welcome", new HomePage())
+                }),
                 new YamuiMainMenuTab("Set", "set", false, new List<YamuiSecMenuTab> {
                     new YamuiSecMenuTab("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
@@ -57,9 +61,9 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenuTab("FEATURES", "features", new OptionPage()),
                     new YamuiSecMenuTab("APPEARANCE", "appearance", new SettingAppearance())
                 }),
-                new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
-                    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
-                })
+                //new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
+                //    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
+                //})
             };
             CreateContent(content);
 

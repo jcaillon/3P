@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.fastOLV = new FastObjectListViewWoScrolls();
+            this.fastOLV = new _3PA.MainFeatures.AutoCompletion.FastObjectListViewWoScrolls();
             this.Keyword = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Type = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();
@@ -140,9 +140,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // htmlToolTip
             // 
             this.htmlToolTip.AllowLinksHandling = true;
+            this.htmlToolTip.AutoPopDelay = 90000;
             this.htmlToolTip.BaseStylesheet = null;
+            this.htmlToolTip.InitialDelay = 500;
             this.htmlToolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.htmlToolTip.OwnerDraw = true;
+            this.htmlToolTip.ReshowDelay = 100;
+            this.htmlToolTip.ShowAlways = true;
             this.htmlToolTip.TooltipCssClass = "htmltooltip";
             // 
             // AutoCompletionForm
