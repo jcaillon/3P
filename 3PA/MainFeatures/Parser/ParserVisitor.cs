@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures.Parser {
         /// in the program we are parsing, dictionnary is faster that list when it comes to
         /// test if a procedure/function exists in the program
         /// </summary>
-        public Dictionary<string, bool> DefinedProcedures = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        public HashSet<string> DefinedProcedures = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Line info from the parser
@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// We keep tracks of the parsed files, to avoid parsing the same file twice
         /// </summary>
-        private static Dictionary<string, bool> _parsedFiles = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+        private static HashSet<string> _parsedFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
@@ -138,9 +138,9 @@ namespace _3PA.MainFeatures.Parser {
             if (pars.HasPersistent && !string.IsNullOrEmpty(fullFilePath)) {
 
                 // ensure to not parse the same file twice in a parser session!
-                if (_parsedFiles.ContainsKey(fullFilePath))
+                if (_parsedFiles.Contains(fullFilePath))
                     return;
-                _parsedFiles.Add(fullFilePath, false);
+                _parsedFiles.Add(fullFilePath);
 
                 LoadProcPersistent(fullFilePath, pars.OwnerName, true);
             }
@@ -176,9 +176,9 @@ namespace _3PA.MainFeatures.Parser {
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = missingDbName ? pars.Name : name[1],
-                Branch = CodeExplorerBranch.TableUsed,
-                IconType = CodeExplorerIconType.Table,
-                Flag = AddExternalFlag(missingDbName ? CodeExplorerFlag.MissingDbName : 0),
+                Branch = pars.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
+                IconType = pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
+                Flag = AddExternalFlag((missingDbName && !pars.IsTempTable) ? CodeExplorerFlag.MissingDbName : 0),
                 IsNotBlock = true,
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
@@ -194,7 +194,7 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedIncludeFile pars) {
 
             // try to find the file in the propath
-            var fullFilePath = ProEnvironment.FindFirstFileInEnv(pars.Name);
+            var fullFilePath = ProEnvironment.FindFileInPropath(pars.Name);
 
             // To code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
@@ -212,9 +212,9 @@ namespace _3PA.MainFeatures.Parser {
             if (string.IsNullOrEmpty(fullFilePath)) return;
 
             // ensure to not parse the same file twice in a parser session!
-            if (_parsedFiles.ContainsKey(fullFilePath))
+            if (_parsedFiles.Contains(fullFilePath))
                 return;
-            _parsedFiles.Add(fullFilePath, false);
+            _parsedFiles.Add(fullFilePath);
 
             ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
             var parserItemList = parserVisitor.ParsedItemsList.ToList();
@@ -228,8 +228,8 @@ namespace _3PA.MainFeatures.Parser {
                 ParsedExplorerItemsList.AddRange(parserVisitor.ParsedExplorerItemsList.ToList());
 
             // fill the defined procedures dictionnary
-            foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.ContainsKey(definedProcedure.Key))) {
-                DefinedProcedures.Add(definedProcedure.Key, definedProcedure.Value);
+            foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.Contains(definedProcedure))) {
+                DefinedProcedures.Add(definedProcedure);
             }
         }
 
@@ -315,8 +315,8 @@ namespace _3PA.MainFeatures.Parser {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
 
             // fill dictionnary containing the name of all procedures defined
-            if (!DefinedProcedures.ContainsKey(pars.Name))
-                DefinedProcedures.Add(pars.Name, false);
+            if (!DefinedProcedures.Contains(pars.Name))
+                DefinedProcedures.Add(pars.Name);
 
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
@@ -429,9 +429,9 @@ namespace _3PA.MainFeatures.Parser {
                     // To code explorer, list buffers and associated tables
                     ParsedExplorerItemsList.Add(new CodeExplorerItem {
                         DisplayText = foundTable.Name,
-                        Branch = CodeExplorerBranch.TableUsed,
-                        IconType = CodeExplorerIconType.TempTable,
-                        Flag = AddExternalFlag(pars.BufferFor.IndexOf('.') >= 0 ? 0 : CodeExplorerFlag.MissingDbName),
+                        Branch = foundTable.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
+                        IconType = foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
+                        Flag = AddExternalFlag(((!pars.BufferFor.Contains(".") && !foundTable.IsTempTable) ?  CodeExplorerFlag.MissingDbName : 0) | CodeExplorerFlag.Buffer),
                         IsNotBlock = true,
                         DocumentOwner = pars.FilePath,
                         GoToLine = pars.Line,
@@ -548,6 +548,8 @@ namespace _3PA.MainFeatures.Parser {
                         // if there is no "use index", the tt uses the same index as the original table
                         pars.Fields.AddRange(foundTable.Fields.ToList());
                     }
+                } else {
+                    subStr = "Like ??";
                 }
             }
 
@@ -568,6 +570,8 @@ namespace _3PA.MainFeatures.Parser {
 
         /// <summary>
         /// Parses a file.
+        /// Remarks : it doesn't parse the document against known words since this is only useful for
+        /// the CURRENT document and not for the others
         /// </summary>
         /// <param name="fileName"></param>
         /// <param name="ownerName"></param>
@@ -580,7 +584,7 @@ namespace _3PA.MainFeatures.Parser {
                 parserVisitor = ParserHandler.SavedParserVisitors[fileName];
             } else {
                 // Parse it
-                var ablParser = new Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName, DataBase.GetTablesDictionary());
+                var ablParser = new Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName);
 
                 parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.GetLineInfo);
                 ablParser.Accept(parserVisitor);

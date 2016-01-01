@@ -23,6 +23,13 @@ using _3PA.Lib;
 
 namespace _3PA.Interop {
 
+    /// <summary>
+    /// For every scintilla message that involves a position, the exepect position (expected by scintilla) is the
+    /// BYTE position, not the CHAR position (as anyone would assume at first!)
+    /// This class enables you to easily get the correspondance between a BYTE position and a CHAR position,
+    /// it keeps tracks of inserted/deleted lines and register each line's start position, this
+    /// information allows us to quickly convert BYTE to CHAR position and vice-versa
+    /// </summary>
     public class DocumentLines {
 
         #region Fields
@@ -67,12 +74,18 @@ namespace _3PA.Interop {
         /// </summary>
         /// <param name="scn"></param>
         public void OnScnModified(SCNotification scn) {
-            if ((scn.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) > 0) {
+            _lastEncoding = Npp.Encoding;
+            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
+
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return;
+
+            if ((scn.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) > 0) {
+                OnInsertedText(scn);
+            } else if ((scn.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) > 0) {
                 OnDeletedText(scn);
             } 
-            if ((scn.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) > 0) {
-                OnInsertedText(scn);
-            }
         }
 
         /// <summary>
@@ -80,6 +93,13 @@ namespace _3PA.Interop {
         /// (when switching document for instance)
         /// </summary>
         internal void Reset() {
+            _lastEncoding = Npp.Encoding;
+            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
+
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return;
+
             _linesList = new GapBuffer<int> { 0, 0 };
             var scn = new SCNotification {
                 linesAdded = SciGetLineCount() - 1,
@@ -95,9 +115,6 @@ namespace _3PA.Interop {
         /// </summary>
         /// <param name="scn"></param>
         private void OnDeletedText(SCNotification scn) {
-            _lastEncoding = Npp.Encoding;
-            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
-
             var startLine = SciLineFromPosition(scn.position);
             if (scn.linesAdded == 0) {
                 var delCharLenght = GetCharCount(scn.text, scn.length, _lastEncoding);
@@ -121,9 +138,6 @@ namespace _3PA.Interop {
         /// </summary>
         /// <param name="scn"></param>
         private void OnInsertedText(SCNotification scn) {
-            _lastEncoding = Npp.Encoding;
-            _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
-
             var startLine = SciLineFromPosition(scn.position);
             if (scn.linesAdded == 0) {
                 var insCharLenght = GetCharCount(scn.position, scn.length);
@@ -194,14 +208,26 @@ namespace _3PA.Interop {
         /// </summary>
         /// <returns>The number of lines</returns>
         public int Count {
-            get { return (_linesList.Count - 1); }
+            get {
+                // bypass the hard work for simple encoding
+                if (_oneByteCharEncoding)
+                    return SciGetLineCount();
+
+                return (_linesList.Count - 1);
+            }
         }
 
         /// <summary>
         /// Gets the number of CHAR in the document.
         /// </summary>
         internal int TextLength {
-            get { return CharPositionFromLine(_linesList.Count - 1); }
+            get {
+                // bypass the hard work for simple encoding
+                if (_oneByteCharEncoding)
+                    return SciGetLength();
+
+                return CharPositionFromLine(_linesList.Count - 1);
+            }
         }
 
         /// <summary>
@@ -209,6 +235,10 @@ namespace _3PA.Interop {
         /// this is THE method of this class (since it is the only info we keep on the lines!)
         /// </summary>
         public int CharPositionFromLine(int index) {
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return SciPositionFromLine(index);
+
             if (_holeLenght != 0 && index > _holeLine) {
                 return _linesList[index] + _holeLenght;
             }
@@ -219,7 +249,10 @@ namespace _3PA.Interop {
         /// Returns the number of CHAR in a line.
         /// </summary>
         public int LineCharLength(int index) {
-            //index = Npp.Clamp(index, 0, Count);
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return SciLineLength(index);
+
             return CharPositionFromLine(index + 1) - CharPositionFromLine(index);
         }
 
@@ -227,6 +260,10 @@ namespace _3PA.Interop {
         /// Returns the line index containing the CHAR position.
         /// </summary>
         public int LineFromCharPosition(int pos) {
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return SciLineFromPosition(pos);
+
             // Dichotomic algo to find the line containing the char pos
             var low = 0;
             var high = Count - 1;
@@ -247,7 +284,10 @@ namespace _3PA.Interop {
         /// Converts a CHAR position to a BYTE position
         /// </summary>
         public int CharToBytePosition(int pos) {
-            // pos = Npp.Clamp(pos, 0, TextLenght);
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return pos;
+
             // nearest line start
             var line = LineFromCharPosition(pos);
             var byteStartPos = SciPositionFromLine(line);
@@ -270,6 +310,10 @@ namespace _3PA.Interop {
         /// Converts a BYTE position to a CHAR position.
         /// </summary>
         public int ByteToCharPosition(int pos) {
+            // bypass the hard work for simple encoding
+            if (_oneByteCharEncoding)
+                return pos;
+
             //pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
             var line = SciLineFromPosition(pos);
             var byteStart = SciPositionFromLine(line);

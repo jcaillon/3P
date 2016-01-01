@@ -37,12 +37,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
 
         /// <summary>
-        /// A simple dictionnary containing all the possible names for the tables defined in the database,
-        /// it is used by the parser to identify used tables in a program
-        /// </summary>
-        private static Dictionary<string, bool> _tablesDictionary = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
-
-        /// <summary>
         /// File path to the output file of the dumpdatabase program
         /// </summary>
         public static string OutputFileName { get; private set; }
@@ -101,7 +95,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     File.Delete(filePath);
                 } catch (Exception) {
                     UserCommunication.Notify("Couldn't delete the following files:<br><a href='" + filePath + "'>" + filePath + "</a>", MessageImg.MsgError, "Delete failed", "Current database info");
-                    return;
                 }
             }
         }
@@ -197,7 +190,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         /// <summary>
         /// This method parses the output of the .p procedure that exports the database info
-        /// and fills _dataBases, _tablesDictionary
+        /// and fills _dataBases
         /// It then updates the parser with the new info
         /// </summary>
         private static void Read(string filePath) {
@@ -281,17 +274,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
-                return;
             }
-
-            // fill dictionary
-            _tablesDictionary.Clear();
-            _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
-                if (!_tablesDictionary.ContainsKey(table.Name))
-                    _tablesDictionary.Add(table.Name, false);
-                if (!_tablesDictionary.ContainsKey(string.Join(".", @base.LogicalName, table.Name)))
-                    _tablesDictionary.Add(string.Join(".", @base.LogicalName, table.Name), false);
-            }));
         }
 
         #endregion
@@ -320,8 +303,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// each table is present 2 times, as "TABLE" and "DATABASE.TABLE"
         /// </summary>
         /// <returns></returns>
-        public static Dictionary<string, bool> GetTablesDictionary() {
-            return _tablesDictionary;
+        public static Dictionary<string, CompletionType> GetDbDictionnary() {
+            var output = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
+            _dataBases.ForEach(@base => @base.Tables.ForEach(table => {
+                if (!output.ContainsKey(table.Name))
+                    output.Add(table.Name, CompletionType.Table);
+                if (!output.ContainsKey(string.Join(".", @base.LogicalName, table.Name)))
+                    output.Add(string.Join(".", @base.LogicalName, table.Name), CompletionType.Table);
+            }));
+            return output;
         }
 
         /// <summary>

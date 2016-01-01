@@ -183,7 +183,7 @@ namespace _3PA {
                         return;
 
                     case (uint) NppMsg.NPPN_FILEBEFOREOPEN:
-                        // fire when a file is opened, can be used to clean up data on closed documents
+                        // fire when a file is opened
 
                         return;
 

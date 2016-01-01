@@ -196,6 +196,7 @@ namespace _3PA.MainFeatures {
             SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.BgError2, curTheme.FgError2);
             SetErrorStyles((byte)ErrorLevel.Error, curTheme.BgError3, curTheme.FgError3);
             SetErrorStyles((byte)ErrorLevel.Critical, curTheme.BgError4, curTheme.FgError4);
+
             BgErrorLevelColors = new List<Color> {
                 curTheme.BgNoError,
                 curTheme.BgError0,

@@ -17,12 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -105,7 +107,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
-                return;    
+                return;
+ 
+            // in strings, only functions trigger the tooltip
+            if ((curContext == UdlStyles.Delimiter1 || curContext == UdlStyles.Delimiter2 || curContext == UdlStyles.Delimiter4 || curContext == UdlStyles.Delimiter5) && _currentCompletionList.First().Type != CompletionType.Function)
+                return;
+
             SetToolTip();
 
             // update position
@@ -224,6 +231,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
             var data = GetCurrentlyDisplayedCompletionData();
             //if (data == null) return;
 
+            // Measure the max size of the title (ensure that the title isn't cropped
+            var size = TextRenderer.MeasureText(data.DisplayText, new Font(@"Segoe UI", 13, FontStyle.Bold, GraphicsUnit.Pixel));
+            var size2 = TextRenderer.MeasureText(data.Type.ToString(), new Font(@"Segoe UI", 13, FontStyle.Bold, GraphicsUnit.Pixel));
+
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
             toDisplay.Append(@"
@@ -261,25 +272,43 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.TempTable:
                     case CompletionType.Table:
                         // buffer
-                        if (data.ParsedItem is ParsedDefine)
-                            toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(data.SubString)));
+                        if (data.FromParser) {
+                            if (data.ParsedItem is ParsedDefine) {
+                                toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(data.SubString)));
+                            } else {
+                                if (data.ParsedItem is ParsedTable && !string.IsNullOrEmpty(data.SubString)) {
+                                    toDisplay.Append(FormatRow("Is like", (data.SubString.Contains("?")) ? "Unknow table [" + ((ParsedTable)data.ParsedItem).LcLikeTable + "]" : data.SubString.Replace("Like ", "")));
+                                } 
+                            }
+                        }
 
                         var tbItem = ParserHandler.FindAnyTableOrBufferByName(data.DisplayText);
                         if (tbItem != null) {
-                            if (!string.IsNullOrEmpty(tbItem.Description))
+                            if (!string.IsNullOrEmpty(tbItem.Description)) {
                                 toDisplay.Append(FormatRow("Description", tbItem.Description));
-                            toDisplay.Append(FormatRow("Number of fields", tbItem.Fields.Count.ToString()));
+                            }
+
+                            if (tbItem.Fields.Count > 0) {
+                                toDisplay.Append(FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
+                                toDisplay.Append("<table width='100%;'>");
+                                foreach (var parsedField in tbItem.Fields) {
+                                    toDisplay.Append("<tr><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProgressQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
+                                }
+                                toDisplay.Append("</table>");
+                            }
 
                             if (tbItem.Triggers.Count > 0) {
-                                toDisplay.Append(FormatSubtitle("TRIGGERS"));
-                                foreach (var parsedTrigger in tbItem.Triggers)
+                                toDisplay.Append(FormatSubtitle("TRIGGERS [x" + tbItem.Triggers.Count + "]"));
+                                foreach (var parsedTrigger in tbItem.Triggers) {
                                     toDisplay.Append(FormatRow(parsedTrigger.Event, "<a class='ToolGotoDefinition' href='trigger#" + parsedTrigger.ProcName + "'>" + parsedTrigger.ProcName + "</a>"));
+                                }
                             }
 
                             if (tbItem.Indexes.Count > 0) {
-                                toDisplay.Append(FormatSubtitle("INDEXES"));
-                                foreach (var parsedIndex in tbItem.Indexes)
+                                toDisplay.Append(FormatSubtitle("INDEXES [x" + tbItem.Indexes.Count + "]"));
+                                foreach (var parsedIndex in tbItem.Indexes) {
                                     toDisplay.Append(FormatRow(parsedIndex.Name, ((parsedIndex.Flag != ParsedIndexFlag.None) ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
+                                }
                             }
                         }
                         break;
@@ -470,7 +499,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             toDisplay.Append("</div>");
 
             toDisplay.Append("</div>");
-            _form.SetText(toDisplay.ToString());
+
+            _form.SetText(toDisplay.ToString(), (Math.Max(size.Width, size2.Width) + 10 + 70));
 
         }
 

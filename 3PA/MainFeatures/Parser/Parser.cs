@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 
 namespace _3PA.MainFeatures.Parser {
@@ -67,12 +68,11 @@ namespace _3PA.MainFeatures.Parser {
         private bool _lastTokenWasSpace;
 
         /// <summary>
-        /// Is is possible to match (almost) every word found by the lexer against database's table names
-        /// to return a list of used table in the program
+        /// Contains all the words parsed
         /// </summary>
-        private Dictionary<string, bool> _databaseTableDictionary;
+        private Dictionary<string, CompletionType> _knownWords = new Dictionary<string, CompletionType>(StringComparer.CurrentCultureIgnoreCase);
 
-        private bool _matchDatabaseTables = true;
+        private bool _matchKnownWords;
 
         /// <summary>
         /// Useful to remember where the function prototype was defined (Point is line, column)
@@ -97,18 +97,15 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="data"></param>
         /// <param name="filePathBeingParsed"></param>
         /// <param name="defaultOwnerName">The default scope to use (before we enter a func/proc/mainblock...)</param>
-        /// <param name="tablesDictionary"></param>
-        public Parser(string data, string filePathBeingParsed, string defaultOwnerName, Dictionary<string, bool> tablesDictionary = null) {
+        /// <param name="matchKnownWords"></param>
+        public Parser(string data, string filePathBeingParsed, string defaultOwnerName, bool matchKnownWords = false) {
             // process inputs
             bool isRootFile = string.IsNullOrEmpty(defaultOwnerName);
             defaultOwnerName = isRootFile ? RootScopeName : defaultOwnerName;
             _context.OwnerName = defaultOwnerName;
             _filePathBeingParsed = filePathBeingParsed;
 
-            if (tablesDictionary == null)
-                _matchDatabaseTables = false;
-            else
-                _databaseTableDictionary = tablesDictionary;
+            _matchKnownWords = matchKnownWords && AutoComplete.KnownStaticItems != null;
 
             ParsingOk = true;
 
@@ -300,10 +297,20 @@ namespace _3PA.MainFeatures.Parser {
                             PushBlockInfoToStack(BlockType.ThenElse, token.Line);
                             break;
                         default:
-                            // try to match with a table's name
-                            if (_matchDatabaseTables) {
-                                if (_databaseTableDictionary.ContainsKey(lowerTok))
-                                    AddParsedItem(new ParsedFoundTableUse(token.Value.AutoCaseToUserLiking(), token.Line, token.Column));
+                            // try to match a known keyword
+                            if (_matchKnownWords) {
+                                if (AutoComplete.KnownStaticItems.ContainsKey(lowerTok)) {
+                                    // we known the word
+                                    if (AutoComplete.KnownStaticItems[lowerTok] == CompletionType.Table) {
+                                        // it's a table from the database
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value.AutoCaseToUserLiking(), token.Line, token.Column, false));
+                                    }
+                                } else if (_knownWords.ContainsKey(lowerTok)) {
+                                    if (_knownWords[lowerTok] == CompletionType.Table) {
+                                        // it's a temp table
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token.Line, token.Column, true));
+                                    }
+                                }
                             }
                             break;
                     }
@@ -419,6 +426,12 @@ namespace _3PA.MainFeatures.Parser {
             item.FilePath = _filePathBeingParsed;
             item.Scope = _context.Scope;
             item.OwnerName = _context.OwnerName;
+
+            // add the item name's to the known words
+            if (!_knownWords.ContainsKey(item.Name)) {
+                _knownWords.Add(item.Name, (item is ParsedTable) ? CompletionType.Table : CompletionType.Keyword);
+            }
+
             _parsedItemList.Add(item);
         }
 
@@ -1050,10 +1063,6 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             if (createdFunc == null) return false;
 
-            // modify context
-            _context.Scope = ParsedScope.Function;
-            _context.OwnerName = name;
-
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;
             createdFunc.Parameters = parameters.ToString();
@@ -1064,11 +1073,18 @@ namespace _3PA.MainFeatures.Parser {
                 createdFunc.PrototypeLine = -1;
                 _functionPrototype.Add(name, new Point());
             }
-            _parsedItemList.Add(createdFunc);
+            AddParsedItem(createdFunc);
+
+            // modify context
+            _context.Scope = ParsedScope.Function;
+            _context.OwnerName = name;
 
             // add the parameters to the list
-            if (parametersList.Count > 0)
-                _parsedItemList.AddRange(parametersList);
+            if (parametersList.Count > 0) {
+                foreach (var parsedItem in parametersList) {
+                    AddParsedItem(parsedItem);
+                }
+            }
             return true;
         }
 

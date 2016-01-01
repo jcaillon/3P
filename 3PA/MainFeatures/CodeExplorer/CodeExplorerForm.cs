@@ -70,10 +70,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public static List<int> GetPriorityList {
             get {
                 if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
-                _explorerBranchTypePriority = new List<int>();
-                var temp = Config.Instance.CodeExplorerPriorityList.Split(',').Select(int.Parse).ToList();
-                for (int i = 0; i < Enum.GetNames(typeof(CompletionType)).Length; i++)
-                    _explorerBranchTypePriority.Add(temp.IndexOf(i));
+                _explorerBranchTypePriority = Config.GetPriorityList(typeof (CompletionType), "CodeExplorerPriorityList");
                 return _explorerBranchTypePriority;
             }
         }
@@ -294,7 +291,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 foreach (var type in _items.Select(x => x.Branch).Distinct()) {
                     if (_rootItems.Find(item => item.Branch == type) != null) continue;
                     _rootItems.Add(new CodeExplorerItem {
-                        DisplayText = ((CodeExplorerTypeAttr)type.GetAttributes()).DisplayText,
+                        DisplayText = ((DisplayAttr)type.GetAttributes()).Name,
                         Branch = type,
                         HasChildren = true,
                         Level = 0

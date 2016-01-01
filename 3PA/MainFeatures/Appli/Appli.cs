@@ -32,19 +32,25 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ToggleView() {
             try {
-                // create the form
-                if (!_hasBeenShownOnce) {
-                    _hasBeenShownOnce = true;
-                    Form.Show(Npp.Win32WindowNpp);
-                    Form.DoShow();
-                    return;
+                if (Form == null) {
+                    Init();
                 }
 
-                // toggle visibility
-                if (Form.Visible && !Form.HasModalOpened)
-                    Form.Cloack();
-                else
-                    Form.UnCloack();
+                if (Form != null) {
+                    // create the form
+                    if (!_hasBeenShownOnce) {
+                        _hasBeenShownOnce = true;
+                        Form.Show(Npp.Win32WindowNpp);
+                        Form.DoShow();
+                        return;
+                    }
+
+                    // toggle visibility
+                    if (Form.Visible && !Form.HasModalOpened)
+                        Form.Cloack();
+                    else
+                        Form.UnCloack();
+                }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading the main window");
             }
@@ -66,7 +72,7 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void GoToAboutPage() {
             try {
-                GoToPage("soft_info");
+                GoToPage("welcome");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoToAboutPage");
             }
@@ -77,7 +83,7 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void GoToOptionPage() {
             try {
-                GoToPage("features");
+                GoToPage("profiles");
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
             }

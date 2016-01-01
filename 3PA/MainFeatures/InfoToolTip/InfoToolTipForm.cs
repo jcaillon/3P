@@ -45,11 +45,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #endregion
 
         #region public
+
         /// <summary>
         /// set the html of the label, resize the tooltip
         /// </summary>
         /// <param name="content"></param>
-        public void SetText(string content) {
+        /// <param name="minimumWidth"></param>
+        public void SetText(string content, int minimumWidth = 150) {
 
             if (Visible)
                 Cloack();
@@ -59,7 +61,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // find max height taken by the html
             labelContent.Width = screen.WorkingArea.Width / 2;
             labelContent.Text = content;
-            var prefHeight = Math.Min(labelContent.Height, (screen.WorkingArea.Height / 2) - 10) + 10;
+            var prefHeight = labelContent.Height;
 
             // now we got the final height, resize width until height changes
             int j = 0;
@@ -67,7 +69,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             int curWidth = labelContent.Width;
             do {
                 curWidth -= detla;
-                labelContent.Width = Math.Min(screen.WorkingArea.Width / 2, curWidth);
+                labelContent.Width = Math.Max(Math.Min(screen.WorkingArea.Width / 2, curWidth), minimumWidth);
                 labelContent.Text = content;
                 if (labelContent.Height > prefHeight) {
                     curWidth += detla;
@@ -75,7 +77,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 }
                 j++;
             } while (j < 20);
-            labelContent.Width = curWidth < 50 ? 150 : curWidth;
             var neededHeight = labelContent.Height;
 
             Width = labelContent.Width + 10;

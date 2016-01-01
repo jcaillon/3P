@@ -1143,6 +1143,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap TempTableUsed {
+            get {
+                object obj = ResourceManager.GetObject("TempTableUsed", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap TType {
             get {
                 object obj = ResourceManager.GetObject("TType", resourceCulture);
@@ -1156,6 +1166,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Uncertain {
             get {
                 object obj = ResourceManager.GetObject("Uncertain", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap UndoUserAction {
+            get {
+                object obj = ResourceManager.GetObject("UndoUserAction", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

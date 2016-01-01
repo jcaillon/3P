@@ -87,6 +87,7 @@ namespace _3PA.Html {
         public static string GetLogo() {
             return "logo30x30";
         }
+
     }
 
     public enum MessageImg {

@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.Globalization;
@@ -40,19 +41,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// </summary>
     public partial class OptionPage : YamuiPage {
 
-        #region constructor
-        public OptionPage() {
-            InitializeComponent();
+        #region fields
 
-            // avoid glitch when using background image
-            NoTransparentBackground = true;
-
-            GeneratePage();
-        }
+        private List<string> _allowedGroups;
 
         #endregion
 
-        #region private
+        #region constructor
+        public OptionPage(List<string> allowedGroups) {
+            InitializeComponent();
+
+            _allowedGroups = allowedGroups;
+
+            GeneratePage();
+        }
+        #endregion
+
+        #region private methods
 
         private void GeneratePage() {
             var lastCategory = "";
@@ -65,6 +70,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 // new group
                 if (!lastCategory.EqualsCi(attribute.GroupName)) {
                     if (!string.IsNullOrEmpty(lastCategory))
+                        // ReSharper disable once AccessToModifiedClosure
                         yPos += 15;
                     lastCategory = attribute.GroupName;
                     dockedPanel.Controls.Add(new YamuiLabel {
@@ -96,8 +102,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Location = new Point(240, yPos),
                         Text = (string)property.GetValue(configInstance),
                         Size = new Size(300, 20),
-                        Tag = attribute.Name
+                        Tag = property.Name
                     };
+
                     dockedPanel.Controls.Add(strControl);
                     var strButton = new YamuiImageButton {
                         BackGrndImage = ImageResources.Save,
@@ -107,12 +114,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         TabStop = false
                     };
                     strButton.ButtonPressed += NumButtonOnButtonPressed;
-                    
                     dockedPanel.Controls.Add(strButton);
-
-                    // tooltip
-                    tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
                     tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
+
+                    var undoButton = new YamuiImageButton {
+                        BackGrndImage = ImageResources.UndoUserAction,
+                        Size = new Size(20, 20),
+                        Location = new Point(565, yPos),
+                        Tag = strControl,
+                        TabStop = false
+                    };
+                    undoButton.ButtonPressed += UndoButtonOnButtonPressed;
+                    dockedPanel.Controls.Add(undoButton);
+                    tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
+
+                    tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
 
                 } if (valObj is int || valObj is double) {
                     // number
@@ -120,8 +136,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Location = new Point(240, yPos),
                         Text = ((valObj is int) ? ((int)property.GetValue(configInstance)).ToString() : ((double)property.GetValue(configInstance)).ToString(CultureInfo.CurrentCulture)),
                         Size = new Size(300, 20),
-                        Tag = attribute.Name
+                        Tag = property.Name
                     };
+
                     dockedPanel.Controls.Add(numControl);
                     var numButton = new YamuiImageButton {
                         BackGrndImage = ImageResources.Save,
@@ -132,13 +149,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     };
                     numButton.ButtonPressed += NumButtonOnButtonPressed;
                     dockedPanel.Controls.Add(numButton);
-
-                    // tooltip
                     tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
-                    if (rangeAttr != null)
-                        tooltip.SetToolTip(numControl, attribute.Description + "<br><br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
-                    else
-                        tooltip.SetToolTip(numControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click the red floppy disk to save your modifications</div>");
+
+                    var undoButton = new YamuiImageButton {
+                        BackGrndImage = ImageResources.UndoUserAction,
+                        Size = new Size(20, 20),
+                        Location = new Point(565, yPos),
+                        Tag = numControl,
+                        TabStop = false
+                    };
+                    undoButton.ButtonPressed += UndoButtonOnButtonPressed;
+                    dockedPanel.Controls.Add(undoButton);
+                    tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
+
+                    tooltip.SetToolTip(numControl, attribute.Description + "<br>" + (rangeAttr != null ? "<br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br>" : "") + "<div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
 
                 } else if (valObj is bool) {
                     // bool
@@ -147,7 +171,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Size = new Size(80, 15),
                         Text = @" ",
                         Checked = (bool)valObj,
-                        Tag = attribute.Name
+                        Tag = property.Name
                     };
                     toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
                     dockedPanel.Controls.Add(toggleControl);
@@ -159,109 +183,145 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 yPos += label.Height + 20;
             });
 
-            yPos += 40;
+            yPos += 20;
             var defaultButton = new YamuiButton {
                 Location = new Point(30, yPos),
-                Size = new Size(94, 23),
-                Text = @"To default"
+                Size = new Size(100, 23),
+                Text = @"Reset to default"
             };
             defaultButton.ButtonPressed += DefaultButtonOnButtonPressed;
             tooltip.SetToolTip(defaultButton, "Click to <b>reset</b> all the options to default");
             dockedPanel.Controls.Add(defaultButton);
-            yPos += 50;
 
-            dockedPanel.Controls.Add(new YamuiLabel {
-                AutoSize = true,
-                Function = LabelFunction.Heading,
-                Location = new Point(0, yPos),
-                Text = @" "
-            });
+            // add a button for the updates
+            if (_allowedGroups.Contains("Updates")) {
+                var updateButton = new YamuiButton {
+                    Location = new Point(135, yPos),
+                    Size = new Size(100, 23),
+                    Text = @"Check for updates"
+                };
+                updateButton.ButtonPressed += (sender, args) => UpdateHandler.CheckForUpdates();
+                tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
+                dockedPanel.Controls.Add(updateButton); 
+            }
 
-            Height = yPos + 20;
+            yPos += 25;
 
+            if (yPos > Height) {
+                // avoid glitch when using background image
+                NoTransparentBackground = true;
+
+                dockedPanel.Controls.Add(new YamuiLabel {
+                    AutoSize = true,
+                    Function = LabelFunction.Heading,
+                    Location = new Point(0, yPos),
+                    Text = @" "
+                });
+                yPos += 10;
+            }
+            Height = yPos;
         }
 
-        private void DefaultButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        #region on events
 
-            // apply default settings
-            var defaultConfig = new ConfigObject();
-            var configInstance = Config.Instance;
-            ForEachConfigPropertyWithDisplayAttribute((property, attribute) => {
-                var valObj = property.GetValue(defaultConfig);
-                property.SetValue(configInstance, valObj);
-                foreach (var control in dockedPanel.Controls) {
-                    var ctrl = (Control) control;
-                    if (ctrl.Tag != null && ctrl.Tag is string) {
-                        if (((string) ctrl.Tag).Equals(attribute.Name)) {
-                            if (ctrl is YamuiToggle)
-                                ((YamuiToggle) ctrl).Checked = (bool) valObj;
-                            else
-                                ((YamuiTextBox)ctrl).Text = valObj.ToString();
-                        }
-                    }
-                }
-            });
+        private void UndoButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            // find the corresponding control
+            var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
+            var propertyName = (string) textBox.Tag;
+            textBox.Text = ((new ConfigObject()).GetValueOf(propertyName)).ToString();
+            Config.Instance.SetValueOf(propertyName, ((new ConfigObject()).GetValueOf(propertyName)));
 
-            ApplySettings();
+            // need to refresh stuff to really apply this option?
+            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+                ApplySettings();
+            }
+            Config.Save();
         }
 
         private void NumButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
             var propertyName = (string) textBox.Tag;
-            SetPropertyValue(propertyName, textBox);
+            if (Config.Instance.GetValueOf(propertyName) is string) {
+                // set value
+                Config.Instance.SetValueOf(propertyName, textBox.Text);
+            } else {
+                double ouptut;
+                if (!double.TryParse(textBox.Text, out ouptut)) {
+                    BlinkTextBox(textBox, ThemeManager.Current.GenericErrorColor);
+                    return;
+                }
+                // check value
+                var rangeAttr = Config.Instance.GetAttributeOf<RangeAttribute>(propertyName);
+                if (rangeAttr != null) {
+                    double maxRange = 9999;
+                    double minRange = -9999;
+                    try {
+                        maxRange = (double) rangeAttr.Maximum;
+                        minRange = (double) rangeAttr.Minimum;
+                    } catch (Exception e) {
+                        if (e is InvalidCastException) {
+                            maxRange = (int) rangeAttr.Maximum;
+                            minRange = (int) rangeAttr.Minimum;
+                        }
+                    }
+                    if (ouptut > maxRange || ouptut < minRange) {
+                        BlinkTextBox(textBox, ThemeManager.Current.GenericErrorColor);
+                        return;
+                    }
+                }
+                // set value
+                if (Config.Instance.GetValueOf(propertyName) is int)
+                    Config.Instance.SetValueOf(propertyName, (int) ouptut);
+                else
+                    Config.Instance.SetValueOf(propertyName, ouptut);
+            }
+
+            // need to refresh stuff to really apply this option?
+            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+                ApplySettings();
+            }
+            Config.Save();
         }
 
         private void ToggleControlOnCheckedChanged(object sender, EventArgs eventArgs) {
             var toggle = (YamuiToggle) sender;
             var propertyName = (string) toggle.Tag;
-            SetPropertyValue(propertyName, toggle);
+            // set value
+            Config.Instance.SetValueOf(propertyName, toggle.Checked);
+
+            // need to refresh stuff to really apply this option?
+            if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
+                ApplySettings();
+            }
+            Config.Save();
         }
 
-        /// <summary>
-        /// Sets the value or a property that has a display name "propertyName"
-        /// to the value "value"
-        /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="sender"></param>
-        private void SetPropertyValue(string propertyName, object sender) {
-            var configInstance = Config.Instance;
+        private void DefaultButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+            // apply default settings
+            var defaultConfig = new ConfigObject();
 
-            ForEachConfigPropertyWithDisplayAttribute((property, attribute) => {
-                if (propertyName.Equals(attribute.Name)) {
-                    var valObj = property.GetValue(configInstance);
-                    if (valObj is bool) {
-                        property.SetValue(configInstance, ((YamuiToggle)sender).Checked);
-                    } else {
-                        if (valObj is string) {
-                            property.SetValue(configInstance, ((YamuiTextBox)sender).Text);
-                        } else {
-                            double ouptut;
-                            if (!double.TryParse(((YamuiTextBox)sender).Text, out ouptut)) {
-                                BlinkTextBox((YamuiTextBox)sender, ThemeManager.Current.GenericErrorColor);
-                                return;
-                            }
-                            var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
-                            var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute)listRangeAttr.FirstOrDefault() : null;
-                            if (rangeAttr != null) {
-                                if (ouptut > (int)rangeAttr.Maximum || ouptut < (int)rangeAttr.Minimum) {
-                                    BlinkTextBox((YamuiTextBox)sender, ThemeManager.Current.GenericErrorColor);
-                                    return;
-                                }
-                            }
-                            if (valObj is int)
-                                property.SetValue(configInstance, (int)ouptut);
-                            else
-                                property.SetValue(configInstance, ouptut);
-                        }
-                    }
-
-                    if (attribute.AutoGenerateField) {
-                        // need to refresh stuff to really apply this option
-                        ApplySettings();
-                    }
+            // refresh stuff on screen
+            foreach (var control in dockedPanel.Controls) {
+                var ctrl = (Control)control;
+                if (ctrl.Tag != null && ctrl.Tag is string) {
+                    var propertyName = (string) ctrl.Tag;
+                    var value = new ConfigObject().GetValueOf(propertyName);
+                    if (ctrl is YamuiToggle) {
+                        Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
+                        ((YamuiToggle)ctrl).Checked = (bool) value;
+                    } else if (ctrl is YamuiTextBox) {
+                        Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
+                        ((YamuiTextBox)ctrl).Text = value.ToString();
+                    } 
                 }
-            });
+            }
+            ApplySettings();
+            Config.Save();
         }
+
+        #endregion
+
+
 
         /// <summary>
         /// For certain config properties, we need to refresh stuff to see a difference
@@ -296,24 +356,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             /* loop through fields */
             foreach (var property in properties) {
-                if (property.IsPrivate) continue;
+                if (property.IsPrivate) {
+                    continue;
+                }
                 var listCustomAttr = property.GetCustomAttributes(typeof (DisplayAttribute), false);
-                if (!listCustomAttr.Any()) 
+                if (!listCustomAttr.Any()) {
                     continue;
+                }
                 var displayAttr = (DisplayAttribute) listCustomAttr.FirstOrDefault();
-                if (displayAttr == null)
+                if (displayAttr == null) {
                     continue;
-                if (string.IsNullOrEmpty(displayAttr.Name))
+                }
+                if (string.IsNullOrEmpty(displayAttr.Name)) {
                     continue;
+                }
+                if (!_allowedGroups.Contains(displayAttr.GroupName)) {
+                    continue;
+                }
+
                 // execute the action with the loop property and display attribute
                 action(property, displayAttr);
             }
         }
 
         #endregion
-
-
-
-
     }
 }

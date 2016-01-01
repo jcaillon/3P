@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -282,7 +281,7 @@ namespace _3PA.MainFeatures {
                 // if log not found then something is messed up!
                 if (String.IsNullOrEmpty(lastExec.LogPath) ||
                     !File.Exists(lastExec.LogPath)) {
-                    UserCommunication.Notify("Something went terribly wrong while " + ((CurrentOperationAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div><a href='" + lastExec.FullFilePathToExecute + "'>" + lastExec.FullFilePathToExecute + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Execution directory :</b><br><a href='" + lastExec.ExecutionDir + "'>" + lastExec.ExecutionDir + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div><a href='" + lastExec.FullFilePathToExecute + "'>" + lastExec.FullFilePathToExecute + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Execution directory :</b><br><a href='" + lastExec.ExecutionDir + "'>" + lastExec.ExecutionDir + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
                 }
 
@@ -302,7 +301,7 @@ namespace _3PA.MainFeatures {
                     if (fileInfo.Length > 0) {
                         // the .log is not empty, maybe something went wrong in the runner, display errors
                         UserCommunication.Notify(
-                            "Something went wrong while " + ((CurrentOperationAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br><br><a href='" +
+                            "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br><br><a href='" +
                             lastExec.FullFilePathToExecute + "'>" +
                             lastExec.FullFilePathToExecute +
                             "</a><br><br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
@@ -323,7 +322,7 @@ namespace _3PA.MainFeatures {
                 }
 
                 // Prepare the notification content
-                var notifTitle = ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText;
+                var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = (nbErrors > 0) ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
@@ -378,8 +377,7 @@ namespace _3PA.MainFeatures {
                             success = false;
                         }
                         if (success) {
-                            // TODO notif?
-
+                            notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", targetDir.ToHtmlLink()));
                         }
                     }
                 }
@@ -387,8 +385,11 @@ namespace _3PA.MainFeatures {
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
                     UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
-                        var splitted = args.Link.Split('#');
-                        Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                        if (args.Link.Contains("#")) {
+                            var splitted = args.Link.Split('#');
+                            Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                            args.Handled = true;
+                        }
                     }, notifTimeOut);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnCompileEnded");
@@ -402,7 +403,7 @@ namespace _3PA.MainFeatures {
 
             // Can't compile and check syntax the same file at the same time
             if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run)) {
-                UserCommunication.Notify("This file is already being compiled or run,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText, "Already being compiled/run", 5);
+                UserCommunication.Notify("This file is already being compiled or run,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
                 return;
             }
 

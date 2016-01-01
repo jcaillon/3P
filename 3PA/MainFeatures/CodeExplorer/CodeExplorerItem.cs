@@ -110,33 +110,34 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     public enum CodeExplorerBranch {
-        [CodeExplorerTypeAttr(DisplayText = "Everything in code order")]
+        [DisplayAttr(Name = "Everything in code order")]
         EverythingInCodeOrder,
-        [CodeExplorerTypeAttr(DisplayText = "Root")]
+        [DisplayAttr(Name = "Root")]
         Root,
-        [CodeExplorerTypeAttr(DisplayText = "Appbuilder blocks")]
+        [DisplayAttr(Name = "Appbuilder blocks")]
         Block,
-        [CodeExplorerTypeAttr(DisplayText = "Main block")]
+        [DisplayAttr(Name = "Main block")]
         MainBlock,
-        [CodeExplorerTypeAttr(DisplayText = "Procedures")]
+        [DisplayAttr(Name = "Procedures")]
         Procedure,
-        [CodeExplorerTypeAttr(DisplayText = "Functions")]
+        [DisplayAttr(Name = "Functions")]
         Function,
-        [CodeExplorerTypeAttr(DisplayText = "ON events")]
+        [DisplayAttr(Name = "ON events")]
         OnEvent,
-        [CodeExplorerTypeAttr(DisplayText = "Includes")]
+        [DisplayAttr(Name = "Includes")]
         Include,
-        [CodeExplorerTypeAttr(DisplayText = "Run statements")]
+        [DisplayAttr(Name = "Run statements")]
         Run,
-        [CodeExplorerTypeAttr(DisplayText = "Dynamic function calls")]
+        [DisplayAttr(Name = "Dynamic function calls")]
         DynamicFunctionCall,
-        [CodeExplorerTypeAttr(DisplayText = "Browse definitions")]
+        [DisplayAttr(Name = "Browse definitions")]
         Browse,
-        [CodeExplorerTypeAttr(DisplayText = "Tables used")]
+        [DisplayAttr(Name = "Tables used")]
         TableUsed,
-        [CodeExplorerTypeAttr(DisplayText = "Program parameters")]
-        ProgramParameter
-        
+        [DisplayAttr(Name = "Program parameters")]
+        ProgramParameter,
+        [DisplayAttr(Name = "Temp-tables used")]
+        TempTableUsed,
     }
 
     /// <summary>
@@ -177,11 +178,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // a proc or func was loaded in persistent
         Persistent = 64,
         // private proc
-        Private = 128
-    }
-
-    public class CodeExplorerTypeAttr : Extensions.EnumAttr {
-        public string DisplayText { get; set; }
-        public int Order { get; set; }
+        Private = 128,
+        // is a buffer
+        Buffer = 256,
     }
 }

@@ -40,6 +40,11 @@ namespace YamuiDemoApp {
         static void Main() {
 
 
+            //ParserLexerTests.Run();
+
+            //return;
+
+
             /*
             Ship ship = new Ship();
             string value = "5.5";
@@ -63,10 +68,6 @@ namespace YamuiDemoApp {
 
 
             //return;
-            
-            ParserLexerTests.Run();
-
-            return;
             
 
             /*

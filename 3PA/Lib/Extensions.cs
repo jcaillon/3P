@@ -133,6 +133,16 @@ namespace _3PA.Lib {
         #region string extensions
 
         /// <summary>
+        /// Returns the html link representation from a url
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="urlName"></param>
+        /// <returns></returns>
+        public static string ToHtmlLink(this string url, string urlName = null) {
+            return string.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
+        }
+
+        /// <summary>
         /// Transforms an md formatted string into an html text
         /// </summary>
         /// <param name="text"></param>

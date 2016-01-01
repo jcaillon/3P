@@ -105,6 +105,12 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OptionPage.Designer.cs">
       <DependentUpon>OptionPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.Designer.cs">
+      <DependentUpon>ProfilesPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\template.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -285,6 +291,9 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OptionPage.resx">
       <DependentUpon>OptionPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ProfilesPage.resx">
+      <DependentUpon>ProfilesPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\template.resx">
       <DependentUpon>template.cs</DependentUpon>
     </EmbeddedResource>
@@ -364,6 +373,7 @@
     <Content Include="Images\Appli\PlusDb.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
+    <Content Include="Images\Appli\UndoUserAction.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
@@ -417,6 +427,7 @@
     <Content Include="Images\DockableExplorer\Type\SettingsBlock.png" />
     <Content Include="Images\DockableExplorer\Type\CreateWindowBlock.png" />
     <Content Include="Images\DockableExplorer\Type\TableUsed.png" />
+    <Content Include="Images\DockableExplorer\Type\TempTableUsed.png" />
     <Content Include="Images\DockableExplorer\Type\XtfrBlock.png" />
     <Content Include="Images\DockableExplorer\Type\Browse.png" />
     <Content Include="Images\DockableExplorer\buttons\clear_filters.png" />

@@ -50,7 +50,7 @@ namespace _3PA.MainFeatures.Appli {
             InitializeComponent();
 
             // create the tabs / content
-            var content = new List<YamuiMainMenuTab> {
+            CreateContent(new List<YamuiMainMenuTab> {
                 new YamuiMainMenuTab("Home", "home", false, new List<YamuiSecMenuTab> {
                     new YamuiSecMenuTab("WELCOME", "welcome", new HomePage())
                 }),
@@ -58,14 +58,19 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenuTab("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
                 new YamuiMainMenuTab("Options", "options", false, new List<YamuiSecMenuTab> {
-                    new YamuiSecMenuTab("FEATURES", "features", new OptionPage()),
-                    new YamuiSecMenuTab("APPEARANCE", "appearance", new SettingAppearance())
+                    new YamuiSecMenuTab("PROFILES", "profiles", new ProfilesPage()),
+                    new YamuiSecMenuTab("GENERAL", "general", new OptionPage(new List<string> { "General" })),
+                    new YamuiSecMenuTab("COLOR SCHEMES", "colors", new SettingAppearance()),
+                    new YamuiSecMenuTab("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
+                    new YamuiSecMenuTab("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
+                    new YamuiSecMenuTab("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
+                    new YamuiSecMenuTab("EXPLORERS", "explorers", new OptionPage(new List<string> { "File explorer", "Code explorer" })),
+                    new YamuiSecMenuTab("TOOLTIPS", "tooltips", new OptionPage(new List<string> { "Tooltip" })),
                 }),
                 //new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
                 //    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
                 //})
-            };
-            CreateContent(content);
+            });
 
             // title
             UpdateTitle();
@@ -183,11 +188,11 @@ namespace _3PA.MainFeatures.Appli {
         }      
 
         private void yamuiLink6_Click(object sender, EventArgs e) {
-            GoToPage("features");
+            GoToPage("profiles");
         }
 
         private void yamuiLink7_Click(object sender, EventArgs e) {
-            GoToPage("soft_info");
+            GoToPage("welcome");
         }
 
         private void yamuiLink8_Click(object sender, EventArgs e) {

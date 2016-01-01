@@ -423,31 +423,23 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public string FileFullPath { get; set; }
     }
 
-    public class CurrentOperationAttr : Extensions.EnumAttr {
-        public string DisplayText { get; set; }
-        /// <summary>
-        /// used like : error while "ActionText" the file...
-        /// </summary>
-        public string ActionText { get; set; }
-    }
-
     /// <summary>
     /// Current undergoing operation on the file
     /// Retrieve the DisplayText value with ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText
     /// </summary>
     [Flags]
     public enum CurrentOperation {
-        [CurrentOperationAttr(DisplayText = "Editing")]
+        [DisplayAttr(Name = "Editing")]
         Default = 0,
-        [CurrentOperationAttr(DisplayText = "Appbuilder section!")]
+        [DisplayAttr(Name = "Appbuilder section!")]
         AppbuilderSection = 32,
-        [CurrentOperationAttr(DisplayText = "Linting")]
+        [DisplayAttr(Name = "Linting")]
         Prolint = 64,
-        [CurrentOperationAttr(DisplayText = "Checking syntax", ActionText = "checking the syntax of")]
+        [DisplayAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
         CheckSyntax = 128,
-        [CurrentOperationAttr(DisplayText = "Compiling", ActionText = "compiling")]
+        [DisplayAttr(Name = "Compiling", ActionText = "compiling")]
         Compile = 216,
-        [CurrentOperationAttr(DisplayText = "Executing", ActionText = "executing")]
+        [DisplayAttr(Name = "Executing", ActionText = "executing")]
         Run = 512
     }
 
@@ -490,26 +482,22 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
     }
 
-    public class ErrorLevelAttr : Extensions.EnumAttr {
-        public string DisplayText { get; set; }
-    }
-
     /// <summary>
     /// Describes the error level, the num is also used for MARKERS in scintilla
     /// and thus must start at 0
     /// </summary>
     public enum ErrorLevel {
-        [ErrorLevelAttr(DisplayText = "Error(s), good!")]
+        [DisplayAttr(Name = "Error(s), good!")]
         NoErrors,
-        [ErrorLevelAttr(DisplayText = "Info")]
+        [DisplayAttr(Name = "Info")]
         Information,
-        [ErrorLevelAttr(DisplayText = "Warning(s)")]
+        [DisplayAttr(Name = "Warning(s)")]
         Warning,
-        [ErrorLevelAttr(DisplayText = "Huge warning(s)")]
+        [DisplayAttr(Name = "Huge warning(s)")]
         StrongWarning,
-        [ErrorLevelAttr(DisplayText = "Error(s)")]
+        [DisplayAttr(Name = "Error(s)")]
         Error,
-        [ErrorLevelAttr(DisplayText = "Critical error(s)!")]
+        [DisplayAttr(Name = "Critical error(s)!")]
         Critical
     }
 

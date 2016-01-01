@@ -199,12 +199,14 @@ namespace _3PA.MainFeatures.Parser {
     /// found table in program
     /// </summary>
     public class ParsedFoundTableUse : ParsedItem {
+        public bool IsTempTable { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFoundTableUse(string name, int line, int column)
+        public ParsedFoundTableUse(string name, int line, int column, bool isTempTable)
             : base(name, line, column) {
+            IsTempTable = isTempTable;
         }
     }
 

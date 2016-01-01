@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (PageAbout.cs) is part of 3P.
+// This file (template.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,35 +18,19 @@
 // ========================================================================
 #endregion
 
-using System;
 using YamuiFramework.Controls;
-using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Html;
-using _3PA.Lib;
 
-namespace _3PA.MainFeatures.Appli.Pages.Home {
-    public partial class HomePage : YamuiPage {
+namespace _3PA.MainFeatures.Appli.Pages.Options {
+    public partial class ProfilesPage : YamuiPage {
 
         #region fields
 
         #endregion
 
         #region constructor
-        public HomePage() {
+        public ProfilesPage() {
             InitializeComponent();
-
-            html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version).Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "");
-
-            html.LinkClicked += HtmlOnLinkClicked;
         }
-
-        private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            if (htmlLinkClickedEventArgs.Link.Equals("update")) {
-                UpdateHandler.CheckForUpdates();
-                htmlLinkClickedEventArgs.Handled = true;
-            }
-        }
-
         #endregion
 
     }

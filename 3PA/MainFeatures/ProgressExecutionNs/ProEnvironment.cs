@@ -294,6 +294,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 IniReader ini = new IniReader(IniPath);
                 var completeProPath = ini.GetValue("PROPATH", "");
                 completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ExtraProPath;
+                // also add the source file base path
+                completeProPath = completeProPath + ",.";
 
                 _currentProPathDirList = new List<string>();
                 var curFilePath = Npp.GetCurrentFileFolder();

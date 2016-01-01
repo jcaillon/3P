@@ -351,31 +351,31 @@ namespace _3PA.MainFeatures.FileExplorer {
                         default:
                             // get the list of FileObjects
                             Regex regex = new Regex(@"\\\.");
-                            var fullList = new Dictionary<string, bool>(StringComparer.CurrentCultureIgnoreCase);
-                            fullList.Add(ProEnvironment.Current.BaseLocalPath, false);
-                            if (!fullList.ContainsKey(ProEnvironment.Current.BaseCompilationPath))
-                                fullList.Add(ProEnvironment.Current.BaseCompilationPath, false);
+                            var fullList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+                            fullList.Add(ProEnvironment.Current.BaseLocalPath);
+                            if (!fullList.Contains(ProEnvironment.Current.BaseCompilationPath))
+                                fullList.Add(ProEnvironment.Current.BaseCompilationPath);
                             // base local path
                             if (Directory.Exists(ProEnvironment.Current.BaseLocalPath)) {
                                 foreach (var directory in Directory.GetDirectories(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories)) {
-                                    if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
-                                        fullList.Add(directory, false);
+                                    if (!fullList.Contains(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                        fullList.Add(directory);
                                 }
                             }
                             // base compilation path
                             if (Directory.Exists(ProEnvironment.Current.BaseCompilationPath)) {
                                 foreach (var directory in Directory.GetDirectories(ProEnvironment.Current.BaseCompilationPath, "*", SearchOption.AllDirectories)) {
-                                    if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
-                                        fullList.Add(directory, false);
+                                    if (!fullList.Contains(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                        fullList.Add(directory);
                                 }
                             }
                             // for each dir in propath
                             foreach (var directory in ProEnvironment.Current.GetProPathDirList) {
-                                if (!fullList.ContainsKey(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
-                                    fullList.Add(directory, false);
+                                if (!fullList.Contains(directory) && (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directory)))
+                                    fullList.Add(directory);
                             }
-                            foreach (var kvp in fullList) {
-                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(kvp.Key, false));
+                            foreach (var path in fullList) {
+                                _initialObjectsList.AddRange(FileExplorer.ListFileOjectsInDirectory(path, false));
                             }
                             break;
                     }
@@ -796,7 +796,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
                 CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
                 if (!updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) continue;
-                lbStatus.Text = ((CurrentOperationAttr)flag.GetAttributes()).DisplayText;
+                lbStatus.Text = ((DisplayAttr)flag.GetAttributes()).Name;
             }
 
             _currentOperation = updatedOperationEventArgs.CurrentOperation;
@@ -825,7 +825,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // text
             t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
-            t.add(lbErrorText, "Text", ((ErrorLevelAttr)updatedErrorsEventArgs.ErrorLevel.GetAttributes()).DisplayText);
+            t.add(lbErrorText, "Text", ((DisplayAttr)updatedErrorsEventArgs.ErrorLevel.GetAttributes()).Name);
 
             t.run();
         }

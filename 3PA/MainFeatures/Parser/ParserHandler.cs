@@ -46,22 +46,13 @@ namespace _3PA.MainFeatures.Parser {
         public static Dictionary<string, int> DisplayTextRankingDatabase = new Dictionary<string, int>();
 
         /// <summary>
-        /// contains the list of items that depend on the current file, that list
-        /// is updated by the parser's visitor class
-        /// </summary>
-        public static List<CompletionData> ParsedItemsList = new List<CompletionData>();
-
-        /// <summary>
-        /// Contains the list of explorer items for the current file, updated by the parser's visitor class
-        /// </summary>
-        public static List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
-
-        /// <summary>
         /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
         /// </summary>
         public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
 
         private static Parser _ablParser;
+
+        private static ParserVisitor _parserVisitor;
 
         /// <summary>
         /// is used to make sure that 2 different threads dont try to access
@@ -96,7 +87,6 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="procedureData"></param>
         /// <returns></returns>
         public static List<CompletionData> FindProcedureParameters(CompletionData procedureData) {
-
             var parserVisitor = ParserVisitor.ParseFile(procedureData.ParsedItem.FilePath, "");
             return parserVisitor.ParsedItemsList.Where(data =>
                 data.FromParser &&
@@ -163,17 +153,15 @@ namespace _3PA.MainFeatures.Parser {
                     SavedParserVisitors.Remove(currentFilePath);
 
                 // Parse the document
-                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, DataBase.GetTablesDictionary());
+                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, true);
 
                 // visitor
-                var parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
-                _ablParser.Accept(parserVisitor);
-                ParsedItemsList = parserVisitor.ParsedItemsList.ToList();
-                ParsedExplorerItemsList = parserVisitor.ParsedExplorerItemsList.ToList();
+                _parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
+                _ablParser.Accept(_parserVisitor);
 
                 // correct the internal/external type of run statements :
-                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                    if (parserVisitor.DefinedProcedures.ContainsKey(item.DisplayText))
+                foreach (var item in _parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                    if (_parserVisitor.DefinedProcedures.Contains(item.DisplayText))
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
 
@@ -189,7 +177,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         public static List<CompletionData> GetParsedItemsList() {
-            return ParsedItemsList.ToList();
+            return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionData>();
         }
 
         /// <summary>
@@ -197,7 +185,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         public static List<CodeExplorerItem> GetParsedExplorerItemsList() {
-            return ParsedExplorerItemsList.ToList();
+            return _parserVisitor != null ? _parserVisitor.ParsedExplorerItemsList.ToList() : new List<CodeExplorerItem>();
         }
         #endregion
 
@@ -261,7 +249,7 @@ namespace _3PA.MainFeatures.Parser {
             if (foundTable != null)
                 return foundTable;
             // for buffer, we return the referenced temptable/table (stored in CompletionData.SubString)
-            var foundParsedItem = ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            var foundParsedItem = _parserVisitor.ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
             return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
         }
 
@@ -289,7 +277,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="name"></param>
         /// <returns></returns>
         private static ParsedTable FindTempTableByName(string name) {
-            var foundTable = ParsedItemsList.Find(data => (data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.Equals(name));
             if (foundTable != null && foundTable.ParsedItem is ParsedTable) return (ParsedTable)foundTable.ParsedItem;
             return null;
         }
@@ -356,7 +344,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // if it's another var
             if (nbPoints == 0) {
-                var foundVar = ParsedItemsList.Find(data =>
+                var foundVar = _parserVisitor.ParsedItemsList.Find(data =>
                     (data.Type == CompletionType.VariablePrimitive ||
                      data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
                 return foundVar != null ? ((ParsedDefine) foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;

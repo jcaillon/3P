@@ -115,6 +115,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             } else {
                 Location = Owner.PointToScreen(Point.Empty);
                 _timerCheck.Start();
+                Refresh();
             }
         }
 

@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
@@ -26,9 +27,23 @@ using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
 using _3PA.Lib;
+using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures {
     public class UserCommunication {
+
+        private static EmptyForm _anchorForm;
+
+        /// <summary>
+        /// init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
+        /// from a back groundthread, use : BeginInvoke()
+        /// </summary>
+        public static void Init() {
+            _anchorForm = new EmptyForm() {
+                Location = new Point(-10000, -10000),
+                Visible = false
+            };
+        }
 
         /// <summary>
         /// Displays a notification on the bottom right of the screen
@@ -41,9 +56,9 @@ namespace _3PA.MainFeatures {
         /// <param name="imageType"></param>
         /// <param name="title"></param>
         public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
-            if (Appli.Appli.Form != null) {
+            if (_anchorForm != null) {
                 // get npp's screen
-                Appli.Appli.Form.BeginInvoke((Action) delegate {
+                _anchorForm.BeginInvoke((Action) delegate {
                     var toastNotification = new YamuiNotifications(
                         LocalHtmlHandler.FormatMessage(html, imageType, title, subTitle)
                         , duration, width, Npp.GetNppScreen());
@@ -66,6 +81,7 @@ namespace _3PA.MainFeatures {
 
         /// <summary>
         /// Displays a messagebox like window
+        /// REMARK : DON'T WAIT FOR AN ANSWER IF YOU CALL IT FROM A THREAD!!!!!!!
         /// new List string  { "fu", "ok" }
         /// </summary>
         /// <param name="html"></param>
@@ -79,13 +95,17 @@ namespace _3PA.MainFeatures {
         /// <returns>returns an integer (-1 if closed, or from 0 to x = buttons.count - 1)</returns>
         public static int Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler = null, bool dontWrapLines = false) {
             var clickedButton = -1;
-            if (Appli.Appli.Form != null) {
+            if (_anchorForm != null) {
                 if (clickHandler == null) {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
-                Appli.Appli.Form.BeginInvoke((Action) delegate {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, waitResponse, clickHandler, dontWrapLines);
-                });
+                if (waitResponse) {
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler, dontWrapLines);
+                } else {
+                    _anchorForm.BeginInvoke((Action) delegate {
+                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler, dontWrapLines);
+                    });
+                }
             }
             return clickedButton;
         }
@@ -119,9 +139,12 @@ namespace _3PA.MainFeatures {
                 string result = null;
                 using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
                     if (resp != null && resp.GetResponseStream() != null) {
-                        StreamReader reader = new StreamReader(resp.GetResponseStream());
-                        result = reader.ReadToEnd();
-                        reader.Close();
+                        var respStream = resp.GetResponseStream();
+                        if (respStream != null) {
+                            StreamReader reader = new StreamReader(respStream);
+                            result = reader.ReadToEnd();
+                            reader.Close();
+                        }
                     }
                 }
                 if (result != null) {

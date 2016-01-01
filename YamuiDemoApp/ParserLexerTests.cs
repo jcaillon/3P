@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -12,7 +13,7 @@ namespace YamuiDemoApp {
     class ParserLexerTests {
 
         public static void Run() {
-            
+
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,9 +21,8 @@ namespace YamuiDemoApp {
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-
-            Parser tok = new Parser(File.ReadAllText(@"C:\Users\Julien\Desktop\saxo2jira.p"), @"d:\Profiles\jcaillon\Desktop\blabla.p", null);
-            //Lexer tok = new Lexer(File.ReadAllText(@"E:\temp\sac-dev\sac\sac\src\proc_uib\sc42lsdd.w"));
+            var inputFile = @"C:\Users\Julien\Desktop\in.p";
+            Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
 
             OutputVis vis = new OutputVis();
             tok.Accept(vis);
@@ -36,7 +36,7 @@ namespace YamuiDemoApp {
 
 
             // OUTPUT INFO ON EACH LINE
-            if (true) {
+            if (false) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
                 var dic = tok.GetLineInfo;
@@ -85,7 +85,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFoundTableUse pars) {
-            
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Name);
         }
 
         public StringBuilder Output = new StringBuilder();
@@ -94,6 +94,7 @@ namespace YamuiDemoApp {
         }
 
         public void Visit(ParsedFunction pars) {
+            return;
             Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
 
@@ -188,4 +189,5 @@ namespace YamuiDemoApp {
             //Output.AppendLine(tok.Value);
         }
     }
+
 }

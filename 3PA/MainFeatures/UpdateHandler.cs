@@ -68,6 +68,16 @@ namespace _3PA.MainFeatures {
         private static bool _checkStarted;
 
         /// <summary>
+        /// To call when the user click on an update button
+        /// </summary>
+        public static void CheckForUpdates() {
+            if (!Utils.IsSpamming("updates", 1000)) {
+                UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
+                GetLatestReleaseInfo(true);
+            }
+        }
+
+        /// <summary>
         /// Gets an object with the latest release info
         /// </summary>
         public static void GetLatestReleaseInfo(bool alwaysGetFeedBack) {

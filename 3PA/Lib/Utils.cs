@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -50,6 +51,17 @@ namespace _3PA.Lib {
 
         #endregion
      */
+
+    /// <summary>
+    /// in an enumeration, above the item:
+    /// [DisplayAttr(Name = "my stuff")]
+    /// how to use it:
+    /// ((DisplayAttr)myenumValue.GetAttributes()).Name)
+    /// </summary>
+    public class DisplayAttr : Extensions.EnumAttr {
+        public string Name { get; set; }
+        public string ActionText { get; set; }
+    }
 
     /// <summary>
     /// Class that exposes utility methods
@@ -83,7 +95,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         /// <summary>
         /// Delete a dir, recursively

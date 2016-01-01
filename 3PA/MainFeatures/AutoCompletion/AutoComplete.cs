@@ -100,15 +100,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region public misc.
 
         /// <summary>
+        /// A dictionnary of known keywords and database info
+        /// </summary>
+        public static Dictionary<string, CompletionType> KnownStaticItems { get; private set; }
+
+        /// <summary>
         /// returns the ranking of each CompletionType, helps sorting them as we wish
         /// </summary>
         public static List<int> GetPriorityList {
             get {
                 if (_completionTypePriority != null) return _completionTypePriority;
-                _completionTypePriority = new List<int>();
-                var temp = Config.Instance.AutoCompletePriorityList.Split(',').Select(Int32.Parse).ToList();
-                for (int i = 0; i < Enum.GetNames(typeof (CompletionType)).Length; i++)
-                    _completionTypePriority.Add(temp.IndexOf(i));
+                _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
                 return _completionTypePriority;
             }
         }
@@ -307,6 +309,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _staticItems.Sort(new CompletionDataSortingClass());
             _savedAllItems = _staticItems.ToList();
 
+            // Update the known items!
+            KnownStaticItems = DataBase.GetDbDictionnary();
+            foreach (var keyword in Keywords.GetList().Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
+                KnownStaticItems[keyword.DisplayText] = keyword.Type;
+            }
+
             // Update the form?
             if (!initializing) {
                 CurrentTypeOfList = TypeOfList.Reset;
@@ -396,6 +404,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     }
                 }
 
+                // close if there is nothing to suggest
+                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                    Close();
+                    return;
+                }
+
                 // if the current is directly preceded by a :, we are entering an object field/method
                 if (lastCharBeforeWord.Equals(":")) {
                     if (CurrentTypeOfList != TypeOfList.KeywordObject) {
@@ -403,12 +417,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         _currentItems = _savedAllItems;
                     }
                     ShowSuggestionList(keyword);
-                    return;
-                }
-
-                // close if there is nothing to suggest
-                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
-                    Close();
                     return;
                 }
 

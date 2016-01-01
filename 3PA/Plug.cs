@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -247,7 +248,7 @@ namespace _3PA {
         internal static void InitPlugin() {
 
             #region Themes
-
+            
             // themes and html
             ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
             ThemeManager.AccentColor = Config.Instance.AccentColor;
@@ -257,42 +258,50 @@ namespace _3PA {
             LocalHtmlHandler.RegisterToYamui();
 
             #endregion
-
-            // init appli form, this gives us a Form to hook onto if we want to do stuff on the UI thread
-            // from a back groundthread, use : Appli.Form.BeginInvoke() for this
-            Appli.Init();
-
+            
+            // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
+            // from a back groundthread, use : BeginInvoke()
+            UserCommunication.Init();
+            
             // code explorer
-            if (Config.Instance.CodeExplorerVisible && !CodeExplorer.IsVisible)
+            if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
+                CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
+            } else if (Config.Instance.CodeExplorerVisible) {
                 CodeExplorer.Toggle();
+            }
 
             // File explorer
-            if (Config.Instance.FileExplorerVisible && !FileExplorer.IsVisible)
+            if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
+                FileExplorer.Toggle(Abl.IsCurrentProgressFile());
+            } else if (Config.Instance.FileExplorerVisible) {
                 FileExplorer.Toggle();
+            }
 
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
+            
+            // everything else can be async
+            Task.Factory.StartNew(() => {
 
-            //Task.Factory.StartNew(() => {
+                Keywords.Import();
+                Snippets.Init();
+                FileTag.Import();
+                ProCompilePath.Import();
 
-            Snippets.Init();
-            Keywords.Import();
-            FileTag.Import();
-            ProCompilePath.Import();
+                // initialize the list of objects of the autocompletion form
+                AutoComplete.FillStaticItems(true);
 
-            // initialize the list of objects of the autocompletion form
-            AutoComplete.FillStaticItems(true);
+                // init database info
+                DataBase.Init();
 
-            // init database info
-            DataBase.Init();
+                PluginIsFullyLoaded = true;
 
-            PluginIsFullyLoaded = true;
+                // Simulates a OnDocumentSwitched when we start this dll
+                OnDocumentSwitched(true);
+            });
 
-            // Simulates a OnDocumentSwitched when we start this dll
-            OnDocumentSwitched();
-
+            // this is done async anyway
             FileExplorer.RebuildItemList();
-            //});
         }
 
         #endregion
@@ -422,6 +431,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="c"></param>
         public static void OnCharTyped(char c) {
+
             // CTRL + S : char code 19
             if (c == (char)19) {
                 Npp.Undo();
@@ -561,7 +571,7 @@ namespace _3PA {
         /// <summary>
         /// Called when the user switches tab document
         /// </summary>
-        public static void OnDocumentSwitched() {
+        public static void OnDocumentSwitched(bool initiating = false) {
             // update current file info
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
             CurrentFilePath = Npp.GetCurrentFilePath();
@@ -581,13 +591,26 @@ namespace _3PA {
                 Style.SetSyntaxStyles();
             }
 
+            // set general styles (useful for the file explorer > current status)
             Style.SetGeneralStyles();
 
-            // Update info on the current file
+            //// Update info on the current file
             FilesInfo.DisplayCurrentFileInfo();
 
-            // Apply options to npp and scintilla depending if we are on a progress file or not
+            //// Apply options to npp and scintilla depending if we are on a progress file or not
             ApplyPluginSpecificOptions(false);
+
+            // Need to compute the propath again, because we take into account relative path
+            ProEnvironment.Current.ReComputeProPath();
+
+            if (!initiating) {
+                if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
+                    CodeExplorer.Toggle(IsCurrentFileProgress);
+                }
+                if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
+                    FileExplorer.Toggle(IsCurrentFileProgress);
+                }
+            }
 
             // refresh file explorer currently opened file
             FileExplorer.RedrawFileExplorerList();
@@ -604,7 +627,7 @@ namespace _3PA {
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder() && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
-                foreach (var codeExplorerItem in ParserHandler.ParsedExplorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))
+                foreach (var codeExplorerItem in ParserHandler.GetParsedExplorerItemsList().Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))
                     warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");
                 if (warningMessage.Length > 0) {
                     warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
@@ -639,7 +662,7 @@ namespace _3PA {
                 _indentWidth = Npp.IndentWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
-
+                
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
@@ -653,7 +676,7 @@ namespace _3PA {
                 Npp.UseTabs = _indentWithTabs;
                 Npp.IndentWidth = _indentWidth;
             } else {
-                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
+                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text... We can also call Npp.AutoCCancel(); on UpdateUi but the list is sometimes shown for Xms
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
                 Npp.AnnotationVisible = Annotation.Boxed;
@@ -708,6 +731,34 @@ namespace _3PA {
 
         public static void Test() {
 
+            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok" },
+                    true);
+            UserCommunication.Notify("ok");
+            return;
+
+            //------------
+            var watch = Stopwatch.StartNew();
+            //------------
+            var inputFile = @"C:\Users\Julien\Desktop\in.p";
+            Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
+
+            OutputVis vis = new OutputVis();
+            tok.Accept(vis);
+
+            //--------------
+            watch.Stop();
+            //------------
+
+            // OUPUT OF VISITOR
+            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+
+
+            UserCommunication.Notify(AutoComplete.KnownStaticItems.Count.ToString());
+
             UserCommunication.Notify(Npp.GetLine().Position + " vs " + Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.GetLine().Length + " vs " + Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.LineFromPosition(Npp.GetLine().Position) + " vs " + Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(Npp.Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32())).ToInt32() + " and " + Npp.Line.Count + " vs " + Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32());
 
             return;
@@ -741,4 +792,67 @@ namespace _3PA {
         }
         #endregion
     }
+
+    public class OutputVis : IParserVisitor {
+        public void Visit(ParsedBlock pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
+        }
+
+        public void Visit(ParsedLabel pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+        }
+
+        public void Visit(ParsedFunctionCall pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+        }
+
+        public void Visit(ParsedFoundTableUse pars) {
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Name);
+        }
+
+        public StringBuilder Output = new StringBuilder();
+        public void Visit(ParsedOnEvent pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+        }
+
+        public void Visit(ParsedFunction pars) {
+            return;
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+        }
+
+        public void Visit(ParsedProcedure pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+        }
+
+        public void Visit(ParsedIncludeFile pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+        }
+
+        public void Visit(ParsedPreProc pars) {
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+        }
+
+        public void Visit(ParsedDefine pars) {
+            return;
+            //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
+            //if (pars.Type == ParseDefineType.Parameter)
+            //if (string.IsNullOrEmpty(pars.ViewAs))
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+        }
+
+        public void Visit(ParsedTable pars) {
+            return;
+            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            foreach (var field in pars.Fields) {
+                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+            }
+            Output.AppendLine("");
+        }
+
+        public void Visit(ParsedRun pars) {
+            return;
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+        }
+    }
+
 }

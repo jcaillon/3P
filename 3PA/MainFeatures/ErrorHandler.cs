@@ -39,7 +39,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Allows to keep track of the messages already displayed to the user
         /// </summary>
-        private static Dictionary<string, bool> _catchedErrors = new Dictionary<string, bool>();
+        private static HashSet<string> _catchedErrors = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Shows a Messagebox informing the user that something went wrong with a file,
@@ -67,9 +67,9 @@ namespace _3PA.MainFeatures {
             var errorToStr = e.ToString();
 
             // don't show/store the same error twice in a session
-            if (_catchedErrors.ContainsKey(errorToStr))
+            if (_catchedErrors.Contains(errorToStr))
                 return;
-            _catchedErrors.Add(errorToStr, true);
+            _catchedErrors.Add(errorToStr);
 
             // log the error into a file
             if (Log(message + "\r\n" + e)) {

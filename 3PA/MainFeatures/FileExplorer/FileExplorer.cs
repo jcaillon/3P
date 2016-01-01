@@ -155,6 +155,12 @@ namespace _3PA.MainFeatures.FileExplorer {
         public static EmptyForm FakeForm { get; private set; }
         public static int DockableCommandIndex;
 
+        public static void Toggle(bool doShow) {
+            if ((doShow && !IsVisible) || (!doShow && IsVisible)) {
+                Toggle();
+            }
+        }
+
         /// <summary>
         /// Toggle the docked form on and off, can be called first and will initialize the form
         /// </summary>
