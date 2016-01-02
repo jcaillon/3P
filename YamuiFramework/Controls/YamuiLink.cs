@@ -41,10 +41,10 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool UseCustomForeColor { get; set; }
 
-        private LabelFunction _function = LabelFunction.Link;
-        [DefaultValue(LabelFunction.Normal)]
+        private FontFunction _function = FontFunction.Link;
+        [DefaultValue(FontFunction.Normal)]
         [Category("Yamui")]
-        public LabelFunction Function {
+        public FontFunction Function {
             get { return _function; }
             set { _function = value; }
         }
@@ -110,7 +110,7 @@ namespace YamuiFramework.Controls {
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
             Color foreColor = ThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetLabelFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
         }
 
         #endregion
@@ -151,17 +151,22 @@ namespace YamuiFramework.Controls {
 
         #region Keyboard Methods
 
+        // This is mandatory to be able to handle the ENTER key in key events!!
+        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
+            if (e.KeyCode == Keys.Enter) e.IsInputKey = true;
+            base.OnPreviewKeyDown(e);
+        }
+
         protected override void OnKeyDown(KeyEventArgs e) {
-            if (e.KeyCode == Keys.Space) {
+            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
                 _isPressed = true;
                 Invalidate();
+                e.Handled = true;
             }
-
             base.OnKeyDown(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
-            //Remove this code cause this prevents the focus color
             _isPressed = false;
             Invalidate();
             base.OnKeyUp(e);

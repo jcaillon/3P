@@ -123,28 +123,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         /// <summary>
-        /// Update the current operation for the file, update the state
-        /// Displays the errors for the current file (if any)
-        /// display an annotation with the message below the line + display a marker in the margin
+        /// Updates the number of errors in the FileExplorer form and the file status
         /// </summary>
-        public static void DisplayCurrentFileInfo() {
-
+        public static void UpdateOperationAndErrors() {
             var currentFilePath = Plug.CurrentFilePath;
-            var marginError = Npp.GetMargin(ErrorMarginNumber);
-
-            // reset margin and annotations
-            if (marginError.Width > 0)
-                marginError.Width = 0;
-            marginError.Sensitive = true;
-            marginError.Type = MarginType.Symbol;
-
-            // set mask so markers from 0 to 3 are displayed in this margin
-            marginError.Mask = EveryMarkersMask;
-
-            // clear annotations, markers
-            Npp.AnnotationClearAll();
-            foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
-                Npp.Marker.MarkerDeleteAll((int)errorLevelMarker);
 
             // UpdatedOperation event
             if (OnUpdatedOperation != null) {
@@ -166,17 +148,42 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 } else
                     OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
             }
+        }
+
+        /// <summary>
+        /// Displays the errors for the current file (if any)
+        /// display an annotation with the message below the line + display a marker in the margin
+        /// </summary>
+        public static void UpdateErrorsInScintilla() {
+
+            // Updates the number of errors in the FileExplorer form and the file status
+            UpdateOperationAndErrors();
+
+            var currentFilePath = Plug.CurrentFilePath;
+            var marginError = Npp.GetMargin(ErrorMarginNumber);
+
+            // need to clear scintilla for this file?
+            if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].NeedToCleanScintilla) {
+                ClearAnnotationsAndMarkers();
+                _sessionInfo[currentFilePath].NeedToCleanScintilla = false;
+            }
 
             // check if current file is a progress and if we got info on it 
-            if (!Plug.IsCurrentFileProgress || !_sessionInfo.ContainsKey(currentFilePath))
+            if (!Plug.IsCurrentFileProgress || !_sessionInfo.ContainsKey(currentFilePath) || _sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0) {
+                if (marginError.Width > 0) {
+                    marginError.Width = 1;
+                    marginError.Width = 0;
+                }
                 return;
-
-            // got error info on it?
-            if (_sessionInfo[currentFilePath].FileErrors == null || _sessionInfo[currentFilePath].FileErrors.Count == 0)
-                return;
+            }
 
             // show margin
-            marginError.Width = ErrorMarginWidth;
+            if (marginError.Sensitive == false)
+                marginError.Sensitive = true;
+            if (marginError.Type != MarginType.Symbol)
+                marginError.Type = MarginType.Symbol;
+            if (marginError.Mask != EveryMarkersMask)
+                marginError.Mask = EveryMarkersMask;
 
             StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;
@@ -188,9 +195,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     stylerHelper.Clear();
                     lastMessage.Clear();
                     // set marker style now (the first error encountered for a given line is the highest anyway)
-                    Npp.GetLine(fileError.Line).MarkerAdd((int)fileError.Level);
+                    if (!((int)Npp.GetLine(fileError.Line).MarkerGet()).IsBitSet((int)fileError.Level))
+                        Npp.GetLine(fileError.Line).MarkerAdd((int)fileError.Level);
                 } else {
-
                     // append to existing annotation
                     stylerHelper.Style("\n", (byte)fileError.Level);
                     lastMessage.Append("\n");
@@ -223,17 +230,23 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
                 Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
             }
+
+            marginError.Width = ErrorMarginWidth + 1;
+            marginError.Width = ErrorMarginWidth;
         }
 
         /// <summary>
         /// Clear all the errors for the current document and then update the view,
         /// returns true if it actually cleared something, false it there was no errors
         /// </summary>
-        public static bool ClearAllErrors() {
+        public static bool ClearAllErrors(bool updateVisual = true) {
             var currentFilePath = Plug.CurrentFilePath;
             if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
                 _sessionInfo[currentFilePath].FileErrors.Clear();
-                DisplayCurrentFileInfo();
+                if (updateVisual) {
+                    ClearAnnotationsAndMarkers();
+                    UpdateOperationAndErrors();
+                }
                 return true;
             }
             return false;
@@ -243,27 +256,70 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// Clears the errors in line 'line' both in the errorsList and visually cleaning annoation + margin symbol
         /// when a user click on the maring symbol, it clears the errors for the line,
         /// returns true if it actually cleans something, false otherwise
+        /// Will always clear the line "visually", but if the user added lines then our references are messed up so it
+        /// won't work
         /// </summary>
         /// <param name="line"></param>
-        public static bool ClearError(int line) {
-            var currentFilePath = Plug.CurrentFilePath;
-            if (!_sessionInfo.ContainsKey(currentFilePath))
+        public static bool ClearLineErrors(int line) {
+            if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath))
                 return false;
             bool jobDone = false;
-            try {
-                if (_sessionInfo[currentFilePath].FileErrors.Exists(error => error.Line == line)) {
-                    _sessionInfo[currentFilePath].FileErrors.RemoveAll(error => error.Line == line);
-                    jobDone = true;
-                }
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
-                return false;
+            if (_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == line)) {
+                _sessionInfo[Plug.CurrentFilePath].FileErrors.RemoveAll(error => error.Line == line);
+                jobDone = true;
             }
+            // visually clear line
+            ClearLine(line);
             if (jobDone) {
-                DisplayCurrentFileInfo();
+                UpdateErrorsInScintilla();
+            } else {
+                // we didn't manage to clear the error, (only visually, not in our records), so clear everything 
+                ClearAllErrors(false);
+                _sessionInfo[Plug.CurrentFilePath].NeedToCleanScintilla = true;
             }
-            // hide margin if no errors
             return jobDone;
+        }
+
+        /// <summary>
+        /// Visually clear all the annotations and markers from a line
+        /// </summary>
+        /// <param name="line"></param>
+        public static void ClearLine(int line) {
+            var lineObj = Npp.GetLine(line);
+            lineObj.AnnotationText = null;
+            foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
+                if (((int)lineObj.MarkerGet()).IsBitSet((int)errorLevelMarker))
+                    lineObj.MarkerDelete((int)errorLevelMarker);
+        }
+
+        /// <summary>
+        /// Clears all the annotations and the markers from scintilla
+        /// </summary>
+        public static void ClearAnnotationsAndMarkers() {
+            if (Npp.GetLine(0).MarkerGet() != 0) {
+                if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath) ||
+                    _sessionInfo[Plug.CurrentFilePath].FileErrors == null ||
+                    !_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == 0)) {
+                    // The line 0 has an error marker when it shouldn't
+                    ClearLine(0);
+                }
+            }
+            int nextLine = Npp.GetLine(0).MarkerNext(EveryMarkersMask);
+            while (nextLine > -1) {
+                if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath) ||
+                    _sessionInfo[Plug.CurrentFilePath].FileErrors == null ||
+                    !_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == nextLine)) {
+                    // The line 0 has an error marker when it shouldn't
+                    ClearLine(nextLine);
+                }
+                nextLine = Npp.GetLine(nextLine + 1).MarkerNext(EveryMarkersMask);
+            }
+            // We should be able to use the lines below, but the experience proves that they sometimes crash...
+            /*
+            Npp.AnnotationClearAll(); // <- this shit tends to be unstable for some reasons
+            foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
+                Npp.Marker.MarkerDeleteAll((int)errorLevelMarker);
+            */
         }
 
         /// <summary>
@@ -282,6 +338,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == nextLine);
                 if (errInfo != null)
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
+                else
+                    Npp.Goto(currentFilePath, nextLine, 0);
             }
         }
 
@@ -302,6 +360,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 var errInfo = _sessionInfo[currentFilePath].FileErrors.FirstOrDefault(error => error.Line == prevLine);
                 if (errInfo != null)
                     Npp.Goto(currentFilePath, errInfo.Line, errInfo.Column);
+                else
+                    Npp.Goto(currentFilePath, prevLine, 0);
             }
         }
 
@@ -421,6 +481,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public ProExecution ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
         public string FileFullPath { get; set; }
+        public bool NeedToCleanScintilla { get; set; }
     }
 
     /// <summary>

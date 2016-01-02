@@ -272,11 +272,9 @@ namespace _3PA.MainFeatures {
 
                 // Clear flag or we can't do any other actions on this file
                 FilesInfo.GetFileInfo(lastExec.FullFilePathToExecute).CurrentOperation &= ~currentOperation;
-
                 var isCurrentFile = lastExec.FullFilePathToExecute.EqualsCi(Plug.CurrentFilePath);
-
                 if (isCurrentFile)
-                    FilesInfo.DisplayCurrentFileInfo();
+                    FilesInfo.UpdateOperationAndErrors();
 
                 // if log not found then something is messed up!
                 if (String.IsNullOrEmpty(lastExec.LogPath) ||
@@ -344,7 +342,7 @@ namespace _3PA.MainFeatures {
 
                 // Update info on the current file
                 if (isCurrentFile)
-                    FilesInfo.DisplayCurrentFileInfo();
+                    FilesInfo.UpdateErrorsInScintilla();
 
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && !errorList.Any()) {
@@ -417,8 +415,7 @@ namespace _3PA.MainFeatures {
             Plug.CurrentFileObject.CurrentOperation |= currentOperation;
 
             // clear current errors (updates the current file info)
-            if (!FilesInfo.ClearAllErrors())
-                FilesInfo.DisplayCurrentFileInfo();
+            FilesInfo.ClearAllErrors();
         }
 
 

@@ -23,6 +23,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YamuiFramework.Helper;
+using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
@@ -60,7 +62,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     Form.Location = _location;
                     Form.UpdateForm();
                     Form.UnCloack();
-                    Form.Focus();
+                    WinApi.SetForegroundWindow(Form.Handle);
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error when uncloaking file info");

@@ -408,7 +408,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void StyleOvlTree() {
             // Style the control
             ovlTree.OwnerDraw = true;
-            ovlTree.Font = FontManager.GetLabelFont(LabelFunction.AutoCompletion);
+            ovlTree.Font = FontManager.GetFont(FontFunction.AutoCompletion);
             ovlTree.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
             ovlTree.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
             ovlTree.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;

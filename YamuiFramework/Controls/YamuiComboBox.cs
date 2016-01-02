@@ -93,7 +93,7 @@ namespace YamuiFramework.Controls {
             _dropDownCheck.Interval = 100;
             _dropDownCheck.Tick += dropDownCheck_Tick;
 
-            Font = FontManager.GetLabelFont(LabelFunction.Small);
+            Font = FontManager.GetFont(FontFunction.Small);
         }
 
         #endregion
@@ -189,7 +189,7 @@ namespace YamuiFramework.Controls {
         private void DrawTextPrompt(Graphics g) {
             if (!_isFocused && SelectedIndex == -1) {
                 Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-                TextRenderer.DrawText(g, _waterMark, FontManager.GetStandardWaterMarkFont(), textRect, SystemColors.GrayText, Color.Transparent, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), textRect, SystemColors.GrayText, Color.Transparent, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
             }
         }
 
@@ -322,7 +322,7 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region " color border "
+        #region Border color
 
         /// <summary>
         /// Non client area border drawing

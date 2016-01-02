@@ -22,7 +22,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Linq;
 using System.Security;
 using System.Web.UI.Design.WebControls;
 using System.Windows.Forms;
@@ -37,12 +36,6 @@ namespace YamuiFramework.Forms {
     public class YamuiForm : Form {
 
         #region Fields
-        /// <summary>
-        /// difference between a main form and another form : 
-        /// - go back navigation button
-        /// </summary>
-        [Category("Yamui")]
-        public bool IsMainForm { get; set; }
 
         private bool _isMovable = true;
 
@@ -51,10 +44,6 @@ namespace YamuiFramework.Forms {
             get { return _isMovable; }
             set { _isMovable = value; }
         }
-
-        [Category("Yamui")]
-        [DefaultValue(false)]
-        public bool UseCustomBackColor { get; set; }
 
         [Category("Yamui")]
         [DefaultValue(false)]
@@ -75,7 +64,6 @@ namespace YamuiFramework.Forms {
         [Browsable(false)]
         public Action OnCloseAllVisible { get; set; }
 
-
         public new Padding Padding {
             get { return base.Padding; }
             set {
@@ -85,16 +73,19 @@ namespace YamuiFramework.Forms {
         }
 
         protected override Padding DefaultPadding {
-            get { return new Padding(40, 40, BorderWidth + 10, BorderWidth + 10); }
+            get { return new Padding(8, 40, BorderWidth + 16, BorderWidth + 16); }
         }
-
-        private bool _isResizable = true;
 
         [Category("Yamui")]
         public bool Resizable {
             get { return _isResizable; }
             set { _isResizable = value; }
         }
+        private bool _isResizable = true;
+
+        [Category("Yamui")]
+        [DefaultValue(true)]
+        public bool SetMinSizeOnLoad { get; set; }
 
         /// <summary>
         /// is set to true when this form is the parent of a yamuimsgbox
@@ -104,12 +95,18 @@ namespace YamuiFramework.Forms {
 
         private const int BorderWidth = 1;
 
-        private List<int[]> _formHistory = new List<int[]>();
+        /// <summary>
+        /// Tooltip for close buttons
+        /// </summary>
         private HtmlToolTip _mainFormToolTip = new HtmlToolTip();
-        private YamuiGoBackButton _goBackButton;
+
+        private YamuiTab _contentTab;
+
+        private YamuiTabButtons _topLinks;
+
         #endregion
 
-        #region Constructor
+        #region Constructor / destructor
 
         public YamuiForm() {
             // why those styles? check here: https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
@@ -125,6 +122,11 @@ namespace YamuiFramework.Forms {
 
             Shown += OnShown;
         }
+
+        ~YamuiForm() {
+            Shown -= OnShown;
+        }
+
         #endregion
 
         #region Paint Methods
@@ -132,7 +134,7 @@ namespace YamuiFramework.Forms {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = UseCustomBackColor ? BackColor : ThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormColorBackColor;
             var foreColor = ThemeManager.Current.FormColorForeColor;
             var borderColor = UseCustomBorderColor ? ForeColor : ThemeManager.AccentColor;
 
@@ -186,158 +188,44 @@ namespace YamuiFramework.Forms {
         /// Go to page pagename
         /// </summary>
         /// <param name="pageName"></param>
-        public void GoToPage(string pageName) {
-            try {
-                YamuiTabPage page = null;
-                foreach (var control in ControlHelper.GetAll(this, typeof(YamuiTabPage))) {
-                    if (control.Name == pageName)
-                        page = (YamuiTabPage)control;
-                }
-                if (page == null) return;
-                YamuiTabControl secControl = (YamuiTabControl)page.Parent;
-                YamuiTabControl mainControl = (YamuiTabControl)secControl.Parent.Parent;
-                GoToPage(mainControl, (YamuiTabPage)secControl.Parent, secControl, page, true);
-            } catch (Exception) {
-                // ignored
-            }
-        }
-
-        public void GoToPage(int pageMainInt, int pageSecInt) {
-            YamuiTabControl mainControl = (YamuiTabControl)ControlHelper.GetFirst(this, typeof(YamuiTabControl));
-            if (mainControl == null || mainControl.TabCount < pageMainInt || mainControl.TabPages[pageMainInt] == null) return;
-            YamuiTabControl secControl = (YamuiTabControl)ControlHelper.GetFirst(mainControl.TabPages[pageMainInt], typeof(YamuiTabControl));
-            if (secControl == null) return;
-            GoToPage(mainControl, (YamuiTabPage)mainControl.TabPages[pageMainInt], secControl, (YamuiTabPage)secControl.TabPages[pageSecInt], false);
-        }
-
-        public void GoToPage(YamuiTabControl tabMain, YamuiTabPage pageMain, YamuiTabControl tabSecondary, YamuiTabPage pageSecondary, bool histoSave) {
-
-            // if we want to display a hidden page            
-            if (pageMain.HiddenPage)
-                pageMain.HiddenState = false;
-
-            if (pageSecondary.HiddenPage)
-                pageSecondary.HiddenState = false;
-
-            var pageMainInt = tabMain.GetIndexOf(pageMain);
-            var pageSecInt = tabSecondary.GetIndexOf(pageSecondary);
-
-            if (histoSave)
-                SaveCurrentPathInHistory();
-
-            // if we change both pages, we can't do the animation for both!
-            if (pageMainInt != tabMain.SelectIndex && pageSecInt != tabSecondary.SelectIndex) {
-                var initState = ThemeManager.TabAnimationAllowed;
-                ThemeManager.TabAnimationAllowed = false;
-                tabSecondary.SelectIndex = pageSecInt;
-                ThemeManager.TabAnimationAllowed = initState;
-            } else if (pageSecInt != tabSecondary.SelectIndex)
-                tabSecondary.SelectIndex = pageSecInt;
-
-            if (pageMainInt != tabMain.SelectIndex)
-                tabMain.SelectIndex = pageMainInt;
-        }
-
-        /// <summary>
-        /// Use the history list to go back to previous tabs
-        /// </summary>
-        public void GoBack() {
-            if (_formHistory.Count == 0) return;
-            var lastPage = _formHistory.Last();
-            GoToPage(lastPage[0], lastPage[1]);
-            _formHistory.Remove(_formHistory.Last());
-            if (_formHistory.Count == 0 && _goBackButton != null) {
-                _goBackButton.FakeDisabled = true;
-                _goBackButton.TabStop = false;
-            }
-        }
-
-        /// <summary>
-        /// Keep an history of the tabs visited through a list handled here
-        /// </summary>
-        public void SaveCurrentPathInHistory() {
-            YamuiTabControl mainControl = GetMainTabControl();
-            if (mainControl == null) return;
-            var pageMainInt = mainControl.SelectedIndex;
-            YamuiTabControl secControl = GetSelectSecondaryTabControl(mainControl);
-            if (secControl == null) return;
-            var pageSecInt = secControl.SelectedIndex;
-            // save only if different from the previous 
-            if (_formHistory.Count > 0) {
-                var lastPage = _formHistory.Last();
-                if (lastPage[0] == pageMainInt && lastPage[1] == pageSecInt) return;
-            }
-            _formHistory.Add(new[] { pageMainInt, pageSecInt });
-            if (_goBackButton.FakeDisabled) {
-                _goBackButton.FakeDisabled = false;
-                _goBackButton.TabStop = true;
-            }
-        }
-
-        private YamuiTabControl GetMainTabControl() {
-            return (YamuiTabControl)ControlHelper.GetFirst(this, typeof(YamuiTabControl));
-        }
-
-        private YamuiTabControl GetSelectSecondaryTabControl(YamuiTabControl mainControl) {
-            return (YamuiTabControl)ControlHelper.GetFirst(mainControl.TabPages[mainControl.SelectedIndex], typeof(YamuiTabControl));
+        public void ShowPage(string pageName) {
+            if (_contentTab != null)
+                _contentTab.ShowPage(pageName);
         }
 
         /// <summary>
         /// allows to automatically generates the tabs/pages
         /// </summary>
         /// <param name="menuDescriber"></param>
-        public void CreateContent(List<YamuiMainMenuTab> menuDescriber) {
-
-            var mainTabControl = new YamuiTabControl {
-                Dock = DockStyle.Fill,
-                Function = TabFunction.Main
+        public void CreateContent(List<YamuiMainMenu> menuDescriber) {
+            _contentTab = new YamuiTab(menuDescriber, this) {
+                Dock = DockStyle.Fill
             };
-
-            foreach (var yamuiMainMenuTab in menuDescriber) {
-                CreateMainTab(yamuiMainMenuTab, mainTabControl);
-            }
-
-            Controls.Add(mainTabControl);
+            Controls.Add(_contentTab);
+            _contentTab.Init();
         }
 
-        private void CreateMainTab(YamuiMainMenuTab mainTab, YamuiTabControl mainTabControl) {
-            var mainTabPage = new YamuiTabPage {
-                Text = mainTab.Name,
-                Dock = DockStyle.Fill,
-                Function = TabFunction.Main,
-                HiddenPage = mainTab.Hidden,
-                Name = mainTab.PageName,
-                TabStop = true
+        public void CreateTopLinks(List<string> links, EventHandler<TabPressedEventArgs> onTabPressed) {
+            _topLinks = new YamuiTabButtons(links, -1) {
+                Font = FontManager.GetFont(FontFunction.TopLink),
+                Height = 15,
+                SpaceBetweenText = 14,
+                DrawSeparator = true,
+                WriteFromRight = true,
+                UseLinksColors = true,
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                TabStop = false
             };
-
-            var secTabControl = new YamuiTabControl {
-                Dock = DockStyle.Fill,
-                Function = TabFunction.Secondary,
-                TabStop = true
-            };
-
-            foreach (var yamuiSecMenuTab in mainTab.SecTabs) {
-                var secTabPage = new YamuiTabPage {
-                    Dock = DockStyle.Fill,
-                    Function = TabFunction.Secondary,
-                    Text = yamuiSecMenuTab.Name,
-                    Name = yamuiSecMenuTab.PageName,
-                    Padding = new Padding(30, 25, 0, 0),
-                    TabStop = true
-                };
-
-                yamuiSecMenuTab.Page.TabStop = true;
-                yamuiSecMenuTab.Page.Dock = DockStyle.Fill;
-                secTabPage.Controls.Add(yamuiSecMenuTab.Page);
-                secTabControl.Controls.Add(secTabPage);
-            }
-
-            mainTabPage.Controls.Add(secTabControl);
-            mainTabControl.Controls.Add(mainTabPage);
+            _topLinks.TabPressed += onTabPressed;
+            _topLinks.Width = _topLinks.GetWidth() + 10;
+            _topLinks.Location = new Point(Width - 100 - _topLinks.Width, 10);
+            Controls.Add(_topLinks);
         }
+
         #endregion
 
         #region Management Methods
+
         /// <summary>
         /// allows to do stuff only when everything is fully loaded
         /// </summary>
@@ -348,16 +236,12 @@ namespace YamuiFramework.Forms {
             Application.DoEvents();
         }
 
+        /// <summary>
+        /// On load of the form
+        /// </summary>
+        /// <param name="e"></param>
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
-
-            if (IsMainForm) {
-                _goBackButton = new YamuiGoBackButton();
-                Controls.Add(_goBackButton);
-                _goBackButton.Location = new Point(8, Padding.Top + 6);
-                _goBackButton.Size = new Size(27, 27);
-                _goBackButton.TabStop = false;
-            }
 
             if (DesignMode) return;
 
@@ -374,6 +258,7 @@ namespace YamuiFramework.Forms {
                     break;
             }
 
+            // display windows buttons
             RemoveCloseButton();
             if (ControlBox) {
                 AddWindowButton(WindowButtons.Close);
@@ -386,12 +271,15 @@ namespace YamuiFramework.Forms {
                 UpdateWindowButtonPosition();
             }
 
-            // add the fonts to the html renderer
-            //HtmlRender.AddFontFamily(GetFontFamily("SEGOEUI"));
+            // Focus content main menu
+            if (_contentTab != null) {
+                ActiveControl = _contentTab;
+                _contentTab.OnFormLoad();
+            }
 
-            // animate the current tab
-            if (IsMainForm)
-                GetSelectSecondaryTabControl(GetMainTabControl()).TabAnimator();
+            // set minimum size
+            if (SetMinSizeOnLoad)
+                MinimumSize = Size;
         }
 
         [SecuritySafeCritical]
@@ -454,9 +342,7 @@ namespace YamuiFramework.Forms {
                     }
                     break;
             }
-
             base.WndProc(ref m);
-
             switch (m.Msg) {
                 case (int)WinApi.Messages.WM_GETMINMAXINFO:
                     OnGetMinMaxInfo(m.HWnd, m.LParam);
@@ -472,7 +358,6 @@ namespace YamuiFramework.Forms {
                     }
                     break;
             }
-
             if (m.Msg == WmNchittest && (int)m.Result == Htclient) // drag the form
                 m.Result = (IntPtr)Htcaption;
         }
@@ -491,15 +376,12 @@ namespace YamuiFramework.Forms {
         private WinApi.HitTest HitTestNca(IntPtr hwnd, IntPtr wparam, IntPtr lparam) {
             var vPoint = new Point((short)lparam, (short)((int)lparam >> 16));
             var vPadding = Math.Max(Padding.Right, Padding.Bottom);
-
             if (Resizable) {
                 if (RectangleToScreen(new Rectangle(ClientRectangle.Width - vPadding, ClientRectangle.Height - vPadding, vPadding, vPadding)).Contains(vPoint))
                     return WinApi.HitTest.HTBOTTOMRIGHT;
             }
-
             if (RectangleToScreen(new Rectangle(BorderWidth, BorderWidth, ClientRectangle.Width - 2 * BorderWidth, 50)).Contains(vPoint))
                 return WinApi.HitTest.HTCAPTION;
-
             return WinApi.HitTest.HTCLIENT;
         }
 
@@ -517,33 +399,23 @@ namespace YamuiFramework.Forms {
             WinApi.ReleaseCapture();
             WinApi.SendMessage(Handle, (int)WinApi.Messages.WM_NCLBUTTONDOWN, (int)WinApi.HitTest.HTCAPTION, 0);
         }
-        #endregion
 
-        #region go back button
-        private class YamuiGoBackButton : YamuiCharButton {
-            public YamuiGoBackButton() {
-                UseWingdings = true;
-                ButtonChar = "ç";
-                FakeDisabled = true;
-                ButtonPressed += (sender, args) => {
-                    if (!FakeDisabled)
-                        TryToGoBack();
-                };
-                Focus();
-            }
-
-            private void TryToGoBack() {
-                try {
-                    YamuiForm ownerForm = (YamuiForm)FindForm();
-                    if (ownerForm != null) ownerForm.GoBack();
-                } catch (Exception) {
-                    // ignored
-                }
-            }
-        }
         #endregion
 
         #region Window Buttons
+
+        [SecuritySafeCritical]
+        public void RemoveCloseButton() {
+            var hMenu = WinApi.GetSystemMenu(Handle, false);
+            if (hMenu == IntPtr.Zero) return;
+
+            var n = WinApi.GetMenuItemCount(hMenu);
+            if (n <= 0) return;
+
+            WinApi.RemoveMenu(hMenu, (uint)(n - 1), WinApi.MfByposition | WinApi.MfRemove);
+            WinApi.RemoveMenu(hMenu, (uint)(n - 2), WinApi.MfByposition | WinApi.MfRemove);
+            WinApi.DrawMenuBar(Handle);
+        }
 
         private enum WindowButtons {
             Minimize,
@@ -751,72 +623,7 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
-        #region Helper Methods
-
-        [SecuritySafeCritical]
-        public void RemoveCloseButton() {
-            var hMenu = WinApi.GetSystemMenu(Handle, false);
-            if (hMenu == IntPtr.Zero) return;
-
-            var n = WinApi.GetMenuItemCount(hMenu);
-            if (n <= 0) return;
-
-            WinApi.RemoveMenu(hMenu, (uint)(n - 1), WinApi.MfByposition | WinApi.MfRemove);
-            WinApi.RemoveMenu(hMenu, (uint)(n - 2), WinApi.MfByposition | WinApi.MfRemove);
-            WinApi.DrawMenuBar(Handle);
-        }
-        #endregion
-
-        private void InitializeComponent() {
-            this._mainFormToolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.SuspendLayout();
-            // 
-            // mainFormToolTip
-            // 
-            this._mainFormToolTip.AllowLinksHandling = true;
-            this._mainFormToolTip.BaseStylesheet = null;
-            this._mainFormToolTip.MaximumSize = new System.Drawing.Size(0, 0);
-            this._mainFormToolTip.OwnerDraw = true;
-            this._mainFormToolTip.TooltipCssClass = "htmltooltip";
-            // 
-            // YamuiForm
-            // 
-            this.ClientSize = new System.Drawing.Size(284, 262);
-            this.Name = "YamuiForm";
-            this.ResumeLayout(false);
-
-        }
     }
-
-    #region AutoBuild tabs
-
-    public class YamuiMainMenuTab {
-        public string Name { get; private set; }
-        public string PageName { get; private set; }
-        public bool Hidden { get; private set; }
-        public List<YamuiSecMenuTab> SecTabs { get; private set; }
-
-        public YamuiMainMenuTab(string name, string pageName, bool hidden, List<YamuiSecMenuTab> secTabs) {
-            this.Name = name;
-            Hidden = hidden;
-            SecTabs = secTabs;
-            PageName = pageName;
-        }
-    }
-
-    public class YamuiSecMenuTab {
-        public string Name { get; private set; }
-        public string PageName { get; private set; }
-        public YamuiPage Page { get; private set; }
-
-        public YamuiSecMenuTab(string name, string pageName, YamuiPage page) {
-            this.Name = name;
-            Page = page;
-            PageName = pageName;
-        }
-    }
-
-    #endregion
 
     #region Designer
 

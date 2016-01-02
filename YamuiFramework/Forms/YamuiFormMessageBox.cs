@@ -234,9 +234,11 @@ namespace YamuiFramework.Forms {
             if (ownerForm == null) { t.run(); return; }
 
             // otherwise had fadein of smokescreen for yamuiform
-            OwnerSmokeScreen = new YamuiSmokeScreen(ownerForm);
-            t.add(OwnerSmokeScreen, "Opacity", OwnerSmokeScreen.Opacity);
-            OwnerSmokeScreen.Opacity = 0d;
+            OwnerSmokeScreen = new YamuiSmokeScreen(ownerForm, new Rectangle(0, 0, ownerForm.Width, ownerForm.Height)) {
+                BackColor = Color.Black,
+                UseCustomBackColor = true
+            };
+            t.add(OwnerSmokeScreen, "Opacity", 0.6d);
             t.run();
         }
 

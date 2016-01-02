@@ -50,14 +50,14 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool UseCustomForeColor { get; set; }
 
-        private LabelFunction _function = LabelFunction.Normal;
-        [DefaultValue(LabelFunction.Normal)]
+        private FontFunction _function = FontFunction.Normal;
+        [DefaultValue(FontFunction.Normal)]
         [Category("Yamui")]
-        public LabelFunction Function {
+        public FontFunction Function {
             get { return _function; }
             set {
                 _function = value;
-                Margin = _function == LabelFunction.Heading ? new Padding(5, 18, 5, 7) : new Padding(3, 3, 3, 3);
+                Margin = _function == FontFunction.Heading ? new Padding(5, 18, 5, 7) : new Padding(3, 3, 3, 3);
             }
         }
 
@@ -138,7 +138,7 @@ namespace YamuiFramework.Controls {
 
             Color foreColor = ThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, false, false, false, !FakeDisabled);
 
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetLabelFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));
         }
 
         #endregion
@@ -150,7 +150,7 @@ namespace YamuiFramework.Controls {
 
             using (var g = CreateGraphics()) {
                 proposedSize = new Size(int.MaxValue, int.MaxValue);
-                preferredSize = TextRenderer.MeasureText(g, Text, FontManager.GetLabelFont(Function), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
+                preferredSize = TextRenderer.MeasureText(g, Text, FontManager.GetFont(Function), proposedSize, FontManager.GetTextFormatFlags(TextAlign));
             }
 
             return preferredSize;

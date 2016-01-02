@@ -68,14 +68,7 @@ namespace YamuiDemoApp.Pages.control {
         }
 
         private void yamuiCharButton5_Click(object sender, EventArgs e) {
-            var x = (YamuiTabPage)Parent;
-            var t = new Transition(new TransitionType_Acceleration(3000));
-            var newSM = new YamuiTabAnimation(FindForm(), x);
-            t.add(newSM, "Opacity", 0d);
-            t.TransitionCompletedEvent += (o, args) => {
-                newSM.Close();
-            };
-            t.run();
+
         }
 
         private void yamuiButton5_ButtonPressed(object sender, ButtonPressedEventArgs e) {

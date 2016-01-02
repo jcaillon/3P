@@ -111,7 +111,7 @@ namespace YamuiDemoApp.Pages.control {
             // 
             // yamuiLink1
             // 
-            this.yamuiLink1.Function = YamuiFramework.Fonts.LabelFunction.Link;
+            this.yamuiLink1.Function = YamuiFramework.Fonts.FontFunction.Link;
             this.yamuiLink1.Location = new System.Drawing.Point(203, 122);
             this.yamuiLink1.Name = "yamuiLink1";
             this.yamuiLink1.Size = new System.Drawing.Size(118, 23);
@@ -122,7 +122,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLink2
             // 
             this.yamuiLink2.Enabled = false;
-            this.yamuiLink2.Function = YamuiFramework.Fonts.LabelFunction.Link;
+            this.yamuiLink2.Function = YamuiFramework.Fonts.FontFunction.Link;
             this.yamuiLink2.Location = new System.Drawing.Point(203, 143);
             this.yamuiLink2.Name = "yamuiLink2";
             this.yamuiLink2.Size = new System.Drawing.Size(118, 23);
@@ -133,7 +133,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel12
             // 
             this.yamuiLabel12.AutoSize = true;
-            this.yamuiLabel12.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel12.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel12.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel12.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel12.Name = "yamuiLabel12";
@@ -144,7 +144,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel18
             // 
             this.yamuiLabel18.AutoSize = true;
-            this.yamuiLabel18.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel18.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel18.Location = new System.Drawing.Point(203, 100);
             this.yamuiLabel18.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel18.Name = "yamuiLabel18";
@@ -219,7 +219,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel14
             // 
             this.yamuiLabel14.AutoSize = true;
-            this.yamuiLabel14.Function = YamuiFramework.Fonts.LabelFunction.Title;
+            this.yamuiLabel14.Function = YamuiFramework.Fonts.FontFunction.Title;
             this.yamuiLabel14.Location = new System.Drawing.Point(203, 19);
             this.yamuiLabel14.Margin = new System.Windows.Forms.Padding(5);
             this.yamuiLabel14.Name = "yamuiLabel14";
@@ -245,7 +245,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel13
             // 
             this.yamuiLabel13.AutoSize = true;
-            this.yamuiLabel13.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel13.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel13.Location = new System.Drawing.Point(203, 0);
             this.yamuiLabel13.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel13.Name = "yamuiLabel13";

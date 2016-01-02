@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // Style the control
             fastOLV.OwnerDraw = true;
-            fastOLV.Font = FontManager.GetLabelFont(LabelFunction.AutoCompletion);
+            fastOLV.Font = FontManager.GetFont(FontFunction.AutoCompletion);
             fastOLV.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
             fastOLV.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
             fastOLV.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;

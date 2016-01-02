@@ -198,7 +198,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel8
             // 
             this.yamuiLabel8.AutoSize = true;
-            this.yamuiLabel8.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel8.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel8.Location = new System.Drawing.Point(0, 212);
             this.yamuiLabel8.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel8.Name = "yamuiLabel8";
@@ -260,7 +260,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel3.Location = new System.Drawing.Point(235, 91);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel3.Name = "yamuiLabel3";
@@ -312,7 +312,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 91);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -323,7 +323,7 @@ namespace YamuiDemoApp.Pages.control {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(20, 5, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";

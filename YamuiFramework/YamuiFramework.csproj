@@ -108,10 +108,10 @@
     <Compile Include="Controls\YamuiScrollBar.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiTabControl.cs">
-      <SubType>Component</SubType>
+    <Compile Include="Controls\YamuiTab.cs">
+      <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiTabPage.cs">
+    <Compile Include="Controls\YamuiTabButtons.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiTextBox.cs">
@@ -140,9 +140,6 @@
     </Compile>
     <Compile Include="Forms\YamuiNotifications.Designer.cs">
       <DependentUpon>YamuiNotifications.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\YamuiTabAnimation.cs">
-      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiSmokeScreen.cs">
       <SubType>Form</SubType>
@@ -285,12 +282,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiNotifications.resx">
       <DependentUpon>YamuiNotifications.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiSmokeScreen.resx">
-      <DependentUpon>YamuiSmokeScreen.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiTabAnimation.resx">
-      <DependentUpon>YamuiTabAnimation.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

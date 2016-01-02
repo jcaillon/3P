@@ -174,7 +174,7 @@ namespace _3PA {
                         // click on the error margin
                         if (nc.margin == FilesInfo.ErrorMarginNumber) {
                             // if it's an error symbol that has been clicked, the error on the line will be cleared
-                            if (!FilesInfo.ClearError(Npp.LineFromPosition(nc.position))) {
+                            if (!FilesInfo.ClearLineErrors(Npp.LineFromPosition(nc.position))) {
                                 // if nothing has been cleared, we go to the next error position
                                 FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
                             }

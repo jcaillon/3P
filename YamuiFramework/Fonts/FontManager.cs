@@ -24,7 +24,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Fonts {
-    public enum LabelFunction {
+
+    public enum FontFunction {
         AppliTitle,
         Small,
         Normal,
@@ -33,57 +34,45 @@ namespace YamuiFramework.Fonts {
         FormTitle,
         TopLink,
         Link,
-        AutoCompletion
-    }
-
-    public enum TabFunction {
-        Main,
-        Secondary,
-        SecondaryNotSelected
+        AutoCompletion,
+        MenuMain,
+        MenuSecondary,
+        WaterMark
     }
 
     public class FontManager {
 
         public static Font GetStandardFont() {
-            return GetFont(FontStyle.Regular, 12f);
+            return GetFont(FontFunction.Normal);
         }
 
-        public static Font GetLabelFont(LabelFunction lbFunction) {
+        public static Font GetFont(FontFunction lbFunction) {
             switch (lbFunction) {
-                case LabelFunction.AppliTitle:
+                case FontFunction.AppliTitle:
                     return GetOtherFont(@"REDCIRCL", FontStyle.Regular, 20f);
-                case LabelFunction.Title:
+                case FontFunction.Title:
                     return GetFont(FontStyle.Bold, 18f);
-                case LabelFunction.Heading:
+                case FontFunction.Heading:
                     return GetFont(FontStyle.Bold, 14f);
-                case LabelFunction.FormTitle:
+                case FontFunction.FormTitle:
                     return GetFont(FontStyle.Bold, 13f);
-                case LabelFunction.TopLink:
+                case FontFunction.TopLink:
                     return GetFont(FontStyle.Regular, 11f);
-                case LabelFunction.Link:
+                case FontFunction.Link:
                     return GetFont(FontStyle.Regular | FontStyle.Underline, 12f);
-                case LabelFunction.Small:
+                case FontFunction.Small:
                     return GetFont(FontStyle.Regular, 10f);
-                case LabelFunction.AutoCompletion:
+                case FontFunction.AutoCompletion:
                     return GetFont(FontStyle.Regular, 12f);
-                default:
-                    return GetFont(FontStyle.Regular, 12f);
-            }
-        }
-
-        public static Font GetTabControlFont(TabFunction tabFunction) {
-            switch (tabFunction) {
-                case TabFunction.Main:
+                case FontFunction.MenuMain:
                     return GetFont(FontStyle.Regular, 24f);
-                case TabFunction.Secondary:
+                case FontFunction.MenuSecondary:
                     return GetFont(FontStyle.Bold, 11f);
+                case FontFunction.WaterMark:
+                    return GetFont(FontStyle.Italic, 12f);
                 default:
-                    return GetFont(FontStyle.Regular, 11f);
+                    return GetFont(FontStyle.Regular, 12f);
             }
-        }
-
-        public static Font GetStandardWaterMarkFont() {
-            return GetFont(FontStyle.Italic, 12f);
         }
 
         public static Font GetFont(FontStyle fontStyle, float size) {
@@ -141,7 +130,6 @@ namespace YamuiFramework.Fonts {
                     controlFlags |= TextFormatFlags.Bottom | TextFormatFlags.Right;
                     break;
             }
-
             return controlFlags;
         }
 

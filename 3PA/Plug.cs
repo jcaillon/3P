@@ -213,6 +213,7 @@ namespace _3PA {
                 FileTag.ForceClose();
                 FileExplorer.ForceClose();
                 CodeExplorer.ForceClose();
+                UserCommunication.Close();
 
                 PluginIsFullyLoaded = false;
 
@@ -279,9 +280,9 @@ namespace _3PA {
 
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
-            
+
             // everything else can be async
-            Task.Factory.StartNew(() => {
+            //Task.Factory.StartNew(() => {
 
                 Keywords.Import();
                 Snippets.Init();
@@ -298,7 +299,7 @@ namespace _3PA {
 
                 // Simulates a OnDocumentSwitched when we start this dll
                 OnDocumentSwitched(true);
-            });
+            //});
 
             // this is done async anyway
             FileExplorer.RebuildItemList();
@@ -594,11 +595,8 @@ namespace _3PA {
             // set general styles (useful for the file explorer > current status)
             Style.SetGeneralStyles();
 
-            //// Update info on the current file
-            FilesInfo.DisplayCurrentFileInfo();
-
-            //// Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
+            // Update info on the current file
+            FilesInfo.UpdateErrorsInScintilla();
 
             // Need to compute the propath again, because we take into account relative path
             ProEnvironment.Current.ReComputeProPath();
@@ -611,6 +609,9 @@ namespace _3PA {
                     FileExplorer.Toggle(IsCurrentFileProgress);
                 }
             }
+
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyPluginSpecificOptions(false);
 
             // refresh file explorer currently opened file
             FileExplorer.RedrawFileExplorerList();
@@ -662,7 +663,7 @@ namespace _3PA {
                 _indentWidth = Npp.IndentWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
-                
+
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
@@ -674,14 +675,14 @@ namespace _3PA {
                 Npp.AutoCStops("");
                 Npp.AnnotationVisible = _annotationMode;
                 Npp.UseTabs = _indentWithTabs;
-                Npp.IndentWidth = _indentWidth;
+                Npp.TabWidth = _indentWidth;
             } else {
-                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text... We can also call Npp.AutoCCancel(); on UpdateUi but the list is sometimes shown for Xms
+                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
                 Npp.AnnotationVisible = Annotation.Boxed;
                 Npp.UseTabs = false;
-                Npp.IndentWidth = Config.Instance.CodeIndentNb;
+                Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
             }
         }
 
@@ -731,13 +732,17 @@ namespace _3PA {
 
         public static void Test() {
 
+            CleanUp();
+            return;
+            
+
             UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
                     new List<string> { "ok" },
                     true);
-            UserCommunication.Notify("ok");
+            UserCommunication.Notify(Npp.TabWidth.ToString());
             return;
 
             //------------

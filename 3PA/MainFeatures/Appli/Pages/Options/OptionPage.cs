@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     lastCategory = attribute.GroupName;
                     dockedPanel.Controls.Add(new YamuiLabel {
                         AutoSize = true,
-                        Function = LabelFunction.Heading,
+                        Function = FontFunction.Heading,
                         Location = new Point(0, yPos),
                         Text = lastCategory.ToUpper()
                     });
@@ -213,7 +213,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 dockedPanel.Controls.Add(new YamuiLabel {
                     AutoSize = true,
-                    Function = LabelFunction.Heading,
+                    Function = FontFunction.Heading,
                     Location = new Point(0, yPos),
                     Text = @" "
                 });

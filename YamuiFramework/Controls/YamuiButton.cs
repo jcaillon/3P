@@ -217,10 +217,10 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyDown(KeyEventArgs e) {
-            e.Handled = true;
             if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
                 IsPressed = true;
                 Invalidate();
+                e.Handled = true;
             }
             base.OnKeyDown(e);
         }

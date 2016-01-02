@@ -126,10 +126,18 @@ namespace YamuiFramework.Forms {
         }
 
         #region Methods
+
         public new void Show() {
             // Prevent the form taking focus when it is initially shown
             _currentForegroundWindow = WinApi.GetForegroundWindow();
             base.Show();
+        }
+
+        public static void CloseEverything() {
+            foreach (var yamuiNotification in _openNotifications) {
+                if (yamuiNotification != null)
+                    yamuiNotification.Close();
+            }
         }
 
         #endregion // Methods

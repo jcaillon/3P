@@ -17,10 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
+
+using System.ComponentModel;
 using System.Windows.Forms;
 using _3PA.Interop;
-using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
@@ -34,6 +34,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            // register to Npp
+            FormIntegration.UnRegisterToNpp(Handle);
+            base.OnClosing(e);
         }
 
     }

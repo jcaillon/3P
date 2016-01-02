@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
@@ -121,6 +122,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         private void MasterFormOnClosed(object sender, EventArgs eventArgs) {
             Close();
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            // register to Npp
+            FormIntegration.UnRegisterToNpp(Handle);
+            base.OnClosing(e);
         }
 
         #endregion

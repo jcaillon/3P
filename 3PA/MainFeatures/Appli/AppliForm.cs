@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
+using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Html;
@@ -50,22 +51,22 @@ namespace _3PA.MainFeatures.Appli {
             InitializeComponent();
 
             // create the tabs / content
-            CreateContent(new List<YamuiMainMenuTab> {
-                new YamuiMainMenuTab("Home", "home", false, new List<YamuiSecMenuTab> {
-                    new YamuiSecMenuTab("WELCOME", "welcome", new HomePage())
+            CreateContent(new List<YamuiMainMenu> {
+                new YamuiMainMenu("Home", "home", false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("WELCOME", "welcome", new HomePage())
                 }),
-                new YamuiMainMenuTab("Set", "set", false, new List<YamuiSecMenuTab> {
-                    new YamuiSecMenuTab("ENVIRONMENT", "environment", new SetEnvironment())
+                new YamuiMainMenu("Set", "set", false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
-                new YamuiMainMenuTab("Options", "options", false, new List<YamuiSecMenuTab> {
-                    new YamuiSecMenuTab("PROFILES", "profiles", new ProfilesPage()),
-                    new YamuiSecMenuTab("GENERAL", "general", new OptionPage(new List<string> { "General" })),
-                    new YamuiSecMenuTab("COLOR SCHEMES", "colors", new SettingAppearance()),
-                    new YamuiSecMenuTab("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
-                    new YamuiSecMenuTab("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
-                    new YamuiSecMenuTab("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
-                    new YamuiSecMenuTab("EXPLORERS", "explorers", new OptionPage(new List<string> { "File explorer", "Code explorer" })),
-                    new YamuiSecMenuTab("TOOLTIPS", "tooltips", new OptionPage(new List<string> { "Tooltip" })),
+                new YamuiMainMenu("Options", "options", false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("PROFILES", "profiles", new ProfilesPage()),
+                    new YamuiSecMenu("GENERAL", "general", new OptionPage(new List<string> { "General" })),
+                    new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
+                    new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
+                    new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
+                    new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
+                    new YamuiSecMenu("EXPLORERS", "explorers", new OptionPage(new List<string> { "File explorer", "Code explorer" })),
+                    new YamuiSecMenu("TOOLTIPS", "tooltips", new OptionPage(new List<string> { "Tooltip" })),
                 }),
                 //new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
                 //    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
@@ -188,11 +189,11 @@ namespace _3PA.MainFeatures.Appli {
         }      
 
         private void yamuiLink6_Click(object sender, EventArgs e) {
-            GoToPage("profiles");
+            ShowPage("profiles");
         }
 
         private void yamuiLink7_Click(object sender, EventArgs e) {
-            GoToPage("welcome");
+            ShowPage("welcome");
         }
 
         private void yamuiLink8_Click(object sender, EventArgs e) {

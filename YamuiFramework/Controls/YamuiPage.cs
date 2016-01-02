@@ -17,28 +17,48 @@
 // // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
-using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
 
-namespace YamuiFramework.Controls
-{
-    public class YamuiPage : UserControl
-    {
-        #region Fields
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool UseCustomBackColor { get; set; }
+namespace YamuiFramework.Controls {
+    public class YamuiPage : UserControl {
 
+        #region Fields
+
+        /// <summary>
+        /// Set this to force the background color to the form background color
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool NoTransparentBackground { get; set; }
+
+        #endregion
+
+        #region constructor
+
+        public YamuiPage() {
+            SetStyle(ControlStyles.UserPaint |
+                     ControlStyles.AllPaintingInWmPaint |
+                     ControlStyles.ResizeRedraw |
+                     ControlStyles.OptimizedDoubleBuffer, true);
+        }
+
+        #endregion
+
+        #region Virtual methods
+
+        /// <summary>
+        /// Method called by YamuiTab when the page changes to this page
+        /// </summary>
+        public virtual void OnShow() {}
+
         #endregion
 
         #region Paint
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -57,39 +77,14 @@ namespace YamuiFramework.Controls
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
-
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                if (NoTransparentBackground || DesignMode) {
-                    e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
-                    return;
-                }
-                if (UseCustomBackColor) 
-                    e.Graphics.Clear(BackColor);
-                else
-                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
-                Invalidate();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
+            if (NoTransparentBackground || DesignMode) {
+                e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                return;
             }
+            PaintTransparentBackground(e.Graphics, DisplayRectangle);
         }
 
-        protected virtual void OnPaintForeground(PaintEventArgs e) {}
-
-        protected override void OnEnabledChanged(EventArgs e)
-        {
-            base.OnEnabledChanged(e);
-            Invalidate();
-        }
         #endregion
     }
 }

@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             // lbNbErrors
             // 
-            this.lbNbErrors.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lbNbErrors.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lbNbErrors.Location = new System.Drawing.Point(70, 23);
             this.lbNbErrors.Margin = new System.Windows.Forms.Padding(3);
             this.lbNbErrors.Name = "lbNbErrors";
@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.lbErrorText.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbErrorText.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lbErrorText.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lbErrorText.Location = new System.Drawing.Point(93, 23);
             this.lbErrorText.Margin = new System.Windows.Forms.Padding(3);
             this.lbErrorText.Name = "lbErrorText";
@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.lbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbStatus.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lbStatus.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lbStatus.Location = new System.Drawing.Point(102, 1);
             this.lbStatus.Margin = new System.Windows.Forms.Padding(3);
             this.lbStatus.Name = "lbStatus";
@@ -140,7 +140,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(4, 1);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -151,7 +151,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel2.Location = new System.Drawing.Point(4, 49);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
@@ -162,7 +162,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // yamuiLabel3
             // 
             this.yamuiLabel3.AutoSize = true;
-            this.yamuiLabel3.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel3.Location = new System.Drawing.Point(4, 104);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(5, 3, 5, 7);
             this.yamuiLabel3.Name = "yamuiLabel3";
@@ -217,7 +217,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.yamuiLabel4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.yamuiLabel4.AutoSize = true;
-            this.yamuiLabel4.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.yamuiLabel4.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.yamuiLabel4.Location = new System.Drawing.Point(4, 495);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(0);
             this.yamuiLabel4.Name = "yamuiLabel4";
@@ -230,7 +230,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.nbitems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.nbitems.AutoSize = true;
-            this.nbitems.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.nbitems.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.nbitems.Location = new System.Drawing.Point(4, 508);
             this.nbitems.Margin = new System.Windows.Forms.Padding(3);
             this.nbitems.Name = "nbitems";
@@ -285,7 +285,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // lbDirectory
             // 
             this.lbDirectory.BackColor = System.Drawing.Color.Transparent;
-            this.lbDirectory.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lbDirectory.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lbDirectory.Location = new System.Drawing.Point(30, 130);
             this.lbDirectory.Margin = new System.Windows.Forms.Padding(3);
             this.lbDirectory.Name = "lbDirectory";

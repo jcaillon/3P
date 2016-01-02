@@ -291,7 +291,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public void StyleOvlTree() {
             // Style the control
             ovl.OwnerDraw = true;
-            ovl.Font = FontManager.GetLabelFont(LabelFunction.AutoCompletion);
+            ovl.Font = FontManager.GetFont(FontFunction.AutoCompletion);
             ovl.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
             ovl.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
             ovl.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
@@ -844,6 +844,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtClearAllErrorsOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             FilesInfo.ClearAllErrors();
+            Npp.GrabFocus();
         }
 
         private void BtNextErrorOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
@@ -857,7 +858,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         private void BtGetHelpOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
             btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
-            FilesInfo.DisplayCurrentFileInfo();
+            FilesInfo.ClearAnnotationsAndMarkers();
+            FilesInfo.UpdateErrorsInScintilla();
+            Npp.GrabFocus();
         }
 
         #endregion

@@ -27,22 +27,35 @@ namespace YamuiDemoApp.Pages.Navigation {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton6 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // yamuiPanel1
             // 
+            this.yamuiPanel1.AutoScroll = true;
+            this.yamuiPanel1.Controls.Add(this.yamuiButton1);
             this.yamuiPanel1.Controls.Add(this.yamuiButton6);
             this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.yamuiPanel1.HorizontalScrollbar = true;
             this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.HorizontalScrollbarSize = 10;
             this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(715, 315);
+            this.yamuiPanel1.Size = new System.Drawing.Size(683, 893);
             this.yamuiPanel1.TabIndex = 0;
+            this.yamuiPanel1.VerticalScrollbar = true;
             this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
             this.yamuiPanel1.VerticalScrollbarSize = 10;
+            // 
+            // yamuiButton1
+            // 
+            this.yamuiButton1.Location = new System.Drawing.Point(25, 857);
+            this.yamuiButton1.Name = "yamuiButton1";
+            this.yamuiButton1.Size = new System.Drawing.Size(100, 23);
+            this.yamuiButton1.TabIndex = 3;
+            this.yamuiButton1.Text = "TaskWindow";
             // 
             // yamuiButton6
             // 
@@ -59,7 +72,8 @@ namespace YamuiDemoApp.Pages.Navigation {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiPanel1);
             this.Name = "Other";
-            this.Size = new System.Drawing.Size(715, 315);
+            this.NoTransparentBackground = true;
+            this.Size = new System.Drawing.Size(683, 893);
             this.yamuiPanel1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -69,5 +83,6 @@ namespace YamuiDemoApp.Pages.Navigation {
 
         private YamuiPanel yamuiPanel1;
         private YamuiButton yamuiButton6;
+        private YamuiButton yamuiButton1;
     }
 }

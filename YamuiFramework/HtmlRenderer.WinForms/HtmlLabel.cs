@@ -147,6 +147,8 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             _htmlContainer.ImageLoad += OnImageLoad;
 
             ResumeLayout(false);
+
+            TabStop = false;
         }
 
         /// <summary>

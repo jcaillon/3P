@@ -56,16 +56,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // cbSyntax
             // 
-            this.cbSyntax.ItemHeight = 19;
-            this.cbSyntax.Location = new System.Drawing.Point(0, 29);
+            this.cbSyntax.ItemHeight = 15;
+            this.cbSyntax.Location = new System.Drawing.Point(30, 29);
             this.cbSyntax.Name = "cbSyntax";
-            this.cbSyntax.Size = new System.Drawing.Size(180, 25);
+            this.cbSyntax.Size = new System.Drawing.Size(180, 21);
             this.cbSyntax.TabIndex = 15;
             // 
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
@@ -75,20 +75,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // comboTheme
             // 
-            this.comboTheme.ItemHeight = 19;
-            this.comboTheme.Location = new System.Drawing.Point(0, 104);
+            this.comboTheme.ItemHeight = 15;
+            this.comboTheme.Location = new System.Drawing.Point(30, 104);
             this.comboTheme.Name = "comboTheme";
-            this.comboTheme.Size = new System.Drawing.Size(180, 25);
+            this.comboTheme.Size = new System.Drawing.Size(180, 21);
             this.comboTheme.TabIndex = 13;
             // 
             // PanelAccentColor
             // 
             this.PanelAccentColor.HorizontalScrollbarHighlightOnWheel = false;
             this.PanelAccentColor.HorizontalScrollbarSize = 10;
-            this.PanelAccentColor.Location = new System.Drawing.Point(0, 176);
+            this.PanelAccentColor.Location = new System.Drawing.Point(30, 176);
             this.PanelAccentColor.Margin = new System.Windows.Forms.Padding(0);
             this.PanelAccentColor.Name = "PanelAccentColor";
-            this.PanelAccentColor.Size = new System.Drawing.Size(809, 136);
+            this.PanelAccentColor.Size = new System.Drawing.Size(690, 136);
             this.PanelAccentColor.TabIndex = 10;
             this.PanelAccentColor.VerticalScrollbarHighlightOnWheel = false;
             this.PanelAccentColor.VerticalScrollbarSize = 10;
@@ -96,7 +96,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel21
             // 
             this.yamuiLabel21.AutoSize = true;
-            this.yamuiLabel21.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel21.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel21.Location = new System.Drawing.Point(0, 150);
             this.yamuiLabel21.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel21.Name = "yamuiLabel21";
@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // yamuiLabel20
             // 
             this.yamuiLabel20.AutoSize = true;
-            this.yamuiLabel20.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel20.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel20.Location = new System.Drawing.Point(0, 75);
             this.yamuiLabel20.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel20.Name = "yamuiLabel20";

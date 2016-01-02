@@ -25,6 +25,7 @@ using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures;
 
 namespace _3PA {
     /// <summary>
@@ -215,13 +216,8 @@ namespace _3PA {
         /// </summary>
         /// <param name="chars">A String of the characters that will cancel autocompletion. The default is empty.</param>
         /// <remarks>Characters specified should be limited to printable ASCII characters.</remarks>
-        public static unsafe void AutoCStops(string chars) {
-            if (!string.IsNullOrEmpty(chars)) {
-                fixed (byte* bp = GetBytes(chars, Encoding, true))
-                    Sci.SendWin32(SciMsg.SCI_AUTOCSTOPS, IntPtr.Zero, new IntPtr(bp));
-            } else {
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
-            }
+        public static void AutoCStops(string chars) {
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
         }
 
         /// <summary>
@@ -504,7 +500,7 @@ namespace _3PA {
         /// <returns>One of the WhitespaceMode enumeration values. The default is WhitespaceMode.Invisible.</returns>
         public static WhitespaceMode ViewWhitespace {
             get { return (WhitespaceMode)Sci.Send(SciMsg.SCI_GETVIEWWS); }
-            set { Sci.SendWin32(SciMsg.SCI_SETVIEWWS, new IntPtr((int)value)); }
+            set { Sci.Send(SciMsg.SCI_SETVIEWWS, new IntPtr((int)value)); }
         }
 
         /// <summary>
@@ -513,7 +509,7 @@ namespace _3PA {
         /// <returns>true to display end-of-line characters; otherwise, false. The default is false.</returns>
         public static bool ViewEol {
             get { return Sci.Send(SciMsg.SCI_GETVIEWEOL).IsTrue(); }
-            set { Sci.SendWin32(SciMsg.SCI_SETVIEWEOL, value.ToPointer()); }
+            set { Sci.Send(SciMsg.SCI_SETVIEWEOL, value.ToPointer()); }
         }
 
         /// <summary>
@@ -523,21 +519,21 @@ namespace _3PA {
         /// <remarks>For best results, values should range from -10 to 20 points.</remarks>
         public static int Zoom {
             get { return Sci.Send(SciMsg.SCI_GETZOOM).ToInt32(); }
-            set { Sci.SendWin32(SciMsg.SCI_SETZOOM, new IntPtr(value)); }
+            set { Sci.Send(SciMsg.SCI_SETZOOM, new IntPtr(value)); }
         }
 
         /// <summary>
         /// Increases the zoom factor by 1 until it reaches 20 points.
         /// </summary>
         public static void ZoomIn() {
-            Sci.SendWin32(SciMsg.SCI_ZOOMIN);
+            Sci.Send(SciMsg.SCI_ZOOMIN);
         }
 
         /// <summary>
         /// Decreases the zoom factor by 1 until it reaches -10 points.
         /// </summary>
         public static void ZoomOut() {
-            Sci.SendWin32(SciMsg.SCI_ZOOMOUT);
+            Sci.Send(SciMsg.SCI_ZOOMOUT);
         }
 
         /// <summary>
@@ -687,7 +683,9 @@ namespace _3PA {
         /// <returns>true to use tab characters; otherwise, false. The default is true.</returns>
         public static bool UseTabs {
             get { return (Sci.Send(SciMsg.SCI_GETUSETABS).IsTrue()); }
-            set { Sci.SendWin32(SciMsg.SCI_SETUSETABS, value.ToPointer()); }
+            set {
+                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0);
+            }
         }
 
         /// <summary>
@@ -696,7 +694,10 @@ namespace _3PA {
         /// <returns>The width of a tab measured in characters. The default is 4.</returns>
         public static int TabWidth {
             get { return Sci.Send(SciMsg.SCI_GETTABWIDTH).ToInt32(); }
-            set { Sci.SendWin32(SciMsg.SCI_SETTABWIDTH, new IntPtr(value)); }
+            set {
+                value = ClampMin(value, 0);
+                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETTABWIDTH, value, 0);
+            }
         }
 
         /// <summary>
@@ -708,7 +709,7 @@ namespace _3PA {
             get { return Sci.Send(SciMsg.SCI_GETINDENT).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Sci.SendWin32(SciMsg.SCI_SETINDENT, new IntPtr(value));
+                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETINDENT, value, 0);
             }
         }
 
@@ -1926,7 +1927,7 @@ namespace _3PA {
         /// Clear all annotations in one go
         /// </summary>
         public static void AnnotationClearAll() {
-            Sci.SendWin32(SciMsg.SCI_ANNOTATIONCLEARALL);
+            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
         }
 
         /// <summary>
@@ -1937,7 +1938,7 @@ namespace _3PA {
             get { return (Annotation) Sci.Send(SciMsg.SCI_ANNOTATIONGETVISIBLE).ToInt32(); }
             set {
                 var visible = (int) value;
-                Sci.SendWin32(SciMsg.SCI_ANNOTATIONSETVISIBLE, new IntPtr(visible));
+                Sci.Send(SciMsg.SCI_ANNOTATIONSETVISIBLE, new IntPtr(visible));
             }
         }
 
@@ -2234,7 +2235,7 @@ namespace _3PA {
                 }
                 set {
                     if (string.IsNullOrEmpty(value)) {
-                        Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, (string) null);
+                        Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, (string)null);
                     } else {
                         var bytes = GetBytes(value, Encoding, true);
                         fixed (byte* bp = bytes)
@@ -2768,13 +2769,6 @@ namespace _3PA {
             }
 
             /// <summary>
-            /// Removes this marker from all lines.
-            /// </summary>
-            public void DeleteAll() {
-                MarkerDeleteAll(Index);
-            }
-
-            /// <summary>
             /// Sets the foreground alpha transparency for markers that are drawn in the content area.
             /// </summary>
             /// <param name="alpha">The alpha transparency ranging from 0 (completely transparent) to 255 (no transparency).</param>
@@ -2854,7 +2848,7 @@ namespace _3PA {
             /// </summary>
             /// <param name="marker">The zero-based Marker index to remove from all lines, or -1 to remove all markers from all lines.</param>
             public static void MarkerDeleteAll(int marker) {
-                Sci.SendWin32(SciMsg.SCI_MARKERDELETEALL, new IntPtr(marker));
+                Sci.Send(SciMsg.SCI_MARKERDELETEALL, new IntPtr(marker));
             }
 
             #endregion
@@ -2872,7 +2866,7 @@ namespace _3PA {
             /// Removes all text displayed in every MarginType.Text and MarginType.RightText margins.
             /// </summary>
             public void ClearAllText() {
-                Sci.SendWin32(SciMsg.SCI_MARGINTEXTCLEARALL);
+                Sci.Send(SciMsg.SCI_MARGINTEXTCLEARALL);
             }
 
             /// <summary>
@@ -2901,7 +2895,7 @@ namespace _3PA {
                 get { return (Sci.Send(SciMsg.SCI_GETMARGINSENSITIVEN, new IntPtr(Index)) != IntPtr.Zero); }
                 set {
                     var sensitive = (value ? new IntPtr(1) : IntPtr.Zero);
-                    Sci.SendWin32(SciMsg.SCI_SETMARGINSENSITIVEN, new IntPtr(Index), sensitive);
+                    Sci.Send(SciMsg.SCI_SETMARGINSENSITIVEN, new IntPtr(Index), sensitive);
                 }
             }
 
@@ -2913,7 +2907,7 @@ namespace _3PA {
                 get { return (MarginType) (Sci.Send(SciMsg.SCI_GETMARGINTYPEN, new IntPtr(Index))); }
                 set {
                     var type = (int) value;
-                    Sci.SendWin32(SciMsg.SCI_SETMARGINTYPEN, new IntPtr(Index), new IntPtr(type));
+                    Sci.Send(SciMsg.SCI_SETMARGINTYPEN, new IntPtr(Index), new IntPtr(type));
                 }
             }
 
@@ -2926,7 +2920,7 @@ namespace _3PA {
                 get { return Sci.Send(SciMsg.SCI_GETMARGINWIDTHN, new IntPtr(Index)).ToInt32(); }
                 set {
                     value = ClampMin(value, 0);
-                    Sci.SendWin32(SciMsg.SCI_SETMARGINWIDTHN, new IntPtr(Index), new IntPtr(value));
+                    Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETMARGINWIDTHN, Index, value);
                 }
             }
 
@@ -2945,7 +2939,7 @@ namespace _3PA {
                 get { return unchecked((uint) Sci.Send(SciMsg.SCI_GETMARGINMASKN, new IntPtr(Index)).ToInt32()); }
                 set {
                     var mask = unchecked((int) value);
-                    Sci.SendWin32(SciMsg.SCI_SETMARGINMASKN, new IntPtr(Index), new IntPtr(mask));
+                    Sci.Send(SciMsg.SCI_SETMARGINMASKN, new IntPtr(Index), new IntPtr(mask));
                 }
             }
 
@@ -3751,10 +3745,10 @@ namespace _3PA {
         /// </summary>
         public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
             _scintillaHandle = scintillaHandle;
-            var directFunctionPointer = Win32.SendMessage(scintillaHandle, SciMsg.SCI_GETDIRECTFUNCTION, 0, 0);
+            var directFunctionPointer = Win32.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
             _directFunction = (Win32.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (Win32.Scintilla_DirectFunction));
-            _directMessagePointer = Win32.SendMessage(scintillaHandle, SciMsg.SCI_GETDIRECTPOINTER, 0, 0);
+            _directMessagePointer = Win32.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {
@@ -3767,18 +3761,6 @@ namespace _3PA {
 
         public IntPtr Send(SciMsg msg) {
             return _directFunction(_directMessagePointer, (int) msg, IntPtr.Zero, IntPtr.Zero);
-        }
-
-        public IntPtr SendWin32(SciMsg msg, IntPtr wParam, IntPtr lParam) {
-            return Win32.SendMessage(_scintillaHandle, (int)msg, wParam, lParam);
-        }
-
-        public IntPtr SendWin32(SciMsg msg, IntPtr wParam) {
-            return Win32.SendMessage(_scintillaHandle, (int)msg, wParam, IntPtr.Zero);
-        }
-
-        public IntPtr SendWin32(SciMsg msg) {
-            return Win32.SendMessage(_scintillaHandle, (int)msg, IntPtr.Zero, IntPtr.Zero);
         }
     }
 

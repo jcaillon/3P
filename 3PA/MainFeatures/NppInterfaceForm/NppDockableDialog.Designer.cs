@@ -23,9 +23,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _timerCheck.Dispose();
             _timerCheck = null;
 
-            // register to Npp
-            FormIntegration.UnRegisterToNpp(Handle);
-
             if (disposing && (components != null)) {
                 components.Dispose();
             }

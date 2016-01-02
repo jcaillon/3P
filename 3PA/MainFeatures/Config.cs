@@ -259,12 +259,12 @@ namespace _3PA.MainFeatures {
             AutoGenerateField = false)]
         public int GlobalMaxNbCharInBlock = 31190;
 
-        [Display(Name = "Indentation width",
+        [Display(Name = "Tab width",
             Description = "The number of spaces that will be inserted when you press TAB and re-indent the code",
             GroupName = "Code edition",
             AutoGenerateField = true)]
         [Range(0, 10)]
-        public int CodeIndentNb = 4;
+        public int CodeTabSpaceNb = 4;
 
         [Display(Name = "Modification tag : opener",
             Description = "You can set your custom modification tag here,<br>this part will be added before your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",

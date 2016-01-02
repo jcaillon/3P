@@ -277,7 +277,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // lblLocally
             // 
             this.lblLocally.AutoSize = true;
-            this.lblLocally.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.lblLocally.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lblLocally.Location = new System.Drawing.Point(223, 339);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";
@@ -455,7 +455,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel4
             // 
             this.yamuiLabel4.AutoSize = true;
-            this.yamuiLabel4.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel4.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel4.Location = new System.Drawing.Point(0, 67);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel4.Name = "yamuiLabel4";
@@ -466,7 +466,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // yamuiLabel1
             // 
             this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.LabelFunction.Heading;
+            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";

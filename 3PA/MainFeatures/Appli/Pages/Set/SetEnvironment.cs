@@ -403,6 +403,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
         private void BtDeleteDownloadOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
             DataBase.DeleteCurrentDbInfo();
+            UpdateDownloadButton();
         }
 
         /// <summary>

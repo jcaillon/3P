@@ -45,6 +45,12 @@ namespace _3PA.MainFeatures {
             };
         }
 
+        public static void Close() {
+            if (_anchorForm != null)
+                _anchorForm.Close();
+            YamuiNotifications.CloseEverything();
+        }
+
         /// <summary>
         /// Displays a notification on the bottom right of the screen
         /// </summary>

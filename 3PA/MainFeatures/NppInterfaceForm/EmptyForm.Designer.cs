@@ -13,9 +13,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing) {
 
-            // register to Npp
-            FormIntegration.UnRegisterToNpp(Handle);
-
             if (disposing && (components != null)) {
                 components.Dispose();
             }

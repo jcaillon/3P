@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.yamuiLabel24.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel24.AutoSize = true;
-            this.yamuiLabel24.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.yamuiLabel24.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.yamuiLabel24.Location = new System.Drawing.Point(56, 12);
             this.yamuiLabel24.Margin = new System.Windows.Forms.Padding(5);
             this.yamuiLabel24.Name = "yamuiLabel24";
@@ -71,7 +71,7 @@ namespace _3PA.MainFeatures.Appli {
             // yamuiLink6
             // 
             this.yamuiLink6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.yamuiLink6.Function = YamuiFramework.Fonts.LabelFunction.TopLink;
+            this.yamuiLink6.Function = YamuiFramework.Fonts.FontFunction.TopLink;
             this.yamuiLink6.Location = new System.Drawing.Point(1, 10);
             this.yamuiLink6.Name = "yamuiLink6";
             this.yamuiLink6.Size = new System.Drawing.Size(57, 17);
@@ -83,7 +83,7 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.yamuiLabel25.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel25.AutoSize = true;
-            this.yamuiLabel25.Function = YamuiFramework.Fonts.LabelFunction.Small;
+            this.yamuiLabel25.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.yamuiLabel25.Location = new System.Drawing.Point(103, 12);
             this.yamuiLabel25.Margin = new System.Windows.Forms.Padding(5);
             this.yamuiLabel25.Name = "yamuiLabel25";
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.Appli {
             // yamuiLink7
             // 
             this.yamuiLink7.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.yamuiLink7.Function = YamuiFramework.Fonts.LabelFunction.TopLink;
+            this.yamuiLink7.Function = YamuiFramework.Fonts.FontFunction.TopLink;
             this.yamuiLink7.Location = new System.Drawing.Point(61, 10);
             this.yamuiLink7.Name = "yamuiLink7";
             this.yamuiLink7.Size = new System.Drawing.Size(43, 17);
@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Appli {
             // yamuiLink8
             // 
             this.yamuiLink8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.yamuiLink8.Function = YamuiFramework.Fonts.LabelFunction.TopLink;
+            this.yamuiLink8.Function = YamuiFramework.Fonts.FontFunction.TopLink;
             this.yamuiLink8.Location = new System.Drawing.Point(109, 10);
             this.yamuiLink8.Name = "yamuiLink8";
             this.yamuiLink8.Size = new System.Drawing.Size(32, 17);
@@ -144,7 +144,6 @@ namespace _3PA.MainFeatures.Appli {
             this.Controls.Add(this.labelTitle);
             this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.yamuiPanel3);
-            this.IsMainForm = true;
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(950, 700);
             this.Name = "AppliForm";

@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.Appli {
             if (!_hasBeenShownOnce || !Form.Visible) {
                 ToggleView();
             }
-            Form.GoToPage(pageName);
+            Form.ShowPage(pageName);
         }
 
         /// <summary>
