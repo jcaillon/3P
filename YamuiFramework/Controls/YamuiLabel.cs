@@ -87,6 +87,7 @@ namespace YamuiFramework.Controls {
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
+            TabStop = false;
         }
 
         #endregion
@@ -114,28 +115,19 @@ namespace YamuiFramework.Controls {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                Color backColor = ThemeManager.LabelsColors.BackGround(BackColor, UseCustomBackColor);
-                if (backColor != Color.Transparent) {
-                    e.Graphics.Clear(backColor);
-                } else
-                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
-                Invalidate();
-            }
+            Color backColor = ThemeManager.LabelsColors.BackGround(BackColor, UseCustomBackColor);
+            if (backColor != Color.Transparent) {
+                e.Graphics.Clear(backColor);
+            } else
+                PaintTransparentBackground(e.Graphics, DisplayRectangle);
         }
 
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
-            }
+            CustomOnPaintBackground(e);
+            OnPaintForeground(e);
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-
             Color foreColor = ThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, false, false, false, !FakeDisabled);
 
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));

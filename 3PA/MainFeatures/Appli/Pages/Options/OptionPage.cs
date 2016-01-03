@@ -197,7 +197,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (_allowedGroups.Contains("Updates")) {
                 var updateButton = new YamuiButton {
                     Location = new Point(135, yPos),
-                    Size = new Size(100, 23),
+                    Size = new Size(130, 23),
                     Text = @"Check for updates"
                 };
                 updateButton.ButtonPressed += (sender, args) => UpdateHandler.CheckForUpdates();
@@ -224,7 +224,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region on events
 
-        private void UndoButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             // find the corresponding control
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
             var propertyName = (string) textBox.Tag;
@@ -238,7 +238,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Save();
         }
 
-        private void NumButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void NumButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
             var propertyName = (string) textBox.Tag;
             if (Config.Instance.GetValueOf(propertyName) is string) {
@@ -296,7 +296,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Save();
         }
 
-        private void DefaultButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void DefaultButtonOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             // apply default settings
             var defaultConfig = new ConfigObject();
 

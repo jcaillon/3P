@@ -71,7 +71,7 @@ namespace YamuiDemoApp.Pages.control {
 
         }
 
-        private void yamuiButton5_ButtonPressed(object sender, ButtonPressedEventArgs e) {
+        private void yamuiButton5_ButtonPressed(object sender, EventArgs e) {
             yamuiButton4.UseCustomBackColor = true;
             Transition.run(yamuiButton4, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, ThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false; });
         }

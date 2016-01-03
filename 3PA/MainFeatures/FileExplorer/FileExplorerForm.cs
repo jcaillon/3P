@@ -93,8 +93,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
 
             StartPosition = FormStartPosition.Manual;
-            Location = new Point(-1000, -1000);
-
 
             #region object view list
 
@@ -175,7 +173,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             lbDirectory.Text = _explorerDirStr[0];
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
-            lbDirectory.Click += (sender, args) => BtDirectoryOnButtonPressed(sender, new ButtonPressedEventArgs(args));
+            lbDirectory.Click += (sender, args) => BtDirectoryOnButtonPressed(sender, new EventArgs());
 
             #endregion
 
@@ -508,8 +506,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
-            var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
+        private void HandleTypeClick(object sender, EventArgs args) {
+            var mouseEvent = args as MouseEventArgs;
             FileType clickedType = ((SelectorButton<FileType>)sender).Type;
 
             // on right click
@@ -547,7 +545,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void OvlOnClick(object sender, EventArgs eventArgs) {
-            if (!KeyInterceptor.GetModifiers().IsAlt)
+            if (!KeyboardMonitor.GetModifiers.IsAlt)
                 return;
             var curItem = GetCurrentFile();
             if (curItem != null) {
@@ -623,7 +621,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private bool LeftRight(bool isLeft) {
             // Alt must be pressed
-            if (!KeyInterceptor.GetModifiers().IsAlt)
+            if (!KeyboardMonitor.GetModifiers.IsAlt)
                 return false;
 
             // only 1 type is active
@@ -731,14 +729,14 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region File Explorer buttons events
 
-        private void BtGotoDirOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtGotoDirOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             if (DirectoryToExplorer == 0)
                 Utils.OpenFolder(ProEnvironment.Current.BaseLocalPath);
             else if (DirectoryToExplorer == 1)
                 Utils.OpenFolder(ProEnvironment.Current.BaseCompilationPath);
         }
 
-        private void BtDirectoryOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDirectoryOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             if (_isListing) return;
             DirectoryToExplorer++;
             if (DirectoryToExplorer > 3) DirectoryToExplorer = 0;
@@ -757,12 +755,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilterByText = textFilter.Text;
         }
 
-        private void BtEraseOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtEraseOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             textFilter.Text = "";
             FilterByText = "";
         }
 
-        private void BtRefreshOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtRefreshOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             RefreshOvl();
         }
 
@@ -842,20 +840,20 @@ namespace _3PA.MainFeatures.FileExplorer {
             btClearAllErrors.Invalidate();
         }
 
-        private void BtClearAllErrorsOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             FilesInfo.ClearAllErrors();
             Npp.GrabFocus();
         }
 
-        private void BtNextErrorOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtNextErrorOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             FilesInfo.GoToNextError(Npp.Line.CurrentLine + 1);
         }
 
-        private void BtPrevErrorOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtPrevErrorOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             FilesInfo.GoToPrevError(Npp.Line.CurrentLine - 1);
         }
 
-        private void BtGetHelpOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtGetHelpOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
             btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
             FilesInfo.ClearAnnotationsAndMarkers();

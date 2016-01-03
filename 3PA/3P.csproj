@@ -89,6 +89,7 @@
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\DocumentLines.cs" />
+    <Compile Include="Interop\NotepadHelper.cs" />
     <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\GapBuffer.cs" />
     <Compile Include="Lib\HtmlHelpInterop.cs" />
@@ -213,8 +214,8 @@
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
-    <Compile Include="Interop\LocalWindowsHook.cs" />
-    <Compile Include="Interop\NppPluginNETHelper.cs" />
+    <Compile Include="Interop\CoreWindowsHook.cs" />
+    <Compile Include="Interop\ScintillaHelper.cs" />
     <Compile Include="Interop\SetCommand.cs" />
     <Compile Include="Interop\Win32.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />

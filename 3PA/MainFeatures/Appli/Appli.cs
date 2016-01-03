@@ -18,13 +18,20 @@
 // ========================================================================
 #endregion
 using System;
+using System.Windows.Forms;
+using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.Appli {
     /// <summary>
     /// Handles the application main window
     /// </summary>
     class Appli {
-        public static AppliForm Form;
+
+        public static AppliForm Form {
+            get { return _form; }
+        }
+
+        private static AppliForm _form;
         private static bool _hasBeenShownOnce;
 
         /// <summary>
@@ -32,24 +39,24 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ToggleView() {
             try {
-                if (Form == null) {
+                if (_form == null) {
                     Init();
                 }
 
-                if (Form != null) {
+                if (_form != null) {
                     // create the form
                     if (!_hasBeenShownOnce) {
                         _hasBeenShownOnce = true;
-                        Form.Show(Npp.Win32WindowNpp);
-                        Form.DoShow();
+                        _form.Show(Npp.Win32WindowNpp);
+                        _form.DoShow();
                         return;
                     }
 
                     // toggle visibility
-                    if (Form.Visible && !Form.HasModalOpened)
-                        Form.Cloack();
+                    if (_form.Visible && !_form.HasModalOpened)
+                        _form.Cloack();
                     else
-                        Form.UnCloack();
+                        _form.UnCloack();
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading the main window");
@@ -61,10 +68,10 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         /// <param name="pageName"></param>
         public static void GoToPage(string pageName) {
-            if (!_hasBeenShownOnce || !Form.Visible) {
+            if (!_hasBeenShownOnce || !_form.Visible) {
                 ToggleView();
             }
-            Form.ShowPage(pageName);
+            _form.ShowPage(pageName);
         }
 
         /// <summary>
@@ -90,12 +97,23 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         /// <summary>
+        /// True if the form is focused 
+        /// </summary>
+        public static bool IsFocused() {
+            return _form != null && _form.Visible && (WinApi.GetForegroundWindow().Equals(_form.Handle));
+        }
+
+        public static Control ActiveControl {
+            get { return !IsFocused() ? null : _form.FindFocusedControl(); }
+        }
+
+        /// <summary>
         /// Initializes the main application, since other windows uses this Form reference, 
         /// it must be called pretty soon in the plugin initialization
         /// </summary>
         public static void Init() {
-            if (Form != null) ForceClose();
-            Form = new AppliForm {
+            if (_form != null) ForceClose();
+            _form = new AppliForm {
                 CurrentForegroundWindow = Npp.HandleNpp
             };
         }
@@ -105,9 +123,9 @@ namespace _3PA.MainFeatures.Appli {
         /// </summary>
         public static void ForceClose() {
             try {
-                if (Form != null)
-                    Form.ForceClose();
-                Form = null;
+                if (_form != null)
+                    _form.ForceClose();
+                _form = null;
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
             }

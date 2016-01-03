@@ -163,23 +163,11 @@ namespace _3PA {
             menu.SetCommand("About", Appli.GoToAboutPage);
             
             // Npp already intercepts these shortcuts so we need to hook keyboard messages
-            KeyInterceptor.Instance.Install();
             foreach (var key in menu.UniqueKeys.Keys)
-                KeyInterceptor.Instance.Add(key);
-            KeyInterceptor.Instance.Add(Keys.Up);
-            KeyInterceptor.Instance.Add(Keys.Down);
-            KeyInterceptor.Instance.Add(Keys.Left);
-            KeyInterceptor.Instance.Add(Keys.Right);
-            KeyInterceptor.Instance.Add(Keys.Tab);
-            KeyInterceptor.Instance.Add(Keys.Return);
-            KeyInterceptor.Instance.Add(Keys.Escape);
-            KeyInterceptor.Instance.Add(Keys.Back);
-            KeyInterceptor.Instance.Add(Keys.PageDown);
-            KeyInterceptor.Instance.Add(Keys.PageUp);
-            KeyInterceptor.Instance.Add(Keys.Next);
-            KeyInterceptor.Instance.Add(Keys.Prior);
-            KeyInterceptor.Instance.KeyDown += OnKeyDown;
-             
+                KeyboardMonitor.Instance.Add(key);
+            KeyboardMonitor.Instance.Add(Keys.Up, Keys.Down, Keys.Left, Keys.Right, Keys.Tab, Keys.Return, Keys.Escape, Keys.Back, Keys.PageDown, Keys.PageUp, Keys.Next, Keys.Prior);
+            KeyboardMonitor.Instance.KeyPressed += OnKeyPressed;
+            KeyboardMonitor.Instance.Install();
         }
 
         /// <summary>
@@ -195,6 +183,10 @@ namespace _3PA {
         /// </summary>
         static internal void CleanUp() {
             try {
+                // uninstall hooks
+                CallWndProcMonitor.Instance.Uninstall();
+                KeyboardMonitor.Instance.Uninstall();
+
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
 
@@ -301,6 +293,11 @@ namespace _3PA {
                 OnDocumentSwitched(true);
             //});
 
+            // hook onto messages sent to npp, to be able to correctly refresh the location/size of the explorers
+            CallWndProcMonitor.Instance.Add(WindowsMessage.WM_MOUSEMOVE);
+            CallWndProcMonitor.Instance.GetMessage += InstanceOnGetMessage;
+            CallWndProcMonitor.Instance.Install();
+
             // this is done async anyway
             FileExplorer.RebuildItemList();
         }
@@ -316,25 +313,19 @@ namespace _3PA {
         /// <summary>
         /// Called when the user presses a key
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="repeatCount"></param>
-        /// <param name="handled"></param>
         // ReSharper disable once RedundantAssignment
-        public static void OnKeyDown(Keys key, int repeatCount, ref bool handled) {
+        public static void OnKeyPressed(Keys key, KeyModifiers keyModifiers, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
-            Modifiers modifiers;
             try {
-                modifiers = KeyInterceptor.GetModifiers();
-
                 // check if the user triggered a function for which we set a shortcut (internalShortcuts)
                 Tuple<Action, int, string> commandUsed = null;
                 foreach (var kpv in NppMenu.InternalShortCuts) {
                     if ((byte) key == kpv.Key._key && 
-                        modifiers.IsCtrl == kpv.Key.IsCtrl &&
-                        modifiers.IsShift == kpv.Key.IsShift &&
-                        modifiers.IsAlt == kpv.Key.IsAlt) {
+                        keyModifiers.IsCtrl == kpv.Key.IsCtrl &&
+                        keyModifiers.IsShift == kpv.Key.IsShift &&
+                        keyModifiers.IsAlt == kpv.Key.IsAlt) {
                         commandUsed = kpv.Value;
                     }
                 }
@@ -346,6 +337,14 @@ namespace _3PA {
                     commandUsed.Item1();
                     handled = true;
                     return;
+                }
+
+                // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
+                // like we normally can, for some reasons, they don't react to certain keys (like enter!)
+                // It only works "almost normally" if we ShowDialog() the form?! Wtf right?
+                // So i gave up and handle things here!
+                if (Appli.IsFocused()) {
+                    handled = Appli.Form.HandleKeyPressed(key, keyModifiers);
                 }
 
                 // check if allowed to execute
@@ -362,13 +361,13 @@ namespace _3PA {
                         handled = AutoComplete.OnKeyDown(key);
                     else {
 
-                        if ((key == Keys.Right || key == Keys.Left) && modifiers.IsAlt)
+                        if ((key == Keys.Right || key == Keys.Left) && keyModifiers.IsAlt)
                             handled = AutoComplete.OnKeyDown(key);
                     }
                 } else {
                     // snippet ?
                     if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
-                        if (!modifiers.IsCtrl && !modifiers.IsAlt && !modifiers.IsShift) {
+                        if (!keyModifiers.IsCtrl && !keyModifiers.IsAlt && !keyModifiers.IsShift) {
                             if (!Snippets.InsertionActive) {
                                 //no snippet insertion in progress
                                 if (key == Keys.Tab) {
@@ -392,7 +391,7 @@ namespace _3PA {
                 }
 
                 // next tooltip
-                if (modifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
+                if (keyModifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
                     if (key == Keys.Up)
                         InfoToolTip.IndexToShow--;
                     else
@@ -400,7 +399,6 @@ namespace _3PA {
                     InfoToolTip.TryToShowIndex();
                     handled = true;
                 }
-
 
                 // we matched a shortcut, execute it
                 if (commandUsed != null) {
@@ -411,8 +409,7 @@ namespace _3PA {
             } catch (Exception e) {
                 var shortcutName = "Instance_KeyDown";
                 try {
-                    modifiers = KeyInterceptor.GetModifiers();
-                    foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key  && modifiers.IsCtrl == shortcut.IsCtrl && modifiers.IsShift == shortcut.IsShift && modifiers.IsAlt == shortcut.IsAlt)) {
+                    foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key  && keyModifiers.IsCtrl == shortcut.IsCtrl && keyModifiers.IsShift == shortcut.IsShift && keyModifiers.IsAlt == shortcut.IsAlt)) {
                         shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
                     }
                 } catch (Exception x) {
@@ -543,8 +540,7 @@ namespace _3PA {
         /// When the user moves his cursor
         /// </summary>
         public static void OnDwellEnd() {
-            Modifiers modifiers = KeyInterceptor.GetModifiers();
-            if (!modifiers.IsCtrl)
+            if (!KeyboardMonitor.GetModifiers.IsCtrl)
                 InfoToolTip.Close(true);
         }
 
@@ -694,8 +690,7 @@ namespace _3PA {
         /// not allow the execution and return false (set to 0 to disable spam check)
         /// </summary>
         /// <returns></returns>
-        public static bool AllowFeatureExecution(int spamInterval = 100) {
-
+        public static bool AllowFeatureExecution(int spamInterval = 300) {
             // Prevent the user from spamming the keys
             if (spamInterval > 0) {
                 var method = new StackFrame(1).GetMethod();
@@ -722,6 +717,13 @@ namespace _3PA {
 
         #region private
 
+        private static void InstanceOnGetMessage(MSG message) {
+            if (FileExplorer.IsVisible)
+                FileExplorer.Form.RefreshPosAndLoc(null, new EventArgs());
+            if (CodeExplorer.IsVisible)
+                CodeExplorer.Form.RefreshPosAndLoc(null, new EventArgs());
+        }
+
         #endregion
 
         #region tests
@@ -732,17 +734,16 @@ namespace _3PA {
 
         public static void Test() {
 
-            CleanUp();
+            UserCommunication.Notify(FileExplorer.Form.Location + " " + FileExplorer.Form.Size);
             return;
-            
 
-            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+            var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok" },
+                    new List<string> { "ok", "cancel" },
                     true);
-            UserCommunication.Notify(Npp.TabWidth.ToString());
+            UserCommunication.Notify(ii.ToString());
             return;
 
             //------------

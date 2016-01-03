@@ -36,14 +36,14 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// 
     /// Unfortunatly, we can't just subscribe to ClientSizeChanged and LocationChanged events of the master form
     /// because when we move the Npp window, the LocationChange event of the master form isn't triggered... Idk why...
-    /// So instead, we run a timer that checks the position of the master form every xx ms 
+    /// So instead, use a hook onto npp and we update the position/size each time we receive a message that npp has 
+    /// moved
     /// </summary>
     public partial class NppDockableDialog : Form {
 
         #region fields
 
         private Rectangle _masterRectangle;
-        private Timer _timerCheck;
         private EmptyForm _masterForm;
 
         #endregion
@@ -70,6 +70,11 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _masterForm.VisibleChanged += Cover_OnVisibleChanged;
             _masterForm.Closed += MasterFormOnClosed;
 
+            _masterForm.ClientSizeChanged += RefreshPosAndLoc;
+            _masterForm.LocationChanged += RefreshPosAndLoc;
+            _masterForm.LostFocus += RefreshPosAndLoc;
+            _masterForm.GotFocus += RefreshPosAndLoc;
+
             Show(_masterForm);
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
@@ -77,21 +82,21 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
-            // timer to check if the master form has changed
-            _timerCheck = new Timer {
-                Enabled = true,
-                Interval = Config.Instance.GlobalRefreshRate
-            };
+            //// timer to check if the master form has changed
+            //_timerCheck = new Timer {
+            //    Enabled = true,
+            //    Interval = Config.Instance.GlobalRefreshRate
+            //};
 
-            _masterRectangle = new Rectangle(0, 0, 0, 0);
-            _timerCheck.Tick += TimerTick;
+            //_masterRectangle = new Rectangle(0, 0, 0, 0);
+            //_timerCheck.Tick += TimerTick;
         }
 
         #endregion
 
-        #region On event handlers
+        #region Its name says it all
 
-        private void TimerTick(object sender, EventArgs e) {
+        public void RefreshPosAndLoc() {
             var rect = new Rectangle();
             Win32.GetWindowRect(_masterForm.Handle, ref rect);
 
@@ -107,15 +112,22 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _masterRectangle = rect;
         }
 
+        #endregion
+
+
+        #region On event handlers
+
+        public void RefreshPosAndLoc(object sender, EventArgs e) {
+            RefreshPosAndLoc();
+        }
+
         private void Cover_OnVisibleChanged(object sender, EventArgs eventArgs) {
             Visible = Owner.Visible;
             if (!Visible) {
                 // get it out of the screen or it might be visible through low opacity... trust me
                 Location = new Point(-10000, -10000);
-                _timerCheck.Stop();
             } else {
                 Location = Owner.PointToScreen(Point.Empty);
-                _timerCheck.Start();
                 Refresh();
             }
         }
@@ -131,13 +143,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         #endregion
-        /*
-        protected override CreateParams CreateParams {
-            get {
-                var Params = base.CreateParams;
-                Params.ExStyle |= 0x80;
-                return Params;
-            }
-        }*/
+
     }
 }

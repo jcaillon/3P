@@ -17,6 +17,8 @@
 // // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -162,7 +164,7 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        private void GoBackButtonOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void GoBackButtonOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             if (_formHistory.Count > 0) {
                 CurrentPage = _formHistory.Pop();
                 if (_formHistory.Count == 0) {

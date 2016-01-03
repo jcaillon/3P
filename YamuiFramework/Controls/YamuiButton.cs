@@ -51,13 +51,13 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool AcceptsRightClick { get; set; }
 
-        private event EventHandler<ButtonPressedEventArgs> OnButtonPressed;
+        private event EventHandler<EventArgs> OnButtonPressed;
 
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
         /// </summary>
         [Category("Yamui")]
-        public event EventHandler<ButtonPressedEventArgs> ButtonPressed {
+        public event EventHandler<EventArgs> ButtonPressed {
             add { OnButtonPressed += value; }
             remove { OnButtonPressed -= value; }
         }
@@ -166,10 +166,12 @@ namespace YamuiFramework.Controls {
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
         }
 
-        private void HandlePressedButton(EventArgs e) {
+        /// <summary>
+        /// Call this method to activate the OnPressedButton event manually
+        /// </summary>
+        public void HandlePressedButton() {
             if (OnButtonPressed == null) return;
-            var args = new ButtonPressedEventArgs(e);
-            OnButtonPressed(this, args);
+            OnButtonPressed(this, new EventArgs());
         }
 
         #endregion
@@ -227,7 +229,8 @@ namespace YamuiFramework.Controls {
 
         protected override void OnKeyUp(KeyEventArgs e) {
             if (IsPressed) {
-                HandlePressedButton(e);
+                if (OnButtonPressed == null) return;
+                OnButtonPressed(this, e);
             }
             IsPressed = false;
             Invalidate();
@@ -254,7 +257,8 @@ namespace YamuiFramework.Controls {
 
         protected override void OnMouseUp(MouseEventArgs e) {
             if (IsPressed) {
-                HandlePressedButton(e);
+                if (OnButtonPressed == null) return;
+                OnButtonPressed(this, e);
             }
             IsPressed = false;
             Invalidate();
@@ -271,14 +275,6 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #endregion
-    }
-
-    public sealed class ButtonPressedEventArgs : EventArgs {
-        public readonly object OriginalEventArgs;
-
-        public ButtonPressedEventArgs(object originalEventArgs) {
-            OriginalEventArgs = originalEventArgs;
-        }
     }
 
     internal class YamuiButtonDesigner : ControlDesigner {

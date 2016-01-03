@@ -23,13 +23,16 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Security;
+using System.Timers;
 using System.Web.UI.Design.WebControls;
 using System.Windows.Forms;
+using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
+using Timer = System.Timers.Timer;
 
 namespace YamuiFramework.Forms {
 
@@ -104,17 +107,21 @@ namespace YamuiFramework.Forms {
 
         private YamuiTabButtons _topLinks;
 
+        private YamuiNotifLabel _bottomNotif;
+
         #endregion
 
         #region Constructor / destructor
 
         public YamuiForm() {
-            // why those styles? check here: https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
+            // why those styles? check here: 
+            // https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
             SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw
+                , true);
 
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.CenterScreen;
@@ -138,34 +145,15 @@ namespace YamuiFramework.Forms {
             var foreColor = ThemeManager.Current.FormColorForeColor;
             var borderColor = UseCustomBorderColor ? ForeColor : ThemeManager.AccentColor;
 
+            // background
             e.Graphics.Clear(backColor);
-
-            /*
-            if (ThemeManager.ThemePageImage != null) {
-                Rectangle imgRectangle = new Rectangle(ClientRectangle.Right - ThemeManager.ThemePageImage.Width, ClientRectangle.Height - ThemeManager.ThemePageImage.Height, ThemeManager.ThemePageImage.Width, ThemeManager.ThemePageImage.Height);
-                e.Graphics.DrawImage(ThemeManager.ThemePageImage, imgRectangle, 0, 0, ThemeManager.ThemePageImage.Width, ThemeManager.ThemePageImage.Height, GraphicsUnit.Pixel);
-            }*/
-
-            /*
-            // draw my logo
-            ColorMap[] colorMap = new ColorMap[1];
-            colorMap[0] = new ColorMap();
-            colorMap[0].OldColor = Color.Black;
-            colorMap[0].NewColor = ThemeManager.AccentColor;
-            ImageAttributes attr = new ImageAttributes();
-            attr.SetRemapTable(colorMap);
-            Image logoImage = Properties.Resources.bull_ant;
-            rect = new Rectangle(ClientRectangle.Right - (100 + logoImage.Width), 0 + 2, logoImage.Width, logoImage.Height);
-            e.Graphics.DrawImage(logoImage, rect, 0, 0, logoImage.Width, logoImage.Height, GraphicsUnit.Pixel, attr);
-            //e.Graphics.DrawImage(Properties.Resources.bull_ant, ClientRectangle.Right - (100 + Properties.Resources.bull_ant.Width), 0 + 5);
-            */
 
             // draw the border with Style color
             var rect = new Rectangle(new Point(0, 0), new Size(Width - BorderWidth, Height - BorderWidth));
             var pen = new Pen(borderColor, BorderWidth);
             e.Graphics.DrawRectangle(pen, rect);
 
-            // draw the resize pixel stuff on the bottom right
+            // draw the resize pixels icon on the bottom right
             if (Resizable && (SizeGripStyle == SizeGripStyle.Auto || SizeGripStyle == SizeGripStyle.Show)) {
                 using (var b = new SolidBrush(foreColor)) {
                     var resizeHandleSize = new Size(2, 2);
@@ -184,19 +172,18 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region For the user
+
         /// <summary>
         /// Go to page pagename
         /// </summary>
-        /// <param name="pageName"></param>
         public void ShowPage(string pageName) {
             if (_contentTab != null)
                 _contentTab.ShowPage(pageName);
         }
 
         /// <summary>
-        /// allows to automatically generates the tabs/pages
+        /// Automatically generates the tabs/pages
         /// </summary>
-        /// <param name="menuDescriber"></param>
         public void CreateContent(List<YamuiMainMenu> menuDescriber) {
             _contentTab = new YamuiTab(menuDescriber, this) {
                 Dock = DockStyle.Fill
@@ -205,7 +192,10 @@ namespace YamuiFramework.Forms {
             _contentTab.Init();
         }
 
-        public void CreateTopLinks(List<string> links, EventHandler<TabPressedEventArgs> onTabPressed) {
+        /// <summary>
+        /// Automatically generates top links
+        /// </summary>
+        public void CreateTopLinks(List<string> links, EventHandler<TabPressedEventArgs> onTabPressed, int xPosFromRight = 120, int yPosFromTop = 10) {
             _topLinks = new YamuiTabButtons(links, -1) {
                 Font = FontManager.GetFont(FontFunction.TopLink),
                 Height = 15,
@@ -218,8 +208,174 @@ namespace YamuiFramework.Forms {
             };
             _topLinks.TabPressed += onTabPressed;
             _topLinks.Width = _topLinks.GetWidth() + 10;
-            _topLinks.Location = new Point(Width - 100 - _topLinks.Width, 10);
+            _topLinks.Location = new Point(Width - xPosFromRight - _topLinks.Width, yPosFromTop);
             Controls.Add(_topLinks);
+        }
+
+        /// <summary>
+        /// Displays an animated notification on the bottom of the form
+        /// you can choose how much time the notif will last (in seconds)
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="stickDurationSecs"></param>
+        public void Notify(string message, int stickDurationSecs) {
+            if (_bottomNotif == null) {
+                _bottomNotif = new YamuiNotifLabel {
+                    Font = FontManager.GetFont(FontFunction.Normal),
+                    Text = "",
+                    Size = new Size(Width - 21, 16),
+                    Location = new Point(1, Height - 17),
+                    Anchor = AnchorStyles.Bottom | AnchorStyles.Left,
+                };
+                Controls.Add(_bottomNotif);
+            }
+            _bottomNotif.Duration = stickDurationSecs;
+            _bottomNotif.AnimText = message;
+        }
+
+        public Control FindFocusedControl() {
+            if (_contentTab == null)
+                return ActiveControl;
+            Control control = _contentTab;
+            var container = control as IContainerControl;
+            while (container != null) {
+                control = container.ActiveControl;
+                container = control as IContainerControl;
+            }
+            return control;
+        }
+
+        #endregion
+
+        #region Bottom notif
+
+        /// <summary>
+        /// Small class to animate a text display
+        /// </summary>
+        internal class YamuiNotifLabel : UserControl {
+
+            #region public fields
+
+            /// <summary>
+            /// Min 3s, the duration the text stays
+            /// </summary>
+            public int Duration { get; set; }
+
+            /// <summary>
+            /// The final text you want to display
+            /// </summary>
+            public string AnimText {
+                set {
+                    LinearBlink = 0;
+                    ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
+                    var t = new Transition(new TransitionType_Linear(500));
+                    t.add(this, "Text", value);
+                    t.add(this, "ForeColor", ThemeManager.AccentColor);
+                    if (!string.IsNullOrEmpty(value))
+                        t.add(this, "LinearBlink", 100);
+                    else
+                        LinearBlink = 21;
+                    t.TransitionCompletedEvent += OnTransitionCompletedEvent;
+                    t.run();
+
+                    // end of duration event
+                    if (!string.IsNullOrEmpty(value)) {
+                        if (_durationTimer == null) {
+                            _durationTimer = new Timer {
+                                AutoReset = false
+                            };
+                            _durationTimer.Elapsed += DurationTimerOnElapsed;
+                        }
+                        _durationTimer.Stop();
+                        _durationTimer.Interval = Math.Max(Duration, 3) * 1000;
+                        _durationTimer.Start();
+                    }
+                }
+            }
+
+            /// <summary>
+            /// For animation purposes, don't use
+            /// </summary>
+            public int LinearBlink {
+                get { return _linearBlink; }
+                set {
+                    _linearBlink = value;
+                    if (_linearBlink == 0) {
+                        _linearCount = 20;
+                        _linearBool = false;
+                    }
+                    if (_linearBlink >= _linearCount) {
+                        _linearBool = !_linearBool;
+                        _linearCount += 20;
+                    }
+                    BackColor = !_linearBool ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor;
+                }
+            }
+
+            #endregion
+
+            #region private
+
+            private int _linearBlink;
+            private bool _linearBool;
+            private int _linearCount;
+
+            private Timer _durationTimer;
+
+            private void OnTransitionCompletedEvent(object sender, Transition.Args args) {
+                if (string.IsNullOrEmpty(Text))
+                    return;
+                var t = new Transition(new TransitionType_Linear(500));
+                t.add(this, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor);
+                t.run();
+                LinearBlink = 0;
+                var t2 = new Transition(new TransitionType_Linear(2000));
+                t2.add(this, "LinearBlink", 401);
+                t2.run();
+            }
+
+            private void DurationTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
+                AnimText = "";
+            }
+
+            #endregion
+
+            #region constructor / destructor
+
+            public YamuiNotifLabel() {
+                SetStyle(
+                    ControlStyles.UserPaint |
+                    ControlStyles.AllPaintingInWmPaint |
+                    ControlStyles.OptimizedDoubleBuffer |
+                    ControlStyles.SupportsTransparentBackColor |
+                    ControlStyles.ResizeRedraw
+                    , true);
+            }
+
+            ~YamuiNotifLabel() {
+                _durationTimer.Dispose();
+                _durationTimer = null;
+            }
+
+            #endregion
+
+            #region paint
+
+            protected override void OnPaint(PaintEventArgs e) {
+                e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+
+                // blinking square
+                using (SolidBrush b = new SolidBrush(BackColor)) {
+                    Rectangle boxRect = new Rectangle(0, 0, 10, Height);
+                    e.Graphics.FillRectangle(b, boxRect);
+                }
+
+                // text
+                TextRenderer.DrawText(e.Graphics, Text, Font, new Rectangle(12, 0, ClientSize.Width - 12, ClientSize.Height), ForeColor, TextFormatFlags.Top | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+            }
+
+            #endregion
+
         }
 
         #endregion

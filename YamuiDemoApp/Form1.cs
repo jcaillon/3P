@@ -15,15 +15,17 @@ namespace YamuiDemoApp {
             InitializeComponent();
 
             CreateContent(new List<YamuiMainMenu> {
-                new YamuiMainMenu("Control", "control", false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("Classic", "classic", new Classic()),
-                    new YamuiSecMenu("Item controls", "controls", new ItemControl())
+                new YamuiMainMenu("Control", null, false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("Classic", null, new Classic()),
+                    new YamuiSecMenu("Item controls", null, new ItemControl()),
+                    new YamuiSecMenu("Text", null, new Text()),
+                    new YamuiSecMenu("Progress", null, new Progress()),
                 }),
                 new YamuiMainMenu("Settings", null, true, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("yamuiTabSecAppearance", "yamuiTabSecAppearance", new SettingAppearance()),
+                    new YamuiSecMenu("yamuiTabSecAppearance", "yamuiTabSecAppearance", new Pages.SettingAppearance()),
                 }),
-                new YamuiMainMenu("Navigation", "navigation", false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("Other", "other", new Other()),
+                new YamuiMainMenu("Navigation", null, false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("Other", null, new Other()),
                 }),
             });
 
@@ -42,19 +44,7 @@ namespace YamuiDemoApp {
                         toastNotification2.Show();
                         break;
                     case 2:
-                    statusLabel.UseCustomForeColor = true;
-                    statusLabel.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
-                    var t = new Transition(new TransitionType_Linear(500));
-                    if (_lab) 
-                        t.add(statusLabel, "Text", "Hello world!");
-                    else
-                        t.add(statusLabel, "Text", "<b>WARNING :</b> this user is awesome");
-                    t.add(statusLabel, "ForeColor", ThemeManager.AccentColor);
-                    t.TransitionCompletedEvent += (o, args) => {
-                        Transition.run(statusLabel, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(400));
-                    };
-                    t.run();
-                    _lab = !_lab;
+                        Notify("hello it's a rather long text! omgplease work on first shot?! I stay for 5s and i go!", 5);
                         break;
                 }
             });

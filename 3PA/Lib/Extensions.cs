@@ -75,10 +75,14 @@ namespace _3PA.Lib {
         /// <summary>
         /// Returns true if the bit at the given position is set to true
         /// </summary>
-        /// <param name="b"></param>
-        /// <param name="pos"></param>
-        /// <returns></returns>
         public static bool IsBitSet(this int b, int pos) {
+            return (b & (1 << pos)) != 0;
+        }
+
+        /// <summary>
+        /// Returns true if the bit at the given position is set to true
+        /// </summary>
+        public static bool IsBitSet(this uint b, int pos) {
             return (b & (1 << pos)) != 0;
         }
 

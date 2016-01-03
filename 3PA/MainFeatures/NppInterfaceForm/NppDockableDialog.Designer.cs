@@ -15,13 +15,18 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing) {
 
-            Owner.VisibleChanged -= Cover_OnVisibleChanged;
+            _masterForm.VisibleChanged -= Cover_OnVisibleChanged;
+            _masterForm.Closed -= MasterFormOnClosed;
+
+            _masterForm.ClientSizeChanged -= RefreshPosAndLoc;
+            _masterForm.LocationChanged -= RefreshPosAndLoc;
+            _masterForm.LostFocus -= RefreshPosAndLoc;
+            _masterForm.GotFocus -= RefreshPosAndLoc;
+
             if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                 int value = 0;
                 DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
-            _timerCheck.Dispose();
-            _timerCheck = null;
 
             if (disposing && (components != null)) {
                 components.Dispose();

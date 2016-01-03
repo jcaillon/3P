@@ -405,8 +405,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="args"></param>
-        private void HandleTypeClick(object sender, ButtonPressedEventArgs args) {
-            var mouseEvent = args.OriginalEventArgs as MouseEventArgs;
+        private void HandleTypeClick(object sender, EventArgs args) {
+            var mouseEvent = args as MouseEventArgs;
             CompletionType clickedType = ((SelectorButton<CompletionType>)sender).Type;
 
             // on right click

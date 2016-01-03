@@ -84,6 +84,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbEdit, "Click to <b>edit</b> this database definition (name and .pf path)");
             toolTip.SetToolTip(btDbAdd, "Click to <b>add</b> a new database definition (name and .pf path)<br>for the current environment");
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
+            toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
 
             toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected<br><br>This field is saved as a .pf file and is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'extra.pf'.</div><br><i>This is a different connect statement that for the .pf above</i>");
 
@@ -401,7 +402,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // refresh the info after the extraction
             DataBase.FetchCurrentDbInfo(UpdateDownloadButton);
         }
-        private void BtDeleteDownloadOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDeleteDownloadOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             DataBase.DeleteCurrentDbInfo();
             UpdateDownloadButton();
         }
@@ -420,7 +421,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <summary>
         ///  Click on "CANCEL" or "ADD NEW"
         /// </summary>
-        private void Btcontrol1ButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void Btcontrol1ButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             btcontrol1.UseCustomBackColor = false;
             if (_currentMode == ViewMode.Select) {
                 // Add new
@@ -443,7 +444,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <summary>
         /// Click on "SAVE" or "MODIFY"
         /// </summary>
-        private void Btcontrol2OnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void Btcontrol2OnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             if (_currentMode == ViewMode.Select) {
                 // modify
                 ToggleMode(ViewMode.Edit);
@@ -454,23 +455,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
         }
 
-        private void BtDeleteOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             _currentMode = ViewMode.Delete;
             if (Save())
                 ToggleMode(ViewMode.Select);
         }
 
-        private void BtDbDeleteOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             _currentMode = ViewMode.DbDelete;
             if (Save())
                 ToggleMode(ViewMode.Select);
         }
 
-        private void BtDbEditOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDbEditOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             ToggleMode(ViewMode.DbEdit);
         }
 
-        private void BtDbAddOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtDbAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             ToggleMode(ViewMode.DbAddNew);
         }
 
@@ -519,7 +520,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="buttonPressedEventArgs"></param>
-        private void BtleftOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtleftOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             var associatedTextBox = GetTextBoxByName(((Control)sender).Name);
             if (associatedTextBox == null) return;
             string tag = (string)(associatedTextBox.Tag ?? string.Empty);
@@ -535,7 +536,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="buttonPressedEventArgs"></param>
-        private void BtrightOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtrightOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             var associatedTextBox = GetTextBoxByName(((Control)sender).Name);
             if (associatedTextBox == null) return;
 

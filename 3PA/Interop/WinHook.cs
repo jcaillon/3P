@@ -17,190 +17,206 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using _3PA.Lib;
 
-#pragma warning disable 1591
+namespace _3PA.Interop {
 
-namespace _3PA.Interop
-{
-    public class ClickMouse {
-        [DllImport("user32.dll", CharSet = CharSet.Auto, CallingConvention = CallingConvention.StdCall)]
-        private static extern void mouse_event(uint dwFlags, uint dx, uint dy, uint cButtons, uint dwExtraInfo);
+    #region Keyboard hook
 
-        private const int MOUSEEVENTF_LEFTDOWN = 0x02;
-        private const int MOUSEEVENTF_LEFTUP = 0x04;
-        private const int MOUSEEVENTF_RIGHTDOWN = 0x08;
-        private const int MOUSEEVENTF_RIGHTUP = 0x10;
-        public static void DoMouseClick(int _x, int _y) {
-            //Call the imported function with the cursor's current position
-            int X = Cursor.Position.X;
-            int Y = Cursor.Position.Y;
-            mouse_event(MOUSEEVENTF_LEFTDOWN | MOUSEEVENTF_LEFTUP, (uint)(_x - X), (uint)(_y - Y), 0, 0);
-        }
-    }
-
-    public class WinHook<T> : LocalWindowsHook, IDisposable where T : new()
-    {
-        static T instance;
-
-        public static T Instance
-        {
-            get
-            {
-                if (instance == null)
-                    instance = new T();
-                return instance;
-            }
-        }
-
-        protected WinHook()
-            : base(HookType.WH_DEBUG)
-        {
-            m_filterFunc = Proc;
-        }
-
-        ~WinHook()
-        {
-            Dispose(false);
-        }
-
-        protected void Dispose(bool disposing)
-        {
-            if (IsInstalled)
-                Uninstall();
-
-            if (disposing)
-                GC.SuppressFinalize(this);
-        }
-
-        protected void Install(HookType type)
-        {
-            m_hookType = type;
-            base.Install();
-        }
-
-        public void Dispose()
-        {
-            Dispose(true);
-        }
-
-        protected int Proc(int code, IntPtr wParam, IntPtr lParam)
-        {
-            if (code == 0) //Win32.HC_ACTION
-                if (HandleHookEvent(wParam, lParam))
-                    return 1;
-
-            return CallNextHookEx(m_hhook, code, wParam, lParam);
-        }
-
-        virtual protected bool HandleHookEvent(IntPtr wParam, IntPtr lParam)
-        {
-            throw new NotSupportedException();
-        }
-    }
-
-    public class MouseMonitor : WinHook<MouseMonitor>
-    {
-        public event Action MouseMove;
-
-        override protected bool HandleHookEvent(IntPtr wParam, IntPtr lParam)
-        {
-            const int WM_MOUSEMOVE = 0x0200;
-            const int WM_NCMOUSEMOVE = 0x00A0;
-
-            if ((wParam.ToInt32() == WM_MOUSEMOVE || wParam.ToInt32() == WM_NCMOUSEMOVE) && MouseMove != null)
-            {
-                MouseMove();
-            }
-            return false;
-        }
-
-        public new void Install()
-        {
-            base.Install(HookType.WH_MOUSE);
-        }
-    }
-
-    public struct Modifiers
-    {
+    public struct KeyModifiers {
         public bool IsCtrl;
         public bool IsShift;
         public bool IsAlt;
     }
 
-    public class KeyInterceptor : WinHook<KeyInterceptor>
-    {
-        [DllImport("USER32.dll")]
-        static extern short GetKeyState(int nVirtKey);
+    public class KeyboardMonitor : WindowsHook<KeyboardMonitor> {
 
-        public static bool IsPressed(Keys key)
-        {
-            const int KEY_PRESSED = 0x8000;
-            return Convert.ToBoolean(GetKeyState((int)key) & KEY_PRESSED);
+        #region private
+
+        private HashSet<Keys> _keysToIntercept = new HashSet<Keys>();
+        public delegate void KeyDownHandler(Keys key, KeyModifiers modifiers, ref bool handled);
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Register to receive on keyPressed events
+        /// </summary>
+        public event KeyDownHandler KeyPressed;
+
+        /// <summary>
+        /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
+        /// </summary>
+        public void Add(params Keys[] keys) {
+            foreach (Keys key in keys.Where(key => !_keysToIntercept.Contains(key)))
+                _keysToIntercept.Add(key);
         }
 
-        public static Modifiers GetModifiers()
-        {
-            return new Modifiers
-            {
-                IsCtrl = IsPressed(Keys.ControlKey),
-                IsShift = IsPressed(Keys.ShiftKey),
-                IsAlt = IsPressed(Keys.Menu)
-            };
+        public void Clear() {
+            _keysToIntercept.Clear();
         }
 
-        public delegate void KeyDownHandler(Keys key, int repeatCount, ref bool handled);
-
-        public List<int> KeysToIntercept = new List<int>();
-
-        public new void Install()
-        {
+        /// <summary>
+        /// Call this method to start listening to events
+        /// </summary>
+        public new void Install() {
             base.Install(HookType.WH_KEYBOARD);
         }
 
-        public event KeyDownHandler KeyDown;
+        #endregion
 
-        public void Add(params Keys[] keys)
-        {
-            foreach (int key in keys)
-                if (!KeysToIntercept.Contains(key))
-                    KeysToIntercept.Add(key);
-        }
 
-        public void Remove(params Keys[] keys)
-        {
-            foreach (int key in keys)
-            {
-                //ignore for now as anyway the extra invoke will not do any harm 
-                //but eventually it needs to be ref counting based
-                //KeysToIntercept.RemoveAll(k => k == key);
-            }
-        }
+        #region Override HandleHookEvent
 
-        public const int KF_UP = 0x8000;
-        public const long KB_TRANSITION_FLAG = 0x80000000;
+        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            var key = (Keys)((int)wParam);
+            int context = (int) lParam;
 
-        override protected bool HandleHookEvent(IntPtr wParam, IntPtr lParam)
-        {
-            int key = (int)wParam;
-            int context = (int)lParam;
+            if (KeyPressed == null)
+                return false;
 
-            if (KeysToIntercept.Contains(key))
-            {
-                bool down = ((context & KB_TRANSITION_FLAG) != KB_TRANSITION_FLAG);
-                int repeatCount = (context & 0xFF00);
-                if (down && KeyDown != null)
-                {
+            if (_keysToIntercept.Contains(key)) {
+                // on key down
+                if (!context.IsBitSet(31)) {
                     bool handled = false;
-                    KeyDown((Keys)key, repeatCount, ref handled);
+                    KeyPressed(key, GetModifiers, ref handled);
                     return handled;
-                }
+                } 
             }
             return false;
         }
+
+        #endregion
+
+        #region Key modifiers
+
+        [DllImport("user32.dll")]
+        private static extern short GetKeyState(int nVirtKey);
+
+        private static bool IsPressed(Keys key) {
+            const int keyPressed = 0x8000;
+            return Convert.ToBoolean(GetKeyState((int) key) & keyPressed);
+        }
+
+        public static KeyModifiers GetModifiers {
+            get {
+                return new KeyModifiers {
+                    IsCtrl = IsPressed(Keys.ControlKey),
+                    IsShift = IsPressed(Keys.ShiftKey),
+                    IsAlt = IsPressed(Keys.Menu)
+                };
+            }
+        }
+
+        #endregion
+
     }
+
+    #endregion
+
+    #region GetMessage hook
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct MSG {
+        public IntPtr hwnd;
+        public UInt32 message;
+        public IntPtr wParam;
+        public IntPtr lParam;
+        public UInt32 time;
+        public POINT pt;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct POINT {
+        public Int32 x;
+        public Int32 y;
+
+        public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
+    }
+
+    public class CallWndProcMonitor : WindowsHook<CallWndProcMonitor> {
+
+        #region public
+
+        /// <summary>
+        /// Register to receive on keyPressed events
+        /// </summary>
+        public event MessageHandler GetMessage;
+        public delegate void MessageHandler(MSG message);
+
+        private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
+
+        /// <summary>
+        /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
+        /// </summary>
+        public void Add(params WindowsMessage[] messages) {
+            foreach (WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+                _messagesToIntercept.Add((uint)key);
+        }
+
+        public void Clear() {
+            _messagesToIntercept.Clear();
+        }
+
+        /// <summary>
+        /// Call this method to start listening to events
+        /// </summary>
+        public new void Install() {
+            base.Install(HookType.WH_GETMESSAGE);
+        }
+
+        #endregion
+
+
+        #region Override HandleHookEvent
+
+        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            MSG nc = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
+            if (GetMessage == null)
+                return false;
+            if (_messagesToIntercept.Contains(nc.message)) {
+                bool handled = false;
+                GetMessage(nc);
+                return handled;
+            }
+            return false;
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region Mouse hook
+
+    /// <summary>
+    /// To do when i need it, for now it's just an empty shell
+    /// </summary>
+    public class MouseMonitor : WindowsHook<MouseMonitor> {
+
+        public event Action MouseMove;
+
+        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            const int wmMousemove = 0x0200;
+            const int wmNcmousemove = 0x00A0;
+            if ((wParam.ToInt32() == wmMousemove || wParam.ToInt32() == wmNcmousemove) && MouseMove != null) {
+                MouseMove();
+            }
+            return false;
+        }
+
+        public new void Install() {
+            base.Install(HookType.WH_MOUSE);
+        }
+    }
+
+    #endregion
 
 }

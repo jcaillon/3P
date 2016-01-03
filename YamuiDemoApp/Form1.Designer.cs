@@ -31,7 +31,6 @@ namespace YamuiDemoApp {
         private void InitializeComponent() {
             this.yamuiLabel19 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel23 = new YamuiFramework.Controls.YamuiLabel();
-            this.statusLabel = new YamuiFramework.Controls.YamuiLabel();
             this.SuspendLayout();
             // 
             // yamuiLabel19
@@ -53,21 +52,11 @@ namespace YamuiDemoApp {
             this.yamuiLabel23.Size = new System.Drawing.Size(100, 23);
             this.yamuiLabel23.TabIndex = 11;
             // 
-            // statusLabel
-            // 
-            this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new System.Drawing.Point(1, 452);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(74, 15);
-            this.statusLabel.TabIndex = 12;
-            this.statusLabel.Text = "yamuiLabel1";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(806, 469);
-            this.Controls.Add(this.statusLabel);
             this.Controls.Add(this.yamuiLabel19);
             this.Controls.Add(this.yamuiLabel23);
             this.MinimumSize = new System.Drawing.Size(806, 469);
@@ -81,7 +70,6 @@ namespace YamuiDemoApp {
 
         private YamuiLabel yamuiLabel19;
         private YamuiLabel yamuiLabel23;
-        private YamuiLabel statusLabel;
 
 
     }

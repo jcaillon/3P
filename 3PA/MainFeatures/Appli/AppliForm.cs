@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
@@ -28,7 +29,6 @@ using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Html;
 using _3PA.Interop;
-using _3PA.MainFeatures.Appli.Pages;
 using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
@@ -52,13 +52,13 @@ namespace _3PA.MainFeatures.Appli {
 
             // create the tabs / content
             CreateContent(new List<YamuiMainMenu> {
-                new YamuiMainMenu("Home", "home", false, new List<YamuiSecMenu> {
+                new YamuiMainMenu("Home", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("WELCOME", "welcome", new HomePage())
                 }),
                 new YamuiMainMenu("Set", "set", false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", "environment", new SetEnvironment())
                 }),
-                new YamuiMainMenu("Options", "options", false, new List<YamuiSecMenu> {
+                new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("PROFILES", "profiles", new ProfilesPage()),
                     new YamuiSecMenu("GENERAL", "general", new OptionPage(new List<string> { "General" })),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
@@ -72,6 +72,20 @@ namespace _3PA.MainFeatures.Appli {
                 //    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
                 //})
             });
+
+            CreateTopLinks(new List<string> { "FEEDBACK", "REPORT A BUG", "HELP" }, (sender, tabArgs) => {
+                switch (tabArgs.SelectedIndex) {
+                    case 0:
+                        Process.Start(@"https://github.com/jcaillon/3P/issues/3");
+                        break;
+                    case 1:
+                        Process.Start(@"https://github.com/jcaillon/3P/issues");
+                        break;
+                    case 2:
+                        Process.Start(@"http://jcaillon.github.io/3P/");
+                        break;
+                }
+            }, 110, 8);
 
             // title
             UpdateTitle();
@@ -178,41 +192,37 @@ namespace _3PA.MainFeatures.Appli {
         }
         #endregion
 
-        #region events
+        #region Key pressed handler
 
-        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            if ((e.Alt && e.KeyCode == Keys.Space) || e.KeyCode == Keys.Escape) {
+        /// <summary>
+        /// Handling key board event sent from the global hook
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="keyModifiers"></param>
+        public bool HandleKeyPressed(Keys key, KeyModifiers keyModifiers) {
+            var handled = false;
+            if (key == Keys.Return) {
+                var activeCtrl = Appli.ActiveControl;
+                if (activeCtrl is YamuiTextBox) {
+                    // enter in a text box?
+                    var txtBox = ((YamuiTextBox) activeCtrl);
+                    if (txtBox.MultiLines) {
+                        txtBox.SelectedText = "";
+                        txtBox.AppendText("\n");
+                        txtBox.SelectionStart = txtBox.TextLength;
+                        txtBox.SelectionLength = 0;
+                        txtBox.ScrollToCaret();
+                    }
+                } else if (activeCtrl is YamuiButton) {
+                    // button, press enter
+                    ((YamuiButton) activeCtrl).HandlePressedButton();
+                }
+                handled = true;
+            } else if (key == Keys.Escape) {
                 Cloack();
-                e.IsInputKey = false;
+                handled = true;
             }
-            base.OnPreviewKeyDown(e);
-        }      
-
-        private void yamuiLink6_Click(object sender, EventArgs e) {
-            ShowPage("profiles");
-        }
-
-        private void yamuiLink7_Click(object sender, EventArgs e) {
-            ShowPage("welcome");
-        }
-
-        private void yamuiLink8_Click(object sender, EventArgs e) {
-            Process.Start(@"http://jcaillon.github.io/3P/");
-            /*
-            statusLabel.UseCustomForeColor = true;
-            statusLabel.ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
-            var t = new Transition(new TransitionType_Linear(500));
-            if (_lab) 
-                t.add(statusLabel, "Text", "Hello world!");
-            else
-                t.add(statusLabel, "Text", "<b>WARNING :</b> this user is awesome");
-            t.add(statusLabel, "ForeColor", ThemeManager.AccentColor);
-            t.TransitionCompletedEvent += (o, args) => {
-                Transition.run(statusLabel, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor, new TransitionType_CriticalDamping(400));
-            };
-            t.run();
-            _lab = !_lab;
-             * */
+            return handled;
         }
 
         #endregion

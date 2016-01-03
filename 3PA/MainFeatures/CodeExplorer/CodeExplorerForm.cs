@@ -550,7 +550,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Npp.GrabFocus();
         }
 
-        private void ButtonIncludeExternalOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void ButtonIncludeExternalOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
             RefreshParserAndCodeExplorer();

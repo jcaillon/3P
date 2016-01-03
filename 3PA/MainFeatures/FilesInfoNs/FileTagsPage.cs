@@ -121,28 +121,28 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             }
         }
 
-        private void BtokOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtokOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Save(Filename);
             Save(FileTag.LastTag);
             FileTag.Export();
             FileTag.Cloak();
         }
 
-        private void BtcancelOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtcancelOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             UpdateView();
             FileTag.Cloak();
         }
 
-        private void BtclearOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtclearOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             LocFileTagObject = new FileTagObject();
             UpdateView();
         }
 
-        private void BtdefaultOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BtdefaultOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Save(FileTag.DefaultTag);
         }
 
-        private void BttodayOnButtonPressed(object sender, ButtonPressedEventArgs buttonPressedEventArgs) {
+        private void BttodayOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy");
         }
 

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using YamuiFramework.Controls;
 
 namespace YamuiDemoApp.Pages.control {
@@ -182,7 +183,7 @@ namespace YamuiDemoApp.Pages.control {
             this.yamuiButton5.Size = new System.Drawing.Size(123, 24);
             this.yamuiButton5.TabIndex = 33;
             this.yamuiButton5.Text = "Blink highlight";
-            this.yamuiButton5.ButtonPressed += new System.EventHandler<YamuiFramework.Controls.ButtonPressedEventArgs>(this.yamuiButton5_ButtonPressed);
+            this.yamuiButton5.ButtonPressed += new System.EventHandler<EventArgs>(this.yamuiButton5_ButtonPressed);
             this.yamuiButton5.Click += new System.EventHandler(this.yamuiButton5_Click);
             // 
             // yamuiButton4

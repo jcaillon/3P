@@ -91,6 +91,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 } else {
                     Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
+                Form.RefreshPosAndLoc();
                 if (FakeForm == null) return;
                 UpdateMenuItemChecked();
             } catch (Exception e) {
