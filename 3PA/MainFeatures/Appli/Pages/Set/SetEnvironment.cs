@@ -115,6 +115,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             tgCompilLocl.CheckedChanged += TgCompilLoclOnCheckedChanged;
             btDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
             btDelete.ButtonPressed += BtDeleteOnButtonPressed;
+            btDownload.ButtonPressed += btDownload_Click;
 
             ToggleMode(ViewMode.Select);
         }

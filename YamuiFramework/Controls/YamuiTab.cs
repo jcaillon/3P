@@ -26,6 +26,8 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
+using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
@@ -153,6 +155,7 @@ namespace YamuiFramework.Controls {
                 // display the new page
                 Controls.Add(_currentPage);
                 _currentPage.Dock = DockStyle.Fill;
+                RedrawAllHtml(_currentPage);
                 _currentPage.Invalidate();
 
                 // Execute the page OnShow method
@@ -195,6 +198,19 @@ namespace YamuiFramework.Controls {
             CurrentPage = new Point(realIndex, _content[realIndex].LastVisitedPage);
 
             // focus secondary menu
+        }
+
+        private void RedrawAllHtml(Control ctrl) {
+            var controls = ControlHelper.GetAll(ctrl, typeof(HtmlLabel));
+            if (controls != null)
+                foreach (var control in controls) {
+                    control.Text = control.Text;
+                }
+            controls = ControlHelper.GetAll(ctrl, typeof(HtmlPanel));
+            if (controls != null)
+                foreach (var y in controls) {
+                    y.Text = y.Text;
+                }
         }
 
         private void SecondaryButtonsOnTabPressed(object sender, TabPressedEventArgs tabPressedEventArgs) {
@@ -260,16 +276,20 @@ namespace YamuiFramework.Controls {
             // the principle is easy, we create a foreground form on top of our form with the same back ground,
             // and we animate its opacity value from 1 to 0 to effectivly create a fade in animation
             if (_animSmokeScreen == null) {
-                _animSmokeScreen = new YamuiTabAnimation(_owner, new Rectangle(Left + Padding.Left, Top + Padding.Top, Width - Padding.Left - Padding.Right, Height - Padding.Top - Padding.Bottom)) { Opacity = 0d };
+                _animSmokeScreen = new YamuiTabAnimation(_owner, new Rectangle(Left + Padding.Left, Top + Padding.Top, Width - Padding.Left - Padding.Right, Height - Padding.Top - Padding.Bottom)) {Opacity = 0d};
                 return false;
+            } else {
+                _animSmokeScreen.Refresh();
             }
-            _animSmokeScreen.GoHide = false;
 
             // show the background image or not
             if (_currentPage.NoTransparentBackground)
                 _animSmokeScreen.DontShowBackGroundImage = true;
             else if (_animSmokeScreen.DontShowBackGroundImage)
                 _animSmokeScreen.DontShowBackGroundImage = false;
+
+            _animSmokeScreen.GoHide = false;
+
             return true;
         }
 

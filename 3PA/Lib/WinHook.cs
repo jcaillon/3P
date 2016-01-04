@@ -23,9 +23,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using _3PA.Lib;
+using _3PA.Interop;
 
-namespace _3PA.Interop {
+namespace _3PA.Lib {
 
     #region Keyboard hook
 
@@ -196,6 +196,14 @@ namespace _3PA.Interop {
 
     #region Mouse hook
 
+    [StructLayout(LayoutKind.Sequential)]
+    struct MOUSEHOOKSTRUCT {
+        public POINT pt;
+        public IntPtr hwnd;
+        public uint wHitTestCode;
+        public IntPtr dwExtraInfo;
+    }
+
     /// <summary>
     /// To do when i need it, for now it's just an empty shell
     /// </summary>
@@ -204,6 +212,7 @@ namespace _3PA.Interop {
         public event Action MouseMove;
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
             const int wmMousemove = 0x0200;
             const int wmNcmousemove = 0x00A0;
             if ((wParam.ToInt32() == wmMousemove || wParam.ToInt32() == wmNcmousemove) && MouseMove != null) {

@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Xml.Serialization;
@@ -96,6 +95,21 @@ namespace _3PA.Lib {
 
         #endregion
 
+
+        /// <summary>
+        /// Checks if a directory is writable as is
+        /// </summary>
+        /// <param name="dirPath"></param>
+        /// <returns></returns>
+        public static bool IsDirectoryWritable(string dirPath) {
+            try {
+                using (FileStream fs = File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose)) { }
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
         /// <summary>
         /// Delete a dir, recursively
         /// </summary>
@@ -149,10 +163,11 @@ namespace _3PA.Lib {
         public static string ShowFileSelection(string initialFile, string filter) {
             OpenFileDialog dialog = new OpenFileDialog {
                 Multiselect = false,
-                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter
+                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
+                Title = "Select a file"
             };
             var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
-            if (initialFolder != null && Directory.Exists(initialFolder))
+            if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                 dialog.InitialDirectory = initialFolder;
             if (File.Exists(initialFile))
                 dialog.FileName = initialFile;
@@ -166,6 +181,15 @@ namespace _3PA.Lib {
         /// <param name="initialFolder"></param>
         /// <returns></returns>
         public static string ShowFolderSelection(string initialFolder) {
+            // Prepare a dummy string, thos would appear in the dialog
+            string dummyFileName = "Select a folder";
+            SaveFileDialog sf = new SaveFileDialog {
+                FileName = dummyFileName,
+                Title = "Select a folder"
+            };
+            if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
+                sf.InitialDirectory = initialFolder;
+            return sf.ShowDialog() == DialogResult.OK ? Path.GetDirectoryName(sf.FileName) : string.Empty;
             var fbd = new FolderBrowserDialog();
             if (Directory.Exists(initialFolder))
                 fbd.SelectedPath = initialFolder;

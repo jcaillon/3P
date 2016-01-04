@@ -39,17 +39,12 @@ namespace _3PA.MainFeatures {
     public class UpdateHandler {
 
         private static string PathUpdateFolder { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
-
         private static string PathDownloadedPlugin { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3P.dll"); } }
-
         private static string Path7ZipExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.exe"); } }
-
         private static string Path7ZipDll { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.dll"); } }
-
         private static string PathUpdaterExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3pUpdater.exe"); } }
-
+        private static string PathUpdaterLst { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3pUpdater.lst"); } }
         private static string PathLatestReleaseZip { get { return Path.Combine(Npp.GetConfigDir(), "Update", "latestRelease.zip"); } }
-
         private static string PathToVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
 
         /// <summary>
@@ -232,9 +227,12 @@ namespace _3PA.MainFeatures {
                     return;
                 }
 
-                // copy the 3pUpdater.exe, which basically copies the downloaded version of the plugin into the /plugins/ dir
+                // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
                 if (!File.Exists(PathUpdaterExe))
-                    File.WriteAllBytes(PathUpdaterExe, Resources._3pUpdater);
+                    File.WriteAllBytes(PathUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
+
+                // configure the update
+                File.WriteAllText(PathUpdaterLst, string.Join("\t", PathDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
 
                 // write the version log
                 File.WriteAllText(PathToVersionLog, LatestReleaseInfo.Body, Encoding.Default);
@@ -251,11 +249,11 @@ namespace _3PA.MainFeatures {
                 <br>
                 A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
                 <br>
-                Your version : <b>" + AssemblyInfo.Version + @"</b><br>
-                Distant version : <b>" + LatestReleaseInfo.Version + @"</b><br>
-                Release name : <b>" + LatestReleaseInfo.Name + @"</b><br>
-                Available since : <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
-                Release URL : <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
+                Your version: <b>" + AssemblyInfo.Version + @"</b><br>
+                Distant version: <b>" + LatestReleaseInfo.Version + @"</b><br>
+                Release name: <b>" + LatestReleaseInfo.Name + @"</b><br>
+                Available since: <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
+                Release URL: <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
                 ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
         }
 
@@ -301,7 +299,7 @@ namespace _3PA.MainFeatures {
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
                         You will have to manually copy the new file and delete the old file :<br><br>
-                        Copy this file : <a href='" + Path.GetDirectoryName(PathDownloadedPlugin) + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
+                        <b>Move</b> this file : <a href='" + Path.GetDirectoryName(PathDownloadedPlugin) + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
                         In this folder (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
                         Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");

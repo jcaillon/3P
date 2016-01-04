@@ -294,7 +294,7 @@ namespace _3PA {
             //});
 
             // hook onto messages sent to npp, to be able to correctly refresh the location/size of the explorers
-            CallWndProcMonitor.Instance.Add(WindowsMessage.WM_MOUSEMOVE);
+            CallWndProcMonitor.Instance.Add(WindowsMessage.WM_MOUSEMOVE, WindowsMessage.WM_NCMOUSELEAVE);
             CallWndProcMonitor.Instance.GetMessage += InstanceOnGetMessage;
             CallWndProcMonitor.Instance.Install();
 
@@ -717,11 +717,33 @@ namespace _3PA {
 
         #region private
 
+        /// <summary>
+        /// Handles the messages we receive from npp's hook
+        /// </summary>
+        /// <param name="message"></param>
         private static void InstanceOnGetMessage(MSG message) {
+            switch (message.message) {
+                case (uint) WindowsMessage.WM_MOUSEMOVE:
+                    var buttPressed = message.wParam.ToInt32();
+                    // left or right click pressed
+                    if (buttPressed == 1 || buttPressed == 2) {
+                        UpdateExplorersPos();
+                    
+                    }
+                    break;
+                default:
+                    UpdateExplorersPos();
+                    break;
+            }
+        }
+        private static int derp;
+
+        private static void UpdateExplorersPos() {
             if (FileExplorer.IsVisible)
-                FileExplorer.Form.RefreshPosAndLoc(null, new EventArgs());
+                FileExplorer.Form.RefreshPosAndLoc();
             if (CodeExplorer.IsVisible)
-                CodeExplorer.Form.RefreshPosAndLoc(null, new EventArgs());
+                CodeExplorer.Form.RefreshPosAndLoc();
+            derp++;
         }
 
         #endregion
@@ -734,7 +756,7 @@ namespace _3PA {
 
         public static void Test() {
 
-            UserCommunication.Notify(FileExplorer.Form.Location + " " + FileExplorer.Form.Size);
+            UserCommunication.Notify(derp.ToString());
             return;
 
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),

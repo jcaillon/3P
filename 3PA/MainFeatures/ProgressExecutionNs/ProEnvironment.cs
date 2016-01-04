@@ -125,6 +125,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (_currentEnv == null) {
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProEnvironmentObject();
             }
+            // set database
+            if (!_currentEnv.DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase))
+                Config.Instance.EnvDatabase = (_currentEnv.DbConnectionInfo.Count > 0) ? _currentEnv.DbConnectionInfo.First().Key : String.Empty;
             // need to compute the propath again
             Current.ReComputeProPath();
         }

@@ -22,8 +22,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
-using YamuiFramework.Helper;
-using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.MainFeatures.AutoCompletion;
@@ -126,47 +124,34 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void PlsRefresh() {
             var thisForm = FindForm();
-            if (thisForm != null) {
-                Style.SetSyntaxStyles();
-                Style.SetGeneralStyles();
+            if (thisForm == null || Appli.Form == null)
+                return;
 
-                // Refresh panels and labels (html)
-                LocalHtmlHandler.ProvideCssSheet();
+            Style.SetSyntaxStyles();
+            Style.SetGeneralStyles();
 
-                try {
-                    var x = ControlHelper.GetAll(FindForm(), typeof (HtmlLabel));
-                    if (x != null)
-                        foreach (var y in x) {
-                            y.Text = y.Text;
-                        }
-                    x = ControlHelper.GetAll(FindForm(), typeof(HtmlPanel));
-                    if (x != null)
-                        foreach (var y in x) {
-                            y.Text = y.Text;
-                        }
-                } catch (Exception x) {
-                    ErrorHandler.DirtyLog(x);
-                }
+            // Refresh panels and labels (html)
+            LocalHtmlHandler.ProvideCssSheet();
 
-                // force the autocomplete to redraw
-                AutoComplete.ForceClose();
+            // force the autocomplete to redraw
+            AutoComplete.ForceClose();
 
-                // force the dockable to redraw
-                CodeExplorer.CodeExplorer.ApplyColorSettings();
-                FileExplorer.FileExplorer.ApplyColorSettings();
+            // force the dockable to redraw
+            CodeExplorer.CodeExplorer.ApplyColorSettings();
+            FileExplorer.FileExplorer.ApplyColorSettings();
 
-                Application.DoEvents();
-                thisForm.Invalidate();
-                Application.DoEvents();
-                thisForm.Update();
-                Application.DoEvents();
-                thisForm.Refresh();
+            Application.DoEvents();
+            thisForm.Invalidate();
+            Application.DoEvents();
+            thisForm.Update();
+            Application.DoEvents();
+            thisForm.Refresh();
 
-                Appli.Form.UpdateTitle();
+            Appli.Form.UpdateTitle();
 
-                // file tags
-                FileTag.ForceClose();
-            }
+            // file tags
+            FileTag.ForceClose();
+
         }
     }
 }

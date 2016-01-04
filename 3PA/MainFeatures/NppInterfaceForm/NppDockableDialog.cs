@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Interop;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 

@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
 using _3PA.Html;
-using _3PA.MainFeatures;
+using _3PA.Interop;
 
-namespace _3PA.Interop {
+namespace _3PA.MainFeatures {
     public class NppMenu {
 
         /// <summary>

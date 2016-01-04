@@ -127,6 +127,8 @@ namespace YamuiFramework.Forms {
             StartPosition = FormStartPosition.CenterScreen;
             TransparencyKey = Color.Fuchsia;
 
+            _mainFormToolTip.ShowAlways = true;
+
             Shown += OnShown;
         }
 

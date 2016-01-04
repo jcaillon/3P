@@ -17,11 +17,12 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Text;
-using _3PA.Lib;
+using _3PA.Interop;
 
-namespace _3PA.Interop {
+namespace _3PA.Lib {
 
     /// <summary>
     /// For every scintilla message that involves a position, the exepect position (expected by scintilla) is the

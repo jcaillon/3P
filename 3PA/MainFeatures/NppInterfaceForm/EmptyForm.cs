@@ -21,6 +21,7 @@
 using System.ComponentModel;
 using System.Windows.Forms;
 using _3PA.Interop;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 

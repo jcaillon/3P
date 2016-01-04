@@ -417,7 +417,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDownload.TabIndex = 48;
             this.btDownload.TabStop = false;
             this.btDownload.Text = "yamuiImageButtonDB";
-            this.btDownload.Click += new System.EventHandler(this.btDownload_Click);
             // 
             // lblLocally
             // 

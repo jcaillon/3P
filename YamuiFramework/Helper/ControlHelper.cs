@@ -34,7 +34,8 @@ namespace YamuiFramework.Helper {
         /// <returns></returns>
         public static IEnumerable<Control> GetAll(Control control, Type type) {
             var controls = control.Controls.Cast<Control>();
-            return controls.SelectMany(ctrl => GetAll(ctrl, type)).Concat(controls).Where(c => c.GetType() == type);
+            var enumerable = controls as IList<Control> ?? controls.ToList();
+            return enumerable.SelectMany(ctrl => GetAll(ctrl, type)).Concat(enumerable).Where(c => c.GetType() == type);
         }
 
         /// <summary>

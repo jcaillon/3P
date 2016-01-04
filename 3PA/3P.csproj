@@ -88,7 +88,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Interop\DocumentLines.cs" />
+    <Compile Include="Lib\DocumentLines.cs" />
     <Compile Include="Interop\NotepadHelper.cs" />
     <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\GapBuffer.cs" />
@@ -216,10 +216,10 @@
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
     <Compile Include="Interop\CoreWindowsHook.cs" />
     <Compile Include="Interop\ScintillaHelper.cs" />
-    <Compile Include="Interop\SetCommand.cs" />
+    <Compile Include="MainFeatures\SetCommand.cs" />
     <Compile Include="Interop\Win32.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />
-    <Compile Include="Interop\WinHook.cs" />
+    <Compile Include="Lib\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />
     <Compile Include="Lib\BinWriter.cs" />
     <Compile Include="Lib\DropToWindows.cs" />
@@ -483,6 +483,7 @@
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
+    <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
     <Content Include="Lib\3pUpdater\7z.dll" />
     <Content Include="Lib\3pUpdater\7z.exe" />
     <Content Include="Lib\ObjectListView\ObjectListView.dll" />

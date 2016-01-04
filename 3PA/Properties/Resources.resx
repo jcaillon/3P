@@ -130,6 +130,9 @@
   <data name="_3pUpdater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\3pupdater\3pupdater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="_3pUpdater_user" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\lib\3pupdater\3pupdater_user.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="_7z" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\lib\3pupdater\7z.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
