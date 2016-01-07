@@ -1042,6 +1042,13 @@ namespace _3PA.MainFeatures.Parser {
                         if (token is TokenWord) {
                             if (token.Value.EqualsCi("private")) isPrivate = true;
                             if (token.Value.EqualsCi("extent") && createdFunc != null) createdFunc.IsExtended = true;
+
+                            // we didn't match any opening (, but we found a forward
+                            if (token.Value.EqualsCi("forward")) {
+                                if (!_functionPrototype.ContainsKey(name))
+                                    _functionPrototype.Add(name, new Point(functionToken.Line, functionToken.Column));
+                                createdFunc = null;
+                            }
                         }
                         else if (!(token is TokenSymbol)) break;
                         if (token.Value.Equals("(")) state = 3;

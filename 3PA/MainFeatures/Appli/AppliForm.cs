@@ -208,9 +208,9 @@ namespace _3PA.MainFeatures.Appli {
                     // enter in a text box?
                     var txtBox = ((YamuiTextBox) activeCtrl);
                     if (txtBox.MultiLines) {
-                        txtBox.SelectedText = "";
-                        txtBox.AppendText("\n");
-                        txtBox.SelectionStart = txtBox.TextLength;
+                        var initialPos = txtBox.SelectionStart;
+                        txtBox.Text = txtBox.Text.Substring(0, initialPos) + "\r\n" + (initialPos < txtBox.TextLength ? txtBox.Text.Substring(initialPos, txtBox.TextLength - initialPos) : "");
+                        txtBox.SelectionStart = initialPos + 2;
                         txtBox.SelectionLength = 0;
                         txtBox.ScrollToCaret();
                     }

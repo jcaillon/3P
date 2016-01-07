@@ -123,8 +123,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _form.SetPosition(point, lineHeight + 5);
 
             _openedFromDwell = openTemporary;
-            if (!_form.Visible)
+            if (!_form.Visible) {
                 _form.UnCloack();
+            }
+
+            if (_form.AutoScroll) {
+                _form.Refresh();
+            }
         }
 
         /// <summary>
@@ -275,11 +280,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         if (data.FromParser) {
                             if (data.ParsedItem is ParsedDefine) {
                                 toDisplay.Append(FormatRowWithImg(ParseFlag.Buffer.ToString(), "BUFFER FOR " + FormatSubString(data.SubString)));
-                            } else {
-                                if (data.ParsedItem is ParsedTable && !string.IsNullOrEmpty(data.SubString)) {
-                                    toDisplay.Append(FormatRow("Is like", (data.SubString.Contains("?")) ? "Unknow table [" + ((ParsedTable)data.ParsedItem).LcLikeTable + "]" : data.SubString.Replace("Like ", "")));
-                                } 
                             }
+                            if (data.ParsedItem is ParsedTable && !string.IsNullOrEmpty(data.SubString)) {
+                                toDisplay.Append(FormatRow("Is like", (data.SubString.Contains("?")) ? "Unknow table [" + ((ParsedTable)data.ParsedItem).LcLikeTable + "]" : data.SubString.Replace("Like ", "")));
+                            } 
                         }
 
                         var tbItem = ParserHandler.FindAnyTableOrBufferByName(data.DisplayText);

@@ -12109,6 +12109,11 @@
             the original ordering of model objects is lost when Sort() is called. So this method
             effectively just turns off sorting.</remarks>
         </member>
+        <member name="M:BrightIdeasSoftware.FastObjectListView.OnPreviewKeyDown(System.Windows.Forms.PreviewKeyDownEventArgs)">
+            <summary>
+            OnPreviewKeyDown
+            </summary>
+        </member>
         <member name="P:BrightIdeasSoftware.FastObjectListView.FilteredObjects">
             <summary>
             Gets the collection of objects that survive any filtering that may be in place.
@@ -12127,6 +12132,11 @@
             code and performance is O(n) where n is the number of selected rows.</para>
             <para>This method is not thread safe.</para>
             </remarks>
+        </member>
+        <member name="P:BrightIdeasSoftware.FastObjectListView.UseTabAsInput">
+            <summary>
+            Allow to view the tab key in the KeyDown event
+            </summary>
         </member>
         <member name="M:BrightIdeasSoftware.FastDataListView.CreateDataSourceAdapter">
             <summary>
@@ -16276,6 +16286,26 @@
             Large error (Vista and later only)
             </summary>
         </member>
+        <member name="T:BrightIdeasSoftware.Utilities.IconSizeZ">
+            <summary>
+            icon size
+            </summary>
+        </member>
+        <member name="F:BrightIdeasSoftware.Utilities.IconSizeZ.Large">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:BrightIdeasSoftware.Utilities.IconSizeZ.Small">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:BrightIdeasSoftware.Utilities.IconSizeZ.Shell">
+            <summary>
+            
+            </summary>
+        </member>
         <member name="T:BrightIdeasSoftware.Utilities.ImagelistAdd">
             <summary>
             This class contains static methods to overcome the problems with the imagelist control
@@ -16309,9 +16339,6 @@
             <summary>
             Adds an alphablended icon or image to an existing imagelist from an external image or icon file.
             </summary>
-            <param name="FileName">The full path to a 32bit alphablended file.</param>
-            <param name="Imagelist">An existing imagelist to add the image or icon to.</param>
-            <example>.FromFile( "C:\\file.ico", toolbarImagelist );</example>
         </member>
         <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.AddIconOfFile(System.String,BrightIdeasSoftware.Utilities.IconSizeZ,System.Boolean,System.Boolean,System.Boolean,System.Windows.Forms.ImageList)">
             <summary>
@@ -16357,9 +16384,6 @@
             <summary>
             Adds a 32bit alphablended icon or image to an existing imagelist from an embedded image or icon.
             </summary>
-            <param name="ResourceName">The name of an embedded resource.</param>
-            <param name="Imagelist">An existing imagelist to add the resource to.</param>
-            <example>.AddEmbeddedResource( "ProjectName.file.ico", toolbarImagelist );</example>
         </member>
         <member name="M:BrightIdeasSoftware.Utilities.ImagelistAdd.Add(System.String,System.Windows.Forms.ImageList,System.UInt32)">
             <summary>

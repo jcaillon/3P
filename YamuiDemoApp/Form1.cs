@@ -39,7 +39,7 @@ namespace YamuiDemoApp {
                         toastNotification.Show();
                         var toastNotification2 = new YamuiNotifications("<img src='poison' />Can i display a link? <br><a href='plswork?'>yop</a>", 0);
                         toastNotification2.LinkClicked += (o, args) => {
-                        MessageBox.Show(args.Link);
+                            MessageBox.Show(args.Link);
                         };
                         toastNotification2.Show();
                         break;
@@ -49,8 +49,5 @@ namespace YamuiDemoApp {
                 }
             });
         }
-
-        private static bool _lab = true;
-
     }
 }

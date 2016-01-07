@@ -776,18 +776,10 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
 
-            Color endingColor;
-
-            if (updatedOperationEventArgs.CurrentOperation == 0) {
-                endingColor = ThemeManager.Current.FormColorBackColor;
-            } else {
-                endingColor = ThemeManager.AccentColor;
-            }
-
             // blink back color
             if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
                 lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.BackColor = endingColor; });
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.UseCustomBackColor = false; });
             }
 
             // text

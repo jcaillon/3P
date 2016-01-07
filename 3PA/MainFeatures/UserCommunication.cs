@@ -130,6 +130,7 @@ namespace _3PA.MainFeatures {
                 HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
                 if (req == null)
                     return false;
+                req.Proxy = Config.Instance.GetWebClientProxy();
                 req.Method = "POST";
                 req.ContentType = "application/json";
                 req.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)";

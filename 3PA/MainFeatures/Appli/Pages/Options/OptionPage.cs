@@ -113,7 +113,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Tag = strControl,
                         TabStop = false
                     };
-                    strButton.ButtonPressed += NumButtonOnButtonPressed;
+                    strButton.ButtonPressed += SaveButtonOnButtonPressed;
                     dockedPanel.Controls.Add(strButton);
                     tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
@@ -141,13 +141,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                     dockedPanel.Controls.Add(numControl);
                     var numButton = new YamuiImageButton {
+                        Text = @"save",
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
                         Location = new Point(545, yPos),
                         Tag = numControl,
                         TabStop = false
                     };
-                    numButton.ButtonPressed += NumButtonOnButtonPressed;
+                    numButton.ButtonPressed += SaveButtonOnButtonPressed;
                     dockedPanel.Controls.Add(numButton);
                     tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
@@ -187,6 +188,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             var defaultButton = new YamuiButton {
                 Location = new Point(30, yPos),
                 Size = new Size(100, 23),
+                Text = @"Save everything"
+            };
+            defaultButton.ButtonPressed += SaveAllButtonOnButtonPressed;
+            tooltip.SetToolTip(defaultButton, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
+            dockedPanel.Controls.Add(defaultButton);
+
+            defaultButton = new YamuiButton {
+                Location = new Point(135, yPos),
+                Size = new Size(100, 23),
                 Text = @"Reset to default"
             };
             defaultButton.ButtonPressed += DefaultButtonOnButtonPressed;
@@ -196,7 +206,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // add a button for the updates
             if (_allowedGroups.Contains("Updates")) {
                 var updateButton = new YamuiButton {
-                    Location = new Point(135, yPos),
+                    Location = new Point(240, yPos),
                     Size = new Size(130, 23),
                     Text = @"Check for updates"
                 };
@@ -224,6 +234,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region on events
 
+        private void SaveAllButtonOnButtonPressed(object sender, EventArgs eventArgs) {
+            // refresh stuff on screen
+            foreach (var control in dockedPanel.Controls) {
+                var ctrl = (Control)control;
+                if (ctrl is YamuiImageButton && ((YamuiImageButton)ctrl).Text.Equals(@"save")) {
+                    SaveButtonOnButtonPressed(ctrl, new EventArgs());
+                }
+            }
+        }
+
         private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             // find the corresponding control
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
@@ -238,7 +258,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Save();
         }
 
-        private void NumButtonOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void SaveButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
             var propertyName = (string) textBox.Tag;
             if (Config.Instance.GetValueOf(propertyName) is string) {

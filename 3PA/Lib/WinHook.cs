@@ -149,7 +149,7 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetMessage;
-        public delegate void MessageHandler(MSG message);
+        public delegate void MessageHandler(MSG message, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
@@ -182,11 +182,63 @@ namespace _3PA.Lib {
             if (GetMessage == null)
                 return false;
             if (_messagesToIntercept.Contains(nc.message)) {
-                bool handled = false;
-                GetMessage(nc);
+                bool handled;
+                GetMessage(nc, out handled);
                 return handled;
             }
             return false;
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region Cbt hook
+    public enum HCBT {
+        MoveSize = 0,
+        MinMax = 1,
+        QueueSync = 2,
+        CreateWnd = 3,
+        DestroyWnd = 4,
+        Activate = 5,
+        ClickSkipped = 6,
+        KeySkipped = 7,
+        SysCommand = 8,
+        SetFocus = 9
+    }
+
+    public class CbtMonitor : WindowsHook<CbtMonitor> {
+
+        #region public
+
+        /// <summary>
+        /// Register to receive on keyPressed events
+        /// </summary>
+        public event MessageHandler GetCode;
+        public delegate void MessageHandler(HCBT code);
+
+        /// <summary>
+        /// Call this method to start listening to events
+        /// </summary>
+        public new void Install() {
+            CallBackFunction = ThisCallBackFunction;
+            base.Install(HookType.WH_CBT);
+        }
+
+        #endregion
+
+        #region Override HandleHookEvent
+
+        /// <summary>
+        /// Override the callback function handling the events so we can return wether or not the event has been handled
+        /// </summary>
+        private int ThisCallBackFunction(int code, IntPtr wParam, IntPtr lParam) {
+            if (code >= 0) {
+                if (GetCode != null)
+                    GetCode((HCBT)code);
+            }
+            return CallNextHookEx(InternalHook, code, wParam, lParam);
         }
 
         #endregion
@@ -209,21 +261,52 @@ namespace _3PA.Lib {
     /// </summary>
     public class MouseMonitor : WindowsHook<MouseMonitor> {
 
-        public event Action MouseMove;
+        #region public
 
-        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
-            const int wmMousemove = 0x0200;
-            const int wmNcmousemove = 0x00A0;
-            if ((wParam.ToInt32() == wmMousemove || wParam.ToInt32() == wmNcmousemove) && MouseMove != null) {
-                MouseMove();
-            }
-            return false;
+        /// <summary>
+        /// Register to receive on keyPressed events
+        /// </summary>
+        public event MessageHandler GetMouseMessage;
+        public delegate void MessageHandler(WindowsMessage message, out bool handled);
+
+        private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
+
+        /// <summary>
+        /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
+        /// </summary>
+        public void Add(params WindowsMessage[] messages) {
+            foreach (WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+                _messagesToIntercept.Add((uint)key);
         }
 
+        public void Clear() {
+            _messagesToIntercept.Clear();
+        }
+
+        /// <summary>
+        /// Call this method to start listening to events
+        /// </summary>
         public new void Install() {
             base.Install(HookType.WH_MOUSE);
         }
+
+        #endregion
+
+
+        #region Override HandleHookEvent
+
+        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            //MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
+            if (GetMouseMessage == null)
+                return false;
+            if (!_messagesToIntercept.Contains((uint) wParam)) 
+                return false;
+            bool handled;
+            GetMouseMessage((WindowsMessage) wParam, out handled);
+            return handled;
+        }
+
+        #endregion
     }
 
     #endregion

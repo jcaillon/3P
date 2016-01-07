@@ -524,10 +524,11 @@ namespace _3PA.MainFeatures.Parser {
             if (!string.IsNullOrEmpty(pars.LcLikeTable)) {
                 var foundTable = ParserHandler.FindAnyTableByName(pars.LcLikeTable);
                 if (foundTable != null) {
+                    // add the fields of the found table (minus the primary information)
+                    subStr = @"Like " + foundTable.Name;
+
                     // handles the use-index, for now only add the isPrimary flag to the field...
                     if (!string.IsNullOrEmpty(pars.UseIndex)) {
-                        // add the fields of the found table (minus the primary information)
-                        subStr = @"Like " + foundTable.Name;
                         foreach (var field in foundTable.Fields) {
                             pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.AsLike) {
                                 Type = field.Type

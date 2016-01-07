@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -186,6 +187,7 @@ namespace _3PA {
                 // uninstall hooks
                 CallWndProcMonitor.Instance.Uninstall();
                 KeyboardMonitor.Instance.Uninstall();
+                CbtMonitor.Instance.Uninstall();
 
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
@@ -270,6 +272,8 @@ namespace _3PA {
                 FileExplorer.Toggle();
             }
 
+            Npp.GrabFocus();
+
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
@@ -294,9 +298,12 @@ namespace _3PA {
             //});
 
             // hook onto messages sent to npp, to be able to correctly refresh the location/size of the explorers
-            CallWndProcMonitor.Instance.Add(WindowsMessage.WM_MOUSEMOVE, WindowsMessage.WM_NCMOUSELEAVE);
+            CallWndProcMonitor.Instance.Add(WindowsMessage.WM_MOUSEMOVE, WindowsMessage.WM_MBUTTONDOWN);
             CallWndProcMonitor.Instance.GetMessage += InstanceOnGetMessage;
             CallWndProcMonitor.Instance.Install();
+
+            CbtMonitor.Instance.GetCode += InstanceOnGetCode;
+            CbtMonitor.Instance.Install();
 
             // this is done async anyway
             FileExplorer.RebuildItemList();
@@ -497,7 +504,7 @@ namespace _3PA {
                     }
 
                     // replace abbreviation by completekeyword
-                    if (Config.Instance.CodeReplaceAbbreviations) {
+                    if (replacementWord == null && Config.Instance.CodeReplaceAbbreviations) {
                         var fullKeyword = Keywords.GetFullKeyword(keyword);
                         if (fullKeyword != null)
                             replacementWord = fullKeyword;
@@ -720,8 +727,7 @@ namespace _3PA {
         /// <summary>
         /// Handles the messages we receive from npp's hook
         /// </summary>
-        /// <param name="message"></param>
-        private static void InstanceOnGetMessage(MSG message) {
+        private static void InstanceOnGetMessage(MSG message, out bool handled) {
             switch (message.message) {
                 case (uint) WindowsMessage.WM_MOUSEMOVE:
                     var buttPressed = message.wParam.ToInt32();
@@ -731,19 +737,37 @@ namespace _3PA {
                     
                     }
                     break;
+                case (uint) WindowsMessage.WM_MBUTTONDOWN:
+                    //Rectangle scintillaRectangle = Rectangle.Empty;
+                    //Win32.GetWindowRect(Npp.HandleScintilla, ref scintillaRectangle);
+                    //if (scintillaRectangle.Contains(Cursor.Position))
+                    if (KeyboardMonitor.GetModifiers.IsCtrl)
+                        ProCodeUtils.GoToDefinition(true);
+                    handled = true;
+                    return;
                 default:
                     UpdateExplorersPos();
                     break;
             }
+            handled = false;
         }
-        private static int derp;
+
+        /// <summary>
+        /// Handles the messages we receive from npp
+        /// </summary>
+        private static void InstanceOnGetCode(HCBT code) {
+            switch (code) {
+                case HCBT.MoveSize:
+                    UpdateExplorersPos();
+                    break;
+            }
+        }
 
         private static void UpdateExplorersPos() {
             if (FileExplorer.IsVisible)
                 FileExplorer.Form.RefreshPosAndLoc();
             if (CodeExplorer.IsVisible)
                 CodeExplorer.Form.RefreshPosAndLoc();
-            derp++;
         }
 
         #endregion
@@ -755,9 +779,6 @@ namespace _3PA {
         }
 
         public static void Test() {
-
-            UserCommunication.Notify(derp.ToString());
-            return;
 
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,

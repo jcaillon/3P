@@ -55,7 +55,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 }
             }
 
-            // themes comob box
+            // themes combo box
             comboTheme.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
             comboTheme.SelectedIndex = ThemeManager.CurrentThemeIndex;
 
@@ -100,7 +100,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 ErrorHandler.DirtyLog(x);
             } finally {
                 Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-                Style.SetSyntaxStyles();
+                if (Plug.IsCurrentFileProgress)
+                    Style.SetSyntaxStyles();
             }
         }
 

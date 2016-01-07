@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures {
         /// go to the definition of the displayed word, otherwise it tries to find the declaration of the parsed word under the
         /// caret. At last, it tries to find a file in the propath
         /// </summary>
-        public static void GoToDefinition() {
+        public static void GoToDefinition(bool fromMouseClick) {
             try {
                 if (!Plug.AllowFeatureExecution())
                     return;
@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures {
                 }
 
                 // try to go to the definition of the selected word
-                var position = Npp.CurrentPosition;
+                var position = fromMouseClick ? Npp.GetPositionFromMouseLocation() : Npp.CurrentPosition;
                 var curWord = Npp.GetWordAtPosition(position);
 
 
@@ -91,6 +91,10 @@ namespace _3PA.MainFeatures {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoToDefinition");
             }
+        }
+
+        public static void GoToDefinition() {
+            GoToDefinition(false);
         }
 
         #endregion

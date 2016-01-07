@@ -117,8 +117,14 @@ namespace BrightIdeasSoftware
         }
 
         #region Custom for 3PA
+        /// <summary>
+        /// Allow to view the tab key in the KeyDown event
+        /// </summary>
         public bool UseTabAsInput { get; set; }
 
+        /// <summary>
+        /// OnPreviewKeyDown
+        /// </summary>
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
             if (UseTabAsInput && e.KeyCode == Keys.Tab) e.IsInputKey = true;
             base.OnPreviewKeyDown(e);

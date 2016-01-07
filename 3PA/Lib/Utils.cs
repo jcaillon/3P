@@ -190,10 +190,10 @@ namespace _3PA.Lib {
             if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                 sf.InitialDirectory = initialFolder;
             return sf.ShowDialog() == DialogResult.OK ? Path.GetDirectoryName(sf.FileName) : string.Empty;
-            var fbd = new FolderBrowserDialog();
-            if (Directory.Exists(initialFolder))
-                fbd.SelectedPath = initialFolder;
-            return fbd.ShowDialog() == DialogResult.OK ? fbd.SelectedPath : string.Empty;
+            //var fbd = new FolderBrowserDialog();
+            //if (Directory.Exists(initialFolder))
+            //    fbd.SelectedPath = initialFolder;
+            //return fbd.ShowDialog() == DialogResult.OK ? fbd.SelectedPath : string.Empty;
         }
 
         /// <summary>

@@ -23,6 +23,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net;
 using _3PA.Html;
 using _3PA.Lib;
 
@@ -359,6 +360,23 @@ namespace _3PA.MainFeatures {
         public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
 
         /// <summary>
+        /// Returns the proxy defined by the user in the configuration
+        /// </summary>
+        /// <returns></returns>
+        public IWebProxy GetWebClientProxy() {
+            IWebProxy proxy;
+            //proxy = new WebProxy {
+            //    Address = new Uri("http://8.8.8.8:2015/"),
+            //    Credentials = new NetworkCredential("usernameHere", "pa****rdHere"),
+            //    UseDefaultCredentials = false,
+            //    BypassProxyOnLocal = false
+            //};
+            proxy = WebRequest.DefaultWebProxy;
+            proxy.Credentials = CredentialCache.DefaultCredentials;
+            return proxy;
+        }
+
+        /// <summary>
         /// Get a value from this instance, by its property name
         /// </summary>
         /// <param name="propertyName"></param>
@@ -463,7 +481,6 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-
         #region private fields
 
         private static ConfigObject _instance;
@@ -520,6 +537,5 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 }

@@ -89,16 +89,7 @@ namespace _3PA.MainFeatures {
             _checkStarted = true;
             try {
                 using (WebClient wc = new WebClient()) {
-
-                    /* TODO: Need a proxy ?
-                    WebProxy proxy = new WebProxy();
-                    proxy.Address = new Uri("mywebproxyserver.com");
-                    proxy.Credentials = new NetworkCredential("usernameHere", "pa****rdHere"); 
-                    proxy.UseDefaultCredentials = false;
-                    proxy.BypassProxyOnLocal = false;
-                    wc.Proxy = proxy;
-                    */
-
+                    wc.Proxy = Config.Instance.GetWebClientProxy();
                     wc.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
                     //wc.Proxy = null;
 

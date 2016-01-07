@@ -177,6 +177,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         ProwinPath = textbox5.Text,
                         LogFilePath = textbox6.Text,
                         CmdLineParameters = flCmdLine.Text,
+                        DbConnectionInfo = ProEnvironment.Current.DbConnectionInfo
                     };
 
                     ProEnvironment.SaveEnv((_currentMode == ViewMode.Edit) ? ProEnvironment.Current : null, newEnv);

@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 
 namespace _3PA.Interop {
@@ -219,8 +220,7 @@ namespace _3PA.Interop {
 
         // Win32: CallNextHookEx()
         [DllImport("user32.dll")]
-        protected static extern int CallNextHookEx(IntPtr hhook,
-            int code, IntPtr wParam, IntPtr lParam);
+        protected static extern int CallNextHookEx(IntPtr hhook, int code, IntPtr wParam, IntPtr lParam);
 
         #endregion
     }

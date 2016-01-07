@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     // find max error
                     ErrorLevel maxLvl = ErrorLevel.NoErrors;
                     if (_sessionInfo[currentFilePath].FileErrors.Any()) {
-                        maxLvl = _sessionInfo[currentFilePath].FileErrors.OrderByDescending(error => error.ErrorNumber).First().Level;
+                        maxLvl = _sessionInfo[currentFilePath].FileErrors.OrderByDescending(error => error.Level).First().Level;
                     }
                     OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(maxLvl, _sessionInfo[currentFilePath].FileErrors.Count));
                 } else

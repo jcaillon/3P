@@ -61,7 +61,23 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace BrightIdeasSoftware.Utilities {
-    public enum IconSizeZ { Large, Small, Shell };
+    /// <summary>
+    /// icon size
+    /// </summary>
+    public enum IconSizeZ {
+        /// <summary>
+        /// 
+        /// </summary>
+        Large, 
+        /// <summary>
+        /// 
+        /// </summary>
+        Small, 
+        /// <summary>
+        /// 
+        /// </summary>
+        Shell
+    };
 
     /// <summary>
     /// This class contains static methods to overcome the problems with the imagelist control
@@ -152,9 +168,6 @@ namespace BrightIdeasSoftware.Utilities {
         /// <summary>
         /// Adds an alphablended icon or image to an existing imagelist from an external image or icon file.
         /// </summary>
-        /// <param name="FileName">The full path to a 32bit alphablended file.</param>
-        /// <param name="Imagelist">An existing imagelist to add the image or icon to.</param>
-        /// <example>.FromFile( "C:\\file.ico", toolbarImagelist );</example>
         public static void AddFromFile(string fileName, ImageList destinationImagelist) {
             Bitmap bm = new Bitmap(fileName);
 
@@ -234,9 +247,6 @@ namespace BrightIdeasSoftware.Utilities {
         /// <summary>
         /// Adds a 32bit alphablended icon or image to an existing imagelist from an embedded image or icon.
         /// </summary>
-        /// <param name="ResourceName">The name of an embedded resource.</param>
-        /// <param name="Imagelist">An existing imagelist to add the resource to.</param>
-        /// <example>.AddEmbeddedResource( "ProjectName.file.ico", toolbarImagelist );</example>
         public static void AddEmbeddedResource(string resourceName, ImageList destinationImagelist) {
             Bitmap bm = new Bitmap(Assembly.GetExecutingAssembly().GetManifestResourceStream(resourceName));
 
