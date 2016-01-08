@@ -87,6 +87,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Database = 11,
         Widget = 12,
         KeywordObject = 13,
-        Label = 14
+        Label = 14,
+        Sequence = 15,
     }
 }

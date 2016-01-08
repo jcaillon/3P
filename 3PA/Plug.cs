@@ -26,6 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -272,7 +273,7 @@ namespace _3PA {
                 FileExplorer.Toggle();
             }
 
-            Npp.GrabFocus();
+            WinApi.SetForegroundWindow(Npp.HandleScintilla);
 
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
@@ -504,8 +505,8 @@ namespace _3PA {
                     }
 
                     // replace abbreviation by completekeyword
-                    if (replacementWord == null && Config.Instance.CodeReplaceAbbreviations) {
-                        var fullKeyword = Keywords.GetFullKeyword(keyword);
+                    if (Config.Instance.CodeReplaceAbbreviations) {
+                        var fullKeyword = Keywords.GetFullKeyword(replacementWord ?? keyword);
                         if (fullKeyword != null)
                             replacementWord = fullKeyword;
                     }

@@ -37,6 +37,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static List<ParsedDataBase> _dataBases = new List<ParsedDataBase>();
 
         /// <summary>
+        /// List of sequences of the database
+        /// </summary>
+        private static List<CompletionData> _sequences = new List<CompletionData>();
+
+        /// <summary>
         /// File path to the output file of the dumpdatabase program
         /// </summary>
         public static string OutputFileName { get; private set; }
@@ -196,6 +201,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static void Read(string filePath) {
             if (!File.Exists(filePath)) return;
             _dataBases.Clear();
+            _sequences.Clear();
             try {
                 ParsedDataBase currentDb = null;
                 ParsedTable currentTable = null;
@@ -212,6 +218,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 splitted[5],
                                 new List<ParsedTable>());
                             _dataBases.Add(currentDb);
+                            break;
+                        case 'S':
+                            if (splitted.Count() != 3 || currentDb == null) continue;
+                            _sequences.Add(new CompletionData {
+                                DisplayText = splitted[1].ToUpper(),
+                                Type = CompletionType.Sequence,
+                                SubString = currentDb.LogicalName
+                            });
                             break;
                         case 'T':
                             // table
@@ -326,6 +340,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
                 Flag = 0
             }).ToList();
+        }
+
+        /// <summary>
+        /// returns the list of keywords
+        /// </summary>
+        public static List<CompletionData> GetSequencesList() {
+            return _sequences;
         }
 
         /// <summary>

@@ -15,11 +15,13 @@ FUNCTION fi_subst RETURNS CHARACTER(gc_text AS CHARACTER) FORWARD.
 /* Report meta-information */
 /* Format is: H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version> */
 PUT STREAM str_out UNFORMATTED "#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>" SKIP.
+PUT STREAM str_out UNFORMATTED "#S|<Sequence name>|<Sequence num>" SKIP.
 PUT STREAM str_out UNFORMATTED "#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>" SKIP.
 PUT STREAM str_out UNFORMATTED "#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>" SKIP.
 PUT STREAM str_out UNFORMATTED "#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>" SKIP.
 PUT STREAM str_out UNFORMATTED "#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>" SKIP.
 
+/* Write database info */
 PUT STREAM str_out UNFORMATTED    "H" + gc_sep +
     STRING(YEAR(TODAY), "9999") + "." + STRING(MONTH(TODAY), "99") + "." + STRING(DAY(TODAY), "99") + gc_sep +
     STRING(TIME, "HH:MM:SS") + gc_sep +
@@ -28,9 +30,18 @@ PUT STREAM str_out UNFORMATTED    "H" + gc_sep +
     PROVERSION
     SKIP.
 
+/* write sequences info */
+FOR EACH DICTDB._Sequence NO-LOCK:
+    PUT STREAM str_out UNFORMATTED    
+        "S" + gc_sep +
+        TRIM(fi_subst(DICTDB._Sequence._Seq-Name)) + gc_sep +
+        fi_subst(STRING(DICTDB._Sequence._Seq-Num))
+        SKIP.
+END.
+
 /* Write table information */
 /* Format is: T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description> */
-FOR EACH DICTDB._FILE NO-LOCK WHERE NOT DICTDB._FILE._HIDDEN AND DICTDB._FILE._Tbl-Type = "T".
+FOR EACH DICTDB._FILE NO-LOCK WHERE NOT DICTDB._FILE._HIDDEN AND DICTDB._FILE._Tbl-Type = "T":
     PUT STREAM str_out UNFORMATTED "# ______________________________________________________________" SKIP.
     PUT STREAM str_out UNFORMATTED    
         "T" + gc_sep +

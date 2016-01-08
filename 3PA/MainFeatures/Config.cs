@@ -36,8 +36,9 @@ namespace _3PA.MainFeatures {
 
     /// <summary>
     /// The config object, should not be used
+    /// Each field can have display attributes, they are used in the options pages to automatically
+    /// generates the pages
     /// </summary>
-
     public class ConfigObject {
 
         //[StringLength(15)]
@@ -89,7 +90,7 @@ namespace _3PA.MainFeatures {
             Description = "Whether or not to systematically show a notification after a compilation<br>By default, a notification is shown if notepad++ doesn't have the focus or if they are errors",
             GroupName = "General",
             AutoGenerateField = false)]
-        public bool CompileAlwaysShowNotification = false;
+        public bool CompileAlwaysShowNotification = true;
 
 
         [Display(Name = "Use alternate back color for lists",
@@ -217,7 +218,7 @@ namespace _3PA.MainFeatures {
         [Range(0.1, 1)]
         public double AutoCompleteFocusedOpacity = 0.92;
 
-        public string AutoCompletePriorityList = "11,2,4,5,3,6,7,8,10,13,9,12,14,0,1";
+        public string AutoCompletePriorityList = "2,4,5,12,7,8,11,3,6,15,9,14,10,13,0,1";
 
         #endregion
 

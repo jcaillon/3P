@@ -316,6 +316,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             }
                         }
                         break;
+                    case CompletionType.Sequence:
+                        toDisplay.Append(FormatRow("Database logical name", data.SubString));
+                        break;
                     case CompletionType.Database:
                         var dbItem = DataBase.GetDb(data.DisplayText);
 

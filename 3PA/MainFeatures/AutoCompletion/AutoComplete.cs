@@ -302,6 +302,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // add database info?
             if (!initializing) {
                 _staticItems.AddRange(DataBase.GetDbList());
+                _staticItems.AddRange(DataBase.GetSequencesList());
                 _staticItems.AddRange(DataBase.GetTablesList());
             }
 

@@ -400,6 +400,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\Label.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Preprocessed.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Procedure.png" />
+    <Content Include="Images\AutoCompletion\CompletionType\Sequence.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Snippet.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Table.png" />
     <Content Include="Images\AutoCompletion\CompletionType\TempTable.png" />
