@@ -30,7 +30,7 @@ using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures {
 
-    public class SnippetContext {
+    internal class SnippetContext {
         public static int IndicatorId = 8;
         public List<List<Point>> ParametersGroups = new List<List<Point>>();
         public List<Point> Parameters = new List<Point>();
@@ -39,7 +39,7 @@ namespace _3PA.MainFeatures {
         public string ReplacementString = "";
     }
 
-    public class Snippets {
+    internal static class Snippets {
 
         public static SnippetContext LocSnippetContext;
         static public Dictionary<string, string> Map = new Dictionary<string, string>();

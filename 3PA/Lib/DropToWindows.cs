@@ -29,6 +29,7 @@ using System.Text;
 using System.Threading;
 
 namespace _3PA.Lib {
+
     public static class DropToWindows {
         public static void DropToAppBuilder(string prowin32Path, string pfPath, string filename) {
             /*
@@ -44,7 +45,7 @@ namespace _3PA.Lib {
         }
     }
 
-    static class DropFileToWindow {
+    public static class DropFileToWindow {
 
         #region "give window focus"
         [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
@@ -85,7 +86,7 @@ namespace _3PA.Lib {
         }
     }
 
-    static class FindWindow {
+    public static class FindWindow {
         [DllImport("user32.dll", SetLastError = false)]
         private static extern IntPtr GetDesktopWindow();
 

@@ -1,12 +1,13 @@
 ﻿using System.Runtime.InteropServices;
 
 namespace _3PA.Lib {
-    public class HtmlHelpInterop {
-        protected const int HhDisplayIndex = 0x0002;
+    public static class HtmlHelpInterop {
+
+        public const int HhDisplayIndex = 0x0002;
 
         // This overload is for passing a string as the dwData parameter (for example, for the HH_DISPLAY_INDEX command)
         [DllImport("hhctrl.ocx", CharSet = CharSet.Unicode, EntryPoint = "HtmlHelpW")]
-        protected static extern int HtmlHelp(int caller, string file, uint command, string str);
+        public static extern int HtmlHelp(int caller, string file, uint command, string str);
 
         public static int DisplayIndex(int caller, string file, string index) {
             return HtmlHelp(caller, file, HhDisplayIndex, index);

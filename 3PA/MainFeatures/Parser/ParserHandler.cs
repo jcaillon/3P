@@ -28,7 +28,7 @@ using _3PA.MainFeatures.CodeExplorer;
 
 namespace _3PA.MainFeatures.Parser {
 
-    class ParserHandler {
+    internal static class ParserHandler {
 
         #region fields
 

@@ -21,7 +21,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Token object
     /// </summary>
-    public abstract class Token {
+    internal abstract class Token {
         public string Value { get; private set; }
         public int Line { get; private set; }
         public int Column { get; private set; }
@@ -44,56 +44,56 @@ namespace _3PA.MainFeatures.Parser {
     // QuotedString is either a simple or double quote string (handles ~ escape char)
     // Symbol is a single char
 
-    public class TokenComment : Token {
+    internal class TokenComment : Token {
         public TokenComment(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenPreProcStatement : Token {
+    internal class TokenPreProcStatement : Token {
         public TokenPreProcStatement(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenInclude : Token {
+    internal class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenEos : Token {
+    internal class TokenEos : Token {
         public TokenEos(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenUnknown : Token {
+    internal class TokenUnknown : Token {
         public TokenUnknown(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenWord : Token {
+    internal class TokenWord : Token {
         public TokenWord(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenNumber : Token {
+    internal class TokenNumber : Token {
         public TokenNumber(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenString : Token {
+    internal class TokenString : Token {
         public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
@@ -105,35 +105,35 @@ namespace _3PA.MainFeatures.Parser {
     /// "characters" [ : [ R | L | C | T ] [ U ] [ max-length ] ]
     /// This matches the properties of the string
     /// </summary>
-    public class TokenStringDescriptor : Token {
+    internal class TokenStringDescriptor : Token {
         public TokenStringDescriptor(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenWhiteSpace : Token {
+    internal class TokenWhiteSpace : Token {
         public TokenWhiteSpace(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenSymbol : Token {
+    internal class TokenSymbol : Token {
         public TokenSymbol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenEol : Token {
+    internal class TokenEol : Token {
         public TokenEol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
-    public class TokenEof : Token {
+    internal class TokenEof : Token {
         public TokenEof(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);

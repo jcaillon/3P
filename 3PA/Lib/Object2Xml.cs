@@ -31,7 +31,7 @@ namespace _3PA.Lib {
     /// TODO: save more than a simple string, string dico
     /// <remarks>/!\ THIS CLASS IS DUPLICATED IN YAMUIFRAMEWORK!!!!!!!!</remarks>
     /// </summary>
-    public class Object2Xml<T> {
+    public static class Object2Xml<T> {
 
         #region Fields
 

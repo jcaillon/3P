@@ -32,7 +32,7 @@ namespace _3PA.MainFeatures.Parser {
     /// This class is not actually a parser "per say" but it extract important information
     /// from the tokens created by the lexer
     /// </summary>
-    public class Parser {
+    internal class Parser {
         private const string RootScopeName = "Root";
         /// <summary>
         /// List of the parsed items (output)
@@ -1252,7 +1252,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// contains the info on the current context (as we move through tokens)
     /// </summary>
-    public class ParseContext {
+    internal class ParseContext {
         public ParsedScope Scope { get; set; }
         public string OwnerName { get; set; }
         /// <summary>
@@ -1268,7 +1268,7 @@ namespace _3PA.MainFeatures.Parser {
         public Stack<BlockInfo> BlockStack { get; set; }
     }
 
-    public struct BlockInfo {
+    internal struct BlockInfo {
         public int LineStart { get; set; }
         public int LineTriggerWord { get; set; }
         public BlockType BlockType { get; set; }
@@ -1281,7 +1281,7 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public enum BlockType {
+    internal enum BlockType {
         DoEnd,
         ThenElse
     }
@@ -1289,7 +1289,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Contains the info of a specific line number (built during the parsing)
     /// </summary>
-    public class LineInfo {
+    internal class LineInfo {
         /// <summary>
         /// Block depth for the current line (= number of indents)
         /// </summary>

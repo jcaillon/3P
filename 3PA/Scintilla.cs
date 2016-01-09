@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -25,7 +26,6 @@ using System.Text;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures;
 
 namespace _3PA {
     /// <summary>
@@ -40,7 +40,7 @@ namespace _3PA {
     /// - This class also uses the direct function call to scintilla, as described in scintilla's documention. It allows<br />
     /// faster execution than with SendMessage<br />
     /// </summary>
-    public partial class Npp {
+    internal static partial class Npp {
 
         #region fields
 
@@ -57,7 +57,7 @@ namespace _3PA {
         /// Gets the window handle to current Scintilla.
         /// </summary>
         public static IntPtr HandleScintilla {
-            get { return (_curScintilla != IntPtr.Zero) ? _curScintilla : (_curScintilla = (CurrentScintilla == 0) ? Plug.NppData._scintillaMainHandle : Plug.NppData._scintillaSecondHandle); }
+            get { return (_curScintilla != IntPtr.Zero) ? _curScintilla : (_curScintilla = (CurrentScintilla == 0) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle); }
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace _3PA {
         /// Called when the user changes the current document
         /// </summary>
         public static void UpdateScintilla() {
-            _curScintilla = (CurrentScintilla == 0) ? Plug.NppData._scintillaMainHandle : Plug.NppData._scintillaSecondHandle;
+            _curScintilla = (CurrentScintilla == 0) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
             Sci.UpdateScintillaDirectMessage(_curScintilla);
         }
 
@@ -217,7 +217,7 @@ namespace _3PA {
         /// <param name="chars">A String of the characters that will cancel autocompletion. The default is empty.</param>
         /// <remarks>Characters specified should be limited to printable ASCII characters.</remarks>
         public static void AutoCStops(string chars) {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
+            WinApi.SendMessage(HandleScintilla, SciMsg.SCI_AUTOCSTOPS, 0, chars);
         }
 
         /// <summary>
@@ -226,7 +226,7 @@ namespace _3PA {
         /// <returns></returns>
         public static Rectangle GetWindowRect() {
             var r = new Rectangle();
-            Win32.GetWindowRect(HandleScintilla, ref r);
+            WinApi.GetWindowRect(HandleScintilla, ref r);
             return r;
         }
 
@@ -684,7 +684,7 @@ namespace _3PA {
         public static bool UseTabs {
             get { return (Sci.Send(SciMsg.SCI_GETUSETABS).IsTrue()); }
             set {
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0);
+                WinApi.SendMessage(HandleScintilla, SciMsg.SCI_SETUSETABS, value ? 1 : 0, 0);
             }
         }
 
@@ -696,7 +696,7 @@ namespace _3PA {
             get { return Sci.Send(SciMsg.SCI_GETTABWIDTH).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETTABWIDTH, value, 0);
+                WinApi.SendMessage(HandleScintilla, SciMsg.SCI_SETTABWIDTH, value, 0);
             }
         }
 
@@ -709,7 +709,7 @@ namespace _3PA {
             get { return Sci.Send(SciMsg.SCI_GETINDENT).ToInt32(); }
             set {
                 value = ClampMin(value, 0);
-                Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETINDENT, value, 0);
+                WinApi.SendMessage(HandleScintilla, SciMsg.SCI_SETINDENT, value, 0);
             }
         }
 
@@ -800,7 +800,7 @@ namespace _3PA {
         /// <returns><c>Point</c> representing the coordinates of the screen location.</returns>
         public static Point GetCaretScreenLocation() {
             var point = GetPointXyFromPosition(CurrentPosition);
-            Win32.ClientToScreen(HandleScintilla, ref point);
+            WinApi.ClientToScreen(HandleScintilla, ref point);
             return point;
         }
 
@@ -839,7 +839,7 @@ namespace _3PA {
         /// <returns></returns>
         public static int GetPositionFromMouseLocation() {
             var point = Cursor.Position;
-            Win32.ScreenToClient(HandleScintilla, ref point);
+            WinApi.ScreenToClient(HandleScintilla, ref point);
             return CharPositionFromPointClose(point.X, point.Y);
         }
 
@@ -1234,7 +1234,7 @@ namespace _3PA {
         /// Gets or sets the search flags used when searching text.
         /// </summary>
         /// <returns>A bitwise combination of Interop.SearchFlags values. The default is Interop.SearchFlags.None.</returns>
-        public SearchFlags SearchFlags {
+        public static SearchFlags SearchFlags {
             get { return (SearchFlags) Sci.Send(SciMsg.SCI_GETSEARCHFLAGS).ToInt32(); }
             set {
                 var searchFlags = (int) value;
@@ -1812,7 +1812,7 @@ namespace _3PA {
         /// <summary>
         /// The colour of the caret
         /// </summary>
-        public Color CaretForeColor {
+        public static Color CaretForeColor {
             get { return ColorTranslator.FromWin32(Sci.Send(SciMsg.SCI_GETCARETFORE).ToInt32()); }
             set { Sci.Send(SciMsg.SCI_STYLESETFORE, new IntPtr(ColorTranslator.ToWin32(value.IsEmpty ? Color.Black : value))); }
         }
@@ -1927,7 +1927,7 @@ namespace _3PA {
         /// Clear all annotations in one go
         /// </summary>
         public static void AnnotationClearAll() {
-            Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
+            WinApi.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONCLEARALL, 0, 0);
         }
 
         /// <summary>
@@ -2235,7 +2235,7 @@ namespace _3PA {
                 }
                 set {
                     if (string.IsNullOrEmpty(value)) {
-                        Win32.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, (string)null);
+                        WinApi.SendMessage(HandleScintilla, SciMsg.SCI_ANNOTATIONSETTEXT, Index, null);
                     } else {
                         var bytes = GetBytes(value, Encoding, true);
                         fixed (byte* bp = bytes)
@@ -2874,7 +2874,7 @@ namespace _3PA {
             /// </summary>
             /// <returns>One of the MarginCursor enumeration values. The default is MarginCursor.Arrow.</returns>
             public MarginCursor Cursor {
-                get { return (MarginCursor) Sci.Send(SciMsg.SCI_GETMARGINCURSORN, new IntPtr(Index)); }
+                get { return (MarginCursor)Sci.Send(SciMsg.SCI_GETMARGINCURSORN, new IntPtr(Index)); }
                 set {
                     var cursor = (int) value;
                     Sci.Send(SciMsg.SCI_SETMARGINCURSORN, new IntPtr(Index), new IntPtr(cursor));
@@ -2920,7 +2920,7 @@ namespace _3PA {
                 get { return Sci.Send(SciMsg.SCI_GETMARGINWIDTHN, new IntPtr(Index)).ToInt32(); }
                 set {
                     value = ClampMin(value, 0);
-                    Win32.SendMessage(HandleScintilla, SciMsg.SCI_SETMARGINWIDTHN, Index, value);
+                    WinApi.SendMessage(HandleScintilla, SciMsg.SCI_SETMARGINWIDTHN, Index, value);
                 }
             }
 
@@ -3731,7 +3731,7 @@ namespace _3PA {
     /// Use this class to communicate with scintilla
     /// </summary>
     public class Scintilla {
-        private static Win32.Scintilla_DirectFunction _directFunction;
+        private static WinApi.Scintilla_DirectFunction _directFunction;
         private static IntPtr _directMessagePointer;
         private static IntPtr _scintillaHandle;
 
@@ -3745,10 +3745,10 @@ namespace _3PA {
         /// </summary>
         public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
             _scintillaHandle = scintillaHandle;
-            var directFunctionPointer = Win32.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
+            var directFunctionPointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
-            _directFunction = (Win32.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (Win32.Scintilla_DirectFunction));
-            _directMessagePointer = Win32.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            _directFunction = (WinApi.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (WinApi.Scintilla_DirectFunction));
+            _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {

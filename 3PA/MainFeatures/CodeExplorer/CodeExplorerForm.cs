@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 using _3PA.Images;
@@ -34,7 +33,8 @@ using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.CodeExplorer {
-    public partial class CodeExplorerForm : NppDockableDialog {
+
+    internal partial class CodeExplorerForm : NppDockableDialog {
 
         #region fields
 
@@ -615,7 +615,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    public class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
+    internal class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
         public int Compare(CodeExplorerItem x, CodeExplorerItem y) {
             // compare first by BranchType
             int compare = x.Branch.CompareTo(y.Branch);

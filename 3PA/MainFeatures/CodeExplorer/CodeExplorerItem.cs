@@ -26,7 +26,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// <summary>
     /// base class
     /// </summary>
-    public class CodeExplorerItem {
+    internal class CodeExplorerItem {
         public string DisplayText { get; set; }
        
         /// <summary>
@@ -109,7 +109,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// The attribute is used for the text displayed for the branch
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
-    public enum CodeExplorerBranch {
+    internal enum CodeExplorerBranch {
         [DisplayAttr(Name = "Everything in code order")]
         EverythingInCodeOrder,
         [DisplayAttr(Name = "Root")]
@@ -143,7 +143,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// <summary>
     /// Corresponds to an image, displayed on the left of an item
     /// </summary>
-    public enum CodeExplorerIconType {
+    internal enum CodeExplorerIconType {
         BranchIcon,
         DefinitionBlock,
         XtfrBlock,
@@ -162,7 +162,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
     }
 
     [Flags]
-    public enum CodeExplorerFlag {
+    internal enum CodeExplorerFlag {
         // the block has too much characters and the program will not be openable in the appbuilder
         IsTooLong = 1,
         // applies for Run statement, the program/proc to run is VALUE(something) so we only guess which one it is

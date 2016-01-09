@@ -28,7 +28,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
     /// An empty form that does absolutely nothing
     /// </summary>
-    public partial class EmptyForm : Form {
+    internal partial class EmptyForm : Form {
 
         public EmptyForm() {
             InitializeComponent();

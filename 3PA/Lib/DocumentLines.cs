@@ -31,7 +31,7 @@ namespace _3PA.Lib {
     /// it keeps tracks of inserted/deleted lines and register each line's start position, this
     /// information allows us to quickly convert BYTE to CHAR position and vice-versa
     /// </summary>
-    public class DocumentLines {
+    internal class DocumentLines {
 
         #region Fields
 

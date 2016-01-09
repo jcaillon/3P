@@ -31,7 +31,7 @@ using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    public partial class SetEnvironment : YamuiPage {
+    internal partial class SetEnvironment : YamuiPage {
 
         #region fields
 

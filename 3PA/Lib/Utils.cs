@@ -36,12 +36,8 @@ namespace _3PA.Lib {
     /*        
        #region Events
 
-        private static event EventHandler<EventArgs> OnUpdatedUi;
-
-        public static event EventHandler<EventArgs> UpdatedUi {
-            add { OnUpdatedUi += value; }
-            remove { OnUpdatedUi -= value; }
-        }
+        public delegate void NotificationEvent(SCNotification notification);
+        public static event NotificationEvent OnNppNotification;
 
         // execute events
         if (OnUpdatedUi != null) {

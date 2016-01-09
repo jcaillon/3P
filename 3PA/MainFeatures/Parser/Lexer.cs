@@ -27,7 +27,7 @@ namespace _3PA.MainFeatures.Parser {
     /// This class "tokenize" the input data into tokens of various types,
     /// it implements a visitor pattern
     /// </summary>
-    public class Lexer {
+    internal class Lexer {
         private const int LineStartAt = 0;
         private const int ColumnStartAt = 0;
         private const char Eof = (char)0;

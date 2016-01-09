@@ -24,7 +24,8 @@ using System.Linq;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class ProEnvironment {
+
+    internal static class ProEnvironment {
 
         private static string _fileName = "_ProgressEnvironnement.xml";
         private static ProEnvironmentObject _currentEnv;
@@ -228,7 +229,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #endregion
     }
 
-    public class ProEnvironmentObject {
+    internal class ProEnvironmentObject {
 
         // prim key
         public string Name = "";

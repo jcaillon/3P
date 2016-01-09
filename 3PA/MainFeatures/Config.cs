@@ -39,7 +39,7 @@ namespace _3PA.MainFeatures {
     /// Each field can have display attributes, they are used in the options pages to automatically
     /// generates the pages
     /// </summary>
-    public class ConfigObject {
+    internal class ConfigObject {
 
         //[StringLength(15)]
         //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures {
             Description = "Used for modification tags",
             GroupName = "General",
             AutoGenerateField = false)]
-        public string UserName = LocalEnv.Instance.GetTrigramFromPa();
+        public string UserName = Config.GetTrigramFromPa();
 
         [Display(Name = "Progress 4GL files extension list",
             Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
@@ -431,7 +431,7 @@ namespace _3PA.MainFeatures {
     /// Holds the configuration of the application, this class is a singleton and
     /// you should call it like this : Config.Instance.myparam
     /// </summary>
-    public static class Config {
+    internal static class Config {
 
         #region public fields
 
@@ -458,7 +458,7 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region public helper
+        #region static helper
 
         /// <summary>
         /// Takes a list of priority like AutoCompletePriorityList and return the expected list
@@ -478,6 +478,16 @@ namespace _3PA.MainFeatures {
             for (int i = 0; i < Enum.GetNames(enumerationType).Length; i++)
                 output.Add(temp.IndexOf(i));
             return output;
+        }
+
+        public static string GetTrigramFromPa() {
+            // default values
+            string paIniPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "ProgressAssist", "pa.ini");
+            if (File.Exists(paIniPath)) {
+                IniReader ini = new IniReader(paIniPath);
+                return ini.GetValue("Trigram", "");
+            }
+            return "";
         }
 
         #endregion

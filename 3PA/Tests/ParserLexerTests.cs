@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Windows.Forms;
-using _3PA;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
 
-namespace YamuiDemoApp {
-    class ParserLexerTests {
+namespace _3PA.Tests {
+    public class ParserLexerTests {
 
         public static void Run() {
 
@@ -71,7 +66,7 @@ namespace YamuiDemoApp {
         }
     }
 
-    public class OutputVis : IParserVisitor {
+    internal class OutputVis : IParserVisitor {
         public void Visit(ParsedBlock pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
         }
@@ -133,7 +128,7 @@ namespace YamuiDemoApp {
         }
     }
 
-    public class OutputLexer : ILexerVisitor {
+    internal class OutputLexer : ILexerVisitor {
 
         public StringBuilder Output = new StringBuilder();
 

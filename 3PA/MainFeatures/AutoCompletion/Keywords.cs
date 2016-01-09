@@ -34,7 +34,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// this class handles the static keywords of progress
     /// </summary>
-    public class Keywords {
+    internal static class Keywords {
 
         #region fields
 

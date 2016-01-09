@@ -29,13 +29,13 @@ namespace _3PA.Lib {
 
     #region Keyboard hook
 
-    public struct KeyModifiers {
+    internal struct KeyModifiers {
         public bool IsCtrl;
         public bool IsShift;
         public bool IsAlt;
     }
 
-    public class KeyboardMonitor : WindowsHook<KeyboardMonitor> {
+    internal class KeyboardMonitor : WindowsHook<KeyboardMonitor> {
 
         #region private
 
@@ -121,10 +121,92 @@ namespace _3PA.Lib {
 
     #endregion
 
+
+    #region Mouse hook
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct MOUSEHOOKSTRUCT {
+        public POINT pt;
+        public IntPtr hwnd;
+        public uint wHitTestCode;
+        public IntPtr dwExtraInfo;
+    }
+
+    /// <summary>
+    /// Monitors the mouse actions
+    /// </summary>
+    internal class MouseMonitor : WindowsHook<MouseMonitor> {
+
+        #region public
+
+        /// <summary>
+        /// Register to receive on keyPressed events
+        /// </summary>
+        public event MessageHandler GetMouseMessage;
+        public delegate void MessageHandler(WinApi.WindowsMessage message, MOUSEHOOKSTRUCT mouseStruct, out bool handled);
+
+        private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
+
+        /// <summary>
+        /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
+        /// WM_MOUSEMOVE = 0x200,
+        /// WM_LBUTTONDOWN = 0x201,
+        /// WM_LBUTTONUP = 0x202,
+        /// WM_LBUTTONDBLCLK = 0x203,
+        /// WM_RBUTTONDOWN = 0x204,
+        /// WM_RBUTTONUP = 0x205,
+        /// WM_RBUTTONDBLCLK = 0x206,
+        /// WM_MBUTTONDOWN = 0x207,
+        /// WM_MBUTTONUP = 0x208,
+        /// WM_MBUTTONDBLCLK = 0x209,
+        /// WM_MOUSEWHEEL = 0x20A,
+        /// WM_XBUTTONDOWN = 0x20B,
+        /// WM_XBUTTONUP = 0x20C,
+        /// WM_XBUTTONDBLCLK = 0x20D,
+        /// WM_MOUSEHWHEEL = 0x20E
+        /// </summary>
+        public void Add(params WinApi.WindowsMessage[] messages) {
+            foreach (WinApi.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+                _messagesToIntercept.Add((uint)key);
+        }
+
+        public void Clear() {
+            _messagesToIntercept.Clear();
+        }
+
+        /// <summary>
+        /// Call this method to start listening to events
+        /// </summary>
+        public new void Install() {
+            base.Install(HookType.WH_MOUSE);
+        }
+
+        #endregion
+
+
+        #region Override HandleHookEvent
+
+        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
+            if (GetMouseMessage == null)
+                return false;
+            if (!_messagesToIntercept.Contains((uint)wParam))
+                return false;
+            bool handled;
+            MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
+            GetMouseMessage((WinApi.WindowsMessage)wParam, ms, out handled);
+            return handled;
+        }
+
+        #endregion
+    }
+
+    #endregion
+    
+    
     #region GetMessage hook
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct MSG {
+    internal struct MSG {
         public IntPtr hwnd;
         public UInt32 message;
         public IntPtr wParam;
@@ -134,14 +216,14 @@ namespace _3PA.Lib {
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public struct POINT {
+    internal struct POINT {
         public Int32 x;
         public Int32 y;
 
         public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
     }
 
-    public class CallWndProcMonitor : WindowsHook<CallWndProcMonitor> {
+    internal class CallWndProcMonitor : WindowsHook<CallWndProcMonitor> {
 
         #region public
 
@@ -156,8 +238,8 @@ namespace _3PA.Lib {
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
-        public void Add(params WindowsMessage[] messages) {
-            foreach (WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+        public void Add(params WinApi.WindowsMessage[] messages) {
+            foreach (WinApi.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
                 _messagesToIntercept.Add((uint)key);
         }
 
@@ -194,8 +276,9 @@ namespace _3PA.Lib {
 
     #endregion
 
+
     #region Cbt hook
-    public enum HCBT {
+    internal enum HCBT {
         MoveSize = 0,
         MinMax = 1,
         QueueSync = 2,
@@ -208,7 +291,7 @@ namespace _3PA.Lib {
         SetFocus = 9
     }
 
-    public class CbtMonitor : WindowsHook<CbtMonitor> {
+    internal class CbtMonitor : WindowsHook<CbtMonitor> {
 
         #region public
 
@@ -239,71 +322,6 @@ namespace _3PA.Lib {
                     GetCode((HCBT)code);
             }
             return CallNextHookEx(InternalHook, code, wParam, lParam);
-        }
-
-        #endregion
-    }
-
-    #endregion
-
-    #region Mouse hook
-
-    [StructLayout(LayoutKind.Sequential)]
-    struct MOUSEHOOKSTRUCT {
-        public POINT pt;
-        public IntPtr hwnd;
-        public uint wHitTestCode;
-        public IntPtr dwExtraInfo;
-    }
-
-    /// <summary>
-    /// To do when i need it, for now it's just an empty shell
-    /// </summary>
-    public class MouseMonitor : WindowsHook<MouseMonitor> {
-
-        #region public
-
-        /// <summary>
-        /// Register to receive on keyPressed events
-        /// </summary>
-        public event MessageHandler GetMouseMessage;
-        public delegate void MessageHandler(WindowsMessage message, out bool handled);
-
-        private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
-
-        /// <summary>
-        /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
-        /// </summary>
-        public void Add(params WindowsMessage[] messages) {
-            foreach (WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
-                _messagesToIntercept.Add((uint)key);
-        }
-
-        public void Clear() {
-            _messagesToIntercept.Clear();
-        }
-
-        /// <summary>
-        /// Call this method to start listening to events
-        /// </summary>
-        public new void Install() {
-            base.Install(HookType.WH_MOUSE);
-        }
-
-        #endregion
-
-
-        #region Override HandleHookEvent
-
-        protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            //MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
-            if (GetMouseMessage == null)
-                return false;
-            if (!_messagesToIntercept.Contains((uint) wParam)) 
-                return false;
-            bool handled;
-            GetMouseMessage((WindowsMessage) wParam, out handled);
-            return handled;
         }
 
         #endregion

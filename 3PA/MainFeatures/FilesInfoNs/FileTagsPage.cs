@@ -22,10 +22,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
-using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
-    public partial class FileTagsPage : YamuiPage {
+
+    internal partial class FileTagsPage : YamuiPage {
 
         #region fields
 
@@ -200,15 +200,15 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #endregion
 
+        #region item combo struct
+
+        private struct ItemCombo {
+            public string DisplayText;
+            public string Nb;
+        }
+
+        #endregion
+
     }
-
-    #region item combo struct
-
-    public struct ItemCombo {
-        public string DisplayText { get; set; }
-        public string Nb { get; set; }
-    }
-
-    #endregion
 
 }

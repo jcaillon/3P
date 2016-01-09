@@ -24,7 +24,7 @@ using System.Text;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class ProCompilePath {
+    internal static class ProCompilePath {
 
         #region fields
 
@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     /// <summary>
     /// The compilation path item
     /// </summary>
-    public class CompilationPathItem {
+    internal class CompilationPathItem {
         /// <summary>
         /// This compilation path applies to a given application (can be empty)
         /// </summary>

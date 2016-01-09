@@ -28,7 +28,7 @@ using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
-    public partial class SettingAppearance : YamuiPage {
+    internal partial class SettingAppearance : YamuiPage {
 
         private static YamuiColorRadioButton _checkButton;
 

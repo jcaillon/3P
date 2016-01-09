@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures {
     /// <summary>
     /// This class handles the STYLENEEDED notification of scintilla
     /// </summary>
-    public class Style {
+    internal static class Style {
 
         #region fields
 

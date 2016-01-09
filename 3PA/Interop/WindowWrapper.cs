@@ -22,7 +22,8 @@ using System;
 using System.Windows.Forms;
 
 namespace _3PA.Interop {
-    public class WindowWrapper : IWin32Window {
+
+    internal class WindowWrapper : IWin32Window {
         public WindowWrapper(IntPtr handle) {
             _hwnd = handle;
         }
@@ -34,14 +35,14 @@ namespace _3PA.Interop {
         private IntPtr _hwnd;
     }
 
-    public static class FormIntegration {
+    internal static class FormIntegration {
 
         public static void RegisterToNpp(IntPtr handle) {
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGADD, handle);
         }
 
         public static void UnRegisterToNpp(IntPtr handle) {
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_MODELESSDIALOG, (int)NppMsg.MODELESSDIALOGREMOVE, handle);
         }
     }
 }

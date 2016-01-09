@@ -23,7 +23,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
-    public class CompletionData {
+    internal class CompletionData {
         /// <summary>
         /// The piece of text displayed in the completion list
         /// </summary>
@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public KeywordType KeywordType { get; set; }
     }
 
-    public enum CompletionType {
+    internal enum CompletionType {
         FieldPk = 0,
         Field = 1,
         Snippet = 2,

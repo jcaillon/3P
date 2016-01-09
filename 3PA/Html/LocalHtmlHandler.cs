@@ -27,7 +27,7 @@ namespace _3PA.Html {
     /// <summary>
     /// Add css and images specific to this application to the yamui html panels/labels/tooltips
     /// </summary>
-    class LocalHtmlHandler {
+    internal static class LocalHtmlHandler {
 
         /// <summary>
         /// Call this when initializing the plugin feed the html renderer
@@ -90,7 +90,7 @@ namespace _3PA.Html {
 
     }
 
-    public enum MessageImg {
+    internal enum MessageImg {
         MsgDebug,
         MsgError,
         MsgHighImportance,

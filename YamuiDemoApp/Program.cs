@@ -12,14 +12,6 @@ using System.Xml.Linq;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
-using _3PA;
-using _3PA.Lib;
-using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
-using _3PA.MainFeatures.SyntaxHighlighting;
 
 namespace YamuiDemoApp {
 
@@ -40,9 +32,9 @@ namespace YamuiDemoApp {
         static void Main() {
 
 
-            //ParserLexerTests.Run();
+            _3PA.Tests.ParserLexerTests.Run();
 
-            //return;
+            return;
 
 
             /*

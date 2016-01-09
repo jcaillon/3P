@@ -26,7 +26,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// base abstract class for ParsedItem
     /// </summary>
-    public abstract class ParsedItem {
+    internal abstract class ParsedItem {
         public string Name { get; private set; }
         public string FilePath { get; set; }
         /// <summary>
@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public enum ParsedScope {
+    internal enum ParsedScope {
         File,
         Procedure,
         Function,
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Flags applicable for every ParsedItems
     /// </summary>
     [Flags]
-    public enum ParseFlag {
+    internal enum ParseFlag {
         // indicates that the parsed item is not coming from the originally parsed source (= from .i)
         External = 1,
         // Local/File define the scope of a defined variable...
@@ -97,7 +97,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Parent class for procedure, function and OnEvent Items
     /// </summary>
-    public abstract class ParsedScopeItem : ParsedItem {
+    internal abstract class ParsedScopeItem : ParsedItem {
         /// <summary>
         /// line of the "end" keyword that ends the block
         /// </summary>
@@ -114,7 +114,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    public class ParsedBlock : ParsedScopeItem {
+    internal class ParsedBlock : ParsedScopeItem {
         public CodeExplorerIconType IconIconType { get; set; }
         public CodeExplorerBranch Branch { get; set; }
         public bool IsRoot { get; set; }
@@ -130,7 +130,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    public class ParsedProcedure : ParsedScopeItem {
+    internal class ParsedProcedure : ParsedScopeItem {
         public string Left { get; private set; }
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    public class ParsedFunction : ParsedScopeItem {
+    internal class ParsedFunction : ParsedScopeItem {
         public ParsedPrimitiveType ReturnType { get; set; }
         /// <summary>
         /// Parsed string for the return type, use ReturnType instead!
@@ -183,7 +183,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    public class ParsedOnEvent : ParsedScopeItem {
+    internal class ParsedOnEvent : ParsedScopeItem {
         public string On { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -198,7 +198,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// found table in program
     /// </summary>
-    public class ParsedFoundTableUse : ParsedItem {
+    internal class ParsedFoundTableUse : ParsedItem {
         public bool IsTempTable { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -213,7 +213,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Label
     /// </summary>
-    public class ParsedLabel : ParsedItem {
+    internal class ParsedLabel : ParsedItem {
         public int UndefinedLine { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
@@ -227,7 +227,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// dynamic function calls parsed item
     /// </summary>
-    public class ParsedFunctionCall : ParsedItem {
+    internal class ParsedFunctionCall : ParsedItem {
         /// <summary>
         /// true if the called function is not defined in the program
         /// </summary>
@@ -246,7 +246,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Run parsed item
     /// </summary>
-    public class ParsedRun : ParsedItem {
+    internal class ParsedRun : ParsedItem {
         /// <summary>
         /// true if the Run statement is based on a evaluating a VALUE()
         /// </summary>
@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// include file parsed item
     /// </summary>
-    public class ParsedIncludeFile : ParsedItem {
+    internal class ParsedIncludeFile : ParsedItem {
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -279,7 +279,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Pre-processed var parsed item
     /// </summary>
-    public class ParsedPreProc : ParsedItem {
+    internal class ParsedPreProc : ParsedItem {
         public string Value { get; private set; }
         public int UndefinedLine { get; set; }
         public ParsedPreProcFlag Flag { get; set; }
@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public enum ParsedPreProcFlag {
+    internal enum ParsedPreProcFlag {
         None = 1,
         Scope = 2,
         Global = 4
@@ -303,7 +303,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Define parsed item
     /// </summary>
-    public class ParsedDefine : ParsedItem {
+    internal class ParsedDefine : ParsedItem {
         /// <summary>
         /// can contains (separated by 1 space) :
         /// global, shared, private, new
@@ -362,13 +362,13 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
-    public enum ParsedAsLike {
+    internal enum ParsedAsLike {
         None,
         As,
         Like
     }
 
-    public class ParseDefineTypeAttr : Extensions.EnumAttr {
+    internal class ParseDefineTypeAttr : Extensions.EnumAttr {
         public string Value { get; set; }
     }
 
@@ -376,7 +376,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Enumeration of DEFINE types
     /// Retrieve the description value with ((ParseDefineTypeAttr)parseDefineType.GetAttributes()).Value
     /// </summary>
-    public enum ParseDefineType {
+    internal enum ParseDefineType {
         [ParseDefineTypeAttr(Value = "PARAMETER")]
         Parameter,
         [ParseDefineTypeAttr(Value = "DATA-SOURCE")]
@@ -413,7 +413,7 @@ namespace _3PA.MainFeatures.Parser {
         None
     }
 
-    public enum ParsedPrimitiveType {
+    internal enum ParsedPrimitiveType {
         Character = 0,
         Comhandle,
         Date,
@@ -455,7 +455,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// data base parsed item
     /// </summary>
-    public class ParsedDataBase {
+    internal class ParsedDataBase {
         public string LogicalName { get; private set; }
         public string PhysicalName { get; private set; }
         public string ProgressVersion { get; private set; }
@@ -472,7 +472,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Table or temp table parsed item
     /// </summary>
-    public class ParsedTable : ParsedItem {
+    internal class ParsedTable : ParsedItem {
         public string Id { get; private set; }
         public string Crc { get; private set; }
         public string DumpName { get; private set; }
@@ -522,7 +522,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// describes a field of a table
     /// </summary>
-    public class ParsedField {
+    internal class ParsedField {
         public string Name { get; private set; }
         /// <summary>
         /// When parsing, we store the value of the "primitive-type" in there, 
@@ -552,7 +552,7 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     [Flags]
-    public enum ParsedFieldFlag {
+    internal enum ParsedFieldFlag {
         None = 1,
         Extent = 2,
         Index = 4,
@@ -563,7 +563,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// defines a index of a table
     /// </summary>
-    public class ParsedIndex {
+    internal class ParsedIndex {
         public string Name { get; private set; }
         public ParsedIndexFlag Flag { get; private set; }
         public List<string> FieldsList { get; private set; }
@@ -575,7 +575,7 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     [Flags]
-    public enum ParsedIndexFlag {
+    internal enum ParsedIndexFlag {
         None = 1,
         Unique = 2,
         Primary = 4
@@ -584,7 +584,7 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// defines a trigger of a table
     /// </summary>
-    public class ParsedTrigger {
+    internal class ParsedTrigger {
         public string Event { get; private set; }
         public string ProcName { get; private set; }
         public ParsedTrigger(string @event, string procName) {

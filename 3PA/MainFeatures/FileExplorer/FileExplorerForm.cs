@@ -40,7 +40,8 @@ using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
-    public partial class FileExplorerForm : NppDockableDialog {
+
+    internal partial class FileExplorerForm : NppDockableDialog {
 
         #region Fields
         private const string StrEmptyList = "No files found!";
@@ -861,7 +862,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    public class FilesSortingClass : IComparer<FileObject> {
+    internal class FilesSortingClass : IComparer<FileObject> {
         public int Compare(FileObject x, FileObject y) {
             // first, the favourite
             int compare = x.Flags.HasFlag(FileFlag.Favourite).CompareTo(y.Flags.HasFlag(FileFlag.Favourite));

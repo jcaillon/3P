@@ -28,7 +28,8 @@ using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
-    public class ProExecution {
+
+    internal class ProExecution {
 
         #region public fields
 
@@ -292,14 +293,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     }
 
-    public class ProcessOnExitEventArgs : EventArgs {
+    internal class ProcessOnExitEventArgs : EventArgs {
         public ProExecution ProgressExecution;
         public ProcessOnExitEventArgs(ProExecution progressExecution) {
             ProgressExecution = progressExecution;
         }
     }
 
-    public enum ExecutionType {
+    internal enum ExecutionType {
         CheckSyntax,
         Compile,
         Run,

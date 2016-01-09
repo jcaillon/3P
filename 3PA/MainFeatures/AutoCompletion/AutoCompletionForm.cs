@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// This class create an autocompletion window
     /// </summary>
-    public partial class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
+    internal partial class AutoCompletionForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
         private const string StrEmptyList = "No suggestions!";
@@ -608,7 +608,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    public class CompletionDataSortingClass : IComparer<CompletionData> {
+    internal class CompletionDataSortingClass : IComparer<CompletionData> {
         public int Compare(CompletionData x, CompletionData y) {
             // compare first by CompletionType
             int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
@@ -676,7 +676,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
     #region TabCompletedEventArgs
 
-    public sealed class TabCompletedEventArgs : EventArgs {
+    internal sealed class TabCompletedEventArgs : EventArgs {
         /// <summary>
         /// the link href that was clicked
         /// </summary>

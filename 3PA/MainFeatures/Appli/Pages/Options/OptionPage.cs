@@ -39,7 +39,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
     /// <summary>
     /// This page is built programatically
     /// </summary>
-    public partial class OptionPage : YamuiPage {
+    internal partial class OptionPage : YamuiPage {
 
         #region fields
 

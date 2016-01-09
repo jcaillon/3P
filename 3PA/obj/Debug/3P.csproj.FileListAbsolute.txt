@@ -47,7 +47,6 @@ C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.AppliForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Home.HomePage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.OptionPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.ProfilesPage.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.FuckingPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.template.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.SettingAppearance.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Data.DataResources.resources
@@ -65,3 +64,4 @@ C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3P\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
 C:\Work\3P\3PA\obj\Debug\3P.dll
 C:\Work\3P\3PA\obj\Debug\3P.pdb
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.FuckingPage.resources

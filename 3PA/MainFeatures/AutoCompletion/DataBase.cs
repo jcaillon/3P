@@ -27,7 +27,7 @@ using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.AutoCompletion {
-    public class DataBase {
+    internal static class DataBase {
 
         #region fields
 

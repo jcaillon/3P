@@ -32,7 +32,7 @@ namespace _3PA.MainFeatures.Parser {
     /// This class sustains the autocompletion list AND the code explorer list
     /// by visiting the parser and creating new completionData
     /// </summary>
-    class ParserVisitor : IParserVisitor {
+    internal class ParserVisitor : IParserVisitor {
 
         #region Fields
 

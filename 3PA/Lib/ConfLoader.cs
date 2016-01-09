@@ -26,7 +26,7 @@ namespace _3PA.Lib {
     /// <summary>
     /// This class allows to easily import/export into .conf files
     /// </summary>
-    public class ConfLoader {
+    public static class ConfLoader {
 
         /// <summary>
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,

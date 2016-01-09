@@ -21,7 +21,9 @@ using System;
 using _3PA.MainFeatures;
 
 namespace _3PA {
-    public class Abl {
+
+    internal static class Abl {
+
         /// <summary>
         /// is the char allowed in a variable's name?
         /// </summary>

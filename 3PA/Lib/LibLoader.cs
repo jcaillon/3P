@@ -24,7 +24,7 @@ using _3PA.MainFeatures;
 using _3PA.Properties;
 
 namespace _3PA.Lib {
-    class LibLoader {
+    internal static class LibLoader {
 
         private static string _rootDir;
         private static string _pathToYamui;
@@ -58,7 +58,7 @@ namespace _3PA.Lib {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
+        public static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
             try {
                 if (!Directory.Exists(_rootDir))
                     Directory.CreateDirectory(_rootDir);

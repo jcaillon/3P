@@ -23,7 +23,7 @@ using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 
 namespace _3PA.MainFeatures.InfoToolTip {
-    public partial class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
+    internal partial class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
         // prevents the form from stealing the focus

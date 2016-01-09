@@ -26,7 +26,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
     /// This class facilitates the use of StyeEx or SetStyles for annotations and syntax highlighting
     /// It creates the byte array of styles for the text it is fed with
     /// </summary>
-    public class StylerHelper {
+    internal class StylerHelper {
 
         #region private fields
 

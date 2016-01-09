@@ -22,10 +22,11 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 
 namespace _3PA.MainFeatures.Appli {
+
     /// <summary>
     /// Handles the application main window
     /// </summary>
-    class Appli {
+    internal static class Appli {
 
         public static AppliForm Form {
             get { return _form; }

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.Appli.Pages {
+namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class FuckingPage {
         /// <summary> 
         /// Required designer variable.

@@ -29,7 +29,7 @@ using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
-    class ProCodeUtils {
+    internal static class ProCodeUtils {
 
         #region Go to definition
 
@@ -55,6 +55,8 @@ namespace _3PA.MainFeatures {
 
                 // try to go to the definition of the selected word
                 var position = fromMouseClick ? Npp.GetPositionFromMouseLocation() : Npp.CurrentPosition;
+                if (fromMouseClick && position <= 0)
+                    return;
                 var curWord = Npp.GetWordAtPosition(position);
 
 

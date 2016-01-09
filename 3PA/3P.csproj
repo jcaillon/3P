@@ -82,18 +82,22 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Tests\ParserLexerTests.cs" />
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ImageResources.resx</DependentUpon>
     </Compile>
+    <Compile Include="Interop\CoreWindowsHook.cs" />
     <Compile Include="Lib\DocumentLines.cs" />
     <Compile Include="Interop\NotepadHelper.cs" />
     <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\GapBuffer.cs" />
     <Compile Include="Lib\HtmlHelpInterop.cs" />
+    <Compile Include="Lib\JsonParser.cs" />
     <Compile Include="Lib\TextEncodingDetect.cs" />
+    <Compile Include="Lib\User.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Home\HomePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -214,14 +218,12 @@
       <DependentUpon>DataResources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
-    <Compile Include="Interop\CoreWindowsHook.cs" />
     <Compile Include="Interop\ScintillaHelper.cs" />
     <Compile Include="MainFeatures\SetCommand.cs" />
-    <Compile Include="Interop\Win32.cs" />
+    <Compile Include="Interop\WinApi.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />
     <Compile Include="Lib\WinHook.cs" />
     <Compile Include="Lib\AssemblyInfo.cs" />
-    <Compile Include="Lib\BinWriter.cs" />
     <Compile Include="Lib\DropToWindows.cs" />
     <Compile Include="MainFeatures\ErrorHandler.cs" />
     <Compile Include="Lib\Object2Xml.cs" />
@@ -229,10 +231,8 @@
     <Compile Include="MainFeatures\Parser\ParsedItem.cs" />
     <Compile Include="MainFeatures\Config.cs" />
     <Compile Include="Lib\Extensions.cs" />
-    <Compile Include="Lib\IniFile.cs" />
     <Compile Include="Lib\IniReader.cs" />
     <Compile Include="Lib\LibLoader.cs" />
-    <Compile Include="MainFeatures\LocalEnv.cs" />
     <Compile Include="Lib\SpecialDictionary.cs" />
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
@@ -267,6 +267,7 @@
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.Designer.cs">
       <DependentUpon>InfoToolTipForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="NotificationsHandler.cs" />
     <Compile Include="Npp.cs" />
     <Compile Include="Scintilla.cs" />
     <Compile Include="Plug.cs" />
@@ -276,7 +277,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="UnmanagedExports.cs" />
+    <Compile Include="Interop\UnmanagedExports.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">

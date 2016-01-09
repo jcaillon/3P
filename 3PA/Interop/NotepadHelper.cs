@@ -5,44 +5,16 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 namespace _3PA.Interop {
+
     [StructLayout(LayoutKind.Sequential)]
-    public struct NppData {
+    internal struct NppData {
         public IntPtr _nppHandle;
         public IntPtr _scintillaMainHandle;
         public IntPtr _scintillaSecondHandle;
     }
-    //public delegate void NppFuncItemDelegate();
-    [StructLayout(LayoutKind.Sequential)]
-    public struct ShortcutKey {
-        public ShortcutKey(string data) {
-            //Ctrl+Shift+Alt+Key
-            var parts = data.Split('+');
-            _key = Convert.ToByte(Enum.Parse(typeof(Keys), parts.Last()));
-            parts = parts.Take(parts.Length - 1).ToArray();
-            _isCtrl = Convert.ToByte(parts.Contains("Ctrl"));
-            _isShift = Convert.ToByte(parts.Contains("Shift"));
-            _isAlt = Convert.ToByte(parts.Contains("Alt"));
-        }
-        public ShortcutKey(bool isCtrl, bool isAlt, bool isShift, Keys key) {
-            // the types 'bool' and 'char' have a size of 1 byte only!
-            _isCtrl = Convert.ToByte(isCtrl);
-            _isAlt = Convert.ToByte(isAlt);
-            _isShift = Convert.ToByte(isShift);
-            _key = Convert.ToByte(key);
-        }
-        public byte _isCtrl;
-        public byte _isAlt;
-        public byte _isShift;
-        public byte _key;
-        public bool IsCtrl { get { return _isCtrl != 0; } }
-        public bool IsShift { get { return _isShift != 0; } }
-        public bool IsAlt { get { return _isAlt != 0; } }
-        public bool IsSet {
-            get { return _key != 0; }
-        }
-    }
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct FuncItem {
+    internal struct FuncItem {
         [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
         public string _itemName;
         public Action _pFunc;
@@ -50,7 +22,8 @@ namespace _3PA.Interop {
         public bool _init2Check;
         public ShortcutKey _pShKey;
     }
-    public class FuncItems : IDisposable {
+
+    internal class FuncItems : IDisposable {
         List<FuncItem> _funcItems;
         int _sizeFuncItem;
         List<IntPtr> _shortCutKeys;
@@ -120,8 +93,39 @@ namespace _3PA.Interop {
             Dispose();
         }
     }
+
     [StructLayout(LayoutKind.Sequential)]
-    public struct RECT {
+    internal struct ShortcutKey {
+        public ShortcutKey(string data) {
+            //Ctrl+Shift+Alt+Key
+            var parts = data.Split('+');
+            _key = Convert.ToByte(Enum.Parse(typeof(Keys), parts.Last()));
+            parts = parts.Take(parts.Length - 1).ToArray();
+            _isCtrl = Convert.ToByte(parts.Contains("Ctrl"));
+            _isShift = Convert.ToByte(parts.Contains("Shift"));
+            _isAlt = Convert.ToByte(parts.Contains("Alt"));
+        }
+        public ShortcutKey(bool isCtrl, bool isAlt, bool isShift, Keys key) {
+            // the types 'bool' and 'char' have a size of 1 byte only!
+            _isCtrl = Convert.ToByte(isCtrl);
+            _isAlt = Convert.ToByte(isAlt);
+            _isShift = Convert.ToByte(isShift);
+            _key = Convert.ToByte(key);
+        }
+        public byte _isCtrl;
+        public byte _isAlt;
+        public byte _isShift;
+        public byte _key;
+        public bool IsCtrl { get { return _isCtrl != 0; } }
+        public bool IsShift { get { return _isShift != 0; } }
+        public bool IsAlt { get { return _isAlt != 0; } }
+        public bool IsSet {
+            get { return _key != 0; }
+        }
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    internal struct RECT {
         public RECT(int left, int top, int right, int bottom) {
             Left = left; Top = top; Right = right; Bottom = bottom;
         }
@@ -130,8 +134,41 @@ namespace _3PA.Interop {
         public int Right;
         public int Bottom;
     }
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    internal struct NppTbData {
+        public IntPtr hClient;            // HWND: client Window Handle
+        public string pszName;            // TCHAR*: name of plugin (shown in window)
+        public int dlgID;                // int: a funcItem provides the function pointer to start a dialog. Please parse here these ID
+        // user modifications
+        public NppTbMsg uMask;                // UINT: mask params: look to above defines
+        public uint hIconTab;            // HICON: icon for tabs
+        public string pszAddInfo;        // TCHAR*: for plugin to display additional informations
+        // internal data, do not use !!!
+        public RECT rcFloat;            // RECT: floating position
+        public int iPrevCont;           // int: stores the privious container (toggling between float and dock)
+        public string pszModuleName;    // const TCHAR*: it's the plugin file name. It's used to identify the plugin
+    }
+
+    internal enum LangType {
+        L_TEXT, L_PHP, L_C, L_CPP, L_CS, L_OBJC, L_JAVA, L_RC,
+        L_HTML, L_XML, L_MAKEFILE, L_PASCAL, L_BATCH, L_INI, L_ASCII, L_USER,
+        L_ASP, L_SQL, L_VB, L_JS, L_CSS, L_PERL, L_PYTHON, L_LUA,
+        L_TEX, L_FORTRAN, L_BASH, L_FLASH, L_NSIS, L_TCL, L_LISP, L_SCHEME,
+        L_ASM, L_DIFF, L_PROPS, L_PS, L_RUBY, L_SMALLTALK, L_VHDL, L_KIX, L_AU3,
+        L_CAML, L_ADA, L_VERILOG, L_MATLAB, L_HASKELL, L_INNO, L_SEARCHRESULT,
+        L_CMAKE, L_YAML, L_COBOL, L_GUI4CLI, L_D, L_POWERSHELL, L_R, L_JSP,
+        // The end of enumated language type, so it should be always at the end
+        L_EXTERNAL
+    }
+
     [Flags]
-    public enum NppTbMsg : uint {
+    internal enum WinMsg {
+        WM_COMMAND = 0x111
+    }
+
+    [Flags]
+    internal enum NppTbMsg : uint {
         // styles for containers
         //CAPTION_TOP                = 1,
         //CAPTION_BOTTOM            = 0,
@@ -153,37 +190,9 @@ namespace _3PA.Interop {
         DWS_DF_CONT_BOTTOM = (CONT_BOTTOM << 28),    // default docking on bottom
         DWS_DF_FLOATING = 0x80000000            // default state is floating
     }
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
-    public struct NppTbData {
-        public IntPtr hClient;            // HWND: client Window Handle
-        public string pszName;            // TCHAR*: name of plugin (shown in window)
-        public int dlgID;                // int: a funcItem provides the function pointer to start a dialog. Please parse here these ID
-        // user modifications
-        public NppTbMsg uMask;                // UINT: mask params: look to above defines
-        public uint hIconTab;            // HICON: icon for tabs
-        public string pszAddInfo;        // TCHAR*: for plugin to display additional informations
-        // internal data, do not use !!!
-        public RECT rcFloat;            // RECT: floating position
-        public int iPrevCont;           // int: stores the privious container (toggling between float and dock)
-        public string pszModuleName;    // const TCHAR*: it's the plugin file name. It's used to identify the plugin
-    }
-    public enum LangType {
-        L_TEXT, L_PHP, L_C, L_CPP, L_CS, L_OBJC, L_JAVA, L_RC,
-        L_HTML, L_XML, L_MAKEFILE, L_PASCAL, L_BATCH, L_INI, L_ASCII, L_USER,
-        L_ASP, L_SQL, L_VB, L_JS, L_CSS, L_PERL, L_PYTHON, L_LUA,
-        L_TEX, L_FORTRAN, L_BASH, L_FLASH, L_NSIS, L_TCL, L_LISP, L_SCHEME,
-        L_ASM, L_DIFF, L_PROPS, L_PS, L_RUBY, L_SMALLTALK, L_VHDL, L_KIX, L_AU3,
-        L_CAML, L_ADA, L_VERILOG, L_MATLAB, L_HASKELL, L_INNO, L_SEARCHRESULT,
-        L_CMAKE, L_YAML, L_COBOL, L_GUI4CLI, L_D, L_POWERSHELL, L_R, L_JSP,
-        // The end of enumated language type, so it should be always at the end
-        L_EXTERNAL
-    }
+
     [Flags]
-    public enum WinMsg {
-        WM_COMMAND = 0x111
-    }
-    [Flags]
-    public enum NppMsg : uint {
+    internal enum NppMsg : uint {
         //Here you can find how to use these messages : http://notepad-plus.sourceforge.net/uk/plugins-HOWTO.php
         NPPMSG = (0x400/*WM_USER*/ + 1000),
         NPPM_GETCURRENTSCINTILLA = (NPPMSG + 4),
@@ -528,6 +537,7 @@ namespace _3PA.Interop {
         //scnNotification->nmhdr.hwndFrom = newIndex;
         //scnNotification->nmhdr.idFrom = BufferID;
     }
+
     internal class Idm {
         public const int Base = 40000;
         public const int File = Base + 1000;
@@ -542,10 +552,12 @@ namespace _3PA.Interop {
         public const int Setting = Base + 8000;
         public const int Execute = Base + 9000;
     }
+
     /// <summary>
     /// A built-in Notepad++ menu command.
     /// </summary>
-    public enum NppMenuCmd {
+    internal enum NppMenuCmd {
+
         #region File
         FileNew = (Idm.File + 1),
         FileOpen = (Idm.File + 2),
@@ -568,6 +580,7 @@ namespace _3PA.Interop {
         FileOpenAllRecentFiles = (Idm.Edit + 40),
         FileCleanRecentFileList = (Idm.Edit + 41),
         #endregion
+
         #region Edit
         EditCut = (Idm.Edit + 1),
         EditCopy = (Idm.Edit + 2),
@@ -603,6 +616,7 @@ namespace _3PA.Interop {
         EditAutoCompleteCurrentFile = (50000 + 1),
         EditFuncionCallTip = (50000 + 2),
         #endregion
+
         #region Search
         SearchFind = (Idm.Search + 1),
         SearchFindNext = (Idm.Search + 2),
@@ -634,6 +648,7 @@ namespace _3PA.Interop {
         SearchUnmarkAllExt5 = (Idm.Search + 31),
         SearchClearAllMarks = (Idm.Search + 32),
         #endregion
+
         #region View
         //IDM.ViewToolbarHide = (IDM.View + 1),
         ViewToolbarReduce = (Idm.View + 2),
@@ -702,6 +717,7 @@ namespace _3PA.Interop {
         ViewLoadInNewInstance = 10004,
         ViewSwitchToOtherView = (Idm.View + 72),
         #endregion
+
         #region Format
         FormatToDos = (Idm.Format + 1),
         FormatToUnix = (Idm.Format + 2),
@@ -717,6 +733,7 @@ namespace _3PA.Interop {
         FormatConvertUnicodeBigEndian = (Idm.Format + 12),
         FormatConvertUnicodeLittleEndian = (Idm.Format + 13),
         #endregion
+
         #region Language
         LangStyleConfigDialog = (Idm.Lang + 1),
         LangC = (Idm.Lang + 2),
@@ -772,6 +789,7 @@ namespace _3PA.Interop {
         LangUser = (Idm.Lang + 80),
         LangUserLimit = (Idm.Lang + 110),
         #endregion
+
         #region About
         AboutHomePage = (Idm.About + 1),
         AboutProjectPage = (Idm.About + 2),
@@ -782,6 +800,7 @@ namespace _3PA.Interop {
         AboutWikiFaq = (Idm.About + 7),
         AboutHelp = (Idm.About + 8),
         #endregion
+
         #region Settings
         SettingTabSize = (Idm.Setting + 1),
         SettingTabReplaceSpace = (Idm.Setting + 2),
@@ -795,6 +814,7 @@ namespace _3PA.Interop {
         SettingPreferences = (Idm.Setting + 11),
         SettingAutoCnbChar = (Idm.Setting + 15),
         #endregion
+
         #region Macro
         MacroStartRecording = (Idm.Edit + 18),
         MacroStopRecording = (Idm.Edit + 19),
@@ -803,8 +823,9 @@ namespace _3PA.Interop {
         MacroRunMultiDialog = (Idm.Edit + 32)
         #endregion
     }
+
     [Flags]
-    public enum DockMgrMsg : uint {
+    internal enum DockMgrMsg : uint {
         IDB_CLOSE_DOWN = 137,
         IDB_CLOSE_UP = 138,
         IDD_CONTAINER_DLG = 139,
@@ -836,8 +857,9 @@ namespace _3PA.Interop {
         //nmhdr.hwndFrom = hwndNpp;
         //nmhdr.idFrom = ctrlIdNpp;
     }
+
     [StructLayout(LayoutKind.Sequential)]
-    public struct toolbarIcons {
+    internal struct toolbarIcons {
         public IntPtr hToolbarBmp;
         public IntPtr hToolbarIcon;
     }

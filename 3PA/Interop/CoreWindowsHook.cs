@@ -19,8 +19,8 @@
 #endregion
 
 using System;
-using System.Diagnostics;
 using System.Runtime.InteropServices;
+// ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
 
@@ -32,7 +32,7 @@ namespace _3PA.Interop {
     /// read this: 
     /// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644959(v=vs.85).aspx
     /// </summary>
-    public abstract class WindowsHook<T> : CoreWindowsHook, IDisposable where T : new() {
+    internal abstract class WindowsHook<T> : CoreWindowsHook, IDisposable where T : new() {
 
         #region Singleton
 
@@ -115,7 +115,7 @@ namespace _3PA.Interop {
     #region Enum HookType
 
     // Hook Types
-	public enum HookType {
+    internal enum HookType {
 		WH_JOURNALRECORD = 0,
 		WH_JOURNALPLAYBACK = 1,
 		WH_KEYBOARD = 2,
@@ -137,7 +137,7 @@ namespace _3PA.Interop {
 
     #region CoreWindowsHook
 
-    public class CoreWindowsHook {
+    internal class CoreWindowsHook {
 
         // Filter function delegate
         public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
@@ -229,7 +229,7 @@ namespace _3PA.Interop {
 
     #region Class HookEventArgs
 
-    public class HookEventArgs : EventArgs {
+    internal class HookEventArgs : EventArgs {
         public int HookCode;	// Hook code
         public IntPtr WParam;	// WPARAM argument
         public IntPtr LParam;	// LPARAM argument

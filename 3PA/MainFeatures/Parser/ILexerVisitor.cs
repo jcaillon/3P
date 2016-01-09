@@ -18,8 +18,8 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
-     
-    public interface ILexerVisitor {
+
+    internal interface ILexerVisitor {
         void Visit(TokenComment tok);
         void Visit(TokenEol tok);
         void Visit(TokenEos tok);

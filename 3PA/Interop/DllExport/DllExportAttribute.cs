@@ -24,26 +24,36 @@ using System.Runtime.InteropServices;
 
 // BE CAREFUL, DONT CHANGE THE NAMESPACE HERE!!! It should be : NppPlugin.DllExport
 namespace NppPlugin.DllExport {
+
     [AttributeUsage(AttributeTargets.Method)]
     class DllExportAttribute : Attribute {
+
         public DllExportAttribute() {
         }
+
         public DllExportAttribute(string exportName)
             : this(exportName, CallingConvention.StdCall) {
         }
+
         public DllExportAttribute(string exportName, CallingConvention callingConvention) {
             ExportName = exportName;
             CallingConvention = callingConvention;
         }
+
         CallingConvention _callingConvention;
+
         public CallingConvention CallingConvention {
             get { return _callingConvention; }
             set { _callingConvention = value; }
         }
+
         string _exportName;
+
         public string ExportName {
             get { return _exportName; }
             set { _exportName = value; }
         }
+
     }
+
 }

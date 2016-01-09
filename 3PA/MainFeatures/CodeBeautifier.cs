@@ -21,7 +21,8 @@ using _3PA.Html;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures {
-    class CodeBeautifier {
+
+    internal static class CodeBeautifier {
 
         /// <summary>
         /// Tries to re-indent the code of the whole document

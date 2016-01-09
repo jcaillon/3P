@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Runtime.InteropServices;
+// ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
 
@@ -133,7 +134,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Visibility and location of annotations in a Scintilla instance
     /// </summary>
-    public enum Annotation {
+    public enum Annotation : uint {
         /// <summary>
         /// Annotations are not displayed. This is the default.
         /// </summary>
@@ -158,7 +159,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Additional location options for line wrapping visual indicators.
     /// </summary>
-    public enum WrapVisualFlagLocation {
+    public enum WrapVisualFlagLocation : uint {
         /// <summary>
         /// Wrap indicators are drawn near the border. This is the default.
         /// </summary>
@@ -179,7 +180,7 @@ namespace _3PA.Interop {
     /// The visual indicator used on a wrapped line.
     /// </summary>
     [Flags]
-    public enum WrapVisualFlags {
+    public enum WrapVisualFlags : uint {
         /// <summary>
         /// No visual indicator is displayed. This the default.
         /// </summary>
@@ -205,7 +206,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// The line wrapping strategy.
     /// </summary>
-    public enum WrapMode {
+    public enum WrapMode : uint {
         /// <summary>
         /// Line wrapping is disabled. This is the default.
         /// </summary>
@@ -230,7 +231,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Indenting behavior of wrapped sublines.
     /// </summary>
-    public enum WrapIndentMode {
+    public enum WrapIndentMode : uint {
         /// <summary>
         /// Wrapped sublines aligned to left of window plus the amount set by WrapStartIndent
         /// This is the default.
@@ -248,7 +249,7 @@ namespace _3PA.Interop {
         Indent = SciMsg.SC_WRAPINDENT_INDENT
     }
 
-    public enum WhitespaceMode {
+    public enum WhitespaceMode : uint {
         /// <summary>
         /// The normal display mode with whitespace displayed as an empty background color.
         /// </summary>
@@ -271,7 +272,7 @@ namespace _3PA.Interop {
     /// </summary>
     /// <remarks>This enumeration has a FlagsAttribute attribute that allows a bitwise combination of its member values.</remarks>
     [Flags]
-    public enum SearchFlags {
+    public enum SearchFlags : uint {
         /// <summary>
         /// Matches every instance of the search string.
         /// </summary>
@@ -307,7 +308,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Specifies the behavior of pasting into multiple selections.
     /// </summary>
-    public enum MultiPaste {
+    public enum MultiPaste : uint {
         /// <summary>
         /// Pasting into multiple selections only pastes to the main selection. This is the default.
         /// </summary>
@@ -322,7 +323,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Specifies the lexer to use for syntax highlighting in a Scintilla instance.
     /// </summary>
-    public enum Lexer {
+    public enum Lexer : uint {
         /// <summary>
         /// Lexing is performed by the Scintilla instance container (host) using
         /// the Scintilla.StyleNeeded event.
@@ -465,7 +466,7 @@ namespace _3PA.Interop {
         R = SciMsg.SCLEX_R
     }
 
-    public enum FontQuality {
+    public enum FontQuality : uint {
         /// <summary>
         /// Specifies that the character quality of the font does not matter; so the lowest quality can be used.
         /// This is the default.
@@ -491,7 +492,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// End-of-line format.
     /// </summary>
-    public enum Eol {
+    public enum Eol : uint {
         /// <summary>
         /// Carriage Return, Line Feed pair "\r\n" (0x0D0A).
         /// </summary>
@@ -511,7 +512,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Actions which can be performed by the application or bound to keys in a Scintilla instance.
     /// </summary>
-    public enum Command {
+    public enum Command : uint {
         /// <summary>
         /// When bound to keys performs the standard platform behavior.
         /// </summary>
@@ -1084,7 +1085,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// Fold actions.
     /// </summary>
-    public enum FoldAction {
+    public enum FoldAction : uint {
         /// <summary>
         /// Contract the fold.
         /// </summary>
@@ -1104,7 +1105,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// The possible casing styles of a style.
     /// </summary>
-    public enum StyleCase {
+    public enum StyleCase : uint {
         /// <summary>
         /// Display the text normally.
         /// </summary>
@@ -1131,7 +1132,7 @@ namespace _3PA.Interop {
     /// </summary>
     /// <remarks>This enumeration has a FlagsAttribute attribute that allows a bitwise combination of its member values.</remarks>
     [Flags]
-    public enum IndicatorFlags {
+    public enum IndicatorFlags : uint {
         /// <summary>
         /// No flags. This is the default.
         /// </summary>
@@ -1148,7 +1149,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// The visual appearance of an indicator.
     /// </summary>
-    public enum IndicatorStyle {
+    public enum IndicatorStyle : uint {
         /// <summary>
         /// Underlined with a single, straight line.
         /// </summary>
@@ -1244,22 +1245,27 @@ namespace _3PA.Interop {
     /// <summary>
     /// The display of a cursor when over a margin.
     /// </summary>
-    public enum MarginCursor {
+    public enum MarginCursor : uint {
         /// <summary>
         /// A normal arrow.
         /// </summary>
-        Arrow = SciMsg.SC_CURSORARROW,
+        Arrow = 2, // SC_CURSORARROW
 
         /// <summary>
         /// A reversed arrow.
         /// </summary>
-        ReverseArrow = SciMsg.SC_CURSORREVERSEARROW
+        ReverseArrow = 7 // SC_CURSORREVERSEARROW
+    }
+
+    public enum SciCursor {
+        Normal = -1, // SC_CURSORNORMAL
+        Wait = 4 // SC_CURSORWAIT
     }
 
     /// <summary>
     /// The behavior and appearance of a margin.
     /// </summary>
-    public enum MarginType {
+    public enum MarginType : uint {
         /// <summary>
         /// Margin can display symbols.
         /// </summary>
@@ -1294,7 +1300,7 @@ namespace _3PA.Interop {
     /// <summary>
     /// The symbol displayed by a Npp.Marker
     /// </summary>
-    public enum MarkerSymbol {
+    public enum MarkerSymbol : uint {
         /// <summary>
         /// A circle. This symbol is typically used to indicate a breakpoint.
         /// </summary>
@@ -1459,7 +1465,7 @@ namespace _3PA.Interop {
     /// Flags for additional line fold level behavior.
     /// </summary>
     [Flags]
-    public enum FoldLevelFlags {
+    public enum FoldLevelFlags : uint {
         /// <summary>
         /// Indicates that the line is blank and should be treated slightly different than its level may indicate;
         /// otherwise, blank lines should generally not be fold points.
@@ -1475,7 +1481,7 @@ namespace _3PA.Interop {
     #endregion
 
     [Flags]
-    public enum SciMarkerStyle {
+    public enum SciMarkerStyle : uint {
         SC_MARK_CIRCLE = 0,
         SC_MARK_ROUNDRECT = 1,
         SC_MARK_ARROW = 2,
@@ -1511,7 +1517,7 @@ namespace _3PA.Interop {
     }
 
     [Flags]
-    public enum SciMarginType {
+    public enum SciMarginType : uint {
         SC_MARGIN_SYMBOL = 0,
         SC_MARGIN_NUMBER = 1,
         SC_MARGIN_BACK = 2,
@@ -1521,7 +1527,7 @@ namespace _3PA.Interop {
     }
 
     [Flags]
-    public enum SciIndicatorType {
+    public enum SciIndicatorType : uint {
         INDIC_PLAIN = 0,
         INDIC_SQUIGGLE = 1,
         INDIC_TT = 2,
@@ -1542,7 +1548,7 @@ namespace _3PA.Interop {
     }
 
     [Flags]
-    public enum SciMsg {
+    public enum SciMsg : uint {
         // Autocompletions
         SC_AC_FILLUP = 1,
         SC_AC_DOUBLECLICK = 2,
@@ -1644,12 +1650,6 @@ namespace _3PA.Interop {
 
         // Encodings
         SC_CP_UTF8 = 65001,
-
-        // Cursors
-        SC_CURSORNORMAL = -1,
-        SC_CURSORARROW = 2,
-        SC_CURSORWAIT = 4,
-        SC_CURSORREVERSEARROW = 7,
 
         // Font quality
         SC_EFF_QUALITY_DEFAULT = 0,

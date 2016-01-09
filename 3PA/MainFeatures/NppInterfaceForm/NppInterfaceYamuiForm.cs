@@ -22,12 +22,12 @@ using System.Drawing;
 using System.Security;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using YamuiFramework.Helper;
 using _3PA.Interop;
-using _3PA.Lib;
+using WinApi = YamuiFramework.Helper.WinApi;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
-    public partial class NppInterfaceYamuiForm : NppInterfaceForm {
+
+    internal partial class NppInterfaceYamuiForm : NppInterfaceForm {
 
         #region fields
         private const int BorderWidth = 1;

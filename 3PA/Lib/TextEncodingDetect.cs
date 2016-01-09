@@ -28,7 +28,8 @@ namespace _3PA.Lib {
     /// This class offers a simple detection of a text file encoding
     /// </summary>
     /// <remarks>Credits go to: https://github.com/AutoIt/text-encoding-detect</remarks>
-    class TextEncodingDetect {
+    public class TextEncodingDetect {
+
         #region Fields
 
         private readonly byte[] _utf16Lebom = { 0xFF, 0xFE };

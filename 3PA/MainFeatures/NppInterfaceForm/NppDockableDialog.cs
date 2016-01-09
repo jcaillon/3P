@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Interop;
-using _3PA.Lib;
+using WinApi = _3PA.Interop.WinApi;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// So instead, use a hook onto npp and we update the position/size each time we receive a message that npp has 
     /// moved
     /// </summary>
-    public partial class NppDockableDialog : Form {
+    internal partial class NppDockableDialog : Form {
 
         #region fields
 
@@ -99,7 +99,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         public void RefreshPosAndLoc() {
             var rect = new Rectangle();
-            Win32.GetWindowRect(_masterForm.Handle, ref rect);
+            WinApi.GetWindowRect(_masterForm.Handle, ref rect);
 
             // update location
             if (_masterRectangle.Location != rect.Location) {

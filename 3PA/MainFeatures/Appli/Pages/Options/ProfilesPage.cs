@@ -21,7 +21,7 @@
 using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
-    public partial class ProfilesPage : YamuiPage {
+    internal partial class ProfilesPage : YamuiPage {
 
         #region fields
 

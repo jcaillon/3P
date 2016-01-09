@@ -25,7 +25,7 @@ using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Home {
-    public partial class HomePage : YamuiPage {
+    internal partial class HomePage : YamuiPage {
 
         #region fields
 

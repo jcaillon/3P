@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
@@ -35,7 +34,8 @@ using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli {
-    public partial class AppliForm : YamuiForm {
+
+    internal partial class AppliForm : YamuiForm {
 
         #region fields
         /// <summary>

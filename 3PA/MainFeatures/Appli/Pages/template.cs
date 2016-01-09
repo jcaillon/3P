@@ -20,7 +20,7 @@
 using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.Appli.Pages {
-    public partial class template : YamuiPage {
+    internal partial class template : YamuiPage {
 
         #region fields
 

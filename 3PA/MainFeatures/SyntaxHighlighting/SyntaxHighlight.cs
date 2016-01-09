@@ -17,10 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-namespace _3PA.MainFeatures.SyntaxHighlighting
-{
-    class SyntaxHighlight
-    {
+namespace _3PA.MainFeatures.SyntaxHighlighting {
+    internal class SyntaxHighlight {
 
         #region real colorization todo
         /*

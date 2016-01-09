@@ -29,7 +29,8 @@ using _3PA.Html;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures {
-    public class ErrorHandler {
+
+    internal static class ErrorHandler {
 
         private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
         private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }

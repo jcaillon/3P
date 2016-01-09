@@ -30,7 +30,8 @@ using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures {
-    public class UserCommunication {
+
+    internal static class UserCommunication {
 
         private static EmptyForm _anchorForm;
 
@@ -139,7 +140,7 @@ namespace _3PA.MainFeatures {
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 writer.Write("{\"body\": " + serializer.Serialize(
                     "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                    "#### 3P version : " + AssemblyInfo.Version + " ####\r\n" +
+                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion() + " ####\r\n" +
                     message
                     ) + "}");
                 writer.Close();

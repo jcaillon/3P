@@ -17,10 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using YamuiFramework.Controls;
 
-namespace _3PA.MainFeatures.Appli.Pages {
-    public partial class FuckingPage : YamuiPage {
+namespace _3PA.MainFeatures.Appli.Pages.Set {
+    internal partial class FuckingPage : YamuiPage {
 
         #region fields
 

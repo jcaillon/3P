@@ -29,7 +29,7 @@ namespace _3PA.Lib {
     /// This classes reads a .ini file
     /// TODO: make it able to write the .ini as well?
     /// </summary>
-    class IniReader {
+    public class IniReader {
 
         /// <summary>
         /// Dictonnary of sections, each containing a dictionnary of key/value

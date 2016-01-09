@@ -25,31 +25,39 @@ using _3PA.Html;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures {
-    public class NppMenu {
+
+    internal class NppMenu {
+
+        #region fields
+
+        private Dictionary<Keys, int> _uniqueKeys = new Dictionary<Keys, int>();
+
+        public int CmdIndex { get; set; }
+
+        #endregion
+
+
+        #region public methods
 
         /// <summary>
-        /// new Tuple Action, int, string = (functionPointer, index, shortcutName)
+        /// Returns the dictionnary of unique keys used by the shortcuts
         /// </summary>
-        public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts { get; set; }
-
-        public Dictionary<Keys, int> UniqueKeys = new Dictionary<Keys, int>();
-
-        public int CmdIndex;
+        public Dictionary<Keys, int> UniqueKeys {
+            get { return _uniqueKeys; }
+        }
 
         /// <summary>
-        ///     Main SetCommand
+        /// Allows to set a plugin's command
         /// </summary>
         /// <param name="commandName">Name</param>
         /// <param name="functionPointer">Method to call on click</param>
         /// <param name="shortcutSpec">
-        ///     Composed of the name of the shortcut + the shortcut itself
-        ///     Ex : "_ShowSuggestionList:Ctrl+Space"
+        /// Composed of the name of the shortcut + the shortcut itself
+        /// Ex : "_ShowSuggestionList:Ctrl+Space"
         /// </param>
         /// <param name="checkOnInit"></param>
         public void SetCommand(string commandName, Action functionPointer, string shortcutSpec, bool checkOnInit) {
             try {
-                if (InternalShortCuts == null)
-                    InternalShortCuts = new Dictionary<ShortcutKey, Tuple<Action, int, string>>();
                 var parts = shortcutSpec.Split(':');
                 var shortcutName = parts[0];
                 var shortcutData = parts[1];
@@ -65,12 +73,12 @@ namespace _3PA.MainFeatures {
                     }
                     thisShortcut = new ShortcutKey(shortcutData);
                 }
-                InternalShortCuts.Add(thisShortcut, new Tuple<Action, int, string>(functionPointer, CmdIndex, shortcutName));
+                _internalShortCuts.Add(thisShortcut, new Tuple<Action, int, string>(functionPointer, CmdIndex, shortcutName));
                 Config.Instance.ShortCuts.Add(shortcutName, shortcutData);
 
-                var key = (Keys)thisShortcut._key;
-                if (!UniqueKeys.ContainsKey(key))
-                    UniqueKeys.Add(key, 0);
+                var key = (Keys) thisShortcut._key;
+                if (!_uniqueKeys.ContainsKey(key))
+                    _uniqueKeys.Add(key, 0);
 
                 if (!String.IsNullOrWhiteSpace(commandName))
                     SetCommand(CmdIndex++, commandName, functionPointer, thisShortcut, checkOnInit);
@@ -82,8 +90,6 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Sets a menu item without shortcut
         /// </summary>
-        /// <param name="commandName"></param>
-        /// <param name="functionPointer"></param>
         public void SetCommand(string commandName, Action functionPointer) {
             SetCommand(CmdIndex++, commandName, functionPointer);
         }
@@ -95,15 +101,24 @@ namespace _3PA.MainFeatures {
             SetCommand(CmdIndex++, "---", null);
         }
 
+        #endregion
+
+
+        #region static
+
+        /// <summary>
+        /// new Tuple Action, int, string = (functionPointer, index, shortcutName)
+        /// </summary>
+        private static Dictionary<ShortcutKey, Tuple<Action, int, string>> _internalShortCuts = new Dictionary<ShortcutKey, Tuple<Action, int, string>>();
+
+        public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts {
+            get { return _internalShortCuts; }
+        }
+
         /// <summary>
         /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu
         /// </summary>
-        /// <param name="index"></param>
-        /// <param name="commandName"></param>
-        /// <param name="functionPointer"></param>
-        /// <param name="shortcut"></param>
-        /// <param name="checkOnInit"></param>
-        internal static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut = new ShortcutKey(), bool checkOnInit = false) {
+        private static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut = new ShortcutKey(), bool checkOnInit = false) {
             var funcItem = new FuncItem {
                 _cmdID = index,
                 _itemName = commandName
@@ -113,7 +128,7 @@ namespace _3PA.MainFeatures {
             if (shortcut._key != 0)
                 funcItem._pShKey = shortcut;
             funcItem._init2Check = checkOnInit;
-            Plug.FuncItems.Add(funcItem);
+            UnmanagedExports.FuncItems.Add(funcItem);
         }
 
         private static bool _alreadyWarnedUserAboutShortkey;
@@ -121,20 +136,18 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Called when the user changes the shortkey for a function
         /// </summary>
-        /// <param name="cmdId"></param>
-        /// <param name="shortcut"></param>
         public static void ShortcutsUpdated(int cmdId, ShortcutKey shortcut) {
             int index = 0;
-            foreach (var item in Plug.FuncItems.Items) {
-                if (cmdId == Plug.FuncItems.Items[index]._cmdID) {
+            foreach (var item in UnmanagedExports.FuncItems.Items) {
+                if (cmdId == UnmanagedExports.FuncItems.Items[index]._cmdID) {
                     break;
                 }
                 index++;
             }
             string shortcutName = "";
-            foreach (var locshortcut in InternalShortCuts.Keys) {
-                if (index == InternalShortCuts[locshortcut].Item2) {
-                    shortcutName = InternalShortCuts[locshortcut].Item3;
+            foreach (var locshortcut in _internalShortCuts.Keys) {
+                if (index == _internalShortCuts[locshortcut].Item2) {
+                    shortcutName = _internalShortCuts[locshortcut].Item3;
                     break;
                 }
             }
@@ -154,19 +167,18 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Converts a shortcut into a string
         /// </summary>
-        /// <param name="shortcut"></param>
-        /// <returns></returns>
         public static string ShortcutKey2String(ShortcutKey shortcut) {
-            return (shortcut.IsCtrl ? "Ctrl+" : "") + (shortcut.IsShift ? "Shift+" : "") + (shortcut.IsAlt ? "Alt+" : "") + Enum.GetName(typeof(Keys), shortcut._key);
+            return (shortcut.IsCtrl ? "Ctrl+" : "") + (shortcut.IsShift ? "Shift+" : "") + (shortcut.IsAlt ? "Alt+" : "") + Enum.GetName(typeof (Keys), shortcut._key);
         }
 
         /// <summary>
         /// Returns the shortcut specs corresponding to the shortcut name given
         /// </summary>
-        /// <param name="shortcutName"></param>
-        /// <returns></returns>
         public static string GetShortcutSpecFromName(string shortcutName) {
             return (Config.Instance.ShortCuts.ContainsKey(shortcutName) ? Config.Instance.ShortCuts[shortcutName] : "Unknown shortcut");
         }
+
+        #endregion
+
     }
 }

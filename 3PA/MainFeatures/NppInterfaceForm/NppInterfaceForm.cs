@@ -24,14 +24,14 @@ using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Interop;
-using _3PA.Lib;
+using WinApi = YamuiFramework.Helper.WinApi;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
-    public partial class NppInterfaceForm : Form {
+    internal partial class NppInterfaceForm : Form {
 
         #region fields
         /// <summary>

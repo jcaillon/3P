@@ -28,7 +28,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
-    public class FileExplorer {
+    internal static class FileExplorer {
 
         #region fields
 
@@ -170,7 +170,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 if (FakeForm == null) {
                     Init();
                 } else {
-                    Win32.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
+                    WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
                 Form.RefreshPosAndLoc();
                 if (FakeForm == null) return;
@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void UpdateMenuItemChecked() {
             if (FakeForm == null) return;
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, Plug.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
             Config.Instance.FileExplorerVisible = FakeForm.Visible;
         }
 
@@ -207,7 +207,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
-            Win32.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_DMMREGASDCKDLG, 0, ptrNppTbData);
 
             Form = new FileExplorerForm(FakeForm);
         }

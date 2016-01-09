@@ -24,7 +24,7 @@ using System.Reflection;
 
 namespace _3PA.Lib {
 
-    class AssemblyInfo {
+    internal static class AssemblyInfo {
 
         private static Assembly _assembly = Assembly.GetExecutingAssembly();
 
@@ -95,7 +95,7 @@ namespace _3PA.Lib {
             get { return _assembly.Location; }
         }
 
-        protected static string GetAttributeValue<TAttr>(Func<TAttr,
+        public static string GetAttributeValue<TAttr>(Func<TAttr,
           string> resolveFunc, string defaultResult = null) where TAttr : Attribute {
             object[] attributes = _assembly.GetCustomAttributes(typeof(TAttr), false);
             if (attributes.Length > 0)

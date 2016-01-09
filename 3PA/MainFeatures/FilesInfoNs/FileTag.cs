@@ -23,13 +23,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
+using WinApi = YamuiFramework.Helper.WinApi;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
 
-    public class FileTag {
+    internal static class FileTag {
 
         #region Form handling
 
@@ -215,7 +214,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
     #region File tag object
 
-    public struct FileTagObject {
+    internal struct FileTagObject {
         public string CorrectionNumber { get; set; }
         public string CorrectionDate { get; set; }
         public string CorrectionDecription { get; set; }

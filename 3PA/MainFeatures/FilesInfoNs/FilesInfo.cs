@@ -33,7 +33,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
     /// </summary>
-    public static class FilesInfo {
+    internal static class FilesInfo {
 
         #region event
 
@@ -445,7 +445,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// <summary>
     /// This class allows to keep info on a particular file loaded in npp's session
     /// </summary>
-    public class FileInfoObject {
+    internal class FileInfoObject {
 
         private CurrentOperation _currentOperation;
         private static object _lock = new object();
@@ -489,7 +489,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// Retrieve the DisplayText value with ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText
     /// </summary>
     [Flags]
-    public enum CurrentOperation {
+    internal enum CurrentOperation {
         [DisplayAttr(Name = "Editing")]
         Default = 0,
         [DisplayAttr(Name = "Appbuilder section!")]
@@ -507,7 +507,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// <summary>
     /// Errors found for this file, either from compilation or from prolint
     /// </summary>
-    public class FileError {
+    internal class FileError {
         public ErrorLevel Level { get; set; }
         public int Line { get; set; }
         public int Column { get; set; }
@@ -524,7 +524,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// <summary>
     /// Sort FileError
     /// </summary>
-    public class FileErrorSortingClass : IComparer<FileError> {
+    internal class FileErrorSortingClass : IComparer<FileError> {
         public int Compare(FileError x, FileError y) {
             // compare first by line
             int compare = x.Line.CompareTo(y.Line);
@@ -547,7 +547,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// Describes the error level, the num is also used for MARKERS in scintilla
     /// and thus must start at 0
     /// </summary>
-    public enum ErrorLevel {
+    internal enum ErrorLevel {
         [DisplayAttr(Name = "Error(s), good!")]
         NoErrors,
         [DisplayAttr(Name = "Info")]
@@ -562,7 +562,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         Critical
     }
 
-    public enum ErrorFontWeight {
+    internal enum ErrorFontWeight {
         Normal,
         Bold,
         Italic
@@ -572,14 +572,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
     #region EventArgs
 
-    public class UpdatedOperationEventArgs : EventArgs {
+    internal class UpdatedOperationEventArgs : EventArgs {
         public CurrentOperation CurrentOperation { get; private set; }
         public UpdatedOperationEventArgs(CurrentOperation currentOperation) {
             CurrentOperation = currentOperation;
         }
     }
 
-    public class UpdatedErrorsEventArgs : EventArgs {
+    internal class UpdatedErrorsEventArgs : EventArgs {
         public ErrorLevel ErrorLevel { get; private set; }
         public int NbErrors { get; private set; }
         public UpdatedErrorsEventArgs(ErrorLevel errorLevel, int nbErrors) {
