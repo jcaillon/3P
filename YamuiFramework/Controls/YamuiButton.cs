@@ -228,9 +228,9 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
-            if (IsPressed) {
-                if (OnButtonPressed == null) return;
+            if (IsPressed && OnButtonPressed != null) {
                 OnButtonPressed(this, e);
+                e.Handled = true;
             }
             IsPressed = false;
             Invalidate();
@@ -256,8 +256,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            if (IsPressed) {
-                if (OnButtonPressed == null) return;
+            if (IsPressed && OnButtonPressed != null) {
                 OnButtonPressed(this, e);
             }
             IsPressed = false;

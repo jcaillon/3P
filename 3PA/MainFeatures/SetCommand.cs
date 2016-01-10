@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures {
                     _uniqueKeys.Add(key, 0);
 
                 if (!String.IsNullOrWhiteSpace(commandName))
-                    SetCommand(CmdIndex++, commandName, functionPointer, thisShortcut, checkOnInit);
+                    Npp.SetCommand(CmdIndex++, commandName, functionPointer, thisShortcut, checkOnInit);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in SetCommand");
             }
@@ -91,14 +91,14 @@ namespace _3PA.MainFeatures {
         /// Sets a menu item without shortcut
         /// </summary>
         public void SetCommand(string commandName, Action functionPointer) {
-            SetCommand(CmdIndex++, commandName, functionPointer);
+            Npp.SetCommand(CmdIndex++, commandName, functionPointer);
         }
 
         /// <summary>
         /// Inserts a sperator, will be visible as an horizontal in the npp menu
         /// </summary>
         public void SetSeparator() {
-            SetCommand(CmdIndex++, "---", null);
+            Npp.SetCommand(CmdIndex++, "---", null);
         }
 
         #endregion
@@ -113,22 +113,6 @@ namespace _3PA.MainFeatures {
 
         public static Dictionary<ShortcutKey, Tuple<Action, int, string>> InternalShortCuts {
             get { return _internalShortCuts; }
-        }
-
-        /// <summary>
-        /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu
-        /// </summary>
-        private static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut = new ShortcutKey(), bool checkOnInit = false) {
-            var funcItem = new FuncItem {
-                _cmdID = index,
-                _itemName = commandName
-            };
-            if (functionPointer != null)
-                funcItem._pFunc = functionPointer;
-            if (shortcut._key != 0)
-                funcItem._pShKey = shortcut;
-            funcItem._init2Check = checkOnInit;
-            UnmanagedExports.FuncItems.Add(funcItem);
         }
 
         private static bool _alreadyWarnedUserAboutShortkey;

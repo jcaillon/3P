@@ -500,7 +500,9 @@ namespace YamuiFramework.Forms {
                     }
                     break;
             }
+
             base.WndProc(ref m);
+
             switch (m.Msg) {
                 case (int)WinApi.Messages.WM_GETMINMAXINFO:
                     OnGetMinMaxInfo(m.HWnd, m.LParam);

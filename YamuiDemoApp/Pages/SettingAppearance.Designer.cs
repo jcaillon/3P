@@ -26,49 +26,54 @@ namespace YamuiDemoApp.Pages {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
             this.comboTheme = new YamuiFramework.Controls.YamuiComboBox();
             this.yamuiComboBox3 = new YamuiFramework.Controls.YamuiComboBox();
             this.yamuiLabel22 = new YamuiFramework.Controls.YamuiLabel();
             this.PanelAccentColor = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel21 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiPanel1.SuspendLayout();
+            this.yamuiScrollPage1.ContentPanel.SuspendLayout();
+            this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiPanel1
+            // yamuiScrollPage1
             // 
-            this.yamuiPanel1.Controls.Add(this.comboTheme);
-            this.yamuiPanel1.Controls.Add(this.yamuiComboBox3);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel22);
-            this.yamuiPanel1.Controls.Add(this.PanelAccentColor);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel21);
-            this.yamuiPanel1.Controls.Add(this.yamuiLabel20);
-            this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.HorizontalScrollbarSize = 10;
-            this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(715, 315);
-            this.yamuiPanel1.TabIndex = 0;
-            this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.VerticalScrollbarSize = 10;
+            // 
+            // yamuiScrollPage1.ContentPanel
+            // 
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.comboTheme);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiComboBox3);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel22);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.PanelAccentColor);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel21);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel20);
+            this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
+            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
+            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(715, 315);
+            this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
+            this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.Name = "yamuiScrollPage1";
+            this.yamuiScrollPage1.Size = new System.Drawing.Size(715, 315);
+            this.yamuiScrollPage1.TabIndex = 0;
             // 
             // comboTheme
             // 
-            this.comboTheme.ItemHeight = 19;
+            this.comboTheme.ItemHeight = 15;
             this.comboTheme.Location = new System.Drawing.Point(0, 29);
             this.comboTheme.Name = "comboTheme";
-            this.comboTheme.Size = new System.Drawing.Size(180, 25);
-            this.comboTheme.TabIndex = 13;
+            this.comboTheme.Size = new System.Drawing.Size(180, 21);
+            this.comboTheme.TabIndex = 19;
             // 
             // yamuiComboBox3
             // 
-            this.yamuiComboBox3.ItemHeight = 19;
+            this.yamuiComboBox3.ItemHeight = 15;
             this.yamuiComboBox3.Location = new System.Drawing.Point(0, 256);
             this.yamuiComboBox3.Name = "yamuiComboBox3";
-            this.yamuiComboBox3.Size = new System.Drawing.Size(121, 25);
-            this.yamuiComboBox3.TabIndex = 12;
+            this.yamuiComboBox3.Size = new System.Drawing.Size(121, 21);
+            this.yamuiComboBox3.TabIndex = 18;
             // 
             // yamuiLabel22
             // 
@@ -78,20 +83,16 @@ namespace YamuiDemoApp.Pages {
             this.yamuiLabel22.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel22.Name = "yamuiLabel22";
             this.yamuiLabel22.Size = new System.Drawing.Size(78, 19);
-            this.yamuiLabel22.TabIndex = 11;
+            this.yamuiLabel22.TabIndex = 17;
             this.yamuiLabel22.Text = "FONT SIZE";
             // 
             // PanelAccentColor
             // 
-            this.PanelAccentColor.HorizontalScrollbarHighlightOnWheel = false;
-            this.PanelAccentColor.HorizontalScrollbarSize = 10;
             this.PanelAccentColor.Location = new System.Drawing.Point(0, 101);
             this.PanelAccentColor.Margin = new System.Windows.Forms.Padding(0);
             this.PanelAccentColor.Name = "PanelAccentColor";
             this.PanelAccentColor.Size = new System.Drawing.Size(715, 108);
-            this.PanelAccentColor.TabIndex = 10;
-            this.PanelAccentColor.VerticalScrollbarHighlightOnWheel = false;
-            this.PanelAccentColor.VerticalScrollbarSize = 10;
+            this.PanelAccentColor.TabIndex = 16;
             // 
             // yamuiLabel21
             // 
@@ -101,7 +102,7 @@ namespace YamuiDemoApp.Pages {
             this.yamuiLabel21.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel21.Name = "yamuiLabel21";
             this.yamuiLabel21.Size = new System.Drawing.Size(114, 19);
-            this.yamuiLabel21.TabIndex = 9;
+            this.yamuiLabel21.TabIndex = 15;
             this.yamuiLabel21.Text = "ACCENT COLOR";
             // 
             // yamuiLabel20
@@ -112,31 +113,33 @@ namespace YamuiDemoApp.Pages {
             this.yamuiLabel20.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel20.Name = "yamuiLabel20";
             this.yamuiLabel20.Size = new System.Drawing.Size(55, 19);
-            this.yamuiLabel20.TabIndex = 8;
+            this.yamuiLabel20.TabIndex = 14;
             this.yamuiLabel20.Text = "THEME";
             // 
             // SettingAppearance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiPanel1);
+            this.Controls.Add(this.yamuiScrollPage1);
             this.Name = "SettingAppearance";
             this.Size = new System.Drawing.Size(715, 315);
-            this.yamuiPanel1.ResumeLayout(false);
-            this.yamuiPanel1.PerformLayout();
+            this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
+            this.yamuiScrollPage1.ContentPanel.PerformLayout();
+            this.yamuiScrollPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiPanel yamuiPanel1;
+        private YamuiScrollPage yamuiScrollPage1;
+        private YamuiComboBox comboTheme;
         private YamuiComboBox yamuiComboBox3;
         private YamuiLabel yamuiLabel22;
         private YamuiPanel PanelAccentColor;
         private YamuiLabel yamuiLabel21;
         private YamuiLabel yamuiLabel20;
-        private YamuiComboBox comboTheme;
+
 
     }
 }

@@ -27,18 +27,8 @@ namespace _3PA.MainFeatures.Appli {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.statusLabel = new YamuiFramework.Controls.YamuiLabel();
             this.labelTitle = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.SuspendLayout();
-            // 
-            // statusLabel
-            // 
-            this.statusLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.statusLabel.Location = new System.Drawing.Point(1, 680);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(927, 20);
-            this.statusLabel.TabIndex = 12;
             // 
             // labelTitle
             // 
@@ -60,7 +50,6 @@ namespace _3PA.MainFeatures.Appli {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(950, 700);
             this.Controls.Add(this.labelTitle);
-            this.Controls.Add(this.statusLabel);
             this.MinimizeBox = false;
             this.MinimumSize = new System.Drawing.Size(950, 700);
             this.Name = "AppliForm";
@@ -73,7 +62,6 @@ namespace _3PA.MainFeatures.Appli {
 
         #endregion
 
-        private YamuiLabel statusLabel;
         private HtmlLabel labelTitle;
 
 

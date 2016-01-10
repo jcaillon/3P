@@ -37,18 +37,6 @@ namespace YamuiFramework.Forms {
         }
 
         /// <summary>
-        /// Show the background image.. or not?
-        /// </summary>
-        public bool DontShowBackGroundImage {
-            get { return _dontShowBackGroundImage; }
-            set {
-                _dontShowBackGroundImage = value;
-                Invalidate();
-            }
-        }
-        private bool _dontShowBackGroundImage;
-
-        /// <summary>
         /// Set to true if you want to use the BackColor property, otherwise the color is the form back color
         /// </summary>
         public bool UseCustomBackColor { get; set; }

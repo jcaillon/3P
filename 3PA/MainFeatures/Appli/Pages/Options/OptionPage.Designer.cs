@@ -27,23 +27,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.dockedPanel = new YamuiFramework.Controls.YamuiPanel();
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.dockedPanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // dockedPanel
-            // 
-            this.dockedPanel.AutoScroll = true;
-            this.dockedPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dockedPanel.HorizontalScrollbarHighlightOnWheel = false;
-            this.dockedPanel.HorizontalScrollbarSize = 10;
-            this.dockedPanel.Location = new System.Drawing.Point(0, 0);
-            this.dockedPanel.Name = "dockedPanel";
-            this.dockedPanel.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.TabIndex = 0;
-            this.dockedPanel.VerticalScrollbar = true;
-            this.dockedPanel.VerticalScrollbarHighlightOnWheel = true;
-            this.dockedPanel.VerticalScrollbarSize = 10;
             // 
             // tooltip
             // 
@@ -59,6 +46,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tooltip.UseAnimation = false;
             this.tooltip.UseFading = false;
             // 
+            // dockedPanel
+            // 
+            // 
+            // dockedPanel.ContentPanel
+            // 
+            this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.dockedPanel.ContentPanel.Name = "ContentPanel";
+            this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
+            this.dockedPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.dockedPanel.ContentPanel.TabIndex = 0;
+            this.dockedPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dockedPanel.Location = new System.Drawing.Point(0, 0);
+            this.dockedPanel.Name = "dockedPanel";
+            this.dockedPanel.Size = new System.Drawing.Size(720, 550);
+            this.dockedPanel.TabIndex = 0;
+            // 
             // OptionPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -67,13 +70,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.Controls.Add(this.dockedPanel);
             this.Name = "OptionPage";
             this.Size = new System.Drawing.Size(720, 550);
+            this.dockedPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiPanel dockedPanel;
         private HtmlToolTip tooltip;
+        private YamuiScrollPage dockedPanel;
     }
 }

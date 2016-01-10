@@ -82,6 +82,9 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Tests\ParserLexerTests.cs" />
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="Images\ImageResources.Designer.cs">
@@ -115,12 +118,6 @@
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.Designer.cs">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\template.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\template.Designer.cs">
-      <DependentUpon>template.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\CodeBeautifier.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
@@ -261,12 +258,6 @@
       <DependentUpon>NppInterfaceForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
-    <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.Designer.cs">
-      <DependentUpon>InfoToolTipForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="NotificationsHandler.cs" />
     <Compile Include="Npp.cs" />
     <Compile Include="Scintilla.cs" />
@@ -295,9 +286,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ProfilesPage.resx">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\template.resx">
-      <DependentUpon>template.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\template.resx">
       <DependentUpon>template.cs</DependentUpon>
@@ -338,9 +326,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
       <DependentUpon>NppInterfaceForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\InfoToolTip\InfoToolTipForm.resx">
-      <DependentUpon>InfoToolTipForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

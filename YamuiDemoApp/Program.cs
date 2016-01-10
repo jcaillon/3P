@@ -32,9 +32,9 @@ namespace YamuiDemoApp {
         static void Main() {
 
 
-            _3PA.Tests.ParserLexerTests.Run();
+            //_3PA.Tests.ParserLexerTests.Run();
 
-            return;
+            //return;
 
 
             /*

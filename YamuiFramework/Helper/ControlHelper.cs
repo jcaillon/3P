@@ -23,6 +23,7 @@ using System.Linq;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
+
     public class ControlHelper {
 
         /// <summary>
@@ -33,9 +34,13 @@ namespace YamuiFramework.Helper {
         /// <param name="type"></param>
         /// <returns></returns>
         public static IEnumerable<Control> GetAll(Control control, Type type) {
-            var controls = control.Controls.Cast<Control>();
-            var enumerable = controls as IList<Control> ?? controls.ToList();
-            return enumerable.SelectMany(ctrl => GetAll(ctrl, type)).Concat(enumerable).Where(c => c.GetType() == type);
+            try {
+                var controls = control.Controls.Cast<Control>();
+                var enumerable = controls as IList<Control> ?? controls.ToList();
+                return enumerable.SelectMany(ctrl => GetAll(ctrl, type)).Concat(enumerable).Where(c => c.GetType() == type);
+            } catch (Exception) {
+                return null;
+            }
         }
 
         /// <summary>
@@ -45,7 +50,11 @@ namespace YamuiFramework.Helper {
         /// <param name="type"></param>
         /// <returns></returns>
         public static Control GetFirst(Control control, Type type) {
-            return control.Controls.Cast<object>().Where(control1 => control1.GetType() == type).Cast<Control>().FirstOrDefault();
+            try {
+                return control.Controls.Cast<object>().Where(control1 => control1.GetType() == type).Cast<Control>().FirstOrDefault();
+            } catch (Exception) {
+                return null;
+            }
         }
     }
 }

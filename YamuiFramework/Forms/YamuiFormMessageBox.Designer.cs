@@ -29,28 +29,28 @@ namespace YamuiFramework.Forms {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.contentPanel = new YamuiFramework.Controls.YamuiPanel();
+            this.contentPanel = new YamuiFramework.Controls.YamuiScrollPage();
             this.contentLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.contentPanel.ContentPanel.SuspendLayout();
             this.contentPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // contentPanel
             // 
-            this.contentPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.contentPanel.AutoScroll = true;
-            this.contentPanel.Controls.Add(this.contentLabel);
-            this.contentPanel.HorizontalScrollbar = true;
-            this.contentPanel.HorizontalScrollbarHighlightOnWheel = false;
-            this.contentPanel.HorizontalScrollbarSize = 10;
-            this.contentPanel.Location = new System.Drawing.Point(8, 24);
+            // 
+            // contentPanel.ContentPanel
+            // 
+            this.contentPanel.ContentPanel.Controls.Add(this.contentLabel);
+            this.contentPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.contentPanel.ContentPanel.Name = "ContentPanel";
+            this.contentPanel.ContentPanel.OwnerPage = this.contentPanel;
+            this.contentPanel.ContentPanel.Size = new System.Drawing.Size(245, 113);
+            this.contentPanel.ContentPanel.TabIndex = 0;
+            this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.contentPanel.Location = new System.Drawing.Point(5, 25);
             this.contentPanel.Name = "contentPanel";
-            this.contentPanel.Size = new System.Drawing.Size(239, 121);
+            this.contentPanel.Size = new System.Drawing.Size(245, 113);
             this.contentPanel.TabIndex = 4;
-            this.contentPanel.VerticalScrollbar = true;
-            this.contentPanel.VerticalScrollbarHighlightOnWheel = false;
-            this.contentPanel.VerticalScrollbarSize = 10;
             // 
             // contentLabel
             // 
@@ -60,10 +60,11 @@ namespace YamuiFramework.Forms {
             this.contentLabel.AutoSizeHeightOnly = true;
             this.contentLabel.BackColor = System.Drawing.Color.Transparent;
             this.contentLabel.BaseStylesheet = null;
-            this.contentLabel.Location = new System.Drawing.Point(3, 3);
+            this.contentLabel.Location = new System.Drawing.Point(0, 0);
             this.contentLabel.Name = "contentLabel";
-            this.contentLabel.Size = new System.Drawing.Size(233, 15);
-            this.contentLabel.TabIndex = 3;
+            this.contentLabel.Size = new System.Drawing.Size(245, 15);
+            this.contentLabel.TabIndex = 4;
+            this.contentLabel.TabStop = false;
             this.contentLabel.Text = "htmlLabel1";
             // 
             // YamuiFormMessageBox
@@ -75,9 +76,10 @@ namespace YamuiFramework.Forms {
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "YamuiFormMessageBox";
-            this.Padding = new System.Windows.Forms.Padding(5);
+            this.Padding = new System.Windows.Forms.Padding(5, 25, 5, 50);
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "YamuiFormMessageBox";
+            this.contentPanel.ContentPanel.ResumeLayout(false);
             this.contentPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -85,8 +87,9 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
-        private YamuiPanel contentPanel;
+        private YamuiScrollPage contentPanel;
         private HtmlLabel contentLabel;
+
 
 
     }

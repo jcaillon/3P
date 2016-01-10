@@ -73,7 +73,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         // ReSharper disable once AccessToModifiedClosure
                         yPos += 15;
                     lastCategory = attribute.GroupName;
-                    dockedPanel.Controls.Add(new YamuiLabel {
+                    dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
                         AutoSize = true,
                         Function = FontFunction.Heading,
                         Location = new Point(0, yPos),
@@ -91,7 +91,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     IsSelectionEnabled = false,
                     Text = attribute.Name
                 };
-                dockedPanel.Controls.Add(label);
+                dockedPanel.ContentPanel.Controls.Add(label);
 
                 var listRangeAttr = property.GetCustomAttributes(typeof(RangeAttribute), false);
                 var rangeAttr = (listRangeAttr.Any()) ? (RangeAttribute)listRangeAttr.FirstOrDefault() : null;
@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Tag = property.Name
                     };
 
-                    dockedPanel.Controls.Add(strControl);
+                    dockedPanel.ContentPanel.Controls.Add(strControl);
                     var strButton = new YamuiImageButton {
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
@@ -114,7 +114,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         TabStop = false
                     };
                     strButton.ButtonPressed += SaveButtonOnButtonPressed;
-                    dockedPanel.Controls.Add(strButton);
+                    dockedPanel.ContentPanel.Controls.Add(strButton);
                     tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
                     var undoButton = new YamuiImageButton {
@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         TabStop = false
                     };
                     undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                    dockedPanel.Controls.Add(undoButton);
+                    dockedPanel.ContentPanel.Controls.Add(undoButton);
                     tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
 
                     tooltip.SetToolTip(strControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Tag = property.Name
                     };
 
-                    dockedPanel.Controls.Add(numControl);
+                    dockedPanel.ContentPanel.Controls.Add(numControl);
                     var numButton = new YamuiImageButton {
                         Text = @"save",
                         BackGrndImage = ImageResources.Save,
@@ -149,7 +149,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         TabStop = false
                     };
                     numButton.ButtonPressed += SaveButtonOnButtonPressed;
-                    dockedPanel.Controls.Add(numButton);
+                    dockedPanel.ContentPanel.Controls.Add(numButton);
                     tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
                     var undoButton = new YamuiImageButton {
@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         TabStop = false
                     };
                     undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                    dockedPanel.Controls.Add(undoButton);
+                    dockedPanel.ContentPanel.Controls.Add(undoButton);
                     tooltip.SetToolTip(undoButton, "Click to <b>reset this field</b> to its default value");
 
                     tooltip.SetToolTip(numControl, attribute.Description + "<br>" + (rangeAttr != null ? "<br><b><i>" + "Min value = " + rangeAttr.Minimum + "<br>Max value = " + rangeAttr.Maximum + "</i></b><br>" : "") + "<div class='ToolTipBottomGoTo'>Click on the save button <img src='Save'> to set your modifications</div>");
@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                         Tag = property.Name
                     };
                     toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
-                    dockedPanel.Controls.Add(toggleControl);
+                    dockedPanel.ContentPanel.Controls.Add(toggleControl);
 
                     // tooltip
                     tooltip.SetToolTip(toggleControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click to <b>toggle on/off</b> this feature<br>Your choice is automatically applied</div>");
@@ -192,7 +192,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
             defaultButton.ButtonPressed += SaveAllButtonOnButtonPressed;
             tooltip.SetToolTip(defaultButton, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
-            dockedPanel.Controls.Add(defaultButton);
+            dockedPanel.ContentPanel.Controls.Add(defaultButton);
 
             defaultButton = new YamuiButton {
                 Location = new Point(135, yPos),
@@ -201,7 +201,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
             defaultButton.ButtonPressed += DefaultButtonOnButtonPressed;
             tooltip.SetToolTip(defaultButton, "Click to <b>reset</b> all the options to default");
-            dockedPanel.Controls.Add(defaultButton);
+            dockedPanel.ContentPanel.Controls.Add(defaultButton);
 
             // add a button for the updates
             if (_allowedGroups.Contains("Updates")) {
@@ -212,16 +212,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 updateButton.ButtonPressed += (sender, args) => UpdateHandler.CheckForUpdates();
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");
-                dockedPanel.Controls.Add(updateButton); 
+                dockedPanel.ContentPanel.Controls.Add(updateButton); 
             }
 
             yPos += 25;
 
             if (yPos > Height) {
-                // avoid glitch when using background image
-                NoTransparentBackground = true;
-
-                dockedPanel.Controls.Add(new YamuiLabel {
+                dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
                     AutoSize = true,
                     Function = FontFunction.Heading,
                     Location = new Point(0, yPos),
@@ -236,7 +233,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private void SaveAllButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             // refresh stuff on screen
-            foreach (var control in dockedPanel.Controls) {
+            foreach (var control in dockedPanel.ContentPanel.Controls) {
                 var ctrl = (Control)control;
                 if (ctrl is YamuiImageButton && ((YamuiImageButton)ctrl).Text.Equals(@"save")) {
                     SaveButtonOnButtonPressed(ctrl, new EventArgs());
@@ -321,7 +318,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             var defaultConfig = new ConfigObject();
 
             // refresh stuff on screen
-            foreach (var control in dockedPanel.Controls) {
+            foreach (var control in dockedPanel.ContentPanel.Controls) {
                 var ctrl = (Control)control;
                 if (ctrl.Tag != null && ctrl.Tag is string) {
                     var propertyName = (string) ctrl.Tag;

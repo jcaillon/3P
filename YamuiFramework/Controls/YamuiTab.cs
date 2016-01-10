@@ -17,7 +17,6 @@
 // // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -124,6 +123,9 @@ namespace YamuiFramework.Controls {
 
         #region Mechanic
 
+        /// <summary>
+        /// Should be called by the owner form when this one loads
+        /// </summary>
         public void OnFormLoad() {
             ActiveControl = _mainButtons;
         }
@@ -160,6 +162,8 @@ namespace YamuiFramework.Controls {
 
                 // Execute the page OnShow method
                 _currentPage.OnShow();
+
+                Application.DoEvents();
 
                 // tab animation (do if needed)
                 if (doAnimate)
@@ -283,10 +287,8 @@ namespace YamuiFramework.Controls {
             }
 
             // show the background image or not
-            if (_currentPage.NoTransparentBackground)
-                _animSmokeScreen.DontShowBackGroundImage = true;
-            else if (_animSmokeScreen.DontShowBackGroundImage)
-                _animSmokeScreen.DontShowBackGroundImage = false;
+            var firstScrollPage = ControlHelper.GetFirst(_currentPage, typeof(YamuiScrollPage));
+            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPage)firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
 
             _animSmokeScreen.GoHide = false;
 
@@ -307,11 +309,6 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
-            var img = ThemeManager.ThemePageImage;
-            if (img != null) {
-                Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
-                e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
-            }
         }
 
         #endregion
@@ -320,18 +317,34 @@ namespace YamuiFramework.Controls {
 
         internal class YamuiTabAnimation : YamuiSmokeScreen {
 
+            #region fields
+
+            /// <summary>
+            /// Show the background image.. or not?
+            /// </summary>
+            public bool DontShowBackGroundImage {
+                get { return _dontShowBackGroundImage; }
+                set {
+                    _dontShowBackGroundImage = value;
+                    Invalidate();
+                }
+            }
+
+            private bool _dontShowBackGroundImage = true;
+
+            #endregion
+
+
             #region implement constructor
 
             public YamuiTabAnimation(Form owner, Rectangle pageRectangle) : base(owner, pageRectangle) {}
 
             #endregion
 
-
             #region Override paint method
 
             protected override void OnPaint(PaintEventArgs e) {
                 e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
-
                 // background image?
                 if (!DontShowBackGroundImage) {
                     var img = ThemeManager.ThemePageImage;

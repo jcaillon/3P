@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -381,6 +382,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static bool AllowFeatureExecution(int spamInterval = 300) {
+
             // Prevent the user from spamming the keys
             if (spamInterval > 0) {
                 var method = new StackFrame(1).GetMethod();
@@ -414,18 +416,16 @@ namespace _3PA {
 
         public static void Test() {
 
-            UserCommunication.Notify(Npp.GetNppVersion());
-            //WinApi.SendMessage(Npp.HandleNpp, (uint)0x111, (int)NppMenuCmd.SettingAutoCnbChar, IntPtr.Zero);
-            return;
 
-            //var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
-            //        MessageImg.MsgUpdate,
-            //        "A new version has been installed!",
-            //        "Updated to version " + AssemblyInfo.Version,
-            //        new List<string> { "ok", "cancel" },
-            //        true);
-            //UserCommunication.Notify(ii.ToString());
-            //return;
+
+            var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok", "cancel" },
+                    true);
+            UserCommunication.Notify(ii.ToString());
+            return;
 
             //------------
             var watch = Stopwatch.StartNew();

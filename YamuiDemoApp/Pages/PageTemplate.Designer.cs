@@ -26,34 +26,41 @@ namespace YamuiDemoApp.Pages {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
+            this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiPanel1
+            // yamuiScrollPage1
             // 
-            this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.HorizontalScrollbarSize = 10;
-            this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(715, 315);
-            this.yamuiPanel1.TabIndex = 0;
-            this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.VerticalScrollbarSize = 10;
+            // 
+            // yamuiScrollPage1.ContentPanel
+            // 
+            this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
+            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
+            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(715, 315);
+            this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
+            this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.Name = "yamuiScrollPage1";
+            this.yamuiScrollPage1.Size = new System.Drawing.Size(715, 315);
+            this.yamuiScrollPage1.TabIndex = 0;
             // 
             // PageTemplate
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiPanel1);
+            this.Controls.Add(this.yamuiScrollPage1);
             this.Name = "PageTemplate";
             this.Size = new System.Drawing.Size(715, 315);
+            this.yamuiScrollPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiPanel yamuiPanel1;
+        private YamuiScrollPage yamuiScrollPage1;
+
     }
 }

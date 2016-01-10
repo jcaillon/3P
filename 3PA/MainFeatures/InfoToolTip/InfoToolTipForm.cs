@@ -20,10 +20,13 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
+using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.InfoToolTip {
-    internal partial class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
+
+    internal sealed class InfoToolTipForm : NppInterfaceForm.NppInterfaceForm {
 
         #region fields
         // prevents the form from stealing the focus
@@ -36,11 +39,31 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static int _lineHeight;
         private static Rectangle _rect;
         private static bool _reversed;
+
+        private YamuiScrollPage _panel;
+        private HtmlLabel _labelContent;
+
         #endregion
 
         #region constructor
         public InfoToolTipForm() {
-            InitializeComponent();
+            // add scroll page
+            _panel = new YamuiScrollPage {
+                Dock = DockStyle.Fill,
+                NoBackgroundImage = true
+            };
+            Controls.Add(_panel);
+
+            // add label
+            _labelContent = new HtmlLabel {
+                AutoSizeHeightOnly = true,
+                Location = new Point(5, 5),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left
+            };
+            _panel.ContentPanel.Location = new Point(0, 0);
+            _panel.ContentPanel.Controls.Add(_labelContent);
+
+            Size = new Size(50, 50);
         }
         #endregion
 
@@ -59,37 +82,34 @@ namespace _3PA.MainFeatures.InfoToolTip {
             var screen = Npp.GetNppScreen();
 
             // find max height taken by the html
-            labelContent.Width = screen.WorkingArea.Width / 2;
-            labelContent.Text = content;
-            var prefHeight = labelContent.Height;
+            _labelContent.Width = screen.WorkingArea.Width / 2;
+            _labelContent.Text = content;
+            var prefHeight = _labelContent.Height;
 
             // now we got the final height, resize width until height changes
             int j = 0;
             int detla = 50;
-            int curWidth = labelContent.Width;
+            int curWidth = _labelContent.Width;
             do {
                 curWidth -= detla;
-                labelContent.Width = Math.Max(Math.Min(screen.WorkingArea.Width / 2, curWidth), minimumWidth);
-                labelContent.Text = content;
-                if (labelContent.Height > prefHeight) {
+                _labelContent.Width = Math.Max(Math.Min(screen.WorkingArea.Width / 2, curWidth), minimumWidth);
+                _labelContent.Text = content;
+                if (_labelContent.Height > prefHeight) {
                     curWidth += detla;
                     detla /= 2;
                 }
                 j++;
             } while (j < 20);
-            var neededHeight = labelContent.Height;
+            var neededHeight = _labelContent.Height;
+            _panel.ContentPanel.Height = neededHeight + 10;
+            _panel.ContentPanel.Width = _labelContent.Width + 10;
 
-            Width = labelContent.Width + 10;
+            Width = _panel.ContentPanel.Width;
             Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 10) + 10;
 
             // Too tall?
             if (neededHeight > (screen.WorkingArea.Height / 2) - 10) {
-                panel.AutoScroll = true;
-                panel.VerticalScrollbar = true;
-                panel.HorizontalScrollbar = false;
                 Width = Width + 10;
-            } else {
-                panel.AutoScroll = false;
             }
         }
 
@@ -143,7 +163,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Reposition the tooltip with the last SetPosition method called
         /// </summary>
         public void SetPosition() {
-            if (_positionMode == 1) 
+            if (_positionMode == 1)
                 SetPosition(_rect, _reversed);
             else
                 SetPosition(_position, _lineHeight);
@@ -154,7 +174,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <param name="clickHandler"></param>
         public void SetLinkClickedEvent(Action<HtmlLinkClickedEventArgs> clickHandler) {
-            labelContent.LinkClicked += (sender, args) => clickHandler(args);
+            _labelContent.LinkClicked += (sender, args) => clickHandler(args);
         }
         #endregion
 

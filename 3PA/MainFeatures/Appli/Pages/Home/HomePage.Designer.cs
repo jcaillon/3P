@@ -27,27 +27,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiPanel1 = new YamuiFramework.Controls.YamuiPanel();
+            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
             this.html = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiPanel1.SuspendLayout();
+            this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiPanel1
+            // yamuiScrollPage1
             // 
-            this.yamuiPanel1.AutoScroll = true;
-            this.yamuiPanel1.BackColor = System.Drawing.Color.Gray;
-            this.yamuiPanel1.Controls.Add(this.html);
-            this.yamuiPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiPanel1.HorizontalScrollbar = true;
-            this.yamuiPanel1.HorizontalScrollbarHighlightOnWheel = false;
-            this.yamuiPanel1.HorizontalScrollbarSize = 10;
-            this.yamuiPanel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiPanel1.Name = "yamuiPanel1";
-            this.yamuiPanel1.Size = new System.Drawing.Size(750, 600);
-            this.yamuiPanel1.TabIndex = 0;
-            this.yamuiPanel1.VerticalScrollbar = true;
-            this.yamuiPanel1.VerticalScrollbarHighlightOnWheel = true;
-            this.yamuiPanel1.VerticalScrollbarSize = 10;
+            // 
+            // yamuiScrollPage1.ContentPanel
+            // 
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.html);
+            this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
+            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
+            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(750, 600);
+            this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
+            this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
+            this.yamuiScrollPage1.Name = "yamuiScrollPage1";
+            this.yamuiScrollPage1.Size = new System.Drawing.Size(750, 600);
+            this.yamuiScrollPage1.TabIndex = 0;
             // 
             // html
             // 
@@ -58,27 +58,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.html.BackColor = System.Drawing.Color.Transparent;
             this.html.BaseStylesheet = null;
             this.html.IsSelectionEnabled = false;
-            this.html.Location = new System.Drawing.Point(3, 3);
+            this.html.Location = new System.Drawing.Point(0, 0);
             this.html.Name = "html";
             this.html.Size = new System.Drawing.Size(744, 15);
-            this.html.TabIndex = 2;
+            this.html.TabIndex = 3;
+            this.html.TabStop = false;
             this.html.Text = "home HTML";
             // 
             // HomePage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiPanel1);
+            this.Controls.Add(this.yamuiScrollPage1);
             this.Name = "HomePage";
             this.Size = new System.Drawing.Size(750, 600);
-            this.yamuiPanel1.ResumeLayout(false);
+            this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiPanel yamuiPanel1;
+        private YamuiScrollPage yamuiScrollPage1;
         private HtmlLabel html;
+
     }
 }

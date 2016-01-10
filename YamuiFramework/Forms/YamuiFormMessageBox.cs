@@ -96,7 +96,7 @@ namespace YamuiFramework.Forms {
                 // find max height taken by the html
                 Width = Screen.PrimaryScreen.WorkingArea.Width;
                 contentLabel.Text = htmlContent;
-                Height = Math.Min(contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + 55, Screen.PrimaryScreen.WorkingArea.Height);
+                Height = Math.Min(contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + Padding.Bottom, Screen.PrimaryScreen.WorkingArea.Height);
 
                 // now we got the final height, resize width until height changes
                 int j = 0;
@@ -106,7 +106,7 @@ namespace YamuiFramework.Forms {
                     curWidth -= detla;
                     Width = Math.Max(minButtonsWidth, curWidth);
                     contentLabel.Text = htmlContent;
-                    var compHeight = Math.Min(contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + 55, Screen.PrimaryScreen.WorkingArea.Height);
+                    var compHeight = Math.Min(contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + Padding.Bottom, Screen.PrimaryScreen.WorkingArea.Height);
                     if (compHeight > Height) {
                         curWidth += detla;
                         detla /= 2;
@@ -119,15 +119,19 @@ namespace YamuiFramework.Forms {
                 do {
                     Width = minButtonsWidth;
                     contentLabel.Text = htmlContent;
-                    var compHeight = contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + 55;
+                    var compHeight = contentPanel.Location.Y + contentLabel.Location.Y + contentLabel.Height + Padding.Bottom;
                     compHeight = Math.Min(compHeight, Screen.PrimaryScreen.WorkingArea.Height);
                     Height = compHeight;
                     minButtonsWidth = minButtonsWidth * (compHeight / minButtonsWidth);
                     j++;
                 } while (j < 2 && Height > Width);
             }
-            MinimumSize = new Size(Width, Height);
 
+            contentPanel.ContentPanel.Height = contentLabel.Height;
+
+
+            MinimumSize = new Size(Width, Height);
+            
             // add outro animation
             Tag = false;
             Closing += (sender, args) => {

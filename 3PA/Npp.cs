@@ -216,6 +216,23 @@ namespace _3PA {
             Marshal.FreeHGlobal(pTbIcons);
         }
 
+
+        /// <summary>
+        /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu
+        /// </summary>
+        public static void SetCommand(int index, string commandName, Action functionPointer, ShortcutKey shortcut = new ShortcutKey(), bool checkOnInit = false) {
+            var funcItem = new FuncItem {
+                _cmdID = index,
+                _itemName = commandName
+            };
+            if (functionPointer != null)
+                funcItem._pFunc = functionPointer;
+            if (shortcut._key != 0)
+                funcItem._pShKey = shortcut;
+            funcItem._init2Check = checkOnInit;
+            UnmanagedExports.FuncItems.Add(funcItem);
+        }
+
         /// <summary>
         /// Gets the file path of each file currently opened
         /// </summary>

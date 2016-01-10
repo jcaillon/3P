@@ -54,7 +54,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // sets buttons behavior
-            foreach (var control in mainPanel.Controls) {
+            foreach (var control in mainPanel.ContentPanel.Controls) {
                 if (control is YamuiImageButton) {
                     var x = (YamuiImageButton)control;
                     if (x.Name.StartsWith("btleft")) {
@@ -269,7 +269,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
 
             // btleft
-            foreach (var control in mainPanel.Controls) {
+            foreach (var control in mainPanel.ContentPanel.Controls) {
                 if (control is YamuiImageButton) {
                     var x = (YamuiImageButton)control;
                     if (x.Name.StartsWith("btleft")) {
@@ -358,7 +358,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             UpdateDownloadButton();
 
             if (mode == ViewMode.AddNew) {
-                foreach (var control in mainPanel.Controls) {
+                foreach (var control in mainPanel.ContentPanel.Controls) {
                     if (control is YamuiTextBox)
                         ((YamuiTextBox)control).Text = string.Empty;
                 }
@@ -579,7 +579,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// false to disable all textboxes of the form, true to enable
         /// </summary>
         private void EnableAllTextBoxes(bool newStatus) {
-            foreach (var control in mainPanel.Controls) {
+            foreach (var control in mainPanel.ContentPanel.Controls) {
                 if (control is YamuiTextBox)
                     ((YamuiTextBox)control).Enabled = newStatus;
             }
