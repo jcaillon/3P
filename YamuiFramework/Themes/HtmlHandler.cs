@@ -55,8 +55,8 @@ namespace YamuiFramework.Themes {
         /// </summary>
         public static void UpdateBaseCssData() {
             var baseCss = Resources.Resources.BaseStyleSheet;
-            baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.LabelsColorsNormalForeColor));
-            baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(ThemeManager.Current.FormColorBackColor));
+            baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(YamuiThemeManager.Current.LabelsColorsNormalForeColor));
+            baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(YamuiThemeManager.Current.FormColorBackColor));
             _baseCssData = HtmlRender.ParseStyleSheet(baseCss + "\n" + ExtraCssSheet);
         }
 

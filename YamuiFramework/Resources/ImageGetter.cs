@@ -20,7 +20,8 @@
 using System.Drawing;
 
 namespace YamuiFramework.Resources {
-    class ImageGetter {
+
+    internal class ImageGetter {
 
         private static ImageGetter _instance;
 

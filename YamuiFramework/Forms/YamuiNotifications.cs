@@ -104,7 +104,7 @@ namespace YamuiFramework.Forms {
             // do we need to animate a panel on the bottom to visualise time left
             if (duration > 0) {
                 _progressPanel = new YamuiPanel {
-                    BackColor = ThemeManager.AccentColor,
+                    BackColor = YamuiThemeManager.AccentColor,
                     AutoScroll = false,
                     Location = new Point(1, Height - 11),
                     Name = "progressPanel",

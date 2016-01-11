@@ -74,7 +74,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             // background
-            e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
 
             // foreground
             var startingIndex = WriteFromRight ? _listOfButtons.Count - 1 : 0;
@@ -102,13 +102,13 @@ namespace YamuiFramework.Controls {
                 if (WriteFromRight)
                     textRect.Offset(SpaceBetweenText, 0);
                 Color foreColor = UseLinksColors?
-                    ThemeManager.LabelsColors.ForeGround(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
-                    ThemeManager.TabsColors.ForeGround(_isFocused, (index == _hotIndex && _isHovered), index == _selectedIndex);
+                    YamuiThemeManager.LabelsColors.ForeGround(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
+                    YamuiThemeManager.TabsColors.ForeGround(_isFocused, (index == _hotIndex && _isHovered), index == _selectedIndex);
                 TextRenderer.DrawText(e.Graphics, button, Font, textRect, foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
 
                 // draw a | separator?
                 if (DrawSeparator && i != (_listOfButtons.Count - 1)) {
-                    using (var pen = new Pen(ThemeManager.Current.TabsColorsNormalForeColor, 1)) {
+                    using (var pen = new Pen(YamuiThemeManager.Current.TabsColorsNormalForeColor, 1)) {
                         var xPos = thisTabRekt.X + (WriteFromRight ? SpaceBetweenText / 2 : thisTabRekt.Width - SpaceBetweenText / 2);
                         e.Graphics.DrawLine(pen, new Point(xPos, (int)(Height * 0.8)), new Point(xPos, Height - (int)(Height * 0.7)));
                     }

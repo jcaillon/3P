@@ -27,7 +27,7 @@ namespace YamuiFramework.Themes {
     /// <summary>
     /// A class to read and write an object instance
     /// </summary>
-    internal class Class2Xml<T> {
+    public class Class2Xml<T> {
 
         private const string KeyString = "Key";
         private const string ValueString = "Value";

@@ -38,8 +38,6 @@ D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Fonts.ResourceFont.resources
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiForm.resources
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiFormMessageBox.resources
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiNotifications.resources
-D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiSmokeScreen.resources
-D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Forms.YamuiTabAnimation.resources
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resources
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.dll
@@ -55,3 +53,4 @@ C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.pdb
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
+D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache

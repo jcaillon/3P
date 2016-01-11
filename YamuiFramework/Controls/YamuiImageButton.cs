@@ -55,8 +55,8 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                Color borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
+                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
+                Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
                 if (DesignMode)

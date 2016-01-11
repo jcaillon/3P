@@ -103,14 +103,14 @@ namespace _3PA.MainFeatures.CodeExplorer {
             var x = r.X + (r.Width / 2) - w / 2;
             var y = r.Y + (r.Height / 2) - h / 2;
 
-            using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverBorderColor)) {
+            using (var p = new Pen(YamuiThemeManager.Current.ButtonColorsHoverBorderColor)) {
                 g.DrawRectangle(p, new Rectangle(x, y, w, h));
             }
-            using (var p = new SolidBrush(ThemeManager.Current.ButtonColorsHoverBackColor)) {
+            using (var p = new SolidBrush(YamuiThemeManager.Current.ButtonColorsHoverBackColor)) {
                 g.FillRectangle(p, new Rectangle(x + 1, y + 1, w - 1, h - 1));
             }
             if (isExpanded)
-                using (var b = new SolidBrush(ThemeManager.AccentColor)) {
+                using (var b = new SolidBrush(YamuiThemeManager.AccentColor)) {
                     g.FillRectangle(b, new Rectangle(x + 2, y + 2, w - 4, h - 4));
                 }
             //using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverForeColor)) {

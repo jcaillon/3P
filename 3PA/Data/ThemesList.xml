@@ -32,6 +32,17 @@
     <ButtonColorsDisabledBackColor Value="#E6E6E6" />
     <ButtonColorsDisabledForeColor Value="#646464" />
     <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+
+    <AutoCompletionNormalBackColor Value="#E6E6E6" />
+    <AutoCompletionNormalAlternateBackColor Value="#FAFAFA" />
+    <AutoCompletionNormalForeColor Value="#1E1E1E" />
+    <AutoCompletionNormalSubTypeForeColor Value="#471212" />
+    <AutoCompletionHoverBackColor Value="#CEE2FC" />
+    <AutoCompletionHoverForeColor Value="#000000" />
+    <AutoCompletionFocusBackColor Value="#9AC2F9" />
+    <AutoCompletionFocusForeColor Value="#000000" />
+    <AutoCompletionHighlightBack Value="#FEE465" />
+    <AutoCompletionHighlightBorder Value="#FFAB00" />
   </Item>
   <Item>
     <ThemeName Value="Monokawai" />
@@ -65,6 +76,17 @@
     <ButtonColorsDisabledBackColor Value="#333333" />
     <ButtonColorsDisabledForeColor Value="#545454" />
     <ButtonColorsDisabledBorderColor Value="#333333" />
+
+    <AutoCompletionNormalBackColor Value="#252526" />
+    <AutoCompletionNormalAlternateBackColor Value="#333333" />
+    <AutoCompletionNormalForeColor Value="#D2D2D2" />
+    <AutoCompletionNormalSubTypeForeColor Value="#649AD1" />
+    <AutoCompletionHoverBackColor Value="#181718" />
+    <AutoCompletionHoverForeColor Value="#D7D2D8" />
+    <AutoCompletionFocusBackColor Value="#0A3259" />
+    <AutoCompletionFocusForeColor Value="#F5CDA6" />
+    <AutoCompletionHighlightBack Value="#5F0005" />
+    <AutoCompletionHighlightBorder Value="#9D0008" />
   </Item>
   <Item>
     <ThemeName Value="Hi kitty" />
@@ -98,5 +120,16 @@
     <ButtonColorsDisabledBackColor Value="#E6E6E6" />
     <ButtonColorsDisabledForeColor Value="#646464" />
     <ButtonColorsDisabledBorderColor Value="#BEBEBE" />
+
+    <AutoCompletionNormalBackColor Value="#E6E6E6" />
+    <AutoCompletionNormalAlternateBackColor Value="#FAFAFA" />
+    <AutoCompletionNormalForeColor Value="#1E1E1E" />
+    <AutoCompletionNormalSubTypeForeColor Value="#471212" />
+    <AutoCompletionHoverBackColor Value="#CEE2FC" />
+    <AutoCompletionHoverForeColor Value="#000000" />
+    <AutoCompletionFocusBackColor Value="#9AC2F9" />
+    <AutoCompletionFocusForeColor Value="#000000" />
+    <AutoCompletionHighlightBack Value="#FEE465" />
+    <AutoCompletionHighlightBorder Value="#FFAB00" />
   </Item>
 </Root>

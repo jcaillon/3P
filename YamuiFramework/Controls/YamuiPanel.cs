@@ -78,7 +78,7 @@ namespace YamuiFramework.Controls {
                 PaintTransparentBackground(e.Graphics, DisplayRectangle);
             else
                 if (!UseCustomBackColor)
-                    e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
                 else
                     e.Graphics.Clear(BackColor);
         }

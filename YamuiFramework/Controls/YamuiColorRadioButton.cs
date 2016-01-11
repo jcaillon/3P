@@ -92,13 +92,13 @@ namespace YamuiFramework.Controls {
         protected virtual void OnPaintForeground(PaintEventArgs e) {
 
             if (!Checked && _isHovered)
-                using (SolidBrush b = new SolidBrush(ThemeManager.Current.ButtonColorsHoverBackColor))
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonColorsHoverBackColor))
                     e.Graphics.FillRectangle(b, new Rectangle(0, 0, Width, Height));
 
             Rectangle boxRect = (!Checked) ? new Rectangle(5, 5, Width - 10, Height - 10) : new Rectangle(0, 0, Width, Height);
 
             if (UseBorder) {
-                using (SolidBrush b = new SolidBrush(ThemeManager.AccentColor))
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.AccentColor))
                     e.Graphics.FillRectangle(b, boxRect);
                 boxRect = (!Checked) ? new Rectangle(10, 10, Width - 20, Height - 20) : new Rectangle(5, 5, Width - 10, Height - 10);
             }

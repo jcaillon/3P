@@ -115,7 +115,7 @@ namespace YamuiFramework.Controls {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
-            Color backColor = ThemeManager.LabelsColors.BackGround(BackColor, UseCustomBackColor);
+            Color backColor = YamuiThemeManager.LabelsColors.BackGround(BackColor, UseCustomBackColor);
             if (backColor != Color.Transparent) {
                 e.Graphics.Clear(backColor);
             } else
@@ -128,7 +128,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color foreColor = ThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, false, false, false, !FakeDisabled);
+            Color foreColor = YamuiThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, false, false, false, !FakeDisabled);
 
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));
         }

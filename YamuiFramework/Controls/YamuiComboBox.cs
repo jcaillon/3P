@@ -120,7 +120,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
                 if (backColor != Color.Transparent)
                     e.Graphics.Clear(backColor);
                 else
@@ -142,8 +142,8 @@ namespace YamuiFramework.Controls {
         private void OnPaintForeground(PaintEventArgs e) {
             ItemHeight = GetPreferredSize(Size.Empty).Height;
 
-            Color borderColor = ThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
 
             // draw border
             if (borderColor != Color.Transparent)
@@ -166,13 +166,13 @@ namespace YamuiFramework.Controls {
         protected override void OnDrawItem(DrawItemEventArgs e) {
             if (e.Index >= 0) {
                 Color foreColor;
-                Color backColor = ThemeManager.Current.ButtonColorsNormalBackColor;
+                Color backColor = YamuiThemeManager.Current.ButtonColorsNormalBackColor;
 
                 if ((e.State & DrawItemState.Selected) == DrawItemState.Selected) {
-                    backColor = ThemeManager.AccentColor;
-                    foreColor = ThemeManager.Current.ButtonColorsPressForeColor;
+                    backColor = YamuiThemeManager.AccentColor;
+                    foreColor = YamuiThemeManager.Current.ButtonColorsPressForeColor;
                 } else {
-                    foreColor = ThemeManager.Current.ButtonColorsNormalForeColor;
+                    foreColor = YamuiThemeManager.Current.ButtonColorsNormalForeColor;
                 }
 
                 using (SolidBrush b = new SolidBrush(backColor)) {
@@ -347,7 +347,7 @@ namespace YamuiFramework.Controls {
             ExcludeClipRect(dc, clientRect.Left, clientRect.Top, clientRect.Right, clientRect.Bottom);
 
             // Create a pen and select it
-            Color borderColor = ThemeManager.AccentColor;
+            Color borderColor = YamuiThemeManager.AccentColor;
             IntPtr border = CreatePen(PenStyles.PS_SOLID, 1, RGB(borderColor.R,
                 borderColor.G, borderColor.B));
 

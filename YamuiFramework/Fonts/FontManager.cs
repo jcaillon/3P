@@ -40,7 +40,7 @@ namespace YamuiFramework.Fonts {
         WaterMark
     }
 
-    public class FontManager {
+    public static class FontManager {
 
         public static Font GetStandardFont() {
             return GetFont(FontFunction.Normal);

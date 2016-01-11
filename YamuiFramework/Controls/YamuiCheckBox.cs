@@ -99,9 +99,9 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color borderColor = ThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
-            Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
 
             var backRect = new Rectangle(0, Height / 2 - 6, 12, 12);
 
@@ -124,9 +124,9 @@ namespace YamuiFramework.Controls {
                     var fuRect = ClientRectangle;
                     fuRect.Width = 15;
                     fuRect.Offset(0, -3);
-                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, ThemeManager.AccentColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, YamuiThemeManager.AccentColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
-                    using (SolidBrush b = new SolidBrush(ThemeManager.AccentColor)) {
+                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.AccentColor)) {
                         Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
                         e.Graphics.FillRectangle(b, boxRect);
                     }

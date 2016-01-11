@@ -18,7 +18,7 @@ namespace YamuiDemoApp.Pages {
             // AccentColors picker
             int x = 0;
             int y = 0;
-            foreach (var accentColor in ThemeManager.GetAccentColors) {
+            foreach (var accentColor in YamuiThemeManager.GetAccentColors) {
                 var newColorPicker = new YamuiColorRadioButton();
                 PanelAccentColor.Controls.Add(newColorPicker);
                 newColorPicker.CheckedChanged += NewColorPickerOnCheckedChanged;
@@ -29,15 +29,15 @@ namespace YamuiDemoApp.Pages {
                     y = 0;
                 } else
                     y += newColorPicker.Height;
-                if (ThemeManager.AccentColor == accentColor) {
+                if (YamuiThemeManager.AccentColor == accentColor) {
                     _checkButton = newColorPicker;
                     newColorPicker.Checked = true;
                 }
             }
 
             // themes comob box
-            comboTheme.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
-            comboTheme.SelectedIndex = ThemeManager.CurrentThemeIndex;
+            comboTheme.DataSource = YamuiThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
+            comboTheme.SelectedIndex = YamuiThemeManager.GetThemesList().IndexOf(YamuiThemeManager.Current);
 
             comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
         }
@@ -49,13 +49,12 @@ namespace YamuiDemoApp.Pages {
         /// <param name="eventArgs"></param>
         private void ComboThemeOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
-                ThemeManager.Current = ThemeManager.GetThemesList()[comboTheme.SelectedIndex];
-                if (!ThemeManager.Current.UseCurrentAccentColor)
+                YamuiThemeManager.Current = YamuiThemeManager.GetThemesList()[comboTheme.SelectedIndex];
+                if (!YamuiThemeManager.Current.UseCurrentAccentColor)
                     _checkButton.Checked = false;
             } catch (Exception) {
                 // ignored
             } finally {
-                ThemeManager.ImageName = ThemeManager.Current.PageBackGroundImage;
                 if (Program.MainForm != null) PlsRefresh();
             }
             
@@ -69,7 +68,7 @@ namespace YamuiDemoApp.Pages {
         private void NewColorPickerOnCheckedChanged(object sender, EventArgs eventArgs) {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {
-                ThemeManager.AccentColor = rb.BackColor;
+                YamuiThemeManager.AccentColor = rb.BackColor;
                 _checkButton = rb;
                 if (Program.MainForm != null) PlsRefresh();
             }

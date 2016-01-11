@@ -111,7 +111,7 @@ namespace YamuiDemoApp {
             //Application.EnableVisualStyles();
             //Application.SetCompatibleTextRenderingDefault(false);
              
-            ThemeManager.TabAnimationAllowed = true;
+            YamuiThemeManager.TabAnimationAllowed = true;
             MainForm = new Form1();
 
             Application.Run(MainForm);

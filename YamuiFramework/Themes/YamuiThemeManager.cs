@@ -19,39 +19,15 @@
 #endregion
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using YamuiFramework.Resources;
 
 namespace YamuiFramework.Themes {
 
-    public static class ThemeManager {
-
-        private static Color _accentColor = GetAccentColors[13];
-        private static int _currentThemeId = 2;
-        private static Theme _currentTheme;
-        private static List<Theme> _listOfThemes = new List<Theme>();
-        public static string ImageName;
-        public static int CurrentThemeIndex;
-
-        /// <summary>
-        /// You can set this property to read the theme.xml file from a local path instead of
-        /// the embedded ressource file
-        /// </summary>
-        public static string ThemeXmlPath;
-
-        /// <summary>
-        /// Default theme id to use when the ThemeManager is first called, 
-        /// should be set before calling anyelse in the ThemeManager
-        /// </summary>
-        public static int CurrentThemeIdToUse {
-            get { return _currentThemeId; }
-            set { _currentThemeId = value; }
-        }
+    public static class YamuiThemeManager {
 
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
-        public static Theme Current {
+        public static YamuiTheme Current {
             set { 
                 _currentTheme = value;
                 UpdatedTheme();
@@ -60,18 +36,18 @@ namespace YamuiFramework.Themes {
                 if (_currentTheme != null)
                     return _currentTheme;
                 // instanciation of current theme
-                _currentTheme = GetThemesList().Find(theme => theme.UniqueId == CurrentThemeIdToUse) ?? GetThemesList()[0];
+                _currentTheme = GetThemesList()[0];
                 UpdatedTheme();
                 return _currentTheme;
             }
         }
+        private static YamuiTheme _currentTheme;
 
         private static void UpdatedTheme() {
             if (!_currentTheme.UseCurrentAccentColor)
                 _accentColor = _currentTheme.AccentColor;
             HtmlHandler.UpdateBaseCssData();
-            ImageName = _currentTheme.PageBackGroundImage;
-            CurrentThemeIndex = _listOfThemes.IndexOf(_currentTheme);
+            ThemePageImage = (!string.IsNullOrEmpty(_currentTheme.PageBackGroundImage) ? (Image)Resources.Resources.ResourceManager.GetObject(_currentTheme.PageBackGroundImage) : null);
         }
 
         /// <summary>
@@ -81,20 +57,29 @@ namespace YamuiFramework.Themes {
             get { return _accentColor; }
             set { _accentColor = value; }
         }
+        private static Color _accentColor = GetAccentColors[13];
 
         /// <summary>
-        /// get the Image of the page background
+        /// Background image
         /// </summary>
-        public static Image ThemePageImage {
-            get {
-                return !string.IsNullOrEmpty(ImageName) ? ImageGetter.GetInstance().Get(ImageName) : null;
-            }
-        }
+        public static Image ThemePageImage { get; set; }
 
         /// <summary>
         /// Set to false to deactivate tab animation
         /// </summary>
         public static bool TabAnimationAllowed { get; set; }
+
+        /// <summary>
+        /// Returns the list of all available themes
+        /// </summary>
+        /// <returns></returns>
+        public static List<YamuiTheme> GetThemesList() {
+            if (_listOfThemes.Count == 0) {
+                Class2Xml<YamuiTheme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
+            }
+            return _listOfThemes;
+        }
+        private static List<YamuiTheme> _listOfThemes = new List<YamuiTheme>();
 
         /// <summary>
         /// Returns a list of accent colors to choose from
@@ -127,23 +112,7 @@ namespace YamuiFramework.Themes {
         }
 
         /// <summary>
-        /// Returns the list of all available themes
-        /// </summary>
-        /// <returns></returns>
-        public static List<Theme> GetThemesList() {
-            if (_listOfThemes.Count == 0) {
-                if (string.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
-                    Class2Xml<Theme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
-                    if (!string.IsNullOrEmpty(ThemeXmlPath))
-                        Class2Xml<Theme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
-                } else
-                    Class2Xml<Theme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
-            }
-            return _listOfThemes;
-        }
-
-        /// <summary>
-        ///     This class is used for sliders as well as scrollbars
+        /// This class is used for sliders as well as scrollbars
         /// </summary>
         public static class ScrollBarsColors {
             public static Color BackGround(bool isFocused, bool isHovered, bool isPressed, bool enabled) {

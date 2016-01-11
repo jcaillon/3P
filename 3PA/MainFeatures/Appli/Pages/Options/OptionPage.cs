@@ -344,7 +344,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// For certain config properties, we need to refresh stuff to see a difference
         /// </summary>
         private void ApplySettings() {
-            ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
+            YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             CodeExplorer.CodeExplorer.ApplyColorSettings();
             FileExplorer.FileExplorer.ApplyColorSettings();
             AutoComplete.ForceClose();
@@ -361,7 +361,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "CustomBackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
 
         /// <summary>

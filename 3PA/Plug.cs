@@ -204,12 +204,13 @@ namespace _3PA {
             #region Themes
 
             // themes and html
-            ThemeManager.CurrentThemeIdToUse = Config.Instance.ThemeId;
-            ThemeManager.AccentColor = Config.Instance.AccentColor;
-            ThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
+            ThemeManager.Init();
+            LocalHtmlHandler.RegisterToYamui();           
+            YamuiThemeManager.AccentColor = Config.Instance.AccentColor;
+            YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             //ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
             //Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
-            LocalHtmlHandler.RegisterToYamui();
+            
 
             #endregion
 

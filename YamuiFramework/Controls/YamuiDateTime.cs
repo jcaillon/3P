@@ -77,7 +77,7 @@ namespace YamuiFramework.Controls {
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = ThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
                 if (backColor != Color.Transparent)
                     e.Graphics.Clear(backColor);
                 else
@@ -97,8 +97,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color borderColor = ThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
 
             if (borderColor != Color.Transparent)
                 using (Pen p = new Pen(borderColor)) {
@@ -120,13 +120,13 @@ namespace YamuiFramework.Controls {
                     e.Graphics.DrawRectangle(p, boxRect);
                 }
                 if (Checked) {
-                    Color fillColor = ThemeManager.AccentColor;
+                    Color fillColor = YamuiThemeManager.AccentColor;
                     using (SolidBrush b = new SolidBrush(fillColor)) {
                         Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
                         e.Graphics.FillRectangle(b, boxRect);
                     }
                 } else {
-                    foreColor = ThemeManager.Current.ButtonColorsDisabledForeColor;
+                    foreColor = YamuiThemeManager.Current.ButtonColorsDisabledForeColor;
                 }
             }
 

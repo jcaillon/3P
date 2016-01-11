@@ -275,7 +275,7 @@ namespace YamuiFramework.Controls {
         private YamuiForm _owner;
 
         public bool TabAnimatorInit() {
-            if (!ThemeManager.TabAnimationAllowed) return false;
+            if (!YamuiThemeManager.TabAnimationAllowed) return false;
 
             // the principle is easy, we create a foreground form on top of our form with the same back ground,
             // and we animate its opacity value from 1 to 0 to effectivly create a fade in animation
@@ -296,7 +296,7 @@ namespace YamuiFramework.Controls {
         }
 
         public void TabAnimatorStart() {
-            if (!ThemeManager.TabAnimationAllowed) return;
+            if (!YamuiThemeManager.TabAnimationAllowed) return;
             var t = new Transition(new TransitionType_Acceleration(500));
             t.add(_animSmokeScreen, "Opacity", 0d);
             t.TransitionCompletedEvent += (sender, args) => _animSmokeScreen.GoHide = true;
@@ -308,7 +308,7 @@ namespace YamuiFramework.Controls {
         #region Paint
 
         protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
         }
 
         #endregion
@@ -344,10 +344,10 @@ namespace YamuiFramework.Controls {
             #region Override paint method
 
             protected override void OnPaint(PaintEventArgs e) {
-                e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
                 // background image?
                 if (!DontShowBackGroundImage) {
-                    var img = ThemeManager.ThemePageImage;
+                    var img = YamuiThemeManager.ThemePageImage;
                     if (img != null) {
                         Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
                         e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);

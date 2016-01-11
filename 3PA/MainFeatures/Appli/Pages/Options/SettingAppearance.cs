@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // AccentColors picker
             int x = 0;
             int y = 0;
-            foreach (var accentColor in ThemeManager.GetAccentColors) {
+            foreach (var accentColor in YamuiThemeManager.GetAccentColors) {
                 var newColorPicker = new YamuiColorRadioButton();
                 PanelAccentColor.Controls.Add(newColorPicker);
                 newColorPicker.CheckedChanged += NewColorPickerOnCheckedChanged;
@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     y = 0;
                 } else
                     y += newColorPicker.Height;
-                if (ThemeManager.AccentColor == accentColor) {
+                if (YamuiThemeManager.AccentColor == accentColor) {
                     _checkButton = newColorPicker;
                     newColorPicker.Checked = true;
                 }
@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // themes combo box
             comboTheme.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
-            comboTheme.SelectedIndex = ThemeManager.CurrentThemeIndex;
+            comboTheme.SelectedIndex = ThemeManager.GetThemesList().FindIndex(theme => theme.UniqueId == Config.Instance.ThemeId);
 
             comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
 
@@ -81,7 +81,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
             } finally {
-                ThemeManager.ImageName = ThemeManager.Current.PageBackGroundImage;
                 Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
                 PlsRefresh();
             }
@@ -113,9 +112,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void NewColorPickerOnCheckedChanged(object sender, EventArgs eventArgs) {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {
-                ThemeManager.AccentColor = rb.BackColor;
+                YamuiThemeManager.AccentColor = rb.BackColor;
                 _checkButton = rb;
-                Config.Instance.AccentColor = ThemeManager.AccentColor;
+                Config.Instance.AccentColor = YamuiThemeManager.AccentColor;
                 PlsRefresh();
             }
         }

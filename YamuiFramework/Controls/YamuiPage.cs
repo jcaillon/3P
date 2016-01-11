@@ -48,7 +48,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
-            e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
         }
 
         #endregion

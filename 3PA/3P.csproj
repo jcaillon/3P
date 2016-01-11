@@ -86,6 +86,8 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Tests\ParserLexerTests.cs" />
+    <Compile Include="ThemeManager.cs" />
+    <Content Include="Data\ThemesList.xml" />
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>

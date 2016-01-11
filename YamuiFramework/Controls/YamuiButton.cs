@@ -129,7 +129,7 @@ namespace YamuiFramework.Controls {
         protected override void OnPaintBackground(PaintEventArgs e) {}
 
         protected virtual void CustomOnPaintBackground(PaintEventArgs e) {
-            var backColor = ThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
+            var backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
             if (backColor != Color.Transparent)
                 e.Graphics.Clear(backColor);
             else
@@ -146,8 +146,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            var borderColor = ThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, Enabled);
-            var foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
+            var borderColor = YamuiThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, Enabled);
+            var foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
 
             if (borderColor != Color.Transparent)
                 using (var p = new Pen(borderColor)) {
@@ -157,7 +157,7 @@ namespace YamuiFramework.Controls {
 
             // highlight is a border with more width
             if (Highlight && !IsHovered && !IsPressed && Enabled) {
-                using (var p = new Pen(ThemeManager.AccentColor, 4)) {
+                using (var p = new Pen(YamuiThemeManager.AccentColor, 4)) {
                     var borderRect = new Rectangle(2, 2, Width - 4, Height - 4);
                     e.Graphics.DrawRectangle(p, borderRect);
                 }

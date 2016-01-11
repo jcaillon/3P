@@ -196,8 +196,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
-            var borderColor = ThemeManager.AccentColor;
+            var backColor = YamuiThemeManager.Current.FormColorBackColor;
+            var borderColor = YamuiThemeManager.AccentColor;
             var borderWidth = 1;
 
             e.Graphics.Clear(backColor);

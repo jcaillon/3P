@@ -265,8 +265,8 @@
     </Compile>
     <Compile Include="Themes\Class2xml.cs" />
     <Compile Include="Themes\HtmlHandler.cs" />
-    <Compile Include="Themes\Theme.cs" />
-    <Compile Include="Themes\ThemeManager.cs" />
+    <Compile Include="Themes\YamuiTheme.cs" />
+    <Compile Include="Themes\YamuiThemeManager.cs" />
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>

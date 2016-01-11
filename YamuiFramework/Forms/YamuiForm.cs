@@ -143,9 +143,9 @@ namespace YamuiFramework.Forms {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
-            var foreColor = ThemeManager.Current.FormColorForeColor;
-            var borderColor = UseCustomBorderColor ? ForeColor : ThemeManager.AccentColor;
+            var backColor = YamuiThemeManager.Current.FormColorBackColor;
+            var foreColor = YamuiThemeManager.Current.FormColorForeColor;
+            var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.AccentColor;
 
             // background
             e.Graphics.Clear(backColor);
@@ -269,10 +269,10 @@ namespace YamuiFramework.Forms {
             public string AnimText {
                 set {
                     LinearBlink = 0;
-                    ForeColor = ThemeManager.Current.LabelsColorsNormalForeColor;
+                    ForeColor = YamuiThemeManager.Current.LabelsColorsNormalForeColor;
                     var t = new Transition(new TransitionType_Linear(500));
                     t.add(this, "Text", value);
-                    t.add(this, "ForeColor", ThemeManager.AccentColor);
+                    t.add(this, "ForeColor", YamuiThemeManager.AccentColor);
                     if (!string.IsNullOrEmpty(value))
                         t.add(this, "LinearBlink", 100);
                     else
@@ -310,7 +310,7 @@ namespace YamuiFramework.Forms {
                         _linearBool = !_linearBool;
                         _linearCount += 20;
                     }
-                    BackColor = !_linearBool ? ThemeManager.AccentColor : ThemeManager.Current.FormColorBackColor;
+                    BackColor = !_linearBool ? YamuiThemeManager.AccentColor : YamuiThemeManager.Current.FormColorBackColor;
                 }
             }
 
@@ -328,7 +328,7 @@ namespace YamuiFramework.Forms {
                 if (string.IsNullOrEmpty(Text))
                     return;
                 var t = new Transition(new TransitionType_Linear(500));
-                t.add(this, "ForeColor", ThemeManager.Current.LabelsColorsNormalForeColor);
+                t.add(this, "ForeColor", YamuiThemeManager.Current.LabelsColorsNormalForeColor);
                 t.run();
                 LinearBlink = 0;
                 var t2 = new Transition(new TransitionType_Linear(2000));
@@ -364,7 +364,7 @@ namespace YamuiFramework.Forms {
             #region paint
 
             protected override void OnPaint(PaintEventArgs e) {
-                e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
 
                 // blinking square
                 using (SolidBrush b = new SolidBrush(BackColor)) {
@@ -695,14 +695,14 @@ namespace YamuiFramework.Forms {
             #region Paint Methods
             protected override void OnPaint(PaintEventArgs e) {
                 if (_isPressed)
-                    e.Graphics.Clear(ThemeManager.AccentColor);
+                    e.Graphics.Clear(YamuiThemeManager.AccentColor);
                 else if (_isHovered)
-                    e.Graphics.Clear(ThemeManager.Current.ButtonColorsHoverBackColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.ButtonColorsHoverBackColor);
                 else
-                    e.Graphics.Clear(ThemeManager.Current.FormColorBackColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
                 //PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
-                Color foreColor = ThemeManager.ButtonColors.ForeGround(ForeColor, false, false, _isHovered, _isPressed, Enabled);
+                Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, false, false, _isHovered, _isPressed, Enabled);
                 TextRenderer.DrawText(e.Graphics, Text, new Font("Webdings", 9.25f), ClientRectangle, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             }
 
