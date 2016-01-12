@@ -185,8 +185,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color thumbColor = YamuiThemeManager.ScrollBarsColors.ForeGround(_isFocused, _isHovered, _isPressed, Enabled);
-            Color barColor = YamuiThemeManager.ScrollBarsColors.BackGround(_isFocused, _isHovered, _isPressed, Enabled);
+            Color thumbColor = YamuiThemeManager.Current.ScrollBarsFg(_isFocused, _isHovered, _isPressed, Enabled);
+            Color barColor = YamuiThemeManager.Current.ScrollBarsBg(_isFocused, _isHovered, _isPressed, Enabled);
             DrawTrackBar(e.Graphics, thumbColor, barColor);
         }
 

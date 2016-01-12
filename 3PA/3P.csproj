@@ -63,7 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abl.cs" />
-    <Compile Include="Html\LocalHtmlHandler.cs" />
+    <Compile Include="Html\HtmlHandler.cs" />
     <Compile Include="Html\HtmlResources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -82,6 +82,12 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.Designer.cs">
+      <DependentUpon>SetFileInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -167,24 +173,6 @@
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\FilesInfoNs\FileTag.cs" />
-    <Compile Include="MainFeatures\FilesInfoNs\FileTagsForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FileTagsForm.Designer.cs">
-      <DependentUpon>FileTagsForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FileTagsPage.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FileTagsPage.Designer.cs">
-      <DependentUpon>FileTagsPage.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceYamuiForm.Designer.cs">
-      <DependentUpon>NppInterfaceYamuiForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
     <Compile Include="MainFeatures\ProCodeUtils.cs" />
@@ -289,6 +277,9 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ProfilesPage.resx">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
+      <DependentUpon>SetFileInfo.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\template.resx">
       <DependentUpon>template.cs</DependentUpon>
     </EmbeddedResource>
@@ -316,12 +307,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsForm.resx">
-      <DependentUpon>FileTagsForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\FilesInfoNs\FileTagsPage.resx">
-      <DependentUpon>FileTagsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>

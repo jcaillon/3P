@@ -25,7 +25,8 @@ using System.Linq;
 using System.Text;
 
 namespace YamuiFramework.Helper {
-    public class Utilities {
+
+    internal static class Utilities {
 
         public static Bitmap MakeGrayscale3(Bitmap original) {
             //create a blank bitmap the same size as original

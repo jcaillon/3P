@@ -311,7 +311,7 @@ namespace YamuiFramework.Controls {
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, IsFocused, _isHovered, false, Enabled);
+                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, _isHovered, false, Enabled);
                 _baseTextBox.BackColor = backColor;
                 e.Graphics.Clear(backColor);
             } catch {
@@ -329,8 +329,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            _baseTextBox.ForeColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, IsFocused, _isHovered, false, Enabled);
-            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(IsFocused, _isHovered, false, Enabled);
+            _baseTextBox.ForeColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, _isHovered, false, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, _isHovered, false, Enabled);
 
             using (Pen p = new Pen(borderColor)) {
                 e.Graphics.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));

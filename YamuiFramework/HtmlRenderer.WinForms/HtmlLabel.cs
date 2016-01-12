@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
+using System.Net.Mime;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
@@ -149,6 +150,34 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             ResumeLayout(false);
 
             TabStop = false;
+
+            // subscribe to an event called when the BaseCss sheet changes
+            YamuiThemeManager.OnCssSheetChanged += YamuiThemeManagerOnOnCssSheetChanged;
+        }
+
+        private void YamuiThemeManagerOnOnCssSheetChanged() {
+            if (_text != null)
+                Text = _text;
+        }
+
+        /// <summary>
+        /// Gets or sets the html of this control.
+        /// </summary>
+        [Description("Sets the html of this control.")]
+        public override string Text {
+            get { return _text; }
+            set {
+                _text = value;
+                base.Text = value;
+                if (!IsDisposed) {
+                    if (_text.StartsWith(@"<div class='yamui-text'>"))
+                        _htmlContainer.SetHtml(_text, YamuiThemeManager.BaseCssData);
+                    else
+                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", YamuiThemeManager.BaseCssData);
+                    PerformLayout();
+                    Invalidate();
+                }
+            }
         }
 
         /// <summary>
@@ -387,29 +416,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         }
 
         /// <summary>
-        /// Gets or sets the html of this control.
-        /// </summary>
-        [Description("Sets the html of this control.")]
-        public override string Text
-        {
-            get { return _text; }
-            set
-            {
-                _text = value;
-                base.Text = value;
-                if (!IsDisposed)
-                {
-                    if (_text.StartsWith(@"<div class='yamui-text'>"))
-                        _htmlContainer.SetHtml(_text, HtmlHandler.GetBaseCssData());
-                    else
-                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", HtmlHandler.GetBaseCssData());
-                    PerformLayout();
-                    Invalidate();
-                }
-            }
-        }
-
-        /// <summary>
         /// Get the currently selected text segment in the html.
         /// </summary>
         [Browsable(false)]
@@ -613,7 +619,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e)
         {
-            HtmlHandler.OnImageLoad(e);
+            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);

@@ -6,7 +6,7 @@
     <RankNeeded Value="0" />
     <PageBackGroundImage Value="" />
     <UseCurrentAccentColor Value="true" />
-    <AccentColor Value="#F0A30A" />
+    <ThemeAccentColor Value="#1BA1E2" />
     <FormColorBackColor Value="#E6E6E6" />
     <FormColorForeColor Value="#1E1E1E" />
     <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />
@@ -50,7 +50,7 @@
     <RankNeeded Value="0" />
     <PageBackGroundImage Value="" />
     <UseCurrentAccentColor Value="true" />
-    <AccentColor Value="#F0A30A" />
+    <ThemeAccentColor Value="#F0A30A" />
     <FormColorBackColor Value="#252526" />
     <FormColorForeColor Value="#D2D2D2" />
     <ScrollBarsColorsNormalBackColor Value="#333333" />
@@ -94,7 +94,7 @@
     <RankNeeded Value="0" />
     <PageBackGroundImage Value="hellokitty" />
     <UseCurrentAccentColor Value="false" />
-    <AccentColor Value="#FF1493" />
+    <ThemeAccentColor Value="#FF1493" />
     <FormColorBackColor Value="#E6E6E6" />
     <FormColorForeColor Value="#1E1E1E" />
     <ScrollBarsColorsNormalBackColor Value="#CCCCCC" />

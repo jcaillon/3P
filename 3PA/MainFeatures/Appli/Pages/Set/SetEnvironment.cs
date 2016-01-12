@@ -261,7 +261,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     } else {
                         // the user needs to add a new one
                         btcontrol1.UseCustomBackColor = true;
-                        btcontrol1.BackColor = YamuiThemeManager.AccentColor;
+                        btcontrol1.BackColor = ThemeManager.Current.AccentColor;
                     }
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when filling comboboxes");
@@ -368,8 +368,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDelete.Enabled = ProEnvironment.GetList.Count > 1;
 
             if (mode != _currentMode) {
-                BlinkButton(btcontrol1, YamuiThemeManager.AccentColor);
-                BlinkButton(btcontrol2, YamuiThemeManager.AccentColor);
+                BlinkButton(btcontrol1, ThemeManager.Current.AccentColor);
+                BlinkButton(btcontrol2, ThemeManager.Current.AccentColor);
             }
 
             cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
@@ -529,7 +529,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             var selectedStuff = tag.Equals("true") ? Utils.ShowFolderSelection(associatedTextBox.Text) : Utils.ShowFileSelection(associatedTextBox.Text, tag);
             if (!string.IsNullOrEmpty(selectedStuff)) {
                 associatedTextBox.Text = selectedStuff;
-                BlinkTextBox(associatedTextBox, YamuiThemeManager.AccentColor);
+                BlinkTextBox(associatedTextBox, ThemeManager.Current.AccentColor);
             }
         }
 
@@ -568,11 +568,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
         private void BlinkButton(YamuiButton button, Color blinkColor) {
             button.UseCustomBackColor = true;
-            Transition.run(button, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { button.UseCustomBackColor = false; });
+            Transition.run(button, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { button.UseCustomBackColor = false; });
         }
 
         /// <summary>

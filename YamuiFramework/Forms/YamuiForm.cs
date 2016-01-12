@@ -145,7 +145,7 @@ namespace YamuiFramework.Forms {
         protected override void OnPaint(PaintEventArgs e) {
             var backColor = YamuiThemeManager.Current.FormColorBackColor;
             var foreColor = YamuiThemeManager.Current.FormColorForeColor;
-            var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.AccentColor;
+            var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.Current.AccentColor;
 
             // background
             e.Graphics.Clear(backColor);
@@ -272,7 +272,7 @@ namespace YamuiFramework.Forms {
                     ForeColor = YamuiThemeManager.Current.LabelsColorsNormalForeColor;
                     var t = new Transition(new TransitionType_Linear(500));
                     t.add(this, "Text", value);
-                    t.add(this, "ForeColor", YamuiThemeManager.AccentColor);
+                    t.add(this, "ForeColor", YamuiThemeManager.Current.AccentColor);
                     if (!string.IsNullOrEmpty(value))
                         t.add(this, "LinearBlink", 100);
                     else
@@ -310,7 +310,7 @@ namespace YamuiFramework.Forms {
                         _linearBool = !_linearBool;
                         _linearCount += 20;
                     }
-                    BackColor = !_linearBool ? YamuiThemeManager.AccentColor : YamuiThemeManager.Current.FormColorBackColor;
+                    BackColor = !_linearBool ? YamuiThemeManager.Current.AccentColor : YamuiThemeManager.Current.FormColorBackColor;
                 }
             }
 
@@ -695,14 +695,14 @@ namespace YamuiFramework.Forms {
             #region Paint Methods
             protected override void OnPaint(PaintEventArgs e) {
                 if (_isPressed)
-                    e.Graphics.Clear(YamuiThemeManager.AccentColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.AccentColor);
                 else if (_isHovered)
                     e.Graphics.Clear(YamuiThemeManager.Current.ButtonColorsHoverBackColor);
                 else
                     e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
                 //PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
-                Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, false, false, _isHovered, _isPressed, Enabled);
+                Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, false, _isHovered, _isPressed, Enabled);
                 TextRenderer.DrawText(e.Graphics, Text, new Font("Webdings", 9.25f), ClientRectangle, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             }
 

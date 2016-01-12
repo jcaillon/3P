@@ -24,9 +24,10 @@ using System.Runtime.InteropServices;
 using System.Security;
 
 namespace YamuiFramework.Helper {
+
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public static class WinApi {
+    internal static class WinApi {
         #region Structs
 
         [StructLayout(LayoutKind.Sequential)]

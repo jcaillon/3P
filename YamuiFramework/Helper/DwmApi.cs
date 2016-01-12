@@ -23,9 +23,11 @@ using System.Runtime.InteropServices;
 using System.Security;
 
 namespace YamuiFramework.Helper {
+    
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    public class DwmApi {
+    internal static class DwmApi {
+
         #region API calls
         [DllImport("dwmapi.dll")]
         public static extern int DwmExtendFrameIntoClientArea(IntPtr hdc, ref MARGINS marInset);
@@ -54,5 +56,6 @@ namespace YamuiFramework.Helper {
             }
         }
         #endregion
+
     }
 }

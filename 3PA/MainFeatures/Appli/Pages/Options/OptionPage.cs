@@ -361,7 +361,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
 
         /// <summary>

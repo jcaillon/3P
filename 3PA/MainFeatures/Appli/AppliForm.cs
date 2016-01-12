@@ -29,6 +29,7 @@ using YamuiFramework.Helper;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli.Pages;
 using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
@@ -56,8 +57,16 @@ namespace _3PA.MainFeatures.Appli {
                 new YamuiMainMenu("Home", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("WELCOME", "welcome", new HomePage())
                 }),
-                new YamuiMainMenu("Set", "set", false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("ENVIRONMENT", "environment", new SetEnvironment())
+                new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("ENVIRONMENT", null, new SetEnvironment()),
+                    new YamuiSecMenu("FILE INFORMATION", "file_info", new SetFileInfo()),
+                    new YamuiSecMenu("COMPILATION PATH", null, new template()),
+                    new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
+                }),
+                new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("3P COMMANDS", null, new template()),
+                    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
+                    new YamuiSecMenu("COMPILE MANY", null, new template()),
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("PROFILES", "profiles", new ProfilesPage()),
@@ -89,7 +98,8 @@ namespace _3PA.MainFeatures.Appli {
             }, 110, 8);
 
             // title
-            UpdateTitle();
+            string strongBold = "<span class='AccentColor'>";
+            labelTitle.Text = @"<img src='" + HtmlHandler.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -101,18 +111,6 @@ namespace _3PA.MainFeatures.Appli {
             Visible = false;
             Tag = false;
             KeyPreview = true;
-        }
-
-        #endregion
-
-        #region Public methods
-
-        /// <summary>
-        /// Updates the title of the main form
-        /// </summary>
-        public void UpdateTitle() {
-            string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='" + LocalHtmlHandler.GetLogo() + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
         }
 
         #endregion

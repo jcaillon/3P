@@ -16,7 +16,7 @@ namespace YamuiDemoApp.Pages.control {
 
         private void yamuiButton5_Click(object sender, EventArgs e) {
             yamuiButton4.UseCustomBackColor = true;
-            Transition.run(yamuiButton4, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, YamuiThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false;  });
+            Transition.run(yamuiButton4, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, YamuiThemeManager.Current.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false;  });
         }
 
         private void yamuiButton1_Click(object sender, EventArgs e) {
@@ -73,7 +73,7 @@ namespace YamuiDemoApp.Pages.control {
 
         private void yamuiButton5_ButtonPressed(object sender, EventArgs e) {
             yamuiButton4.UseCustomBackColor = true;
-            Transition.run(yamuiButton4, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, YamuiThemeManager.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false; });
+            Transition.run(yamuiButton4, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, YamuiThemeManager.Current.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false; });
         }
     }
 }

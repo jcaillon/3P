@@ -89,7 +89,7 @@ namespace YamuiFramework.Controls {
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.LabelsColors.BackGround(BackColor, UseCustomBackColor);
+                Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
                 if (backColor != Color.Transparent)
                     e.Graphics.Clear(backColor);
                 else
@@ -109,7 +109,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color foreColor = YamuiThemeManager.LabelsColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.Current.LabelsFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
         }
 

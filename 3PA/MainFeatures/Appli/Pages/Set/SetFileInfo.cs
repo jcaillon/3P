@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FileTagsPage.cs) is part of 3P.
+// This file (template.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,15 +17,16 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using _3PA.MainFeatures.FilesInfoNs;
 
-namespace _3PA.MainFeatures.FilesInfoNs {
-
-    internal partial class FileTagsPage : YamuiPage {
+namespace _3PA.MainFeatures.Appli.Pages.Set {
+    internal partial class SetFileInfo : YamuiPage {
 
         #region fields
 
@@ -36,11 +37,13 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #region constructor
 
-        /// <summary>
-        /// constructor
-        /// </summary>
-        public FileTagsPage() {
+        public SetFileInfo() {
             InitializeComponent();
+        }
+
+        #endregion
+
+        public override void OnShow() {
 
             if (!DesignMode)
                 UpdateInfo();
@@ -56,9 +59,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             bttoday.Click += (sender, args) => { yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy"); };
 
             yamuiComboBox1.KeyDown += YamuiComboBox1OnKeyDown;
-        }
 
-        #endregion
+            base.OnShow();
+        }
 
         #region public
 
@@ -112,12 +115,12 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         private void YamuiComboBox1OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
             if (keyEventArgs.KeyCode == Keys.Escape) {
                 UpdateView();
-                FileTag.Cloak();
+                Appli.ToggleView();
             } else if (keyEventArgs.KeyCode == Keys.Enter) {
                 Save(Filename);
                 Save(FileTag.LastTag);
                 FileTag.Export();
-                FileTag.Cloak();
+                Appli.ToggleView();
             }
         }
 
@@ -125,12 +128,12 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             Save(Filename);
             Save(FileTag.LastTag);
             FileTag.Export();
-            FileTag.Cloak();
+            Appli.ToggleView();
         }
 
         private void BtcancelOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             UpdateView();
-            FileTag.Cloak();
+            Appli.ToggleView();
         }
 
         private void BtclearOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -148,7 +151,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         private void OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
             if (keyEventArgs.KeyCode == Keys.Escape)
-                FileTag.Cloak();
+                Appli.ToggleView();
         }
 
         #endregion
@@ -199,16 +202,14 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         #endregion
-
-        #region item combo struct
-
-        private struct ItemCombo {
-            public string DisplayText;
-            public string Nb;
-        }
-
-        #endregion
-
     }
 
+    #region item combo struct
+
+    public struct ItemCombo {
+        public string DisplayText { get; set; }
+        public string Nb { get; set; }
+    }
+
+    #endregion
 }

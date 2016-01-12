@@ -24,7 +24,7 @@ using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
 
-    public class ControlHelper {
+    internal static class ControlHelper {
 
         /// <summary>
         /// List all the controls children of "control" of type "type"

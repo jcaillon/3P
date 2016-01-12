@@ -26,7 +26,6 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
-using YamuiFramework.HtmlRenderer.WinForms;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
@@ -157,7 +156,6 @@ namespace YamuiFramework.Controls {
                 // display the new page
                 Controls.Add(_currentPage);
                 _currentPage.Dock = DockStyle.Fill;
-                RedrawAllHtml(_currentPage);
                 _currentPage.Invalidate();
 
                 // Execute the page OnShow method
@@ -202,19 +200,6 @@ namespace YamuiFramework.Controls {
             CurrentPage = new Point(realIndex, _content[realIndex].LastVisitedPage);
 
             // focus secondary menu
-        }
-
-        private void RedrawAllHtml(Control ctrl) {
-            var controls = ControlHelper.GetAll(ctrl, typeof(HtmlLabel));
-            if (controls != null)
-                foreach (var control in controls) {
-                    control.Text = control.Text;
-                }
-            controls = ControlHelper.GetAll(ctrl, typeof(HtmlPanel));
-            if (controls != null)
-                foreach (var y in controls) {
-                    y.Text = y.Text;
-                }
         }
 
         private void SecondaryButtonsOnTabPressed(object sender, TabPressedEventArgs tabPressedEventArgs) {
@@ -347,7 +332,7 @@ namespace YamuiFramework.Controls {
                 e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
                 // background image?
                 if (!DontShowBackGroundImage) {
-                    var img = YamuiThemeManager.ThemePageImage;
+                    var img = YamuiThemeManager.Current.GetThemeImage();
                     if (img != null) {
                         Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
                         e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);

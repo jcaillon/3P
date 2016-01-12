@@ -651,7 +651,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region Paint Methods
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, false, IsFocused, IsHovered, IsPressed, true);
+                Color backColor = ThemeManager.Current.ButtonBg(BackColor, false, IsFocused, IsHovered, IsPressed, true);
                 var img = BackGrndImage;
 
                 // draw background

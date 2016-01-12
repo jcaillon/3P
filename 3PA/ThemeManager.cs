@@ -19,32 +19,29 @@
 #endregion
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using YamuiFramework.Themes;
 using _3PA.Data;
-using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA {
 
     public static class ThemeManager {
 
-        public static void Init() {
-            Current = GetThemesList().Find(theme => theme.UniqueId == Config.Instance.ThemeId) ?? GetThemesList()[0];
-        }
-
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
         public static Theme Current {
             get {
+                if (_currentTheme == null) {
+                    Current = GetThemesList().Find(theme => theme.UniqueId == Config.Instance.ThemeId) ?? GetThemesList()[0];
+                }
                 return _currentTheme;
             }
             set {
                 _currentTheme = value;
                 YamuiThemeManager.Current = _currentTheme;
-                //YamuiThemeManager.ThemePageImage =;
+                //ThemeManager.Current.GetThemeImage() =;
             }
         }
         private static Theme _currentTheme;
@@ -60,6 +57,36 @@ namespace _3PA {
             return _listOfThemes;
         }
         private static List<Theme> _listOfThemes = new List<Theme>();
+
+        /// <summary>
+        /// Returns a list of accent colors to choose from
+        /// </summary>
+        public static Color[] GetAccentColors {
+            get {
+                return new[] {
+                    Color.FromArgb(164, 196, 0),
+                    Color.FromArgb(96, 169, 23),
+                    Color.FromArgb(0, 138, 0),
+                    Color.FromArgb(0, 171, 169),
+                    Color.FromArgb(27, 161, 226),
+                    Color.FromArgb(0, 80, 239),
+                    Color.FromArgb(106, 0, 255),
+                    Color.FromArgb(170, 0, 255),
+                    Color.FromArgb(244, 114, 208),
+                    Color.FromArgb(216, 0, 115),
+                    Color.FromArgb(162, 0, 37),
+                    Color.FromArgb(229, 20, 0),
+                    Color.FromArgb(250, 104, 0),
+                    Color.FromArgb(240, 163, 10),
+                    Color.FromArgb(227, 200, 0),
+                    Color.FromArgb(130, 90, 44),
+                    Color.FromArgb(109, 135, 100),
+                    Color.FromArgb(100, 118, 135),
+                    Color.FromArgb(118, 96, 138),
+                    Color.FromArgb(135, 121, 78)
+                };
+            }
+        }
 
         public class Theme : YamuiTheme {
 

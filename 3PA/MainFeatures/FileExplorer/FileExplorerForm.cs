@@ -139,7 +139,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
             toolTipHtml.SetToolTip(lbStatus, "Provides information on the current status of the file");
 
-            lbStatus.BackColor = YamuiThemeManager.Current.FormColorBackColor;
+            lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
 
             #endregion
 
@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormColorBackColor;
             e.Graphics.Clear(backColor);
         }
         #endregion
@@ -780,7 +780,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             // blink back color
             if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
                 lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == YamuiThemeManager.Current.FormColorBackColor) ? YamuiThemeManager.AccentColor : YamuiThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.UseCustomBackColor = false; });
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.UseCustomBackColor = false; });
             }
 
             // text

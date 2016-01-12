@@ -126,7 +126,7 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            menu.SetCommand("Edit current file info", FileTag.UnCloak, "Edit_file_info:Ctrl+Shift+M", false);
+            menu.SetCommand("Edit current file info", Appli.GoToFileInfo, "Edit_file_info:Ctrl+Shift+M", false);
             //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
             menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
 
@@ -204,14 +204,13 @@ namespace _3PA {
             #region Themes
 
             // themes and html
-            ThemeManager.Init();
-            LocalHtmlHandler.RegisterToYamui();           
-            YamuiThemeManager.AccentColor = Config.Instance.AccentColor;
+            ThemeManager.Current.AccentColor = Config.Instance.AccentColor;
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
+            YamuiThemeManager.OnGetCssSheet += HtmlHandler.YamuiThemeManagerOnOnGetCssSheet;
+            YamuiThemeManager.OnHtmlImageNeeded += HtmlHandler.YamuiThemeManagerOnOnHtmlImageNeeded;
             //ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
             //Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
             
-
             #endregion
 
             // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
@@ -289,7 +288,6 @@ namespace _3PA {
                 AutoComplete.ForceClose();
                 InfoToolTip.ForceClose();
                 Appli.ForceClose();
-                FileTag.ForceClose();
                 FileExplorer.ForceClose();
                 CodeExplorer.ForceClose();
                 UserCommunication.Close();

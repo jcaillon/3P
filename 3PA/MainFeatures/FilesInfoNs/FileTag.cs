@@ -23,76 +23,12 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using _3PA.Interop;
 using _3PA.Lib;
-using WinApi = YamuiFramework.Helper.WinApi;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
 
     internal static class FileTag {
-
-        #region Form handling
-
-        public static FileTagsForm Form;
-        private static Point _location;
-
-        /// <summary>
-        /// Call this method to show the form
-        /// </summary>
-        public static void UnCloak() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                if (Form != null && Form.Visible)
-                    ForceClose();
-
-                // init if needed
-                if (Form == null) {
-                    Form = new FileTagsForm {
-                        UnfocusedOpacity = 1,
-                        FocusedOpacity = 1,
-                        OncloseAction = Cloak
-                    };
-                    Form.Show(Npp.Win32WindowNpp);
-                    _location = Form.Location;
-                }
-
-                if (Form != null) {
-                    Form.Location = _location;
-                    Form.UpdateForm();
-                    Form.UnCloack();
-                    WinApi.SetForegroundWindow(Form.Handle);
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when uncloaking file info");
-            }
-        }
-
-        /// <summary>
-        /// Call this method to hide the form
-        /// </summary>
-        public static void Cloak() {
-            // toggle visibility
-            if (Form != null && Form.Visible) {
-                _location = Form.Location;
-                Form.Cloack();
-            }
-        }
-
-        /// <summary>
-        /// Forces the form to close, only when leaving npp
-        /// </summary>
-        public static void ForceClose() {
-            try {
-                if (Form != null)
-                    Form.ForceClose();
-                Form = null;
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
-            }
-        }
-
-        #endregion
 
         #region fields
 

@@ -102,8 +102,8 @@ namespace YamuiFramework.Controls {
                 if (WriteFromRight)
                     textRect.Offset(SpaceBetweenText, 0);
                 Color foreColor = UseLinksColors?
-                    YamuiThemeManager.LabelsColors.ForeGround(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
-                    YamuiThemeManager.TabsColors.ForeGround(_isFocused, (index == _hotIndex && _isHovered), index == _selectedIndex);
+                    YamuiThemeManager.Current.LabelsFg(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
+                    YamuiThemeManager.Current.TabsFg(_isFocused, (index == _hotIndex && _isHovered), index == _selectedIndex);
                 TextRenderer.DrawText(e.Graphics, button, Font, textRect, foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
 
                 // draw a | separator?

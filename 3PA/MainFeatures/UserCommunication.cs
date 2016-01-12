@@ -67,7 +67,7 @@ namespace _3PA.MainFeatures {
                 // get npp's screen
                 _anchorForm.BeginInvoke((Action) delegate {
                     var toastNotification = new YamuiNotifications(
-                        LocalHtmlHandler.FormatMessage(html, imageType, title, subTitle)
+                        HtmlHandler.FormatMessage(html, imageType, title, subTitle)
                         , duration, width, Npp.GetNppScreen());
                     if (clickHandler != null)
                         toastNotification.LinkClicked += (sender, args) => clickHandler(args);
@@ -107,10 +107,10 @@ namespace _3PA.MainFeatures {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
                 if (waitResponse) {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler, dontWrapLines);
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler, dontWrapLines);
                 } else {
                     _anchorForm.BeginInvoke((Action) delegate {
-                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, LocalHtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler, dontWrapLines);
+                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler, dontWrapLines);
                     });
                 }
             }

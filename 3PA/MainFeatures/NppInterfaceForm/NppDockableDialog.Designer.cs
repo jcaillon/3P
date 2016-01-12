@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                 int value = 0;
-                DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             if (disposing && (components != null)) {

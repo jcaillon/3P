@@ -143,7 +143,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormColorBackColor;
             e.Graphics.Clear(backColor);
         }
         #endregion

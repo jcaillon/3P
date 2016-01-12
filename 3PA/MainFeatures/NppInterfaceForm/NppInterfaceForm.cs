@@ -22,9 +22,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
-using YamuiFramework.Themes;
 using _3PA.Interop;
-using WinApi = YamuiFramework.Helper.WinApi;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 
@@ -196,8 +194,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.FormColorBackColor;
-            var borderColor = YamuiThemeManager.AccentColor;
+            var backColor = ThemeManager.Current.FormColorBackColor;
+            var borderColor = ThemeManager.Current.AccentColor;
             var borderWidth = 1;
 
             e.Graphics.Clear(backColor);
@@ -235,7 +233,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         private bool CheckAeroEnabled() {
             if (Environment.OSVersion.Version.Major >= 6) {
                 var enabled = 0;
-                DwmApi.DwmIsCompositionEnabled(ref enabled);
+                WinApi.DwmIsCompositionEnabled(ref enabled);
                 return (enabled == 1);
             }
             return false;
@@ -245,9 +243,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             if (m.Msg == WmNcpaint && _mAeroEnabled) {
                 var v = 2;
-                DwmApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-                var margins = new DwmApi.MARGINS(1, 1, 1, 1);
-                DwmApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
+                WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
+                var margins = new WinApi.MARGINS(1, 1, 1, 1);
+                WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
             }
 
 

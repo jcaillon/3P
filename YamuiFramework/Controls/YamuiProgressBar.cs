@@ -242,7 +242,7 @@ namespace YamuiFramework.Controls {
         }
 
         private void UpdateLgBrushes() {
-            Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, false, false, false, false, Enabled);
+            Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, false, false, false, false, Enabled);
 
             if (Width <= 0 || Height <= 0) return;
 
@@ -252,10 +252,10 @@ namespace YamuiFramework.Controls {
 
             if (Enabled) {
                 darkColor = ChangeColorBrightness(backColor, _gradientIntensity);
-                darkColor2 = ChangeColorBrightness(YamuiThemeManager.AccentColor, _gradientIntensity);
+                darkColor2 = ChangeColorBrightness(YamuiThemeManager.Current.AccentColor, _gradientIntensity);
             } else {
                 darkColor = ChangeColorBrightness(Desaturate(backColor), _gradientIntensity);
-                darkColor2 = ChangeColorBrightness(Desaturate(YamuiThemeManager.AccentColor), _gradientIntensity);
+                darkColor2 = ChangeColorBrightness(Desaturate(YamuiThemeManager.Current.AccentColor), _gradientIntensity);
             }
 
             Rectangle rect = (!_vertical) ? new Rectangle(0, 0, Width, Height / 2) :
@@ -263,10 +263,10 @@ namespace YamuiFramework.Controls {
 
             if (Enabled) {
                 _backLgb = new LinearGradientBrush(rect, backColor, darkColor, angle, true);
-                _foreLgb = new LinearGradientBrush(rect, YamuiThemeManager.AccentColor, darkColor2, angle, true);
+                _foreLgb = new LinearGradientBrush(rect, YamuiThemeManager.Current.AccentColor, darkColor2, angle, true);
             } else {
                 _backLgb = new LinearGradientBrush(rect, Desaturate(backColor), darkColor, angle, true);
-                _foreLgb = new LinearGradientBrush(rect, Desaturate(YamuiThemeManager.AccentColor), darkColor2, angle, true);
+                _foreLgb = new LinearGradientBrush(rect, Desaturate(YamuiThemeManager.Current.AccentColor), darkColor2, angle, true);
             }
 
             _backLgb.WrapMode = WrapMode.TileFlipX;
@@ -336,7 +336,7 @@ namespace YamuiFramework.Controls {
             else
                 text = Text;
 
-            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, false, false, false, false, Enabled);
+            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, false, false, false, Enabled);
             Font font = FontManager.GetStandardFont();
 
             float strWidth = _bufGraphics.Graphics.MeasureString(text, font).Width;

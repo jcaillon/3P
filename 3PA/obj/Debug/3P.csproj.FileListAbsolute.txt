@@ -53,8 +53,6 @@ C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetEnvironment.resour
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.EmptyForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerForm.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsForm.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FilesInfoNs.FileTagsPage.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
@@ -64,3 +62,4 @@ C:\Work\3P\3PA\obj\Debug\3P.pdb
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Home.HomePage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Options.ProfilesPage.resources
 D:\Repo\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.EmptyForm.resources
+C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.Appli.Pages.Set.SetFileInfo.resources

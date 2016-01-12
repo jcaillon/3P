@@ -134,6 +134,35 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             _htmlContainer.ScrollChange += OnScrollChange;
             _htmlContainer.StylesheetLoad += OnStylesheetLoad;
             _htmlContainer.ImageLoad += OnImageLoad;
+
+            // subscribe to an event called when the BaseCss sheet changes
+            YamuiThemeManager.OnCssSheetChanged += YamuiThemeManagerOnOnCssSheetChanged;
+        }
+
+        private void YamuiThemeManagerOnOnCssSheetChanged() {
+            if (_text != null)
+                Text = _text;
+        }
+
+        /// <summary>
+        /// Gets or sets the text of this panel
+        /// </summary>
+        [Browsable(true)]
+        [Description("Sets the html of this control.")]
+        public override string Text {
+            get { return _text; }
+            set {
+                if (value == null) return; ;
+                _text = value;
+                base.Text = value;
+                if (!IsDisposed) {
+                    VerticalScroll.Value = VerticalScroll.Minimum;
+                    _htmlContainer.SetHtml((_text.StartsWith(@"<html") ? _text : @"<html><body>" + _text + @"</body><html>"), YamuiThemeManager.BaseCssData);
+                    PerformLayout();
+                    Invalidate();
+                    InvokeMouseMove();
+                }
+            }
         }
 
         /// <summary>
@@ -332,30 +361,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         {
             get { return base.AutoScroll; }
             set { base.AutoScroll = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the text of this panel
-        /// </summary>
-        [Browsable(true)]
-        [Description("Sets the html of this control.")]
-        public override string Text
-        {
-            get { return _text; }
-            set
-            {
-                if (value == null) return;;
-                _text = value;
-                base.Text = value;
-                if (!IsDisposed)
-                {
-                    VerticalScroll.Value = VerticalScroll.Minimum;
-                    _htmlContainer.SetHtml((_text.StartsWith(@"<html") ? _text : @"<html><body>" + _text + @"</body><html>"), HtmlHandler.GetBaseCssData());
-                    PerformLayout();
-                    Invalidate();
-                    InvokeMouseMove();
-                }
-            }
         }
 
         /// <summary>
@@ -662,7 +667,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Propagate the image load event from root container.
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e) {
-            HtmlHandler.OnImageLoad(e);
+            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);

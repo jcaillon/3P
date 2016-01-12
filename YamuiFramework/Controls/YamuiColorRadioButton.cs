@@ -98,7 +98,7 @@ namespace YamuiFramework.Controls {
             Rectangle boxRect = (!Checked) ? new Rectangle(5, 5, Width - 10, Height - 10) : new Rectangle(0, 0, Width, Height);
 
             if (UseBorder) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.AccentColor))
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor))
                     e.Graphics.FillRectangle(b, boxRect);
                 boxRect = (!Checked) ? new Rectangle(10, 10, Width - 20, Height - 20) : new Rectangle(5, 5, Width - 10, Height - 10);
             }

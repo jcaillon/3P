@@ -17,8 +17,13 @@
 // // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // // ========================================================================
 #endregion
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using YamuiFramework.HtmlRenderer.Core.Core;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Themes {
 
@@ -28,41 +33,21 @@ namespace YamuiFramework.Themes {
         /// Return the current Theme object 
         /// </summary>
         public static YamuiTheme Current {
-            set { 
+            set {
                 _currentTheme = value;
-                UpdatedTheme();
+                BaseCssData = null;
             }
             get {
-                if (_currentTheme != null)
+                if (_currentTheme != null) {
                     return _currentTheme;
+                }
                 // instanciation of current theme
                 _currentTheme = GetThemesList()[0];
-                UpdatedTheme();
+                BaseCssData = null;
                 return _currentTheme;
             }
         }
         private static YamuiTheme _currentTheme;
-
-        private static void UpdatedTheme() {
-            if (!_currentTheme.UseCurrentAccentColor)
-                _accentColor = _currentTheme.AccentColor;
-            HtmlHandler.UpdateBaseCssData();
-            ThemePageImage = (!string.IsNullOrEmpty(_currentTheme.PageBackGroundImage) ? (Image)Resources.Resources.ResourceManager.GetObject(_currentTheme.PageBackGroundImage) : null);
-        }
-
-        /// <summary>
-        /// Set/get the accent color
-        /// </summary>
-        public static Color AccentColor {
-            get { return _accentColor; }
-            set { _accentColor = value; }
-        }
-        private static Color _accentColor = GetAccentColors[13];
-
-        /// <summary>
-        /// Background image
-        /// </summary>
-        public static Image ThemePageImage { get; set; }
 
         /// <summary>
         /// Set to false to deactivate tab animation
@@ -82,174 +67,61 @@ namespace YamuiFramework.Themes {
         private static List<YamuiTheme> _listOfThemes = new List<YamuiTheme>();
 
         /// <summary>
-        /// Returns a list of accent colors to choose from
+        /// Subscribe to this event to feed YamuiFramework with a css sheet of your making
         /// </summary>
-        public static Color[] GetAccentColors {
+        public static event GetCssSheet OnGetCssSheet;
+        public static event CssSheetChanged OnCssSheetChanged;
+
+        public static CssData BaseCssData {
             get {
-                return new[] {
-                    Color.FromArgb(164, 196, 0),
-                    Color.FromArgb(96, 169, 23),
-                    Color.FromArgb(0, 138, 0),
-                    Color.FromArgb(0, 171, 169),
-                    Color.FromArgb(27, 161, 226),
-                    Color.FromArgb(0, 80, 239),
-                    Color.FromArgb(106, 0, 255),
-                    Color.FromArgb(170, 0, 255),
-                    Color.FromArgb(244, 114, 208),
-                    Color.FromArgb(216, 0, 115),
-                    Color.FromArgb(162, 0, 37),
-                    Color.FromArgb(229, 20, 0),
-                    Color.FromArgb(250, 104, 0),
-                    Color.FromArgb(240, 163, 10),
-                    Color.FromArgb(227, 200, 0),
-                    Color.FromArgb(130, 90, 44),
-                    Color.FromArgb(109, 135, 100),
-                    Color.FromArgb(100, 118, 135),
-                    Color.FromArgb(118, 96, 138),
-                    Color.FromArgb(135, 121, 78)
-                };
+                if (_baseCssData == null) {
+                    var baseCss = Resources.Resources.BaseStyleSheet;
+                    baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(Current.LabelsColorsNormalForeColor));
+                    baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(Current.FormColorBackColor));
+
+                    // load extra css from the user program
+                    if (OnGetCssSheet != null) {
+                        baseCss = string.Join("\n", baseCss, OnGetCssSheet());
+                    }
+                    _baseCssData = HtmlRender.ParseStyleSheet(baseCss);
+                }
+                return _baseCssData;
+            }
+            set {
+                // The css has changed
+                if (_baseCssData != null && OnCssSheetChanged != null) {
+                    _baseCssData = value;
+                    OnCssSheetChanged();
+                } else {
+                    _baseCssData = value;
+                }
             }
         }
+
+        private static CssData _baseCssData;
+        public delegate string GetCssSheet();
+        public delegate void CssSheetChanged();
 
         /// <summary>
-        /// This class is used for sliders as well as scrollbars
+        /// Subscribe to this event to feed the YamuiFramework with an image to load in a img tag
+        /// The needed image is in HtmlImageLoadEventArgs.src and you need to feed back the Image
+        /// on HtmlImageLoadEventArgs.Callback(MyImage);
         /// </summary>
-        public static class ScrollBarsColors {
-            public static Color BackGround(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color backColor;
-                if (!enabled)
-                    backColor = Current.ScrollBarsColorsDisabledBackColor;
-                else if (isPressed)
-                    backColor = Current.ScrollBarsColorsNormalBackColor;
-                else if (isHovered || isFocused)
-                    backColor = Current.ScrollBarsColorsHoverBackColor;
-                else
-                    backColor = Current.ScrollBarsColorsNormalBackColor;
+        public static event EventHandler<HtmlImageLoadEventArgs> OnHtmlImageNeeded;
 
-                return backColor;
+        public static void OnHtmlImageLoad(HtmlImageLoadEventArgs e) {
+            // load image from user
+            if (OnHtmlImageNeeded != null) {
+                OnHtmlImageNeeded(null, e);
+                if (e.Handled)
+                    return;
             }
-
-            public static Color ForeGround(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color foreColor;
-
-                if (!enabled)
-                    foreColor = Current.ScrollBarsColorsDisabledForeColor;
-                else if (isPressed)
-                    foreColor = AccentColor;
-                else if (isHovered || isFocused)
-                    foreColor = Current.ScrollBarsColorsHoverForeColor;
-                else
-                    foreColor = Current.ScrollBarsColorsNormalForeColor;
-
-                return foreColor;
-            }
+            // load image from yamui library
+            Image tryImg = (Image)Resources.Resources.ResourceManager.GetObject(e.Src);
+            if (tryImg == null) return;
+            e.Handled = true;
+            e.Callback(tryImg);
         }
 
-        /// <summary>
-        ///     This class is used for labels as well as links
-        /// </summary>
-        public static class LabelsColors {
-            public static Color ForeGround(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color foreColor;
-                
-                if (useCustomForeColor)
-                    foreColor = controlForeColor;
-                else if (!enabled)
-                    foreColor = Current.LabelsColorsDisabledForeColor;
-                else if (isPressed)
-                    foreColor = Current.LabelsColorsPressForeColor;
-                else if (isHovered || isFocused)
-                    foreColor = AccentColor;
-                else
-                    foreColor = Current.LabelsColorsNormalForeColor;
-
-                return foreColor;
-            }
-
-            public static Color BackGround(Color controlBackColor, bool useCustomBackColor) {
-                return !useCustomBackColor ? Color.Transparent : controlBackColor;
-            }
-        }
-
-        /// <summary>
-        ///     This class is used for tab controls (back color is also used for tab pages)
-        /// </summary>
-        public static class TabsColors {
-            public static Color ForeGround(bool isFocused, bool isHovered, bool isSelected) {
-                Color foreColor;
-
-                if (isFocused && isSelected)
-                    foreColor = AccentColor;
-                else if (isSelected)
-                    foreColor = Current.TabsColorsPressForeColor;
-                else if (isHovered)
-                    foreColor = Current.TabsColorsHoverForeColor;
-                else
-                    foreColor = Current.TabsColorsNormalForeColor;
-
-                return foreColor;
-            }
-        }
-
-        /// <summary>
-        ///     This class is used for :
-        ///     - Buttons
-        ///     - CheckBoxes
-        ///     - ComboBoxes
-        ///     - DatePicker
-        ///     - RadioButtons
-        /// </summary>
-        public static class ButtonColors {
-            public static Color BackGround(Color controlBackColor, bool useCustomBackColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color backColor;
-
-                if (useCustomBackColor)
-                    backColor = controlBackColor;
-                else if (!enabled)
-                    backColor = Current.ButtonColorsDisabledBackColor;
-                else if (isPressed)
-                    backColor = AccentColor;
-                else if (isHovered)
-                    backColor = Current.ButtonColorsHoverBackColor;
-                else
-                    backColor = Current.ButtonColorsNormalBackColor;
-
-                return backColor;
-            }
-
-            public static Color ForeGround(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color foreColor;
-
-                if (useCustomForeColor)
-                    foreColor = controlForeColor;
-                else if (!enabled)
-                    foreColor = Current.ButtonColorsDisabledForeColor;
-                else if (isPressed)
-                    foreColor = Current.ButtonColorsPressForeColor;
-                else if (isHovered)
-                    foreColor = Current.ButtonColorsHoverForeColor;
-                else
-                    foreColor = Current.ButtonColorsNormalForeColor;
-
-                return foreColor;
-            }
-
-            public static Color BorderColor(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
-                Color borderColor;
-
-                if (!enabled)
-                    borderColor = Current.ButtonColorsDisabledBorderColor;
-                else if (isPressed)
-                    borderColor = AccentColor;
-                else if (isFocused)
-                    borderColor = AccentColor;
-                else if (isHovered)
-                    borderColor = Current.ButtonColorsHoverBorderColor;
-                else
-                    borderColor = Current.ButtonColorsNormalBorderColor;
-
-                return borderColor;
-            }
-        }
     }
 }

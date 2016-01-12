@@ -22,8 +22,6 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
-using YamuiFramework.Themes;
-using _3PA.Html;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
 
@@ -38,7 +36,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // AccentColors picker
             int x = 0;
             int y = 0;
-            foreach (var accentColor in YamuiThemeManager.GetAccentColors) {
+            foreach (var accentColor in ThemeManager.GetAccentColors) {
                 var newColorPicker = new YamuiColorRadioButton();
                 PanelAccentColor.Controls.Add(newColorPicker);
                 newColorPicker.CheckedChanged += NewColorPickerOnCheckedChanged;
@@ -49,7 +47,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     y = 0;
                 } else
                     y += newColorPicker.Height;
-                if (YamuiThemeManager.AccentColor == accentColor) {
+                if (ThemeManager.Current.AccentColor == accentColor) {
                     _checkButton = newColorPicker;
                     newColorPicker.Checked = true;
                 }
@@ -58,13 +56,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // themes combo box
             comboTheme.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
             comboTheme.SelectedIndex = ThemeManager.GetThemesList().FindIndex(theme => theme.UniqueId == Config.Instance.ThemeId);
-
             comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
 
             // syntax combo
             cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
-
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
 
@@ -76,8 +72,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void ComboThemeOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
                 ThemeManager.Current = ThemeManager.GetThemesList()[comboTheme.SelectedIndex];
-                if (!ThemeManager.Current.UseCurrentAccentColor)
-                    _checkButton.Checked = false;
+                ThemeManager.Current.AccentColor = ThemeManager.Current.ThemeAccentColor;
+                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
+                _checkButton.Checked = false;
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
             } finally {
@@ -112,9 +109,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void NewColorPickerOnCheckedChanged(object sender, EventArgs eventArgs) {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {
-                YamuiThemeManager.AccentColor = rb.BackColor;
+                ThemeManager.Current.AccentColor = rb.BackColor;
+                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
                 _checkButton = rb;
-                Config.Instance.AccentColor = YamuiThemeManager.AccentColor;
                 PlsRefresh();
             }
         }
@@ -123,15 +120,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// force all the html panel/label to refresh and try to refresh the main window
         /// </summary>
         private void PlsRefresh() {
+
+            // Allows to refresh stuff corrrectly (mainly, it sets the baseCssData to null so it can be recomputed)
+            ThemeManager.Current = ThemeManager.Current;
+
             var thisForm = FindForm();
             if (thisForm == null || Appli.Form == null)
                 return;
 
-            Style.SetSyntaxStyles();
             Style.SetGeneralStyles();
-
-            // Refresh panels and labels (html)
-            LocalHtmlHandler.ProvideCssSheet();
 
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
@@ -141,17 +138,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             FileExplorer.FileExplorer.ApplyColorSettings();
 
             Application.DoEvents();
-            thisForm.Invalidate();
-            Application.DoEvents();
-            thisForm.Update();
-            Application.DoEvents();
             thisForm.Refresh();
-
-            Appli.Form.UpdateTitle();
-
-            // file tags
-            FileTag.ForceClose();
-
         }
     }
 }

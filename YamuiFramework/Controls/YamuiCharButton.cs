@@ -55,9 +55,9 @@ namespace YamuiFramework.Controls {
         #region Paint Methods
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
-                Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
-                Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
+                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
+                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
+                Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled && !FakeDisabled);
 
                 var designRect = ClientRectangle;
                 designRect.Width -= 2;

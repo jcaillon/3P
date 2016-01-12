@@ -102,9 +102,9 @@ namespace YamuiFramework.Controls
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
-            Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
 
             // Paint the back + border of the checkbox
             using (SolidBrush b = new SolidBrush(backColor)) {
@@ -120,7 +120,7 @@ namespace YamuiFramework.Controls
 
             // paint the form inside
             if (Checked) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.AccentColor)) {
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
                     Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
                     e.Graphics.FillRectangle(b, boxRect);
                 }

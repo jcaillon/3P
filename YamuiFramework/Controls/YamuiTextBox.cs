@@ -94,8 +94,8 @@ namespace YamuiFramework.Controls {
         public YamuiTextBox() {
             BorderStyle = BorderStyle.None;
             Font = FontManager.GetStandardFont();
-            BackColor = YamuiThemeManager.ButtonColors.BackGround(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
-            ForeColor = YamuiThemeManager.ButtonColors.ForeGround(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
+            BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
+            ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Multiline = true;
             Size = new Size(100, 20);
             MinimumSize = new Size(20, 20);
@@ -167,11 +167,11 @@ namespace YamuiFramework.Controls {
             }
 
             // Modify colors
-            BackColor = YamuiThemeManager.ButtonColors.BackGround(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
-            ForeColor = YamuiThemeManager.ButtonColors.ForeGround(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
+            BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
+            ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
 
             // draw border
-            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, false, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
             using (Pen p = new Pen(borderColor)) {
                 g.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));
             }

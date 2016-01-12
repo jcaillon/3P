@@ -80,7 +80,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // Disable Aero transitions, the plexiglass gets too visible
             if (Environment.OSVersion.Version.Major >= 6) {
                 int value = 1;
-                DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
             //// timer to check if the master form has changed

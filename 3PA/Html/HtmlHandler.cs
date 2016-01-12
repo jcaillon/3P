@@ -17,7 +17,10 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using System.Drawing;
+using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Properties;
@@ -27,34 +30,25 @@ namespace _3PA.Html {
     /// <summary>
     /// Add css and images specific to this application to the yamui html panels/labels/tooltips
     /// </summary>
-    internal static class LocalHtmlHandler {
+    internal static class HtmlHandler {
 
-        /// <summary>
-        /// Call this when initializing the plugin feed the html renderer
-        /// </summary>
-        public static void RegisterToYamui() {
-            ProvideCssSheet();
-            HtmlHandler.ImageNeeded += (sender, args) => {
-                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(args.Src);
-                if (tryImg == null) return;
+        public static void YamuiThemeManagerOnOnHtmlImageNeeded(object sender, HtmlImageLoadEventArgs args) {
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(args.Src);
+            if (tryImg != null) {
                 args.Handled = true;
                 args.Callback(tryImg);
-            };
+            }
         }
 
-        /// <summary>
-        /// Updates the colors of the css sheet and feeds it to the html renderer
-        /// </summary>
-        public static void ProvideCssSheet() {
+        public static string YamuiThemeManagerOnOnGetCssSheet() {
             var cssStyleSheet = Resources.StyleSheet;
             cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalForeColor));
             cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalBackColor));
             cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalAlternateBackColor));
-            cssStyleSheet = cssStyleSheet.Replace("%ACCENTCOLOR%", ColorTranslator.ToHtml(YamuiThemeManager.AccentColor));
+            cssStyleSheet = cssStyleSheet.Replace("%ACCENTCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AccentColor));
             cssStyleSheet = cssStyleSheet.Replace("%SUBSTRINGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalSubTypeForeColor));
             cssStyleSheet = cssStyleSheet.Replace("%LINKCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.GenericLinkColor));
-            HtmlHandler.ExtraCssSheet = cssStyleSheet;
-            HtmlHandler.UpdateBaseCssData();
+            return cssStyleSheet;
         }
 
         /// <summary>
@@ -71,7 +65,7 @@ namespace _3PA.Html {
             <table style='margin-bottom: 5px; width: 100%'>
                 <tr>
                     <td rowspan='2' style='width: 80px'><img src='" + image + @"' width='64' height='64' /></td>
-                    <td class='NotificationTitle'><img src='" + GetLogo() + @"' style='padding-right: 10px;'>" + title + @"</td>
+                    <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
                 </tr>
                 <tr>
                     <td class='NotificationSubTitle'>" + subtitle + @"</td>
@@ -84,8 +78,8 @@ namespace _3PA.Html {
         /// Returns the image of the logo (30x30)
         /// </summary>
         /// <returns></returns>
-        public static string GetLogo() {
-            return "logo30x30";
+        public static string GetLogo {
+            get { return "logo30x30"; }
         }
 
     }

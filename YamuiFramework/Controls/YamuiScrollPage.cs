@@ -72,7 +72,7 @@ namespace YamuiFramework.Controls {
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
             if (!NoBackgroundImage && !DesignMode) {
-                var img = YamuiThemeManager.ThemePageImage;
+                var img = YamuiThemeManager.Current.GetThemeImage();
                 if (img != null) {
                     Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
                     e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);
@@ -84,8 +84,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color thumbColor = YamuiThemeManager.ScrollBarsColors.ForeGround(false, _isHovered, _isPressed, Enabled);
-            Color barColor = YamuiThemeManager.ScrollBarsColors.BackGround(false, _isHovered, _isPressed, Enabled);
+            Color thumbColor = YamuiThemeManager.Current.ScrollBarsFg(false, _isHovered, _isPressed, Enabled);
+            Color barColor = YamuiThemeManager.Current.ScrollBarsBg(false, _isHovered, _isPressed, Enabled);
             DrawScrollBar(e.Graphics, thumbColor, barColor);
         }
 

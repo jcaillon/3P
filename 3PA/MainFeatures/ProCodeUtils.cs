@@ -465,7 +465,7 @@ namespace _3PA.MainFeatures {
                 } else {
 
                     UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
-                    FileTag.UnCloak();
+                    Appli.Appli.GoToFileInfo();
                 }
 
             } catch (Exception e) {

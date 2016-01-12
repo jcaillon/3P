@@ -257,14 +257,12 @@
     <Compile Include="Helper\DwmApi.cs" />
     <Compile Include="Helper\WinApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resources\ImageGetter.cs" />
     <Compile Include="Resources\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Themes\Class2xml.cs" />
-    <Compile Include="Themes\HtmlHandler.cs" />
     <Compile Include="Themes\YamuiTheme.cs" />
     <Compile Include="Themes\YamuiThemeManager.cs" />
   </ItemGroup>

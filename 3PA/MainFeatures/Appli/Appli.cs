@@ -20,6 +20,7 @@
 using System;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
+using _3PA.Interop;
 
 namespace _3PA.MainFeatures.Appli {
 
@@ -97,6 +98,15 @@ namespace _3PA.MainFeatures.Appli {
             }
         }
 
+
+        internal static void GoToFileInfo() {
+            try {
+                GoToPage("file_info");
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
+            }
+        }
+
         /// <summary>
         /// True if the form is focused 
         /// </summary>
@@ -131,5 +141,6 @@ namespace _3PA.MainFeatures.Appli {
                 ErrorHandler.DirtyLog(x);
             }
         }
+
     }
 }

@@ -1,24 +1,31 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
+﻿using System.Drawing;
 
 namespace YamuiFramework.Themes {
 
     public class YamuiTheme {
+
+        public delegate Image ImageGetter();
+        public static event ImageGetter OnImageNeeded;
+
+        /// <summary>
+        /// This field is dynamic and can be modified by the calling program
+        /// </summary>
+        public Color AccentColor = Color.DarkSlateGray;
+
+
+        #region Stored in the config file
+
         /// <summary>
         /// Theme's name
         /// </summary>
         public string ThemeName;
 
         public int UniqueId = 0;
+
         public int RankNeeded = 0;
         public string PageBackGroundImage = "";
 
-        public bool UseCurrentAccentColor = true;
-        public Color AccentColor = YamuiThemeManager.AccentColor;
-
+        public Color ThemeAccentColor = Color.DarkSlateGray;
         public Color FormColorBackColor = Color.FromArgb(230, 230, 230);
         public Color FormColorForeColor = Color.FromArgb(30, 30, 30);
         public Color ScrollBarsColorsNormalBackColor = Color.FromArgb(204, 204, 204);
@@ -44,5 +51,152 @@ namespace YamuiFramework.Themes {
         public Color ButtonColorsDisabledBackColor = Color.FromArgb(230, 230, 230);
         public Color ButtonColorsDisabledForeColor = Color.FromArgb(100, 100, 100);
         public Color ButtonColorsDisabledBorderColor = Color.FromArgb(190, 190, 190);
+
+        #endregion
+
+        /// <summary>
+        /// Gets the background image for the current theme
+        /// </summary>
+        public Image GetThemeImage() {
+            var yamuiImage = (!string.IsNullOrEmpty(PageBackGroundImage) ? (Image)Resources.Resources.ResourceManager.GetObject(PageBackGroundImage) : null);
+            // can't find the image locally (in Yamui), use the event to try and find one from the user program
+            if (yamuiImage == null && OnImageNeeded != null) {
+                yamuiImage = OnImageNeeded();
+            }
+            return yamuiImage;
+        }
+
+        /// <summary>
+        /// This class is used for sliders as well as scrollbars
+        /// </summary>
+        public Color ScrollBarsBg(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color backColor;
+            if (!enabled)
+                backColor = ScrollBarsColorsDisabledBackColor;
+            else if (isPressed)
+                backColor = ScrollBarsColorsNormalBackColor;
+            else if (isHovered || isFocused)
+                backColor = ScrollBarsColorsHoverBackColor;
+            else
+                backColor = ScrollBarsColorsNormalBackColor;
+
+            return backColor;
+        }
+
+        public Color ScrollBarsFg(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color foreColor;
+
+            if (!enabled)
+                foreColor = ScrollBarsColorsDisabledForeColor;
+            else if (isPressed)
+                foreColor = AccentColor;
+            else if (isHovered || isFocused)
+                foreColor = ScrollBarsColorsHoverForeColor;
+            else
+                foreColor = ScrollBarsColorsNormalForeColor;
+
+            return foreColor;
+        }
+
+        /// <summary>
+        ///     This class is used for labels as well as links
+        /// </summary>
+        public Color LabelsFg(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color foreColor;
+                
+            if (useCustomForeColor)
+                foreColor = controlForeColor;
+            else if (!enabled)
+                foreColor = LabelsColorsDisabledForeColor;
+            else if (isPressed)
+                foreColor = LabelsColorsPressForeColor;
+            else if (isHovered || isFocused)
+                foreColor = AccentColor;
+            else
+                foreColor = LabelsColorsNormalForeColor;
+
+            return foreColor;
+        }
+
+        public Color LabelsBg(Color controlBackColor, bool useCustomBackColor) {
+            return !useCustomBackColor ? Color.Transparent : controlBackColor;
+        }
+
+        /// <summary>
+        ///     This class is used for tab controls (back color is also used for tab pages)
+        /// </summary>
+        public Color TabsFg(bool isFocused, bool isHovered, bool isSelected) {
+            Color foreColor;
+
+            if (isFocused && isSelected)
+                foreColor = AccentColor;
+            else if (isSelected)
+                foreColor = TabsColorsPressForeColor;
+            else if (isHovered)
+                foreColor = TabsColorsHoverForeColor;
+            else
+                foreColor = TabsColorsNormalForeColor;
+
+            return foreColor;
+        }
+
+        /// <summary>
+        ///     This class is used for :
+        ///     - Buttons
+        ///     - CheckBoxes
+        ///     - ComboBoxes
+        ///     - DatePicker
+        ///     - RadioButtons
+        /// </summary>
+        public Color ButtonBg(Color controlBackColor, bool useCustomBackColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color backColor;
+
+            if (useCustomBackColor)
+                backColor = controlBackColor;
+            else if (!enabled)
+                backColor = ButtonColorsDisabledBackColor;
+            else if (isPressed)
+                backColor = AccentColor;
+            else if (isHovered)
+                backColor = ButtonColorsHoverBackColor;
+            else
+                backColor = ButtonColorsNormalBackColor;
+
+            return backColor;
+        }
+
+        public Color ButtonFg(Color controlForeColor, bool useCustomForeColor, bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color foreColor;
+
+            if (useCustomForeColor)
+                foreColor = controlForeColor;
+            else if (!enabled)
+                foreColor = ButtonColorsDisabledForeColor;
+            else if (isPressed)
+                foreColor = ButtonColorsPressForeColor;
+            else if (isHovered)
+                foreColor = ButtonColorsHoverForeColor;
+            else
+                foreColor = ButtonColorsNormalForeColor;
+
+            return foreColor;
+        }
+
+        public Color ButtonBorder(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
+            Color borderColor;
+
+            if (!enabled)
+                borderColor = ButtonColorsDisabledBorderColor;
+            else if (isPressed)
+                borderColor = AccentColor;
+            else if (isFocused)
+                borderColor = AccentColor;
+            else if (isHovered)
+                borderColor = ButtonColorsHoverBorderColor;
+            else
+                borderColor = ButtonColorsNormalBorderColor;
+
+            return borderColor;
+        }
     }
 }

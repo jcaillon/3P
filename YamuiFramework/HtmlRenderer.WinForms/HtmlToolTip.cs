@@ -21,6 +21,7 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Text;
+using System.Net.Mime;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -95,8 +96,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// Init.
         /// </summary>
-        public HtmlToolTip()
-        {
+        public HtmlToolTip() {
             OwnerDraw = true;
 
             _htmlContainer = new HtmlContainer();
@@ -256,7 +256,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             //Create fragment container
             var cssClass = string.IsNullOrEmpty(_tooltipCssClass) ? null : string.Format(" class=\"{0}\"", "yamui-tooltip");
             var toolipHtml = string.Format("<div{0}>{1}</div>", cssClass, GetToolTip(e.AssociatedControl));
-            _htmlContainer.SetHtml(toolipHtml, HtmlHandler.GetBaseCssData());
+            _htmlContainer.SetHtml(toolipHtml, YamuiThemeManager.BaseCssData);
             _htmlContainer.MaxSize = MaximumSize;
 
             //Measure size of the container
@@ -365,7 +365,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e)
         {
-            HtmlHandler.OnImageLoad(e);
+            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);

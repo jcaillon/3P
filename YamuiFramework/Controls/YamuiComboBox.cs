@@ -120,7 +120,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.ButtonColors.BackGround(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
                 if (backColor != Color.Transparent)
                     e.Graphics.Clear(backColor);
                 else
@@ -142,8 +142,8 @@ namespace YamuiFramework.Controls {
         private void OnPaintForeground(PaintEventArgs e) {
             ItemHeight = GetPreferredSize(Size.Empty).Height;
 
-            Color borderColor = YamuiThemeManager.ButtonColors.BorderColor(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = YamuiThemeManager.ButtonColors.ForeGround(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
 
             // draw border
             if (borderColor != Color.Transparent)
@@ -169,7 +169,7 @@ namespace YamuiFramework.Controls {
                 Color backColor = YamuiThemeManager.Current.ButtonColorsNormalBackColor;
 
                 if ((e.State & DrawItemState.Selected) == DrawItemState.Selected) {
-                    backColor = YamuiThemeManager.AccentColor;
+                    backColor = YamuiThemeManager.Current.AccentColor;
                     foreColor = YamuiThemeManager.Current.ButtonColorsPressForeColor;
                 } else {
                     foreColor = YamuiThemeManager.Current.ButtonColorsNormalForeColor;
@@ -347,7 +347,7 @@ namespace YamuiFramework.Controls {
             ExcludeClipRect(dc, clientRect.Left, clientRect.Top, clientRect.Right, clientRect.Bottom);
 
             // Create a pen and select it
-            Color borderColor = YamuiThemeManager.AccentColor;
+            Color borderColor = YamuiThemeManager.Current.AccentColor;
             IntPtr border = CreatePen(PenStyles.PS_SOLID, 1, RGB(borderColor.R,
                 borderColor.G, borderColor.B));
 
