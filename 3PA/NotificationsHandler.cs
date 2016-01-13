@@ -23,6 +23,16 @@ namespace _3PA {
 
         #region public
 
+        #region Events
+
+        /// <summary>
+        /// Subscribe to this event, published when the current document in changed (on document open or tab switched)
+        /// </summary>
+        public static event DocumentChanged OnDocumentChangedEnd;
+        public delegate void DocumentChanged();
+
+        #endregion
+
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
@@ -439,7 +449,7 @@ namespace _3PA {
         /// Called when the user switches tab document
         /// </summary>
         public static void OnDocumentSwitched(bool initiating = false) {
-            ErrorHandler.Log("changing docu " + initiating.ToString());
+
             // update current file info
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
             CurrentFilePath = Npp.GetCurrentFilePath();
@@ -486,6 +496,11 @@ namespace _3PA {
             // Parse the document
             if (PluginIsFullyLoaded)
                 AutoComplete.ParseCurrentDocument(true);
+
+            // publish an event
+            if (OnDocumentChangedEnd != null) {
+                OnDocumentChangedEnd();
+            }
         }
 
         #endregion

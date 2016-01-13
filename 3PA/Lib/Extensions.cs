@@ -314,9 +314,6 @@ namespace _3PA.Lib {
         /// Tests if the string contains the given filter, uses the text matching of resharper autocompletion (like)
         /// WARNING : CASE SENSITIVE!!!
         /// </summary>
-        /// <param name="input"></param>
-        /// <param name="filter"></param>
-        /// <returns></returns>
         public static bool FullyMatchFilter(this string input, string filter) {
             if (string.IsNullOrEmpty(filter)) return true;
             int pos = 0;
@@ -332,6 +329,34 @@ namespace _3PA.Lib {
                 pos++;
             }
             return false;
+        }
+
+        /// <summary>
+        /// Returns the dispersion level of a input string compared to a filter
+        /// </summary>
+        public static int DispersionLevel(this string input, string filter) {
+            int dispersion = 0;
+            if (string.IsNullOrEmpty(filter)) return dispersion;
+            int pos = 0;
+            int posFilter = 0;
+            while (pos < input.Length) {
+                // we match the current char of the filter
+                if (char.ToLower(input[pos]) == filter[posFilter]) {
+                    posFilter++;
+                    // we matched the entire filter
+                    if (posFilter >= filter.Length)
+                        return dispersion;
+                } else {
+                    // gap between match mean more penalty than finding the match later in the string
+                    if (posFilter > 0) {
+                        dispersion += 900;
+                    } else {
+                        dispersion += 30;
+                    }
+                }
+                pos++;
+            }
+            return dispersion;
         }
 
         /// <summary>

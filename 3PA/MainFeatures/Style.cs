@@ -92,8 +92,7 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var udlFilePath = Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml");
-            var fileContent = File.Exists(udlFilePath) ? File.ReadAllText(udlFilePath, Encoding.Default) : @"<NotepadPlus />";
+            var fileContent = File.Exists(Config.FileUdl) ? File.ReadAllText(Config.FileUdl, Encoding.Default) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -113,10 +112,10 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
             try {
-                File.WriteAllText(udlFilePath, fileContent, Encoding.Default);
+                File.WriteAllText(Config.FileUdl, fileContent, Encoding.Default);
             } catch (Exception e) {
                 if (e is UnauthorizedAccessException)
-                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + udlFilePath + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
+                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileUdl + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
                 else
                     ErrorHandler.ShowErrors(e, "Error while accessing userDefineLang.xml");
                 return false;

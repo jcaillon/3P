@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures {
 
 
                 // match a word in the autocompletion? go to definition
-                var data = AutoComplete.FindInCompletionData(curWord, position);
+                var data = AutoComplete.FindInCompletionData(curWord, position, true);
                 if (data != null && data.Count > 0) {
                     foreach (var completionData in data) {
                         if (completionData.FromParser) {

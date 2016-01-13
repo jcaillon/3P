@@ -38,13 +38,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region fields
 
-        private static List<CompletionData> _keywords = new List<CompletionData>();
+        private static Dictionary<string, CompletionData> _keywordList = new Dictionary<string, CompletionData>(); 
         private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
         private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.OrdinalIgnoreCase);
-
-        private const string FileNameKeywords = "_Keywords.conf";
-        private const string FileNameKeywordsHelp = "_KeywordsHelp.conf";
-        private const string FileNameAbbrev = "_Abbreviations.conf";
 
         #endregion
         
@@ -55,33 +51,46 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static void Import() {
             // reads keywords
-            _keywords.Clear();
-            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), DataResources.Keywords, Encoding.Default, s => {
+            _keywordList.Clear();
+            ConfLoader.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, Encoding.Default, s => {
                 var items = s.Split('\t');
-                if (items.Count() == 4) {
+                if (items.Count() == 5) {
                     // find the KeywordType from items[1]
                     KeywordType keywordType;
-                    if (!Enum.TryParse(items[1], true, out keywordType))
+                    if (!Enum.TryParse(items[2], true, out keywordType))
                         keywordType = KeywordType.Unknow;
 
                     // set flags
-                    var flag = (items[2] == "1") ? ParseFlag.Reserved : 0;
+                    var flag = (items[3] == "1") ? ParseFlag.Reserved : 0;
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
-                    _keywords.Add(new CompletionData {
-                        DisplayText = items[0],
-                        Type = ((int)keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
-                        Ranking = int.Parse(items[3]),
-                        SubString = keywordType.ToString(),
-                        Flag = flag,
-                        KeywordType = keywordType
-                    });
+                    if (!_keywordList.ContainsKey(items[0])) {
+                        _keywordList.Add(items[0], new CompletionData {
+                            DisplayText = items[1],
+                            Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
+                            Ranking = int.Parse(items[4]),
+                            SubString = keywordType.ToString(),
+                            Flag = flag,
+                            KeywordType = keywordType
+                        });
+                    }
+                }
+            });
+
+            // reads keywords rank
+            ConfLoader.ForEachLine(Config.FileKeywordsRank, new byte[0], Encoding.Default, s => {
+                var items = s.Split('\t');
+                if (items.Count() == 2 && _keywordList.ContainsKey(items[0])) {
+                    int val;
+                    if (int.TryParse(items[1], out val)) {
+                        _keywordList[items[0]].Ranking = val;
+                    }
                 }
             });
 
             // reads abbreviations
             _abbreviations.Clear();
-            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameAbbrev), DataResources.Abbreviations, Encoding.Default, s => {
+            ConfLoader.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2) {
                     _abbreviations.Add(new KeywordsAbbreviations {
@@ -93,7 +102,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // reads keywords help
             _help.Clear();
-            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileNameKeywordsHelp), DataResources.KeywordsHelp, Encoding.Default, s => {
+            ConfLoader.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() > 2) {
                     var listSynthax = new List<string>();
@@ -112,12 +121,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Save the keywords data into the file (to remember the ranking of each keyword)
         /// </summary>
         public static void Export() {
-            if (_keywords.Count == 0) return;
+            if (_keywordList.Count == 0) return;
             var strBuilder = new StringBuilder();
-            foreach (var keyword in _keywords) {
-                strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubString + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
+            foreach (var kpv in _keywordList) {
+                strBuilder.AppendLine(kpv.Key + "\t" + kpv.Value.Ranking);
             }
-            File.WriteAllText(Path.Combine(Npp.GetConfigDir(), FileNameKeywords), strBuilder.ToString());
+            File.WriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
         }
 
         #endregion
@@ -128,7 +137,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the list of keywords
         /// </summary>
         public static List<CompletionData> GetList() {
-            return _keywords;
+            return _keywordList.Values.ToList();
         }
 
         /// <summary>

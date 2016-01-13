@@ -37,15 +37,6 @@ namespace _3PA.MainFeatures {
     /// </summary>
     internal static class UpdateHandler {
 
-        private static string PathUpdateFolder { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
-        private static string PathDownloadedPlugin { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3P.dll"); } }
-        private static string Path7ZipExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.exe"); } }
-        private static string Path7ZipDll { get { return Path.Combine(Npp.GetConfigDir(), "Update", "7z.dll"); } }
-        private static string PathUpdaterExe { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3pUpdater.exe"); } }
-        private static string PathUpdaterLst { get { return Path.Combine(Npp.GetConfigDir(), "Update", "3pUpdater.lst"); } }
-        private static string PathLatestReleaseZip { get { return Path.Combine(Npp.GetConfigDir(), "Update", "latestRelease.zip"); } }
-        private static string PathToVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
-
         /// <summary>
         /// Holds the info about the latest release found on the distant update server
         /// </summary>
@@ -150,9 +141,9 @@ namespace _3PA.MainFeatures {
                     // There is a distant version higher than the local one
                     if (highestVersionInt > -1) {
                         // Update dir
-                        if (Directory.Exists(PathUpdateFolder))
-                            Utils.DeleteDirectory(PathUpdateFolder, true);
-                        Directory.CreateDirectory(PathUpdateFolder);
+                        if (Directory.Exists(Config.FolderUpdate))
+                            Utils.DeleteDirectory(Config.FolderUpdate, true);
+                        Directory.CreateDirectory(Config.FolderUpdate);
 
                         // latest release info
                         try {
@@ -173,7 +164,7 @@ namespace _3PA.MainFeatures {
                         var downloadUriTuple = releasesList[highestVersionInt].FirstOrDefault(tuple => tuple.Item1.Equals("browser_download_url"));
                         if (downloadUriTuple != null) {
                             wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
-                            wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), PathLatestReleaseZip);
+                            wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), Config.FileLatestReleaseZip);
                         }
 
                     } else if (_alwaysGetFeedBack) {
@@ -195,15 +186,15 @@ namespace _3PA.MainFeatures {
         private static void WcOnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
                 // copy 7zip.exe
-                if (!File.Exists(Path7ZipExe))
-                    File.WriteAllBytes(Path7ZipExe, Resources._7z);
-                if (!File.Exists(Path7ZipDll))
-                    File.WriteAllBytes(Path7ZipDll, Resources._7zdll);
+                if (!File.Exists(Config.FileZipExe))
+                    File.WriteAllBytes(Config.FileZipExe, Resources._7z);
+                if (!File.Exists(Config.FileZipDll))
+                    File.WriteAllBytes(Config.FileZipDll, Resources._7zdll);
 
                 // Extract the .zip file
                 var process = Process.Start(new ProcessStartInfo {
-                    FileName = Path7ZipExe,
-                    Arguments = string.Format("x -y \"-o{0}\" \"{1}\"", Path.Combine(Npp.GetConfigDir(), "Update"), PathLatestReleaseZip),
+                    FileName = Config.FileZipExe,
+                    Arguments = string.Format("x -y \"-o{0}\" \"{1}\"", Config.FolderUpdate, Config.FileLatestReleaseZip),
                     CreateNoWindow = true,
                     UseShellExecute = false,
                     WindowStyle = ProcessWindowStyle.Hidden
@@ -212,20 +203,20 @@ namespace _3PA.MainFeatures {
                     process.WaitForExit();
 
                 // check the presence of the plugin file
-                if (!File.Exists(PathDownloadedPlugin)) {
-                    Utils.DeleteDirectory(PathUpdateFolder, true);
+                if (!File.Exists(Config.FileDownloadedPlugin)) {
+                    Utils.DeleteDirectory(Config.FolderUpdate, true);
                     return;
                 }
 
                 // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                if (!File.Exists(PathUpdaterExe))
-                    File.WriteAllBytes(PathUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
+                if (!File.Exists(Config.FileUpdaterExe))
+                    File.WriteAllBytes(Config.FileUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
 
                 // configure the update
-                File.WriteAllText(PathUpdaterLst, string.Join("\t", PathDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
+                File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", Config.FileDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
 
                 // write the version log
-                File.WriteAllText(PathToVersionLog, LatestReleaseInfo.Body, Encoding.Default);
+                File.WriteAllText(Config.FileVersionLog, LatestReleaseInfo.Body, Encoding.Default);
 
                 NotifyUpdateAvailable();
 
@@ -252,11 +243,11 @@ namespace _3PA.MainFeatures {
         /// check if there is an update to make
         /// </summary>
         public static void OnNotepadExit() {
-            if (File.Exists(PathUpdaterExe)) {
+            if (File.Exists(Config.FileUpdaterExe)) {
                 var process = new Process {
                     StartInfo = {
-                        FileName = PathUpdaterExe,
-                        Arguments = PathDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
+                        FileName = Config.FileUpdaterExe,
+                        Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
                         UseShellExecute = true,
                         WindowStyle = ProcessWindowStyle.Hidden
                     }
@@ -277,26 +268,29 @@ namespace _3PA.MainFeatures {
             } else {
                 // first use message?
                 if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("First use of the program, display a smart message explaining where to start and why he should deactivate npp's default auto-completion", MessageImg.MsgInfo, "Information", "Welcome!");
+                    UserCommunication.Notify("Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P i invite you to read the <b><i>Getting started</b></i> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br><div align='right'>Enjoy!!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                        Appli.Appli.ToggleView();
+                        args.Handled = true;
+                    });
                     Config.Instance.UserFirstUse = false;
                 }
             }
 
             // an update has been done
-            if (File.Exists(PathToVersionLog)) {
-                if (File.Exists(PathDownloadedPlugin)) {
+            if (File.Exists(Config.FileVersionLog)) {
+                if (File.Exists(Config.FileDownloadedPlugin)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
                         You will have to manually copy the new file and delete the old file :<br><br>
-                        <b>Move</b> this file : <a href='" + Path.GetDirectoryName(PathDownloadedPlugin) + "'>" + PathDownloadedPlugin + @"</a></b><br>" + @"
+                        <b>Move</b> this file : <a href='" + Path.GetDirectoryName(Config.FileDownloadedPlugin) + "'>" + Config.FileDownloadedPlugin + @"</a></b><br>" + @"
                         In this folder (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
                         Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                     return;
                 }
 
-                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(PathToVersionLog, TextEncodingDetect.GetFileEncoding(PathToVersionLog))).MdToHtml(),
+                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(Config.FileVersionLog, TextEncodingDetect.GetFileEncoding(Config.FileVersionLog))).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
@@ -304,9 +298,9 @@ namespace _3PA.MainFeatures {
                     false);
 
                 try {
-                    File.Delete(PathToVersionLog);
-                    if (Directory.Exists(PathUpdateFolder))
-                        Utils.DeleteDirectory(PathUpdateFolder, true);
+                    File.Delete(Config.FileVersionLog);
+                    if (Directory.Exists(Config.FolderUpdate))
+                        Utils.DeleteDirectory(Config.FolderUpdate, true);
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when deleting a file/folder");
                 }
@@ -321,29 +315,33 @@ namespace _3PA.MainFeatures {
                 Task.Factory.StartNew(GetLatestReleaseInfo);
         }
 
-    }
+        #region ReleaseInfo
 
-    /// <summary>
-    /// Contains info about the latest release
-    /// </summary>
-    public class ReleaseInfo {
-        public string Version { private set; get; }
-        public string Name { private set; get; }
-        public bool IsPreRelease { private set; get; }
-        public bool IsDraft { private set; get; }
-        public string ReleaseUrl { private set; get; }
-        public string Body { private set; get; }
-        public string ReleaseDate { private set; get; }
+        /// <summary>
+        /// Contains info about the latest release
+        /// </summary>
+        public class ReleaseInfo {
+            public string Version { private set; get; }
+            public string Name { private set; get; }
+            public bool IsPreRelease { private set; get; }
+            public bool IsDraft { private set; get; }
+            public string ReleaseUrl { private set; get; }
+            public string Body { private set; get; }
+            public string ReleaseDate { private set; get; }
 
-        public ReleaseInfo(string version, string name, bool isPreRelease, string releaseUrl, string body, bool isDraft, string releaseDate) {
-            Version = version;
-            Name = name;
-            IsPreRelease = isPreRelease;
-            ReleaseUrl = releaseUrl;
-            Body = body;
-            IsDraft = isDraft;
-            ReleaseDate = releaseDate;
+            public ReleaseInfo(string version, string name, bool isPreRelease, string releaseUrl, string body, bool isDraft, string releaseDate) {
+                Version = version;
+                Name = name;
+                IsPreRelease = isPreRelease;
+                ReleaseUrl = releaseUrl;
+                Body = body;
+                IsDraft = isDraft;
+                ReleaseDate = releaseDate;
+            }
         }
+
+        #endregion
+
     }
 
 }

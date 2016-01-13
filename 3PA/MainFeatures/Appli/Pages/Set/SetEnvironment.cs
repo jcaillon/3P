@@ -165,7 +165,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         return false;
                     }
 
-                    var newEnv = new ProEnvironmentObject {
+                    var newEnv = new ProEnvironment.ProEnvironmentObject {
                         Name = flName.Text,
                         Suffix = flSuffix.Text,
                         Label = flLabel.Text,

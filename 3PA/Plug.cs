@@ -17,13 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +40,6 @@ using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
-using WinApi = _3PA.Interop.WinApi;
 
 namespace _3PA {
 
@@ -54,24 +51,6 @@ namespace _3PA {
         /// Set to true after the plugin has been fully loaded
         /// </summary>
         public static bool PluginIsFullyLoaded { get; private set; }
-
-        /// <summary>
-        /// Gets the temporary directory to use
-        /// </summary>
-        public static string TempDir {
-            get {
-                var dir = Path.Combine(Path.GetTempPath(), AssemblyInfo.ProductTitle);
-                if (!Directory.Exists(dir))
-                    try {
-                        Directory.CreateDirectory(dir);
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Permission denied when creating " + dir);
-                    }
-                return dir;
-            }
-        }
-
-        #region Current file info
 
         // We don't want to recompute those values all the time so we store them when the buffer (document) changes
 
@@ -89,8 +68,6 @@ namespace _3PA {
         /// Information on the current file
         /// </summary>
         public static FileInfoObject CurrentFileObject { get; private set; }
-
-        #endregion
 
         #endregion
 
@@ -144,10 +121,10 @@ namespace _3PA {
 
             menu.SetSeparator();
 
-            if (Config.Instance.UserName.Equals("JCA"))
+            if (Config.IsDevelopper)
                 menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
 
-            if (Config.Instance.UserName.Equals("JCA"))
+            if (Config.IsDevelopper)
                 menu.SetCommand("DEBUG", StartDebug, "DEBUG:Ctrl+F12", false);
 
             //menu.SetSeparator();
@@ -415,7 +392,12 @@ namespace _3PA {
 
         public static void Test() {
 
-
+            string derp = @"" +
+                          "blabla".DispersionLevel("lala") +
+                          "azerty".DispersionLevel("zry") +
+                          "azerty".DispersionLevel("zer") +
+                          "azerty".DispersionLevel("ay");
+            UserCommunication.Notify(derp);
 
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,
@@ -460,7 +442,7 @@ namespace _3PA {
             UserCommunication.Notify("<a href='" + AssemblyInfo.Location.ProgressQuoter() + "'>" + AssemblyInfo.Location.ProgressQuoter() + "</a><br>" + AssemblyInfo.IsPreRelease + "<br><a href='" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "'>" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "</a>" + "<br><a href='" + @"C:\Work\3P\3PA\Interop" + "'>" + @"C:\Work\3P\3PA\Interop" + "</a>" + "<br><a href='" + @"https://github.com/jcaillon/3P/releases" + "'>" + @" https://github.com/jcaillon/3P/releases" + "</a>");
 
             var canIndent = ParserHandler.CanIndent();
-            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(TempDir, "lines.log") + "'>" + Path.Combine(TempDir, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
+            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(Config.FolderTemp, "lines.log") + "'>" + Path.Combine(Config.FolderTemp, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
             if (!canIndent) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
@@ -470,7 +452,7 @@ namespace _3PA {
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
                     i++;
                 }
-                File.WriteAllText(Path.Combine(TempDir, "lines.log"), x.ToString());
+                File.WriteAllText(Path.Combine(Config.FolderTemp, "lines.log"), x.ToString());
             }
 
             //var x = 0;

@@ -47,22 +47,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static string OutputFileName { get; private set; }
 
         /// <summary>
-        /// Gets the directory where database info are stored
-        /// </summary>
-        public static string DatabaseDir {
-            get {
-                var dir = Path.Combine(Npp.GetConfigDir(), "DatabaseInfo");
-                if (!Directory.Exists(dir))
-                    try {
-                        Directory.CreateDirectory(dir);
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Permission denied when creating " + dir);
-                    }
-                return dir;
-            }
-        }
-
-        /// <summary>
         /// Action called when an extraction is done
         /// </summary>
         private static Action _onExtractionDone;
@@ -80,7 +64,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var fileName = GetOutputName();
 
             // read
-            if (File.Exists(Path.Combine(DatabaseDir, fileName))) {
+            if (File.Exists(Path.Combine(Config.FolderDatabase, fileName))) {
                 if (Plug.PluginIsFullyLoaded) {
                     Config.Instance.EnvLastDbInfoUsed = fileName;
                     Init();
@@ -94,7 +78,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Deletes the file corresponding to the current database (if it exists)
         /// </summary>
         public static void DeleteCurrentDbInfo() {
-            var filePath = Path.Combine(DatabaseDir, GetOutputName());
+            var filePath = Path.Combine(Config.FolderDatabase, GetOutputName());
             if (File.Exists(filePath)) {
                 try {
                     File.Delete(filePath);
@@ -140,7 +124,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (!File.Exists(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath) || new FileInfo(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath).Length == 0) {
                     UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(processOnExitEventArgs.ProgressExecution.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
                 } else {
-                    var targetFile = Path.Combine(DatabaseDir, OutputFileName);
+                    var targetFile = Path.Combine(Config.FolderDatabase, OutputFileName);
                     if (File.Exists(targetFile))
                         File.Delete(targetFile);
 
@@ -174,7 +158,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 return;
 
             // read file, extract info
-            Read(Path.Combine(DatabaseDir, Config.Instance.EnvLastDbInfoUsed));
+            Read(Path.Combine(Config.FolderDatabase, Config.Instance.EnvLastDbInfoUsed));
 
             // Update autocompletion
             AutoComplete.FillStaticItems(false);

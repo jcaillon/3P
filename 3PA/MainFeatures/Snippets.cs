@@ -43,7 +43,6 @@ namespace _3PA.MainFeatures {
 
         public static SnippetContext LocSnippetContext;
         static public Dictionary<string, string> Map = new Dictionary<string, string>();
-        private const string FileName = "snippets.data";
 
         static public bool InsertionActive { get { return LocSnippetContext != null; } }
 
@@ -61,12 +60,12 @@ namespace _3PA.MainFeatures {
 
         public static void Init() {
             lock (Map) {
-                if (!File.Exists(ConfigFile))
-                    File.WriteAllBytes(ConfigFile, DataResources.Snippets);
+                if (!File.Exists(Config.FileSnippets))
+                    File.WriteAllBytes(Config.FileSnippets, DataResources.Snippets);
                 try {
-                    Read(ConfigFile);
+                    Read(Config.FileSnippets);
                 } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while loading snippets!", ConfigFile);
+                    ErrorHandler.ShowErrors(e, "Error while loading snippets!", Config.FileSnippets);
                 }
                 SetupFileWatcher();
             }
@@ -80,11 +79,7 @@ namespace _3PA.MainFeatures {
             }
         }
 
-        static string ConfigFile {
-            get {
-                return Path.Combine(Npp.GetConfigDir(), FileName);
-            }
-        }
+        
 
         static void Read(string file) {
             //Debug.Assert(false);
@@ -300,14 +295,14 @@ namespace _3PA.MainFeatures {
         }
 
         static public void EditSnippetsConfig() {
-            Npp.OpenFile(ConfigFile);
+            Npp.OpenFile(Config.FileSnippets);
         }
 
         static FileSystemWatcher _configWatcher;
 
         static void SetupFileWatcher() {
-            string dir = Path.GetDirectoryName(ConfigFile);
-            string fileName = Path.GetFileName(ConfigFile);
+            string dir = Path.GetDirectoryName(Config.FileSnippets);
+            string fileName = Path.GetFileName(Config.FileSnippets);
             if (dir != null) {
                 _configWatcher = new FileSystemWatcher(dir, fileName);
                 _configWatcher.NotifyFilter = NotifyFilters.LastWrite;

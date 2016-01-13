@@ -515,18 +515,17 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (string.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
             } else {
-                char firstChar = char.ToUpperInvariant(_filterByText[0]);
                 fastOLV.SetObjects(_initialObjectsList.OrderBy(
-                x => {
-                    if (x.DisplayText.Length < 1 || char.ToUpperInvariant(x.DisplayText[0]) != firstChar) return 2;
-                    return x.DisplayText.Equals(_filterByText, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
-                }).ToList());
+                x => x.DisplayText.ToLower().DispersionLevel(_filterByText) + x.DisplayText.Length).ToList());
             }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
             _currentLineNumber = Npp.Line.CurrentLine;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
+            if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
+                _currentLineNumber = -1;
+            }
             _filterString = _filterByText;
             _useTypeFiltering = true;
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
@@ -565,19 +564,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // check for scope
                 if (compData.ParsedItem.Scope != ParsedScope.File)
                     output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);
-                // check for the definition line
-                output = output && _currentLineNumber >= (compData.ParsedItem.IncludeLine >= 0 ? compData.ParsedItem.IncludeLine : compData.ParsedItem.Line);
 
-                // for labels, only dislay them in the block which they label
-                if (compData.ParsedItem is ParsedLabel)
-                    output = output && _currentLineNumber <= ((ParsedLabel)compData.ParsedItem).UndefinedLine;
+                if (_currentLineNumber >= 0) {
+                    // check for the definition line
+                    output = output && _currentLineNumber >= (compData.ParsedItem.IncludeLine >= 0 ? compData.ParsedItem.IncludeLine : compData.ParsedItem.Line);
+
+                    // for labels, only dislay them in the block which they label
+                    if (compData.ParsedItem is ParsedLabel)
+                        output = output && _currentLineNumber <= ((ParsedLabel) compData.ParsedItem).UndefinedLine;
+                }
 
             } else if (compData.ParsedItem is ParsedPreProc) {
-                // if preproc, check line of definition and undefine
-                var parsedItem = (ParsedPreProc)compData.ParsedItem;
-                output = output && _currentLineNumber >= parsedItem.Line;
-                if (parsedItem.UndefinedLine > 0)
-                    output = output && _currentLineNumber <= parsedItem.UndefinedLine;
+                if (_currentLineNumber >= 0) {
+                    // if preproc, check line of definition and undefine
+                    var parsedItem = (ParsedPreProc) compData.ParsedItem;
+
+                    output = output && _currentLineNumber >= parsedItem.Line;
+                    if (parsedItem.UndefinedLine > 0)
+                        output = output && _currentLineNumber <= parsedItem.UndefinedLine;
+                }
             }
 
             return output;
@@ -587,16 +592,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Applies the same sorting / filtering as the autocompletion form to a given list
         /// of items
         /// </summary>
-        /// <param name="objectsList"></param>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static List<CompletionData> ExternalFilterItems(List<CompletionData> objectsList, int line) {
+        public static List<CompletionData> ExternalFilterItems(List<CompletionData> objectsList, int line, bool dontCheckLine = false) {
             objectsList.Sort(new CompletionDataSortingClass());
             if (_displayedTypes == null)
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
             _useTypeFiltering = false;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
-            _currentLineNumber = line;
+            _currentLineNumber = (!Config.Instance.AutoCompleteOnlyShowDefinedVar || dontCheckLine) ? -1 : line;
             _filterString = "";
             return objectsList.Where(FilterPredicate).ToList();
         }

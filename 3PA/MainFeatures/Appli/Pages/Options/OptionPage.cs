@@ -245,8 +245,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // find the corresponding control
             var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
             var propertyName = (string) textBox.Tag;
-            textBox.Text = ((new ConfigObject()).GetValueOf(propertyName)).ToString();
-            Config.Instance.SetValueOf(propertyName, ((new ConfigObject()).GetValueOf(propertyName)));
+            textBox.Text = ((new Config.ConfigObject()).GetValueOf(propertyName)).ToString();
+            Config.Instance.SetValueOf(propertyName, ((new Config.ConfigObject()).GetValueOf(propertyName)));
 
             // need to refresh stuff to really apply this option?
             if (Config.Instance.GetAttributeOf<DisplayAttribute>(propertyName).AutoGenerateField) {
@@ -315,14 +315,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private void DefaultButtonOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             // apply default settings
-            var defaultConfig = new ConfigObject();
+            var defaultConfig = new Config.ConfigObject();
 
             // refresh stuff on screen
             foreach (var control in dockedPanel.ContentPanel.Controls) {
                 var ctrl = (Control)control;
                 if (ctrl.Tag != null && ctrl.Tag is string) {
                     var propertyName = (string) ctrl.Tag;
-                    var value = new ConfigObject().GetValueOf(propertyName);
+                    var value = new Config.ConfigObject().GetValueOf(propertyName);
                     if (ctrl is YamuiToggle) {
                         Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
                         ((YamuiToggle)ctrl).Checked = (bool) value;
@@ -369,7 +369,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         /// <param name="action"></param>
         private void ForEachConfigPropertyWithDisplayAttribute(Action<FieldInfo, DisplayAttribute> action) {
-            var properties = typeof (ConfigObject).GetFields();
+            var properties = typeof (Config.ConfigObject).GetFields();
 
             /* loop through fields */
             foreach (var property in properties) {

@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #region fields
 
         private static List<CompilationPathItem> _compilationPathList = new List<CompilationPathItem>();
-        private const string FileName = "_CompilationPath.conf";
 
         #endregion
 
@@ -41,7 +40,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void Import() {
             _compilationPathList.Clear();
-            ConfLoader.ForEachLine(Path.Combine(Npp.GetConfigDir(), FileName), new byte[0], Encoding.Default, s => {
+            ConfLoader.ForEachLine(Config.FileCompilPath, new byte[0], Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 4) {
                     _compilationPathList.Add(new CompilationPathItem {

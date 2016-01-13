@@ -181,7 +181,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             // create unique execution folder
-            ExecutionDir = Path.Combine(Plug.TempDir, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+            ExecutionDir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
             while (Directory.Exists(ExecutionDir)) ExecutionDir += "_";
             try {
                 Directory.CreateDirectory(ExecutionDir);

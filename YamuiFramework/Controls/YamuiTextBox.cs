@@ -128,6 +128,7 @@ namespace YamuiFramework.Controls {
                 if (!_appliedPadding) {
                     WinApi.RECT rc = new WinApi.RECT(4, 2, ClientSize.Width - 8, ClientSize.Height - 3);
                     WinApi.SendMessageRefRect(Handle, WinApi.EM_SETRECT, 0, ref rc);
+
                     _appliedPadding = true;
                 } else {
                     using (Graphics graphics = CreateGraphics()) {

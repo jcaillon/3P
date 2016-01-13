@@ -19,11 +19,9 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
@@ -32,7 +30,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #region fields
 
-        private static string FilePath { get { return Path.Combine(Npp.GetConfigDir(), "FilesInfo.dump"); } }
+        
         private static Dictionary<string, List<FileTagObject>> _filesInfo = new Dictionary<string, List<FileTagObject>>(StringComparer.CurrentCultureIgnoreCase);
         public const string DefaultTag = "DefaultTag";
         public const string LastTag = "LastTag";
@@ -47,7 +45,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public static void Import() {
             _filesInfo.Clear();
             try {
-                ConfLoader.ForEachLine(FilePath, new byte[0], Encoding.Default, s => {
+                ConfLoader.ForEachLine(Config.FileFilesInfo, new byte[0], Encoding.Default, s => {
                     var items = s.Split('\t');
                     if (items.Count() == 8) {
                         var fileName = items[0].Trim();
@@ -75,7 +73,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 if (!_filesInfo.ContainsKey(LastTag))
                     SetFileTags(LastTag, "", "", "", "", "", "", "");
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "", FilePath);
+                ErrorHandler.ShowErrors(e, "", Config.FileFilesInfo);
             }
         }
 
@@ -84,7 +82,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// </summary>
         public static void Export() {
             try {
-                using (var writer = new StreamWriter(FilePath, false)) {
+                using (var writer = new StreamWriter(Config.FileFilesInfo, false)) {
                     foreach (var kpv in _filesInfo) {
                         foreach (var obj in kpv.Value) {
                             writer.WriteLine(string.Join("\t", kpv.Key, obj.CorrectionNumber, obj.CorrectionDate, obj.CorrectionDecription, obj.ApplicationName, obj.ApplicationVersion, obj.WorkPackage, obj.BugId));

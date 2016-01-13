@@ -52,5 +52,5 @@ C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.Resources.Resources.resources
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csproj.GenerateResource.Cache
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.dll
 C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.pdb
-C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
 D:\Repo\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache
+C:\Work\3P\YamuiFramework\obj\Debug\YamuiFramework.csprojResolveAssemblyReference.cache

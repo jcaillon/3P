@@ -150,8 +150,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="line"></param>
         /// <returns></returns>
         public static CompletionData FindInSavedItems(string keyword, int line) {
             var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), line);
@@ -164,11 +162,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Find a list of items in the completion and return it
         /// Uses the position to filter the list the same way the autocompletion form would
         /// </summary>
-        /// <param name="keyword"></param>
-        /// <param name="position"></param>
         /// <returns></returns>
-        public static List<CompletionData> FindInCompletionData(string keyword, int position) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.LineFromPosition(position));
+        public static List<CompletionData> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
+            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)

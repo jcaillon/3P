@@ -322,7 +322,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\Keywords" />
+    <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\handleCompilErrors_forv10.1.p" />

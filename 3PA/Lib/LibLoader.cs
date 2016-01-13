@@ -26,7 +26,6 @@ using _3PA.Properties;
 namespace _3PA.Lib {
     internal static class LibLoader {
 
-        private static string _rootDir;
         private static string _pathToYamui;
         private static string _pathToOlv;
 
@@ -36,11 +35,14 @@ namespace _3PA.Lib {
         public static void Init() {
             AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
 
-            _rootDir = Path.Combine(Npp.GetConfigDir(), "Librairies");
-            _pathToYamui = Path.Combine(_rootDir, @"YamuiFramework.dll");
-            _pathToOlv = Path.Combine(_rootDir, @"ObjectListView.dll");
+            _pathToYamui = Path.Combine(Config.FolderLibrary, @"YamuiFramework.dll");
+            _pathToOlv = Path.Combine(Config.FolderLibrary, @"ObjectListView.dll");
 
             // delete existing libs so we are sure to use up to date libs
+            ResetLib();
+        }
+
+        public static void ResetLib() {
             try {
                 if (File.Exists(_pathToYamui))
                     File.Delete(_pathToYamui);
@@ -60,9 +62,6 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
             try {
-                if (!Directory.Exists(_rootDir))
-                    Directory.CreateDirectory(_rootDir);
-
                 if (args.Name.StartsWith("YamuiFramework,")) {
                     if (!File.Exists(_pathToYamui))
                         File.WriteAllBytes(_pathToYamui, Resources.YamuiFramework);

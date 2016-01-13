@@ -39,14 +39,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         public SetFileInfo() {
             InitializeComponent();
-        }
-
-        #endregion
-
-        public override void OnShow() {
-
-            if (!DesignMode)
-                UpdateInfo();
 
             // add event handlers
             yamuiComboBox1.SelectedIndexChanged += SelectedIndexChanged;
@@ -57,8 +49,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btdefault.ButtonPressed += BtdefaultOnButtonPressed;
             bttoday.ButtonPressed += BttodayOnButtonPressed;
             bttoday.Click += (sender, args) => { yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy"); };
-
             yamuiComboBox1.KeyDown += YamuiComboBox1OnKeyDown;
+
+            // register to the document changed event
+            Plug.OnDocumentChangedEnd += OnShow;
+        }
+
+        #endregion
+
+        public override void OnShow() {
+
+            // update the info displayed on the screen
+            if (!DesignMode)
+                UpdateInfo();
 
             base.OnShow();
         }

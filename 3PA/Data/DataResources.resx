@@ -133,9 +133,6 @@
   <data name="Abbreviations" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>abbreviations;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="Keywords" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>keywords;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="KeywordsHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>keywordshelp;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -144,5 +141,8 @@
   </data>
   <data name="ThemesList" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>themeslist.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="KeywordsList" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>keywordslist;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

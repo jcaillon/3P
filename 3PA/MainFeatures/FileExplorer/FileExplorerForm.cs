@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -28,11 +29,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
-using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
-using YamuiFramework.Themes;
 using _3PA.Images;
-using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
@@ -651,12 +649,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (string.IsNullOrEmpty(_filterByText)) {
                 ovl.SetObjects(_initialObjectsList);
             } else {
-                char firstChar = char.ToUpperInvariant(_filterByText[0]);
                 ovl.SetObjects(_initialObjectsList.OrderBy(
-                    x => {
-                        if (x.FileName.Length < 1 || char.ToUpperInvariant(x.FileName[0]) != firstChar) return 2;
-                        return x.FileName.Equals(_filterByText, StringComparison.CurrentCultureIgnoreCase) ? 0 : 1;
-                    }).ToList());
+                x => x.FileName.ToLower().DispersionLevel(_filterByText) + x.FileName.Length).ToList());
             }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)

@@ -32,11 +32,6 @@ namespace _3PA.MainFeatures {
 
     internal static class ErrorHandler {
 
-        private static string PathLogFolder { get { return Path.Combine(Npp.GetConfigDir(), "Log"); } }
-        private static string PathErrorfile { get { return Path.Combine(PathLogFolder, "error.log"); } }
-        public static string PathErrorToSend { get { return Path.Combine(PathLogFolder, "error_.log"); } }
-        private static string PathDirtyErrorsfile { get { return Path.Combine(PathLogFolder, "dirty_errors.log"); } }
-
         /// <summary>
         /// Allows to keep track of the messages already displayed to the user
         /// </summary>
@@ -77,9 +72,9 @@ namespace _3PA.MainFeatures {
                 Task.Factory.StartNew(() => {
                     try {
                         if (Config.Instance.LogError) {
-                            if (!Config.Instance.GlobalDontAutoPostLog && UserCommunication.SendIssue(File.ReadAllText(PathErrorToSend), Config.SendLogUrl)) {
-                                if (File.Exists(PathErrorToSend))
-                                    File.Delete(PathErrorToSend);
+                            if (!Config.Instance.GlobalDontAutoPostLog && UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogUrl)) {
+                                if (File.Exists(Config.FileErrorToSend))
+                                    File.Delete(Config.FileErrorToSend);
                             }
                         }
                     } catch (Exception exception) {
@@ -92,7 +87,7 @@ namespace _3PA.MainFeatures {
                 // show it to the user, conditionally
                 if (Config.Instance.UserGetsPreReleases)
                     UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                        (File.Exists(PathErrorfile) ? "<br><a href='" + PathErrorfile + "'>Link to the error log</a>" : "") +
+                        (File.Exists(Config.FileErrorLog) ? "<br><a href='" + Config.FileErrorLog + "'>Link to the error log</a>" : "") +
                         "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
                         MessageImg.MsgPoison, "An error has occurred", message,
                         args => {
@@ -129,9 +124,6 @@ namespace _3PA.MainFeatures {
                 var callingClass = method.DeclaringType;
                 var callingMethod = method.Name;
 
-                if (!Directory.Exists(PathLogFolder))
-                    Directory.CreateDirectory(PathLogFolder);
-
                 toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
                 if (method.DeclaringType != null && !method.DeclaringType.Name.Equals("ErrorHandler"))
                     toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
@@ -139,14 +131,14 @@ namespace _3PA.MainFeatures {
                 toAppend.AppendLine(message);
                 toAppend.AppendLine("```\r\n");
 
-                File.AppendAllText(PathErrorfile, toAppend.ToString());
+                File.AppendAllText(Config.FileErrorLog, toAppend.ToString());
             } catch (Exception x) {
                 DirtyLog(x);
                 success = false;
             }
 
             try {
-                File.AppendAllText(PathErrorToSend, toAppend.ToString());
+                File.AppendAllText(Config.FileErrorToSend, toAppend.ToString());
             } catch (Exception) {
                 // hm it's ok..
             }
@@ -158,8 +150,8 @@ namespace _3PA.MainFeatures {
         /// Log a piece of information
         /// </summary>
         public static void DirtyLog(Exception e) {
-            if (File.Exists(PathDirtyErrorsfile)) {
-                FileInfo f = new FileInfo(PathDirtyErrorsfile);
+            if (File.Exists(Config.FileDirtyErrors)) {
+                FileInfo f = new FileInfo(Config.FileDirtyErrors);
                 if (f.Length > 10000000)
                     return;
             }
@@ -170,9 +162,6 @@ namespace _3PA.MainFeatures {
                 var callingClass = method.DeclaringType;
                 var callingMethod = method.Name;
 
-                if (!Directory.Exists(PathLogFolder))
-                    Directory.CreateDirectory(PathLogFolder);
-
                 toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
                 if (method.DeclaringType != null)
                     toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
@@ -180,7 +169,7 @@ namespace _3PA.MainFeatures {
                 toAppend.AppendLine(e.ToString());
                 toAppend.AppendLine("```\r\n");
 
-                File.AppendAllText(PathDirtyErrorsfile, toAppend.ToString());
+                File.AppendAllText(Config.FileDirtyErrors, toAppend.ToString());
             } catch (Exception) {
                 // ok
             }
