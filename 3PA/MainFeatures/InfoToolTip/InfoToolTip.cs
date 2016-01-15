@@ -126,10 +126,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (!_form.Visible) {
                 _form.UnCloack();
             }
-
-            if (_form.AutoScroll) {
-                _form.Refresh();
-            }
         }
 
         /// <summary>

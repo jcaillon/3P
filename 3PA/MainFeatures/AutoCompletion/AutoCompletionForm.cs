@@ -26,7 +26,6 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
@@ -515,8 +514,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (string.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
             } else {
-                fastOLV.SetObjects(_initialObjectsList.OrderBy(
-                x => x.DisplayText.ToLower().DispersionLevel(_filterByText) + x.DisplayText.Length).ToList());
+                var filterLenght = _filterByText.Length;
+                fastOLV.SetObjects(_initialObjectsList.OrderBy(x => (filterLenght == x.DisplayText.Length) ? 0 : x.DisplayText.ToLower().DispersionLevel(_filterByText) + 1).ToList());
             }
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)

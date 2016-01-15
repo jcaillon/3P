@@ -351,7 +351,7 @@ namespace _3PA.MainFeatures {
                     FilesInfo.UpdateErrorsInScintilla();
 
                 // when compiling, if no errors, move .r to compilation dir
-                if (lastExec.ExecutionType == ExecutionType.Compile && !errorList.Any()) {
+                if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
                     // copy to compilation dir
                     if (!String.IsNullOrEmpty(lastExec.DotRPath) && !String.IsNullOrEmpty(lastExec.LstPath)) {
                         var success = true;

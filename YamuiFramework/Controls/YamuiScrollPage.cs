@@ -58,6 +58,8 @@ namespace YamuiFramework.Controls {
                 Height = Height,
                 OwnerPage = this
             };
+            if (NoBackgroundImage)
+                _contentPanel.DontUseTransparentBackGround = true;
             Controls.Add(_contentPanel);
 
             _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
@@ -106,7 +108,8 @@ namespace YamuiFramework.Controls {
 
         [SecuritySafeCritical]
         protected override void WndProc(ref Message message) {
-            HandleWindowsProc(message);
+            if (!TurnOffScroll)
+                HandleWindowsProc(message);
             base.WndProc(ref message);
         }
 
@@ -117,7 +120,7 @@ namespace YamuiFramework.Controls {
                     DoScroll(Math.Sign(delta) * _thumbRectangle.Height / 2);
                     break;
                 case (int)WinApi.Messages.WM_LBUTTONDOWN:
-                    if (!_isPressed && !TurnOffScroll) {
+                    if (!_isPressed) {
                         _isPressed = true;
                         _lastMouseMove = PointToScreen(MousePosition);
                         Invalidate();
@@ -211,14 +214,13 @@ namespace YamuiFramework.Controls {
 
         private void OnResizedContentPanel() {
 
-            // thumb heigh is a ratio of displayed height and the content panel height
-            _thumbRectangle.Height = Math.Max(Convert.ToInt32(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
-
             // if the content is not too tall, no need to display the scroll bars
             if (_contentPanel.Height <= Height) {
                 _contentPanel.Width = Width;
                 TurnOffScroll = true;
             } else {
+                // thumb heigh is a ratio of displayed height and the content panel height
+                _thumbRectangle.Height = Math.Max(Convert.ToInt32(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
                 _contentPanel.Width = Width - 10;
                 TurnOffScroll = false;
             }
