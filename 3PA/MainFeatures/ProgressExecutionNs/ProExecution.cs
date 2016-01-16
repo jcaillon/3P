@@ -133,16 +133,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Deletes temp directory and everything in it
         /// </summary>
-        ~ProExecution()
-        {
-            try
-            {
+        ~ProExecution() {
+            try {
                 if (Process != null)
                     Process.Close();
                 Utils.DeleteDirectory(ExecutionDir, true);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
         }
@@ -231,7 +227,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + ProEnvironment.Current.ExtraProPath).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + string.Join(",", ProEnvironment.Current.GetProPathDirList)).ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE dumbDataBaseProgram " + dumpDbProgramName.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 

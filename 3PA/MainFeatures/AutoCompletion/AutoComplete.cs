@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// is used to make sure that 2 different threads dont try to access
         /// the same resource (_parserTimer) at the same time, which would be problematic
         /// </summary>
-        private static object _thisLock = new object();
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         private static Timer _parserTimer;
 
@@ -195,29 +195,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="doNow"></param>
         public static void ParseCurrentDocument(bool doNow = false) {
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_thisLock, 500, ref lockTaken);
-                if (!lockTaken) return;
+            // parse immediatly
+            if (doNow) {
+                ParseCurrentDocumentTick();
+                return;
+            }
 
-                // parse immediatly
-                if (doNow) {
-                    ParseCurrentDocumentTick();
-                    return;
+            // parse in 1s, if nothing delays the timer
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    if (_parserTimer == null) {
+                        _parserTimer = new Timer {Interval = 800};
+                        _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
+                        _parserTimer.Start();
+                    } else {
+                        // reset timer
+                        _parserTimer.Stop();
+                        _parserTimer.Start();
+                    }
+                } finally {
+                    _lock.ExitWriteLock();
                 }
-
-                // parse in 1s, if nothing delays the timer
-                if (_parserTimer == null) {
-                    _parserTimer = new Timer {Interval = 800};
-                    _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
-                    _parserTimer.Start();
-                } else {
-                    // reset timer
-                    _parserTimer.Stop();
-                    _parserTimer.Start();
-                }
-            } finally {
-                if (lockTaken) Monitor.Exit(_thisLock);
             }
         }
 
@@ -225,26 +223,26 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Called when the _parserTimer ticks
         /// </summary>
         private static void ParseCurrentDocumentTick() {
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_thisLock, 500, ref lockTaken);
-                if (!lockTaken) return;
-
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
                 // delete timer
                 if (_parserTimer != null) {
                     _parserTimer.Dispose();
                     _parserTimer = null;
                 }
+
                 //------------
                 //var watch = Stopwatch.StartNew();
                 FillItems();
                 //watch.Stop();
                 //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
                 //------------
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
-            } finally {
-                if (lockTaken) Monitor.Exit(_thisLock);
+
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                } finally {
+                    _lock.ExitWriteLock();
+                }
             }
         }
 
@@ -353,7 +351,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // get current word, current previous word (table or database name)
                 int nbPoints;
                 string previousWord = "";
-                //TODO: for multiselection, when we erase a char, the last char is a " " idk why
                 var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
                 var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
                 var splitted = keyword.Split('.');

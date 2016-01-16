@@ -17,11 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
@@ -29,7 +29,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
-    internal partial class NppInterfaceForm : Form {
+    internal class NppInterfaceForm : Form {
 
         #region fields
         /// <summary>
@@ -56,9 +56,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         private bool _allowInitialdisplay;
         private bool _focusAllowed;
-        // check the npp window rect, if it has changed from a previous state, close this form (poll every 500ms)
-        private Rectangle? _nppRect;
-        private Timer _timerCheckNppRect;
+
         /// <summary>
         /// Use this to know if the form is currently activated
         /// </summary>
@@ -76,22 +74,27 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
 
-            InitializeComponent();
+            ControlBox = false;
+            FormBorderStyle = FormBorderStyle.None;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            ShowIcon = false;
+            ShowInTaskbar = false;
+            SizeGripStyle = SizeGripStyle.Hide;
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
-
-            // timer to check if the npp window changed
-            _timerCheckNppRect = new Timer {
-                Enabled = true,
-                Interval = 800
-            };
-            _timerCheckNppRect.Tick += TimerCheckNppRectTick;
 
             Opacity = 0;
             Visible = false;
             Tag = false;
             Closing += OnClosing;
+
+            Plug.OnNppWindowsMove += PlugOnOnNppWindowsMove;
+        }
+
+        ~NppInterfaceForm() {
+            Closing -= OnClosing;
         }
         #endregion
 
@@ -100,9 +103,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// </summary>
         public void Cloack() {
             GiveFocusBack();
-
             Visible = false;
-
             // move this to an invisible part of the screen, otherwise we can see this window
             // if another window with Opacity <1 is in front Oo
             Location = new Point(-10000, 0);
@@ -115,7 +116,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             _allowInitialdisplay = true;
             Opacity = UnfocusedOpacity;
             Visible = true;
-
             GiveFocusBack();
         }
 
@@ -165,20 +165,13 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             base.OnActivated(e);
         }
 
+        private void PlugOnOnNppWindowsMove() {
+            Close();
+        }
+
         protected override void OnShown(EventArgs e) {
             _focusAllowed = true;
             base.OnShown(e);
-        }
-
-        private void TimerCheckNppRectTick(object sender, EventArgs e) {
-            try {
-                var rect = Npp.GetWindowRect();
-                if (_nppRect.HasValue && _nppRect.Value != rect)
-                    Close();
-                _nppRect = rect;
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
-            }
         }
 
         /// <summary>
@@ -248,12 +241,12 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
             }
 
-
             base.WndProc(ref m);
 
             if (m.Msg == WmNchittest && (int)m.Result == Htclient) // drag the form
                 m.Result = (IntPtr)Htcaption;
         }
+
         #endregion
     }
 }

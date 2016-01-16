@@ -47,6 +47,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         #region constructor
         public InfoToolTipForm() {
+
+            Padding = new Padding(1);
+
             // add scroll page
             _panel = new YamuiScrollPage {
                 Dock = DockStyle.Fill,
@@ -104,8 +107,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             _panel.ContentPanel.Height = neededHeight + 10;
             _panel.ContentPanel.Width = _labelContent.Width + 10;
 
-            Width = _panel.ContentPanel.Width;
-            Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 10) + 10;
+            Width = _panel.ContentPanel.Width + 2;
+            Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 12) + 12;
 
             // Too tall?
             if (neededHeight > (screen.WorkingArea.Height / 2) - 10) {

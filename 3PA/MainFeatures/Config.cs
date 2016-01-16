@@ -310,6 +310,9 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool FileExplorerAutoHideOnNonProgressFile = false;
 
+            [Range(1000, 30000)]
+            public int FileExplorerListFilesTimeOutInMs = 5000;
+
             #endregion
 
             #region CODE EXPLORER

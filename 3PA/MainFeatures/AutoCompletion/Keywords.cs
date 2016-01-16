@@ -118,9 +118,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Save the keywords data into the file (to remember the ranking of each keyword)
+        /// Save the keywords data into a file (to remember the ranking of each keyword)
         /// </summary>
-        public static void Export() {
+        public static void SaveRanking() {
             if (_keywordList.Count == 0) return;
             var strBuilder = new StringBuilder();
             foreach (var kpv in _keywordList) {

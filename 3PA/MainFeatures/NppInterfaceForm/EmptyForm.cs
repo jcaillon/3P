@@ -30,6 +30,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// </summary>
     internal partial class EmptyForm : Form {
 
+        protected override bool ShowWithoutActivation {
+            get { return true; }
+        }
+
         public EmptyForm() {
             InitializeComponent();
 

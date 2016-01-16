@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
+using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -92,16 +93,18 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
         }
 
+        private static DateTime _startTime;
+        
         /// <summary>
         /// Add each files/folders of a given path to the output List of FileObject,
         /// can be set to be recursive,
         /// can be set to not add the subfolders in the results
         /// </summary>
-        /// <param name="dirPath"></param>
-        /// <param name="recursive"></param>
-        /// <param name="includeFolders"></param>
-        /// <returns></returns>
-        public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true) {
+        public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
+
+            if (firstCall)
+                _startTime = DateTime.Now;
+
             var output = new List<FileObject>();
             if (!Directory.Exists(dirPath))
                 return output;
@@ -132,8 +135,9 @@ namespace _3PA.MainFeatures.FileExplorer {
                 foreach (var directoryInfo in dirInfo.GetDirectories()) {
                     if (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directoryInfo.FullName)) {
                         // recursive
-                        if (recursive)
-                            output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName));
+                        if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
+                                output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false));
+                        }
                         output.Add(new FileObject {
                             FileName = directoryInfo.Name,
                             BasePath = Path.GetDirectoryName(directoryInfo.FullName),
@@ -144,6 +148,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                         });
                     }
                 }
+            }
+
+            if (firstCall && DateTime.Now.Subtract(_startTime).TotalMilliseconds > Config.Instance.FileExplorerListFilesTimeOutInMs) {
+                UserCommunication.Notify("The file explorer was listing all the files of the requested folder but has been interrupted because it was taking too long.<br><br>You can set a value for this time out in the option page.", MessageImg.MsgInfo, "Listing files", "Time out reached");
             }
 
             return output;
@@ -193,7 +201,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Initialize the form
         /// </summary>
-        public static void Init() {
+        private static void Init() {
             // register fake form to Npp
             FakeForm = new EmptyForm();
             NppTbData nppTbData = new NppTbData {

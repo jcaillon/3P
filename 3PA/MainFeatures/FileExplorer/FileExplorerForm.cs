@@ -120,8 +120,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             #region Current file
 
             // register to Updated Operation events
-            FilesInfo.UpdatedOperation += FilesInfoOnUpdatedOperation;
-            FilesInfo.UpdatedErrors += FilesInfoOnUpdatedErrors;
+            FilesInfo.OnUpdatedOperation += FilesInfoOnUpdatedOperation;
+            FilesInfo.OnUpdatedErrors += FilesInfoOnUpdatedErrors;
 
             btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
             UpdateErrorButtons(false);
@@ -767,15 +767,12 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region Current file
 
-        private CurrentOperation _currentOperation;
+        private int _currentOperation = - 1;
 
-        private void FilesInfoOnUpdatedOperation(object sender, UpdatedOperationEventArgs updatedOperationEventArgs) {
+        private void FilesInfoOnUpdatedOperation(UpdatedOperationEventArgs updatedOperationEventArgs) {
 
-            // blink back color
-            if (_currentOperation != updatedOperationEventArgs.CurrentOperation) {
-                lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 300), (o, args) => { lbStatus.UseCustomBackColor = false; });
-            }
+            if (_currentOperation == (int) updatedOperationEventArgs.CurrentOperation)
+                return;
 
             // text
             foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
@@ -784,16 +781,14 @@ namespace _3PA.MainFeatures.FileExplorer {
                 lbStatus.Text = ((DisplayAttr)flag.GetAttributes()).Name;
             }
 
-            _currentOperation = updatedOperationEventArgs.CurrentOperation;
+            // blink back color
+            lbStatus.UseCustomBackColor = true;
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
 
+            _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
         }
 
-        /// <summary>
-        /// This method is called each time the user switches document or start a compile or ends a compile...
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="updatedErrorsEventArgs"></param>
-        private void FilesInfoOnUpdatedErrors(object sender, UpdatedErrorsEventArgs updatedErrorsEventArgs) {
+        private void FilesInfoOnUpdatedErrors(UpdatedErrorsEventArgs updatedErrorsEventArgs) {
 
             lbNbErrors.UseCustomBackColor = true;
             lbNbErrors.UseCustomForeColor = true;

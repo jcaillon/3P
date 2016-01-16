@@ -37,25 +37,11 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
         #region event
 
-        private static event EventHandler<UpdatedOperationEventArgs> OnUpdatedOperation;
+        public delegate void UpdatedOperation(UpdatedOperationEventArgs args);
+        public static event UpdatedOperation OnUpdatedOperation;
 
-        /// <summary>
-        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
-        /// </summary>
-        public static event EventHandler<UpdatedOperationEventArgs> UpdatedOperation {
-            add { OnUpdatedOperation += value; }
-            remove { OnUpdatedOperation -= value; }
-        }
-
-        private static event EventHandler<UpdatedErrorsEventArgs> OnUpdatedErrors;
-
-        /// <summary>
-        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
-        /// </summary>
-        public static event EventHandler<UpdatedErrorsEventArgs> UpdatedErrors {
-            add { OnUpdatedErrors += value; }
-            remove { OnUpdatedErrors -= value; }
-        }
+        public delegate void UpdatedErrors(UpdatedErrorsEventArgs args);
+        public static event UpdatedErrors OnUpdatedErrors;
 
         #endregion
 
@@ -131,9 +117,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             // UpdatedOperation event
             if (OnUpdatedOperation != null) {
                 if (_sessionInfo.ContainsKey(currentFilePath))
-                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(_sessionInfo[currentFilePath].CurrentOperation));
+                    OnUpdatedOperation(new UpdatedOperationEventArgs(_sessionInfo[currentFilePath].CurrentOperation));
                 else
-                    OnUpdatedOperation(new object(), new UpdatedOperationEventArgs(0));
+                    OnUpdatedOperation(new UpdatedOperationEventArgs(0));
             }
 
             // UpdatedErrors event
@@ -144,9 +130,9 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     if (_sessionInfo[currentFilePath].FileErrors.Any()) {
                         maxLvl = _sessionInfo[currentFilePath].FileErrors.OrderByDescending(error => error.Level).First().Level;
                     }
-                    OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(maxLvl, _sessionInfo[currentFilePath].FileErrors.Count));
+                    OnUpdatedErrors(new UpdatedErrorsEventArgs(maxLvl, _sessionInfo[currentFilePath].FileErrors.Count));
                 } else
-                    OnUpdatedErrors(new object(), new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
+                    OnUpdatedErrors(new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
             }
         }
 
@@ -448,30 +434,25 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     internal class FileInfoObject {
 
         private CurrentOperation _currentOperation;
-        private static object _lock = new object();
+
+        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
         public CurrentOperation CurrentOperation {
             get {
                 CurrentOperation output = 0;
-                bool lockTaken = false;
+                if (!_lock.TryEnterWriteLock(500)) return output;
                 try {
-                    Monitor.TryEnter(_lock, 1500, ref lockTaken);
-                    if (lockTaken) output = _currentOperation;
-                } catch (Exception e) {
-                    ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
+                    output = _currentOperation;
                 } finally {
-                    if (lockTaken) Monitor.Exit(_lock);
+                    _lock.ExitWriteLock();
                 }
                 return output;
             }
             set {
-                bool lockTaken = false;
+                if (!_lock.TryEnterWriteLock(500)) return;
                 try {
-                    Monitor.TryEnter(_lock, 1500, ref lockTaken);
-                    if (lockTaken) _currentOperation = value;
-                } catch (Exception e) {
-                    ErrorHandler.Log("Couldn't get the lock on CurrentOperation??! Exception is : " + e);
+                    _currentOperation = value;
                 } finally {
-                    if (lockTaken) Monitor.Exit(_lock);
+                    _lock.ExitWriteLock();
                 }
             }
         }

@@ -30,10 +30,10 @@ hr {
 
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
-    border: solid 1px %FGCOLOR%;
+    border: solid 2px %ACCENTCOLOR%;
     background-color: %BGCOLOR%;
     color: %FGCOLOR%;
-    padding: 5px;
+    padding: 4px;
     Font: 12px "Segoe UI";
 }
 

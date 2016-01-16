@@ -164,7 +164,7 @@ namespace _3PA {
                 return;
             }
             if (saveHistoric)
-                _goToHistory.Push(new Tuple<string, Point>(GetCurrentFilePath(), new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
+                _goToHistory.Push(new Tuple<string, int, Point>(GetCurrentFilePath(), FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
             if (!String.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
@@ -181,8 +181,9 @@ namespace _3PA {
 
         /// <summary>
         /// handles a stack of points to go back to where we came from when we "goto definition"
+        /// document path, first line visible, caret point
         /// </summary>
-        private static Stack<Tuple<string, Point>> _goToHistory = new Stack<Tuple<string, Point>>();
+        private static Stack<Tuple<string, int, Point>> _goToHistory = new Stack<Tuple<string, int, Point>>();
 
         /// <summary>
         /// When you use the GoToDefinition method, you stack points of your position before the jump,
@@ -195,7 +196,8 @@ namespace _3PA {
 
                 if (_goToHistory.Count > 0) {
                     var lastPoint = _goToHistory.Pop();
-                    Goto(lastPoint.Item1, lastPoint.Item2.X, lastPoint.Item2.Y, false);
+                    Goto(lastPoint.Item1, lastPoint.Item3.X, lastPoint.Item3.Y, false);
+                    FirstVisibleLine = lastPoint.Item2;
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoBackFromDefinition");

@@ -69,6 +69,8 @@ namespace _3PA {
         /// </summary>
         public static FileInfoObject CurrentFileObject { get; private set; }
 
+        private static NppMenu _menu = new NppMenu();
+
         #endregion
 
 
@@ -79,73 +81,57 @@ namespace _3PA {
         /// </summary>
         internal static void OnCommandMenuInit() {
 
-            var menu = new NppMenu();
-            menu.SetCommand("Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false);
-            menu.SetCommand("Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false);
+            _menu.SetCommand("Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false);
+            _menu.SetCommand("Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false);
 
-            menu.SetSeparator();
+            _menu.SetSeparator();
 
-            menu.SetCommand("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
-            menu.SetCommand("Check syntax", ProCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
-            menu.SetCommand("Compile", ProCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
-            menu.SetCommand("Run program", ProCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
+            _menu.SetCommand("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
+            _menu.SetCommand("Check syntax", ProCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
+            _menu.SetCommand("Compile", ProCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
+            _menu.SetCommand("Run program", ProCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
             //menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
 
-            menu.SetSeparator();
+            _menu.SetSeparator();
 
-            menu.SetCommand("Search file", FileExplorer.StartSearch, "Search_file:Alt+Q", false);
-            menu.SetCommand("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
-            menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
-            menu.SetCommand("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
+            _menu.SetCommand("Search file", FileExplorer.StartSearch, "Search_file:Alt+Q", false);
+            _menu.SetCommand("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
+            _menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
+            _menu.SetCommand("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
             //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
             //menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
             //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
 
-            menu.SetSeparator();
+            _menu.SetSeparator();
 
-            menu.SetCommand("Edit current file info", Appli.GoToFileInfo, "Edit_file_info:Ctrl+Shift+M", false);
+            _menu.SetCommand("Edit current file info", Appli.GoToFileInfo, "Edit_file_info:Ctrl+Shift+M", false);
             //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
-            menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
+            _menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
 
-            menu.SetSeparator();
+            _menu.SetSeparator();
 
             //menu.SetCommand("Insert new function", ProgressCodeUtils.NotImplemented);
             //menu.SetCommand("Insert new internal procedure", ProgressCodeUtils.NotImplemented);
 
             //menu.SetSeparator();
 
-            menu.SetCommand("Toggle code explorer", CodeExplorer.Toggle);
-            CodeExplorer.DockableCommandIndex = menu.CmdIndex - 1;
-            menu.SetCommand("Toggle file explorer", FileExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = menu.CmdIndex - 1;
+            _menu.SetCommand("Toggle code explorer", CodeExplorer.Toggle);
+            CodeExplorer.DockableCommandIndex = _menu.CmdIndex - 1;
+            _menu.SetCommand("Toggle file explorer", FileExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = _menu.CmdIndex - 1;
 
-            menu.SetSeparator();
-
-            if (Config.IsDevelopper)
-                menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+            _menu.SetSeparator();
 
             if (Config.IsDevelopper)
-                menu.SetCommand("DEBUG", StartDebug, "DEBUG:Ctrl+F12", false);
+                _menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
+
+            if (Config.IsDevelopper)
+                _menu.SetCommand("DEBUG", StartDebug, "DEBUG:Ctrl+F12", false);
 
             //menu.SetSeparator();
 
-            menu.SetCommand("Options", Appli.GoToOptionPage);
-            menu.SetCommand("About", Appli.GoToAboutPage);
-
-            // Install a WM_KEYDOWN hook
-            foreach (var key in menu.UniqueKeys.Keys)
-                KeyboardMonitor.Instance.Add(key);
-            KeyboardMonitor.Instance.Add(Keys.Up, Keys.Down, Keys.Left, Keys.Right, Keys.Tab, Keys.Return, Keys.Escape, Keys.Back, Keys.PageDown, Keys.PageUp, Keys.Next, Keys.Prior);
-            KeyboardMonitor.Instance.KeyPressed += OnKeyPressed;
-            KeyboardMonitor.Instance.Install();
-
-            // Install a mouse hook
-            MouseMonitor.Instance.Add(WinApi.WindowsMessage.WM_MBUTTONDOWN);
-            MouseMonitor.Instance.GetMouseMessage += InstanceOnGetMouseMessage;
-            MouseMonitor.Instance.Install();
-
-            // Set a new WndProc delegate
-            OverrideWindowProc();
+            _menu.SetCommand("Options", Appli.GoToOptionPage);
+            _menu.SetCommand("About", Appli.GoToAboutPage);
         }
 
         /// <summary>
@@ -178,17 +164,11 @@ namespace _3PA {
 
         internal static void InitPlugin() {
 
-            #region Themes
-
             // themes and html
             ThemeManager.Current.AccentColor = Config.Instance.AccentColor;
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.OnGetCssSheet += HtmlHandler.YamuiThemeManagerOnOnGetCssSheet;
             YamuiThemeManager.OnHtmlImageNeeded += HtmlHandler.YamuiThemeManagerOnOnHtmlImageNeeded;
-            //ThemeManager.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "Themes.xml");
-            //Style.ThemeXmlPath = Path.Combine(Npp.GetConfigDir(), "SyntaxHighlight.xml");
-            
-            #endregion
 
             // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
             // from a back groundthread, use : BeginInvoke()
@@ -210,6 +190,8 @@ namespace _3PA {
 
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
+
+            InstallHooks();
 
             // everything else can be async
             //Task.Factory.StartNew(() => {
@@ -259,7 +241,7 @@ namespace _3PA {
                 Config.Save();
 
                 // remember the most used keywords
-                Keywords.Export();
+                Keywords.SaveRanking();
 
                 // close every form
                 AutoComplete.ForceClose();
@@ -281,15 +263,30 @@ namespace _3PA {
         #endregion
 
 
-        #region WndProc override
+        #region Hooks and WndProc override
 
         private static IntPtr _oldWindowProc;
         private static WinApi.WindowProc _newWindowDeleg;
 
         /// <summary>
+        /// Hook messages,
         /// Overrides the WNDPROC procedure of Npp's window with a local one
         /// </summary>
-        private static void OverrideWindowProc() {
+        private static void InstallHooks() {
+
+            // Install a WM_KEYDOWN hook
+            foreach (var key in _menu.UniqueKeys.Keys)
+                KeyboardMonitor.Instance.Add(key);
+            KeyboardMonitor.Instance.Add(Keys.Up, Keys.Down, Keys.Left, Keys.Right, Keys.Tab, Keys.Return, Keys.Escape, Keys.Back, Keys.PageDown, Keys.PageUp, Keys.Next, Keys.Prior);
+            KeyboardMonitor.Instance.KeyPressed += OnKeyPressed;
+            KeyboardMonitor.Instance.Install();
+
+            // Install a mouse hook
+            MouseMonitor.Instance.Add(WinApi.WindowsMessage.WM_MBUTTONDOWN);
+            MouseMonitor.Instance.GetMouseMessage += InstanceOnGetMouseMessage;
+            MouseMonitor.Instance.Install();
+
+            // override the original WndProc of Npp
             _newWindowDeleg = OnWndProcMessage;
             int newWndProc = Marshal.GetFunctionPointerForDelegate(_newWindowDeleg).ToInt32();
             int result = WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, newWndProc);
@@ -392,12 +389,8 @@ namespace _3PA {
 
         public static void Test() {
 
-            string derp = @"" +
-                          "blabla".DispersionLevel("lala") +
-                          "azerty".DispersionLevel("zry") +
-                          "azerty".DispersionLevel("zer") +
-                          "azerty".DispersionLevel("ay");
-            UserCommunication.Notify(derp);
+            UserCommunication.Notify(string.Join(",", ProEnvironment.Current.GetProPathDirList));
+            return;
 
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,

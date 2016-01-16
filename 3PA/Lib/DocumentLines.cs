@@ -167,7 +167,7 @@ namespace _3PA.Lib {
                 // but is it sent BEFORE the text is actually put into scintilla! So what we do here doesn't work at all
                 // so in that case, we need to refresh the info when the text is acutally inserted, that is after updateui
                 if (TextLength == 0) {
-                    Plug.ActionAfterUpdateUi = Reset;
+                    Plug.ActionsAfterUpdateUi.Enqueue(Reset);
                 }
             }
         }

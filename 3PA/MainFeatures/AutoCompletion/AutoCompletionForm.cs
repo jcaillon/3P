@@ -22,6 +22,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
@@ -84,6 +85,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// True if the form is ABOVE the text it autocompletes
         /// </summary>
         private bool _isReversed;
+
+        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
         #endregion
 
         #region constructor
@@ -361,10 +365,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         public CompletionData GetCurrentSuggestion() {
+            _lock.EnterReadLock();
             try {
-                return (CompletionData)fastOLV.SelectedItem.RowObject;
+                return (CompletionData) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
+            } finally {
+                _lock.ExitReadLock();
             }
             return null;
         }
@@ -507,40 +514,45 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
+            _lock.EnterWriteLock();
+            try {
+                Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
 
-            // order the list, first the ones that are equals to the filter, then the
-            // ones that start with the filter, then the rest
-            if (string.IsNullOrEmpty(_filterByText)) {
-                fastOLV.SetObjects(_initialObjectsList);
-            } else {
-                var filterLenght = _filterByText.Length;
-                fastOLV.SetObjects(_initialObjectsList.OrderBy(x => (filterLenght == x.DisplayText.Length) ? 0 : x.DisplayText.ToLower().DispersionLevel(_filterByText) + 1).ToList());
+                // order the list, first the ones that are equals to the filter, then the
+                // ones that start with the filter, then the rest
+                if (string.IsNullOrEmpty(_filterByText)) {
+                    fastOLV.SetObjects(_initialObjectsList);
+                } else {
+                    var filterLenght = _filterByText.Length;
+                    fastOLV.SetObjects(_initialObjectsList.OrderBy(x => (filterLenght == x.DisplayText.Length) ? 0 : x.DisplayText.ToLower().DispersionLevel(_filterByText) + 1).ToList());
+                }
+
+                // apply the filter, need to match the filter + need to be an active type (Selector button activated)
+                // + need to be in the right scope for variables
+                _currentLineNumber = Npp.Line.CurrentLine;
+                _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
+                if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
+                    _currentLineNumber = -1;
+                }
+                _filterString = _filterByText;
+                _useTypeFiltering = true;
+                fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
+
+                fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
+
+                // update total items
+                TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
+                nbitems.Text = TotalItems + StrItems;
+
+                // if the selected row is > to number of items, then there will be a unselect
+                if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
+                    Keyword.Width = _normalWidth;
+                if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
+                if (fastOLV.SelectedIndex >= 0)
+                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+            } finally {
+                _lock.ExitWriteLock();
             }
-
-            // apply the filter, need to match the filter + need to be an active type (Selector button activated)
-            // + need to be in the right scope for variables
-            _currentLineNumber = Npp.Line.CurrentLine;
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
-            if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
-                _currentLineNumber = -1;
-            }
-            _filterString = _filterByText;
-            _useTypeFiltering = true;
-            fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
-
-            fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
-
-            // update total items
-            TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
-            nbitems.Text = TotalItems + StrItems;
-
-            // if the selected row is > to number of items, then there will be a unselect
-            if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
-                Keyword.Width = _normalWidth;
-            if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
-            if (fastOLV.SelectedIndex >= 0)
-                fastOLV.EnsureVisible(fastOLV.SelectedIndex);
         }
 
         /// <summary>

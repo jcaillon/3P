@@ -52,7 +52,6 @@ C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.AutoCompletion.AutoCompletionForm.res
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.EmptyForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.FileExplorer.FileExplorerForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.CodeExplorer.CodeExplorerForm.resources
-C:\Work\3P\3PA\obj\Debug\_3PA.MainFeatures.NppInterfaceForm.NppInterfaceForm.resources
 C:\Work\3P\3PA\obj\Debug\_3PA.Properties.Resources.resources
 C:\Work\3P\3PA\obj\Debug\3P.csproj.GenerateResource.Cache
 C:\Work\3P\3PA\obj\Debug\3P.dll

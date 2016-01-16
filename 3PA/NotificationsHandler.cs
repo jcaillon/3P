@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using _3PA.Html;
 using _3PA.Interop;
@@ -25,18 +27,29 @@ namespace _3PA {
 
         #region Events
 
+        public delegate void SimpleCall();
+
         /// <summary>
         /// Subscribe to this event, published when the current document in changed (on document open or tab switched)
         /// </summary>
-        public static event DocumentChanged OnDocumentChangedEnd;
-        public delegate void DocumentChanged();
+        public static event SimpleCall OnDocumentChangedEnd;
+
+        /// <summary>
+        /// Published when the Npp windows is being moved
+        /// </summary>
+        public static event SimpleCall OnNppWindowsMove;
+
+        /// <summary>
+        /// Published when the Npp windows is activated
+        /// </summary>
+        public static event SimpleCall OnNppWindowsActivate;
 
         #endregion
 
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
-        public static Action ActionAfterUpdateUi { private get; set; }
+        public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
 
         #endregion
 
@@ -91,10 +104,10 @@ namespace _3PA {
 
                 case (uint) SciMsg.SCN_UPDATEUI:
                     // we need to set the indentation when we received this notification, not before or it's overwritten
-                    if (ActionAfterUpdateUi != null) {
-                        ActionAfterUpdateUi();
-                        ActionAfterUpdateUi = null;
+                    while (ActionsAfterUpdateUi.Any()) {
+                        ActionsAfterUpdateUi.Dequeue()();
                     }
+
 
                     if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
                         nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
@@ -189,10 +202,14 @@ namespace _3PA {
                 //case (uint)WinApi.WindowsMessage.WM_SIZE:
                 case (uint) WinApi.WindowsMessage.WM_EXITSIZEMOVE:
                 case (uint) WinApi.WindowsMessage.WM_MOVE:
-                    if (FileExplorer.IsVisible)
-                        FileExplorer.Form.RefreshPosAndLoc();
-                    if (CodeExplorer.IsVisible)
-                        CodeExplorer.Form.RefreshPosAndLoc();
+                    if (OnNppWindowsMove != null) {
+                        OnNppWindowsMove();
+                    }
+                    break;
+                case (uint)WinApi.WindowsMessage.WM_NCACTIVATE:
+                    if (OnNppWindowsActivate != null) {
+                        OnNppWindowsActivate();
+                    }
                     break;
             }
             return WinApi.CallWindowProc(_oldWindowProc, hwnd, uMsg, wParam, lParam);
@@ -352,15 +369,17 @@ namespace _3PA {
 
             // we are still entering a keyword
             if (Abl.IsCharAllowedInVariables(c)) {
-                ActionAfterUpdateUi = () => {
+                ActionsAfterUpdateUi.Enqueue(() => {
                     OnCharAddedWordContinue(c);
-                };
+                });
             } else {
-                ActionAfterUpdateUi = () => {
+                ActionsAfterUpdateUi.Enqueue(() => {
                     OnCharAddedWordEnd(c);
-                };
+                });
             }
         }
+
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Called when the user is still typing a word

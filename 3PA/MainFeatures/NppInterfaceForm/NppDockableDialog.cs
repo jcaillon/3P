@@ -21,7 +21,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
 using _3PA.Interop;
 using WinApi = _3PA.Interop.WinApi;
 
@@ -40,7 +39,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// So instead, use a hook onto npp and we update the position/size each time we receive a message that npp has 
     /// moved
     /// </summary>
-    internal partial class NppDockableDialog : Form {
+    internal class NppDockableDialog : Form {
 
         #region fields
 
@@ -51,10 +50,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #region constructor
 
-        public NppDockableDialog() {}
+        public NppDockableDialog() { }
 
         public NppDockableDialog(EmptyForm formToCover) {
-            InitializeComponent();
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -83,14 +81,26 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
             }
 
-            //// timer to check if the master form has changed
-            //_timerCheck = new Timer {
-            //    Enabled = true,
-            //    Interval = Config.Instance.GlobalRefreshRate
-            //};
+            Plug.OnNppWindowsMove += RefreshPosAndLoc;
+            Plug.OnNppWindowsActivate += PlugOnOnNppWindowsActivate;
+        }
 
-            //_masterRectangle = new Rectangle(0, 0, 0, 0);
-            //_timerCheck.Tick += TimerTick;
+        ~NppDockableDialog() {
+            _masterForm.VisibleChanged -= Cover_OnVisibleChanged;
+            _masterForm.Closed -= MasterFormOnClosed;
+
+            _masterForm.ClientSizeChanged -= RefreshPosAndLoc;
+            _masterForm.LocationChanged -= RefreshPosAndLoc;
+            _masterForm.LostFocus -= RefreshPosAndLoc;
+            _masterForm.GotFocus -= RefreshPosAndLoc;
+
+            Plug.OnNppWindowsMove -= RefreshPosAndLoc;
+            Plug.OnNppWindowsActivate -= PlugOnOnNppWindowsActivate;
+
+            if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
+                int value = 0;
+                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
+            }
         }
 
         #endregion
@@ -115,10 +125,14 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #endregion
 
-
         #region On event handlers
 
-        public void RefreshPosAndLoc(object sender, EventArgs e) {
+        private void PlugOnOnNppWindowsActivate() {
+            RefreshPosAndLoc();
+            Refresh();
+        }
+
+        private void RefreshPosAndLoc(object sender, EventArgs e) {
             RefreshPosAndLoc();
         }
 

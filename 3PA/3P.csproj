@@ -91,6 +91,12 @@
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Tests\ParserLexerTests.cs" />
     <Compile Include="ThemeManager.cs" />
     <Content Include="Data\ThemesList.xml" />
@@ -140,12 +146,6 @@
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.Designer.cs">
-      <DependentUpon>NppDockableDialog.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
@@ -241,12 +241,6 @@
     <Compile Include="MainFeatures\AutoCompletion\Keywords.cs" />
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
-    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.Designer.cs">
-      <DependentUpon>NppInterfaceForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
     <Compile Include="NotificationsHandler.cs" />
     <Compile Include="Npp.cs" />
@@ -310,9 +304,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.resx">
-      <DependentUpon>NppInterfaceForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
