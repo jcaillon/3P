@@ -135,6 +135,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResourceFont.resx</DependentUpon>
     </Compile>
+    <Compile Include="Forms\YamuiMenu.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\YamuiNotifications.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -153,6 +156,7 @@
     <Compile Include="Forms\YamuiFormMessageBox.Designer.cs">
       <DependentUpon>YamuiFormMessageBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="Helper\DelayedAction.cs" />
     <Compile Include="Helper\TabOrderManager.cs" />
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />

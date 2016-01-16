@@ -4,8 +4,8 @@ using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -243,7 +243,7 @@ namespace _3PA {
         /// Called when the user presses a key
         /// </summary>
         // ReSharper disable once RedundantAssignment
-        public static void OnKeyPressed(Keys key, KeyModifiers keyModifiers, ref bool handled) {
+        public static void OnKeyDown(Keys key, KeyModifiers keyModifiers, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
@@ -274,6 +274,13 @@ namespace _3PA {
                 // So i gave up and handle things here!
                 if (Appli.IsFocused()) {
                     handled = Appli.Form.HandleKeyPressed(key, keyModifiers);
+                } else {
+                    // same shit for the YamuiMenu
+                    var curMenu = (Control.FromHandle(WinApi.GetForegroundWindow()));
+                    var menu = curMenu as YamuiMenu;
+                    if (menu != null) {
+                        menu.OnKeyDown(key);
+                    }
                 }
 
                 // check if allowed to execute
@@ -337,13 +344,8 @@ namespace _3PA {
 
             } catch (Exception e) {
                 var shortcutName = "Instance_KeyDown";
-                try {
-                    foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key && keyModifiers.IsCtrl == shortcut.IsCtrl && keyModifiers.IsShift == shortcut.IsShift && keyModifiers.IsAlt == shortcut.IsAlt)) {
-                        shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
-                    }
-                } catch (Exception x) {
-                    ErrorHandler.DirtyLog(x);
-                    // ignored, can't do much more
+                foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key && keyModifiers.IsCtrl == shortcut.IsCtrl && keyModifiers.IsShift == shortcut.IsShift && keyModifiers.IsAlt == shortcut.IsAlt)) {
+                    shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
                 }
                 ErrorHandler.ShowErrors(e, "Error in " + shortcutName);
             }
@@ -378,8 +380,6 @@ namespace _3PA {
                 });
             }
         }
-
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         /// <summary>
         /// Called when the user is still typing a word

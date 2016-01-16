@@ -143,6 +143,7 @@ namespace YamuiDemoApp.Pages.control {
             this.yamuiCharButton1.TabIndex = 59;
             this.yamuiCharButton1.Text = "yamuiCharButton1";
             this.yamuiCharButton1.UseWingdings = true;
+            this.yamuiCharButton1.Click += new System.EventHandler(this.yamuiCharButton1_Click);
             // 
             // yamuiToggle3
             // 

@@ -20,9 +20,18 @@ hr {
   border-bottom: 1px solid %FGCOLOR%;
 }
 
+a:link {
+    color: %LINKCOLOR%;
+    text-decoration: underline;
+    /*margin: 0px;
+    padding: 0px;*/
+}
+
+
+
+
 /* this decorates the htmllabels */
 .yamui-text { 
-    Font: 12px "Segoe UI";
     color: %FGCOLOR%;
     margin: 0;
     padding: 0;
@@ -34,7 +43,19 @@ hr {
     background-color: %BGCOLOR%;
     color: %FGCOLOR%;
     padding: 4px;
-    Font: 12px "Segoe UI";
+}
+
+
+
+.contextMenuTitle {
+    border-width: 0;
+    color: %FGCOLOR%;
+    padding: 5px;
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    /*background-color: %BGCOLOR%;*/
+    padding-right: 20px;
 }
 
 .AccentColor {
@@ -49,12 +70,7 @@ hr {
     background-color: %ALTERNATEBGCOLOR%;
 }
 
-a:link {
-    color: %LINKCOLOR%;
-    text-decoration: underline;
-    margin: 0px;
-    padding: 0px;
-}
+
 
 
 /* ==================================== */

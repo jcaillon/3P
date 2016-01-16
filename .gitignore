@@ -1,0 +1,21 @@
+*/obj/*
+*/bin/*
+*/Debug/*
+*.FileListAbsolute.txt
+/3PA/Backup 4 of 3PA.csproj
+/3PA/Backup 5 of 3PA.csproj
+/3PA/Backup 6 of 3PA.csproj
+/3PA/Backup 1 of 3PA.csproj
+/3PA/Backup 2 of 3PA.csproj
+/3PA/Backup 3 of 3PA.csproj
+/3PA/Lib/3pUpdater/3pUpdater/obj
+/3PA/Lib/3pUpdater/3pUpdater/bin
+/ObjectListView/obj
+/ObjectListView/bin
+/YamuiDemoApp/obj
+/YamuiDemoApp/bin
+/YamuiFramework/bin
+/YamuiFramework/obj
+/3PA/bin
+/3PA/obj
+/3PA/Lib/ObjectListView/ObjectListView.XML

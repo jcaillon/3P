@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiDemoApp.Pages.control {
@@ -74,6 +76,45 @@ namespace YamuiDemoApp.Pages.control {
         private void yamuiButton5_ButtonPressed(object sender, EventArgs e) {
             yamuiButton4.UseCustomBackColor = true;
             Transition.run(yamuiButton4, "BackColor", YamuiThemeManager.Current.ButtonColorsNormalBackColor, YamuiThemeManager.Current.AccentColor, new TransitionType_Flash(3, 300), (o, args) => { yamuiButton4.UseCustomBackColor = false; });
+        }
+
+        private void yamuiCharButton1_Click(object sender, EventArgs e) {
+            var menu = new YamuiMenu(Cursor.Position, new List<YamuiMenuItem> {
+                new YamuiMenuItem {
+                    ItemName = "zefefzefzef zedf item 1",
+                    Children = new List<YamuiMenuItem> {
+                        new YamuiMenuItem {ItemName = "child 1"}
+                    }
+                },
+                new YamuiMenuItem {
+                    ItemName = "item 2",
+                },
+                new YamuiMenuItem {
+                    ItemName = "item 3",
+                    Children = new List<YamuiMenuItem> {
+                        new YamuiMenuItem {ItemName = "child 1"},
+                        new YamuiMenuItem {ItemName = "child 2"}
+                    }
+                }
+            });
+            menu.Show();
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT {
+            public Int32 x;
+            public Int32 y;
+            public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
+        }
+
+
+        [DllImport("user32.dll")]
+        private static extern bool GetCursorPos(out POINT lpPoint);
+
+        public static Point GetCursorPosition() {
+            POINT lpPoint;
+            GetCursorPos(out lpPoint);
+            return new Point(lpPoint.x, lpPoint.y);
         }
     }
 }

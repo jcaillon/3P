@@ -98,6 +98,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
         #endregion
 
+        #region public
+
         /// <summary>
         /// hides the form
         /// </summary>
@@ -129,17 +131,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         /// <summary>
-        /// instead of closing, cloak this form (invisible)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="cancelEventArgs"></param>
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            if ((bool)Tag) return;
-            cancelEventArgs.Cancel = true;
-            Cloack();
-        }
-
-        /// <summary>
         /// Gives focus back to the owner window
         /// </summary>
         public void GiveFocusBack() {
@@ -150,6 +141,22 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             IsActivated = !IsActivated;
             Opacity = UnfocusedOpacity;
         }
+
+        #endregion
+
+        #region private methods
+
+        /// <summary>
+        /// instead of closing, cloak this form (invisible)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="cancelEventArgs"></param>
+        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
+            if ((bool) Tag) return;
+            cancelEventArgs.Cancel = true;
+            Cloack();
+        }
+
 
         protected override void OnActivated(EventArgs e) {
             // Activate the window that previously had focus
@@ -182,9 +189,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             base.SetVisibleCore(_allowInitialdisplay ? value : _allowInitialdisplay);
         }
 
-        #region Paint Methods
+        #endregion
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
+
+        #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
             var backColor = ThemeManager.Current.FormColorBackColor;

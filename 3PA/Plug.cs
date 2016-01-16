@@ -26,6 +26,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -278,7 +279,7 @@ namespace _3PA {
             foreach (var key in _menu.UniqueKeys.Keys)
                 KeyboardMonitor.Instance.Add(key);
             KeyboardMonitor.Instance.Add(Keys.Up, Keys.Down, Keys.Left, Keys.Right, Keys.Tab, Keys.Return, Keys.Escape, Keys.Back, Keys.PageDown, Keys.PageUp, Keys.Next, Keys.Prior);
-            KeyboardMonitor.Instance.KeyPressed += OnKeyPressed;
+            KeyboardMonitor.Instance.KeyDown += OnKeyDown;
             KeyboardMonitor.Instance.Install();
 
             // Install a mouse hook
@@ -389,7 +390,30 @@ namespace _3PA {
 
         public static void Test() {
 
-            UserCommunication.Notify(string.Join(",", ProEnvironment.Current.GetProPathDirList));
+            var menu = new YamuiMenu(Cursor.Position, new List<YamuiMenuItem> {
+                new YamuiMenuSeparator(),
+                new YamuiMenuItem {
+                    ItemName = "zefefzefzef zedf item 1",
+                    Children = new List<YamuiMenuItem> {
+                        new YamuiMenuItem {ItemName = "child 1", ItemImage = ImageResources.Abbreviation}
+                    }
+                },
+                new YamuiMenuItem {
+                    ItemName = "item 2",
+                },
+                new YamuiMenuSeparator(),
+                new YamuiMenuItem {
+                    ItemName = "item 3",
+                    Children = new List<YamuiMenuItem> {
+                        new YamuiMenuItem {ItemName = "child 1"},
+                        new YamuiMenuSeparator(),
+                        new YamuiMenuItem {ItemName = "child 2"}
+                    }
+                }
+            },
+            "<div class='contextMenuTitle'><img src='logo16x16' style='padding-right: 7px; padding-top: 1px;'>Main menu</span>");
+            menu.Show();
+
             return;
 
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),

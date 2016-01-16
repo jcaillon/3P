@@ -49,7 +49,7 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event KeyDownHandler KeyPressed;
+        public event KeyDownHandler KeyDown;
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
@@ -79,14 +79,14 @@ namespace _3PA.Lib {
             var key = (Keys)((int)wParam);
             int context = (int) lParam;
 
-            if (KeyPressed == null)
+            if (KeyDown == null)
                 return false;
 
             if (_keysToIntercept.Contains(key)) {
                 // on key down
                 if (!context.IsBitSet(31)) {
                     bool handled = false;
-                    KeyPressed(key, GetModifiers, ref handled);
+                    KeyDown(key, GetModifiers, ref handled);
                     return handled;
                 } 
             }
@@ -120,7 +120,6 @@ namespace _3PA.Lib {
     }
 
     #endregion
-
 
     #region Mouse hook
 
@@ -202,7 +201,6 @@ namespace _3PA.Lib {
 
     #endregion
     
-    
     #region GetMessage hook
 
     [StructLayout(LayoutKind.Sequential)]
@@ -275,7 +273,6 @@ namespace _3PA.Lib {
     }
 
     #endregion
-
 
     #region Cbt hook
     internal enum HCBT {

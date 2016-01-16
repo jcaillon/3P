@@ -155,6 +155,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 position.Y = (rect.Y + rect.Height) - Height;
             else
                 position.Y = rect.Y;
+
             if (rect.X > (screen.WorkingArea.Width - (rect.X + rect.Width)))
                 position.X = rect.X - Width;
             else
