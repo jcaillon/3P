@@ -79,7 +79,7 @@ namespace _3PA.Interop {
             if (code == 0) // Win32.HC_ACTION
                 if (HandleHookEvent(wParam, lParam))
                     return 1; // The event has been handled
-            return CallNextHookEx(InternalHook, code, wParam, lParam);
+            return WinApi.CallNextHookEx(InternalHook, code, wParam, lParam);
         }
 
         /// <summary>
@@ -138,12 +138,11 @@ namespace _3PA.Interop {
 
     internal class CoreWindowsHook {
 
-        // Filter function delegate
-        public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
+
 
         // Internal properties
         protected IntPtr InternalHook = IntPtr.Zero;
-        protected HookProc CallBackFunction;
+        protected WinApi.HookProc CallBackFunction;
         protected HookType InternalHookType;
 
         // Event delegate
@@ -168,7 +167,7 @@ namespace _3PA.Interop {
         /// <summary>
         /// Use your own HookProc ?
         /// </summary>
-        public CoreWindowsHook(HookType hookType, HookProc callBackFunction) {
+        public CoreWindowsHook(HookType hookType, WinApi.HookProc callBackFunction) {
             InternalHookType = hookType;
             CallBackFunction = callBackFunction;
         }
@@ -176,7 +175,7 @@ namespace _3PA.Interop {
         // Default filter function
         protected int CoreHookProc(int code, IntPtr wParam, IntPtr lParam) {
             if (code < 0)
-                return CallNextHookEx(InternalHook, code, wParam, lParam);
+                return WinApi.CallNextHookEx(InternalHook, code, wParam, lParam);
 
             // Let clients determine what to do
             OnHookInvoked(new HookEventArgs {
@@ -186,17 +185,17 @@ namespace _3PA.Interop {
             });
 
             // Yield to the next hook in the chain
-            return CallNextHookEx(InternalHook, code, wParam, lParam);
+            return WinApi.CallNextHookEx(InternalHook, code, wParam, lParam);
         }
 
         // Install the hook
         public void Install() {
-            InternalHook = SetWindowsHookEx(InternalHookType, CallBackFunction, IntPtr.Zero, GetCurrentThreadId());
+            InternalHook = WinApi.SetWindowsHookEx(InternalHookType, CallBackFunction, IntPtr.Zero, WinApi.GetCurrentThreadId());
         }
 
         // Uninstall the hook
         public void Uninstall() {
-            UnhookWindowsHookEx(InternalHook);
+            WinApi.UnhookWindowsHookEx(InternalHook);
             InternalHook = IntPtr.Zero;
         }
 
@@ -204,24 +203,6 @@ namespace _3PA.Interop {
             get { return InternalHook != IntPtr.Zero; }
         }
 
-        #region Win32 Imports
-
-        [DllImport("kernel32.dll")]
-        static extern uint GetCurrentThreadId();
-
-        // Win32: SetWindowsHookEx()
-        [DllImport("user32.dll")]
-        protected static extern IntPtr SetWindowsHookEx(HookType code, HookProc func, IntPtr hInstance, uint threadId);
-
-        // Win32: UnhookWindowsHookEx()
-        [DllImport("user32.dll")]
-        protected static extern int UnhookWindowsHookEx(IntPtr hhook);
-
-        // Win32: CallNextHookEx()
-        [DllImport("user32.dll")]
-        protected static extern int CallNextHookEx(IntPtr hhook, int code, IntPtr wParam, IntPtr lParam);
-
-        #endregion
     }
 
     #endregion

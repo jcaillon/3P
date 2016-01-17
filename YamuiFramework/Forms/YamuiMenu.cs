@@ -48,7 +48,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// We keep a list of the menu currently opened so we can know if a menu is still in focus
         /// </summary>
-        private static List<IntPtr> _listOfOpenededMenuHandle = new List<IntPtr>();
+        public static List<IntPtr> ListOfOpenededMenuHandle { get; set; }
 
         private const int LineHeight = 22;
         private const int SeparatorLineHeight = 8;
@@ -87,7 +87,11 @@ namespace YamuiFramework.Forms {
 
             var useImageIcon = content.Exists(item => item.ItemImage != null);
             var noChildren = !content.Exists(item => item.Children != null);
-            var maxWidth = content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max() + (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
+            var maxWidth = content.Select(item => TextRenderer.MeasureText(item.SubText, FontManager.GetFont(FontFunction.Small)).Width).Concat(new[] { 0 }).Max();
+            maxWidth += maxWidth == 0 ? 0 : 15;
+            maxWidth += content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
+            maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
+
 
             int yPos = 1;
 
@@ -101,7 +105,8 @@ namespace YamuiFramework.Forms {
                     Text = htmlTitle,
                     Location = new Point(1, 1),
                     IsSelectionEnabled = false,
-                    IsContextMenuEnabled = false
+                    IsContextMenuEnabled = false,
+                    Enabled = false
                 };
                 yPos += title.Height;
             }
@@ -110,7 +115,7 @@ namespace YamuiFramework.Forms {
             int index = 0;
             Controls.Clear();
             foreach (var item in content) {
-                if (item is YamuiMenuSeparator) {
+                if (item.IsSeparator) {
                     _yPosOfSeparators.Add(yPos);
                     yPos += SeparatorLineHeight;
                 } else {
@@ -121,6 +126,7 @@ namespace YamuiFramework.Forms {
                         Size = new Size(maxWidth - 2, LineHeight),
                         NoIconImage = !useImageIcon,
                         IconImage = item.ItemImage,
+                        SubText = item.SubText,
                         Tag = index
                     };
                     button.Click += ButtonOnButtonPressed;
@@ -159,7 +165,10 @@ namespace YamuiFramework.Forms {
             Activated += OnActivated;
             Closing += OnClosing;
 
-            _listOfOpenededMenuHandle.Add(Handle);
+            if (ListOfOpenededMenuHandle == null) {
+                ListOfOpenededMenuHandle = new List<IntPtr>();
+            }
+            ListOfOpenededMenuHandle.Add(Handle);
 
             // keydown
             KeyPreview = true;
@@ -171,7 +180,7 @@ namespace YamuiFramework.Forms {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.ButtonColorsNormalBackColor;
+            var backColor = YamuiThemeManager.Current.FormBack;
             var borderColor = YamuiThemeManager.Current.AccentColor;
             var borderWidth = 1;
 
@@ -184,8 +193,9 @@ namespace YamuiFramework.Forms {
 
             // draw separators
             foreach (var yPosOfSeparator in _yPosOfSeparators) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonColorsHoverBackColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(10, yPosOfSeparator + SeparatorLineHeight / 2 - 1, Width - 20, 2));
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonHoverBack)) {
+                    var width = (int) (Width*0.35);
+                    e.Graphics.FillRectangle(b, new Rectangle(width, yPosOfSeparator + SeparatorLineHeight / 2 - 1, Width - width * 2, 2));
                 }
             }
         }
@@ -210,7 +220,7 @@ namespace YamuiFramework.Forms {
 
         private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
             _closing = true;
-            _listOfOpenededMenuHandle.Remove(Handle);
+            ListOfOpenededMenuHandle.Remove(Handle);
 
             Deactivate -= OnDeactivate;
             Activated -= OnActivated;
@@ -233,9 +243,7 @@ namespace YamuiFramework.Forms {
                 _childMenu.Show();
             } else {
                 // exec action and close the menu
-                if (item.OnClic != null) {
-                    item.OnClic();
-                }
+                item.Do();
                 CloseAll();
             }
         }
@@ -247,7 +255,7 @@ namespace YamuiFramework.Forms {
             // close if the new active windows isn't a menu
             // ReSharper disable once ObjectCreationAsStatement
             new DelayedAction(30, () => {
-                if (!_listOfOpenededMenuHandle.Contains(WinApi.GetForegroundWindow()) && !_closing) {
+                if (!ListOfOpenededMenuHandle.Contains(WinApi.GetForegroundWindow()) && !_closing) {
                     BeginInvoke((Action) CloseAll);
                 }
             });
@@ -323,7 +331,7 @@ namespace YamuiFramework.Forms {
             }
         }
 
-        private void CloseAll() {
+        public void CloseAll() {
             CloseChildren();
             CloseParents();
             Close();
@@ -338,14 +346,15 @@ namespace YamuiFramework.Forms {
             public bool NoIconImage { private get; set; }
             public bool NoChildren { private get; set; }
             public Image IconImage { private get; set; }
+            public string SubText { get; set; }
 
             protected override void OnPaint(PaintEventArgs e) {
                 // background
-                var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, false, Enabled);
+                var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered);
                 e.Graphics.Clear(backColor);
 
                 // foreground
-                var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, false, Enabled);
+                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered);
 
                 // left line
                 if (IsFocused) {
@@ -357,14 +366,17 @@ namespace YamuiFramework.Forms {
                 // Image icon
                 Image img = IconImage;
                 if (img != null && !NoIconImage) {
-                    if (!IsFocused && !IsHovered && !IsPressed) {
-                        img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(20, 20)));
-                    }
                     e.Graphics.DrawImage(img, new Rectangle(8, 1, 20, 20));
                 }
 
                 // text
                 TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(NoIconImage ? 8 : 35, 0, ClientRectangle.Width - (NoIconImage ? 8 : 35), ClientRectangle.Height), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+
+                // sub text 
+                if (!string.IsNullOrEmpty(SubText)) {
+                    var textWidth = TextRenderer.MeasureText(SubText, FontManager.GetFont(FontFunction.Small)).Width;
+                    TextRenderer.DrawText(e.Graphics, SubText, FontManager.GetFont(FontFunction.Small), new Rectangle(Width - (NoChildren ? 0 : 12) - textWidth - 3, 0, textWidth + 3, ClientRectangle.Height), YamuiThemeManager.Current.SubTextFore, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+                }
 
                 // arrow
                 if (!NoChildren) {
@@ -381,13 +393,24 @@ namespace YamuiFramework.Forms {
     public class YamuiMenuItem {
         public Image ItemImage { get; set; }
         public string ItemName { get; set; }
-        public ClicAction OnClic { get; set; }
+        public Action OnClic { get; set; }
+        public bool IsSeparator { get; set; }
         public List<YamuiMenuItem> Children { get; set; }
+        public string SubText { get; set; }
 
-        public delegate void ClicAction();
+        private Action _do;
+
+        public Action Do { 
+            get { 
+                return _do ?? (() => {
+                    if (OnClic != null) {
+                        OnClic();
+                    }
+                }) ; 
+            }
+            set { _do = value; }
+        }
     }
-
-    public class YamuiMenuSeparator : YamuiMenuItem { }
 
     #endregion
 

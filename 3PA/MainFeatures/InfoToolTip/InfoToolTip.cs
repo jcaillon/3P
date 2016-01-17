@@ -492,7 +492,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 [HIT CTRL ONCE] Prevent auto-close");
             // parsed item?
             if (data.FromParser) {
-                toDisplay.Append(@"<br>[" + NppMenu.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
+                toDisplay.Append(@"<br>[" + Config.Instance.GetShortcutSpecFromName("Go_To_Definition").ToUpper() + "] <a class='ToolGotoDefinition' href='gotodefinition'>Go to definition</a>");
                 GoToDefinitionPoint = new Point(data.ParsedItem.Line, data.ParsedItem.Column);
                 GoToDefinitionFile = data.ParsedItem.FilePath;
             }

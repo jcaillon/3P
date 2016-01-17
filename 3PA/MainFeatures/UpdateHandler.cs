@@ -86,9 +86,9 @@ namespace _3PA.MainFeatures {
                     // Download release list from GITHUB API 
                     string json = "";
                     try {
-                        json = wc.DownloadString(Config.ReleasesUrl);
+                        json = wc.DownloadString(Config.ReleasesApi);
                     } catch (WebException e) {
-                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesUrl + "'>" + Config.ReleasesUrl + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed");
+                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesApi + "'>" + Config.ReleasesApi + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed");
                         ErrorHandler.Log(e.ToString());
                     }
 

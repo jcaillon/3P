@@ -208,7 +208,6 @@
     </Compile>
     <Compile Include="Interop\DllExport\DllExportAttribute.cs" />
     <Compile Include="Interop\ScintillaHelper.cs" />
-    <Compile Include="MainFeatures\SetCommand.cs" />
     <Compile Include="Interop\WinApi.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />
     <Compile Include="Lib\WinHook.cs" />
@@ -437,6 +436,27 @@
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
+    <None Include="Images\Menu\FileInfo.png" />
+    <None Include="Images\Menu\FormatCode.png" />
+    <None Include="Images\Menu\GenerateCode.png" />
+    <None Include="Images\Menu\GoBackward.png" />
+    <None Include="Images\Menu\GoToDefinition.png" />
+    <None Include="Images\Menu\InsertMark.png" />
+    <None Include="Images\Menu\MainWindow.png" />
+    <None Include="Images\Menu\ModificationTag.png" />
+    <None Include="Images\Menu\ProgressHelp.png" />
+    <None Include="Images\Menu\ProlintCode.png" />
+    <None Include="Images\Menu\RunCode.png" />
+    <None Include="Images\Menu\Search.png" />
+    <None Include="Images\Menu\SendToAppbuilder.png" />
+    <None Include="Images\Menu\Tests.png" />
+    <None Include="Images\Menu\TestTube.png" />
+    <None Include="Images\Menu\TitleBlock.png" />
+    <None Include="Images\Menu\ToggleComment.png" />
+    <None Include="Images\Menu\Autocompletion.png" />
+    <None Include="Images\Menu\CheckCode.png" />
+    <None Include="Images\Menu\CompileCode.png" />
+    <Content Include="Images\Menu\ShowOptions.png" />
     <Content Include="Images\NotifAndMessages\MsgDebug.png" />
     <Content Include="Images\NotifAndMessages\MsgError.png" />
     <Content Include="Images\NotifAndMessages\MsgHighImportance.png" />

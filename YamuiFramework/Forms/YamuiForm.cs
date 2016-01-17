@@ -143,8 +143,8 @@ namespace YamuiFramework.Forms {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.FormColorBackColor;
-            var foreColor = YamuiThemeManager.Current.FormColorForeColor;
+            var backColor = YamuiThemeManager.Current.FormBack;
+            var foreColor = YamuiThemeManager.Current.FormFore;
             var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.Current.AccentColor;
 
             // background
@@ -269,7 +269,7 @@ namespace YamuiFramework.Forms {
             public string AnimText {
                 set {
                     LinearBlink = 0;
-                    ForeColor = YamuiThemeManager.Current.LabelsColorsNormalForeColor;
+                    ForeColor = YamuiThemeManager.Current.LabelNormalFore;
                     var t = new Transition(new TransitionType_Linear(500));
                     t.add(this, "Text", value);
                     t.add(this, "ForeColor", YamuiThemeManager.Current.AccentColor);
@@ -310,7 +310,7 @@ namespace YamuiFramework.Forms {
                         _linearBool = !_linearBool;
                         _linearCount += 20;
                     }
-                    BackColor = !_linearBool ? YamuiThemeManager.Current.AccentColor : YamuiThemeManager.Current.FormColorBackColor;
+                    BackColor = !_linearBool ? YamuiThemeManager.Current.AccentColor : YamuiThemeManager.Current.FormBack;
                 }
             }
 
@@ -328,7 +328,7 @@ namespace YamuiFramework.Forms {
                 if (string.IsNullOrEmpty(Text))
                     return;
                 var t = new Transition(new TransitionType_Linear(500));
-                t.add(this, "ForeColor", YamuiThemeManager.Current.LabelsColorsNormalForeColor);
+                t.add(this, "ForeColor", YamuiThemeManager.Current.LabelNormalFore);
                 t.run();
                 LinearBlink = 0;
                 var t2 = new Transition(new TransitionType_Linear(2000));
@@ -364,7 +364,7 @@ namespace YamuiFramework.Forms {
             #region paint
 
             protected override void OnPaint(PaintEventArgs e) {
-                e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
+                e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
 
                 // blinking square
                 using (SolidBrush b = new SolidBrush(BackColor)) {
@@ -697,9 +697,9 @@ namespace YamuiFramework.Forms {
                 if (_isPressed)
                     e.Graphics.Clear(YamuiThemeManager.Current.AccentColor);
                 else if (_isHovered)
-                    e.Graphics.Clear(YamuiThemeManager.Current.ButtonColorsHoverBackColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.ButtonHoverBack);
                 else
-                    e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
+                    e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
                 //PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
                 Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, false, _isHovered, _isPressed, Enabled);

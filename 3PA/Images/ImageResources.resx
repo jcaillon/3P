@@ -481,4 +481,67 @@
   <data name="FileExplorer16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>fileexplorer\fileexplorer16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="Autocompletion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\Autocompletion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CheckCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\CheckCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="CompileCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\CompileCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FileInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\FileInfo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FormatCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\FormatCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GenerateCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\GenerateCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GoBackward" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\GoBackward.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="GoToDefinition" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\GoToDefinition.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="InsertMark" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\InsertMark.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MainWindow" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\MainWindow.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ModificationTag" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\ModificationTag.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProgressHelp" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\ProgressHelp.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProlintCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\ProlintCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="RunCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\RunCode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Search" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\Search.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SendToAppbuilder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\SendToAppbuilder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ShowOptions" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\showoptions.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Tests" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\Tests.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TestTube" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\TestTube.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="TitleBlock" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\TitleBlock.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ToggleComment" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Menu\ToggleComment.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

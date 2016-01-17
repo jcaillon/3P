@@ -24,7 +24,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using _3PA.Html;
 using _3PA.Lib;
 
 // ReSharper disable LocalizableElement
@@ -43,6 +42,7 @@ namespace _3PA.MainFeatures {
         /// The config object, should not be used
         /// Each field can have display attributes, they are used in the options pages to automatically
         /// generates the pages
+        /// Set AutoGenerateField to refresh certain options that need special treatment to appear changed (see option page)
         /// </summary>
         public class ConfigObject {
 
@@ -59,7 +59,13 @@ namespace _3PA.MainFeatures {
                 Description = "Used for modification tags",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string UserName = Config.GetTrigramFromPa();
+            public string UserName = GetTrigramFromPa();
+
+            [Display(Name = "Use simple right click for the main menu",
+                Description = "Toggle this option on to replace the default right of Notepad++ by 3P's main menu<br>You then can access the default Notepad++ context menu with CTRL + Right click",
+                GroupName = "General",
+                AutoGenerateField = false)]
+            public bool AppliSimpleRightClickForMenu = false;
 
             [Display(Name = "Progress 4GL files extension list",
                 Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
@@ -375,7 +381,7 @@ namespace _3PA.MainFeatures {
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
 
-            // SHORTCUTS
+            // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
 
             /// <summary>
@@ -442,6 +448,13 @@ namespace _3PA.MainFeatures {
                 var displayAttr = (T)listCustomAttr.FirstOrDefault();
                 return displayAttr;
             }
+
+            /// <summary>
+            /// Returns the shortcut specs corresponding to the itemId given
+            /// </summary>
+            public string GetShortcutSpecFromName(string itemId) {
+                return (ShortCuts.ContainsKey(itemId) ? ShortCuts[itemId] : "Unknown shortcut?");
+            }
         }
 
         #endregion
@@ -458,12 +471,14 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Url to request to get info on the latest releases
         /// </summary>
-        public static string ReleasesUrl { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
+        public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
 
         /// <summary>
         /// Url to post logs
         /// </summary>
-        public static string SendLogUrl { get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; } }
+        public static string SendLogApi { get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; } }
+
+        public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
 
         public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
 

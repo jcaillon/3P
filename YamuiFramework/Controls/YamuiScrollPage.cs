@@ -91,7 +91,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
-            e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             if (!NoBackgroundImage && !DesignMode) {
                 var img = YamuiThemeManager.Current.GetThemeImage();
                 if (img != null) {

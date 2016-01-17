@@ -129,7 +129,7 @@ namespace YamuiFramework.Forms {
         #endregion
 
         protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.Clear(UseCustomBackColor ? BackColor : YamuiThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(UseCustomBackColor ? BackColor : YamuiThemeManager.Current.FormBack);
         }
     }
 }

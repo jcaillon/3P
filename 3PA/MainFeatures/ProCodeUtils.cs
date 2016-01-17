@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using _3PA.Html;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -39,60 +40,53 @@ namespace _3PA.MainFeatures {
         /// caret. At last, it tries to find a file in the propath
         /// </summary>
         public static void GoToDefinition(bool fromMouseClick) {
-            try {
-                if (!Plug.AllowFeatureExecution())
+            // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
+            if (InfoToolTip.InfoToolTip.IsVisible) {
+                if (!String.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
+                    Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
+                    InfoToolTip.InfoToolTip.Close();
                     return;
+                }
+                InfoToolTip.InfoToolTip.Close();
+            }
 
-                // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
-                if (InfoToolTip.InfoToolTip.IsVisible) {
-                    if (!String.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
-                        Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
-                        InfoToolTip.InfoToolTip.Close();
+            // try to go to the definition of the selected word
+            var position = fromMouseClick ? Npp.GetPositionFromMouseLocation() : Npp.CurrentPosition;
+            if (fromMouseClick && position <= 0)
+                return;
+            var curWord = Npp.GetWordAtPosition(position);
+
+
+            // match a word in the autocompletion? go to definition
+            var data = AutoComplete.FindInCompletionData(curWord, position, true);
+            if (data != null && data.Count > 0) {
+                foreach (var completionData in data) {
+                    if (completionData.FromParser) {
+                        Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
                         return;
                     }
-                    InfoToolTip.InfoToolTip.Close();
                 }
-
-                // try to go to the definition of the selected word
-                var position = fromMouseClick ? Npp.GetPositionFromMouseLocation() : Npp.CurrentPosition;
-                if (fromMouseClick && position <= 0)
-                    return;
-                var curWord = Npp.GetWordAtPosition(position);
-
-
-                // match a word in the autocompletion? go to definition
-                var data = AutoComplete.FindInCompletionData(curWord, position, true);
-                if (data != null && data.Count > 0) {
-                    foreach (var completionData in data) {
-                        if (completionData.FromParser) {
-                            Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
-                            return;
-                        }
-                    }
-                }
-
-                // last resort, try to find a matching file in the propath
-                // first look in the propath
-                var fullPaths = ProEnvironment.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
-                if (fullPaths.Count > 0) {
-                    if (fullPaths.Count > 1) {
-                        var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");
-                        foreach (var fullPath in fullPaths) {
-                            output.Append("<br><a class='ToolGotoDefinition' href='" + fullPath + "'>" + fullPath + "</a>");
-                        }
-                        UserCommunication.Notify(output.ToString(), MessageImg.MsgQuestion, "Question", "Open a file", args => {
-                            Npp.Goto(args.Link);
-                            args.Handled = true;
-                        }, 0, 500);
-                    } else
-                        Npp.Goto(fullPaths[0]);
-                    return;
-                }
-
-                UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "information", "Failed to find an origin", 5);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in GoToDefinition");
             }
+
+            // last resort, try to find a matching file in the propath
+            // first look in the propath
+            var fullPaths = ProEnvironment.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
+            if (fullPaths.Count > 0) {
+                if (fullPaths.Count > 1) {
+                    var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");
+                    foreach (var fullPath in fullPaths) {
+                        output.Append("<br><a class='ToolGotoDefinition' href='" + fullPath + "'>" + fullPath + "</a>");
+                    }
+                    UserCommunication.Notify(output.ToString(), MessageImg.MsgQuestion, "Question", "Open a file", args => {
+                        Npp.Goto(args.Link);
+                        args.Handled = true;
+                    }, 0, 500);
+                } else
+                    Npp.Goto(fullPaths[0]);
+                return;
+            }
+
+            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "information", "Failed to find an origin", 5);
         }
 
         public static void GoToDefinition() {
@@ -108,44 +102,37 @@ namespace _3PA.MainFeatures {
         /// If selection, comment the selection as a block
         /// </summary>
         public static void ToggleComment() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
+            Npp.BeginUndoAction();
 
-                Npp.BeginUndoAction();
+            // for each selection (limit selection number)
+            for (var i = 0; i < Npp.Selection.Count; i++) {
+                var selection = Npp.GetSelection(i);
 
-                // for each selection (limit selection number)
-                for (var i = 0; i < Npp.Selection.Count; i++) {
-                    var selection = Npp.GetSelection(i);
-
-                    int startPos;
-                    int endPos;
-                    bool singleLineComm = false;
-                    if (selection.Caret == selection.Anchor) {
-                        // comment line
-                        var thisLine = new Npp.Line(Npp.LineFromPosition(selection.Caret));
-                        startPos = thisLine.IndentationPosition;
-                        endPos = thisLine.EndPosition;
-                        singleLineComm = true;
-                    } else {
-                        startPos = selection.Start;
-                        endPos = selection.End;
-                    }
-
-                    var toggleMode = ToggleCommentOnRange(startPos, endPos);
-                    if (toggleMode == 3)
-                        selection.SetPosition(startPos + 3);
-
-                    // correct selection...
-                    if (!singleLineComm && toggleMode == 2) {
-                        selection.End += 2;
-                    }
+                int startPos;
+                int endPos;
+                bool singleLineComm = false;
+                if (selection.Caret == selection.Anchor) {
+                    // comment line
+                    var thisLine = new Npp.Line(Npp.LineFromPosition(selection.Caret));
+                    startPos = thisLine.IndentationPosition;
+                    endPos = thisLine.EndPosition;
+                    singleLineComm = true;
+                } else {
+                    startPos = selection.Start;
+                    endPos = selection.End;
                 }
 
-                Npp.EndUndoAction();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error when commenting");
+                var toggleMode = ToggleCommentOnRange(startPos, endPos);
+                if (toggleMode == 3)
+                    selection.SetPosition(startPos + 3);
+
+                // correct selection...
+                if (!singleLineComm && toggleMode == 2) {
+                    selection.End += 2;
+                }
             }
+
+            Npp.EndUndoAction();
         }
 
         /// <summary>
@@ -188,80 +175,30 @@ namespace _3PA.MainFeatures {
         /// Opens the lgrfeng.chm file if it can find it in the config
         /// </summary>
         public static void Open4GlHelp() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                // get path
-                if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
-                    if (File.Exists(ProEnvironment.Current.ProwinPath)) {
-                        // Try to find the help file from the prowin32.exe location
-                        var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
-                        if (File.Exists(helpPath)) {
-                            Config.Instance.GlobalHelpFilePath = helpPath;
-                            UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
-                        }
+            // get path
+            if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
+                if (File.Exists(ProEnvironment.Current.ProwinPath)) {
+                    // Try to find the help file from the prowin32.exe location
+                    var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
+                    if (File.Exists(helpPath)) {
+                        Config.Instance.GlobalHelpFilePath = helpPath;
+                        UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
                     }
                 }
-
-                if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
-                    UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
-                    return;
-                }
-
-                HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, 
-                    (Math.Abs(Npp.SelectionEnd - Npp.SelectionStart) < 15) ? Npp.SelectedText : "");
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error Open4GlHelp");
             }
+
+            if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+                UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
+                return;
+            }
+
+            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, 
+                (Math.Abs(Npp.SelectionEnd - Npp.SelectionStart) < 15) ? Npp.SelectedText : "");
         }
 
         #endregion
 
         #region Compilation, Check syntax, Run
-
-        /// <summary>
-        /// Check current file syntax
-        /// </summary>
-        public static void CheckSyntaxCurrent() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                StartProgressExec(ExecutionType.CheckSyntax);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in CheckSyntaxCurrent");
-            }
-        }
-
-        /// <summary>
-        /// Compile the current file
-        /// </summary>
-        public static void CompileCurrent() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                StartProgressExec(ExecutionType.Compile);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in CompileCurrent");
-            }
-        }
-
-        /// <summary>
-        /// Run the current file
-        /// </summary>
-        public static void RunCurrent() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                StartProgressExec(ExecutionType.Run);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in RunCurrent");
-            }
-        }
 
         /// <summary>
         /// Called after the compilation
@@ -430,46 +367,38 @@ namespace _3PA.MainFeatures {
         #region Modification tags
 
         public static void SurroundSelectionWithTag() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
+            var output = new StringBuilder();
+            var filename = Path.GetFileName(Plug.CurrentFilePath);
 
-                var output = new StringBuilder();
-                var filename = Path.GetFileName(Plug.CurrentFilePath);
+            if (FileTag.Contains(filename)) {
+                var fileInfo = FileTag.GetLastFileTag(filename);
 
-                if (FileTag.Contains(filename)) {
-                    var fileInfo = FileTag.GetLastFileTag(filename);
+                Npp.BeginUndoAction();
 
-                    Npp.BeginUndoAction();
+                Npp.TargetFromSelection();
+                var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
 
-                    Npp.TargetFromSelection();
-                    var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
+                var opener = ReplaceTokens(fileInfo, Config.Instance.CodeModifTagOpener);
+                var eol = Npp.GetEolString;
+                output.Append(opener);
+                output.Append(eol);
+                output.Append(indent);
+                output.Append(Npp.SelectedText);
+                output.Append(eol);
+                output.Append(indent);
+                output.Append(ReplaceTokens(fileInfo, Config.Instance.CodeModifTagCloser));
 
-                    var opener = ReplaceTokens(fileInfo, Config.Instance.CodeModifTagOpener);
-                    var eol = Npp.GetEolString;
-                    output.Append(opener);
-                    output.Append(eol);
-                    output.Append(indent);
-                    output.Append(Npp.SelectedText);
-                    output.Append(eol);
-                    output.Append(indent);
-                    output.Append(ReplaceTokens(fileInfo, Config.Instance.CodeModifTagCloser));
+                Npp.TargetFromSelection();
+                Npp.ReplaceTarget(output.ToString());
 
-                    Npp.TargetFromSelection();
-                    Npp.ReplaceTarget(output.ToString());
-
-                    Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
+                Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
                     
-                    Npp.EndUndoAction();
+                Npp.EndUndoAction();
 
-                } else {
+            } else {
 
-                    UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
-                    Appli.Appli.GoToFileInfo();
-                }
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in SurroundSelectionWithTag");
+                UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
+                Appli.Appli.GoToPage(PageNames.FileInfo);
             }
         }
 

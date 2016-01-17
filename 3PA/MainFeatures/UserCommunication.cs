@@ -46,7 +46,10 @@ namespace _3PA.MainFeatures {
             };
         }
 
-        public static void Close() {
+        /// <summary>
+        /// Close all the notifications
+        /// </summary>
+        public static void ForceClose() {
             if (_anchorForm != null)
                 _anchorForm.Close();
             YamuiNotifications.CloseEverything();

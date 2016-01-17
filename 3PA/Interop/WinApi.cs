@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using YamuiFramework.Helper;
+// ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
 
@@ -85,6 +85,8 @@ namespace _3PA.Interop {
 
         #endregion
 
+        #region Api
+
         [DllImport("user32.dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
 
@@ -109,6 +111,11 @@ namespace _3PA.Interop {
 
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, IntPtr windowTitle);
+
+        [DllImport("user32.dll")]
+        public static extern short GetKeyState(int nVirtKey);
+
+        #endregion
 
         #region SetWindowLong
 
@@ -156,7 +163,40 @@ namespace _3PA.Interop {
         public const int DwmwaTransitionsForcedisabled = 3;
         #endregion
 
+        #region SetHook
+
+        // Filter function delegate
+
+        public delegate int HookProc(int code, IntPtr wParam, IntPtr lParam);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint GetCurrentThreadId();
+
+        // Win32: SetWindowsHookEx()
+        [DllImport("user32.dll")]
+        public static extern IntPtr SetWindowsHookEx(HookType code, HookProc func, IntPtr hInstance, uint threadId);
+
+        // Win32: UnhookWindowsHookEx()
+        [DllImport("user32.dll")]
+        public static extern int UnhookWindowsHookEx(IntPtr hhook);
+
+        // Win32: CallNextHookEx()
+        [DllImport("user32.dll")]
+        public static extern int CallNextHookEx(IntPtr hhook, int code, IntPtr wParam, IntPtr lParam);
+
+        #endregion
+
+
         #region Structs
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MOUSEHOOKSTRUCT {
+            public POINT pt;
+            public IntPtr hwnd;
+            public uint wHitTestCode;
+            public IntPtr dwExtraInfo;
+        }
+
         [StructLayout(LayoutKind.Sequential)]
         public struct MARGINS {
             public int cxLeftWidth;
@@ -169,6 +209,59 @@ namespace _3PA.Interop {
                 cyTopHeight = Top;
                 cyBottomHeight = Bottom;
             }
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct MSG {
+            public IntPtr hwnd;
+            public UInt32 message;
+            public IntPtr wParam;
+            public IntPtr lParam;
+            public UInt32 time;
+            public POINT pt;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct POINT {
+            public Int32 x;
+            public Int32 y;
+
+            public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
+        }
+
+        #endregion
+
+        #region Enums
+
+        internal enum HCBT {
+            MoveSize = 0,
+            MinMax = 1,
+            QueueSync = 2,
+            CreateWnd = 3,
+            DestroyWnd = 4,
+            Activate = 5,
+            ClickSkipped = 6,
+            KeySkipped = 7,
+            SysCommand = 8,
+            SetFocus = 9
+        }
+
+        public enum WindowsMessageMouse {
+            WM_MOUSEMOVE = WindowsMessage.WM_MOUSEMOVE,
+            WM_LBUTTONDOWN = WindowsMessage.WM_LBUTTONDOWN,
+            WM_LBUTTONUP = WindowsMessage.WM_LBUTTONUP,
+            WM_LBUTTONDBLCLK = WindowsMessage.WM_LBUTTONDBLCLK,
+            WM_RBUTTONDOWN = WindowsMessage.WM_RBUTTONDOWN,
+            WM_RBUTTONUP = WindowsMessage.WM_RBUTTONUP,
+            WM_RBUTTONDBLCLK = WindowsMessage.WM_RBUTTONDBLCLK,
+            WM_MBUTTONDOWN = WindowsMessage.WM_MBUTTONDOWN,
+            WM_MBUTTONUP = WindowsMessage.WM_MBUTTONUP,
+            WM_MBUTTONDBLCLK = WindowsMessage.WM_MBUTTONDBLCLK,
+            WM_MOUSEWHEEL = WindowsMessage.WM_MOUSEWHEEL,
+            WM_XBUTTONDOWN = WindowsMessage.WM_XBUTTONDOWN,
+            WM_XBUTTONUP = WindowsMessage.WM_XBUTTONUP,
+            WM_XBUTTONDBLCLK = WindowsMessage.WM_XBUTTONDBLCLK,
+            WM_MOUSEHWHEEL = WindowsMessage.WM_MOUSEHWHEEL
         }
 
         #endregion
@@ -444,7 +537,7 @@ namespace _3PA.Interop {
 
         #region WindowLongFlags
 
-        public enum WindowLongFlags : int {
+        public enum WindowLongFlags {
             GWL_EXSTYLE = -20,
             GWLP_HINSTANCE = -6,
             GWLP_HWNDPARENT = -8,
@@ -546,7 +639,6 @@ namespace _3PA.Interop {
 
         #endregion
 
-
         #region ClikeStringArray
 
         public class ClikeStringArray : IDisposable {
@@ -612,7 +704,6 @@ namespace _3PA.Interop {
         }
 
         #endregion
-
     }
 
 

@@ -25,7 +25,6 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
-using YamuiFramework.Helper;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -55,11 +54,11 @@ namespace _3PA.MainFeatures.Appli {
             // create the tabs / content
             CreateContent(new List<YamuiMainMenu> {
                 new YamuiMainMenu("Home", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("WELCOME", "welcome", new HomePage())
+                    new YamuiSecMenu("WELCOME", PageNames.Welcome.ToString(), new HomePage())
                 }),
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", null, new SetEnvironment()),
-                    new YamuiSecMenu("FILE INFORMATION", "file_info", new SetFileInfo()),
+                    new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
                     new YamuiSecMenu("COMPILATION PATH", null, new template()),
                     new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
@@ -69,7 +68,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("COMPILE MANY", null, new template()),
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("PROFILES", "profiles", new ProfilesPage()),
+                    new YamuiSecMenu("PROFILES", PageNames.OptionsProfile.ToString(), new ProfilesPage()),
                     new YamuiSecMenu("GENERAL", "general", new OptionPage(new List<string> { "General" })),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
@@ -89,7 +88,7 @@ namespace _3PA.MainFeatures.Appli {
                         Process.Start(@"https://github.com/jcaillon/3P/issues/3");
                         break;
                     case 1:
-                        Process.Start(@"https://github.com/jcaillon/3P/issues");
+                        Process.Start(@"" + Config.IssueUrl + "");
                         break;
                     case 2:
                         Process.Start(@"http://jcaillon.github.io/3P/");
@@ -103,9 +102,6 @@ namespace _3PA.MainFeatures.Appli {
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
-
-            // reorder tab indexes
-            (new TabOrderManager(this)).SetTabOrder(TabOrderManager.TabScheme.AcrossFirst);
 
             Opacity = 0;
             Visible = false;
@@ -207,7 +203,7 @@ namespace _3PA.MainFeatures.Appli {
                     var txtBox = ((YamuiTextBox) activeCtrl);
                     if (txtBox.MultiLines) {
                         var initialPos = txtBox.SelectionStart;
-                        txtBox.Text = txtBox.Text.Substring(0, initialPos) + "\r\n" + (initialPos < txtBox.TextLength ? txtBox.Text.Substring(initialPos, txtBox.TextLength - initialPos) : "");
+                        txtBox.Text = txtBox.Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < txtBox.TextLength ? txtBox.Text.Substring(initialPos, txtBox.TextLength - initialPos) : "");
                         txtBox.SelectionStart = initialPos + 2;
                         txtBox.SelectionLength = 0;
                         txtBox.ScrollToCaret();
@@ -225,6 +221,13 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         #endregion
+
+    }
+
+    internal enum PageNames {
+        Welcome,
+        FileInfo,
+        OptionsProfile
 
     }
 }

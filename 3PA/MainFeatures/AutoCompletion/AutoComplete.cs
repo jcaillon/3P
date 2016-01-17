@@ -322,17 +322,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Called from CTRL + Space shortcut
         /// </summary>
         public static void OnShowCompleteSuggestionList() {
-            try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
-                ParseCurrentDocument();
-                _openedFromShortCut = true;
-                _openedFromShortCutPosition = Npp.CurrentPosition;
-                UpdateAutocompletion();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
-            }
+            ParseCurrentDocument();
+            _openedFromShortCut = true;
+            _openedFromShortCutPosition = Npp.CurrentPosition;
+            UpdateAutocompletion();
         }
 
         /// <summary>
@@ -422,7 +415,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ShowSuggestionList(keyword);
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowCompleteSuggestionList");
+                ErrorHandler.ShowErrors(e, "Error in UpdateAutocompletion");
             }
         }
 
@@ -442,7 +435,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     UnfocusedOpacity = Config.Instance.AutoCompleteUnfocusedOpacity,
                     FocusedOpacity = Config.Instance.AutoCompleteFocusedOpacity
                 };
-                _form.TabCompleted += OnTabCompleted;
+                _form.InsertSuggestion += OnInsertSuggestion;
                 _form.Show(Npp.Win32WindowNpp);
                 _form.SetItems(_currentItems);
             } else if (_needToSetItems) {
@@ -500,7 +493,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="tabCompletedEventArgs"></param>
-        private static void OnTabCompleted(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
+        private static void OnInsertSuggestion(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
             try {
                 var data = tabCompletedEventArgs.CompletionItem;
 

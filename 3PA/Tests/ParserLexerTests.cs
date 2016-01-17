@@ -20,7 +20,6 @@
 using System.Diagnostics;
 using System.IO;
 using System.Text;
-using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.Tests {
@@ -50,7 +49,7 @@ namespace _3PA.Tests {
 
 
             // OUTPUT INFO ON EACH LINE
-            if (false) {
+            /*
                 StringBuilder x = new StringBuilder();
                 var i = 0;
                 var dic = tok.GetLineInfo;
@@ -60,14 +59,13 @@ namespace _3PA.Tests {
                     i++;
                 }
                 File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-            }
+            */
 
-            return;
-            
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+            /*
             //------------
             var watch2 = Stopwatch.StartNew();
             //------------
@@ -81,7 +79,7 @@ namespace _3PA.Tests {
             watch2.Stop();
 
             File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\test.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-            
+            */
         }
     }
 
@@ -108,8 +106,7 @@ namespace _3PA.Tests {
         }
 
         public void Visit(ParsedFunction pars) {
-            return;
-            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
 
         public void Visit(ParsedProcedure pars) {
@@ -125,25 +122,22 @@ namespace _3PA.Tests {
         }
 
         public void Visit(ParsedDefine pars) {
-            return;
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
-                Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
         }
 
         public void Visit(ParsedTable pars) {
-            return;
-            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
-            foreach (var field in pars.Fields) {
-                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
-            }
-            Output.AppendLine("");
+            //Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            //foreach (var field in pars.Fields) {
+            //    Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+            //}
+            //Output.AppendLine("");
         }
 
         public void Visit(ParsedRun pars) {
-            return;
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
         }
     }
 

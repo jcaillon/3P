@@ -45,31 +45,37 @@ namespace YamuiFramework.Themes {
         public string PageBackGroundImage = "";
 
         public Color ThemeAccentColor = Color.DarkSlateGray;
-        public Color FormColorBackColor = Color.FromArgb(230, 230, 230);
-        public Color FormColorForeColor = Color.FromArgb(30, 30, 30);
-        public Color ScrollBarsColorsNormalBackColor = Color.FromArgb(204, 204, 204);
-        public Color ScrollBarsColorsNormalForeColor = Color.FromArgb(102, 102, 102);
-        public Color ScrollBarsColorsHoverBackColor = Color.FromArgb(204, 204, 204);
-        public Color ScrollBarsColorsHoverForeColor = Color.FromArgb(37, 37, 38);
-        public Color ScrollBarsColorsDisabledBackColor = Color.FromArgb(230, 230, 230);
-        public Color ScrollBarsColorsDisabledForeColor = Color.FromArgb(179, 179, 179);
-        public Color LabelsColorsNormalForeColor = Color.FromArgb(30, 30, 30);
-        public Color LabelsColorsPressForeColor = Color.FromArgb(0, 0, 0);
-        public Color LabelsColorsDisabledForeColor = Color.FromArgb(150, 150, 150);
-        public Color TabsColorsNormalBackColor = Color.FromArgb(230, 230, 230);
-        public Color TabsColorsNormalForeColor = Color.FromArgb(110, 110, 110);
-        public Color TabsColorsHoverForeColor = Color.FromArgb(60, 60, 60);
-        public Color TabsColorsPressForeColor = Color.FromArgb(30, 30, 30);
-        public Color ButtonColorsNormalBackColor = Color.FromArgb(230, 230, 230);
-        public Color ButtonColorsNormalForeColor = Color.FromArgb(30, 30, 30);
-        public Color ButtonColorsNormalBorderColor = Color.FromArgb(190, 190, 190);
-        public Color ButtonColorsHoverBackColor = Color.FromArgb(210, 210, 210);
-        public Color ButtonColorsHoverForeColor = Color.FromArgb(30, 30, 30);
-        public Color ButtonColorsHoverBorderColor = Color.FromArgb(190, 190, 190);
-        public Color ButtonColorsPressForeColor = Color.FromArgb(30, 30, 30);
-        public Color ButtonColorsDisabledBackColor = Color.FromArgb(230, 230, 230);
-        public Color ButtonColorsDisabledForeColor = Color.FromArgb(100, 100, 100);
-        public Color ButtonColorsDisabledBorderColor = Color.FromArgb(190, 190, 190);
+        public Color FormBack = Color.FromArgb(230, 230, 230);
+        public Color FormAltBack = Color.FromArgb(200, 200, 200);
+        public Color FormFore = Color.FromArgb(30, 30, 30);
+        public Color ScrollBarNormalBack = Color.FromArgb(204, 204, 204);
+        public Color ScrollThumbNormalBack = Color.FromArgb(102, 102, 102);
+        public Color ScrollBarHoverBack = Color.FromArgb(204, 204, 204);
+        public Color ScrollThumbHoverBack = Color.FromArgb(37, 37, 38);
+        public Color ScrollBarDisabledBack = Color.FromArgb(230, 230, 230);
+        public Color ScrollThumbDisabledBack = Color.FromArgb(179, 179, 179);
+        public Color LabelNormalFore = Color.FromArgb(30, 30, 30);
+        public Color LabelPressedFore = Color.FromArgb(0, 0, 0);
+        public Color LabelDisabledFore = Color.FromArgb(150, 150, 150);
+        public Color TabNormalBack = Color.FromArgb(230, 230, 230);
+        public Color TabNormalFore = Color.FromArgb(110, 110, 110);
+        public Color TabHoverFore = Color.FromArgb(60, 60, 60);
+        public Color TabPressedFore = Color.FromArgb(30, 30, 30);
+        public Color ButtonNormalBack = Color.FromArgb(230, 230, 230);
+        public Color ButtonNormalFore = Color.FromArgb(30, 30, 30);
+        public Color ButtonNormalBorder = Color.FromArgb(190, 190, 190);
+        public Color ButtonHoverBack = Color.FromArgb(210, 210, 210);
+        public Color ButtonHoverFore = Color.FromArgb(30, 30, 30);
+        public Color ButtonHoverBorder = Color.FromArgb(190, 190, 190);
+        public Color ButtonPressedFore = Color.FromArgb(30, 30, 30);
+        public Color ButtonDisabledBack = Color.FromArgb(230, 230, 230);
+        public Color ButtonDisabledFore = Color.FromArgb(100, 100, 100);
+        public Color ButtonDisabledBorder = Color.FromArgb(190, 190, 190);
+        public Color SubTextFore = Color.FromArgb(100, 154, 209);
+        public Color MenuHoverBack = Color.FromArgb(206, 226, 252);
+        public Color MenuHoverFore = Color.FromArgb(0, 0, 0);
+        public Color MenuFocusBack = Color.FromArgb(154, 194, 249);
+        public Color MenuFocusFore = Color.FromArgb(0, 0, 0);
 
         #endregion
 
@@ -91,13 +97,13 @@ namespace YamuiFramework.Themes {
         public Color ScrollBarsBg(bool isFocused, bool isHovered, bool isPressed, bool enabled) {
             Color backColor;
             if (!enabled)
-                backColor = ScrollBarsColorsDisabledBackColor;
+                backColor = ScrollBarDisabledBack;
             else if (isPressed)
-                backColor = ScrollBarsColorsNormalBackColor;
+                backColor = ScrollBarNormalBack;
             else if (isHovered || isFocused)
-                backColor = ScrollBarsColorsHoverBackColor;
+                backColor = ScrollBarHoverBack;
             else
-                backColor = ScrollBarsColorsNormalBackColor;
+                backColor = ScrollBarNormalBack;
 
             return backColor;
         }
@@ -106,13 +112,13 @@ namespace YamuiFramework.Themes {
             Color foreColor;
 
             if (!enabled)
-                foreColor = ScrollBarsColorsDisabledForeColor;
+                foreColor = ScrollThumbDisabledBack;
             else if (isPressed)
                 foreColor = AccentColor;
             else if (isHovered || isFocused)
-                foreColor = ScrollBarsColorsHoverForeColor;
+                foreColor = ScrollThumbHoverBack;
             else
-                foreColor = ScrollBarsColorsNormalForeColor;
+                foreColor = ScrollThumbNormalBack;
 
             return foreColor;
         }
@@ -126,13 +132,13 @@ namespace YamuiFramework.Themes {
             if (useCustomForeColor)
                 foreColor = controlForeColor;
             else if (!enabled)
-                foreColor = LabelsColorsDisabledForeColor;
+                foreColor = LabelDisabledFore;
             else if (isPressed)
-                foreColor = LabelsColorsPressForeColor;
+                foreColor = LabelPressedFore;
             else if (isHovered || isFocused)
                 foreColor = AccentColor;
             else
-                foreColor = LabelsColorsNormalForeColor;
+                foreColor = LabelNormalFore;
 
             return foreColor;
         }
@@ -150,11 +156,11 @@ namespace YamuiFramework.Themes {
             if (isFocused && isSelected)
                 foreColor = AccentColor;
             else if (isSelected)
-                foreColor = TabsColorsPressForeColor;
+                foreColor = TabPressedFore;
             else if (isHovered)
-                foreColor = TabsColorsHoverForeColor;
+                foreColor = TabHoverFore;
             else
-                foreColor = TabsColorsNormalForeColor;
+                foreColor = TabNormalFore;
 
             return foreColor;
         }
@@ -173,13 +179,13 @@ namespace YamuiFramework.Themes {
             if (useCustomBackColor)
                 backColor = controlBackColor;
             else if (!enabled)
-                backColor = ButtonColorsDisabledBackColor;
+                backColor = ButtonDisabledBack;
             else if (isPressed)
                 backColor = AccentColor;
             else if (isHovered)
-                backColor = ButtonColorsHoverBackColor;
+                backColor = ButtonHoverBack;
             else
-                backColor = ButtonColorsNormalBackColor;
+                backColor = ButtonNormalBack;
 
             return backColor;
         }
@@ -190,13 +196,13 @@ namespace YamuiFramework.Themes {
             if (useCustomForeColor)
                 foreColor = controlForeColor;
             else if (!enabled)
-                foreColor = ButtonColorsDisabledForeColor;
+                foreColor = ButtonDisabledFore;
             else if (isPressed)
-                foreColor = ButtonColorsPressForeColor;
+                foreColor = ButtonPressedFore;
             else if (isHovered)
-                foreColor = ButtonColorsHoverForeColor;
+                foreColor = ButtonHoverFore;
             else
-                foreColor = ButtonColorsNormalForeColor;
+                foreColor = ButtonNormalFore;
 
             return foreColor;
         }
@@ -205,17 +211,43 @@ namespace YamuiFramework.Themes {
             Color borderColor;
 
             if (!enabled)
-                borderColor = ButtonColorsDisabledBorderColor;
+                borderColor = ButtonDisabledBorder;
             else if (isPressed)
                 borderColor = AccentColor;
             else if (isFocused)
                 borderColor = AccentColor;
             else if (isHovered)
-                borderColor = ButtonColorsHoverBorderColor;
+                borderColor = ButtonHoverBorder;
             else
-                borderColor = ButtonColorsNormalBorderColor;
+                borderColor = ButtonNormalBorder;
 
             return borderColor;
+        }
+
+        public Color MenuBg(bool isFocused, bool isHovered) {
+            Color backColor;
+
+            if (isFocused)
+                backColor = MenuFocusBack;
+            else if (isHovered)
+                backColor = MenuHoverBack;
+            else
+                backColor = FormBack;
+
+            return backColor;
+        }
+
+        public Color MenuFg(bool isFocused, bool isHovered) {
+            Color foreColor;
+
+            if (isFocused)
+                foreColor = MenuFocusFore;
+            else if (isHovered)
+                foreColor = MenuHoverFore;
+            else
+                foreColor = FormFore;
+
+            return foreColor;
         }
     }
 }

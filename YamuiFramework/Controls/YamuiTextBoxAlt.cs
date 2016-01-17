@@ -491,7 +491,7 @@ namespace YamuiFramework.Controls {
                         flags |= TextFormatFlags.HorizontalCenter;
                         break;
                 }
-                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonColorsDisabledForeColor, flags);
+                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonDisabledFore, flags);
             }
 
             protected override void OnTextAlignChanged(EventArgs e) {

@@ -216,9 +216,9 @@ namespace YamuiFramework.Controls {
             else DrawHorizProgress();
 
             // Draw border
-            if (YamuiThemeManager.Current.ButtonColorsNormalBorderColor != Color.Transparent) {
+            if (YamuiThemeManager.Current.ButtonNormalBorder != Color.Transparent) {
                 Rectangle rect = ClientRectangle;
-                _bufGraphics.Graphics.DrawRectangle(new Pen(YamuiThemeManager.Current.ButtonColorsNormalBorderColor, 1f), rect.X,
+                _bufGraphics.Graphics.DrawRectangle(new Pen(YamuiThemeManager.Current.ButtonNormalBorder, 1f), rect.X,
                     rect.Y, rect.Width - 1, rect.Height - 1);
             }
 

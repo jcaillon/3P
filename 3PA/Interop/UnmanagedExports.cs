@@ -52,7 +52,6 @@ namespace _3PA.Interop {
 
         #endregion
 
-
         #region Exported methods (to be used by npp)
 
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
@@ -90,15 +89,10 @@ namespace _3PA.Interop {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void beNotified(IntPtr notifyCode) {
             SCNotification nc = (SCNotification)Marshal.PtrToStructure(notifyCode, typeof(SCNotification));
-            try {
-                Plug.OnNppNotification(nc);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
-            }
+            Plug.OnNppNotification(nc);
         }
 
         #endregion
-
 
         #region public methods
 

@@ -141,6 +141,14 @@ namespace _3PA.Interop {
         public bool IsSet {
             get { return _key != 0; }
         }
+
+        public Keys Key {
+            get { return (Keys) _key; }
+        }
+
+        public override string ToString() {
+            return (IsCtrl ? "Ctrl+" : "") + (IsShift ? "Shift+" : "") + (IsAlt ? "Alt+" : "") + Enum.GetName(typeof(Keys), _key);
+        }
     }
 
     [StructLayout(LayoutKind.Sequential)]
@@ -210,7 +218,6 @@ namespace _3PA.Interop {
         DWS_DF_FLOATING = 0x80000000            // default state is floating
     }
 
-    [Flags]
     internal enum NppMsg : uint {
         //Here you can find how to use these messages : http://notepad-plus.sourceforge.net/uk/plugins-HOWTO.php
         NPPMSG = (0x400/*WM_USER*/ + 1000),
@@ -555,6 +562,29 @@ namespace _3PA.Interop {
         //scnNotification->nmhdr.code = NPPN_DOCORDERCHANGED;
         //scnNotification->nmhdr.hwndFrom = newIndex;
         //scnNotification->nmhdr.idFrom = BufferID;
+    }
+
+    internal enum NppNotif : uint {
+        NPPN_FIRST = NppMsg.NPPN_FIRST,
+        NPPN_READY = NppMsg.NPPN_READY,
+        NPPN_TBMODIFICATION = NppMsg.NPPN_TBMODIFICATION,
+        NPPN_FILEBEFORECLOSE = NppMsg.NPPN_FILEBEFORECLOSE,
+        NPPN_FILEOPENED = NppMsg.NPPN_FILEOPENED,
+        NPPN_FILECLOSED = NppMsg.NPPN_FILECLOSED,
+        NPPN_FILEBEFOREOPEN = NppMsg.NPPN_FILEBEFOREOPEN,
+        NPPN_FILEBEFORESAVE = NppMsg.NPPN_FILEBEFORESAVE,
+        NPPN_FILESAVED = NppMsg.NPPN_FILESAVED,
+        NPPN_SHUTDOWN = NppMsg.NPPN_SHUTDOWN,
+        NPPN_BUFFERACTIVATED = NppMsg.NPPN_BUFFERACTIVATED,
+        NPPN_LANGCHANGED = NppMsg.NPPN_LANGCHANGED,
+        NPPN_WORDSTYLESUPDATED = NppMsg.NPPN_WORDSTYLESUPDATED,
+        NPPN_SHORTCUTREMAPPED = NppMsg.NPPN_SHORTCUTREMAPPED,
+        NPPN_FILEBEFORELOAD = NppMsg.NPPN_FILEBEFORELOAD,
+        NPPN_FILELOADFAILED = NppMsg.NPPN_FILELOADFAILED,
+        NPPN_READONLYCHANGED = NppMsg.NPPN_READONLYCHANGED,
+        DOCSTAUS_READONLY = NppMsg.DOCSTAUS_READONLY,
+        DOCSTAUS_BUFFERDIRTY = NppMsg.DOCSTAUS_BUFFERDIRTY,
+        NPPN_DOCORDERCHANGED = NppMsg.NPPN_DOCORDERCHANGED,
     }
 
     internal class Idm {

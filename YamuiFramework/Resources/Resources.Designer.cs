@@ -186,11 +186,11 @@ namespace YamuiFramework.Resources {
         ///    &lt;PageBackGroundImage Value=&quot;&quot; /&gt;
         ///    &lt;UseCurrentAccentColor Value=&quot;true&quot; /&gt;
         ///    &lt;AccentColor Value=&quot;#F0A30A&quot; /&gt;
-        ///    &lt;FormColorBackColor Value=&quot;#E6E6E6&quot; /&gt;
-        ///    &lt;FormColorForeColor Value=&quot;#1E1E1E&quot; /&gt;
-        ///    &lt;ScrollBarsColorsNormalBackColor Value=&quot;#CCCCCC&quot; /&gt;
-        ///    &lt;ScrollBarsColorsNormalForeColor Value=&quot;#666666&quot; /&gt;
-        ///    &lt;ScrollBarsColorsHoverBackColor  [rest of string was truncated]&quot;;.
+        ///    &lt;FormBack Value=&quot;#E6E6E6&quot; /&gt;
+        ///    &lt;FormFore Value=&quot;#1E1E1E&quot; /&gt;
+        ///    &lt;ScrollBarNormalBack Value=&quot;#CCCCCC&quot; /&gt;
+        ///    &lt;ScrollThumbNormalBack Value=&quot;#666666&quot; /&gt;
+        ///    &lt;ScrollBarHoverBack  [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string themesXml {
             get {

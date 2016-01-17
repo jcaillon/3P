@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Html;
 using _3PA.Lib;
+// ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
 
@@ -46,9 +47,9 @@ namespace _3PA.MainFeatures {
         /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
             Log(e.ToString());
-            MessageBox.Show(@"Attention user! An error has occurred while loading in the following file :" + "\n\n"
+            MessageBox.Show("Attention user! An error has occurred while loading in the following file :" + "\n\n"
                 + fileName +
-                "\n\n" + @"The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             if (File.Exists(fileName + "_errors"))
                 File.Delete(fileName + "_errors");
             File.Move(fileName, fileName + "_errors");
@@ -72,7 +73,7 @@ namespace _3PA.MainFeatures {
                 Task.Factory.StartNew(() => {
                     try {
                         if (Config.Instance.LogError) {
-                            if (!Config.Instance.GlobalDontAutoPostLog && UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogUrl)) {
+                            if (!Config.Instance.GlobalDontAutoPostLog && UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
                                 if (File.Exists(Config.FileErrorToSend))
                                     File.Delete(Config.FileErrorToSend);
                             }
@@ -88,16 +89,16 @@ namespace _3PA.MainFeatures {
                 if (Config.Instance.UserGetsPreReleases)
                     UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
                         (File.Exists(Config.FileErrorLog) ? "<br><a href='" + Config.FileErrorLog + "'>Link to the error log</a>" : "") +
-                        "<br>Consider opening an issue on GitHub :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
-                        MessageImg.MsgPoison, "An error has occurred", message,
+                        "<br>Consider opening an issue on GitHub :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                        MessageImg.MsgPoison, "Unexpected error", message,
                         args => {
                             Npp.Goto(args.Link);
                             args.Handled = true;
                         },
                         0, 500);
                 else
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='https://github.com/jcaillon/3P/issues'>https://github.com/jcaillon/3P/issues</a>",
-                        MessageImg.MsgPoison, "An error has occurred", message,
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>",
+                        MessageImg.MsgPoison, "Unexpected error", message,
                         args => {
                             Npp.Goto(args.Link);
                             args.Handled = true;
@@ -106,7 +107,7 @@ namespace _3PA.MainFeatures {
             } catch (Exception x) {
                 DirtyLog(x);
                 // display the error message the old way
-                MessageBox.Show("An unidentified error has occurred, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : https://github.com/jcaillon/3P/issues if the problem persists.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An unidentified error has occurred, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.ProductTitle + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

@@ -191,9 +191,6 @@ namespace _3PA {
         /// </summary>
         public static void GoBackFromDefinition() {
             try {
-                if (!Plug.AllowFeatureExecution())
-                    return;
-
                 if (_goToHistory.Count > 0) {
                     var lastPoint = _goToHistory.Pop();
                     Goto(lastPoint.Item1, lastPoint.Item3.X, lastPoint.Item3.Y, false);

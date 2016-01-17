@@ -71,7 +71,6 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
@@ -96,12 +95,9 @@ namespace _3PA.Lib {
 
         #region Key modifiers
 
-        [DllImport("user32.dll")]
-        private static extern short GetKeyState(int nVirtKey);
-
         private static bool IsPressed(Keys key) {
             const int keyPressed = 0x8000;
-            return Convert.ToBoolean(GetKeyState((int) key) & keyPressed);
+            return Convert.ToBoolean(WinApi.GetKeyState((int) key) & keyPressed);
         }
 
         public static KeyModifiers GetModifiers {
@@ -115,20 +111,11 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
     }
 
     #endregion
 
     #region Mouse hook
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct MOUSEHOOKSTRUCT {
-        public POINT pt;
-        public IntPtr hwnd;
-        public uint wHitTestCode;
-        public IntPtr dwExtraInfo;
-    }
 
     /// <summary>
     /// Monitors the mouse actions
@@ -141,30 +128,15 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetMouseMessage;
-        public delegate void MessageHandler(WinApi.WindowsMessage message, MOUSEHOOKSTRUCT mouseStruct, out bool handled);
+        public delegate void MessageHandler(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
-        /// WM_MOUSEMOVE = 0x200,
-        /// WM_LBUTTONDOWN = 0x201,
-        /// WM_LBUTTONUP = 0x202,
-        /// WM_LBUTTONDBLCLK = 0x203,
-        /// WM_RBUTTONDOWN = 0x204,
-        /// WM_RBUTTONUP = 0x205,
-        /// WM_RBUTTONDBLCLK = 0x206,
-        /// WM_MBUTTONDOWN = 0x207,
-        /// WM_MBUTTONUP = 0x208,
-        /// WM_MBUTTONDBLCLK = 0x209,
-        /// WM_MOUSEWHEEL = 0x20A,
-        /// WM_XBUTTONDOWN = 0x20B,
-        /// WM_XBUTTONUP = 0x20C,
-        /// WM_XBUTTONDBLCLK = 0x20D,
-        /// WM_MOUSEHWHEEL = 0x20E
         /// </summary>
-        public void Add(params WinApi.WindowsMessage[] messages) {
-            foreach (WinApi.WindowsMessage key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
+        public void Add(params WinApi.WindowsMessageMouse[] messages) {
+            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
                 _messagesToIntercept.Add((uint)key);
         }
 
@@ -190,8 +162,8 @@ namespace _3PA.Lib {
             if (!_messagesToIntercept.Contains((uint)wParam))
                 return false;
             bool handled;
-            MOUSEHOOKSTRUCT ms = (MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(MOUSEHOOKSTRUCT));
-            GetMouseMessage((WinApi.WindowsMessage)wParam, ms, out handled);
+            WinApi.MOUSEHOOKSTRUCT ms = (WinApi.MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinApi.MOUSEHOOKSTRUCT));
+            GetMouseMessage((WinApi.WindowsMessageMouse)wParam, ms, out handled);
             return handled;
         }
 
@@ -202,24 +174,6 @@ namespace _3PA.Lib {
     
     #region GetMessage hook
 
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct MSG {
-        public IntPtr hwnd;
-        public UInt32 message;
-        public IntPtr wParam;
-        public IntPtr lParam;
-        public UInt32 time;
-        public POINT pt;
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct POINT {
-        public Int32 x;
-        public Int32 y;
-
-        public POINT(Int32 x, Int32 y) { this.x = x; this.y = y; }
-    }
-
     internal class CallWndProcMonitor : WindowsHook<CallWndProcMonitor> {
 
         #region public
@@ -228,7 +182,7 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetMessage;
-        public delegate void MessageHandler(MSG message, out bool handled);
+        public delegate void MessageHandler(WinApi.MSG message, out bool handled);
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
@@ -257,7 +211,7 @@ namespace _3PA.Lib {
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            MSG nc = (MSG)Marshal.PtrToStructure(lParam, typeof(MSG));
+            WinApi.MSG nc = (WinApi.MSG)Marshal.PtrToStructure(lParam, typeof(WinApi.MSG));
             if (GetMessage == null)
                 return false;
             if (_messagesToIntercept.Contains(nc.message)) {
@@ -274,18 +228,6 @@ namespace _3PA.Lib {
     #endregion
 
     #region Cbt hook
-    internal enum HCBT {
-        MoveSize = 0,
-        MinMax = 1,
-        QueueSync = 2,
-        CreateWnd = 3,
-        DestroyWnd = 4,
-        Activate = 5,
-        ClickSkipped = 6,
-        KeySkipped = 7,
-        SysCommand = 8,
-        SetFocus = 9
-    }
 
     internal class CbtMonitor : WindowsHook<CbtMonitor> {
 
@@ -295,7 +237,7 @@ namespace _3PA.Lib {
         /// Register to receive on keyPressed events
         /// </summary>
         public event MessageHandler GetCode;
-        public delegate void MessageHandler(HCBT code);
+        public delegate void MessageHandler(WinApi.HCBT code);
 
         /// <summary>
         /// Call this method to start listening to events
@@ -315,9 +257,9 @@ namespace _3PA.Lib {
         private int ThisCallBackFunction(int code, IntPtr wParam, IntPtr lParam) {
             if (code >= 0) {
                 if (GetCode != null)
-                    GetCode((HCBT)code);
+                    GetCode((WinApi.HCBT)code);
             }
-            return CallNextHookEx(InternalHook, code, wParam, lParam);
+            return WinApi.CallNextHookEx(InternalHook, code, wParam, lParam);
         }
 
         #endregion

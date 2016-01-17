@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -37,11 +36,18 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA {
 
+    /// <summary>
+    /// The entry points for this plugin are the following :<br></br>
+    /// - OnCommandMenuInit (through UnmanagedExports)<br></br>
+    /// - OnNppNotification (through UnmanagedExports)<br></br>
+    /// - OnWndProcMessage<br></br>
+    /// - OnMouseMessage<br></br>
+    /// - OnKeyDown<br></br>
+    /// </summary>
     internal static partial class Plug {
 
         #region Fields
@@ -68,8 +74,6 @@ namespace _3PA {
         /// </summary>
         public static FileInfoObject CurrentFileObject { get; private set; }
 
-        private static NppMenu _menu = new NppMenu();
-
         #endregion
 
 
@@ -79,18 +83,13 @@ namespace _3PA {
         /// Called on notepad++ setinfo
         /// </summary>
         internal static void OnCommandMenuInit() {
-
-            //var CmdIndex = 0;
-            //Npp.SetCommand(CmdIndex++, "Show 3P's main menu", functionPointer, thisShortcut, checkOnInit);
-
-            AppliMenu.DockableCommandIndex = _menu.CmdIndex;
-            _menu.SetCommand("Show main menu  [Ctrl + Right click]", AppliMenu.DoShowMenuAtCursor);
-            _menu.SetSeparator();
-            CodeExplorer.DockableCommandIndex = _menu.CmdIndex;
-            _menu.SetCommand("Toggle code explorer", CodeExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = _menu.CmdIndex;
-            _menu.SetCommand("Toggle file explorer", FileExplorer.Toggle);
-
+            var cmdIndex = 0;
+            AppliMenu.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
+            CodeExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
         }
 
         /// <summary>
@@ -151,8 +150,6 @@ namespace _3PA {
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
-            InstallHooks();
-
             // everything else can be async
             //Task.Factory.StartNew(() => {
 
@@ -171,6 +168,8 @@ namespace _3PA {
 
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched(true);
+
+            SetHooks();
             //});
 
             // this is done async anyway
@@ -188,9 +187,7 @@ namespace _3PA {
         internal static void OnNppShutdown() {
             try {
                 // uninstall hooks
-                KeyboardMonitor.Instance.Uninstall();
-                MouseMonitor.Instance.Uninstall();
-                RestoreWindowProc();
+                UninstallHooks();
 
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
@@ -209,12 +206,13 @@ namespace _3PA {
                 Appli.ForceClose();
                 FileExplorer.ForceClose();
                 CodeExplorer.ForceClose();
-                UserCommunication.Close();
+                UserCommunication.ForceClose();
 
                 PluginIsFullyLoaded = false;
 
                 // runs exit program if any
                 UpdateHandler.OnNotepadExit();
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");
             }
@@ -225,39 +223,74 @@ namespace _3PA {
 
         #region Hooks and WndProc override
 
-        private static IntPtr _oldWindowProc;
+        private static IntPtr _oldWindowProc = IntPtr.Zero;
         private static WinApi.WindowProc _newWindowDeleg;
 
         /// <summary>
-        /// Hook messages,
-        /// Overrides the WNDPROC procedure of Npp's window with a local one
+        /// Bascially, this method allows us to hook onto:
+        /// - WndProc messages                      -> OnWndProcMessage
+        /// - Keyboard (on key down only) messages  -> OnKeyDown
+        /// - Mouse messages                        -> OnMouseMessage
+        /// It either install the hooks (if they are not installed yet) or just refresh the keyboard keys / mouse messages
+        /// to watch, so it can be called several times safely
         /// </summary>
-        private static void InstallHooks() {
+        private static void SetHooks() {
 
             // Install a WM_KEYDOWN hook
-            foreach (var key in _menu.UniqueKeys.Keys)
-                KeyboardMonitor.Instance.Add(key);
-            KeyboardMonitor.Instance.Add(Keys.Up, Keys.Down, Keys.Left, Keys.Right, Keys.Tab, Keys.Return, Keys.Escape, Keys.Back, Keys.PageDown, Keys.PageUp, Keys.Next, Keys.Prior);
-            KeyboardMonitor.Instance.KeyDown += OnKeyDown;
-            KeyboardMonitor.Instance.Install();
+            KeyboardMonitor.Instance.Clear();
+            KeyboardMonitor.Instance.Add(
+                Keys.Up, 
+                Keys.Down, 
+                Keys.Left, 
+                Keys.Right, 
+                Keys.Tab, 
+                Keys.Return, 
+                Keys.Escape, 
+                Keys.Back, 
+                Keys.PageDown, 
+                Keys.PageUp, 
+                Keys.Next, 
+                Keys.Prior);
+            // we also add the key that are used as shortcut for 3P functions
+            AppliMenu.Instance = null;
+            if (AppliMenu.Instance != null) foreach (var item in AppliMenu.Instance.MainMenuList) {
+                if (item.Shortcut.IsSet) {
+                    KeyboardMonitor.Instance.Add(item.Shortcut.Key);
+                }
+            }
+            if (!KeyboardMonitor.Instance.IsInstalled) {
+                KeyboardMonitor.Instance.KeyDown += OnKeyDown;
+                KeyboardMonitor.Instance.Install();
+            }
 
             // Install a mouse hook
-            MouseMonitor.Instance.Add(WinApi.WindowsMessage.WM_MBUTTONDOWN, WinApi.WindowsMessage.WM_RBUTTONUP);
-            MouseMonitor.Instance.GetMouseMessage += InstanceOnGetMouseMessage;
-            MouseMonitor.Instance.Install();
+            MouseMonitor.Instance.Clear();
+            MouseMonitor.Instance.Add(
+                WinApi.WindowsMessageMouse.WM_MBUTTONDOWN, 
+                WinApi.WindowsMessageMouse.WM_RBUTTONUP);
+
+            if (!MouseMonitor.Instance.IsInstalled) {
+                MouseMonitor.Instance.GetMouseMessage += OnMouseMessage;
+                MouseMonitor.Instance.Install();
+            }
 
             // override the original WndProc of Npp
-            _newWindowDeleg = OnWndProcMessage;
-            int newWndProc = Marshal.GetFunctionPointerForDelegate(_newWindowDeleg).ToInt32();
-            int result = WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, newWndProc);
-            _oldWindowProc = (IntPtr) result;
-            if (result == 0) {
-                ErrorHandler.ShowErrors(new Exception("Failed to SetWindowLong"), "Error in OverrideWindowProc");
+            if (_oldWindowProc == IntPtr.Zero) {
+                _newWindowDeleg = OnWndProcMessage;
+                int newWndProc = Marshal.GetFunctionPointerForDelegate(_newWindowDeleg).ToInt32();
+                int result = WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, newWndProc);
+                _oldWindowProc = (IntPtr) result;
+                if (result == 0) {
+                    ErrorHandler.ShowErrors(new Exception("Failed to SetWindowLong"), "Error in OverrideWindowProc");
+                }
             }
         }
 
-        private static void RestoreWindowProc() {
+        private static void UninstallHooks() {
+            KeyboardMonitor.Instance.Uninstall();
+            MouseMonitor.Instance.Uninstall();
             WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, _oldWindowProc.ToInt32());
+            _oldWindowProc = IntPtr.Zero;
         }
 
         #endregion
@@ -309,28 +342,6 @@ namespace _3PA {
         #region utils
 
         /// <summary>
-        /// This method needs to be called by each function that the user can trigger, to check if he has the possibility to execute it,n
-        /// Set "spamInterval" to a value in milliseconds, if the user called this feature less that x ms ago, it will
-        /// not allow the execution and return false (set to 0 to disable spam check)
-        /// </summary>
-        /// <returns></returns>
-        public static bool AllowFeatureExecution(int spamInterval = 300) {
-
-            // Prevent the user from spamming the keys
-            if (spamInterval > 0) {
-                var method = new StackFrame(1).GetMethod();
-                if (Utils.IsSpamming(method.DeclaringType + method.Name, spamInterval))
-                    return false;
-            }
-
-            // correct info since it doesn't cost too much here (can be wrong when creating a new file, saving as .p, since the buffer didn't change we didn't execute the OnDocumentSwitched method)
-            if (!CurrentFilePath.EqualsCi(Npp.GetCurrentFilePath()))
-                OnDocumentSwitched();
-
-            return PluginIsFullyLoaded && IsCurrentFileProgress;
-        }
-
-        /// <summary>
         /// Call this method to close all popup/autocompletion form and alike
         /// </summary>
         public static void ClosePopups() {
@@ -349,10 +360,6 @@ namespace _3PA {
 
         public static void Test() {
 
-            AppliMenu.Instance.ShowMenuAtCursor();
-
-            return;
-
             var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
@@ -360,120 +367,6 @@ namespace _3PA {
                     new List<string> { "ok", "cancel" },
                     true);
             UserCommunication.Notify(ii.ToString());
-            return;
-
-            //------------
-            var watch = Stopwatch.StartNew();
-            //------------
-            var inputFile = @"C:\Users\Julien\Desktop\in.p";
-            Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
-
-            OutputVis vis = new OutputVis();
-            tok.Accept(vis);
-
-            //--------------
-            watch.Stop();
-            //------------
-
-            // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
-
-            UserCommunication.Notify(AutoComplete.KnownStaticItems.Count.ToString());
-
-            UserCommunication.Notify(Npp.GetLine().Position + " vs " + Npp.Sci.Send(SciMsg.SCI_POSITIONFROMLINE, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.GetLine().Length + " vs " + Npp.Sci.Send(SciMsg.SCI_LINELENGTH, new IntPtr(Npp.GetLine().Index)).ToInt32() + " and " + Npp.LineFromPosition(Npp.GetLine().Position) + " vs " + Npp.Sci.Send(SciMsg.SCI_LINEFROMPOSITION, new IntPtr(Npp.Sci.Send(SciMsg.SCI_GETCURRENTPOS).ToInt32())).ToInt32() + " and " + Npp.Line.Count + " vs " + Npp.Sci.Send(SciMsg.SCI_GETLINECOUNT).ToInt32());
-
-            return;
-            UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
-                        The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
-                        It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
-                        You will have to manually copy the new file and delete the old file :<br><br>
-                        Copy this file : <a href='" + Path.GetDirectoryName(@"L:\cnaf 2014\Production\BAO\BOI\65.100\325-2\04-Développement\BOI 325-2 - Liste des composants.xls") + "'>" + @"L:\cnaf 2014\Production\BAO\BOI\65.100\325-2\04-Développement\BOI 325-2 - Liste des composants.xls" + @"</a></b><br>" + @"
-                        In this folder (replacing the old file) : <b><a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a></b><br>
-                        Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
-
-            UserCommunication.Notify("<a href='" + AssemblyInfo.Location.ProgressQuoter() + "'>" + AssemblyInfo.Location.ProgressQuoter() + "</a><br>" + AssemblyInfo.IsPreRelease + "<br><a href='" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "'>" + @"C:\Users\Julien\Desktop\saxo2jira.p" + "</a>" + "<br><a href='" + @"C:\Work\3P\3PA\Interop" + "'>" + @"C:\Work\3P\3PA\Interop" + "</a>" + "<br><a href='" + @"https://github.com/jcaillon/3P/releases" + "'>" + @" https://github.com/jcaillon/3P/releases" + "</a>");
-
-            var canIndent = ParserHandler.CanIndent();
-            UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(Config.FolderTemp, "lines.log") + "'>" + Path.Combine(Config.FolderTemp, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
-            if (!canIndent) {
-                StringBuilder x = new StringBuilder();
-                var i = 0;
-                var dic = ParserHandler.GetLineInfo();
-                while (dic.ContainsKey(i)) {
-                    x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
-                    //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
-                    i++;
-                }
-                File.WriteAllText(Path.Combine(Config.FolderTemp, "lines.log"), x.ToString());
-            }
-
-            //var x = 0;
-            //var y = 1/x;
-        }
-
-
-        public class OutputVis : IParserVisitor {
-            public void Visit(ParsedBlock pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
-            }
-
-            public void Visit(ParsedLabel pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
-            }
-
-            public void Visit(ParsedFunctionCall pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
-            }
-
-            public void Visit(ParsedFoundTableUse pars) {
-                Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Name);
-            }
-
-            public StringBuilder Output = new StringBuilder();
-            public void Visit(ParsedOnEvent pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
-            }
-
-            public void Visit(ParsedFunction pars) {
-                return;
-                Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
-            }
-
-            public void Visit(ParsedProcedure pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
-            }
-
-            public void Visit(ParsedIncludeFile pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
-            }
-
-            public void Visit(ParsedPreProc pars) {
-                //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
-            }
-
-            public void Visit(ParsedDefine pars) {
-                return;
-                //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
-                //if (pars.Type == ParseDefineType.Parameter)
-                //if (string.IsNullOrEmpty(pars.ViewAs))
-                Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
-            }
-
-            public void Visit(ParsedTable pars) {
-                return;
-                Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
-                foreach (var field in pars.Fields) {
-                    Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
-                }
-                Output.AppendLine("");
-            }
-
-            public void Visit(ParsedRun pars) {
-                return;
-                Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
-            }
         }
 
         #endregion

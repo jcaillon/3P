@@ -74,7 +74,7 @@ namespace _3PA.Lib {
         /// <param name="featureName"></param>
         /// <param name="minIntervalInMilliseconds"></param>
         /// <returns></returns>
-        public static bool IsSpamming(string featureName, int minIntervalInMilliseconds) {
+        public static bool IsSpamming(string featureName, int minIntervalInMilliseconds, bool resetOnSpam = false) {
             // first use, no problem
             if (!_registeredEvents.ContainsKey(featureName)) {
                 _registeredEvents.Add(featureName, DateTime.Now);
@@ -82,7 +82,9 @@ namespace _3PA.Lib {
             }
             // minimum interval not respected
             if (DateTime.Now.Subtract(_registeredEvents[featureName]).TotalMilliseconds < minIntervalInMilliseconds) {
-                _registeredEvents[featureName] = DateTime.Now;
+                if (resetOnSpam) {
+                    _registeredEvents[featureName] = DateTime.Now;
+                }
                 return true;
             }
             _registeredEvents[featureName] = DateTime.Now;

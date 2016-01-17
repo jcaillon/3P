@@ -126,7 +126,7 @@ namespace YamuiFramework.Controls {
                         e.Graphics.FillRectangle(b, boxRect);
                     }
                 } else {
-                    foreColor = YamuiThemeManager.Current.ButtonColorsDisabledForeColor;
+                    foreColor = YamuiThemeManager.Current.ButtonDisabledFore;
                 }
             }
 

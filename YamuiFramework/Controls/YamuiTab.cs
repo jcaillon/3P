@@ -293,7 +293,7 @@ namespace YamuiFramework.Controls {
         #region Paint
 
         protected override void OnPaint(PaintEventArgs e) {
-            e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
         }
 
         #endregion
@@ -328,7 +328,7 @@ namespace YamuiFramework.Controls {
             #region Override paint method
 
             protected override void OnPaint(PaintEventArgs e) {
-                e.Graphics.Clear(YamuiThemeManager.Current.FormColorBackColor);
+                e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
                 // background image?
                 if (!DontShowBackGroundImage) {
                     var img = YamuiThemeManager.Current.GetThemeImage();

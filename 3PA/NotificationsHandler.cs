@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
@@ -42,28 +41,22 @@ namespace _3PA {
 
     internal static partial class Plug {
 
-        #region public
-
-        #region Events
-
-        public delegate void SimpleCall();
+        #region Members
 
         /// <summary>
         /// Subscribe to this event, published when the current document in changed (on document open or tab switched)
         /// </summary>
-        public static event SimpleCall OnDocumentChangedEnd;
+        public static event Action OnDocumentChangedEnd;
 
         /// <summary>
         /// Published when the Npp windows is being moved
         /// </summary>
-        public static event SimpleCall OnNppWindowsMove;
+        public static event Action OnNppWindowsMove;
 
         /// <summary>
         /// Published when the Npp windows is activated
         /// </summary>
-        public static event SimpleCall OnNppWindowsActivate;
-
-        #endregion
+        public static event Action OnNppWindowsActivate;
 
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
@@ -72,147 +65,146 @@ namespace _3PA {
 
         #endregion
 
-
         #region Npp notifications
 
         /// <summary>
         /// handles the notifications send by npp and scintilla to the plugin
         /// </summary>
         public static void OnNppNotification(SCNotification nc) {
-            uint code = nc.nmhdr.code;
+            try {
+                uint code = nc.nmhdr.code;
 
-            #region Basic notifications
+                #region Basic notifications
 
-            switch (code) {
-                case (uint) NppMsg.NPPN_TBMODIFICATION:
-                    UnmanagedExports.FuncItems.RefreshItems();
-                    InitToolbarImages();
-                    return;
+                switch (code) {
+                    case (uint) NppNotif.NPPN_TBMODIFICATION:
+                        UnmanagedExports.FuncItems.RefreshItems();
+                        InitToolbarImages();
+                        return;
 
-                case (uint) NppMsg.NPPN_READY:
-                    // notify plugins that all the procedures of launchment of notepad++ are done
-                    OnNppReady();
-                    return;
+                    case (uint) NppNotif.NPPN_READY:
+                        // notify plugins that all the procedures of launchment of notepad++ are done
+                        OnNppReady();
+                        return;
 
-                case (uint) NppMsg.NPPN_SHUTDOWN:
-                    OnNppShutdown();
-                    return;
-            }
+                    case (uint) NppNotif.NPPN_SHUTDOWN:
+                        OnNppShutdown();
+                        return;
+                }
 
-            #endregion
+                #endregion
 
-            // Only do stuff when the dll is fully loaded
-            if (!PluginIsFullyLoaded) return;
+                // Only do stuff when the dll is fully loaded
+                if (!PluginIsFullyLoaded) return;
 
-            // the user changed the current document
-            if (code == (uint) NppMsg.NPPN_BUFFERACTIVATED) {
-                OnDocumentSwitched();
-                return;
-            }
+                // the user changed the current document
+                switch (code) {
+                    case (uint) NppNotif.NPPN_FILESAVED:
+                    case (uint) NppNotif.NPPN_BUFFERACTIVATED:
+                        OnDocumentSwitched();
+                        return;
+                }
 
-            // only do extra stuff if we are in a progress file
-            if (!IsCurrentFileProgress) return;
+                // only do extra stuff if we are in a progress file
+                if (!IsCurrentFileProgress) return;
 
-            #region extra
+                #region extra
 
-            switch (code) {
-                case (uint) SciMsg.SCN_CHARADDED:
-                    // called each time the user add a char in the current scintilla
-                    OnCharTyped((char) nc.ch);
-                    return;
+                switch (code) {
+                    case (uint) SciNotif.SCN_CHARADDED:
+                        // called each time the user add a char in the current scintilla
+                        OnCharTyped((char) nc.ch);
+                        return;
 
-                case (uint) SciMsg.SCN_UPDATEUI:
-                    // we need to set the indentation when we received this notification, not before or it's overwritten
-                    while (ActionsAfterUpdateUi.Any()) {
-                        ActionsAfterUpdateUi.Dequeue()();
-                    }
-
-
-                    if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
-                        nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
-                        // user scrolled
-                        OnPageScrolled();
-                    } else if (nc.updated == (int) SciMsg.SC_UPDATE_SELECTION) {
-                        // the user changed its selection
-                        OnUpdateSelection();
-                    }
-                    return;
-
-                case (uint) SciMsg.SCN_MODIFIED:
-                    // observe modification to lines
-                    Npp.UpdateLinesInfo(nc);
-
-                    // if the text has changed, parse
-                    if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 ||
-                        (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
-                        AutoComplete.ParseCurrentDocument();
-                    }
-
-                    // did the user supress 1 char?
-                    if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
-                        AutoComplete.UpdateAutocompletion();
-                    }
-
-                    // if (nc.linesAdded != 0)
-                    //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_USER) != 0;
-                    //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_UNDO) != 0;
-                    //bool x = (nc.modificationType & (int)SciMsg.SC_PERFORMED_REDO) != 0;
-                    return;
-
-                case (uint) SciMsg.SCN_STYLENEEDED:
-                    // if we use the contained lexer, we will receive this notification and we will have to style the text
-                    //Style.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
-                    return;
-
-                case (uint) SciMsg.SCN_MARGINCLICK:
-                    // called each time the user click on a margin
-                    // click on the error margin
-                    if (nc.margin == FilesInfo.ErrorMarginNumber) {
-                        // if it's an error symbol that has been clicked, the error on the line will be cleared
-                        if (!FilesInfo.ClearLineErrors(Npp.LineFromPosition(nc.position))) {
-                            // if nothing has been cleared, we go to the next error position
-                            FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
+                    case (uint) SciNotif.SCN_UPDATEUI:
+                        // we need to set the indentation when we received this notification, not before or it's overwritten
+                        while (ActionsAfterUpdateUi.Any()) {
+                            ActionsAfterUpdateUi.Dequeue()();
                         }
-                    }
-                    // can also use : modifiers, the appropriate combination of SCI_SHIFT, SCI_CTRL and SCI_ALT to indicate the keys that were held down at the time of the margin click.
-                    return;
 
-                case (uint) NppMsg.NPPN_FILEBEFOREOPEN:
-                    // fire when a file is opened
 
-                    return;
+                        if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
+                            nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
+                            // user scrolled
+                            OnPageScrolled();
+                        } else if (nc.updated == (int) SciMsg.SC_UPDATE_SELECTION) {
+                            // the user changed its selection
+                            OnUpdateSelection();
+                        }
+                        return;
 
-                case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:
-                    // notify plugins that plugin command shortcut is remapped
-                    //NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
-                    return;
+                    case (uint) SciNotif.SCN_MODIFIED:
+                        // observe modification to lines
+                        Npp.UpdateLinesInfo(nc);
 
-                case (uint) SciMsg.SCN_MODIFYATTEMPTRO:
-                    // Code a checkout when trying to modify a read-only file
+                        // if the text has changed, parse
+                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 ||
+                            (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
+                            AutoComplete.ParseCurrentDocument();
+                        }
 
-                    return;
+                        // did the user supress 1 char?
+                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
+                            AutoComplete.UpdateAutocompletion();
+                        }
+                        return;
 
-                case (uint) SciMsg.SCN_DWELLSTART:
-                    // when the user hover at a fixed position for too long
-                    OnDwellStart();
-                    return;
+                    case (uint) SciNotif.SCN_STYLENEEDED:
+                        // if we use the contained lexer, we will receive this notification and we will have to style the text
+                        //Style.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
+                        return;
 
-                case (uint) SciMsg.SCN_DWELLEND:
-                    // when he moves his cursor
-                    OnDwellEnd();
-                    return;
+                    case (uint) SciNotif.SCN_MARGINCLICK:
+                        // called each time the user click on a margin
+                        // click on the error margin
+                        if (nc.margin == FilesInfo.ErrorMarginNumber) {
+                            // if it's an error symbol that has been clicked, the error on the line will be cleared
+                            if (!FilesInfo.ClearLineErrors(Npp.LineFromPosition(nc.position))) {
+                                // if nothing has been cleared, we go to the next error position
+                                FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
+                            }
+                        }
+                        return;
 
-                case (uint) NppMsg.NPPN_FILESAVED:
-                    // on file saved
-                    OnFileSaved();
-                    return;
+                    case (uint) NppNotif.NPPN_FILEBEFOREOPEN:
+                        // fire when a file is opened
+
+                        return;
+
+                    case (uint) NppNotif.NPPN_SHORTCUTREMAPPED:
+                        // notify plugins that plugin command shortcut is remapped
+                        //NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
+                        return;
+
+                    case (uint) SciNotif.SCN_MODIFYATTEMPTRO:
+                        // Code a checkout when trying to modify a read-only file
+
+                        return;
+
+                    case (uint) SciNotif.SCN_DWELLSTART:
+                        // when the user hover at a fixed position for too long
+                        OnDwellStart();
+                        return;
+
+                    case (uint) SciNotif.SCN_DWELLEND:
+                        // when he moves his cursor
+                        OnDwellEnd();
+                        return;
+
+                    case (uint) NppNotif.NPPN_FILESAVED:
+                        // on file saved
+                        OnFileSaved();
+                        return;
+                }
+
+                #endregion
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
             }
-
-            #endregion
         }
 
         #endregion
-
 
         #region WndProc notifications
 
@@ -236,13 +228,12 @@ namespace _3PA {
 
         #endregion
 
-
         #region On mouse message
 
-        private static void InstanceOnGetMouseMessage(WinApi.WindowsMessage message, MOUSEHOOKSTRUCT mouseStruct, out bool handled) {
+        private static void OnMouseMessage(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct, out bool handled) {
             switch (message) {
                 // middle click
-                case WinApi.WindowsMessage.WM_MBUTTONDOWN:
+                case WinApi.WindowsMessageMouse.WM_MBUTTONDOWN:
                     Rectangle scintillaRectangle = Rectangle.Empty;
                     WinApi.GetWindowRect(Npp.HandleScintilla, ref scintillaRectangle);
                     if (scintillaRectangle.Contains(Cursor.Position)) {
@@ -252,9 +243,10 @@ namespace _3PA {
                     }
                     break;
                 // CTRL + Right click
-                case WinApi.WindowsMessage.WM_RBUTTONUP:
-                    if (KeyboardMonitor.GetModifiers.IsCtrl) {
-                        AppliMenu.Instance.ShowMenuAtCursor();
+                case WinApi.WindowsMessageMouse.WM_RBUTTONUP:
+                    if (Config.Instance.AppliSimpleRightClickForMenu && !KeyboardMonitor.GetModifiers.IsCtrl ||
+                        !Config.Instance.AppliSimpleRightClickForMenu && KeyboardMonitor.GetModifiers.IsCtrl) {
+                        AppliMenu.ShowMainMenuAtCursor();
                         handled = true;
                         return;
                     }
@@ -272,31 +264,18 @@ namespace _3PA {
         /// Called when the user presses a key
         /// </summary>
         // ReSharper disable once RedundantAssignment
-        public static void OnKeyDown(Keys key, KeyModifiers keyModifiers, ref bool handled) {
+        private static void OnKeyDown(Keys key, KeyModifiers keyModifiers, ref bool handled) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
+            MainFeatures.MenuItem menuItem = null;
             try {
-                // check if the user triggered a function for which we set a shortcut (internalShortcuts)
-                Tuple<Action, int, string> commandUsed = null;
-                foreach (var kpv in NppMenu.InternalShortCuts) {
-                    if ((byte)key == kpv.Key._key &&
-                        keyModifiers.IsCtrl == kpv.Key.IsCtrl &&
-                        keyModifiers.IsShift == kpv.Key.IsShift &&
-                        keyModifiers.IsAlt == kpv.Key.IsAlt) {
-                        commandUsed = kpv.Value;
-                    }
-                }
-
-                // For the main window, we make an exception because we want to display no matter what
-                if (commandUsed != null && commandUsed.Item3.Equals("Open_main_window")) {
-                    if (Utils.IsSpamming("Open_main_window", 100))
-                        return;
-                    commandUsed.Item1();
-                    handled = true;
+                // Since it's a keydown message, we can receive this a lot if the user let a button pressed, prevent it here
+                if (Utils.IsSpamming(key.ToString(), 50, true)) {
                     return;
                 }
 
+                //HACK:
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
                 // It only works "almost normally" if we ShowDialog() the form?! Wtf right?
@@ -312,14 +291,30 @@ namespace _3PA {
                     }
                 }
 
-                // check if allowed to execute
-                if (!AllowFeatureExecution(0))
+                // check if the user triggered a 3P function defined in the AppliMenu
+                foreach (var item in AppliMenu.Instance.MainMenuList) {
+                    if ((byte)key == item.Shortcut._key &&
+                        keyModifiers.IsCtrl == item.Shortcut.IsCtrl &&
+                        keyModifiers.IsShift == item.Shortcut.IsShift &&
+                        keyModifiers.IsAlt == item.Shortcut.IsAlt &&
+                        (item.Generic || IsCurrentFileProgress)) {
+                        menuItem = item;
+                        item.Do();
+                        handled = true;
+                        return;
+                    }
+                }
+
+                // The following is specific to 3P so don't go further if we are not on a valid file
+                if (!IsCurrentFileProgress) {
                     return;
+                }
 
                 // Close interfacePopups
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
                     ClosePopups();
                 }
+
                 // Autocompletion 
                 if (AutoComplete.IsVisible) {
                     if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
@@ -365,18 +360,8 @@ namespace _3PA {
                     handled = true;
                 }
 
-                // we matched a shortcut, execute it
-                if (commandUsed != null) {
-                    commandUsed.Item1();
-                    handled = true;
-                }
-
             } catch (Exception e) {
-                var shortcutName = "Instance_KeyDown";
-                foreach (var shortcut in NppMenu.InternalShortCuts.Keys.Where(shortcut => (byte)key == shortcut._key && keyModifiers.IsCtrl == shortcut.IsCtrl && keyModifiers.IsShift == shortcut.IsShift && keyModifiers.IsAlt == shortcut.IsAlt)) {
-                    shortcutName = NppMenu.InternalShortCuts[shortcut].Item3;
-                }
-                ErrorHandler.ShowErrors(e, "Error in " + shortcutName);
+                ErrorHandler.ShowErrors(e, "Occured in : " + (menuItem == null ? (new ShortcutKey(keyModifiers.IsCtrl, keyModifiers.IsAlt, keyModifiers.IsShift, key)).ToString() : menuItem.ItemId));
             }
         }
 

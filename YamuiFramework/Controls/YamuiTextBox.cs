@@ -163,7 +163,7 @@ namespace YamuiFramework.Controls {
                         clientRectangle.Offset(0, 2);
                         break;
                 }
-                TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonColorsDisabledForeColor, flags);
+                TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonDisabledFore, flags);
             }
 
             // Modify colors

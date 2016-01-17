@@ -40,12 +40,6 @@ namespace _3PA.MainFeatures {
         #region fields
 
         /// <summary>
-        /// You can set this property to read the theme.xml file from a local path instead of
-        /// the embedded ressource file
-        /// </summary>
-        public static string ThemeXmlPath;
-
-        /// <summary>
         /// List of themes
         /// </summary>
         private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();
@@ -289,12 +283,7 @@ namespace _3PA.MainFeatures {
         /// <returns></returns>
         public static List<StyleTheme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
-                if (string.IsNullOrEmpty(ThemeXmlPath) || !File.Exists(ThemeXmlPath)) {
-                    Object2Xml<StyleTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
-                    if (!string.IsNullOrEmpty(ThemeXmlPath))
-                        Object2Xml<StyleTheme>.SaveToFile(_listOfThemes, ThemeXmlPath, true);
-                } else
-                    Object2Xml<StyleTheme>.LoadFromFile(_listOfThemes, ThemeXmlPath, true);
+                Object2Xml<StyleTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
             }
 
             if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)

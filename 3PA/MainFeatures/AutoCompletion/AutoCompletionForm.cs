@@ -63,7 +63,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
-        public event EventHandler<TabCompletedEventArgs> TabCompleted;
+        public event EventHandler<TabCompletedEventArgs> InsertSuggestion;
 
         // the private fields below are used for the filter function
         private static Dictionary<CompletionType, SelectorButton<CompletionType>> _displayedTypes;
@@ -444,7 +444,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         protected virtual void OnTabCompleted(TabCompletedEventArgs e) {
-            var handler = TabCompleted;
+            var handler = InsertSuggestion;
             if (handler != null) handler(this, e);
         }
         #endregion

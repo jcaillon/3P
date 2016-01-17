@@ -124,7 +124,7 @@ namespace YamuiFramework.Controls {
                 _graphicsBuffer.Graphics.Clear(BackColor);
 
             for (int i = 0; i < _circlePoints.Length; i++) {
-                _graphicsBuffer.Graphics.FillEllipse(_circleIndex == i ? new SolidBrush(YamuiThemeManager.Current.AccentColor) : new SolidBrush(YamuiThemeManager.Current.ButtonColorsHoverBackColor), _circlePoints[i].X,
+                _graphicsBuffer.Graphics.FillEllipse(_circleIndex == i ? new SolidBrush(YamuiThemeManager.Current.AccentColor) : new SolidBrush(YamuiThemeManager.Current.ButtonHoverBack), _circlePoints[i].X,
                     _circlePoints[i].Y, _circleDiam, _circleDiam);
             }
 

@@ -69,14 +69,14 @@ namespace YamuiFramework.Themes {
         /// Subscribe to this event to feed YamuiFramework with a css sheet of your making
         /// </summary>
         public static event GetCssSheet OnGetCssSheet;
-        public static event CssSheetChanged OnCssSheetChanged;
+        public static event Action OnCssSheetChanged;
 
         public static CssData BaseCssData {
             get {
                 if (_baseCssData == null) {
                     var baseCss = Resources.Resources.BaseStyleSheet;
-                    baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(Current.LabelsColorsNormalForeColor));
-                    baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(Current.FormColorBackColor));
+                    baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(Current.LabelNormalFore));
+                    baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(Current.FormBack));
 
                     // load extra css from the user program
                     if (OnGetCssSheet != null) {
@@ -99,7 +99,6 @@ namespace YamuiFramework.Themes {
 
         private static CssData _baseCssData;
         public delegate string GetCssSheet();
-        public delegate void CssSheetChanged();
 
         /// <summary>
         /// Subscribe to this event to feed the YamuiFramework with an image to load in a img tag

@@ -166,13 +166,13 @@ namespace YamuiFramework.Controls {
         protected override void OnDrawItem(DrawItemEventArgs e) {
             if (e.Index >= 0) {
                 Color foreColor;
-                Color backColor = YamuiThemeManager.Current.ButtonColorsNormalBackColor;
+                Color backColor = YamuiThemeManager.Current.ButtonNormalBack;
 
                 if ((e.State & DrawItemState.Selected) == DrawItemState.Selected) {
                     backColor = YamuiThemeManager.Current.AccentColor;
-                    foreColor = YamuiThemeManager.Current.ButtonColorsPressForeColor;
+                    foreColor = YamuiThemeManager.Current.ButtonPressedFore;
                 } else {
-                    foreColor = YamuiThemeManager.Current.ButtonColorsNormalForeColor;
+                    foreColor = YamuiThemeManager.Current.ButtonNormalFore;
                 }
 
                 using (SolidBrush b = new SolidBrush(backColor)) {

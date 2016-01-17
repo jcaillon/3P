@@ -92,8 +92,8 @@ namespace YamuiFramework.Controls {
             Color textColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, _isFocused, _isHovered, _isPressed, Enabled);
             Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, _isFocused, _isHovered, Checked, Enabled);
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
-            Color unfilledColor = YamuiThemeManager.Current.ButtonColorsNormalBackColor;
-            if (unfilledColor == YamuiThemeManager.Current.FormColorBackColor) unfilledColor = borderColor;
+            Color unfilledColor = YamuiThemeManager.Current.ButtonNormalBack;
+            if (unfilledColor == YamuiThemeManager.Current.FormBack) unfilledColor = borderColor;
             Color fillColor = Checked ? YamuiThemeManager.Current.AccentColor : unfilledColor;
 
             Rectangle textRect = new Rectangle(33, 0, Width - 42, Height);

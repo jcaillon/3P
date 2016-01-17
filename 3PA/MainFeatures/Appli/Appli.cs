@@ -69,41 +69,14 @@ namespace _3PA.MainFeatures.Appli {
         /// Opens the application window and go to a specific page
         /// </summary>
         /// <param name="pageName"></param>
-        public static void GoToPage(string pageName) {
-            if (!_hasBeenShownOnce || !_form.Visible) {
-                ToggleView();
-            }
-            _form.ShowPage(pageName);
-        }
-
-        /// <summary>
-        /// Opens the application window and go to the about page
-        /// </summary>
-        public static void GoToAboutPage() {
+        public static void GoToPage(PageNames pageName) {
             try {
-                GoToPage("welcome");
+                if (!_hasBeenShownOnce || !_form.Visible) {
+                    ToggleView();
+                }
+                _form.ShowPage(pageName.ToString());
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in GoToAboutPage");
-            }
-        }
-
-        /// <summary>
-        /// Opens the application window and go to the about page
-        /// </summary>
-        public static void GoToOptionPage() {
-            try {
-                GoToPage("profiles");
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
-            }
-        }
-
-
-        internal static void GoToFileInfo() {
-            try {
-                GoToPage("file_info");
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in GoToSettingsPage");
+                ErrorHandler.ShowErrors(e, "Error in GoToPage");
             }
         }
 
