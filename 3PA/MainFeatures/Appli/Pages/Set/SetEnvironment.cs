@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SetEnvironment.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -568,11 +568,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="blinkColor"></param>
         private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
             textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
         }
         private void BlinkButton(YamuiButton button, Color blinkColor) {
             button.UseCustomBackColor = true;
-            Transition.run(button, "BackColor", ThemeManager.Current.ButtonColorsNormalBackColor, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { button.UseCustomBackColor = false; });
+            Transition.run(button, "BackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { button.UseCustomBackColor = false; });
         }
 
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (AutoCompletionForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -108,19 +108,19 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Style the control
             fastOLV.OwnerDraw = true;
             fastOLV.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            fastOLV.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
-            fastOLV.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-            fastOLV.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.AutoCompletionFocusBackColor;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.AutoCompletionFocusForeColor;
+            fastOLV.BackColor = ThemeManager.Current.FormBack;
+            fastOLV.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
+            fastOLV.ForeColor = ThemeManager.Current.FormFore;
+            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
+            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
             fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
             fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
 
             // Decorate and configure hot item
             fastOLV.UseHotItem = true;
             fastOLV.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.AutoCompletionHoverBackColor,
-                ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor
+                BackColor = ThemeManager.Current.MenuHoverBack,
+                ForeColor = ThemeManager.Current.MenuHoverFore
             };
 
             // set the image list to use for the keywords
@@ -133,9 +133,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.EmptyListMsg = StrEmptyList;
             TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
             if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-                textOverlay.BackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-                textOverlay.BorderColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+                textOverlay.TextColor = ThemeManager.Current.FormFore;
+                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
+                textOverlay.BorderColor = ThemeManager.Current.FormFore;
                 textOverlay.BorderWidth = 4.0f;
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;
@@ -202,12 +202,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 TextDecoration decoration = new TextDecoration(data.SubString, 100) {
                     Alignment = ContentAlignment.MiddleRight,
                     Offset = new Size(offset, 0),
-                    Font = FontManager.GetFont(FontStyle.Bold, 11),
-                    TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor,
+                    Font = FontManager.GetFont(FontStyle.Bold, 10),
+                    TextColor = ThemeManager.Current.SubTextFore,
                     CornerRounding = 1f,
                     Rotation = 0,
                     BorderWidth = 1,
-                    BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor
+                    BorderColor = ThemeManager.Current.SubTextFore
                 };
                 args.SubItem.Decorations.Add(decoration);
             }

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (FileExplorerForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -137,7 +136,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
             toolTipHtml.SetToolTip(lbStatus, "Provides information on the current status of the file");
 
-            lbStatus.BackColor = ThemeManager.Current.FormColorBackColor;
+            lbStatus.BackColor = ThemeManager.Current.FormBack;
 
             #endregion
 
@@ -184,7 +183,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormBack;
             e.Graphics.Clear(backColor);
         }
         #endregion
@@ -239,8 +238,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             // currently document
             if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
-                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusBack)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusFore), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };
@@ -272,11 +271,11 @@ namespace _3PA.MainFeatures.FileExplorer {
                     Alignment = ContentAlignment.MiddleRight,
                     Offset = new Size(offset, 0),
                     Font = FontManager.GetFont(FontStyle.Bold, 11),
-                    TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor,
+                    TextColor = ThemeManager.Current.SubTextFore,
                     CornerRounding = 1f,
                     Rotation = 0,
                     BorderWidth = 1,
-                    BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor
+                    BorderColor = ThemeManager.Current.SubTextFore
                 };
                 args.SubItem.Decorations.Add(decoration);
             }
@@ -289,28 +288,28 @@ namespace _3PA.MainFeatures.FileExplorer {
             // Style the control
             ovl.OwnerDraw = true;
             ovl.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            ovl.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
-            ovl.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-            ovl.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-            ovl.HighlightBackgroundColor = ThemeManager.Current.AutoCompletionFocusBackColor;
-            ovl.HighlightForegroundColor = ThemeManager.Current.AutoCompletionFocusForeColor;
+            ovl.BackColor = ThemeManager.Current.FormBack;
+            ovl.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
+            ovl.ForeColor = ThemeManager.Current.FormFore;
+            ovl.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
+            ovl.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
             ovl.UnfocusedHighlightBackgroundColor = ovl.HighlightBackgroundColor;
             ovl.UnfocusedHighlightForegroundColor = ovl.HighlightForegroundColor;
 
             // Decorate and configure hot item
             ovl.UseHotItem = true;
             ovl.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.AutoCompletionHoverBackColor,
-                ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor
+                BackColor = ThemeManager.Current.MenuHoverBack,
+                ForeColor = ThemeManager.Current.MenuHoverFore
             };
 
             // overlay of empty list :
             ovl.EmptyListMsg = StrEmptyList;
             TextOverlay textOverlay = ovl.EmptyListMsgOverlay as TextOverlay;
             if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-                textOverlay.BackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-                textOverlay.BorderColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+                textOverlay.TextColor = ThemeManager.Current.FormFore;
+                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
+                textOverlay.BorderColor = ThemeManager.Current.FormFore;
                 textOverlay.BorderWidth = 4.0f;
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;
@@ -783,7 +782,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // blink back color
             lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormColorBackColor) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormColorBackColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
+                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormBack) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
 
             _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
         }

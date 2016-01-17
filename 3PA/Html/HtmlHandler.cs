@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (LocalHtmlHandler.cs) is part of 3P.
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (HtmlHandler.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -42,11 +41,11 @@ namespace _3PA.Html {
 
         public static string YamuiThemeManagerOnOnGetCssSheet() {
             var cssStyleSheet = Resources.StyleSheet;
-            cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalForeColor));
-            cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalBackColor));
-            cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalAlternateBackColor));
+            cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormFore));
+            cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormBack));
+            cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormAltBack));
             cssStyleSheet = cssStyleSheet.Replace("%ACCENTCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AccentColor));
-            cssStyleSheet = cssStyleSheet.Replace("%SUBSTRINGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AutoCompletionNormalSubTypeForeColor));
+            cssStyleSheet = cssStyleSheet.Replace("%SUBSTRINGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.SubTextFore));
             cssStyleSheet = cssStyleSheet.Replace("%LINKCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.GenericLinkColor));
             return cssStyleSheet;
         }

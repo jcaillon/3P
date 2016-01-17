@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (template.cs) is part of 3P.
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (ProfilesPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using YamuiFramework.Controls;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {

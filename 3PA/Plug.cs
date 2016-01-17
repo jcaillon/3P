@@ -1,6 +1,6 @@
 #region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (Plug.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -26,7 +25,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 using _3PA.Html;
 using _3PA.Images;
@@ -82,65 +80,26 @@ namespace _3PA {
         /// </summary>
         internal static void OnCommandMenuInit() {
 
-            _menu.SetCommand("Open main window", Appli.ToggleView, "Open_main_window:Alt+Space", false);
-            _menu.SetCommand("Show auto-complete suggestions", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List:Ctrl+Space", false);
+            //var CmdIndex = 0;
+            //Npp.SetCommand(CmdIndex++, "Show 3P's main menu", functionPointer, thisShortcut, checkOnInit);
 
+            AppliMenu.DockableCommandIndex = _menu.CmdIndex;
+            _menu.SetCommand("Show main menu  [Ctrl + Right click]", AppliMenu.DoShowMenuAtCursor);
             _menu.SetSeparator();
-
-            _menu.SetCommand("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help:F1", false);
-            _menu.SetCommand("Check syntax", ProCodeUtils.CheckSyntaxCurrent, "Check_syntax:Shift+F1", false);
-            _menu.SetCommand("Compile", ProCodeUtils.CompileCurrent, "Compile:Alt+F1", false);
-            _menu.SetCommand("Run program", ProCodeUtils.RunCurrent, "Run_program:Ctrl+F1", false);
-            //menu.SetCommand("Prolint code", ProgressCodeUtils.NotImplemented, "Prolint:F12", false);
-
-            _menu.SetSeparator();
-
-            _menu.SetCommand("Search file", FileExplorer.StartSearch, "Search_file:Alt+Q", false);
-            _menu.SetCommand("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition:Ctrl+B", false);
-            _menu.SetCommand("Go backwards", Npp.GoBackFromDefinition, "Go_Backwards:Ctrl+Shift+B", false);
-            _menu.SetCommand("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment:Ctrl+Q", false);
-            //menu.SetCommand("Insert mark", ProgressCodeUtils.NotImplemented, "Insert_mark:Ctrl+T", false);
-            //menu.SetCommand("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document:Ctrl+I", false);
-            //menu.SetCommand("Send to AppBuilder", ProgressCodeUtils.NotImplemented, "Send_appbuilder:Alt+O", false);
-
-            _menu.SetSeparator();
-
-            _menu.SetCommand("Edit current file info", Appli.GoToFileInfo, "Edit_file_info:Ctrl+Shift+M", false);
-            //menu.SetCommand("Insert title block", ProgressCodeUtils.NotImplemented, "Insert_title_block:Ctrl+Alt+M", false);
-            _menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
-
-            _menu.SetSeparator();
-
-            //menu.SetCommand("Insert new function", ProgressCodeUtils.NotImplemented);
-            //menu.SetCommand("Insert new internal procedure", ProgressCodeUtils.NotImplemented);
-
-            //menu.SetSeparator();
-
+            CodeExplorer.DockableCommandIndex = _menu.CmdIndex;
             _menu.SetCommand("Toggle code explorer", CodeExplorer.Toggle);
-            CodeExplorer.DockableCommandIndex = _menu.CmdIndex - 1;
+            FileExplorer.DockableCommandIndex = _menu.CmdIndex;
             _menu.SetCommand("Toggle file explorer", FileExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = _menu.CmdIndex - 1;
 
-            _menu.SetSeparator();
-
-            if (Config.IsDevelopper)
-                _menu.SetCommand("Test", Test, "Test:Ctrl+D", false);
-
-            if (Config.IsDevelopper)
-                _menu.SetCommand("DEBUG", StartDebug, "DEBUG:Ctrl+F12", false);
-
-            //menu.SetSeparator();
-
-            _menu.SetCommand("Options", Appli.GoToOptionPage);
-            _menu.SetCommand("About", Appli.GoToAboutPage);
         }
 
         /// <summary>
         /// display images in the npp toolbar
         /// </summary>
         internal static void InitToolbarImages() {
-            Npp.SetToolbarImage(ImageResources.logo16x16_r, FileExplorer.DockableCommandIndex);
-            Npp.SetToolbarImage(ImageResources.logo16x16, CodeExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.FileExplorer16x16, FileExplorer.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.CodeExplorer16x16, CodeExplorer.DockableCommandIndex);
         }
 
         /// <summary>
@@ -283,7 +242,7 @@ namespace _3PA {
             KeyboardMonitor.Instance.Install();
 
             // Install a mouse hook
-            MouseMonitor.Instance.Add(WinApi.WindowsMessage.WM_MBUTTONDOWN);
+            MouseMonitor.Instance.Add(WinApi.WindowsMessage.WM_MBUTTONDOWN, WinApi.WindowsMessage.WM_RBUTTONUP);
             MouseMonitor.Instance.GetMouseMessage += InstanceOnGetMouseMessage;
             MouseMonitor.Instance.Install();
 
@@ -390,29 +349,7 @@ namespace _3PA {
 
         public static void Test() {
 
-            var menu = new YamuiMenu(Cursor.Position, new List<YamuiMenuItem> {
-                new YamuiMenuSeparator(),
-                new YamuiMenuItem {
-                    ItemName = "zefefzefzef zedf item 1",
-                    Children = new List<YamuiMenuItem> {
-                        new YamuiMenuItem {ItemName = "child 1", ItemImage = ImageResources.Abbreviation}
-                    }
-                },
-                new YamuiMenuItem {
-                    ItemName = "item 2",
-                },
-                new YamuiMenuSeparator(),
-                new YamuiMenuItem {
-                    ItemName = "item 3",
-                    Children = new List<YamuiMenuItem> {
-                        new YamuiMenuItem {ItemName = "child 1"},
-                        new YamuiMenuSeparator(),
-                        new YamuiMenuItem {ItemName = "child 2"}
-                    }
-                }
-            },
-            "<div class='contextMenuTitle'><img src='logo16x16' style='padding-right: 7px; padding-top: 1px;'>Main menu</span>");
-            menu.Show();
+            AppliMenu.Instance.ShowMenuAtCursor();
 
             return;
 

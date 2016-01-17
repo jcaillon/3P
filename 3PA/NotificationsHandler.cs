@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (NotificationsHandler.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -165,7 +184,7 @@ namespace _3PA {
 
                 case (uint) NppMsg.NPPN_SHORTCUTREMAPPED:
                     // notify plugins that plugin command shortcut is remapped
-                    NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
+                    //NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
                     return;
 
                 case (uint) SciMsg.SCN_MODIFYATTEMPTRO:
@@ -226,10 +245,20 @@ namespace _3PA {
                 case WinApi.WindowsMessage.WM_MBUTTONDOWN:
                     Rectangle scintillaRectangle = Rectangle.Empty;
                     WinApi.GetWindowRect(Npp.HandleScintilla, ref scintillaRectangle);
-                    if (scintillaRectangle.Contains(Cursor.Position))
+                    if (scintillaRectangle.Contains(Cursor.Position)) {
                         ProCodeUtils.GoToDefinition(true);
-                    handled = true;
-                    return;
+                        handled = true;
+                        return;
+                    }
+                    break;
+                // CTRL + Right click
+                case WinApi.WindowsMessage.WM_RBUTTONUP:
+                    if (KeyboardMonitor.GetModifiers.IsCtrl) {
+                        AppliMenu.Instance.ShowMenuAtCursor();
+                        handled = true;
+                        return;
+                    }
+                    break;
             }
             handled = false;
         }

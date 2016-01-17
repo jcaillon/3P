@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppDockableDialog.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -110,6 +110,9 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         public void RefreshPosAndLoc() {
             var rect = new Rectangle();
             WinApi.GetWindowRect(_masterForm.Handle, ref rect);
+
+            if (Owner == null)
+                return;
 
             // update location
             if (_masterRectangle.Location != rect.Location) {

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (NppInterfaceForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.ComponentModel;
 using System.Drawing;
@@ -195,7 +194,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormBack;
             var borderColor = ThemeManager.Current.AccentColor;
             var borderWidth = 1;
 

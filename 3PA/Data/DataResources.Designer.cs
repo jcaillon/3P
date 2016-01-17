@@ -154,10 +154,10 @@ namespace _3PA.Data {
         ///    &lt;PageBackGroundImage Value=&quot;&quot; /&gt;
         ///    &lt;UseCurrentAccentColor Value=&quot;true&quot; /&gt;
         ///    &lt;ThemeAccentColor Value=&quot;#1BA1E2&quot; /&gt;
-        ///    &lt;FormColorBackColor Value=&quot;#E6E6E6&quot; /&gt;
-        ///    &lt;FormColorForeColor Value=&quot;#1E1E1E&quot; /&gt;
-        ///    &lt;ScrollBarsColorsNormalBackColor Value=&quot;#CCCCCC&quot; /&gt;
-        ///    &lt;ScrollBarsColorsNormalForeColor Value=&quot;#666666&quot; /&gt;
+        ///    &lt;FormBack Value=&quot;#E6E6E6&quot; /&gt;
+        ///    &lt;FormFore Value=&quot;#1E1E1E&quot; /&gt;
+        ///    &lt;ScrollBarNormalBack Value=&quot;#CCCCCC&quot; /&gt;
+        ///    &lt;ScrollThumbNormalBack Value=&quot;#666666&quot; /&gt;
         ///    &lt;ScrollBarsColorsHoverBackC [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string ThemesList {

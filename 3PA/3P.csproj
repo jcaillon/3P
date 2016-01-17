@@ -92,6 +92,7 @@
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\AppliMenu.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\NppDockableDialog.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -373,6 +374,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
     <Content Include="Images\DockableExplorer\Flag\LoadPersistent.png" />
@@ -415,6 +417,7 @@
     <Content Include="Images\FileExplorer\ExplorerDir1.png" />
     <Content Include="Images\FileExplorer\ExplorerDir2.png" />
     <Content Include="Images\FileExplorer\ExplorerDir3.png" />
+    <Content Include="Images\FileExplorer\FileExplorer16x16.png" />
     <Content Include="Images\FileExplorer\FileExplorerLogo.png" />
     <Content Include="Images\FileExplorer\FolderType.png" />
     <Content Include="Images\FileExplorer\GetHelp.png" />

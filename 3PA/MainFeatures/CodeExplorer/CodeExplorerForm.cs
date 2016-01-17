@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CodeExplorerForm.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -143,7 +142,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormColorBackColor;
+            var backColor = ThemeManager.Current.FormBack;
             e.Graphics.Clear(backColor);
         }
         #endregion
@@ -160,7 +159,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         #endregion
-
 
         #region cell formatting
         /// <summary>
@@ -186,8 +184,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // currently selected block
             if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
-                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.AutoCompletionFocusBackColor)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.AutoCompletionFocusForeColor), 1),
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusBack)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusFore), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };
@@ -218,12 +216,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 TextDecoration decoration = new TextDecoration(obj.SubString, 100) {
                     Alignment = ContentAlignment.MiddleRight,
                     Offset = new Size(offset, 0),
-                    Font = FontManager.GetFont(FontStyle.Bold, 11),
-                    TextColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor,
+                    Font = FontManager.GetFont(FontStyle.Bold, 10),
+                    TextColor = ThemeManager.Current.SubTextFore,
                     CornerRounding = 1f,
                     Rotation = 0,
                     BorderWidth = 1,
-                    BorderColor = ThemeManager.Current.AutoCompletionNormalSubTypeForeColor
+                    BorderColor = ThemeManager.Current.SubTextFore
                 };
                 args.SubItem.Decorations.Add(decoration);
             }
@@ -409,28 +407,28 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // Style the control
             ovlTree.OwnerDraw = true;
             ovlTree.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            ovlTree.BackColor = ThemeManager.Current.AutoCompletionNormalBackColor;
-            ovlTree.AlternateRowBackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-            ovlTree.ForeColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-            ovlTree.HighlightBackgroundColor = ThemeManager.Current.AutoCompletionFocusBackColor;
-            ovlTree.HighlightForegroundColor = ThemeManager.Current.AutoCompletionFocusForeColor;
+            ovlTree.BackColor = ThemeManager.Current.FormBack;
+            ovlTree.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
+            ovlTree.ForeColor = ThemeManager.Current.FormFore;
+            ovlTree.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
+            ovlTree.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
             ovlTree.UnfocusedHighlightBackgroundColor = ovlTree.HighlightBackgroundColor;
             ovlTree.UnfocusedHighlightForegroundColor = ovlTree.HighlightForegroundColor;
 
             // Decorate and configure hot item
             ovlTree.UseHotItem = true;
             ovlTree.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.AutoCompletionHoverBackColor,
-                ForeColor = ThemeManager.Current.AutoCompletionHoverForeColor
+                BackColor = ThemeManager.Current.MenuHoverBack,
+                ForeColor = ThemeManager.Current.MenuHoverFore
             };
 
             // overlay of empty list :
             ovlTree.EmptyListMsg = EmptyListString;
             TextOverlay textOverlay = ovlTree.EmptyListMsgOverlay as TextOverlay;
             if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.AutoCompletionNormalForeColor;
-                textOverlay.BackColor = ThemeManager.Current.AutoCompletionNormalAlternateBackColor;
-                textOverlay.BorderColor = ThemeManager.Current.AutoCompletionNormalForeColor;
+                textOverlay.TextColor = ThemeManager.Current.FormFore;
+                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
+                textOverlay.BorderColor = ThemeManager.Current.FormFore;
                 textOverlay.BorderWidth = 4.0f;
                 textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
                 textOverlay.Rotation = -5;

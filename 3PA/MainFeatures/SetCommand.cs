@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (SetCommand.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
@@ -26,6 +25,11 @@ using _3PA.Interop;
 
 namespace _3PA.MainFeatures {
 
+    /* Handle the Npp menu the old way :
+     *  _menu.SetCommand("Edit current file info", Appli.GoToFileInfo, "Edit_file_info:Ctrl+Shift+M", false);
+        _menu.SetCommand("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags:Ctrl+M", false);
+        _menu.SetSeparator();
+     */
     internal class NppMenu {
 
         #region fields

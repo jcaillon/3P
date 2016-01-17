@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
-// This file (CompilationPath.cs) is part of 3P.
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (ProCompilePath.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by

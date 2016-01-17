@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2015 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (CustomTreeRenderer.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         ///     Create a TreeRenderer
         /// </summary>
         public CustomTreeRenderer(string filterStr) {
-            _linePen = new Pen(ThemeManager.Current.AutoCompletionNormalAlternateBackColor, 1.5f) {
+            _linePen = new Pen(ThemeManager.Current.FormAltBack, 1.5f) {
                 DashStyle = DashStyle.Solid
             };
             _fillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
@@ -103,17 +103,17 @@ namespace _3PA.MainFeatures.CodeExplorer {
             var x = r.X + (r.Width / 2) - w / 2;
             var y = r.Y + (r.Height / 2) - h / 2;
 
-            using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverBorderColor)) {
+            using (var p = new Pen(ThemeManager.Current.ButtonHoverBorder)) {
                 g.DrawRectangle(p, new Rectangle(x, y, w, h));
             }
-            using (var p = new SolidBrush(ThemeManager.Current.ButtonColorsHoverBackColor)) {
+            using (var p = new SolidBrush(ThemeManager.Current.ButtonHoverBack)) {
                 g.FillRectangle(p, new Rectangle(x + 1, y + 1, w - 1, h - 1));
             }
             if (isExpanded)
                 using (var b = new SolidBrush(ThemeManager.Current.AccentColor)) {
                     g.FillRectangle(b, new Rectangle(x + 2, y + 2, w - 4, h - 4));
                 }
-            //using (var p = new Pen(ThemeManager.Current.ButtonColorsHoverForeColor)) {
+            //using (var p = new Pen(ThemeManager.Current.ButtonHoverFore)) {
             //    g.DrawLine(p, x + 2, y + 4, x + w - 2, y + 4);
             //    if (!isExpanded)
             //        g.DrawLine(p, x + 4, y + 2, x + 4, y + h - 2);
