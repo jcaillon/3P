@@ -77,6 +77,7 @@ namespace YamuiFramework.Themes {
                     var baseCss = Resources.Resources.BaseStyleSheet;
                     baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(Current.LabelNormalFore));
                     baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(Current.FormBack));
+                    baseCss = baseCss.Replace("%FORMBORDER%", ColorTranslator.ToHtml(Current.FormBorder));
 
                     // load extra css from the user program
                     if (OnGetCssSheet != null) {

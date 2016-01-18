@@ -68,7 +68,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.fastOLV.HeaderMaximumHeight = 0;
             this.fastOLV.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
             this.fastOLV.HideSelection = false;
-            this.fastOLV.Location = new System.Drawing.Point(1, 1);
+            this.fastOLV.Location = new System.Drawing.Point(2, 2);
             this.fastOLV.MultiSelect = false;
             this.fastOLV.Name = "fastOLV";
             this.fastOLV.OwnerDraw = true;
@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.fastOLV.ShowGroups = false;
             this.fastOLV.ShowHeaderInAllViews = false;
             this.fastOLV.ShowSortIndicators = false;
-            this.fastOLV.Size = new System.Drawing.Size(392, 400);
+            this.fastOLV.Size = new System.Drawing.Size(390, 400);
             this.fastOLV.TabIndex = 0;
             this.fastOLV.TriggerCellOverEventsWhenOverHeader = false;
             this.fastOLV.UpdateSpaceFillingColumnsWhenDraggingColumnDivider = false;
@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.nbitems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.nbitems.Enabled = false;
             this.nbitems.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.nbitems.Location = new System.Drawing.Point(330, 432);
+            this.nbitems.Location = new System.Drawing.Point(329, 431);
             this.nbitems.Margin = new System.Windows.Forms.Padding(3);
             this.nbitems.Name = "nbitems";
             this.nbitems.Size = new System.Drawing.Size(60, 12);
@@ -129,7 +129,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.yamuiLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel1.Enabled = false;
             this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel1.Location = new System.Drawing.Point(330, 419);
+            this.yamuiLabel1.Location = new System.Drawing.Point(329, 418);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel1.Name = "yamuiLabel1";
             this.yamuiLabel1.Size = new System.Drawing.Size(60, 12);
@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.htmlToolTip.AllowLinksHandling = true;
             this.htmlToolTip.AutoPopDelay = 90000;
             this.htmlToolTip.BaseStylesheet = null;
-            this.htmlToolTip.InitialDelay = 500;
+            this.htmlToolTip.InitialDelay = 300;
             this.htmlToolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.htmlToolTip.OwnerDraw = true;
             this.htmlToolTip.ReshowDelay = 100;
@@ -159,7 +159,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.Controls.Add(this.fastOLV);
             this.Location = new System.Drawing.Point(0, 0);
             this.Name = "AutoCompletionForm";
-            this.Padding = new System.Windows.Forms.Padding(1);
+            this.Padding = new System.Windows.Forms.Padding(2);
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "AutoCompletionForm";
             ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).EndInit();

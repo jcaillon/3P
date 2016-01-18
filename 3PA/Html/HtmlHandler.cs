@@ -47,6 +47,7 @@ namespace _3PA.Html {
             cssStyleSheet = cssStyleSheet.Replace("%ACCENTCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.AccentColor));
             cssStyleSheet = cssStyleSheet.Replace("%SUBSTRINGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.SubTextFore));
             cssStyleSheet = cssStyleSheet.Replace("%LINKCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.GenericLinkColor));
+            cssStyleSheet = cssStyleSheet.Replace("%FORMBORDER%", ColorTranslator.ToHtml(ThemeManager.Current.FormBorder));
             return cssStyleSheet;
         }
 

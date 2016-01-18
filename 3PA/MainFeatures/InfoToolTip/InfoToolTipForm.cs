@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #region constructor
         public InfoToolTipForm() {
 
-            Padding = new Padding(1);
+            Padding = new Padding(2);
 
             // add scroll page
             _panel = new YamuiScrollPage {
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // add label
             _labelContent = new HtmlLabel {
                 AutoSizeHeightOnly = true,
-                Location = new Point(5, 5),
+                Location = new Point(4, 4),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             _panel.ContentPanel.Location = new Point(0, 0);
@@ -104,15 +104,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 j++;
             } while (j < 20);
             var neededHeight = _labelContent.Height;
-            _panel.ContentPanel.Height = neededHeight + 10;
-            _panel.ContentPanel.Width = _labelContent.Width + 10;
+            _panel.ContentPanel.Height = neededHeight + 8;
+            _panel.ContentPanel.Width = _labelContent.Width + 8;
 
             Width = _panel.ContentPanel.Width + 2;
             Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 12) + 12;
 
             // Too tall?
-            if (neededHeight > (screen.WorkingArea.Height / 2) - 10) {
-                Width = Width + 10;
+            if (neededHeight > (screen.WorkingArea.Height / 2) - 8) {
+                Width = Width + 8;
             }
         }
 

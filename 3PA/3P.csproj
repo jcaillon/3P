@@ -504,7 +504,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Images\FunctionsIcons\" />
-    <Folder Include="MainFeatures\SmallMenu\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildProjectDirectory)\Interop\DllExport\NppPlugin.DllExport.targets" />

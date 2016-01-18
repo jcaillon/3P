@@ -54,11 +54,6 @@ namespace _3PA {
         public static event Action OnNppWindowsMove;
 
         /// <summary>
-        /// Published when the Npp windows is activated
-        /// </summary>
-        public static event Action OnNppWindowsActivate;
-
-        /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
@@ -121,7 +116,6 @@ namespace _3PA {
                         while (ActionsAfterUpdateUi.Any()) {
                             ActionsAfterUpdateUi.Dequeue()();
                         }
-
 
                         if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
                             nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
@@ -206,31 +200,10 @@ namespace _3PA {
 
         #endregion
 
-        #region WndProc notifications
-
-        private static IntPtr OnWndProcMessage(IntPtr hwnd, uint uMsg, IntPtr wParam, IntPtr lParam) {
-            switch (uMsg) {
-                //case (uint)WinApi.WindowsMessage.WM_SIZE:
-                case (uint) WinApi.WindowsMessage.WM_EXITSIZEMOVE:
-                case (uint) WinApi.WindowsMessage.WM_MOVE:
-                    if (OnNppWindowsMove != null) {
-                        OnNppWindowsMove();
-                    }
-                    break;
-                case (uint)WinApi.WindowsMessage.WM_NCACTIVATE:
-                    if (OnNppWindowsActivate != null) {
-                        OnNppWindowsActivate();
-                    }
-                    break;
-            }
-            return WinApi.CallWindowProc(_oldWindowProc, hwnd, uMsg, wParam, lParam);
-        }
-
-        #endregion
-
         #region On mouse message
 
         private static void OnMouseMessage(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct, out bool handled) {
+            handled = false;
             switch (message) {
                 // middle click
                 case WinApi.WindowsMessageMouse.WM_MBUTTONDOWN:
@@ -242,17 +215,43 @@ namespace _3PA {
                         return;
                     }
                     break;
-                // CTRL + Right click
+                // (CTRL + ) Right click : show main menu
                 case WinApi.WindowsMessageMouse.WM_RBUTTONUP:
                     if (Config.Instance.AppliSimpleRightClickForMenu && !KeyboardMonitor.GetModifiers.IsCtrl ||
                         !Config.Instance.AppliSimpleRightClickForMenu && KeyboardMonitor.GetModifiers.IsCtrl) {
-                        AppliMenu.ShowMainMenuAtCursor();
-                        handled = true;
-                        return;
+                        // we need the cursor to be in scintilla but not on the application or the auto-completion!
+                        if (Npp.GetScintillaRectangle().Contains(Cursor.Position) && 
+                            (!Appli.IsVisible || !Appli.IsMouseIn()) &&
+                            (!AutoComplete.IsVisible ||  !AutoComplete.IsMouseIn())) {
+                            AppliMenu.ShowMainMenuAtCursor();
+                            handled = true;
+                            return;
+                        }
                     }
                     break;
             }
-            handled = false;
+
+            // HACK: The following is to handle the MOVE/RESIZE event of npp's window. 
+            // It would be cleaner to use a WndProc bypass but it costs too much... this is a cheaper solution
+            switch (message) {
+                case WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN:
+                    if (!WinApi.GetWindowRect(Npp.HandleScintilla).Contains(Cursor.Position)) {
+                        MouseMonitor.Instance.Add(WinApi.WindowsMessageMouse.WM_MOUSEMOVE);
+                    }
+                    break;
+                case WinApi.WindowsMessageMouse.WM_LBUTTONUP:
+                case WinApi.WindowsMessageMouse.WM_NCLBUTTONUP:
+                    if (MouseMonitor.Instance.Remove(WinApi.WindowsMessageMouse.WM_MOUSEMOVE) && OnNppWindowsMove != null) {
+                        OnNppWindowsMove();
+                    }
+                    break;
+                case WinApi.WindowsMessageMouse.WM_MOUSEMOVE:
+                    if (OnNppWindowsMove != null) {
+                        OnNppWindowsMove();
+                    }
+                    break;
+            }
+            
         }
 
         #endregion
@@ -270,10 +269,8 @@ namespace _3PA {
 
             MainFeatures.MenuItem menuItem = null;
             try {
-                // Since it's a keydown message, we can receive this a lot if the user let a button pressed, prevent it here
-                if (Utils.IsSpamming(key.ToString(), 50, true)) {
-                    return;
-                }
+                // Since it's a keydown message, we can receive this a lot if the user let a button pressed
+                var isSpamming = Utils.IsSpamming(key.ToString(), 100, true);
 
                 //HACK:
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
@@ -299,7 +296,9 @@ namespace _3PA {
                         keyModifiers.IsAlt == item.Shortcut.IsAlt &&
                         (item.Generic || IsCurrentFileProgress)) {
                         menuItem = item;
-                        item.Do();
+                        if (!isSpamming) {
+                            item.Do();
+                        }
                         handled = true;
                         return;
                     }

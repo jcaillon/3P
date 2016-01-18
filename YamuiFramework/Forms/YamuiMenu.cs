@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
@@ -62,6 +63,8 @@ namespace YamuiFramework.Forms {
 
         private int _selectedIndex;
 
+        private const int BorderWidth = 2;
+
         #endregion
 
         #region Life and death
@@ -93,7 +96,7 @@ namespace YamuiFramework.Forms {
             maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
 
 
-            int yPos = 1;
+            int yPos = BorderWidth;
 
             // title
             HtmlLabel title = null;
@@ -101,9 +104,9 @@ namespace YamuiFramework.Forms {
                 title = new HtmlLabel {
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
-                    Width = maxWidth - 2,
+                    Width = maxWidth - BorderWidth * 2,
                     Text = htmlTitle,
-                    Location = new Point(1, 1),
+                    Location = new Point(BorderWidth, BorderWidth),
                     IsSelectionEnabled = false,
                     IsContextMenuEnabled = false,
                     Enabled = false
@@ -122,8 +125,8 @@ namespace YamuiFramework.Forms {
                     var button = new YamuiMenuButton {
                         Text = item.ItemName,
                         NoChildren = item.Children == null || !item.Children.Any(),
-                        Location = new Point(1, yPos),
-                        Size = new Size(maxWidth - 2, LineHeight),
+                        Location = new Point(BorderWidth, yPos),
+                        Size = new Size(maxWidth - BorderWidth * 2, LineHeight),
                         NoIconImage = !useImageIcon,
                         IconImage = item.ItemImage,
                         SubText = item.SubText,
@@ -144,7 +147,7 @@ namespace YamuiFramework.Forms {
             }
 
             // Size the form
-            Size = new Size(maxWidth, yPos + 1);
+            Size = new Size(maxWidth, yPos + BorderWidth);
             MinimumSize = Size;
             MaximumSize = Size;
 
@@ -181,14 +184,13 @@ namespace YamuiFramework.Forms {
 
         protected override void OnPaint(PaintEventArgs e) {
             var backColor = YamuiThemeManager.Current.FormBack;
-            var borderColor = YamuiThemeManager.Current.AccentColor;
-            var borderWidth = 1;
+            var borderColor = YamuiThemeManager.Current.FormBorder;
 
             e.Graphics.Clear(backColor);
 
             // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width - borderWidth, Height - borderWidth));
-            var pen = new Pen(borderColor, borderWidth);
+            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
+            var pen = new Pen(borderColor, BorderWidth) { Alignment = PenAlignment.Inset };
             e.Graphics.DrawRectangle(pen, rect);
 
             // draw separators

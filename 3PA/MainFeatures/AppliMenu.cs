@@ -80,19 +80,27 @@ namespace _3PA.MainFeatures {
         public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16") {
             try {
                 // Close any already opened menu
-                if (YamuiMenu.ListOfOpenededMenuHandle != null && YamuiMenu.ListOfOpenededMenuHandle.Count > 0) {
-                    var curCtrl = (Control.FromHandle(YamuiMenu.ListOfOpenededMenuHandle[0]));
-                    var curMenu = curCtrl as YamuiMenu;
-                    if (curMenu != null) {
-                        curMenu.CloseAll();
-                    }
-                }
+                ForceClose();
+
                 // open requested menu
                 menuList.Insert(0, new YamuiMenuItem { IsSeparator = true });
                 var menu = new YamuiMenu(Cursor.Position, menuList, "<div class='contextMenuTitle'><img src='" + menuLogo +"' width='16' Height='16' style='padding-right: 5px; padding-top: 1px;'>" + menuTitle + "</span>");
                 menu.Show();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
+            }
+        }
+
+        /// <summary>
+        /// Closes the visible menu (if any)
+        /// </summary>
+        public static void ForceClose() {
+            if (YamuiMenu.ListOfOpenededMenuHandle != null && YamuiMenu.ListOfOpenededMenuHandle.Count > 0) {
+                var curCtrl = (Control.FromHandle(YamuiMenu.ListOfOpenededMenuHandle[0]));
+                var curMenu = curCtrl as YamuiMenu;
+                if (curMenu != null) {
+                    curMenu.CloseAll();
+                }
             }
         }
 
@@ -200,12 +208,13 @@ namespace _3PA.MainFeatures {
             OnClic = action;
             ItemSpec = defaultKey;
             if (!string.IsNullOrEmpty(defaultKey)) {
-                SubText = ItemSpec;
                 if (Config.Instance.ShortCuts.ContainsKey(ItemId)) {
                     ItemSpec = Config.Instance.ShortCuts[ItemId];
                     Config.Instance.ShortCuts.Remove(ItemId);
                 }
+                Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
                 Shortcut = new ShortcutKey(ItemSpec);
+                SubText = ItemSpec;
             }
 
             // We set the Do() action, which is the "go through" action when the OnClic action is activated

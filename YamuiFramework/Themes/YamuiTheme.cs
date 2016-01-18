@@ -48,6 +48,7 @@ namespace YamuiFramework.Themes {
         public Color FormBack = Color.FromArgb(230, 230, 230);
         public Color FormAltBack = Color.FromArgb(200, 200, 200);
         public Color FormFore = Color.FromArgb(30, 30, 30);
+        public Color FormBorder = Color.FromArgb(100, 118, 135);
         public Color ScrollBarNormalBack = Color.FromArgb(204, 204, 204);
         public Color ScrollThumbNormalBack = Color.FromArgb(102, 102, 102);
         public Color ScrollBarHoverBack = Color.FromArgb(204, 204, 204);

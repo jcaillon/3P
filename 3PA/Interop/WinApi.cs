@@ -22,6 +22,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Windows.Forms;
+
 // ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
@@ -109,11 +111,37 @@ namespace _3PA.Interop {
         [DllImport("user32.dll")]
         public static extern long GetWindowRect(IntPtr hWnd, ref Rectangle lpRect);
 
+        public static Rectangle GetWindowRect(IntPtr hWnd) {
+            Rectangle output = new Rectangle();
+            GetWindowRect(hWnd, ref output);
+            return output;
+        }
+
+        /// <summary>
+        /// Test if the cursor is in the window rectangle
+        /// </summary>
+        public static bool IsCursorIn(IntPtr hWnd) {
+            return GetWindowRect(hWnd).Contains(GetCursorPosition());
+        }
+
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr FindWindowEx(IntPtr parentHandle, IntPtr childAfter, string className, IntPtr windowTitle);
 
         [DllImport("user32.dll")]
         public static extern short GetKeyState(int nVirtKey);
+
+        /// <summary>
+        /// Retrieves the cursor's position, in screen coordinates.
+        /// </summary>
+        /// <see>See MSDN documentation for further information.</see>
+        [DllImport("user32.dll")]
+        private static extern bool GetCursorPos(out POINT lpPoint);
+
+        public static Point GetCursorPosition() {
+            POINT lpPoint;
+            GetCursorPos(out lpPoint);
+            return new Point(lpPoint.x, lpPoint.y);
+        }
 
         #endregion
 
@@ -261,7 +289,21 @@ namespace _3PA.Interop {
             WM_XBUTTONDOWN = WindowsMessage.WM_XBUTTONDOWN,
             WM_XBUTTONUP = WindowsMessage.WM_XBUTTONUP,
             WM_XBUTTONDBLCLK = WindowsMessage.WM_XBUTTONDBLCLK,
-            WM_MOUSEHWHEEL = WindowsMessage.WM_MOUSEHWHEEL
+            WM_MOUSEHWHEEL = WindowsMessage.WM_MOUSEHWHEEL,
+
+            WM_NCMOUSEMOVE = WindowsMessage.WM_NCMOUSEMOVE,
+            WM_NCLBUTTONDOWN = WindowsMessage.WM_NCLBUTTONDOWN,
+            WM_NCLBUTTONUP = WindowsMessage.WM_NCLBUTTONUP,
+            WM_NCLBUTTONDBLCLK = WindowsMessage.WM_NCLBUTTONDBLCLK,
+            WM_NCRBUTTONDOWN = WindowsMessage.WM_NCRBUTTONDOWN,
+            WM_NCRBUTTONUP = WindowsMessage.WM_NCRBUTTONUP,
+            WM_NCRBUTTONDBLCLK = WindowsMessage.WM_NCRBUTTONDBLCLK,
+            WM_NCMBUTTONDOWN = WindowsMessage.WM_NCMBUTTONDOWN,
+            WM_NCMBUTTONUP = WindowsMessage.WM_NCMBUTTONUP,
+            WM_NCMBUTTONDBLCLK = WindowsMessage.WM_NCMBUTTONDBLCLK,
+            WM_NCXBUTTONDOWN = WindowsMessage.WM_NCXBUTTONDOWN,
+            WM_NCXBUTTONUP = WindowsMessage.WM_NCXBUTTONUP,
+            WM_NCXBUTTONDBLCLK = WindowsMessage.WM_NCXBUTTONDBLCLK,
         }
 
         #endregion

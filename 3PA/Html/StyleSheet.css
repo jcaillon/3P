@@ -17,7 +17,7 @@ hr {
   margin: 15px 0;
   overflow: hidden;
   border: 0;
-  border-bottom: 1px solid %FGCOLOR%;
+  border-bottom: 1px solid %FORMBORDER%;
 }
 
 a:link {
@@ -39,7 +39,7 @@ a:link {
 
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
-    border: solid 2px %ACCENTCOLOR%;
+    border: solid 2px %FORMBORDER%;
     background-color: %BGCOLOR%;
     color: %FGCOLOR%;
     padding: 4px;

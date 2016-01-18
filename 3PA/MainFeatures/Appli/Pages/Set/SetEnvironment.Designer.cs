@@ -87,7 +87,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.AutomaticDelay = 100;
             this.toolTip.AutoPopDelay = 90000;
             this.toolTip.BaseStylesheet = null;
-            this.toolTip.InitialDelay = 100;
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 20;

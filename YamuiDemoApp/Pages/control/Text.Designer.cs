@@ -54,7 +54,6 @@ namespace YamuiDemoApp.Pages.control {
             this.htmlToolTip1.AllowLinksHandling = true;
             this.htmlToolTip1.AutoPopDelay = 90000;
             this.htmlToolTip1.BaseStylesheet = null;
-            this.htmlToolTip1.InitialDelay = 500;
             this.htmlToolTip1.MaximumSize = new System.Drawing.Size(0, 0);
             this.htmlToolTip1.OwnerDraw = true;
             this.htmlToolTip1.ReshowDelay = 100;

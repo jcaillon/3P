@@ -23,6 +23,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using _3PA.Interop;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -136,8 +137,21 @@ namespace _3PA.Lib {
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
         public void Add(params WinApi.WindowsMessageMouse[] messages) {
-            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint)key)))
-                _messagesToIntercept.Add((uint)key);
+            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => !_messagesToIntercept.Contains((uint) key))) {
+                _messagesToIntercept.Add((uint) key);
+            }
+        }
+
+        /// <summary>
+        /// Remove the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
+        /// </summary>
+        public bool Remove(params WinApi.WindowsMessageMouse[] messages) {
+            bool iDidSomething = false;
+            foreach (WinApi.WindowsMessageMouse key in messages.Where(key => _messagesToIntercept.Contains((uint) key))) {
+                _messagesToIntercept.Remove((uint) key);
+                iDidSomething = true;
+            }
+            return iDidSomething;
         }
 
         public void Clear() {
@@ -264,6 +278,53 @@ namespace _3PA.Lib {
 
         #endregion
     }
+
+    #endregion
+
+    #region WndProc notifications
+
+    /*
+    Originally i was using a hook on wndProc to know when the npp windows was moving so i could move the dialog forms accordingly
+
+    private static WinApi.WindowProc _newWindowDeleg;
+    private static IntPtr _oldWindowProc = IntPtr.Zero;
+
+    private static void InstallHooks() {
+        if (_oldWindowProc == IntPtr.Zero) {
+            _newWindowDeleg = OnWndProcMessage;
+            int newWndProc = Marshal.GetFunctionPointerForDelegate(_newWindowDeleg).ToInt32();
+            int result = WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, newWndProc);
+            _oldWindowProc = (IntPtr) result;
+            if (result == 0) {
+                ErrorHandler.ShowErrors(new Exception("Failed to SetWindowLong"), "Error in OverrideWindowProc");
+            }
+        }
+    }
+
+    private static IntPtr OnWndProcMessage(IntPtr hwnd, uint uMsg, IntPtr wParam, IntPtr lParam) {
+        switch (uMsg) {
+            //case (uint)WinApi.WindowsMessage.WM_SIZE:
+            case (uint)WinApi.WindowsMessage.WM_EXITSIZEMOVE:
+            case (uint)WinApi.WindowsMessage.WM_MOVE:
+                if (OnNppWindowsMove != null) {
+                    OnNppWindowsMove();
+                }
+                break;
+            case (uint)WinApi.WindowsMessage.WM_NCACTIVATE:
+                if (OnNppWindowsActivate != null) {
+                    OnNppWindowsActivate();
+                }
+                break;
+        }
+        return WinApi.CallWindowProc(_oldWindowProc, hwnd, uMsg, wParam, lParam);
+    }
+
+    private static void UninstallHooks() {
+        WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, _oldWindowProc.ToInt32());
+        _oldWindowProc = IntPtr.Zero;
+    }
+
+    */
 
     #endregion
 

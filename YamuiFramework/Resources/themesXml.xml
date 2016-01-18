@@ -9,6 +9,7 @@
     <ThemeAccentColor Value="#1BA1E2" />
     <FormBack Value="#E6E6E6" />
     <FormFore Value="#1E1E1E" />
+    <FormBorder Value="#647687" />
     <ScrollBarNormalBack Value="#CCCCCC" />
     <ScrollThumbNormalBack Value="#666666" />
     <ScrollBarHoverBack Value="#CCCCCC" />
@@ -48,6 +49,7 @@
     <ThemeAccentColor Value="#F0A30A" />
     <FormBack Value="#252526" />
     <FormFore Value="#D2D2D2" />
+    <FormBorder Value="#647687" />
     <ScrollBarNormalBack Value="#333333" />
     <ScrollThumbNormalBack Value="#999999" />
     <ScrollBarHoverBack Value="#333333" />
@@ -87,6 +89,7 @@
     <ThemeAccentColor Value="#FF1493" />
     <FormBack Value="#E6E6E6" />
     <FormFore Value="#1E1E1E" />
+    <FormBorder Value="#647687" />
     <ScrollBarNormalBack Value="#CCCCCC" />
     <ScrollThumbNormalBack Value="#666666" />
     <ScrollBarHoverBack Value="#CCCCCC" />

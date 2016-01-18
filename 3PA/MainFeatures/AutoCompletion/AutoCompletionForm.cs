@@ -514,7 +514,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            _lock.EnterWriteLock();
+            //_lock.EnterWriteLock();
             try {
                 Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
 
@@ -551,7 +551,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (fastOLV.SelectedIndex >= 0)
                     fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } finally {
-                _lock.ExitWriteLock();
+                //_lock.ExitWriteLock();
             }
         }
 

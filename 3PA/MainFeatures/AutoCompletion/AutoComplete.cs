@@ -19,9 +19,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using Timer = System.Windows.Forms.Timer;
@@ -542,7 +544,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region _form handler
 
         /// <summary>
-        /// Is the autocompletion currently visible?
+        /// Is the form currently visible?
         /// </summary>
         public static bool IsVisible {
             get { return _form != null && _form.Visible; }
@@ -584,6 +586,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static bool OnKeyDown(Keys key) {
             return IsVisible && _form.OnKeyDown(key);
+        }
+
+        /// <summary>
+        /// Returns true if the cursor is within the form window
+        /// </summary>
+        public static bool IsMouseIn() {
+            return WinApi.IsCursorIn(_form.Handle);
         }
 
         #endregion

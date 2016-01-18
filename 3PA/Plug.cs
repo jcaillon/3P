@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -207,6 +206,7 @@ namespace _3PA {
                 FileExplorer.ForceClose();
                 CodeExplorer.ForceClose();
                 UserCommunication.ForceClose();
+                AppliMenu.ForceClose();
 
                 PluginIsFullyLoaded = false;
 
@@ -223,19 +223,15 @@ namespace _3PA {
 
         #region Hooks and WndProc override
 
-        private static IntPtr _oldWindowProc = IntPtr.Zero;
-        private static WinApi.WindowProc _newWindowDeleg;
-
         /// <summary>
         /// Bascially, this method allows us to hook onto:
-        /// - WndProc messages                      -> OnWndProcMessage
         /// - Keyboard (on key down only) messages  -> OnKeyDown
         /// - Mouse messages                        -> OnMouseMessage
         /// It either install the hooks (if they are not installed yet) or just refresh the keyboard keys / mouse messages
         /// to watch, so it can be called several times safely
         /// </summary>
         private static void SetHooks() {
-
+            
             // Install a WM_KEYDOWN hook
             KeyboardMonitor.Instance.Clear();
             KeyboardMonitor.Instance.Add(
@@ -266,6 +262,9 @@ namespace _3PA {
             // Install a mouse hook
             MouseMonitor.Instance.Clear();
             MouseMonitor.Instance.Add(
+                WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN,
+                WinApi.WindowsMessageMouse.WM_NCLBUTTONUP,
+                WinApi.WindowsMessageMouse.WM_LBUTTONUP,
                 WinApi.WindowsMessageMouse.WM_MBUTTONDOWN, 
                 WinApi.WindowsMessageMouse.WM_RBUTTONUP);
 
@@ -273,24 +272,11 @@ namespace _3PA {
                 MouseMonitor.Instance.GetMouseMessage += OnMouseMessage;
                 MouseMonitor.Instance.Install();
             }
-
-            // override the original WndProc of Npp
-            if (_oldWindowProc == IntPtr.Zero) {
-                _newWindowDeleg = OnWndProcMessage;
-                int newWndProc = Marshal.GetFunctionPointerForDelegate(_newWindowDeleg).ToInt32();
-                int result = WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, newWndProc);
-                _oldWindowProc = (IntPtr) result;
-                if (result == 0) {
-                    ErrorHandler.ShowErrors(new Exception("Failed to SetWindowLong"), "Error in OverrideWindowProc");
-                }
-            }
         }
 
         private static void UninstallHooks() {
             KeyboardMonitor.Instance.Uninstall();
             MouseMonitor.Instance.Uninstall();
-            WinApi.SetWindowLong(Npp.HandleNpp, (int) WinApi.WindowLongFlags.GWL_WNDPROC, _oldWindowProc.ToInt32());
-            _oldWindowProc = IntPtr.Zero;
         }
 
         #endregion

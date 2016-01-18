@@ -22,6 +22,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Security;
 using System.Timers;
 using System.Web.UI.Design.WebControls;
@@ -96,7 +97,7 @@ namespace YamuiFramework.Forms {
         [Browsable(false)]
         public bool HasModalOpened { get; set; }
 
-        private const int BorderWidth = 1;
+        private const int BorderWidth = 2;
 
         /// <summary>
         /// Tooltip for close buttons
@@ -145,14 +146,14 @@ namespace YamuiFramework.Forms {
         protected override void OnPaint(PaintEventArgs e) {
             var backColor = YamuiThemeManager.Current.FormBack;
             var foreColor = YamuiThemeManager.Current.FormFore;
-            var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.Current.AccentColor;
+            var borderColor = UseCustomBorderColor ? ForeColor : YamuiThemeManager.Current.FormBorder;
 
             // background
             e.Graphics.Clear(backColor);
 
             // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width - BorderWidth, Height - BorderWidth));
-            var pen = new Pen(borderColor, BorderWidth);
+            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
+            var pen = new Pen(borderColor, BorderWidth) {Alignment = PenAlignment.Inset};
             e.Graphics.DrawRectangle(pen, rect);
 
             // draw the resize pixels icon on the bottom right

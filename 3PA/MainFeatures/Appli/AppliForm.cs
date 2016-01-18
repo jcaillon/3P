@@ -59,17 +59,17 @@ namespace _3PA.MainFeatures.Appli {
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", null, new SetEnvironment()),
                     new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
-                    new YamuiSecMenu("COMPILATION PATH", null, new template()),
-                    new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
+                    //new YamuiSecMenu("COMPILATION PATH", null, new template()),
+                    //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
-                new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("3P COMMANDS", null, new template()),
-                    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
-                    new YamuiSecMenu("COMPILE MANY", null, new template()),
-                }),
+                //new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
+                //    new YamuiSecMenu("3P COMMANDS", null, new template()),
+                //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
+                //    new YamuiSecMenu("COMPILE MANY", null, new template()),
+                //}),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("PROFILES", PageNames.OptionsProfile.ToString(), new ProfilesPage()),
-                    new YamuiSecMenu("GENERAL", "general", new OptionPage(new List<string> { "General" })),
+                    //new YamuiSecMenu("PROFILES", PageNames.OptionsProfile.ToString(), new ProfilesPage()),
+                    new YamuiSecMenu("GENERAL", PageNames.OptionsProfile.ToString(), new OptionPage(new List<string> { "General" })), //TODO change the page name!
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
                     new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),

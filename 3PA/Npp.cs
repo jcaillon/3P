@@ -102,6 +102,10 @@ namespace _3PA {
             get { return UnmanagedExports.NppData._nppHandle; }
         }
 
+        public static bool IsNppWindowFocused() {
+            return (WinApi.GetForegroundWindow() == HandleNpp);
+        }
+
         /// <summary>
         /// Returns the current instance of scintilla used
         /// 0/1 corresponding to the main/seconday scintilla currently used

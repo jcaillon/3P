@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using _3PA.Interop;
@@ -113,6 +114,20 @@ namespace _3PA.MainFeatures.Appli {
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
             }
+        }
+
+        /// <summary>
+        /// Returns true if the cursor is within the form window
+        /// </summary>
+        public static bool IsMouseIn() {
+            return WinApi.IsCursorIn(_form.Handle);
+        }
+
+        /// <summary>
+        /// Is the form currently visible?
+        /// </summary>
+        public static bool IsVisible {
+            get { return _form != null && _form.Visible; }
         }
 
     }

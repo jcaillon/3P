@@ -20,7 +20,7 @@ body {
 
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
-    border: solid 1px #767676;
+    border: solid 1px %FORMBORDER%;
     background-color: %BGcolor%;
     color: %FGcolor%;
     padding: 5px;

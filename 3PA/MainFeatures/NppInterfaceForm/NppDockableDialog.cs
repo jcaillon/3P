@@ -82,7 +82,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             }
 
             Plug.OnNppWindowsMove += RefreshPosAndLoc;
-            Plug.OnNppWindowsActivate += PlugOnOnNppWindowsActivate;
         }
 
         ~NppDockableDialog() {
@@ -91,11 +90,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             _masterForm.ClientSizeChanged -= RefreshPosAndLoc;
             _masterForm.LocationChanged -= RefreshPosAndLoc;
-            _masterForm.LostFocus -= RefreshPosAndLoc;
-            _masterForm.GotFocus -= RefreshPosAndLoc;
+            _masterForm.LostFocus -= RefreshPosLocContent;
+            _masterForm.GotFocus -= RefreshPosLocContent;
 
             Plug.OnNppWindowsMove -= RefreshPosAndLoc;
-            Plug.OnNppWindowsActivate -= PlugOnOnNppWindowsActivate;
 
             if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
                 int value = 0;
@@ -130,7 +128,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #region On event handlers
 
-        private void PlugOnOnNppWindowsActivate() {
+        private void RefreshPosLocContent(object sender, EventArgs e) {
             RefreshPosAndLoc();
             Refresh();
         }

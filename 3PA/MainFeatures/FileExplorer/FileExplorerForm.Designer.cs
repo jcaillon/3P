@@ -58,7 +58,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.toolTipHtml.AllowLinksHandling = true;
             this.toolTipHtml.AutoPopDelay = 90000;
             this.toolTipHtml.BaseStylesheet = null;
-            this.toolTipHtml.InitialDelay = 500;
             this.toolTipHtml.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.ReshowDelay = 100;

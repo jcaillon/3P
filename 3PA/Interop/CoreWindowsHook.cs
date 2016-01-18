@@ -27,7 +27,7 @@ namespace _3PA.Interop {
 
     /// <summary>
     /// A nice wrapper around the CoreWindowsHook class, 
-    /// doesn't use the EventHandler but replace the 
+    /// doesn't use the EventHandler but replace the CallBackFunction
     /// read this: 
     /// https://msdn.microsoft.com/en-us/library/windows/desktop/ms644959(v=vs.85).aspx
     /// </summary>

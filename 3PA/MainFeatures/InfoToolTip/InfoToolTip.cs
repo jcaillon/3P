@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // update position
             var point = Npp.GetPointXyFromPosition(position);
-            point.Offset(Npp.GetWindowRect().Location);
+            point.Offset(Npp.GetScintillaRectangle().Location);
             var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight + 5;
             _form.SetPosition(point, lineHeight + 5);

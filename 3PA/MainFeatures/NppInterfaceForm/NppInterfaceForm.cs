@@ -20,6 +20,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using _3PA.Interop;
 
@@ -195,14 +196,14 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         protected override void OnPaint(PaintEventArgs e) {
             var backColor = ThemeManager.Current.FormBack;
-            var borderColor = ThemeManager.Current.AccentColor;
-            var borderWidth = 1;
+            var borderColor = ThemeManager.Current.FormBorder;
+            var borderWidth = 2;
 
             e.Graphics.Clear(backColor);
 
             // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width - borderWidth, Height - borderWidth));
-            var pen = new Pen(borderColor, borderWidth);
+            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
+            var pen = new Pen(borderColor, borderWidth) { Alignment = PenAlignment.Inset }; ;
             e.Graphics.DrawRectangle(pen, rect);
         }
 

@@ -223,10 +223,8 @@ namespace _3PA {
         /// returns a rectangle representing the location and size of the scintilla window
         /// </summary>
         /// <returns></returns>
-        public static Rectangle GetWindowRect() {
-            var r = new Rectangle();
-            WinApi.GetWindowRect(HandleScintilla, ref r);
-            return r;
+        public static Rectangle GetScintillaRectangle() {
+            return WinApi.GetWindowRect(HandleScintilla);
         }
 
         /// <summary>

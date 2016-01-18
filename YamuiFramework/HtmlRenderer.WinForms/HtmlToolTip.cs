@@ -21,7 +21,6 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Text;
-using System.Net.Mime;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -86,6 +85,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// if clicked the <see cref="LinkClicked"/> event will be raised although the tooltip will be closed.
         /// </summary>
         private bool _allowLinksHandling = true;
+
 #endif
 
         #endregion
@@ -120,6 +120,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             HtmlContainer.LinkClicked += OnLinkClicked;
 #endif
             AutoPopDelay = 90000;
+            InitialDelay = 300;
         }
 
 #if !MONO
