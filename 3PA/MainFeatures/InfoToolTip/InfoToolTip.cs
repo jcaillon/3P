@@ -25,6 +25,7 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -538,6 +539,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #endregion
 
         #region handle form
+
         /// <summary>
         /// Method to init the tooltip form if needed
         /// </summary>
@@ -597,6 +599,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <returns></returns>
         public static bool IsVisible {
             get { return _form != null && _form.Visible; }
+        }
+
+        /// <summary>
+        /// Returns true if the cursor is within the form window
+        /// </summary>
+        public static bool IsMouseIn() {
+            return WinApi.IsCursorIn(_form.Handle);
         }
 
         #endregion

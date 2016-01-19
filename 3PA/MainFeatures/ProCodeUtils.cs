@@ -356,6 +356,7 @@ namespace _3PA.MainFeatures {
 
             // change file object current operation, set flag
             Plug.CurrentFileObject.CurrentOperation |= currentOperation;
+            FilesInfo.UpdateOperationAndErrors();
 
             // clear current errors (updates the current file info)
             FilesInfo.ClearAllErrors();

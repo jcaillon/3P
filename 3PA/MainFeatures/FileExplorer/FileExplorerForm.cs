@@ -773,16 +773,17 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (_currentOperation == (int) updatedOperationEventArgs.CurrentOperation)
                 return;
 
-            // text
+            // status text, take the last flag found
             foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
                 CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
-                if (!updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) continue;
-                lbStatus.Text = ((DisplayAttr)flag.GetAttributes()).Name;
+                if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
+                    lbStatus.Text = ((DisplayAttr) flag.GetAttributes()).Name;
+                }
             }
 
             // blink back color
             lbStatus.UseCustomBackColor = true;
-                Transition.run(lbStatus, "BackColor", lbStatus.BackColor, (lbStatus.BackColor == ThemeManager.Current.FormBack) ? ThemeManager.Current.AccentColor : ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
+            Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
 
             _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
         }

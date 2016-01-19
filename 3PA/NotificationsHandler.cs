@@ -222,6 +222,7 @@ namespace _3PA {
                         // we need the cursor to be in scintilla but not on the application or the auto-completion!
                         if (Npp.GetScintillaRectangle().Contains(Cursor.Position) && 
                             (!Appli.IsVisible || !Appli.IsMouseIn()) &&
+                            (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
                             (!AutoComplete.IsVisible ||  !AutoComplete.IsMouseIn())) {
                             AppliMenu.ShowMainMenuAtCursor();
                             handled = true;

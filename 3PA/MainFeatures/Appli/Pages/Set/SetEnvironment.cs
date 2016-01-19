@@ -24,7 +24,7 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
-using YamuiFramework.Themes;
+using _3PA.Html;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
@@ -61,22 +61,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         // Left button
                         x.BackGrndImage = ImageResources.SelectFile;
                         x.ButtonPressed += BtleftOnButtonPressed;
-                        toolTip.SetToolTip(x, "<b>Click</b> to select a new file");
+                        toolTip.SetToolTip(x, "Click to <b>select</b> a new file");
                     } else if (x.Name.StartsWith("btright")) {
                         // right button
                         x.BackGrndImage = ImageResources.OpenInExplorer;
                         x.ButtonPressed += BtrightOnButtonPressed;
                         string tag = (string)(x.Tag ?? string.Empty);
-                        toolTip.SetToolTip(x, "<b>Click</b> to " + (tag.Equals("true") ? "open this folder in the explorer" : "to open the containing folder in the explorer"));
+                        toolTip.SetToolTip(x, "Click to " + (tag.Equals("true") ? "<b>open this folder in the explorer</b>" : "<b>to open the containing folder in the explorer</b>"));
                     }
                 }
             }
 
             // tooltips
-            toolTip.SetToolTip(cbName, "<b>Select</b> the environment to use<br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
-            toolTip.SetToolTip(cbSuffix, "<b>Select</b> the environment's suffix");
+            toolTip.SetToolTip(cbName, "Select the <b>environment to use</b><br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
+            toolTip.SetToolTip(cbSuffix, "Select the <b>environment's suffix</b>");
             toolTip.SetToolTip(flLabel, "The label for this environment (has no use beside being more meaningful than the name)");
-            toolTip.SetToolTip(cbDatabase, "<b>Select</b> the database to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
+            toolTip.SetToolTip(cbDatabase, "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
 
             toolTip.SetToolTip(flName, "The name of this environment<br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
             toolTip.SetToolTip(flSuffix, "This field is optional, you can have several suffixes for a<br>given environment, or you can just use different environment names if it's enough for you");
@@ -100,6 +100,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             toolTip.SetToolTip(btDelete, "Click here to <b>delete</b> the current environment");
 
+            toolTip.SetToolTip(btSaveDb, "Click to <b>save</b> your modifications");
+            toolTip.SetToolTip(btCancelDb, "Click to <b>cancel</b> your modifications");
+
             // buttons
             btDbAdd.BackGrndImage = ImageResources.PlusDb;
             btDbDelete.BackGrndImage = ImageResources.MinusDb;
@@ -116,6 +119,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
             btDelete.ButtonPressed += BtDeleteOnButtonPressed;
             btDownload.ButtonPressed += btDownload_Click;
+
+            btSaveDb.ButtonPressed += BtSaveDbOnButtonPressed;
+            btCancelDb.ButtonPressed += BtCancelDbOnButtonPressed;
 
             ToggleMode(ViewMode.Select);
         }
@@ -179,6 +185,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         CmdLineParameters = flCmdLine.Text,
                         DbConnectionInfo = ProEnvironment.Current.DbConnectionInfo
                     };
+
+                    if (_currentMode != ViewMode.Edit && (ProEnvironment.GetList.Exists(env => env.Name.EqualsCi(newEnv.Name) && env.Suffix.EqualsCi(newEnv.Suffix)))) {
+                        // name + suffix must be unique!
+                        BlinkTextBox(flName, ThemeManager.Current.GenericErrorColor);
+                        BlinkTextBox(flSuffix, ThemeManager.Current.GenericErrorColor);
+                        return false;
+                    }
 
                     ProEnvironment.SaveEnv((_currentMode == ViewMode.Edit) ? ProEnvironment.Current : null, newEnv);
                     Config.Instance.EnvName = newEnv.Name;
@@ -307,6 +320,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btleft1.Show();
                 cbName.Enabled = false;
                 cbSuffix.Enabled = false;
+
+                btcontrol2.Visible = false;
+                btcontrol1.Visible = false;
+                btDelete.Visible = false;
+
+                btSaveDb.Visible = true;
+                btCancelDb.Visible = true;
             } else {
                 flDatabase.Hide();
                 cbDatabase.Show();
@@ -316,6 +336,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btleft1.Hide();
                 cbName.Enabled = true;
                 cbSuffix.Enabled = true;
+
+                btcontrol2.Visible = true;
+                btcontrol1.Visible = true;
+                btDelete.Visible = true;
+
+                btSaveDb.Visible = false;
+                btCancelDb.Visible = false;
             }
 
             // bottom buttons
@@ -370,6 +397,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (mode != _currentMode) {
                 BlinkButton(btcontrol1, ThemeManager.Current.AccentColor);
                 BlinkButton(btcontrol2, ThemeManager.Current.AccentColor);
+
+                BlinkButton(btSaveDb, ThemeManager.Current.AccentColor);
+                BlinkButton(btCancelDb, ThemeManager.Current.AccentColor);
             }
 
             cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
@@ -386,12 +416,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btDownload.BackGrndImage = ImageResources.DownloadDbOk;
                 btDeleteDownload.Enabled = true;
                 btDeleteDownload.FakeDisabled = false;
-                toolTip.SetToolTip(btDownload, "<i>The database information for this environment are available and in use in the auto-completion list</i><br><br><b>Click this button</b> to force a refresh of the database information for this environment");
+                toolTip.SetToolTip(btDownload, "<i>The database information for this environment are available and in use in the auto-completion list</i><br><br>Click this button to <b>force a refresh of the database information</b> for this environment");
             } else {
                 btDownload.BackGrndImage = ImageResources.DownloadDbNok;
                 btDeleteDownload.Enabled = false;
                 btDeleteDownload.FakeDisabled = true;
-                toolTip.SetToolTip(btDownload, "<i>No information available for this database!</i><br><br><b>Click this button</b> to fetch the database information for this environment,<br>they will be used in the auto-completion list to suggest database names,<br>table names and field names.<br><br>By default, the auto-completion list uses the last environment <br>selected where database info were available.");
+                toolTip.SetToolTip(btDownload, "<i>No information available for this database!</i><br><br>Click this button to <b>fetch the database information</b> for this environment,<br>they will be used in the auto-completion list to suggest database names,<br>table names and field names.<br><br>By default, the auto-completion list uses the last environment <br>selected where database info were available.");
             }
             btDownload.Invalidate();
         }
@@ -434,14 +464,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
         }
 
+        private void BtCancelDbOnButtonPressed(object sender, EventArgs eventArgs) {
+            ToggleMode(ViewMode.Select);
+        }
+
+        private void BtSaveDbOnButtonPressed(object sender, EventArgs eventArgs) {
+            if (Save())
+                ToggleMode(ViewMode.Select);
+        }
+
         private void Btcontrol1OnMouseDown(object sender, MouseEventArgs mouseEventArgs) {
             btcontrol1.UseCustomBackColor = false;
             if (mouseEventArgs.Button == MouseButtons.Right && _currentMode == ViewMode.Select) {
-                // duplicate, add new
-                ToggleMode(ViewMode.AddNew);
+                // duplicate
+                ToggleMode(ViewMode.Edit);
+                _currentMode = ViewMode.AddNew;
             }
         }
-
 
         /// <summary>
         /// Click on "SAVE" or "MODIFY"
@@ -458,15 +497,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            _currentMode = ViewMode.Delete;
-            if (Save())
-                ToggleMode(ViewMode.Select);
+            var answ = UserCommunication.Message("Do you really want to delete the current environment, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I am", "No, Cancel"}, true);
+            if (answ == 0) {
+                _currentMode = ViewMode.Delete;
+                if (Save())
+                    ToggleMode(ViewMode.Select);
+            }
         }
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            _currentMode = ViewMode.DbDelete;
-            if (Save())
-                ToggleMode(ViewMode.Select);
+            var answ = UserCommunication.Message("Do you really want to delete the current database info, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I am", "No, Cancel" }, true);
+            if (answ == 0) {
+                _currentMode = ViewMode.DbDelete;
+                if (Save())
+                    ToggleMode(ViewMode.Select);
+            }
         }
 
         private void BtDbEditOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {

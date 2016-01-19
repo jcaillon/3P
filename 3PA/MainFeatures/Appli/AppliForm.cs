@@ -28,7 +28,6 @@ using YamuiFramework.Forms;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli.Pages;
 using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
