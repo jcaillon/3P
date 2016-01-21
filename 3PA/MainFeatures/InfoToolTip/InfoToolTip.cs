@@ -219,8 +219,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #region SetToolTip text
 
         /// <summary>
-        /// Sets the content of the tooltip (when we want to descibe something present
-        /// in the completionData list)
+        /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
             
@@ -292,7 +291,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                                 toDisplay.Append(FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
                                 toDisplay.Append("<table width='100%;'>");
                                 foreach (var parsedField in tbItem.Fields) {
-                                    toDisplay.Append("<tr><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProgressQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
+                                    toDisplay.Append("<tr><td style='padding-right: 4px'><img src='" + (parsedField.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProgressQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
                                 }
                                 toDisplay.Append("</table>");
                             }

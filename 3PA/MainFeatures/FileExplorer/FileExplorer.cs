@@ -206,11 +206,11 @@ namespace _3PA.MainFeatures.FileExplorer {
             FakeForm = new EmptyForm();
             NppTbData nppTbData = new NppTbData {
                 hClient = FakeForm.Handle,
-                pszName = AssemblyInfo.ProductTitle + " - File explorer",
+                pszName = AssemblyInfo.AssemblyProduct + " - File explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_LEFT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
                 hIconTab = (uint) Utils.GetIconFromImage(ImageResources.FileExplorerLogo).Handle,
-                pszModuleName = AssemblyInfo.ProductTitle
+                pszModuleName = AssemblyInfo.AssemblyProduct
             };
 
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));

@@ -51,6 +51,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     _checkButton = newColorPicker;
                     newColorPicker.Checked = true;
                 }
+                toolTip.SetToolTip(newColorPicker, "Click me to set a new accent color for the current theme");
             }
 
             // themes combo box
@@ -62,6 +63,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
+
+            // tooltips
+            toolTip.SetToolTip(comboTheme, "Choose the theme you wish to use for the software");
+            toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
         }
 
         /// <summary>

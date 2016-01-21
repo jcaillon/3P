@@ -33,6 +33,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.PanelAccentColor = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel21 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
+            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -116,6 +117,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel20.TabIndex = 16;
             this.yamuiLabel20.Text = "APPLICATION THEME";
             // 
+            // toolTip
+            // 
+            this.toolTip.AllowLinksHandling = true;
+            this.toolTip.AutoPopDelay = 90000;
+            this.toolTip.BaseStylesheet = null;
+            this.toolTip.InitialDelay = 300;
+            this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this.toolTip.OwnerDraw = true;
+            this.toolTip.ReshowDelay = 100;
+            this.toolTip.TooltipCssClass = "htmltooltip";
+            // 
             // SettingAppearance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -139,8 +151,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiPanel PanelAccentColor;
         private YamuiLabel yamuiLabel21;
         private YamuiLabel yamuiLabel20;
-
-
-
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
     }
 }

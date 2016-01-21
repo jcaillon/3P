@@ -487,7 +487,7 @@ namespace _3PA.MainFeatures {
         public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
         public static string FolderLibrary { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Libraries")); } }
         public static string FolderUpdate { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
-        public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.ProductTitle)); } }
+        public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
 
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }
         public static string FileErrorToSend { get { return Path.Combine(FolderLog, "error_.log"); } }

@@ -276,6 +276,11 @@ namespace _3PA.MainFeatures {
                 }
             }
 
+            // check Npp version, 3P requires version 6.8 or higher
+            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
+                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+            }
+
             // an update has been done
             if (File.Exists(Config.FileVersionLog)) {
                 if (File.Exists(Config.FileDownloadedPlugin)) {

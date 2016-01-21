@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #region constructor
         public InfoToolTipForm() {
 
-            Padding = new Padding(2);
+            Padding = new Padding(5);
 
             // add scroll page
             _panel = new YamuiScrollPage {
@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // add label
             _labelContent = new HtmlLabel {
                 AutoSizeHeightOnly = true,
-                Location = new Point(4, 4),
+                Location = new Point(0, 0),
                 Anchor = AnchorStyles.Top | AnchorStyles.Left
             };
             _panel.ContentPanel.Location = new Point(0, 0);
@@ -85,7 +85,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             var screen = Npp.GetNppScreen();
 
             // find max height taken by the html
-            _labelContent.Width = screen.WorkingArea.Width / 2;
+            var maximumWidth = screen.WorkingArea.Width/2 - 10;
+            _labelContent.Width = maximumWidth;
             _labelContent.Text = content;
             var prefHeight = _labelContent.Height;
 
@@ -95,8 +96,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
             int curWidth = _labelContent.Width;
             do {
                 curWidth -= detla;
-                _labelContent.Width = Math.Max(Math.Min(screen.WorkingArea.Width / 2, curWidth), minimumWidth);
-                _labelContent.Text = content;
+                _labelContent.Width = Math.Max(Math.Min(maximumWidth, curWidth), minimumWidth);
+                _labelContent.PerformLayout();
+                _labelContent.Invalidate();
                 if (_labelContent.Height > prefHeight) {
                     curWidth += detla;
                     detla /= 2;
@@ -104,15 +106,15 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 j++;
             } while (j < 20);
             var neededHeight = _labelContent.Height;
-            _panel.ContentPanel.Height = neededHeight + 8;
-            _panel.ContentPanel.Width = _labelContent.Width + 8;
+            _panel.ContentPanel.Height = _labelContent.Height;
+            _panel.ContentPanel.Width = _labelContent.Width;
 
-            Width = _panel.ContentPanel.Width + 2;
-            Height = Math.Min(neededHeight, (screen.WorkingArea.Height / 2) - 12) + 12;
+            Width = _panel.ContentPanel.Width + 10;
+            Height = Math.Min(neededHeight, screen.WorkingArea.Height / 2 - 10) + 10;
 
             // Too tall?
-            if (neededHeight > (screen.WorkingArea.Height / 2) - 8) {
-                Width = Width + 8;
+            if (neededHeight > (screen.WorkingArea.Height / 2 - 10)) {
+                Width = Width + 10; // add scrollbar width
             }
         }
 

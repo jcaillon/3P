@@ -51,6 +51,10 @@
     <ErrorReport>prompt</ErrorReport>
     <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>
+    </ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -254,6 +258,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\UnmanagedExports.cs" />
+    <Content Include="logo30x30.ico" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">
@@ -431,11 +436,16 @@
     <Content Include="Images\FileExplorer\TType.png" />
     <Content Include="Images\FileExplorer\UnknowType.png" />
     <Content Include="Images\FileExplorer\WType.png" />
+    <Content Include="Images\Html\getting-started-0.png" />
+    <Content Include="Images\Html\getting-started-1.png" />
+    <Content Include="Images\Html\getting-started-2.png" />
+    <Content Include="Images\Html\getting-started-3.png" />
     <Content Include="Images\Html\Update26x26.png" />
     <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo30x30.png" />
+    <Content Include="Html\Pages\getting_started.txt" />
     <None Include="Images\Menu\FileInfo.png" />
     <None Include="Images\Menu\FormatCode.png" />
     <None Include="Images\Menu\GenerateCode.png" />

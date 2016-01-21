@@ -79,7 +79,7 @@ namespace _3PA.Interop {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static IntPtr getName() {
             if (_ptrPluginName == IntPtr.Zero)
-                _ptrPluginName = Marshal.StringToHGlobalUni(AssemblyInfo.ProductTitle);
+                _ptrPluginName = Marshal.StringToHGlobalUni(AssemblyInfo.AssemblyProduct);
             return _ptrPluginName;
         }
 

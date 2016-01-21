@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using MarkdownDeep;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
@@ -34,9 +35,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         public HomePage() {
             InitializeComponent();
 
-            html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version).Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "");
+            html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
+                .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
+                .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
             html.LinkClicked += HtmlOnLinkClicked;
+
+            yamuiScrollPage1.ContentPanel.Height = html.Height;
         }
 
         private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {

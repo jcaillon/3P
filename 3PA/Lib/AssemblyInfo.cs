@@ -31,7 +31,17 @@ namespace _3PA.Lib {
         /// <summary>
         /// Gets the title property
         /// </summary>
-        public static string ProductTitle {
+        public static string AssemblyProduct {
+            get {
+                return GetAttributeValue<AssemblyProductAttribute>(a => a.Product,
+                       Path.GetFileNameWithoutExtension(_assembly.CodeBase));
+            }
+        }
+
+        /// <summary>
+        /// Gets the title property
+        /// </summary>
+        public static string AssemblyTitle {
             get {
                 return GetAttributeValue<AssemblyTitleAttribute>(a => a.Title,
                        Path.GetFileNameWithoutExtension(_assembly.CodeBase));
@@ -64,14 +74,6 @@ namespace _3PA.Lib {
         /// </summary>
         public static string Description {
             get { return GetAttributeValue<AssemblyDescriptionAttribute>(a => a.Description); }
-        }
-
-
-        /// <summary>
-        ///  Gets the product's full name.
-        /// </summary>
-        public static string Product {
-            get { return GetAttributeValue<AssemblyProductAttribute>(a => a.Product); }
         }
 
         /// <summary>

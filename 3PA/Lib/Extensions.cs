@@ -214,6 +214,8 @@ namespace _3PA.Lib {
                 while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
                     if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
                         return true;
+                    if (int.Parse(splitLocal[i]) < int.Parse(splitDistant[i]))
+                        return false;
                     i++;
                 }
             } catch (Exception x) {

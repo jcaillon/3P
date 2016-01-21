@@ -86,7 +86,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
             toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
 
-            toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected<br><br>This field is saved as a .pf file and is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'extra.pf'.</div><br><i>This is a different connect statement that for the .pf above</i>");
+            toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is saved as a .pf file and is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'extra.pf'.</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>- db base2 - ld mylogicalName2 - H 127.0.0.1 - S 10</div>");
 
             toolTip.SetToolTip(textbox2, "Path to an .ini file, which as a <b>PROPATH=</b> field<br>(the section in which this field is doesn't matter)<br>that lists the directories to use for the compilation/execution of your progress files");
             toolTip.SetToolTip(flExtraProPath, "A list of directories to be used when compiling/executing your 4GL code<br>They can be separated by a ',' or ';' or new lines '\\n'");

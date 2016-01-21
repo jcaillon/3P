@@ -165,10 +165,13 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
             toolTipHtml.SetToolTip(lbDirectory, "Click to <b>change</b> the directory to explore");
 
+            // default to "everywhere"
+            DirectoryToExplorer = 3;
+
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
-            btDirectory.BackGrndImage = ImageResources.ExplorerDir0;
+            btDirectory.BackGrndImage = ImageResources.ExplorerDir3;
             _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
-            lbDirectory.Text = _explorerDirStr[0];
+            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
             lbDirectory.Click += (sender, args) => BtDirectoryOnButtonPressed(sender, new EventArgs());

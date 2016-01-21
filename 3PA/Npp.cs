@@ -387,7 +387,7 @@ namespace _3PA {
         }
 
         public static string GetNppVersion() {
-            var output = "v?.?";
+            var output = string.Empty;
             try {
                 var changeLogPath = Path.Combine(GetNppDirectory(), "change.log");
                 if (File.Exists(changeLogPath)) {
@@ -407,14 +407,14 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Returns the configuration directory path e.g. /plugins/config/{ProductTitle}
+        /// Returns the configuration directory path e.g. /plugins/config/{AssemblyProduct}
         /// </summary>
         /// <returns></returns>
         public static string GetConfigDir() {
             if (string.IsNullOrEmpty(_configDir)) {
                 var buffer = new StringBuilder(WinApi.MaxPath);
                 WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, WinApi.MaxPath, buffer);
-                _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.ProductTitle);
+                _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.AssemblyProduct);
                 if (!Directory.Exists(_configDir))
                     Directory.CreateDirectory(_configDir);
             }

@@ -123,6 +123,9 @@ namespace _3PA.MainFeatures {
                 new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure),
             };
 
+            var goToDefItem = new MenuItem("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B", ImageResources.GoToDefinition);
+            goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
+
             MainMenuList = new List<MenuItem> {
                 new MenuItem("Show main window", Appli.Appli.ToggleView, "Open_main_window", "Alt+Space", ImageResources.MainWindow) {
                     Generic = true,
@@ -149,7 +152,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem("Start searching files", FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q", ImageResources.Search) {
                     Generic = true,
                 },
-                new MenuItem("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B", ImageResources.GoToDefinition),
+                goToDefItem,
                 new MenuItem("Go to previous jump point", Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B", ImageResources.GoBackward) {
                     Generic = true,
                 },

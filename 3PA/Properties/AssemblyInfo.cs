@@ -23,8 +23,8 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("3P")]
-[assembly: AssemblyDescription("Progress programmers Pal")]
+[assembly: AssemblyTitle("3P - Progress Programmers Pal - Julien Caillon")]
+[assembly: AssemblyDescription("Progress Programmers Pal")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("BullAnt")]
 [assembly: AssemblyProduct("3P")]
@@ -50,5 +50,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.1.1.1")]
-[assembly: AssemblyFileVersion("1.1.1.1")]
+[assembly: AssemblyVersion("1.2.0.1")]
+[assembly: AssemblyFileVersion("1.2.0.1")]

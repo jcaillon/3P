@@ -115,11 +115,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             FakeForm = new EmptyForm();
             NppTbData nppTbData = new NppTbData {
                 hClient = FakeForm.Handle,
-                pszName = AssemblyInfo.ProductTitle + " - Code explorer",
+                pszName = AssemblyInfo.AssemblyProduct + " - Code explorer",
                 dlgID = DockableCommandIndex,
                 uMask = NppTbMsg.DWS_DF_CONT_RIGHT | NppTbMsg.DWS_ICONTAB | NppTbMsg.DWS_ICONBAR,
                 hIconTab = (uint) Utils.GetIconFromImage(ImageResources.CodeExplorerLogo).Handle,
-                pszModuleName = AssemblyInfo.ProductTitle
+                pszModuleName = AssemblyInfo.AssemblyProduct
             };
             IntPtr ptrNppTbData = Marshal.AllocHGlobal(Marshal.SizeOf(nppTbData));
             Marshal.StructureToPtr(nppTbData, ptrNppTbData, false);
