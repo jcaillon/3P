@@ -18,7 +18,6 @@ namespace YamuiFramework.Forms {
             if (disposing && (components != null)) {
                 components.Dispose();
             }
-            contentLabel.LinkClicked -= OnLinkClicked;
             base.Dispose(disposing);
         }
 
@@ -54,8 +53,6 @@ namespace YamuiFramework.Forms {
             // 
             // contentLabel
             // 
-            this.contentLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
             this.contentLabel.AutoSize = false;
             this.contentLabel.AutoSizeHeightOnly = true;
             this.contentLabel.BackColor = System.Drawing.Color.Transparent;

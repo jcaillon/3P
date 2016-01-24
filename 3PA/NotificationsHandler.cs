@@ -36,6 +36,7 @@ using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
+using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
 
@@ -257,7 +258,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region On key down
 
         /// <summary>
@@ -268,7 +268,7 @@ namespace _3PA {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
             handled = false;
 
-            MainFeatures.MenuItem menuItem = null;
+            MenuItem menuItem = null;
             try {
                 // Since it's a keydown message, we can receive this a lot if the user let a button pressed
                 var isSpamming = Utils.IsSpamming(key.ToString(), 100, true);
@@ -290,19 +290,9 @@ namespace _3PA {
                 }
 
                 // check if the user triggered a 3P function defined in the AppliMenu
-                foreach (var item in AppliMenu.Instance.MainMenuList) {
-                    if ((byte)key == item.Shortcut._key &&
-                        keyModifiers.IsCtrl == item.Shortcut.IsCtrl &&
-                        keyModifiers.IsShift == item.Shortcut.IsShift &&
-                        keyModifiers.IsAlt == item.Shortcut.IsAlt &&
-                        (item.Generic || IsCurrentFileProgress)) {
-                        menuItem = item;
-                        if (!isSpamming) {
-                            item.Do();
-                        }
-                        handled = true;
-                        return;
-                    }
+                menuItem = TriggeredMenuItem(AppliMenu.Instance.MainMenuList, isSpamming, key, keyModifiers, ref handled);
+                if (handled) {
+                    return;
                 }
 
                 // The following is specific to 3P so don't go further if we are not on a valid file
@@ -363,6 +353,35 @@ namespace _3PA {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Occured in : " + (menuItem == null ? (new ShortcutKey(keyModifiers.IsCtrl, keyModifiers.IsAlt, keyModifiers.IsShift, key)).ToString() : menuItem.ItemId));
             }
+        }
+
+        /// <summary>
+        /// Check if the key/keymodifiers correspond to a item in the menu, if yes, returns this item and execute .Do()
+        /// </summary>
+        private static MenuItem TriggeredMenuItem(List<MenuItem> list, bool isSpamming, Keys key, KeyModifiers keyModifiers, ref bool handled) {
+            // check if the user triggered a 3P function defined in the AppliMenu
+            foreach (var item in list) {
+                // shortcut corresponds to the item?
+                if ((byte)key == item.Shortcut._key &&
+                    keyModifiers.IsCtrl == item.Shortcut.IsCtrl &&
+                    keyModifiers.IsShift == item.Shortcut.IsShift &&
+                    keyModifiers.IsAlt == item.Shortcut.IsAlt &&
+                    (item.Generic || IsCurrentFileProgress)) {
+                    if (!isSpamming) {
+                        item.Do();
+                    }
+                    handled = true;
+                    return item;
+                }
+                // check its children if any
+                if (item.ChildrenList != null) {
+                    var childItem = TriggeredMenuItem(item.ChildrenList, isSpamming, key, keyModifiers, ref handled);
+                    if (childItem != null) {
+                        return childItem;
+                    }
+                }
+            }
+            return null;
         }
 
         #endregion

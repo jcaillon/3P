@@ -214,7 +214,6 @@ namespace _3PA.Interop {
 
         #endregion
 
-
         #region Structs
 
         [StructLayout(LayoutKind.Sequential)]

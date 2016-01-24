@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using YamuiFramework.Forms;
 using _3PA.Images;
 using _3PA.Interop;
+using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -102,6 +103,22 @@ namespace _3PA.MainFeatures {
                     curMenu.CloseAll();
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns a list containing all the keys used in the menu's items
+        /// </summary>
+        public static List<Keys> GetMenuKeysList(List<MenuItem> menu) {
+            var output = new List<Keys>();
+            foreach (var item in menu) {
+                if (item.Shortcut.IsSet) {
+                    output.Add(item.Shortcut.Key);
+                }
+                if (item.ChildrenList != null) {
+                    output.AddRange(GetMenuKeysList(item.ChildrenList));
+                }
+            }
+            return output;
         }
 
         #endregion
@@ -181,7 +198,7 @@ namespace _3PA.MainFeatures {
 
             if (Config.IsDevelopper) {
                 MainMenuList.Add(
-                    new MenuItem("Tests", ImageResources.Tests, new List<YamuiMenuItem> {
+                    new MenuItem("Tests", ImageResources.Tests, new List<MenuItem> {
                         new MenuItem("Test", Plug.Test, "Test", "Ctrl+D", ImageResources.TestTube),
                         new MenuItem("DEBUG", Plug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube),
                     }));
@@ -199,10 +216,10 @@ namespace _3PA.MainFeatures {
         /// Key of the item in the shortcut dictionnary stored in the config
         /// </summary>
         public string ItemId { get; set; }
-
         public string ItemSpec { get; set; }
         public ShortcutKey Shortcut { get; set; }
         public bool Generic { get; set; }
+        public List<MenuItem> ChildrenList { get; set; }
 
         public MenuItem(string name, Action action, string itemId, string defaultKey, Image img) {
             ItemName = name;
@@ -232,10 +249,11 @@ namespace _3PA.MainFeatures {
             };
         }
 
-        public MenuItem(string name, Image img, List<YamuiMenuItem> children) {
+        public MenuItem(string name, Image img, List<MenuItem> children) {
             ItemName = name;
             ItemImage = img;
-            Children = children;
+            ChildrenList = children;
+            Children = children.Select(item => (YamuiMenuItem) item).ToList();
         }
 
         public MenuItem(bool isSeparator) {

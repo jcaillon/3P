@@ -249,10 +249,8 @@ namespace _3PA {
                 Keys.Prior);
             // we also add the key that are used as shortcut for 3P functions
             AppliMenu.Instance = null;
-            if (AppliMenu.Instance != null) foreach (var item in AppliMenu.Instance.MainMenuList) {
-                if (item.Shortcut.IsSet) {
-                    KeyboardMonitor.Instance.Add(item.Shortcut.Key);
-                }
+            if (AppliMenu.Instance != null) {
+                KeyboardMonitor.Instance.Add(AppliMenu.GetMenuKeysList(AppliMenu.Instance.MainMenuList).ToArray());
             }
             if (!KeyboardMonitor.Instance.IsInstalled) {
                 KeyboardMonitor.Instance.KeyDown += OnKeyDown;

@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -277,7 +278,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="name"></param>
         /// <returns></returns>
         private static ParsedTable FindTempTableByName(string name) {
-            var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.Equals(name));
+            var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
             if (foundTable != null && foundTable.ParsedItem is ParsedTable) return (ParsedTable)foundTable.ParsedItem;
             return null;
         }

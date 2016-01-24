@@ -382,6 +382,15 @@ namespace YamuiFramework.Helper {
 
         #region API Calls
 
+        [DllImport("user32.dll")]
+        public static extern long GetWindowRect(IntPtr hWnd, ref Rectangle lpRect);
+
+        public static Rectangle GetWindowRect(IntPtr hWnd) {
+            Rectangle output = new Rectangle();
+            GetWindowRect(hWnd, ref output);
+            return output;
+        }
+
         /// <summary>
         /// Retrieves the cursor's position, in screen coordinates.
         /// </summary>

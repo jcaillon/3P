@@ -84,36 +84,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             var screen = Npp.GetNppScreen();
 
-            // find max height taken by the html
-            var maximumWidth = screen.WorkingArea.Width/2 - 10;
-            _labelContent.Width = maximumWidth;
-            _labelContent.Text = content;
-            var prefHeight = _labelContent.Height;
+            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Height / 2 - 20);
 
-            // now we got the final height, resize width until height changes
-            int j = 0;
-            int detla = 50;
-            int curWidth = _labelContent.Width;
-            do {
-                curWidth -= detla;
-                _labelContent.Width = Math.Max(Math.Min(maximumWidth, curWidth), minimumWidth);
-                _labelContent.PerformLayout();
-                _labelContent.Invalidate();
-                if (_labelContent.Height > prefHeight) {
-                    curWidth += detla;
-                    detla /= 2;
-                }
-                j++;
-            } while (j < 20);
-            var neededHeight = _labelContent.Height;
-            _panel.ContentPanel.Height = _labelContent.Height;
-            _panel.ContentPanel.Width = _labelContent.Width;
-
-            Width = _panel.ContentPanel.Width + 10;
-            Height = Math.Min(neededHeight, screen.WorkingArea.Height / 2 - 10) + 10;
+            _panel.ContentPanel.Size = _labelContent.Size;
+            Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
 
             // Too tall?
-            if (neededHeight > (screen.WorkingArea.Height / 2 - 10)) {
+            if (_labelContent.Height > (screen.WorkingArea.Height / 2 - 10)) {
                 Width = Width + 10; // add scrollbar width
             }
         }

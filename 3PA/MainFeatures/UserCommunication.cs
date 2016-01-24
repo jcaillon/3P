@@ -94,26 +94,18 @@ namespace _3PA.MainFeatures {
         /// REMARK : DON'T WAIT FOR AN ANSWER IF YOU CALL IT FROM A THREAD!!!!!!!
         /// new List string  { "fu", "ok" }
         /// </summary>
-        /// <param name="html"></param>
-        /// <param name="type"></param>
-        /// <param name="title"></param>
-        /// <param name="subTitle"></param>
-        /// <param name="buttons"></param>
-        /// <param name="waitResponse"></param>
-        /// <param name="clickHandler"></param>
-        /// <param name="dontWrapLines"></param>
         /// <returns>returns an integer (-1 if closed, or from 0 to x = buttons.count - 1)</returns>
-        public static int Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler = null, bool dontWrapLines = false) {
+        public static int Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler = null) {
             var clickedButton = -1;
             if (_anchorForm != null) {
                 if (clickHandler == null) {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
                 if (waitResponse) {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler, dontWrapLines);
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler);
                 } else {
                     _anchorForm.BeginInvoke((Action) delegate {
-                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler, dontWrapLines);
+                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler);
                     });
                 }
             }

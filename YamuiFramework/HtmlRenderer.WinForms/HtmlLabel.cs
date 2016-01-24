@@ -181,6 +181,34 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         }
 
         /// <summary>
+        /// adapts width to content (the label needs to be in AutoSizeHeight only)
+        /// </summary>
+        public void SetNeededSize(string content, int minWidth, int maxWidth) {
+            // find max height taken by the html
+            Width = maxWidth;
+            Text = content;
+            var prefHeight = Height;
+
+            // now we got the final height, resize width until height changes
+            int j = 0;
+            int detla = maxWidth / 20;
+            int curWidth = maxWidth;
+            do {
+                curWidth -= detla;
+                Width = Math.Max(Math.Min(maxWidth, curWidth), minWidth);
+                PerformLayout();
+                //Invalidate();
+                if (Height > prefHeight) {
+                    curWidth += detla;
+                    detla /= 2;
+                }
+                j++;
+            } while (j < 20);
+
+            Width += 10;
+        }
+
+        /// <summary>
         ///   Raised when the BorderStyle property value changes.
         /// </summary>
         [Category("Property Changed")]

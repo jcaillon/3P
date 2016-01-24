@@ -258,7 +258,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Interop\UnmanagedExports.cs" />
-    <Content Include="logo30x30.ico" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Html\HtmlResources.resx">
