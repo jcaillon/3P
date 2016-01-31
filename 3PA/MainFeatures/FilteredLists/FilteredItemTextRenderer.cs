@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (CustomHighlightTextRenderer.cs) is part of 3P.
+// This file (FilteredItemTextRenderer.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,32 +17,29 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
-using YamuiFramework.Themes;
-using _3PA.Lib;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.FilteredLists {
 
     /// <summary>
-    /// This renderer highlights substrings that match a given text filter. 
+    /// This renderer highlights substrings that match a given text filter,
+    /// It only works for OVL with objects that inherit from FilteredItem and it uses
+    /// FilteredItem.FilterFullyMatch
     /// </summary>
-    public class CustomHighlightTextRenderer : HighlightTextRenderer {
+    public class FilteredItemTextRenderer : HighlightTextRenderer {
 
         /// <summary>
         /// Create a HighlightTextRenderer
         /// </summary>
-        public CustomHighlightTextRenderer(string filterStr) {
+        public FilteredItemTextRenderer() {
             _fillBrush = new SolidBrush(ThemeManager.Current.AutoCompletionHighlightBack);
             _framePen = new Pen(ThemeManager.Current.AutoCompletionHighlightBorder);
-            _filterStr = filterStr;
         }
 
         #region Configuration properties
-        private string _filterStr;
         private Brush _fillBrush;
         private Pen _framePen;
         private bool _useRoundedRectangle = true;
@@ -81,26 +78,30 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Cache the font
             Font f = Font;
 
-            foreach (CharacterRange range in txt.ToLower().FindAllMatchedRanges(_filterStr)) {
-                // Measure the text that comes before our substring
-                Size precedingTextSize = Size.Empty;
-                if (range.First > 0) {
-                    string precedingText = txt.Substring(0, range.First);
-                    precedingTextSize = TextRenderer.MeasureText(g, precedingText, f, r.Size, flags);
-                    precedingTextSize.Width -= paddingAdjustment;
+            var rowObj = RowObject as FilteredItem;
+            if (rowObj != null) {
+                foreach (CharacterRange range in rowObj.FilterMatchedRanges) {
+                    // Measure the text that comes before our substring
+                    Size precedingTextSize = Size.Empty;
+                    if (range.First > 0) {
+                        string precedingText = txt.Substring(0, range.First);
+                        precedingTextSize = TextRenderer.MeasureText(g, precedingText, f, r.Size, flags);
+                        precedingTextSize.Width -= paddingAdjustment;
+                    }
+
+                    // Measure the length of our substring (may be different each time due to case differences)
+                    string highlightText = txt.Substring(range.First, range.Length);
+                    Size textToHighlightSize = TextRenderer.MeasureText(g, highlightText, f, r.Size, flags);
+                    textToHighlightSize.Width -= paddingAdjustment;
+
+                    float textToHighlightLeft = r.X + precedingTextSize.Width + 1;
+                    float textToHighlightTop = AlignVertically(r, textToHighlightSize.Height);
+
+                    // Draw a filled frame around our substring
+                    DrawSubstringFrame(g, textToHighlightLeft, textToHighlightTop, textToHighlightSize.Width, textToHighlightSize.Height);
                 }
-
-                // Measure the length of our substring (may be different each time due to case differences)
-                string highlightText = txt.Substring(range.First, range.Length);
-                Size textToHighlightSize = TextRenderer.MeasureText(g, highlightText, f, r.Size, flags);
-                textToHighlightSize.Width -= paddingAdjustment;
-
-                float textToHighlightLeft = r.X + precedingTextSize.Width + 1;
-                float textToHighlightTop = AlignVertically(r, textToHighlightSize.Height);
-
-                // Draw a filled frame around our substring
-                DrawSubstringFrame(g, textToHighlightLeft, textToHighlightTop, textToHighlightSize.Width, textToHighlightSize.Height);
             }
+
         }
 
         /// <summary>
@@ -146,20 +147,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="r"></param>
         /// <param name="txt"></param>
         protected override void DrawGdiPlusTextHighlighting(Graphics g, Rectangle r, string txt) {
-            // Find the substrings we want to highlight
-            var ranges = new List<CharacterRange>(txt.ToLower().FindAllMatchedRanges(_filterStr));
-
-            if (ranges.Count == 0)
-                return;
 
             using (StringFormat fmt = StringFormatForGdiPlus) {
                 RectangleF rf = r;
-                fmt.SetMeasurableCharacterRanges(ranges.ToArray());
-                Region[] stringRegions = g.MeasureCharacterRanges(txt, Font, rf, fmt);
 
-                foreach (Region region in stringRegions) {
-                    RectangleF bounds = region.GetBounds(g);
-                    DrawSubstringFrame(g, bounds.X - 1, bounds.Y - 1, bounds.Width + 2, bounds.Height);
+                var rowObj = RowObject as FilteredItem;
+                if (rowObj != null) {
+
+                    fmt.SetMeasurableCharacterRanges(rowObj.FilterMatchedRanges.ToArray());
+                    Region[] stringRegions = g.MeasureCharacterRanges(txt, Font, rf, fmt);
+
+                    foreach (Region region in stringRegions) {
+                        RectangleF bounds = region.GetBounds(g);
+                        DrawSubstringFrame(g, bounds.X - 1, bounds.Y - 1, bounds.Width + 2, bounds.Height);
+                    }
                 }
             }
         }

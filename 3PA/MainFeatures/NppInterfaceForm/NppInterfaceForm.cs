@@ -191,7 +191,6 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #endregion
 
-
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {

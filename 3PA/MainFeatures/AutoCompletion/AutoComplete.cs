@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
@@ -252,7 +251,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this method should be called to refresh the Items list with all the static items
         /// as well as the dynamic items found by the parser
         /// </summary>
-        public static void FillItems() {
+        private static void FillItems() {
             if (_savedAllItems == null)
                 _savedAllItems = new List<CompletionData>();
 

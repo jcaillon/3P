@@ -93,6 +93,17 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.Designer.cs">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\FilteredLists\FilteredItem.cs" />
+    <Compile Include="MainFeatures\FilteredLists\FilteredItemTreeRenderer.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\FilteredLists\FilteredItemTree.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -147,12 +158,6 @@
       <DependentUpon>EmptyForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\CodeExplorer\CodeExplorerForm.Designer.cs">
-      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
-    </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
@@ -163,7 +168,7 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetEnvironment.Designer.cs">
       <DependentUpon>SetEnvironment.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\FastObjectListViewWoScrolls.cs">
+    <Compile Include="MainFeatures\FilteredLists\FastObjectListViewWoScrolls.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
@@ -235,10 +240,7 @@
     <Compile Include="MainFeatures\AutoCompletion\AutoCompletionForm.Designer.cs">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\AutoCompletion\CustomHighlightTextRenderer.cs">
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="MainFeatures\CodeExplorer\CustomTreeRenderer.cs">
+    <Compile Include="MainFeatures\FilteredLists\FilteredItemTextRenderer.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\CodeExplorer\CodeExplorer.cs" />
@@ -301,14 +303,14 @@
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
+      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
       <DependentUpon>EmptyForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\FileExplorer\FileExplorerForm.resx">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
-      <DependentUpon>CodeExplorerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

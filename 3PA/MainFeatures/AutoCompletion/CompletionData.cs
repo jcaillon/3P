@@ -17,17 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
-    internal class CompletionData {
-        /// <summary>
-        /// The piece of text displayed in the completion list
-        /// </summary>
-        public string DisplayText { get; set; }
+    internal class CompletionData : FilteredItem {
 
         /// <summary>
         /// Type of completion
@@ -70,6 +67,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// This field is only used when Type == CompletionType.Keyword, it contains the keyword type...
         /// </summary>
         public KeywordType KeywordType { get; set; }
+
     }
 
     internal enum CompletionType {
@@ -88,6 +86,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         Widget = 12,
         KeywordObject = 13,
         Label = 14,
-        Sequence = 15,
+        Sequence = 15
     }
 }

@@ -22,13 +22,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using System.Threading;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
@@ -49,6 +49,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             get { return _filterByText; }
             set { _filterByText = value.ToLower(); ApplyFilter(); }
         }
+
+        /// <summary>
+        /// lowercased Filter string
+        /// </summary>
         private static string _filterByText = "";
 
         public bool UseAlternateBackColor {
@@ -68,7 +72,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         // the private fields below are used for the filter function
         private static Dictionary<CompletionType, SelectorButton<CompletionType>> _displayedTypes;
         private static bool _useTypeFiltering;
-        private static string _filterString = "";
+        private static bool _useTextFiltering;
         private static string _currentOwnerName = "";
         private static int _currentLineNumber;
 
@@ -85,8 +89,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// True if the form is ABOVE the text it autocompletes
         /// </summary>
         private bool _isReversed;
-
-        private ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         #endregion
 
@@ -156,6 +158,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             MouseLeave += CustomOnMouseLeave;
             fastOLV.MouseLeave += CustomOnMouseLeave;
             fastOLV.DoubleClick += FastOlvOnDoubleClick;
+
+            // renderer
+            fastOLV.DefaultRenderer = new FilteredItemTextRenderer();
         }
 
         #endregion
@@ -365,13 +370,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <returns></returns>
         public CompletionData GetCurrentSuggestion() {
-            _lock.EnterReadLock();
             try {
                 return (CompletionData) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
                 ErrorHandler.DirtyLog(x);
-            } finally {
-                _lock.ExitReadLock();
             }
             return null;
         }
@@ -440,7 +442,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         protected override void OnLoad(EventArgs e) {
             base.OnLoad(e);
             fastOLV.SelectedIndex = 0;
-            //if (!string.IsNullOrEmpty(_filterString)) ApplyFilter();
         }
 
         protected virtual void OnTabCompleted(TabCompletedEventArgs e) {
@@ -514,45 +515,37 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            //_lock.EnterWriteLock();
-            try {
-                Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
+            Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
 
-                // order the list, first the ones that are equals to the filter, then the
-                // ones that start with the filter, then the rest
-                if (string.IsNullOrEmpty(_filterByText)) {
-                    fastOLV.SetObjects(_initialObjectsList);
-                } else {
-                    var filterLenght = _filterByText.Length;
-                    fastOLV.SetObjects(_initialObjectsList.OrderBy(x => (filterLenght == x.DisplayText.Length) ? 0 : x.DisplayText.ToLower().DispersionLevel(_filterByText) + 1).ToList());
-                }
-
-                // apply the filter, need to match the filter + need to be an active type (Selector button activated)
-                // + need to be in the right scope for variables
-                _currentLineNumber = Npp.Line.CurrentLine;
-                _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
-                if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
-                    _currentLineNumber = -1;
-                }
-                _filterString = _filterByText;
-                _useTypeFiltering = true;
-                fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
-
-                fastOLV.DefaultRenderer = new CustomHighlightTextRenderer(_filterByText);
-
-                // update total items
-                TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
-                nbitems.Text = TotalItems + StrItems;
-
-                // if the selected row is > to number of items, then there will be a unselect
-                if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
-                    Keyword.Width = _normalWidth;
-                if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
-                if (fastOLV.SelectedIndex >= 0)
-                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
-            } finally {
-                //_lock.ExitWriteLock();
+            // apply filter to each item in the list then set the list
+            _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            if (string.IsNullOrEmpty(_filterByText)) {
+                fastOLV.SetObjects(_initialObjectsList);
+            } else {
+                fastOLV.SetObjects(_initialObjectsList.OrderBy(data => data.FilterDispertionLevel).ToList());
             }
+
+            // apply the filter, need to match the filter + need to be an active type (Selector button activated)
+            // + need to be in the right scope for variables
+            _currentLineNumber = Npp.Line.CurrentLine;
+            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
+            if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
+                _currentLineNumber = -1;
+            }
+            _useTypeFiltering = true;
+            _useTextFiltering = true;
+            fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
+
+            // update total items
+            TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
+            nbitems.Text = TotalItems + StrItems;
+
+            // if the selected row is > to number of items, then there will be a unselect
+            if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
+                Keyword.Width = _normalWidth;
+            if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
+            if (fastOLV.SelectedIndex >= 0)
+                fastOLV.EnsureVisible(fastOLV.SelectedIndex);
         }
 
         /// <summary>
@@ -562,12 +555,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
             var compData = (CompletionData)o;
-            // check for the filter match, the activated category,
-            bool output = compData.DisplayText.ToLower().FullyMatchFilter(_filterString);
+
+            // check for the filter match
+            bool output = !_useTextFiltering || compData.FilterFullyMatch;
+
+            // check for activated categories
             if (_useTypeFiltering && _displayedTypes.ContainsKey(compData.Type))
                 output = output && _displayedTypes[compData.Type].Activated;
 
-            // if the item isn't a parsed item, it is avaiable no matter where we are in the code
+            // if the item isn't a parsed item, it is available no matter where we are in the code
             if (!compData.FromParser) return output;
 
             // case of Parsed define or temp table define
@@ -608,9 +604,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_displayedTypes == null)
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
             _useTypeFiltering = false;
+            _useTextFiltering = false;
             _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
             _currentLineNumber = (!Config.Instance.AutoCompleteOnlyShowDefinedVar || dontCheckLine) ? -1 : line;
-            _filterString = "";
             return objectsList.Where(FilterPredicate).ToList();
         }
 
@@ -623,27 +619,33 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// </summary>
     internal class CompletionDataSortingClass : IComparer<CompletionData> {
         public int Compare(CompletionData x, CompletionData y) {
+
             // compare first by CompletionType
             int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
             if (compare != 0) return compare;
+
             // then by ranking
             compare = y.Ranking.CompareTo(x.Ranking);
             if (compare != 0) return compare;
+
             // then sort by parsed items first
             if (x.Type == CompletionType.Table) {
                 compare = y.FromParser.CompareTo(x.FromParser);
                 if (compare != 0) return compare;
             }
+
             // then sort by scope
             if (x.ParsedItem != null && y.ParsedItem != null) {
                 compare = ((int)y.ParsedItem.Scope).CompareTo(((int)x.ParsedItem.Scope));
                 if (compare != 0) return compare;
             }
+
             // if keyword
             if (x.Type == CompletionType.Keyword || x.Type == CompletionType.KeywordObject) {
                 compare = ((int)x.KeywordType).CompareTo(((int)y.KeywordType));
                 if (compare != 0) return compare;
             }
+
             // sort by display text in last resort
             return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }

@@ -245,7 +245,7 @@ namespace _3PA.MainFeatures.Parser {
                 DisplayText = pars.Name,
                 Branch = pars.Branch,
                 IconType = pars.IconIconType,
-                Level = pars.IsRoot ? 0 : 1,
+                IsRoot = pars.IsRoot,
                 Flag = AddExternalFlag((CodeExplorerFlag)0),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,

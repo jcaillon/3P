@@ -13,3 +13,4 @@
 - Check the default Config
 - Recompile the updater if needed!!
 - Make sure to leave at least 1 empty line above bullet lists in the GitHub release description!
+- Compile in release mode, not debug

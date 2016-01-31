@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -60,7 +59,7 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Use : var name = player.GetAttributeFrom<DisplayAttribute>("PlayerDescription").Name;
+        /// Use : var name = player.GetAttributeFrom DisplayAttribute>("PlayerDescription").Name;
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="instance"></param>
@@ -266,99 +265,6 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static int CountOccurences(this string haystack, string needle) {
             return (haystack.Length - haystack.Replace(needle, "").Length) / needle.Length;
-        }
-
-        /// <summary>
-        /// returns a list of CharacterRange representing the matches found with the given filter
-        /// applied to the string
-        /// It works like the text matching of resharper autocompletion...
-        /// WARNING : CASE SENSITIVE!!!
-        /// </summary>
-        /// <param name="input"></param>
-        /// <param name="filter"></param>
-        /// <returns></returns>
-        public static List<CharacterRange> FindAllMatchedRanges(this string input, string filter) {
-            var ranges = new List<CharacterRange>();
-            if (string.IsNullOrEmpty(filter)) return ranges;
-            int pos = 0;
-            int posFilter = 0;
-            bool matching = false;
-            int startMatch = 0;
-            while (pos < input.Length) {
-                // remember matching state at the beginning of the loop
-                bool wasMatching = matching;
-                // we match the current char of the filter
-                if (input[pos] == filter[posFilter]) {
-                    if (!matching) {
-                        matching = true;
-                        startMatch = pos;
-                    }
-                    posFilter++;
-                    // we matched the entire filter
-                    if (posFilter >= filter.Length) {
-                        ranges.Add(new CharacterRange(startMatch, pos - startMatch + 1));
-                        break;
-                    }
-                } else
-                    matching = false;
-                // we stopped matching, remember matching range
-                if (!matching && wasMatching)
-                    ranges.Add(new CharacterRange(startMatch, pos - startMatch));
-                pos++;
-            }
-            // we reached the end of the input, if we were matching stuff, remember matching range
-            if (pos >= input.Length && matching)
-                ranges.Add(new CharacterRange(startMatch, pos - 1 - startMatch));
-            return ranges;
-        }
-
-        /// <summary>
-        /// Tests if the string contains the given filter, uses the text matching of resharper autocompletion (like)
-        /// WARNING : CASE SENSITIVE!!!
-        /// </summary>
-        public static bool FullyMatchFilter(this string input, string filter) {
-            if (string.IsNullOrEmpty(filter)) return true;
-            int pos = 0;
-            int posFilter = 0;
-            while (pos < input.Length) {
-                // we match the current char of the filter
-                if (char.ToLower(input[pos]) == filter[posFilter]) {
-                    posFilter++;
-                    // we matched the entire filter
-                    if (posFilter >= filter.Length)
-                        return true;
-                }
-                pos++;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Returns the dispersion level of a input string compared to a filter
-        /// </summary>
-        public static int DispersionLevel(this string input, string filter) {
-            int dispersion = 0;
-            if (string.IsNullOrEmpty(filter)) return dispersion;
-            int pos = 0;
-            int posFilter = 0;
-            while (pos < input.Length) {
-                // we match the current char of the filter
-                if (char.ToLower(input[pos]) == filter[posFilter]) {
-                    posFilter++;
-                    // we matched the entire filter
-                    if (posFilter >= filter.Length)
-                        return dispersion;
-                } else {
-                    // gap between match mean more penalty than finding the match later in the string
-                    if (posFilter > 0) {
-                        dispersion += 900;
-                    } else {
-                        dispersion += 30;
-                    }
-                }
-                pos++;
-            }
-            return dispersion;
         }
 
         /// <summary>

@@ -13,6 +13,7 @@ namespace BrightIdeasSoftware {
         /// This class handles drawing the tree structure of the primary column.
         /// </summary>
         public class TreeRenderer : HighlightTextRenderer {
+
             /// <summary>
             /// Create a TreeRenderer
             /// </summary>

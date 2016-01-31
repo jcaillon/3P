@@ -26,6 +26,8 @@ using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
 
 namespace _3PA.MainFeatures.FileExplorer {
@@ -76,7 +78,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void RebuildItemList() {
             if (!IsVisible) return;
-            Form.RefreshOvl();
+            Form.RefreshFileList();
             Form.FilterByText = "";
         }
 
@@ -100,12 +102,12 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// can be set to be recursive,
         /// can be set to not add the subfolders in the results
         /// </summary>
-        public static List<FileObject> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
+        public static List<FileListItem> ListFileOjectsInDirectory(string dirPath, bool recursive = true, bool includeFolders = true, bool firstCall = true) {
 
             if (firstCall)
                 _startTime = DateTime.Now;
 
-            var output = new List<FileObject>();
+            var output = new List<FileListItem>();
             if (!Directory.Exists(dirPath))
                 return output;
 
@@ -117,8 +119,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 FileType fileType;
                 if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileType))
                     fileType = FileType.Unknow;
-                output.Add(new FileObject {
-                    FileName = fileInfo.Name,
+                output.Add(new FileListItem {
+                    DisplayText = fileInfo.Name,
                     BasePath = fileInfo.DirectoryName,
                     FullPath = fileInfo.FullName,
                     Flags = FileFlag.ReadOnly,
@@ -138,8 +140,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                         if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
                                 output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false));
                         }
-                        output.Add(new FileObject {
-                            FileName = directoryInfo.Name,
+                        output.Add(new FileListItem {
+                            DisplayText = directoryInfo.Name,
                             BasePath = Path.GetDirectoryName(directoryInfo.FullName),
                             FullPath = directoryInfo.FullName,
                             CreateDateTime = directoryInfo.CreationTime,
@@ -228,13 +230,12 @@ namespace _3PA.MainFeatures.FileExplorer {
         #endregion
     }
 
-    #region FileObject
+    #region FileListItem
 
     /// <summary>
     /// Object describing a file
     /// </summary>
-    public class FileObject {
-        public string FileName { get; set; }
+    internal class FileListItem : FilteredItem {
         public string BasePath { get; set; }
         public string FullPath { get; set; }
         public DateTime ModifieDateTime { get; set; }
@@ -250,7 +251,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// corresponds to an icon that appends "Type" to the enum name,
     /// for example the icon for R files is named RType.png
     /// </summary>
-    public enum FileType {
+    internal enum FileType {
         Unknow,
         Df,
         D,
@@ -268,7 +269,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// Same as other flag, corresponds to an icon with the same name as in the enumeration
     /// </summary>
     [Flags]
-    public enum FileFlag {
+    internal enum FileFlag {
         /// <summary>
         /// Is the file starred by the user
         /// </summary>

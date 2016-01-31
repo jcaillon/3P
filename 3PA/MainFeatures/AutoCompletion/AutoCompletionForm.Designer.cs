@@ -3,6 +3,7 @@ using System.ComponentModel;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
+using _3PA.MainFeatures.FilteredLists;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     partial class AutoCompletionForm {
@@ -40,7 +41,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.fastOLV = new _3PA.MainFeatures.AutoCompletion.FastObjectListViewWoScrolls();
+            this.fastOLV = new FastObjectListViewWoScrolls();
             this.Keyword = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.Type = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();

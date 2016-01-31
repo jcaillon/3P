@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 
-namespace _3PA.MainFeatures.AutoCompletion {
+namespace _3PA.MainFeatures.FilteredLists {
     class FastObjectListViewWoScrolls : FastObjectListView {
 
         const UInt32 WmNccalcsize = 0x83;

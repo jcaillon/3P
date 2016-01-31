@@ -20,14 +20,14 @@
 using System;
 using System.Collections.Generic;
 using _3PA.Lib;
+using _3PA.MainFeatures.FilteredLists;
 
 namespace _3PA.MainFeatures.CodeExplorer {
 
     /// <summary>
     /// base class
     /// </summary>
-    internal class CodeExplorerItem {
-        public string DisplayText { get; set; }
+    internal class CodeExplorerItem : FilteredItemTree {
        
         /// <summary>
         /// the branch to which this item belongs (if the item is not part of the "root")
@@ -57,15 +57,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public string DocumentOwner { get; set; }
 
         /// <summary>
-        /// The level of the item defines its place in the tree, level 0 is the root, 1 is deeper and so on...
-        /// </summary>
-        public int Level { 
-            get { return _level; }
-            set { _level = value; }
-        }
-        private int _level = 1;
-
-        /// <summary>
         /// Flags for the item, is directly related to the images displayed on the right of the item
         /// </summary>
         public CodeExplorerFlag Flag { get; set; }
@@ -76,32 +67,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public string SubString { get; set; }
 
         /// <summary>
-        /// Does it have children?
-        /// </summary>
-        public bool HasChildren { get; set; }
-
-        /// <summary>
         /// Set this to true if the item doesn't represent a block and therefor should not have a "mouse" selection
         /// image on the right
         /// </summary>
         public bool IsNotBlock { get; set; }
-
-        /// <summary>
-        /// unique identifier for this item
-        /// </summary>
-        public int Index { get; set; }
-
-        /// <summary>
-        /// List of children items
-        /// </summary>
-        public List<CodeExplorerItem> Items {
-            get {
-                if (_items == null)
-                    _items = CodeExplorerForm.GetItemsFor(this);
-                return _items;
-            }
-        }
-        private List<CodeExplorerItem> _items;
     }
 
     /// <summary>

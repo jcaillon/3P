@@ -143,7 +143,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                 // get it out of the screen or it might be visible through low opacity... trust me
                 Location = new Point(-10000, -10000);
             } else {
-                Location = Owner.PointToScreen(Point.Empty);
+                if (Owner != null)
+                    Location = Owner.PointToScreen(Point.Empty);
                 Refresh();
             }
         }

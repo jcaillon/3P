@@ -19,10 +19,8 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
@@ -54,12 +52,6 @@ namespace _3PA.MainFeatures.Parser {
         private static Parser _ablParser;
 
         private static ParserVisitor _parserVisitor;
-
-        /// <summary>
-        /// is used to make sure that 2 different threads dont try to access
-        /// the same resource (_ablParser) at the same time, which would be problematic
-        /// </summary>
-        private static object _parserLock = new object();
         #endregion
 
         #region misc
@@ -70,16 +62,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static string GetCarretLineOwnerName(int line) {
             if (_ablParser == null) return "";
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
-                if (lockTaken) {
-                    return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
-                }
-            } finally {
-                if (lockTaken) Monitor.Exit(_parserLock);
-            }
-            return string.Empty;
+            return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
         }
 
         /// <summary>
@@ -102,16 +85,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static bool CanIndent() {
             if (_ablParser == null) return false;
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
-                if (lockTaken) {
-                    return _ablParser.ParsingOk;
-                }
-            } finally {
-                if (lockTaken) Monitor.Exit(_parserLock);
-            }
-            return false;
+            return _ablParser.ParsingOk;
         }
 
         /// <summary>
@@ -120,16 +94,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static Dictionary<int, LineInfo> GetLineInfo() {
             if (_ablParser == null) return null;
-            bool lockTaken = false;
-            try {
-                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
-                if (lockTaken) {
-                    return _ablParser.GetLineInfo;
-                }
-            } finally {
-                if (lockTaken) Monitor.Exit(_parserLock);
-            }
-            return null;
+            return _ablParser.GetLineInfo;
         }
 
         #endregion
@@ -142,11 +107,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public static void RefreshParser() {
             // we launch the parser, that will fill the DynamicItems
-            bool lockTaken = false;
             try {
-                Monitor.TryEnter(_parserLock, 500, ref lockTaken);
-                if (!lockTaken) return;
-
                 // if this document is in the Saved parsed visitors, we remove it because it might change so
                 // we want to re parse it later
                 var currentFilePath = Plug.CurrentFilePath;
@@ -168,8 +129,6 @@ namespace _3PA.MainFeatures.Parser {
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
-            } finally {
-                if (lockTaken) Monitor.Exit(_parserLock);
             }
         }
 
@@ -338,7 +297,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="likeStr"></param>
         /// <returns></returns>
-        public static ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
+        private static ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
             // determines the format
             var nbPoints = likeStr.CountOccurences(".");
             var splitted = likeStr.Split('.');

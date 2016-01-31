@@ -18,16 +18,18 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Fonts;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.Parser;
 
@@ -37,12 +39,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region fields
 
-        private const string EmptyListString = "Nothing to display!";
+        private const string StrEmptyList = "Nothing to display!";
 
         /// <summary>
         /// Tracks toggle state of the expand/collapse
         /// </summary>
-        private bool _isExpanded;
+        private bool _isExpanded = true;
 
         /// <summary>
         /// tracks if we want to display the "normal" list, with folders and stuff, or the
@@ -50,21 +52,27 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         private bool _displayUnSorted;
 
-        private string _filterText;
-
-        private Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>();
-        private int _topItemIndex;
-
-        // list of items to display in the tree
-        private static List<CodeExplorerItem> _unsortedItems = new List<CodeExplorerItem>();
-        private static List<CodeExplorerItem> _rootItems = new List<CodeExplorerItem>();
-        private static List<CodeExplorerItem> _items = new List<CodeExplorerItem>();
-
-        // holds the display order of the ExplorerType
-        private static List<int> _explorerBranchTypePriority;
+        /// <summary>
+        /// The filter to apply to the autocompletion form
+        /// </summary>
+        public string FilterByText {
+            get { return _filterByText; }
+            set {
+                _filterByText = value.ToLower();
+                _isFiltering = !string.IsNullOrEmpty(_filterByText);
+                ApplyFilter();
+            }
+        }
 
         /// <summary>
-        /// returns the ranking of each ExplorerType, helps sorting them as we wish
+        /// Lowered case filter string
+        /// </summary>
+        private string _filterByText = "";
+
+        private bool _isFiltering;
+
+        /// <summary>
+        /// returns the ranking of each BranchType, helps sorting them as we wish
         /// </summary>
         public static List<int> GetPriorityList {
             get {
@@ -73,13 +81,27 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 return _explorerBranchTypePriority;
             }
         }
+        private static List<int> _explorerBranchTypePriority;
+
+        /// <summary>
+        ///  gets or sets the total items currently displayed in the form
+        /// </summary>
+        public int TotalItems { get; set; }
+
+        // remember the original list of items
+        private List<CodeExplorerItem> _initialObjectsList;
+
+        // to keep track of expanded branches.. tje key is the DisplayText of the branch
+        private static Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>();  
+
+        private OLVColumn _displayText;
+        private FastObjectListView _fastOlv;
 
         #endregion
 
         #region constructor
 
-        public CodeExplorerForm(EmptyForm formToCover)
-            : base(formToCover) {
+        public CodeExplorerForm(EmptyForm formToCover) : base(formToCover) {
             InitializeComponent();
 
             SetStyle(
@@ -88,40 +110,87 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 ControlStyles.UserPaint |
                 ControlStyles.AllPaintingInWmPaint, true);
 
-            // Can the given object be expanded?
-            ovlTree.CanExpandGetter = x => ((CodeExplorerItem)x).HasChildren;
+            #region Object list
 
-            // What objects should belong underneath the given model object?
-            ovlTree.ChildrenGetter = delegate(object x) {
-                var obj = (CodeExplorerItem)x;
-                return (obj != null && obj.HasChildren) ? obj.Items : null;
+            // column
+            _displayText = new OLVColumn {
+                AspectName = "DisplayText",
+                FillsFreeSpace = true,
+                IsEditable = false,
+                ShowTextInHeader = false,
+                Text = ""
             };
 
+            // fast ovl
+            _fastOlv = new FastObjectListView();
+            _fastOlv.AllColumns.Add(_displayText);
+            _fastOlv.AutoArrange = false;
+            _fastOlv.BorderStyle = BorderStyle.None;
+            _fastOlv.Columns.AddRange(new ColumnHeader[] {_displayText});
+            _fastOlv.FullRowSelect = true;
+            _fastOlv.HeaderMaximumHeight = 0;
+            _fastOlv.HeaderStyle = ColumnHeaderStyle.None;
+            _fastOlv.HideSelection = false;
+            _fastOlv.LabelWrap = false;
+            _fastOlv.MultiSelect = false;
+            _fastOlv.OwnerDraw = true;
+            _fastOlv.RowHeight = 20;
+            _fastOlv.SelectAllOnControlA = false;
+            _fastOlv.ShowGroups = false;
+            _fastOlv.ShowHeaderInAllViews = false;
+            _fastOlv.ShowSortIndicators = false;
+            _fastOlv.SortGroupItemsByPrimaryColumn = false;
+            _fastOlv.UseCellFormatEvents = true;
+            _fastOlv.UseCompatibleStateImageBehavior = false;
+            _fastOlv.UseFiltering = true;
+            _fastOlv.UseHotItem = true;
+            _fastOlv.UseTabAsInput = true;
+            _fastOlv.View = View.Details;
+            _fastOlv.VirtualMode = true;
+            _fastOlv.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+            _fastOlv.Location = new Point(0, 30);
+            _fastOlv.Size = new Size(320, 300);
+
+            // add to content panel
+            Controls.Add(_fastOlv);
+
             // Image getter
-            DisplayText.ImageGetter += ImageGetter;
+            _displayText.ImageGetter += ImageGetter;
 
             // Style the control
             StyleOvlTree();
 
+            // Register to events
+            _fastOlv.KeyDown += FastOlvOnKeyDown;
+            _fastOlv.Click += FastOlvOnClick;
+
+            // decorate rows
+            _fastOlv.UseCellFormatEvents = true;
+            _fastOlv.FormatCell += FastOlvOnFormatCell;
+
+            // problems with the width of the column, set here
+            _displayText.Width = _fastOlv.Width - 17;
+            _fastOlv.ClientSizeChanged += (sender, args) => _displayText.Width = _fastOlv.Width - 17;
+
+            #endregion
+
+            #region Buttons
+
+            // Buttons images
             buttonCleanText.BackGrndImage = ImageResources.eraser;
             buttonExpandRetract.BackGrndImage = ImageResources.collapse;
             buttonRefresh.BackGrndImage = ImageResources.refresh;
             buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
             buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
-            _isExpanded = true;
 
-            // Register to events
+            // Register buttons to events
             buttonCleanText.ButtonPressed += buttonCleanText_Click;
             buttonExpandRetract.ButtonPressed += buttonExpandRetract_Click;
             textBoxFilter.TextChanged += textBoxFilter_TextChanged;
             buttonRefresh.ButtonPressed += buttonRefresh_Click;
             buttonSort.ButtonPressed += buttonSort_Click;
             buttonIncludeExternal.ButtonPressed += ButtonIncludeExternalOnButtonPressed;
-            ovlTree.Click += OvlTreeOnClick;
-
-            // decorate rows
-            ovlTree.UseCellFormatEvents = true;
-            ovlTree.FormatCell += FastOlvOnFormatCell;
+            textBoxFilter.KeyDown += TextBoxFilterOnKeyDown;
 
             // tooltips
             toolTipHtml.SetToolTip(buttonExpandRetract, "Toggle <b>Expand/Collapse</b>");
@@ -131,20 +200,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
             toolTipHtml.SetToolTip(buttonIncludeExternal, "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)");
             toolTipHtml.SetToolTip(textBoxFilter, "Allows to <b>filter</b> the items of the list below");
 
-            // problems with the width of the column, set here
-            DisplayText.Width = ovlTree.Width - 17;
-            ClientSizeChanged += (sender, args) => DisplayText.Width = ovlTree.Width - 17;
+            #endregion
+
         }
 
         #endregion
 
+        #region core
+
         #region Paint Methods
-        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormBack;
-            e.Graphics.Clear(backColor);
+            e.Graphics.Clear(ThemeManager.Current.FormBack);
         }
+
         #endregion
 
         #region events
@@ -160,7 +229,23 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        #region cell formatting
+        #endregion
+
+        #region Object list
+
+        #region cell formatting and style
+
+        /// <summary>
+        /// Return the image that needs to be display on the left of an item
+        /// representing its type
+        /// </summary>
+        /// <param name="typeStr"></param>
+        /// <returns></returns>
+        private static Image GetImageFromStr(string typeStr) {
+            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
+            return tryImg ?? ImageResources.Error;
+        }
+
         /// <summary>
         /// Image getter for object rows
         /// </summary>
@@ -169,8 +254,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private static object ImageGetter(object rowObject) {
             var obj = (CodeExplorerItem)rowObject;
             if (obj == null) return ImageResources.Error;
-            Image tryImg = (Image)ImageResources.ResourceManager.GetObject((obj.IconType > 0) ? obj.IconType.ToString() : obj.Branch.ToString());
-            return tryImg ?? ImageResources.Error;
+            return GetImageFromStr((obj.IconType > 0) ? obj.IconType.ToString() : obj.Branch.ToString());
         }
 
         /// <summary>
@@ -179,7 +263,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private static void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            CodeExplorerItem obj = (CodeExplorerItem)args.Model;
+            CodeExplorerItem obj = (CodeExplorerItem) args.Model;
 
             // currently selected block
             if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
@@ -194,11 +278,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
             // display the flags
             int offset = -5;
-            foreach (var name in Enum.GetNames(typeof(CodeExplorerFlag))) {
-                CodeExplorerFlag flag = (CodeExplorerFlag)Enum.Parse(typeof(CodeExplorerFlag), name);
+            foreach (var name in Enum.GetNames(typeof (CodeExplorerFlag))) {
+                CodeExplorerFlag flag = (CodeExplorerFlag) Enum.Parse(typeof (CodeExplorerFlag), name);
                 if (flag == 0) continue;
                 if (!obj.Flag.HasFlag(flag)) continue;
-                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
                 if (tryImg == null) continue;
                 ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
                     Offset = new Size(offset, 0)
@@ -226,205 +310,32 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 args.SubItem.Decorations.Add(decoration);
             }
         }
-        #endregion
-
-        #region public methods
-
-        /// <summary>
-        /// Used when the user update the positon of the carret, to reflect the current location with the mouse
-        /// </summary>
-        public void Redraw() {
-            ovlTree.Invalidate();
-        }
-
-        /// <summary>
-        /// Clear the tree
-        /// </summary>
-        public void ClearTree() {
-            ovlTree.ClearObjects();
-        }
-
-        /// <summary>
-        /// This method uses the items found by the parser to update the code explorer tree
-        /// </summary>
-        public void UpdateTreeData(bool forceUpdate = false) {
-            // Fetch items found by the parser
-            var prevUnsortedItems = _unsortedItems.ToList();
-            _unsortedItems = ParserHandler.GetParsedExplorerItemsList();
-
-            // we set an index for each item, this will be useful to find the updated GoToLine when we click on an item
-            int iIndex = 0;
-            _unsortedItems.ForEach(item => item.Index = iIndex++);
-
-            // dont update the tree if every item is stricly the same..
-            if (!forceUpdate && prevUnsortedItems.Count == _unsortedItems.Count) {
-                bool allEquals = true;
-                for (int i = 0; i < _unsortedItems.Count; i++) {
-                    if (!prevUnsortedItems[i].DisplayText.Equals(_unsortedItems[i].DisplayText)) allEquals = false;
-                }
-                if (allEquals) return;
-            }
-
-            _items = ParserHandler.GetParsedExplorerItemsList();
-            _items.Sort(new ExplorerObjectSortingClass());
-
-            // init branches
-            _rootItems.Clear();
-
-            if (_displayUnSorted) {
-                _rootItems = new List<CodeExplorerItem> {
-                    new CodeExplorerItem {
-                        DisplayText = "Everything in code order",
-                        Branch = CodeExplorerBranch.EverythingInCodeOrder,
-                        HasChildren = true
-                    }
-                };
-            } else {
-                // add root items first
-                foreach (var item in _items.Where(item => item.Level == 0)) {
-                    _rootItems.Add(item);
-                }
-
-                // for each distinct type of items, create a branch (if the branchType isn't already in the root list!)
-                foreach (var type in _items.Select(x => x.Branch).Distinct()) {
-                    if (_rootItems.Find(item => item.Branch == type) != null) continue;
-                    _rootItems.Add(new CodeExplorerItem {
-                        DisplayText = ((DisplayAttr)type.GetAttributes()).Name,
-                        Branch = type,
-                        HasChildren = true,
-                        Level = 0
-                    });
-                }
-
-                // For each duplicated item (same branchType and same displayText), we create a new branch
-                var iItem = 0;
-                while (iItem < _items.Count) {
-
-                    var iIdentical = iItem + 1;
-                    CodeExplorerFlag flags = 0;
-
-                    // while we match identical items
-                    while (iIdentical < _items.Count
-                        && _items[iItem].Branch == _items[iIdentical].Branch
-                        && _items[iItem].IconType == _items[iIdentical].IconType
-                        && _items[iItem].DisplayText.EqualsCi(_items[iIdentical].DisplayText)) {
-                        _items[iIdentical].Level = 2;
-                        flags = flags | _items[iIdentical].Flag;
-                        iIdentical++;
-                    }
-                    // if we found identical item, we create a branch for them
-                    if (iIdentical > iItem + 1) {
-                        _items[iItem].Level = 2;
-                        _items.Insert(iItem, new CodeExplorerItem {
-                            DisplayText = _items[iItem].DisplayText,
-                            Branch = _items[iItem].Branch,
-                            IconType = _items[iItem].IconType,
-                            HasChildren = true,
-                            SubString = "x" + (iIdentical - iItem),
-                            Level = 1,
-                            IsNotBlock = _items[iItem].IsNotBlock,
-                            Flag = flags
-                        });
-                        iItem = iIdentical + 1;
-                    } else
-                        iItem++;
-                }
-
-                // sort root items
-                _rootItems = _rootItems.OrderBy(item => GetPriorityList[(int)item.Branch]).ToList();
-            }
-
-            RememberExpandedItems();
-            ovlTree.Roots = _rootItems;
-            ovlTree.RefreshObjects(_rootItems);
-            SetRememberedExpandedItems();
-            ReapplyFilter();
-        }
-
-        /// <summary>
-        /// Call this before updating the list of items to remember which branch is expanded
-        /// </summary>
-        public void RememberExpandedItems() {
-            foreach (var root in ovlTree.Roots) {
-                var branch = root as CodeExplorerItem;
-                if (branch == null || !branch.HasChildren) continue;
-                if (!_expandedBranches.ContainsKey(branch.DisplayText))
-                    _expandedBranches.Add(branch.DisplayText, ovlTree.IsExpanded(root));
-                else
-                    _expandedBranches[branch.DisplayText] = ovlTree.IsExpanded(root);
-            }
-
-            _topItemIndex = ovlTree.TopItemIndex;
-        }
-
-        /// <summary>
-        /// Call this after updating the list of items to set the remembered expanded branches
-        /// </summary>
-        public void SetRememberedExpandedItems() {
-            foreach (var root in ovlTree.Roots) {
-                var branch = root as CodeExplorerItem;
-                if (branch == null || !branch.HasChildren) continue;
-                if (_expandedBranches.ContainsKey(branch.DisplayText)) {
-                    if (_expandedBranches[branch.DisplayText])
-                        ovlTree.Expand(root);
-                    else
-                        ovlTree.Collapse(root);
-                } else {
-                    _expandedBranches.Add(branch.DisplayText, true);
-                    ovlTree.Expand(root);
-                }
-            }
-
-            ovlTree.TopItemIndex = _topItemIndex > 0 ? Math.Min(_topItemIndex, ovlTree.FilteredObjects.OfType<CodeExplorerItem>().Count()) : 0;
-        }
-
-        /// <summary>
-        /// Static method used by items to return the list of their children
-        /// </summary>
-        /// <returns></returns>
-        public static List<CodeExplorerItem> GetItemsFor(CodeExplorerItem item) {
-            if (item.Branch == CodeExplorerBranch.EverythingInCodeOrder)
-                return _unsortedItems;
-
-            // returns the list of children items
-            switch (item.Level) {
-                case 0:
-                    return _items.Where(expItem => expItem.Branch == item.Branch && expItem.Level == 1).ToList();
-                case 1:
-                    return _items.Where(expItem => expItem.Branch == item.Branch &&
-                        expItem.Level == 2 &&
-                        expItem.IconType == item.IconType &&
-                        expItem.DisplayText.EqualsCi(item.DisplayText)).ToList();
-            }
-
-            return new List<CodeExplorerItem>();
-        }
 
         /// <summary>
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
             // Style the control
-            ovlTree.OwnerDraw = true;
-            ovlTree.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            ovlTree.BackColor = ThemeManager.Current.FormBack;
-            ovlTree.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
-            ovlTree.ForeColor = ThemeManager.Current.FormFore;
-            ovlTree.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
-            ovlTree.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
-            ovlTree.UnfocusedHighlightBackgroundColor = ovlTree.HighlightBackgroundColor;
-            ovlTree.UnfocusedHighlightForegroundColor = ovlTree.HighlightForegroundColor;
+            _fastOlv.OwnerDraw = true;
+            _fastOlv.Font = FontManager.GetFont(FontFunction.AutoCompletion);
+            _fastOlv.BackColor = ThemeManager.Current.FormBack;
+            _fastOlv.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
+            _fastOlv.ForeColor = ThemeManager.Current.FormFore;
+            _fastOlv.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
+            _fastOlv.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
+            _fastOlv.UnfocusedHighlightBackgroundColor = _fastOlv.HighlightBackgroundColor;
+            _fastOlv.UnfocusedHighlightForegroundColor = _fastOlv.HighlightForegroundColor;
 
             // Decorate and configure hot item
-            ovlTree.UseHotItem = true;
-            ovlTree.HotItemStyle = new HotItemStyle {
+            _fastOlv.UseHotItem = true;
+            _fastOlv.HotItemStyle = new HotItemStyle {
                 BackColor = ThemeManager.Current.MenuHoverBack,
                 ForeColor = ThemeManager.Current.MenuHoverFore
             };
 
             // overlay of empty list :
-            ovlTree.EmptyListMsg = EmptyListString;
-            TextOverlay textOverlay = ovlTree.EmptyListMsgOverlay as TextOverlay;
+            _fastOlv.EmptyListMsg = StrEmptyList;
+            TextOverlay textOverlay = _fastOlv.EmptyListMsgOverlay as TextOverlay;
             if (textOverlay != null) {
                 textOverlay.TextColor = ThemeManager.Current.FormFore;
                 textOverlay.BackColor = ThemeManager.Current.FormAltBack;
@@ -434,197 +345,424 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 textOverlay.Rotation = -5;
             }
 
-            ovlTree.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
+            _fastOlv.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
 
-            CleanFilter();
+            _fastOlv.DefaultRenderer = new FilteredItemTreeRenderer();
         }
+
+        #endregion
+
+        #region Update tree data
+
+        /// <summary>
+        /// This method uses the items found by the parser to update the code explorer tree (async)
+        /// </summary>
+        public void UpdateTreeData() {
+            Task.Factory.StartNew(() => {
+                try {
+                    UpdateTreeDataAction();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
+                }
+            });
+        }
+
+        private void UpdateTreeDataAction() {
+            // get the list of items
+            var tempList = ParserHandler.GetParsedExplorerItemsList();
+            if (tempList == null || tempList.Count == 0)
+                return;
+
+            _initialObjectsList = new List<CodeExplorerItem>();
+
+            if (!_displayUnSorted) {
+                // we built the tree "manually"
+                tempList.Sort(new ExplorerObjectSortingClass());
+
+                HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
+
+                // for each distinct type of items, create a branch (if the branchType is not a root item like Root or MainBlock)
+                CodeExplorerItem currentLvl1Parent = null;
+                var iItem = 0;
+                while (iItem < tempList.Count) {
+                    var item = tempList[iItem];
+
+                    // add an extra item that will be a new branch
+                    if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
+                        var branchDisplayText = ((DisplayAttr) item.Branch.GetAttributes()).Name;
+
+                        currentLvl1Parent = new CodeExplorerItem {
+                            DisplayText = branchDisplayText,
+                            Branch = item.Branch,
+                            CanExpand = true,
+                            // by default, the lvl 1 branches are expanded
+                            IsExpanded = (!_expandedBranches.ContainsKey(branchDisplayText) ? _isExpanded : _expandedBranches[branchDisplayText])
+                        };
+                        foundBranches.Add(item.Branch);
+                        _initialObjectsList.Add(currentLvl1Parent);
+                    }
+
+                    // Add a child item to the current branch
+                    if (foundBranches.Contains(item.Branch)) {
+
+                        // For each duplicated item (same Icon and same displayText), we create a new branch
+                        var iIdentical = iItem + 1;
+                        CodeExplorerFlag flags = 0;
+
+                        // while we match identical items
+                        while (iIdentical < tempList.Count &&
+                            tempList[iItem].IconType == tempList[iIdentical].IconType &&
+                            tempList[iItem].DisplayText.EqualsCi(tempList[iIdentical].DisplayText)) {
+                            flags = flags | tempList[iIdentical].Flag;
+                            iIdentical++;
+                        }
+                        // if we found identical item
+                        if (iIdentical > iItem + 1) {
+                            // we create a branch for them
+                            var currentLvl2Parent = new CodeExplorerItem {
+                                DisplayText = tempList[iItem].DisplayText,
+                                Branch = tempList[iItem].Branch,
+                                IconType = tempList[iItem].IconType,
+                                CanExpand = true,
+                                // by default, the lvl 2 branches are NOT expanded
+                                IsExpanded = _expandedBranches.ContainsKey(tempList[iItem].DisplayText) && _expandedBranches[tempList[iItem].DisplayText],
+                                Ancestors = new List<FilteredItemTree> { currentLvl1Parent },
+                                SubString = "x" + (iIdentical - iItem),
+                                IsNotBlock = tempList[iItem].IsNotBlock,
+                                Flag = flags
+                            };
+                            _initialObjectsList.Add(currentLvl2Parent);
+                            
+                            // add child items to the newly created lvl 2 branch
+                            for (int i = iItem; i < iIdentical; i++) {
+                                tempList[i].Ancestors = new List<FilteredItemTree> { currentLvl1Parent, currentLvl2Parent };
+                                tempList[i].IsNotBlock = true;
+                                _initialObjectsList.Add(tempList[i]);
+                            }
+                            
+                            // last child
+                            (_initialObjectsList.LastOrDefault() ?? new CodeExplorerItem()).IsLastItem = true;
+
+                            iItem += (iIdentical - iItem);
+
+                            // last child of the branch
+                            if (iItem >= tempList.Count - 1 || item.Branch != tempList[iItem].Branch)
+                                currentLvl2Parent.IsLastItem = true;
+
+                            continue;
+
+                        }
+
+                        // single item, add it normally
+                        item.Ancestors = new List<FilteredItemTree> { currentLvl1Parent };
+                        _initialObjectsList.Add(item);
+
+                        // last child of the branch
+                        if (iItem == tempList.Count - 1 || item.Branch != tempList[iItem + 1].Branch)
+                            item.IsLastItem = true;
+
+                    } else {
+                        // add existing item as a root item
+                        _initialObjectsList.Add(item);
+                    }
+
+                    iItem++;
+                }
+
+                // last branch, last item and first item
+                (_initialObjectsList.FirstOrDefault() ?? new CodeExplorerItem()).IsFirstItem = true;
+                (currentLvl1Parent ?? new CodeExplorerItem()).IsLastItem = true;
+                (_initialObjectsList.LastOrDefault() ?? new CodeExplorerItem()).IsLastItem = true;
+                
+            } else {
+                _initialObjectsList = tempList;
+            }
+
+            // invoke on ui thread
+            BeginInvoke((Action) delegate {
+                try {
+                    TotalItems = _initialObjectsList.Count;
+                    ApplyFilter();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error while displaying the code explorer content");
+                }
+            });
+        }
+
         #endregion
 
         #region events
+
         /// <summary>
-        /// On key down
+        /// Executed when the user double click an item or press enter
         /// </summary>
-        /// <param name="key"></param>
-        /// <returns></returns>
+        public void OnActivateItem() {
+            var curItem = GetCurrentItem();
+            if (curItem == null)
+                return;
+
+            // Branch clicked : expand/retract
+            if (curItem.CanExpand) {
+                curItem.IsExpanded = !curItem.IsExpanded;
+                if (!_expandedBranches.ContainsKey(curItem.DisplayText)) {
+                    _expandedBranches.Add(curItem.DisplayText, curItem.IsExpanded);
+                } else {
+                    _expandedBranches[curItem.DisplayText] = curItem.IsExpanded;
+                }
+                ApplyFilter();
+                Npp.GrabFocus();
+            } else {
+                // Item clicked : go to line
+                Npp.Goto(curItem.DocumentOwner, curItem.GoToLine, curItem.GoToColumn);
+                _fastOlv.Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Handles keydown event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="keyEventArgs"></param>
+        private void FastOlvOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = OnKeyDown(keyEventArgs.KeyCode);
+        }
+
+        private void FastOlvOnClick(object sender, EventArgs eventArgs) {
+            OnActivateItem();
+        }
+
+        #endregion
+
+        #region on key events
+
         public bool OnKeyDown(Keys key) {
             bool handled = true;
             // down and up change the selection
             if (key == Keys.Up) {
-                if (ovlTree.SelectedIndex > 0)
-                    ovlTree.SelectedIndex--;
+                if (_fastOlv.SelectedIndex > 0)
+                    _fastOlv.SelectedIndex--;
                 else
-                    ovlTree.SelectedIndex = (ovlTree.FilteredObjects.OfType<CodeExplorerItem>().Count() - 1);
-                ovlTree.EnsureVisible(ovlTree.SelectedIndex);
+                    _fastOlv.SelectedIndex = (TotalItems - 1);
+                if (_fastOlv.SelectedIndex >= 0)
+                    _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
             } else if (key == Keys.Down) {
-                if (ovlTree.SelectedIndex < (ovlTree.FilteredObjects.OfType<CodeExplorerItem>().Count() - 1))
-                    ovlTree.SelectedIndex++;
+                if (_fastOlv.SelectedIndex < (TotalItems - 1))
+                    _fastOlv.SelectedIndex++;
                 else
-                    ovlTree.SelectedIndex = 0;
-                ovlTree.EnsureVisible(ovlTree.SelectedIndex);
+                    _fastOlv.SelectedIndex = 0;
+                if (_fastOlv.SelectedIndex >= 0)
+                    _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
+
+                // escape close
+            } else if (key == Keys.Escape) {
+                Npp.GrabFocus();
 
                 // enter and tab accept the current selection
             } else if (key == Keys.Enter) {
-                ActivateSelection();
+                OnActivateItem();
 
-                // else, any other key needs to be analysed by Npp
+            } else if (key == Keys.Tab) {
+                OnActivateItem();
+                GiveFocustoTextBox();
+
+                // else, any other key is unhandled
             } else {
                 handled = false;
+            }
+
+            // down and up activate the display of tooltip
+            if (key == Keys.Up || key == Keys.Down) {
+                // TODO
+                //InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
             }
             return handled;
         }
 
+        #endregion
+
+        #region Filter
+
         /// <summary>
-        /// When the user double click an item on the list
+        /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
-        private void OvlTreeOnClick(object sender, EventArgs eventArgs) {
-            ActivateSelection();
+        private void ApplyFilter() {
+            if (_initialObjectsList == null)
+                return;
+
+            // apply filter to each item in the list then set the list
+            _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            if (!_isFiltering) {
+                _fastOlv.SetObjects(_initialObjectsList);
+            } else {
+                _fastOlv.SetObjects(_initialObjectsList.OrderBy(data => data.FilterDispertionLevel).ToList());
+            }
+
+            // display as tree or flat list?
+            ((FilteredItemTreeRenderer)_fastOlv.DefaultRenderer).DoNotDrawTree = _displayUnSorted || _isFiltering;
+
+            // apply the filter, need to match the filter + need to be an active type (Selector button activated)
+            _fastOlv.ModelFilter = new ModelFilter(FilterPredicate);
+
+            // update total items
+            TotalItems = ((ArrayList)_fastOlv.FilteredObjects).Count;
+
+            // if the selected row is > to number of items, then there will be a unselect
+            if (_fastOlv.SelectedIndex == -1) _fastOlv.SelectedIndex = 0;
+            if (_fastOlv.SelectedIndex >= 0)
+                _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
         }
 
         /// <summary>
-        /// Activates the current selection
+        /// if true, the item isn't filtered
         /// </summary>
-        private void ActivateSelection() {
-            // find currently selected item
-            var selection = (CodeExplorerItem)ovlTree.SelectedObject;
-            if (selection == null) return;
-            // Branch clicked : expand/retract
-            if (selection.HasChildren) {
-                // only allow it if we are not filtering by text
-                if (string.IsNullOrWhiteSpace(textBoxFilter.Text)) {
-                    if (ovlTree.IsExpanded(selection))
-                        ovlTree.Collapse(selection);
-                    else
-                        ovlTree.Expand(selection);
-                }
-                Npp.GrabFocus();
-            } else {
-                // Item clicked : go to line
-                var realSelection = _unsortedItems.Find(item => item.Index == selection.Index);
-                Npp.Goto(realSelection.DocumentOwner, realSelection.GoToLine, realSelection.GoToColumn);
-                ovlTree.Invalidate();
-            }
+        /// <param name="o"></param>
+        /// <returns></returns>
+        private bool FilterPredicate(object o) {
+            var item = (CodeExplorerItem)o;
+            
+            // Match filter
+            bool output = item.FilterFullyMatch;
+
+            // branches it belongs to must be expanded
+            output = output && (item.Ancestors == null || !item.Ancestors.Exists(tree => tree.CanExpand && !tree.IsExpanded));
+
+            // when filtering, only display items not branches
+            if (_isFiltering)
+                output = output && !item.CanExpand;
+
+            return output;
         }
+
+        #endregion
+
+        #region Misc
+
+        /// <summary>
+        /// Get the current selected item
+        /// </summary>
+        /// <returns></returns>
+        public CodeExplorerItem GetCurrentItem() {
+            try {
+                return (CodeExplorerItem)_fastOlv.SelectedItem.RowObject;
+            } catch (Exception x) {
+                ErrorHandler.DirtyLog(x);
+            }
+            return null;
+        }
+
+        internal void Redraw() {
+            _fastOlv.Invalidate();
+        }
+
+        /// <summary>
+        /// Explicit
+        /// </summary>
+        public void GiveFocustoTextBox() {
+            textBoxFilter.Focus();
+        }
+
+        /// <summary>
+        /// Explicit
+        /// </summary>
+        public void ClearFilter() {
+            textBoxFilter.Text = "";
+            FilterByText = "";
+            textBoxFilter.Invalidate();
+        }
+
+        public void RefreshParserAndCodeExplorer() {
+            ClearFilter();
+            ParserHandler.SavedParserVisitors.Clear();
+            Plug.OnDocumentSwitched();
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Button events
 
         private void textBoxFilter_TextChanged(object sender, EventArgs e) {
-            // first char input? we remember the expanded/retracted branches
-            if (!string.IsNullOrWhiteSpace(textBoxFilter.Text) && textBoxFilter.Text.Length == 1) {
-                RememberExpandedItems();
-                ovlTree.ExpandAll();
-            }
+            FilterByText = textBoxFilter.Text;
+        }
 
-            ApplyFilter();
+        private void TextBoxFilterOnKeyDown(object sender, KeyEventArgs keyEventArgs) {
+            keyEventArgs.Handled = OnKeyDown(keyEventArgs.KeyCode);
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
             RefreshParserAndCodeExplorer();
+
             Npp.GrabFocus();
         }
 
         private void buttonSort_Click(object sender, EventArgs e) {
             _displayUnSorted = !_displayUnSorted;
-            CleanFilter();
-            UpdateTreeData(true);
+
+            ClearFilter();
+            UpdateTreeData();
+
             buttonSort.BackGrndImage = _displayUnSorted ? ImageResources.clear_filters : ImageResources.numerical_sorting_12;
             buttonSort.Invalidate();
+
             Npp.GrabFocus();
         }
 
         private void buttonCleanText_Click(object sender, EventArgs e) {
-            CleanFilter();
-            textBoxFilter.Invalidate();
-            Npp.GrabFocus();
+            ClearFilter();
+
+            GiveFocustoTextBox();
         }
 
         private void buttonExpandRetract_Click(object sender, EventArgs e) {
             _isExpanded = !_isExpanded;
-            if (_isExpanded)
-                ovlTree.ExpandAll();
-            else
-                ovlTree.CollapseAll();
+            _expandedBranches.Clear();
+            UpdateTreeData();
+            // update button
             buttonExpandRetract.BackGrndImage = _isExpanded ? ImageResources.collapse : ImageResources.expand;
             buttonExpandRetract.Invalidate();
+
             Npp.GrabFocus();
         }
 
         private void ButtonIncludeExternalOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            // change option and image
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
             buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
-            RefreshParserAndCodeExplorer();
+
+            // parse document
+            Plug.OnDocumentSwitched();
+
             Npp.GrabFocus();
         }
 
         #endregion
 
-        #region filter
-
-        public void RefreshParserAndCodeExplorer() {
-            CleanFilter();
-            _unsortedItems.Clear();
-            ParserHandler.SavedParserVisitors.Clear();
-            Plug.OnDocumentSwitched();
-        }
-
-        public void ReapplyFilter() {
-            if (string.IsNullOrWhiteSpace(textBoxFilter.Text)) return;
-            string curFilter = textBoxFilter.Text;
-            CleanFilter();
-            textBoxFilter.Text = curFilter;
-        }
-
-        /// <summary>
-        /// apply text filter (from textbox)
-        /// </summary>
-        private void ApplyFilter() {
-            if (string.IsNullOrWhiteSpace(textBoxFilter.Text)) {
-                CleanFilter();
-                return;
-            }
-
-            // filter the tree..
-            _filterText = textBoxFilter.Text.ToLower();
-            ovlTree.ModelFilter = new ModelFilter(FilterPredicate);
-            ovlTree.TreeColumnRenderer = new CustomTreeRenderer(_filterText);
-        }
-
-        /// <summary>
-        /// Filter predicate
-        /// </summary>
-        /// <param name="o"></param>
-        /// <returns></returns>
-        private bool FilterPredicate(object o) {
-            var obj = (CodeExplorerItem)o;
-            return (!obj.HasChildren && obj.DisplayText.ToLower().FullyMatchFilter(_filterText));
-        }
-
-        /// <summary>
-        /// Update the renderer (the filter)
-        /// </summary>
-        private void CleanFilter() {
-            ovlTree.TreeColumnRenderer = new CustomTreeRenderer("");
-            textBoxFilter.Text = "";
-            ovlTree.ModelFilter = null;
-            SetRememberedExpandedItems();
-        }
-        #endregion
     }
+
+    #region Sorting class
 
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
     internal class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
         public int Compare(CodeExplorerItem x, CodeExplorerItem y) {
+
             // compare first by BranchType
-            int compare = x.Branch.CompareTo(y.Branch);
+            int compare = CodeExplorerForm.GetPriorityList[(int)x.Branch].CompareTo(CodeExplorerForm.GetPriorityList[(int)y.Branch]);
             if (compare != 0) return compare;
-            // compare by type
+
+            // compare by IconType
             compare = x.IconType.CompareTo(y.IconType);
             if (compare != 0) return compare;
+
             // sort by display text
             compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
             if (compare != 0) return compare;
             return x.GoToLine.CompareTo(y.GoToLine);
         }
     }
+
+    #endregion
+
 }
