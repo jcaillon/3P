@@ -282,6 +282,12 @@ namespace _3PA.MainFeatures {
             [Range(0, 10)]
             public int CodeTabSpaceNb = 4;
 
+            [Display(Name = "Activate 'Show spaces' on start-up",
+                Description = "Toggle on/off to activate the 'show spaces' notepad++ option on 3P's startup<br>This option let the user see the spaces as dots and tabs as arrows in its document",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            public bool CodeShowSpaces = true;
+
             [Display(Name = "Modification tag : opener",
                 Description = "You can set your custom modification tag here,<br>this part will be added before your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",
                 GroupName = "Code edition",

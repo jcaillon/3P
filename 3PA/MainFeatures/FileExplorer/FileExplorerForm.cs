@@ -628,7 +628,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            if (_initialObjectsList == null)
+            if (_initialObjectsList == null || _initialObjectsList.Count == 0)
                 return;
 
             // apply filter to each item in the list then set the list

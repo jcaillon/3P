@@ -18,9 +18,7 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -301,7 +299,9 @@ namespace _3PA {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
-                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                if (Config.Instance.CodeShowSpaces) {
+                    Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                }
                 Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
             }
 
@@ -344,13 +344,12 @@ namespace _3PA {
 
         public static void Test() {
 
-            var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
-                    MessageImg.MsgUpdate,
-                    "A new version has been installed!",
-                    "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok", "cancel" },
-                    true);
-            UserCommunication.Notify(ii.ToString());
+            //var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+            //        MessageImg.MsgUpdate,
+            //        "A new version has been installed!",
+            //        "Updated to version " + AssemblyInfo.Version,
+            //        new List<string> { "ok", "cancel" },
+            //        true);
         }
 
         #endregion

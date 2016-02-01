@@ -86,7 +86,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 // initialize if not done
                 if (FakeForm == null) {
                     Init();
-                    UpdateCodeExplorer();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }

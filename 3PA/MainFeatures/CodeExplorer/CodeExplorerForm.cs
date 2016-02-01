@@ -20,6 +20,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -586,7 +587,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// this methods sorts the items to put the best match on top and then filter it with modelFilter
         /// </summary>
         private void ApplyFilter() {
-            if (_initialObjectsList == null)
+            if (_initialObjectsList == null || _initialObjectsList.Count == 0)
                 return;
 
             // apply filter to each item in the list then set the list
@@ -623,12 +624,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // Match filter
             bool output = item.FilterFullyMatch;
 
-            // branches it belongs to must be expanded
-            output = output && (item.Ancestors == null || !item.Ancestors.Exists(tree => tree.CanExpand && !tree.IsExpanded));
-
             // when filtering, only display items not branches
-            if (_isFiltering)
+            if (_displayUnSorted || _isFiltering)
                 output = output && !item.CanExpand;
+            else
+                // branches it belongs to must be expanded
+                output = output && (item.Ancestors == null || !item.Ancestors.Exists(tree => tree.CanExpand && !tree.IsExpanded));
 
             return output;
         }
