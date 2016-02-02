@@ -134,9 +134,13 @@ namespace YamuiFramework.Forms {
         }
 
         public static void CloseEverything() {
-            foreach (var yamuiNotification in _openNotifications) {
-                if (yamuiNotification != null)
-                    yamuiNotification.Close();
+            try {
+                foreach (var yamuiNotification in _openNotifications.ToList()) {
+                    if (yamuiNotification != null)
+                        yamuiNotification.Close();
+                }
+            } catch (Exception) {
+                // nothing much to do if this crashes
             }
         }
 

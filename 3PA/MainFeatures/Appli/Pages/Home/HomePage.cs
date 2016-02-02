@@ -34,7 +34,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         #region constructor
         public HomePage() {
             InitializeComponent();
-
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
                 .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());

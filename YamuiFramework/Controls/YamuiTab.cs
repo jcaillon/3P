@@ -122,13 +122,6 @@ namespace YamuiFramework.Controls {
 
         #region Mechanic
 
-        /// <summary>
-        /// Should be called by the owner form when this one loads
-        /// </summary>
-        public void OnFormLoad() {
-            ActiveControl = _mainButtons;
-        }
-
         private Point CurrentPage {
             get { return _currentPoint; }
             set {
@@ -166,6 +159,9 @@ namespace YamuiFramework.Controls {
                 // tab animation (do if needed)
                 if (doAnimate)
                     TabAnimatorStart();
+
+                ActiveControl = _currentPage;
+                _currentPage.Focus();
             }
         }
 

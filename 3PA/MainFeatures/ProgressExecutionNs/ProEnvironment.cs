@@ -116,6 +116,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Set .Current object from the values read in Config.Instance.Env...
         /// </summary>
         public static void SetCurrent() {
+
             // determines the current item selected in the envList
             var envList = GetList;
             _currentEnv = envList.FirstOrDefault(environnement =>
@@ -128,9 +129,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (_currentEnv == null) {
                 _currentEnv = envList.Count > 0 ? envList[0] : new ProEnvironmentObject();
             }
+
+            Config.Instance.EnvName = _currentEnv.Name;
+            Config.Instance.EnvSuffix = _currentEnv.Suffix;
+
             // set database
             if (!_currentEnv.DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase))
                 Config.Instance.EnvDatabase = (_currentEnv.DbConnectionInfo.Count > 0) ? _currentEnv.DbConnectionInfo.First().Key : String.Empty;
+
             // need to compute the propath again
             Current.ReComputeProPath();
         }
@@ -171,7 +177,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
                 return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                if (!(x is DirectoryNotFoundException))
+                    ErrorHandler.DirtyLog(x);
             }
             return "";
         }
@@ -198,7 +205,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
                 output.AddRange(FindAllFiles(Current.BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                if (!(x is DirectoryNotFoundException))
+                    ErrorHandler.DirtyLog(x);
             }
             return output;
         }
@@ -225,7 +233,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     output.AddRange(filesInfo.Select(info => info.FullName));
                 }
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                if (!(x is DirectoryNotFoundException))
+                    ErrorHandler.DirtyLog(x);
             }
             return output;
         }

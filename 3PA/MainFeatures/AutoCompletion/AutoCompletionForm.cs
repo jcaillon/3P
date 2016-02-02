@@ -47,7 +47,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public string FilterByText {
             get { return _filterByText; }
-            set { _filterByText = value.ToLower(); ApplyFilter(); }
+            set {
+                _filterByText = value.ToLower();
+                ApplyFilter();
+            }
         }
 
         /// <summary>
@@ -281,8 +284,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // label for the number of items
             TotalItems = objectsList.Count;
             nbitems.Text = TotalItems + StrItems;
-
-            fastOLV.SetObjects(objectsList);
         }
 
         /// <summary>
@@ -291,7 +292,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public void SortItems() {
             _initialObjectsList.Sort(new CompletionDataSortingClass());
-            fastOLV.SetObjects(_initialObjectsList);
         }
 
         /// <summary>
@@ -335,7 +335,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// allows to programmatically select the first item of the list
         /// </summary>
         public void SelectFirstItem() {
-            if (TotalItems > 0) fastOLV.SelectedIndex = 0;
+            if (TotalItems > 0) {
+                fastOLV.TopItemIndex = 0;
+                fastOLV.SelectedIndex = 0;
+            }
         }
 
         /// <summary>
@@ -439,11 +442,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (IsActivated) GiveFocusBack();
         }
 
-        protected override void OnLoad(EventArgs e) {
-            base.OnLoad(e);
-            fastOLV.SelectedIndex = 0;
-        }
-
         protected virtual void OnTabCompleted(TabCompletedEventArgs e) {
             var handler = InsertSuggestion;
             if (handler != null) handler(this, e);
@@ -517,6 +515,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private void ApplyFilter() {
             Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
 
+            // save position in the list
+            var curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
+
             // apply filter to each item in the list then set the list
             _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             if (string.IsNullOrEmpty(_filterByText)) {
@@ -540,12 +541,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             TotalItems = ((ArrayList) fastOLV.FilteredObjects).Count;
             nbitems.Text = TotalItems + StrItems;
 
-            // if the selected row is > to number of items, then there will be a unselect
             if (TotalItems <= Config.Instance.AutoCompleteShowListOfXSuggestions)
                 Keyword.Width = _normalWidth;
-            if (fastOLV.SelectedIndex == - 1) fastOLV.SelectedIndex = 0;
-            if (fastOLV.SelectedIndex >= 0)
-                fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+
+            // reposition the cursor in the list
+            if (TotalItems > 0) {
+                fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
+                fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+            }
         }
 
         /// <summary>

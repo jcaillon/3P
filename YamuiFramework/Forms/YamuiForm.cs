@@ -430,12 +430,6 @@ namespace YamuiFramework.Forms {
                 UpdateWindowButtonPosition();
             }
 
-            // Focus content main menu
-            if (_contentTab != null) {
-                ActiveControl = _contentTab;
-                _contentTab.OnFormLoad();
-            }
-
             // set minimum size
             if (SetMinSizeOnLoad)
                 MinimumSize = Size;

@@ -20,7 +20,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
@@ -590,6 +589,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (_initialObjectsList == null || _initialObjectsList.Count == 0)
                 return;
 
+            // save position in the list
+            var curPos = new Point(_fastOlv.SelectedIndex, _fastOlv.TopItemIndex);
+
             // apply filter to each item in the list then set the list
             _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             if (!_isFiltering) {
@@ -607,10 +609,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // update total items
             TotalItems = ((ArrayList)_fastOlv.FilteredObjects).Count;
 
-            // if the selected row is > to number of items, then there will be a unselect
-            if (_fastOlv.SelectedIndex == -1) _fastOlv.SelectedIndex = 0;
-            if (_fastOlv.SelectedIndex >= 0)
-                _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
+            // reposition the cursor in the list
+            if (TotalItems > 0) {
+                _fastOlv.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
+                _fastOlv.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+            }
         }
 
         /// <summary>

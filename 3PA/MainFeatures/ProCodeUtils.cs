@@ -299,21 +299,28 @@ namespace _3PA.MainFeatures {
                             targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
                         }
 
+                        // create target dir
+                        try {
+                            Directory.CreateDirectory(targetDir);
+                        } catch (Exception) {
+                            UserCommunication.Notify("There was a problem when i tried to create the compilation directory:<br>" + targetDir + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, notifTitle, "Couldn't create the directory");
+                            success = false;
+                        }
+
                         var targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.DotRPath));
                         try {
                             File.Delete(targetFile);
                             File.Move(lastExec.DotRPath, targetFile);
-                        } catch (Exception x) {
-                            ErrorHandler.DirtyLog(x);
+                        } catch (Exception) {
                             UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
                             success = false;
                         }
+
                         try {
                             targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.LstPath));
                             File.Delete(targetFile);
                             File.Move(lastExec.LstPath, targetFile);
-                        } catch (Exception x) {
-                            ErrorHandler.DirtyLog(x);
+                        } catch (Exception) {
                             UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
                             success = false;
                         }

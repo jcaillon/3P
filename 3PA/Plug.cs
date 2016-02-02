@@ -339,11 +339,10 @@ namespace _3PA {
         #region tests
 
         public static void StartDebug() {
-            Debug.Assert(false);
+            //Debug.Assert(false);
         }
 
         public static void Test() {
-
             //var ii = UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",
