@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 namespace _3pUpdater {
 
@@ -42,8 +43,9 @@ namespace _3pUpdater {
                     string line;
                     while ((line = reader.ReadLine()) != null) {
                         if (line.Contains("\t")) {
-                            var from = line.Split()[0];
-                            var to = line.Split()[1];
+                            
+                            var from = line.Split('\t')[0];
+                            var to = line.Split('\t')[1];
                             if (!list.ContainsKey(from)) {
                                 list.Add(from.Trim(), to.Trim());
                             }
@@ -60,11 +62,11 @@ namespace _3pUpdater {
                         // replace with update
                         File.Move(kvp.Key, kvp.Value);
                     } catch (Exception e) {
-                        Console.WriteLine(e);
+                        MessageBox.Show("Error while moving the file :\n" + kvp.Key + "\nto :" + kvp.Value + "\nDetails : " + e);
                     }
                 }
             } catch (Exception e) {
-                Console.WriteLine(e);
+                MessageBox.Show("Unexpected error :\n" + e + "\nPlease contact the author of this program to correct it");
             }
         }
 

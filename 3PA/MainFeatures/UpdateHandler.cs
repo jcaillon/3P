@@ -244,15 +244,20 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void OnNotepadExit() {
             if (File.Exists(Config.FileUpdaterExe)) {
-                var process = new Process {
-                    StartInfo = {
-                        FileName = Config.FileUpdaterExe,
-                        Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
-                        UseShellExecute = true,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    }
-                };
-                process.Start();
+                try {
+                    var process = new Process {
+                        StartInfo = {
+                            FileName = Config.FileUpdaterExe,
+                            Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
+                            UseShellExecute = true,
+                            WindowStyle = ProcessWindowStyle.Hidden
+                        }
+                    };
+                    process.Start();
+                } catch (Exception e) {
+                    if (!(e is Win32Exception))
+                        ErrorHandler.ShowErrors(e, "OnNotepadExit");
+                }
             }
         }
 

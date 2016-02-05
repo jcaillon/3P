@@ -239,6 +239,7 @@ namespace _3PA.Lib {
             if (_oneByteCharEncoding)
                 return SciPositionFromLine(index);
 
+            index = Npp.Clamp(index, 0, _linesList.Count);
             if (_holeLenght != 0 && index > _holeLine) {
                 return _linesList[index] + _holeLenght;
             }

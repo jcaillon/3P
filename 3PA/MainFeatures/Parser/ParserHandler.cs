@@ -209,8 +209,11 @@ namespace _3PA.MainFeatures.Parser {
             if (foundTable != null)
                 return foundTable;
             // for buffer, we return the referenced temptable/table (stored in CompletionData.SubString)
-            var foundParsedItem = _parserVisitor.ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
-            return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
+            if (_parserVisitor != null) {
+                var foundParsedItem = _parserVisitor.ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+                return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
+            }
+            return null;
         }
 
         /// <summary>
@@ -237,8 +240,11 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="name"></param>
         /// <returns></returns>
         private static ParsedTable FindTempTableByName(string name) {
-            var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
-            if (foundTable != null && foundTable.ParsedItem is ParsedTable) return (ParsedTable)foundTable.ParsedItem;
+            if (_parserVisitor != null) {
+                var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
+                if (foundTable != null && foundTable.ParsedItem is ParsedTable)
+                    return (ParsedTable) foundTable.ParsedItem;
+            }
             return null;
         }
 

@@ -106,11 +106,11 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         #region Its name says it all
 
         public void RefreshPosAndLoc() {
-            var rect = new Rectangle();
-            WinApi.GetWindowRect(_masterForm.Handle, ref rect);
-
             if (Owner == null)
                 return;
+
+            var rect = new Rectangle();
+            WinApi.GetWindowRect(_masterForm.Handle, ref rect);
 
             // update location
             if (_masterRectangle.Location != rect.Location) {
@@ -138,13 +138,15 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         }
 
         private void Cover_OnVisibleChanged(object sender, EventArgs eventArgs) {
+            if (Owner == null)
+                return;
+
             Visible = Owner.Visible;
             if (!Visible) {
                 // get it out of the screen or it might be visible through low opacity... trust me
                 Location = new Point(-10000, -10000);
             } else {
-                if (Owner != null)
-                    Location = Owner.PointToScreen(Point.Empty);
+                Location = Owner.PointToScreen(Point.Empty);
                 Refresh();
             }
         }
