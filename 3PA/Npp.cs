@@ -386,24 +386,14 @@ namespace _3PA {
             return Path.Combine(GetNppDirectory(), "notepad++.exe");
         }
 
+        /// <summary>
+        /// Returns the current version of notepad++ (format vX.X.X)
+        /// </summary>
+        /// <returns></returns>
         public static string GetNppVersion() {
-            var output = string.Empty;
-            try {
-                var changeLogPath = Path.Combine(GetNppDirectory(), "change.log");
-                if (File.Exists(changeLogPath)) {
-                    string firstLine;
-                    using (var stream = new StreamReader(changeLogPath)) {
-                        firstLine = stream.ReadLine();
-                    }
-                    if (firstLine != null) {
-                        firstLine = firstLine.Replace("Notepad++ ", "");
-                        output = firstLine.Substring(0, firstLine.IndexOf(" ", StringComparison.CurrentCultureIgnoreCase));
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.DirtyLog(e);
-            }
-            return output;
+            int nppVersion = WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
+            var lowWord = (nppVersion & 0x0000FFFF).ToString();
+            return "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
         }
 
         /// <summary>

@@ -632,7 +632,13 @@ namespace _3PA.MainFeatures.FileExplorer {
                 return;
 
             // save position in the list
-            var curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
+            Point curPos = new Point();
+            try { 
+                curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
+            } catch (Exception e) {
+                if (!(e is ArgumentOutOfRangeException))
+                    ErrorHandler.Log(e.ToString());
+            }
 
             // apply filter to each item in the list then set the list
             _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
@@ -651,13 +657,8 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // reposition the cursor in the list
             if (TotalItems > 0) {
-                try {
-                    fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
-                    fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
-                } catch (Exception e) {
-                    if (!(e is ArgumentOutOfRangeException))
-                        ErrorHandler.Log(e.ToString());
-                }
+                fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
+                fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
             }
         }
 
