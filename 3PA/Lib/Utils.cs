@@ -117,13 +117,26 @@ namespace _3PA.Lib {
             try {
                 if (!Directory.Exists(path))
                     return;
-
                 Directory.Delete(path, true);
-
             } catch (Exception e) {
                 ErrorHandler.DirtyLog(e);
                 UserCommunication.Notify("Failed to delete the following directory :<br>" + path, MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder");
             }
+        }
+
+        /// <summary>
+        /// Move a file, ensures the user gets a feedback is something goes wrong
+        /// return true if ok, false otherwise
+        /// </summary>
+        public static bool MoveFileWithMessages(string sourceFile, string targetFile) {
+            try {
+                File.Delete(targetFile);
+                File.Move(sourceFile, targetFile);
+            } catch (Exception) {
+                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                return false;
+            }
+            return true;
         }
 
         /// <summary>

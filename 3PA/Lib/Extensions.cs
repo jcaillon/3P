@@ -165,12 +165,12 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Replaces " by ~" and add extra " at the start and end of the string
+        /// Replaces " by ~", replaces new lines by spaces and add extra " at the start and end of the string
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
         public static string ProgressQuoter(this string text) {
-            return "\"" + (text ?? "").Replace("\"", "~\"") + "\"";
+            return "\"" + (text ?? "").Replace("\"", "~\"").Replace("\n", " ").Replace("\r", "") + "\"";
         }
 
         /// <summary>

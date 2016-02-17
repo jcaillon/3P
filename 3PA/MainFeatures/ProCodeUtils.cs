@@ -182,7 +182,7 @@ namespace _3PA.MainFeatures {
                     var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
                     if (File.Exists(helpPath)) {
                         Config.Instance.GlobalHelpFilePath = helpPath;
-                        UserCommunication.Notify("I've found an help file here :<br><a href='" + helpPath + "'>" + helpPath + "</a><br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
+                        UserCommunication.Notify("I've found an help file here :<br>" + helpPath.ToHtmlLink() + "<br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
                     }
                 }
             }
@@ -222,7 +222,7 @@ namespace _3PA.MainFeatures {
                 // if log not found then something is messed up!
                 if (String.IsNullOrEmpty(lastExec.LogPath) ||
                     !File.Exists(lastExec.LogPath)) {
-                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div><a href='" + lastExec.FullFilePathToExecute + "'>" + lastExec.FullFilePathToExecute + "</a></div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Execution directory :</b><br><a href='" + lastExec.ExecutionDir + "'>" + lastExec.ExecutionDir + "</a><br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div>" + lastExec.FullFilePathToExecute.ToHtmlLink() + "</div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Temporary directory :</b><br>" + lastExec.TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
                 }
 
@@ -289,44 +289,32 @@ namespace _3PA.MainFeatures {
 
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
-                    // copy to compilation dir
-                    if (!String.IsNullOrEmpty(lastExec.DotRPath) && !String.IsNullOrEmpty(lastExec.LstPath)) {
-                        var success = true;
-                        var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
+                    var success = true;
+                    var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
 
-                        // compile locally?
-                        if (Config.Instance.GlobalCompileFilesLocally) {
-                            targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
-                        }
+                    // compile locally?
+                    if (Config.Instance.GlobalCompileFilesLocally) {
+                        targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
+                    }
 
-                        // create target dir
-                        try {
-                            Directory.CreateDirectory(targetDir);
-                        } catch (Exception) {
-                            UserCommunication.Notify("There was a problem when i tried to create the compilation directory:<br>" + targetDir + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, notifTitle, "Couldn't create the directory");
-                            success = false;
-                        }
+                    // create target dir
+                    try {
+                        Directory.CreateDirectory(targetDir);
+                    } catch (Exception) {
+                        UserCommunication.Notify("There was a problem when i tried to create the compilation directory:<br>" + targetDir + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, notifTitle, "Couldn't create the directory");
+                        success = false;
+                    }
 
-                        var targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.DotRPath));
-                        try {
-                            File.Delete(targetFile);
-                            File.Move(lastExec.DotRPath, targetFile);
-                        } catch (Exception) {
-                            UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
-                            success = false;
-                        }
+                    // move .r file
+                    if (!string.IsNullOrEmpty(lastExec.DotRPath))
+                        success = success && Utils.MoveFileWithMessages(lastExec.DotRPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".r"));
 
-                        try {
-                            targetFile = Path.Combine(targetDir, Path.GetFileName(lastExec.LstPath));
-                            File.Delete(targetFile);
-                            File.Move(lastExec.LstPath, targetFile);
-                        } catch (Exception) {
-                            UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br>The compiled file couldn't been moved to this location!<br><br><i>Please make sure that you have the privileges to write in the targeted compilation directory</i>", MessageImg.MsgError, notifTitle, "Couldn't write target file");
-                            success = false;
-                        }
-                        if (success) {
-                            notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", targetDir.ToHtmlLink()));
-                        }
+                    // move .lst file
+                    if (!string.IsNullOrEmpty(lastExec.LstPath))
+                        success = success && Utils.MoveFileWithMessages(lastExec.LstPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".lst"));
+
+                    if (success) {
+                        notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", targetDir.ToHtmlLink()));
                     }
                 }
 

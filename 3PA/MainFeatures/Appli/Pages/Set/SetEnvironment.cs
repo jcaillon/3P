@@ -78,6 +78,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flLabel, "The label for this environment (has no use beside being more meaningful than the name)");
             toolTip.SetToolTip(cbDatabase, "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
 
+            toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
+            toolTip.SetToolTip(flPfPath, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
+
             toolTip.SetToolTip(flName, "The name of this environment<br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
             toolTip.SetToolTip(flSuffix, "This field is optional, you can have several suffixes for a<br>given environment, or you can just use different environment names if it's enough for you");
 
@@ -86,7 +89,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
             toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
 
-            toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is saved as a .pf file and is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'extra.pf'.</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>- db base2 - ld mylogicalName2 - H 127.0.0.1 - S 10</div>");
+            toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db base2 -ld mylogicalName2 -H 127.0.0.1 -S 10</div>");
 
             toolTip.SetToolTip(textbox2, "Path to an .ini file, which as a <b>PROPATH=</b> field<br>(the section in which this field is doesn't matter)<br>that lists the directories to use for the compilation/execution of your progress files");
             toolTip.SetToolTip(flExtraProPath, "A list of directories to be used when compiling/executing your 4GL code<br>They can be separated by a ',' or ';' or new lines '\\n'");
@@ -150,10 +153,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     }
 
                     if (_currentMode == ViewMode.DbAddNew) {
-                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text);
+                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, flPfPath.Text);
                     } else {
                         ProEnvironment.Current.RemoveCurrentPfPath();
-                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text);
+                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, flPfPath.Text);
                     }
 
                     if (!output) {
@@ -316,7 +319,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.Hide();
                 flDatabase.Enabled = true;
                 cbDatabase.Enabled = false;
-                textbox1.Enabled = true;
+                flPfPath.Enabled = true;
                 btleft1.Show();
                 cbName.Enabled = false;
                 cbSuffix.Enabled = false;
@@ -332,7 +335,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.Show();
                 flDatabase.Enabled = false;
                 cbDatabase.Enabled = (mode == ViewMode.Select);
-                textbox1.Enabled = false;
+                flPfPath.Enabled = false;
                 btleft1.Hide();
                 cbName.Enabled = true;
                 cbSuffix.Enabled = true;
@@ -351,11 +354,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 toolTip.SetToolTip(btcontrol2, "Click to <b>modify</b> the information for the current environment");
                 btcontrol1.Text = AddNewStr;
                 toolTip.SetToolTip(btcontrol1, "Click to <b>add a new</b> environment<br><i>Right click to duplicate the current environment</i>");
+                btDelete.Show();
             } else {
                 btcontrol2.Text = SaveStr;
                 toolTip.SetToolTip(btcontrol2, "Click to <b>save</b> your modifications");
                 btcontrol1.Text = CancelStr;
                 toolTip.SetToolTip(btcontrol1, "Click to <b>cancel</b> your modifications");
+                btDelete.Hide();
             }
             
             // fill details
@@ -371,7 +376,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             flDatabase.Text = (mode == ViewMode.DbAddNew ? string.Empty : Config.Instance.EnvDatabase);
 
-            textbox1.Text = (mode == ViewMode.DbAddNew ? string.Empty : ProEnvironment.Current.GetPfPath());
+            flPfPath.Text = (mode == ViewMode.DbAddNew ? string.Empty : ProEnvironment.Current.GetPfPath());
             textbox2.Text = ProEnvironment.Current.IniPath;
             textbox3.Text = ProEnvironment.Current.BaseLocalPath;
             textbox4.Text = ProEnvironment.Current.BaseCompilationPath;

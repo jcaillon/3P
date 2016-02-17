@@ -207,7 +207,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 }
 
                 if (fileError.Times > 0) {
-                    mess = "\nThis message appeared " + fileError.Times + " in the compiler log";
+                    mess = "\nThis message above appeared " + fileError.Times + " times in the compiler log";
                     stylerHelper.Style(mess, (byte)(Style.ErrorAnnotBoldStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
                 }
@@ -386,7 +386,11 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     // same line/error number as previously
                     if (output[filePath].Count > 0) {
                         var lastFileError = output[filePath].Last();
-                        if (lastFileError != null) lastFileError.Times++;
+                        if (lastFileError != null)
+                            if (lastFileError.Times == 0)
+                                lastFileError.Times = 2;
+                            else
+                                lastFileError.Times++;
                     }
                     continue;
                 }
@@ -402,7 +406,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     Line = lastLineNbCouple[0],
                     Column = column,
                     ErrorNumber = lastLineNbCouple[1],
-                    Message = items[5],
+                    Message = items[5].Replace("<br>", "\n").Trim(),
                     Help = items[6],
                     FromProlint = fromProlint
                 });

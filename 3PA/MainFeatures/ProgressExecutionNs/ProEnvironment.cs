@@ -305,32 +305,38 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #region Get ProPath
 
             /// <summary>
-            /// List the existing directories as they are listed in the .ini file + in the custom ProPath field
+            /// List the existing directories as they are listed in the .ini file + in the custom ProPath field,
+            /// this returns an exhaustive list of EXISTING folders and .pl files and ensure each item is present only once
+            /// It also take into account the relative path, using the BaseLocalPath (or currentFileFolder)
             /// </summary>
             public List<string> GetProPathDirList {
                 get {
-                    if (_currentProPathDirList != null) return _currentProPathDirList;
+                    if (_currentProPathDirList == null) {
+                        var curFilePath = Npp.GetCurrentFileFolder();
+                        var basePath = Directory.Exists(BaseLocalPath) ? BaseLocalPath : curFilePath;
 
-                    // get full propath (from .ini + from user custom field
-                    IniReader ini = new IniReader(IniPath);
-                    var completeProPath = ini.GetValue("PROPATH", "");
-                    completeProPath = (!string.IsNullOrEmpty(completeProPath) ? completeProPath + "," : string.Empty) + ExtraProPath;
-                    // also add the source file base path
-                    completeProPath = completeProPath + ",.";
+                        // get full propath (from .ini + from user custom field + current file folder)
+                        IniReader ini = new IniReader(IniPath);
+                        var completeProPath = ini.GetValue("PROPATH", "");
+                        completeProPath = completeProPath + "," + ExtraProPath + "," + curFilePath;
 
-                    _currentProPathDirList = new List<string>();
-                    var curFilePath = Npp.GetCurrentFileFolder();
-                    foreach (var item in completeProPath.Split(',', '\n', ';')) {
-                        var propath = item.Trim();
-                        // need to take into account relative paths
-                        if (propath.StartsWith("."))
-                            try {
-                                propath = Path.GetFullPath(Path.Combine(curFilePath, propath));
-                            } catch (Exception x) {
-                                ErrorHandler.DirtyLog(x);
+                        var uniqueDirList = new HashSet<string>();
+                        foreach (var item in completeProPath.Split(',', '\n', ';')) {
+                            var propath = item.Trim();
+                            if (!string.IsNullOrEmpty(propath)) {
+                                // need to take into account relative paths
+                                if (!Path.IsPathRooted(propath))
+                                    try {
+                                        propath = Path.GetFullPath(Path.Combine(basePath, propath));
+                                    } catch (Exception x) {
+                                        ErrorHandler.DirtyLog(x);
+                                    }
+                                if (Directory.Exists(propath) || File.Exists(propath))
+                                    if (!uniqueDirList.Contains(propath))
+                                        uniqueDirList.Add(propath);
                             }
-                        if (Directory.Exists(propath))
-                            _currentProPathDirList.Add(propath);
+                        }
+                        _currentProPathDirList = uniqueDirList.ToList();
                     }
                     return _currentProPathDirList;
                 }

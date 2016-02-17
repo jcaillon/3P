@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flSuffix = new YamuiFramework.Controls.YamuiTextBox();
             this.flLabel = new YamuiFramework.Controls.YamuiTextBox();
             this.flDatabase = new YamuiFramework.Controls.YamuiTextBox();
-            this.textbox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.flPfPath = new YamuiFramework.Controls.YamuiTextBox();
             this.flExtraPf = new YamuiFramework.Controls.YamuiTextBox();
             this.textbox2 = new YamuiFramework.Controls.YamuiTextBox();
             this.tgCompilLocl = new YamuiFramework.Controls.YamuiToggle();
@@ -112,7 +112,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.ContentPanel.Controls.Add(this.flSuffix);
             this.mainPanel.ContentPanel.Controls.Add(this.flLabel);
             this.mainPanel.ContentPanel.Controls.Add(this.flDatabase);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox1);
+            this.mainPanel.ContentPanel.Controls.Add(this.flPfPath);
             this.mainPanel.ContentPanel.Controls.Add(this.flExtraPf);
             this.mainPanel.ContentPanel.Controls.Add(this.textbox2);
             this.mainPanel.ContentPanel.Controls.Add(this.tgCompilLocl);
@@ -268,7 +268,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flLabel.Location = new System.Drawing.Point(265, 27);
             this.flLabel.Name = "flLabel";
-            this.flLabel.Size = new System.Drawing.Size(453, 21);
+            this.flLabel.Size = new System.Drawing.Size(433, 21);
             this.flLabel.TabIndex = 134;
             this.flLabel.WaterMark = "Label for this environment";
             // 
@@ -286,20 +286,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flDatabase.TabIndex = 133;
             this.flDatabase.WaterMark = "Set a name for this database connection";
             // 
-            // textbox1
+            // flPfPath
             // 
-            this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.textbox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.textbox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox1.Location = new System.Drawing.Point(193, 122);
-            this.textbox1.Name = "textbox1";
-            this.textbox1.Size = new System.Drawing.Size(482, 20);
-            this.textbox1.TabIndex = 132;
-            this.textbox1.Tag = "pf file (*.pf)|*.pf";
-            this.textbox1.WaterMark = "Path to your .pf file (containing database connection info)";
+            this.flPfPath.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.flPfPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.flPfPath.CustomBackColor = System.Drawing.Color.Empty;
+            this.flPfPath.CustomForeColor = System.Drawing.Color.Empty;
+            this.flPfPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.flPfPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.flPfPath.Location = new System.Drawing.Point(193, 122);
+            this.flPfPath.Name = "flPfPath";
+            this.flPfPath.Size = new System.Drawing.Size(482, 20);
+            this.flPfPath.TabIndex = 132;
+            this.flPfPath.Tag = "pf file (*.pf)|*.pf";
+            this.flPfPath.WaterMark = "Path to your .pf file (containing database connection info)";
             // 
             // flExtraPf
             // 
@@ -723,8 +723,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.Size = new System.Drawing.Size(122, 60);
             this.htmlLabel2.TabIndex = 111;
             this.htmlLabel2.TabStop = false;
-            this.htmlLabel2.Text = "<b>ProPath</b><br>Reads the value from the .ini file and adds the directories lis" +
-    "ted";
+            this.htmlLabel2.Text = "<b>Ini and ProPath</b><br>Use an .ini file and add extra directories / .pl to the" +
+    " ProPath";
             // 
             // htmlLabel1
             // 
@@ -738,7 +738,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.Size = new System.Drawing.Size(122, 45);
             this.htmlLabel1.TabIndex = 110;
             this.htmlLabel1.TabStop = false;
-            this.htmlLabel1.Text = "<b>List of databases (.pf)</b><br>Associated to the current environment";
+            this.htmlLabel1.Text = "<b>List of databases (.pf)</b><br>associated to the current environment";
             // 
             // yamuiLabel4
             // 
@@ -764,8 +764,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btcontrol2
             // 
-            this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol2.Location = new System.Drawing.Point(424, 526);
+            this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btcontrol2.Location = new System.Drawing.Point(504, 527);
             this.btcontrol2.Name = "btcontrol2";
             this.btcontrol2.Size = new System.Drawing.Size(94, 23);
             this.btcontrol2.TabIndex = 123;
@@ -773,8 +773,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btcontrol1
             // 
-            this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btcontrol1.Location = new System.Drawing.Point(524, 526);
+            this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btcontrol1.Location = new System.Drawing.Point(604, 527);
             this.btcontrol1.Name = "btcontrol1";
             this.btcontrol1.Size = new System.Drawing.Size(94, 23);
             this.btcontrol1.TabIndex = 122;
@@ -782,8 +782,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btDelete
             // 
-            this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btDelete.Location = new System.Drawing.Point(624, 526);
+            this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btDelete.Location = new System.Drawing.Point(33, 527);
             this.btDelete.Name = "btDelete";
             this.btDelete.Size = new System.Drawing.Size(94, 23);
             this.btDelete.TabIndex = 121;
@@ -815,7 +815,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiTextBox flSuffix;
         private YamuiTextBox flLabel;
         private YamuiTextBox flDatabase;
-        private YamuiTextBox textbox1;
+        private YamuiTextBox flPfPath;
         private YamuiTextBox flExtraPf;
         private YamuiTextBox textbox2;
         private YamuiToggle tgCompilLocl;

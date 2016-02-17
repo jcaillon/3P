@@ -46,6 +46,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Full path to the directory containing all the files needed for the execution
         /// </summary>
+        public string TempDir { get; private set; }
+
+        /// <summary>
+        /// Full path to the directory used as the working directory to start the prowin process
+        /// </summary>
         public string ExecutionDir { get; private set; }
 
         /// <summary>
@@ -67,11 +72,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Path to the output .r file (for compilation)
         /// </summary>
         public string DotRPath { get; private set; }
-
-        /// <summary>
-        /// Directory where the file will be moved to after the compilation
-        /// </summary>
-        public string CompilationDir { get; private set; }
 
         /// <summary>
         /// progress32.exe used for the execution/compilation
@@ -137,7 +137,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             try {
                 if (Process != null)
                     Process.Close();
-                Utils.DeleteDirectory(ExecutionDir, true);
+                Utils.DeleteDirectory(TempDir, true);
             } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
@@ -176,69 +176,70 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return false;
             }
 
-            // create unique execution folder
-            ExecutionDir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
-            while (Directory.Exists(ExecutionDir)) ExecutionDir += "_";
+            // create unique temporary folder
+            TempDir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+            while (Directory.Exists(TempDir)) TempDir += "_";
             try {
-                Directory.CreateDirectory(ExecutionDir);
+                Directory.CreateDirectory(TempDir);
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Permission denied when creating " + ExecutionDir);
-                ExecutionDir = "";
+                ErrorHandler.ShowErrors(e, "Permission denied when creating " + TempDir);
+                TempDir = "";
                 return false;
             }
 
             // Move context files into the execution dir
-            if (File.Exists(ProEnvironment.Current.GetPfPath()))
-                File.Copy(ProEnvironment.Current.GetPfPath(), Path.Combine(ExecutionDir, "base.pf"));
+            var baseIniPath = "";
+            if (File.Exists(ProEnvironment.Current.IniPath)) {
+                baseIniPath = Path.Combine(TempDir, "base.ini");
+                File.Copy(ProEnvironment.Current.IniPath, baseIniPath);
+            }
 
-            if (!string.IsNullOrEmpty(ProEnvironment.Current.ExtraPf))
-                File.WriteAllText(Path.Combine(ExecutionDir, "extra.pf"), ProEnvironment.Current.ExtraPf, Encoding.Default);
-
-            if (File.Exists(ProEnvironment.Current.IniPath))
-                File.Copy(ProEnvironment.Current.IniPath, Path.Combine(ExecutionDir, "base.ini"));
+            var basePfPath = "";
+            if (File.Exists(ProEnvironment.Current.GetPfPath())) {
+                basePfPath = Path.Combine(TempDir, "base.pf");
+                File.Copy(ProEnvironment.Current.GetPfPath(), basePfPath);
+            }
 
             // If current file, copy Npp.Text to a temp file to be executed
-            var dumpDbProgramName = "";
             if (executionType != ExecutionType.Database) {
                 if (_isCurrentFile) {
-                    TempFullFilePathToExecute = Path.Combine(ExecutionDir, (Path.GetFileName(FullFilePathToExecute) ?? "gg"));
+                    TempFullFilePathToExecute = Path.Combine(TempDir, "tmp" + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
                     File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
                 } else TempFullFilePathToExecute = FullFilePathToExecute;
             } else {
                 // for database extraction, we need the output path and to copy the DumpDatabase program
-                dumpDbProgramName = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
-                File.WriteAllBytes(Path.Combine(ExecutionDir, dumpDbProgramName), DataResources.DumpDatabase);
-                ExtractDbOutputPath = Path.Combine(ExecutionDir, DataBase.OutputFileName);
+                TempFullFilePathToExecute = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
+                File.WriteAllBytes(Path.Combine(TempDir, TempFullFilePathToExecute), DataResources.DumpDatabase);
+                ExtractDbOutputPath = Path.Combine(TempDir, DataBase.OutputFileName);
             }
 
             // set info on the execution
             var baseFileName = Path.GetFileNameWithoutExtension(TempFullFilePathToExecute);
-            if (executionType == ExecutionType.Database) baseFileName = "dump";
-            LogPath = Path.Combine(ExecutionDir, baseFileName + ".log");
-            LstPath = Path.Combine(ExecutionDir, baseFileName + ".lst");
-            DotRPath = Path.Combine(ExecutionDir, baseFileName + ".r");
+            LogPath = Path.Combine(TempDir, baseFileName + ".log");
+            LstPath = Path.Combine(TempDir, baseFileName + ".lst");
+            DotRPath = Path.Combine(TempDir, baseFileName + ".r");
             ExecutionType = executionType;
+            ExecutionDir = Path.GetDirectoryName(FullFilePathToExecute) ?? TempDir;
+            ProgressWin32 = ProEnvironment.Current.ProwinPath;
 
-            // prepare the preproc variable of the .p runner
+            // prepare the .p runner
+            var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
+            _runnerPath = Path.Combine(TempDir, runnerFileName);
+
             var programContent = new StringBuilder();
             programContent.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ToCompile " + TempFullFilePathToExecute.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CompilePath " + ExecutionDir.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ToExecute " + TempFullFilePathToExecute.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE TempDir " + TempDir.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (ExecutionDir + "," + string.Join(",", ProEnvironment.Current.GetProPathDirList)).ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE dumbDataBaseProgram " + dumpDbProgramName.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + ((executionType != ExecutionType.Database) ? string.Join(",", ProEnvironment.Current.GetProPathDirList) : TempDir).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
-            // progress runner
-            var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
-            _runnerPath = Path.Combine(ExecutionDir, runnerFileName);
             File.WriteAllText(_runnerPath, programContent.ToString(), Encoding.Default);
-
-            // misc
-            ProgressWin32 = ProEnvironment.Current.ProwinPath;
-            CompilationDir = ProEnvironment.Current.BaseCompilationPath; //TODO : compilationPath!
 
             // Parameters
             StringBuilder Params = new StringBuilder();
@@ -246,20 +247,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 Params.Append(" -b");
             if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
                 Params.Append(" " + ProEnvironment.Current.CmdLineParameters.Trim());
-            if (File.Exists(Path.Combine(ExecutionDir, "base.ini")))
-                Params.Append(" -ini " + ("base.ini").ProgressQuoter());
             //Params.Append(" -cpinternal ISO8859-1");
             //Params.Append(" -cpstream ISO8859-1");
-            //Params.Append(" -inp 20000");  /* Max char per instruction */
-            //Params.Append(" -tok 2048");  /* Max token per instruction    */
-            Params.Append(" -p " + Path.Combine(ExecutionDir, runnerFileName).ProgressQuoter());
+            Params.Append(" -p " + _runnerPath.ProgressQuoter());
             ExeParameters = Params.ToString();
 
             // Start a process
             Process = new Process {
                 StartInfo = {
-                    //WindowStyle = (executionType != ExecutionType.Run) ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
-                    //CreateNoWindow = (executionType != ExecutionType.Run),
+                    WindowStyle = (executionType != ExecutionType.Run) ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
+                    CreateNoWindow = (executionType != ExecutionType.Run),
                     FileName = ProEnvironment.Current.ProwinPath,
                     Arguments = ExeParameters,
                     WorkingDirectory = ExecutionDir
@@ -268,7 +265,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             };
             Process.Exited += ProcessOnExited;
             Process.Start();
-            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProgressEnv.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Execution directory :</b><br><a href='" + ExecutionDir + "'>" + ExecutionDir + "</a>");
+            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 
             return true;
         }
