@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(cbDatabase, "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
 
             toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
-            toolTip.SetToolTip(flPfPath, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
+            toolTip.SetToolTip(textbox1, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
 
             toolTip.SetToolTip(flName, "The name of this environment<br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
             toolTip.SetToolTip(flSuffix, "This field is optional, you can have several suffixes for a<br>given environment, or you can just use different environment names if it's enough for you");
@@ -92,7 +92,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db base2 -ld mylogicalName2 -H 127.0.0.1 -S 10</div>");
 
             toolTip.SetToolTip(textbox2, "Path to an .ini file, which as a <b>PROPATH=</b> field<br>(the section in which this field is doesn't matter)<br>that lists the directories to use for the compilation/execution of your progress files");
-            toolTip.SetToolTip(flExtraProPath, "A list of directories to be used when compiling/executing your 4GL code<br>They can be separated by a ',' or ';' or new lines '\\n'");
+            toolTip.SetToolTip(flExtraProPath, "A list of directories to be used when compiling/executing your 4GL code<br>They can be separated by a ',' or ';' or new lines '\\n'<br><br><i>You can specify relative paths, the working directory (i.e. base path)<br>is the base local directory</i>");
 
             toolTip.SetToolTip(textbox3, "Path to your project directory<br>It is used to find the .p or .w you RUN in your code");
             toolTip.SetToolTip(textbox4, "Path to the directory where you want your .r and .lst files to be<br>moved after a successful compilation");
@@ -153,10 +153,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     }
 
                     if (_currentMode == ViewMode.DbAddNew) {
-                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, flPfPath.Text);
+                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text);
                     } else {
                         ProEnvironment.Current.RemoveCurrentPfPath();
-                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, flPfPath.Text);
+                        output = ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text);
                     }
 
                     if (!output) {
@@ -319,7 +319,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.Hide();
                 flDatabase.Enabled = true;
                 cbDatabase.Enabled = false;
-                flPfPath.Enabled = true;
+                textbox1.Enabled = true;
                 btleft1.Show();
                 cbName.Enabled = false;
                 cbSuffix.Enabled = false;
@@ -335,7 +335,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.Show();
                 flDatabase.Enabled = false;
                 cbDatabase.Enabled = (mode == ViewMode.Select);
-                flPfPath.Enabled = false;
+                textbox1.Enabled = false;
                 btleft1.Hide();
                 cbName.Enabled = true;
                 cbSuffix.Enabled = true;
@@ -370,13 +370,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             txLabel.Text = ProEnvironment.Current.Label;
 
-            flExtraPf.Text = ProEnvironment.Current.ExtraPf;
-            flExtraProPath.Text = ProEnvironment.Current.ExtraProPath;
+            flExtraPf.Lines = ProEnvironment.Current.ExtraPf.Replace("\r\n", "\n").Split('\n');
+            flExtraProPath.Lines = ProEnvironment.Current.ExtraProPath.Replace("\r\n", "\n").Split('\n');
             flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
 
             flDatabase.Text = (mode == ViewMode.DbAddNew ? string.Empty : Config.Instance.EnvDatabase);
 
-            flPfPath.Text = (mode == ViewMode.DbAddNew ? string.Empty : ProEnvironment.Current.GetPfPath());
+            textbox1.Text = (mode == ViewMode.DbAddNew ? string.Empty : ProEnvironment.Current.GetPfPath());
             textbox2.Text = ProEnvironment.Current.IniPath;
             textbox3.Text = ProEnvironment.Current.BaseLocalPath;
             textbox4.Text = ProEnvironment.Current.BaseCompilationPath;

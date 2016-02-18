@@ -24,6 +24,7 @@ using System.Text;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
+
     internal static class ProCompilePath {
 
         #region fields
@@ -90,7 +91,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (filteredList.Count > 0) {
                 var canFind = filteredList.FirstOrDefault(item => sourcePath.Contains(item.InputPathPattern));
                 if (canFind != null) {
-                    baseComp = Path.Combine(baseComp, canFind.OutputPathAppend);
+                    if (Path.IsPathRooted(canFind.OutputPathAppend)) {
+                        baseComp = canFind.OutputPathAppend;
+                    } else {
+                        baseComp = Path.Combine(baseComp, canFind.OutputPathAppend);
+                    }
                 }
             }
             return baseComp;

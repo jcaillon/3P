@@ -91,6 +91,12 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string GlobalHelpFilePath = "";
 
+            [Display(Name = "Use batch mode to compile",
+                Description = "In order to avoid the prowin32 splash screen when compiling, 3P starts the process in<br>batch mode (-b option).<br>However, if you manually disabled the splash screen (by renaming the file<br>/dlc/bin/splashscreen.bmp for instance), you can set this option to false to avoid<br>having the prowin32 process creating a window in the taskbar",
+                GroupName = "General",
+                AutoGenerateField = false)]
+            public bool UseBatchModeToCompile = true;
+
             [Display(Name = "Use default values in file info",
                 Description = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
                 GroupName = "General",

@@ -26,6 +26,7 @@ using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
+// ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
 
@@ -243,29 +244,39 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Parameters
             StringBuilder Params = new StringBuilder();
-            if (executionType != ExecutionType.Run)
+            Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
+            if (executionType != ExecutionType.Run && Config.Instance.UseBatchModeToCompile)
                 Params.Append(" -b");
+            Params.Append(" -p " + _runnerPath.ProgressQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
                 Params.Append(" " + ProEnvironment.Current.CmdLineParameters.Trim());
-            //Params.Append(" -cpinternal ISO8859-1");
-            //Params.Append(" -cpstream ISO8859-1");
-            Params.Append(" -p " + _runnerPath.ProgressQuoter());
             ExeParameters = Params.ToString();
 
+            // we supress the splashscreen
+            var splashScreenPath = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp");
+            var splashScreenPathMoved = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp");
+            MoveNoError(splashScreenPath, splashScreenPathMoved);
+
             // Start a process
+            var pInfo = new ProcessStartInfo {
+                FileName = ProEnvironment.Current.ProwinPath,
+                Arguments = ExeParameters,
+                WorkingDirectory = ExecutionDir
+            };
+            if (executionType != ExecutionType.Run) {
+                pInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                pInfo.CreateNoWindow = true;
+            }
             Process = new Process {
-                StartInfo = {
-                    WindowStyle = (executionType != ExecutionType.Run) ? ProcessWindowStyle.Hidden : ProcessWindowStyle.Normal,
-                    CreateNoWindow = (executionType != ExecutionType.Run),
-                    FileName = ProEnvironment.Current.ProwinPath,
-                    Arguments = ExeParameters,
-                    WorkingDirectory = ExecutionDir
-                },
+                StartInfo = pInfo,
                 EnableRaisingEvents = true
             };
             Process.Exited += ProcessOnExited;
             Process.Start();
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
+
+            // restore splashscreen
+            MoveNoError(splashScreenPathMoved, splashScreenPath);
 
             return true;
         }
@@ -273,14 +284,26 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
             if (OnProcessExited != null) {
                 OnProcessExited(this, new ProcessOnExitEventArgs(this));
                 Process.Close();
             }
         }
+
+        /// <summary>
+        /// move a file, catch the errors
+        /// </summary>
+        private void MoveNoError(string from, string to) {
+            if (File.Exists(from)) {
+                try {
+                    File.Move(from, to);
+                } catch (Exception e) {
+                    if (e is UnauthorizedAccessException)
+                        ErrorHandler.Log(e.ToString());
+                }
+            }
+        } 
 
         #endregion
 
