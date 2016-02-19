@@ -25,7 +25,8 @@ using System.Text;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
-using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.FilesInfoNs;
+
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
@@ -34,15 +35,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #region public fields
 
-        private event EventHandler<ProcessOnExitEventArgs> OnProcessExited;
-
         /// <summary>
-        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// The action to execute at the end of the execution
         /// </summary>
-        public event EventHandler<ProcessOnExitEventArgs> ProcessExited {
-            add { OnProcessExited += value; }
-            remove { OnProcessExited -= value; }
-        }
+        public Action<ProExecution> OnExecutionEnd { private get; set; }
 
         /// <summary>
         /// Full path to the directory containing all the files needed for the execution
@@ -91,7 +87,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Full file path to the output file of the DumpDatabase program
         /// </summary>
-        public string ExtractDbOutputPath { get; private set; }
+        public string ExtractDbOutputPath { get; set; }
+
+        /// <summary>
+        /// Full file path to the output file of Prolint
+        /// </summary>
+        public string ProlintOutputPath { get; set; }
 
         #endregion
 
@@ -108,27 +109,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public string TempFullFilePathToExecute { get; private set; }
 
-        private readonly bool _isCurrentFile;
-
         #endregion
 
         #region constructors and destructor
-
-        /// <summary>
-        /// Creates a progress execution environnement, to compile or run a program
-        /// </summary>
-        /// <param name="tempFullFilePathToExecute"></param>
-        public ProExecution(string tempFullFilePathToExecute) {
-            FullFilePathToExecute = tempFullFilePathToExecute;
-            _isCurrentFile = false;
-        }
 
         /// <summary>
         /// Creates a progress execution environnement, to compile or run the current program
         /// </summary>
         public ProExecution() {
             FullFilePathToExecute = Plug.CurrentFilePath;
-            _isCurrentFile = true;
         }
 
         /// <summary>
@@ -155,16 +144,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         /// <returns></returns>
         public bool Do(ExecutionType executionType) {
+
             // check info
             if (executionType != ExecutionType.Database) {
-                if (_isCurrentFile && !Abl.IsCurrentProgressFile()) {
-                    UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning,
-                        "Invalid file type", "Progress files only", 10);
+                if (!Abl.IsCurrentProgressFile()) {
+                    UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
                     return false;
                 }
                 if (string.IsNullOrEmpty(FullFilePathToExecute) || !File.Exists(FullFilePathToExecute)) {
-                    UserCommunication.Notify("Couldn't find the following file :<br>" + FullFilePathToExecute,
-                        MessageImg.MsgError, "Execution error", "File not found", 10);
+                    UserCommunication.Notify("Couldn't find the following file :<br>" + FullFilePathToExecute, MessageImg.MsgError, "Execution error", "File not found", 10);
                     return false;
                 }
                 if (!Config.Instance.GlobalCompilableExtension.Split(',').Contains(Path.GetExtension(FullFilePathToExecute))) {
@@ -172,21 +160,23 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     return false;
                 }
             }
+            if (executionType == ExecutionType.Prolint && !File.Exists(Config.FileStartProlint)) {
+                UserCommunication.Notify("Couldn't find the interface program for prolint :<br>" + Config.FileStartProlint, MessageImg.MsgError, "Prolint error", "File not found", 10);
+                return false;
+            }
             if (!File.Exists(ProEnvironment.Current.ProwinPath)) {
                 UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br>" + ProEnvironment.Current.ProwinPath + "<br>You must provide a valid path before executing this action<br><i>You can change this path in the settings window</i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", 10);
                 return false;
             }
 
+            var noBatchMode = (executionType == ExecutionType.Run || executionType == ExecutionType.Prolint);
+            StringBuilder programContent;
+
             // create unique temporary folder
             TempDir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
             while (Directory.Exists(TempDir)) TempDir += "_";
-            try {
-                Directory.CreateDirectory(TempDir);
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Permission denied when creating " + TempDir);
-                TempDir = "";
+            if (!Utils.CreateDirectory(TempDir))
                 return false;
-            }
 
             // Move context files into the execution dir
             var baseIniPath = "";
@@ -201,17 +191,44 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 File.Copy(ProEnvironment.Current.GetPfPath(), basePfPath);
             }
 
-            // If current file, copy Npp.Text to a temp file to be executed
-            if (executionType != ExecutionType.Database) {
-                if (_isCurrentFile) {
-                    TempFullFilePathToExecute = Path.Combine(TempDir, "tmp" + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
-                    File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
-                } else TempFullFilePathToExecute = FullFilePathToExecute;
-            } else {
-                // for database extraction, we need the output path and to copy the DumpDatabase program
+            string fileToExecute;
+            if (executionType == ExecutionType.Database) {
+                // for database extraction, we need to copy the DumpDatabase program
                 TempFullFilePathToExecute = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
                 File.WriteAllBytes(Path.Combine(TempDir, TempFullFilePathToExecute), DataResources.DumpDatabase);
-                ExtractDbOutputPath = Path.Combine(TempDir, DataBase.OutputFileName);
+                fileToExecute = TempFullFilePathToExecute;
+
+            } else {
+                // Copy Npp.Text to a temp file to be executed
+                TempFullFilePathToExecute = Path.Combine(TempDir, "tmp" + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
+                File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
+                fileToExecute = TempFullFilePathToExecute;
+
+                if (executionType == ExecutionType.Prolint) {
+                    // prolint, we need to copy the StartProlint program
+                    fileToExecute = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
+                    ProlintOutputPath = Path.Combine(TempDir, "prolint.log");
+                    programContent = new StringBuilder();
+                    programContent.AppendLine("&SCOPED-DEFINE PathFileToProlint " + TempFullFilePathToExecute.ProgressQuoter());
+                    programContent.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + ProlintOutputPath.ProgressQuoter());
+                    programContent.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProgressQuoter());
+                    programContent.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProgressQuoter());
+                    programContent.AppendLine("&SCOPED-DEFINE PathActualFilePath " + FullFilePathToExecute.ProgressQuoter());
+                    var filename = Path.GetFileName(Plug.CurrentFilePath);
+                    if (FileTag.Contains(filename)) {
+                        var fileInfo = FileTag.GetLastFileTag(filename);
+                        programContent.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProgressQuoter());
+                        programContent.AppendLine("&SCOPED-DEFINE FileCorrectionDescription " + fileInfo.CorrectionDecription.Replace("\r", "").Replace("\n", "~n").ProgressQuoter());
+                    }
+                    File.WriteAllText(Path.Combine(TempDir, fileToExecute), 
+                        File.ReadAllText(Config.FileStartProlint, TextEncodingDetect.GetFileEncoding(Config.FileStartProlint)).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), 
+                        Encoding.Default);
+                }
             }
 
             // set info on the execution
@@ -227,14 +244,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
             _runnerPath = Path.Combine(TempDir, runnerFileName);
 
-            var programContent = new StringBuilder();
+            programContent = new StringBuilder();
             programContent.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ToExecute " + TempFullFilePathToExecute.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ToExecute " + fileToExecute.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE TempDir " + TempDir.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LstFile " + LstPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + ((executionType != ExecutionType.Database) ? string.Join(",", ProEnvironment.Current.GetProPathDirList) : TempDir).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + string.Join(",", ProEnvironment.Current.GetProPathDirList).ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.ProgressQuoter());
@@ -245,7 +262,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // Parameters
             StringBuilder Params = new StringBuilder();
             Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
-            if (executionType != ExecutionType.Run && Config.Instance.UseBatchModeToCompile)
+            if (!noBatchMode && Config.Instance.UseBatchModeToCompile)
                 Params.Append(" -b");
             Params.Append(" -p " + _runnerPath.ProgressQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
@@ -255,7 +272,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // we supress the splashscreen
             var splashScreenPath = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp");
             var splashScreenPathMoved = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp");
-            MoveNoError(splashScreenPath, splashScreenPathMoved);
+            MoveSplashScreenNoError(splashScreenPath, splashScreenPathMoved);
 
             // Start a process
             var pInfo = new ProcessStartInfo {
@@ -263,7 +280,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 Arguments = ExeParameters,
                 WorkingDirectory = ExecutionDir
             };
-            if (executionType != ExecutionType.Run) {
+            if (!noBatchMode) {
                 pInfo.WindowStyle = ProcessWindowStyle.Hidden;
                 pInfo.CreateNoWindow = true;
             }
@@ -276,7 +293,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 
             // restore splashscreen
-            MoveNoError(splashScreenPathMoved, splashScreenPath);
+            MoveSplashScreenNoError(splashScreenPathMoved, splashScreenPath);
 
             return true;
         }
@@ -285,22 +302,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
-            if (OnProcessExited != null) {
-                OnProcessExited(this, new ProcessOnExitEventArgs(this));
-                Process.Close();
+            if (OnExecutionEnd != null) {
+                OnExecutionEnd(this);
             }
         }
 
         /// <summary>
         /// move a file, catch the errors
         /// </summary>
-        private void MoveNoError(string from, string to) {
+        private void MoveSplashScreenNoError(string from, string to) {
             if (File.Exists(from)) {
                 try {
                     File.Move(from, to);
-                } catch (Exception e) {
-                    if (e is UnauthorizedAccessException)
-                        ErrorHandler.Log(e.ToString());
+                } catch (Exception) {
+                    // if it fails it is not really a problem
                 }
             }
         } 
@@ -309,17 +324,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     }
 
-    internal class ProcessOnExitEventArgs : EventArgs {
-        public ProExecution ProgressExecution;
-        public ProcessOnExitEventArgs(ProExecution progressExecution) {
-            ProgressExecution = progressExecution;
-        }
-    }
-
     internal enum ExecutionType {
         CheckSyntax,
         Compile,
         Run,
-        Database
+        Database,
+        Prolint
     }
 }

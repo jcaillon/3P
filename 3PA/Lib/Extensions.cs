@@ -31,6 +31,9 @@ using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
+    /// <summary>
+    /// This class regroups all the extension methods
+    /// </summary>
     public static class Extensions {
 
         public static List<T> ToNonNullList<T>(this IEnumerable<T> obj) {

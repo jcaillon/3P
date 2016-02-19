@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem("Compile", () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1", ImageResources.CompileCode),
                 new MenuItem("Run program", () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1", ImageResources.RunCode),
 
-                //new MenuItem("Prolint code", null, "Prolint", "F12", ImageResources.ProlintCode),
+                new MenuItem("Prolint code",  () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12", ImageResources.ProlintCode),
                 //new MenuItem("Send to AppBuilder", null, "Send_appbuilder", "Alt+O", ImageResources.SendToAppbuilder),
 
                 new MenuItem(true), // --------------------------

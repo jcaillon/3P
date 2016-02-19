@@ -63,8 +63,6 @@ namespace _3PA.Lib {
     /// </summary>
     public static class Utils {
 
-        #region Prevent spam! That's for CCL
-
         private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
 
         /// <summary>
@@ -91,9 +89,6 @@ namespace _3PA.Lib {
             return false;
         }
 
-        #endregion
-
-
         /// <summary>
         /// Checks if a directory is writable as is
         /// </summary>
@@ -111,29 +106,48 @@ namespace _3PA.Lib {
         /// <summary>
         /// Delete a dir, recursively
         /// </summary>
-        /// <param name="path"></param>
-        /// <param name="recursive"></param>
-        public static void DeleteDirectory(string path, bool recursive) {
+        public static bool DeleteDirectory(string path, bool recursive) {
             try {
                 if (!Directory.Exists(path))
-                    return;
+                    return true;
                 Directory.Delete(path, true);
             } catch (Exception e) {
                 ErrorHandler.DirtyLog(e);
-                UserCommunication.Notify("Failed to delete the following directory :<br>" + path, MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder");
+                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder");
+                return false;
             }
+            return true;
+        }
+
+        /// <summary>
+        /// Creates the directory
+        /// </summary>
+        public static bool CreateDirectory(string path) {
+            try {
+                if (Directory.Exists(path))
+                    return true;
+                Directory.CreateDirectory(path);
+            } catch (Exception) {
+                UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
+                return false;
+            }
+            return true;
         }
 
         /// <summary>
         /// Move a file, ensures the user gets a feedback is something goes wrong
         /// return true if ok, false otherwise
         /// </summary>
-        public static bool MoveFileWithMessages(string sourceFile, string targetFile) {
+        public static bool MoveFile(string sourceFile, string targetFile) {
             try {
+                if (!File.Exists(sourceFile)) {
+                    UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + targetFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
+                    return false;
+                }
                 File.Delete(targetFile);
                 File.Move(sourceFile, targetFile);
             } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
                 return false;
             }
             return true;

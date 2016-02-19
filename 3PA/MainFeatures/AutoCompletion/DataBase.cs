@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// File path to the output file of the dumpdatabase program
         /// </summary>
-        public static string OutputFileName { get; private set; }
+        private static string _outputFileName;
 
         /// <summary>
         /// Action called when an extraction is done
@@ -94,45 +94,47 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void FetchCurrentDbInfo(Action onExtractionDone) {
             try {
                 // dont extract 2 db at once
-                if (!string.IsNullOrEmpty(OutputFileName)) {
+                if (!string.IsNullOrEmpty(_outputFileName)) {
                     UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarning, "Database info", "Extracting database structure", 5);
                     return;
                 }
 
                 // save the filename of the output database info file for this environment
-                OutputFileName = GetOutputName();
+                _outputFileName = GetOutputName();
 
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
-                var exec = new ProExecution();
-                exec.ProcessExited += ExtractionDone;
+                var exec = new ProExecution {
+                    OnExecutionEnd = ExtractionDone,
+                    ExtractDbOutputPath = _outputFileName
+                };
                 _onExtractionDone = onExtractionDone;
                 if (exec.Do(ExecutionType.Database))
                     return;
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-            OutputFileName = null;
+            _outputFileName = null;
         }
 
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private static void ExtractionDone(object sender, ProcessOnExitEventArgs processOnExitEventArgs) {
+        private static void ExtractionDone(ProExecution lastExec) {
             try {
 
-                if (!File.Exists(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath) || new FileInfo(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath).Length == 0) {
-                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(processOnExitEventArgs.ProgressExecution.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
+                if (!File.Exists(lastExec.ExtractDbOutputPath) || new FileInfo(lastExec.ExtractDbOutputPath).Length == 0) {
+                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
                 } else {
-                    var targetFile = Path.Combine(Config.FolderDatabase, OutputFileName);
+                    var targetFile = Path.Combine(Config.FolderDatabase, _outputFileName);
                     if (File.Exists(targetFile))
                         File.Delete(targetFile);
 
                     // copy to database dir
-                    File.Copy(processOnExitEventArgs.ProgressExecution.ExtractDbOutputPath, targetFile);
+                    File.Copy(lastExec.ExtractDbOutputPath, targetFile);
 
                     // read
-                    Config.Instance.EnvLastDbInfoUsed = OutputFileName;
+                    Config.Instance.EnvLastDbInfoUsed = _outputFileName;
                     Init();
 
                     UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
@@ -147,7 +149,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-            OutputFileName = null;
+            _outputFileName = null;
         }
 
         /// <summary>

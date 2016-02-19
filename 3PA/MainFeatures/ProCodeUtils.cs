@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -198,17 +199,13 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Compilation, Check syntax, Run
+        #region Compilation, Check syntax, Run, Prolint
 
         /// <summary>
         /// Called after the compilation
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="processOnExitEventArgs"></param>
-        public static void OnCompileEnded(object sender, ProcessOnExitEventArgs processOnExitEventArgs) {
+        public static void OnExecutionEnded(ProExecution lastExec) {
             try {
-                var lastExec = processOnExitEventArgs.ProgressExecution;
-
                 CurrentOperation currentOperation;
                 if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
@@ -217,10 +214,10 @@ namespace _3PA.MainFeatures {
                 FilesInfo.GetFileInfo(lastExec.FullFilePathToExecute).CurrentOperation &= ~currentOperation;
                 var isCurrentFile = lastExec.FullFilePathToExecute.EqualsCi(Plug.CurrentFilePath);
                 if (isCurrentFile)
-                    FilesInfo.UpdateOperationAndErrors();
+                    FilesInfo.UpdateFileStatus();
 
                 // if log not found then something is messed up!
-                if (String.IsNullOrEmpty(lastExec.LogPath) ||
+                if (string.IsNullOrEmpty(lastExec.LogPath) ||
                     !File.Exists(lastExec.LogPath)) {
                         UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div>" + lastExec.FullFilePathToExecute.ToHtmlLink() + "</div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Temporary directory :</b><br>" + lastExec.TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
@@ -229,12 +226,13 @@ namespace _3PA.MainFeatures {
                 int nbWarnings = 0;
                 int nbErrors = 0;
 
-                // Read log info
-                // correct file path...
-                var changePaths = new Dictionary<string, string> {
-                    { lastExec.TempFullFilePathToExecute, lastExec.FullFilePathToExecute }
-                };
-                var errorList = FilesInfo.ReadErrorsFromFile(lastExec.LogPath, false, changePaths);
+                // Read log info, correct file path...
+                var changePaths = new Dictionary<string, string> { { lastExec.TempFullFilePathToExecute, lastExec.FullFilePathToExecute } };
+                Dictionary<string, List<FileError>> errorList;
+                if (lastExec.ExecutionType == ExecutionType.Prolint)
+                    errorList = FilesInfo.ReadErrorsFromFile(lastExec.ProlintOutputPath, true, changePaths);
+                else
+                    errorList = FilesInfo.ReadErrorsFromFile(lastExec.LogPath, false, changePaths);
 
                 if (!errorList.Any()) {
                     // the compiler messages are empty
@@ -251,12 +249,11 @@ namespace _3PA.MainFeatures {
                         return;
                     }
                 } else {
-                    // count number of warnings/errors
-                    // loop through files
+                    // count number of warnings/errors, loop through files
                     foreach (var keyValue in errorList) {
                         // loop through errors in said file
                         foreach (var fileError in keyValue.Value) {
-                            if (fileError.Level == ErrorLevel.Warning) nbWarnings++;
+                            if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
                             else nbErrors++;
                         }
                     }
@@ -266,7 +263,7 @@ namespace _3PA.MainFeatures {
                 var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
-                var notifSubtitle = (nbErrors > 0) ? nbErrors + " critical error(s) found" : ((nbWarnings > 0) ? nbWarnings + " compilation warning(s) found" : "No errors, no warnings!");
+                var notifSubtitle = (nbErrors > 0) ? nbErrors + " error(s) found" : ((nbWarnings > 0) ? nbWarnings + " warning(s) found" : "No errors, no warnings!");
                 var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : String.Empty);
 
                 // has errors
@@ -289,33 +286,25 @@ namespace _3PA.MainFeatures {
 
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
-                    var success = true;
-                    var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
 
+                    var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
                     // compile locally?
-                    if (Config.Instance.GlobalCompileFilesLocally) {
+                    if (Config.Instance.GlobalCompileFilesLocally)
                         targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
-                    }
 
                     // create target dir
-                    try {
-                        Directory.CreateDirectory(targetDir);
-                    } catch (Exception) {
-                        UserCommunication.Notify("There was a problem when i tried to create the compilation directory:<br>" + targetDir + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, notifTitle, "Couldn't create the directory");
-                        success = false;
-                    }
+                    var success = Utils.CreateDirectory(targetDir);
 
                     // move .r file
                     if (!string.IsNullOrEmpty(lastExec.DotRPath))
-                        success = success && Utils.MoveFileWithMessages(lastExec.DotRPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".r"));
+                        success = success && Utils.MoveFile(lastExec.DotRPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".r"));
 
                     // move .lst file
                     if (!string.IsNullOrEmpty(lastExec.LstPath))
-                        success = success && Utils.MoveFileWithMessages(lastExec.LstPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".lst"));
+                        success = success && Utils.MoveFile(lastExec.LstPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".lst"));
 
-                    if (success) {
+                    if (success)
                         notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", targetDir.ToHtmlLink()));
-                    }
                 }
 
                 // Notify the user, or not
@@ -327,31 +316,49 @@ namespace _3PA.MainFeatures {
                             args.Handled = true;
                         }
                     }, notifTimeOut);
+
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnCompileEnded");
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
             }
         }
 
+        /// <summary>
+        /// Called to run/compile/check/prolint the current program
+        /// </summary>
         public static void StartProgressExec(ExecutionType executionType) {
             CurrentOperation currentOperation;
             if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
                 currentOperation = CurrentOperation.Run;
 
             // Can't compile and check syntax the same file at the same time
-            if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run)) {
-                UserCommunication.Notify("This file is already being compiled or run,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
+            if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || 
+                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
+                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
+                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile)) {
+                UserCommunication.Notify("This file is already being compiled, run or lint-ed,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
                 return;
             }
 
+            // prolint? check that the StartProlint.p program is created, or do it
+            if (!File.Exists(Config.FileStartProlint)) {
+                try {
+                    File.WriteAllBytes(Config.FileStartProlint, DataResources.StartProlint);
+                } catch (Exception e) {
+                    ErrorHandler.Log(e.Message);
+                    UserCommunication.Notify("Unable to create the following file :<br>" + Config.FileStartProlint + "<br>Please check the rights of this folder", MessageImg.MsgError, "Creation file failed", "Prolint interface program");
+                }
+            }
+
             // launch the compile process for the current file
-            Plug.CurrentFileObject.ProgressExecution = new ProExecution();
-            Plug.CurrentFileObject.ProgressExecution.ProcessExited += OnCompileEnded;
+            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
+                OnExecutionEnd = OnExecutionEnded
+            };
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
                 return;
 
             // change file object current operation, set flag
             Plug.CurrentFileObject.CurrentOperation |= currentOperation;
-            FilesInfo.UpdateOperationAndErrors();
+            FilesInfo.UpdateFileStatus();
 
             // clear current errors (updates the current file info)
             FilesInfo.ClearAllErrors();
@@ -362,6 +369,9 @@ namespace _3PA.MainFeatures {
 
         #region Modification tags
 
+        /// <summary>
+        /// Allows the user to surround its selection with custom modification tags
+        /// </summary>
         public static void SurroundSelectionWithTag() {
             var output = new StringBuilder();
             var filename = Path.GetFileName(Plug.CurrentFilePath);

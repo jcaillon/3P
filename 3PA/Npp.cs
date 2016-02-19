@@ -405,8 +405,7 @@ namespace _3PA {
                 var buffer = new StringBuilder(WinApi.MaxPath);
                 WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETPLUGINSCONFIGDIR, WinApi.MaxPath, buffer);
                 _configDir = Path.Combine(buffer.ToString(), AssemblyInfo.AssemblyProduct);
-                if (!Directory.Exists(_configDir))
-                    Directory.CreateDirectory(_configDir);
+                Utils.CreateDirectory(_configDir);
             }
             return _configDir;
         }

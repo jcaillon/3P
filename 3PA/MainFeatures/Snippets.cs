@@ -58,18 +58,7 @@ namespace _3PA.MainFeatures {
             }
         }
 
-        public static void Init() {
-            lock (Map) {
-                if (!File.Exists(Config.FileSnippets))
-                    File.WriteAllBytes(Config.FileSnippets, DataResources.Snippets);
-                try {
-                    Read(Config.FileSnippets);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while loading snippets!", Config.FileSnippets);
-                }
-                SetupFileWatcher();
-            }
-        }
+        public static void Init() { }
 
         public static string GetTemplate(string snippetTag) {
             lock (Map) {
@@ -298,21 +287,5 @@ namespace _3PA.MainFeatures {
             Npp.OpenFile(Config.FileSnippets);
         }
 
-        static FileSystemWatcher _configWatcher;
-
-        static void SetupFileWatcher() {
-            string dir = Path.GetDirectoryName(Config.FileSnippets);
-            string fileName = Path.GetFileName(Config.FileSnippets);
-            if (dir != null) {
-                _configWatcher = new FileSystemWatcher(dir, fileName);
-                _configWatcher.NotifyFilter = NotifyFilters.LastWrite;
-                _configWatcher.Changed += configWatcher_Changed;
-                _configWatcher.EnableRaisingEvents = true;
-            }
-        }
-
-        static void configWatcher_Changed(object sender, FileSystemEventArgs e) {
-            Init();
-        }
     }
 }

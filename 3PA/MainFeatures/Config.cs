@@ -494,6 +494,9 @@ namespace _3PA.MainFeatures {
 
         public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
 
+        /// <summary>
+        /// Path to important files / folders
+        /// </summary>
         public static string FolderLog { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Log")); } }
         public static string FolderTechnical { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Technical")); } }
         public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
@@ -504,16 +507,19 @@ namespace _3PA.MainFeatures {
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }
         public static string FileErrorToSend { get { return Path.Combine(FolderLog, "error_.log"); } }
         public static string FileDirtyErrors { get { return Path.Combine(FolderLog, "dirty_errors.log"); } }
+
         public static string FileFilesInfo { get { return Path.Combine(FolderTechnical, "filesInfo.dump"); } }
+        public static string FileKeywordsRank { get { return Path.Combine(FolderTechnical, "keywordsRank.dump"); } }
+
         public static string FileKeywordsList { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsList.conf"); } }
         public static string FileKeywordsHelp { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsHelp.conf"); } }
         public static string FileAbbrev { get { return Path.Combine(Npp.GetConfigDir(), "_Abbreviations.conf"); } }
-        public static string FileKeywordsRank { get { return Path.Combine(FolderTechnical, "keywordsRank.dump"); } }
         public static string FileCompilPath { get { return Path.Combine(Npp.GetConfigDir(), "_CompilationPath.conf"); } }
         public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
-        public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_Snippets.conf"); } }
+        public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
         public static string FileUdl { get { return Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml"); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
+        public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
 
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
         public static string FileDownloadedPlugin { get { return Path.Combine(FolderUpdate, "3P.dll"); } }
@@ -564,13 +570,7 @@ namespace _3PA.MainFeatures {
         private static ConfigObject _instance;
 
         private static string CreateDirectory(string dir) {
-            if (!Directory.Exists(dir)) {
-                try {
-                    Directory.CreateDirectory(dir);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Permission denied when creating " + dir);
-                }
-            }
+            Utils.CreateDirectory(dir);
             return dir;
         }
 

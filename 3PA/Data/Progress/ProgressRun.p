@@ -1,23 +1,51 @@
+/*
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (StartProlint.p.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+*/
+
+/* When executed from 3P, the preprocessed variables below are set to real values */
 
 /* if ExecutionType not already defined */
 &IF DEFINED(ExecutionType) = 0 &THEN 
-    &SCOPED-DEFINE ExecutionType "DATABASE"
-    &SCOPED-DEFINE ToExecute "dumpDatabase.p"
-    &SCOPED-DEFINE TempDir "D:\Work\ProgressFiles\compiler\compile\"
-    &SCOPED-DEFINE LogFile "D:\Work\ProgressFiles\compiler\compile\sc80lbeq.log"
-    &SCOPED-DEFINE LstFile "D:\Work\ProgressFiles\compiler\compile\sc80lbeq.lst"
-    &SCOPED-DEFINE ExtractDbOutputPath "D:\Work\ProgressFiles\compiler\compile\outdb.txt"
-    &SCOPED-DEFINE propathToUse "D:\Work\ProgressFiles\compiler\compile,,"
+    &SCOPED-DEFINE ExecutionType "RUN"
+    &SCOPED-DEFINE ToExecute "StartProlint.p"
+    &SCOPED-DEFINE TempDir "D:\Repo\3P\3PA\Data\Progress"
+    &SCOPED-DEFINE LogFile "P:\outils\cnaftools\prolint\3P-addon\derp.log"
+    &SCOPED-DEFINE LstFile ""
+    &SCOPED-DEFINE ExtractDbOutputPath ""
+    &SCOPED-DEFINE propathToUse ""
     &SCOPED-DEFINE ExtraPf ""
     &SCOPED-DEFINE BasePfPath ""
     &SCOPED-DEFINE BaseIniPath ""
 &ENDIF
 
+
+/* ***************************  Definitions  ************************** */
 DEFINE STREAM str_logout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 
+
+/* Prototypes */
 FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT ipi_messNumber AS INTEGER) FORWARD.
 FUNCTION fi_output_last_error RETURNS LOGICAL ( ) FORWARD.
+
+
+/* ***************************  Main Block  *************************** */
 
 /* Critical options!! */
 SESSION:SYSTEM-ALERT-BOXES = YES.
@@ -36,7 +64,7 @@ IF {&BaseIniPath} > "" THEN DO:
 END.
 
 /* correct the PROPATH here */
-ASSIGN PROPATH = {&propathToUse}.
+ASSIGN PROPATH = {&TempDir} + (IF {&propathToUse} > "" THEN "," + {&propathToUse} ELSE "").
 
 /* connect the database(s) */
 IF {&BasePfPath} > "" THEN DO:
@@ -60,6 +88,7 @@ CASE {&ExecutionType} :
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
     END.
+    WHEN "PROLINT" OR
     WHEN "RUN" THEN DO:
         DO  ON STOP   UNDO, LEAVE
             ON ERROR  UNDO, LEAVE
@@ -85,6 +114,9 @@ OUTPUT STREAM str_logout CLOSE.
 
 /* Must be QUIT or prowin32.exe opens an empty editor! */
 QUIT.
+
+
+/* **********************  Internal Procedures  *********************** */
 
 /* if PROVERSION >= 11 */
 &IF DECIMAL(SUBSTRING(PROVERSION, 1, INDEX(PROVERSION, "."))) >= 11 &THEN
@@ -152,6 +184,9 @@ QUIT.
 
     END PROCEDURE.
 &ENDIF
+
+
+/* ************************  Function Implementations ***************** */
 
 FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT ipi_messNumber AS INTEGER):
 /*------------------------------------------------------------------------------

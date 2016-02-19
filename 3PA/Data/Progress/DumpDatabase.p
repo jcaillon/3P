@@ -1,3 +1,25 @@
+/*
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (StartProlint.p.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+
+Credits to SMarmotte Labs for the original dump program 
+*/
+
 DEFINE INPUT PARAMETER gc_FileName      AS CHARACTER NO-UNDO.
 DEFINE INPUT PARAMETER ipc_baseName     AS CHARACTER NO-UNDO. /* */
 DEFINE INPUT PARAMETER ipc_physicalName AS CHARACTER NO-UNDO. /* */

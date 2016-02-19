@@ -141,9 +141,8 @@ namespace _3PA.MainFeatures {
                     // There is a distant version higher than the local one
                     if (highestVersionInt > -1) {
                         // Update dir
-                        if (Directory.Exists(Config.FolderUpdate))
-                            Utils.DeleteDirectory(Config.FolderUpdate, true);
-                        Directory.CreateDirectory(Config.FolderUpdate);
+                        Utils.DeleteDirectory(Config.FolderUpdate, true);
+                        Utils.CreateDirectory(Config.FolderUpdate);
 
                         // latest release info
                         try {
@@ -310,8 +309,7 @@ namespace _3PA.MainFeatures {
 
                 try {
                     File.Delete(Config.FileVersionLog);
-                    if (Directory.Exists(Config.FolderUpdate))
-                        Utils.DeleteDirectory(Config.FolderUpdate, true);
+                    Utils.DeleteDirectory(Config.FolderUpdate, true);
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when deleting a file/folder");
                 }

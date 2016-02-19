@@ -111,7 +111,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <summary>
         /// Updates the number of errors in the FileExplorer form and the file status
         /// </summary>
-        public static void UpdateOperationAndErrors() {
+        public static void UpdateFileStatus() {
             var currentFilePath = Plug.CurrentFilePath;
 
             // UpdatedOperation event
@@ -143,7 +143,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public static void UpdateErrorsInScintilla() {
 
             // Updates the number of errors in the FileExplorer form and the file status
-            UpdateOperationAndErrors();
+            UpdateFileStatus();
 
             var currentFilePath = Plug.CurrentFilePath;
             var marginError = Npp.GetMargin(ErrorMarginNumber);
@@ -191,8 +191,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
                 lastLine = fileError.Line;
 
-                var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : "Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber;
-                mess += ", col " + fileError.Column + "): ";
+                var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : ("Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber);
+                mess += fileError.FromProlint ? "): " : ", col " + fileError.Column + "): ";
                 stylerHelper.Style(mess, (byte)(Style.ErrorAnnotBoldStyleOffset + fileError.Level));
                 lastMessage.Append(mess);
 
@@ -231,7 +231,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 _sessionInfo[currentFilePath].FileErrors.Clear();
                 if (updateVisual) {
                     ClearAnnotationsAndMarkers();
-                    UpdateOperationAndErrors();
+                    UpdateFileStatus();
                 }
                 return true;
             }
@@ -354,16 +354,16 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <summary>
         /// Reads an error log file, format :
         /// filepath \t ErrorLevel \t line \t column \t error number \t message \t help
+        /// (column and line can be equals to "?" in that case, they will be forced to 0)
         /// fromProlint = true allows to set FromProlint to true in the object,
         /// permutePaths allows to replace a path with another, useful when we compiled from a tempdir but we want the errors
         /// to appear for the "real" file
         /// </summary>
-        /// <param name="fullPath"></param>
-        /// <param name="fromProlint"></param>
-        /// <param name="permutePaths"></param>
-        /// <returns></returns>
         public static Dictionary<string, List<FileError>> ReadErrorsFromFile(string fullPath, bool fromProlint, Dictionary<string, string> permutePaths) {
             var output = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
+
+            if (!File.Exists(fullPath))
+                return output;
 
             var lastLineNbCouple = new[] { -10, -10 };
             foreach (var items in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
@@ -407,7 +407,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     Column = column,
                     ErrorNumber = lastLineNbCouple[1],
                     Message = items[5].Replace("<br>", "\n").Trim(),
-                    Help = items[6],
+                    Help = items[6].Replace("<br>", "\n").Trim(),
                     FromProlint = fromProlint
                 });
             }
@@ -479,7 +479,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         Default = 0,
         [DisplayAttr(Name = "Appbuilder section!")]
         AppbuilderSection = 32,
-        [DisplayAttr(Name = "Linting")]
+        [DisplayAttr(Name = "Linting", ActionText = "prolint-ing")]
         Prolint = 64,
         [DisplayAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
         CheckSyntax = 128,
