@@ -25,7 +25,6 @@ using System.Windows.Forms;
 using YamuiFramework.Forms;
 using _3PA.Images;
 using _3PA.Interop;
-using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -144,10 +143,7 @@ namespace _3PA.MainFeatures {
 
             MainMenuList = new List<MenuItem> {
                 new MenuItem("Show main window", Appli.Appli.ToggleView, "Open_main_window", "Alt+Space", ImageResources.MainWindow) {
-                    Generic = true,
-                    //Children = new List<YamuiMenuItem> {
-                        
-                    //},
+                    Generic = true
                 },
                 new MenuItem("Show auto-completion at caret", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space", ImageResources.Autocompletion),
 
@@ -175,6 +171,10 @@ namespace _3PA.MainFeatures {
 
                 new MenuItem(true), // --------------------------
 
+                //new MenuItem("New 4GL file", ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N", ImageResources.GenerateCode) {
+                //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                //},
+
                 new MenuItem("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment", "Ctrl+Q", ImageResources.ToggleComment),
                 
                 //new MenuItem("Insert mark", null, "Insert_mark", "Ctrl+T", ImageResources.InsertMark),
@@ -187,7 +187,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(true), // --------------------------
 
                 new MenuItem("Edit current file info", () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M", ImageResources.FileInfo),
-               //new MenuItem("Insert title block", null, "Insert_title_block", "Ctrl+Alt+M", ImageResources.TitleBlock),
+               new MenuItem("Insert title block", ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M", ImageResources.TitleBlock),
                new MenuItem("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M", ImageResources.ModificationTag),
 
                new MenuItem(true), // --------------------------

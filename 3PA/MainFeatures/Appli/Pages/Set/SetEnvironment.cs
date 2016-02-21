@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         // Left button
                         x.BackGrndImage = ImageResources.SelectFile;
                         x.ButtonPressed += BtleftOnButtonPressed;
-                        toolTip.SetToolTip(x, "Click to <b>select</b> a new file");
+                        toolTip.SetToolTip(x, "Click to <b>select</b> a file / folder");
                     } else if (x.Name.StartsWith("btright")) {
                         // right button
                         x.BackGrndImage = ImageResources.OpenInExplorer;
@@ -131,6 +131,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #endregion
 
+        public override void OnShow() {
+            ToggleMode(ViewMode.Select);
+        }
+
         #region Update view / update Model
 
         private bool Save() {
@@ -169,7 +173,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                 case ViewMode.AddNew:
                 case ViewMode.Edit:
-                    foreach (var box in new List<YamuiTextBox> { flName, flLabel}.Where(box => string.IsNullOrWhiteSpace(box.Text))) {
+                    foreach (var box in new List<YamuiTextBox> { flName }.Where(box => string.IsNullOrWhiteSpace(box.Text))) {
                         BlinkTextBox(box, ThemeManager.Current.GenericErrorColor);
                         return false;
                     }
@@ -502,7 +506,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = UserCommunication.Message("Do you really want to delete the current environment, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I am", "No, Cancel"}, true);
+            var answ = UserCommunication.Message("Do you really want to delete the current environment, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "No, Cancel"}, true);
             if (answ == 0) {
                 _currentMode = ViewMode.Delete;
                 if (Save())
@@ -511,7 +515,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = UserCommunication.Message("Do you really want to delete the current database info, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I am", "No, Cancel" }, true);
+            var answ = UserCommunication.Message("Do you really want to delete the current database info, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
             if (answ == 0) {
                 _currentMode = ViewMode.DbDelete;
                 if (Save())

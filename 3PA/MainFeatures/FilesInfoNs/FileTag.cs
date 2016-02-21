@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.FilesInfoNs {
@@ -52,7 +53,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                         var fileInfo = new FileTagObject {
                             CorrectionNumber = items[1],
                             CorrectionDate = items[2],
-                            CorrectionDecription = items[3],
+                            CorrectionDecription = items[3].Replace("~n", "\n"),
                             ApplicationName = items[4],
                             ApplicationVersion = items[5],
                             WorkPackage = items[6],
@@ -82,10 +83,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// </summary>
         public static void Export() {
             try {
-                using (var writer = new StreamWriter(Config.FileFilesInfo, false)) {
+                using (var writer = new StreamWriter(Config.FileFilesInfo, false, Encoding.Default)) {
                     foreach (var kpv in _filesInfo) {
                         foreach (var obj in kpv.Value) {
-                            writer.WriteLine(string.Join("\t", kpv.Key, obj.CorrectionNumber, obj.CorrectionDate, obj.CorrectionDecription, obj.ApplicationName, obj.ApplicationVersion, obj.WorkPackage, obj.BugId));
+                            writer.WriteLine(string.Join("\t", kpv.Key, obj.CorrectionNumber, obj.CorrectionDate, obj.CorrectionDecription.Replace("\r", "").Replace("\n", "~n"), obj.ApplicationName, obj.ApplicationVersion, obj.WorkPackage, obj.BugId));
                         }
                     }
                 }
@@ -144,6 +145,42 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         #endregion
+
+        #region public
+
+        /// <summary>
+        /// Call this method to replace the variables inside your tags template (e.g. {&a }) to their actual values
+        /// </summary>
+        public static string ReplaceTokens(FileTagObject fileTagObject, string tagString) {
+            var output = tagString;
+            foreach (var tuple in new List<Tuple<string, string>> {
+                new Tuple<string, string>(@"({&a\s*})", fileTagObject.ApplicationName),
+                new Tuple<string, string>(@"({&v\s*})", fileTagObject.ApplicationVersion),
+                new Tuple<string, string>(@"({&b\s*})", fileTagObject.BugId),
+                new Tuple<string, string>(@"({&da\s*})", fileTagObject.CorrectionDate),
+                new Tuple<string, string>(@"({&de\s*})", fileTagObject.CorrectionDecription),
+                new Tuple<string, string>(@"({&n\s*})", fileTagObject.CorrectionNumber),
+                new Tuple<string, string>(@"({&w\s*})", fileTagObject.WorkPackage),
+                new Tuple<string, string>(@"({&u\s*})", Config.Instance.UserName),
+            }) {
+                var regex = new Regex(tuple.Item1);
+                var match = regex.Match(output);
+                if (match.Success) {
+                    var matchedStr = match.Groups[1].Value;
+                    if (matchedStr.Contains(' ')) {
+                        // need to replace the same amount of char
+                        output = output.Replace(matchedStr, string.Format("{0,-" + matchedStr.Length + @"}", tuple.Item2 ?? ""));
+                    } else {
+                        output = output.Replace(matchedStr, tuple.Item2 ?? "");
+                    }
+                }
+            }
+            return output;
+        }
+
+        #endregion
+
+
     }
 
     #region File tag object

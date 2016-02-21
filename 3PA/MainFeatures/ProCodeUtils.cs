@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
@@ -373,18 +374,13 @@ namespace _3PA.MainFeatures {
         /// Allows the user to surround its selection with custom modification tags
         /// </summary>
         public static void SurroundSelectionWithTag() {
-            var output = new StringBuilder();
-            var filename = Path.GetFileName(Plug.CurrentFilePath);
-
-            if (FileTag.Contains(filename)) {
-                var fileInfo = FileTag.GetLastFileTag(filename);
-
-                Npp.BeginUndoAction();
+            CommonTagAction(fileInfo => {
+                var output = new StringBuilder();
 
                 Npp.TargetFromSelection();
                 var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
 
-                var opener = ReplaceTokens(fileInfo, Config.Instance.CodeModifTagOpener);
+                var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
                 var eol = Npp.GetEolString;
                 output.Append(opener);
                 output.Append(eol);
@@ -392,31 +388,55 @@ namespace _3PA.MainFeatures {
                 output.Append(Npp.SelectedText);
                 output.Append(eol);
                 output.Append(indent);
-                output.Append(ReplaceTokens(fileInfo, Config.Instance.CodeModifTagCloser));
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
 
                 Npp.TargetFromSelection();
                 Npp.ReplaceTarget(output.ToString());
 
                 Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
-                    
+            });
+        }
+
+        /// <summary>
+        /// Allows the user to generate a title block at the caret location, using the current file info
+        /// </summary>
+        public static void AddTitleBlockAtCaret() {
+            CommonTagAction(fileInfo => {
+                var output = new StringBuilder();
+                var eol = Npp.GetEolString;
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
+                output.Append(eol);
+
+                // description
+                var regex = new Regex(@"({&de\s*})");
+                var match = regex.Match(Config.Instance.TagTitleBlock2);
+                if (match.Success && !string.IsNullOrEmpty(fileInfo.CorrectionDecription)) {
+                    var matchedStr = match.Groups[1].Value;
+                    foreach (var line in fileInfo.CorrectionDecription.BreakText(matchedStr.Length).Split('\n')) {
+                        output.Append(Config.Instance.TagTitleBlock2.Replace(matchedStr, string.Format("{0,-" + matchedStr.Length + @"}", line)));
+                        output.Append(eol);
+                    }
+                }
+
+                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
+                output.Append(eol);
+
+                Npp.SetTextByRange(Npp.CurrentPosition, Npp.CurrentPosition, output.ToString());
+                Npp.SetSel(Npp.CurrentPosition + output.Length);
+            });
+        }
+
+        public static void CommonTagAction(Action<FileTagObject> performAction) {
+            var filename = Path.GetFileName(Plug.CurrentFilePath);
+            if (FileTag.Contains(filename)) {
+                var fileInfo = FileTag.GetLastFileTag(filename);
+                Npp.BeginUndoAction();
+                performAction(fileInfo);
                 Npp.EndUndoAction();
-
             } else {
-
                 UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
                 Appli.Appli.GoToPage(PageNames.FileInfo);
             }
-        }
-
-        private static string ReplaceTokens(FileTagObject fileTagObject, string tagString) {
-            var output = tagString.Replace("{&appli}", fileTagObject.ApplicationName);
-            output = output.Replace("{&version}", fileTagObject.ApplicationVersion);
-            output = output.Replace("{&workpackage}", fileTagObject.WorkPackage);
-            output = output.Replace("{&bugid}", fileTagObject.BugId);
-            output = output.Replace("{&number}", fileTagObject.CorrectionNumber);
-            output = output.Replace("{&date}", fileTagObject.CorrectionDate);
-            output = output.Replace("{&username}", Config.Instance.UserName);
-            return output;
         }
 
         #endregion

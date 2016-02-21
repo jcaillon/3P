@@ -175,7 +175,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             LocFileTagObject.WorkPackage = yamuiTextBox4.Text;
             LocFileTagObject.BugId = yamuiTextBox3.Text;
             LocFileTagObject.CorrectionNumber = yamuiTextBox5.Text;
-            LocFileTagObject.CorrectionDecription = yamuiTextBox7.Text;
+            LocFileTagObject.CorrectionDecription = yamuiTextBox7.Text.Replace("\r", "");
             LocFileTagObject.CorrectionDate = yamuiTextBox6.Text;
         }
 
@@ -185,7 +185,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             yamuiTextBox4.Text = LocFileTagObject.WorkPackage;
             yamuiTextBox3.Text = LocFileTagObject.BugId;
             yamuiTextBox5.Text = LocFileTagObject.CorrectionNumber;
-            yamuiTextBox7.Text = LocFileTagObject.CorrectionDecription;
+            yamuiTextBox7.Lines = (LocFileTagObject.CorrectionDecription ?? "").Split('\n');
             yamuiTextBox6.Text = LocFileTagObject.CorrectionDate;
         }
 

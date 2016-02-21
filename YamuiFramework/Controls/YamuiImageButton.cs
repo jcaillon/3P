@@ -68,7 +68,7 @@ namespace YamuiFramework.Controls {
                 }
 
                 // draw main image, in greyscale if not activated
-                if (_fakeDisabled)
+                if (_fakeDisabled || !Enabled)
                     img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
                 var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width) / 2, (ClientRectangle.Height - img.Height) / 2), new Size(img.Width, img.Height));
                 e.Graphics.DrawImage(img, recImg);

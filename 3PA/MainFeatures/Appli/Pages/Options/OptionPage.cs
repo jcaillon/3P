@@ -71,7 +71,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 if (!lastCategory.EqualsCi(attribute.GroupName)) {
                     if (!string.IsNullOrEmpty(lastCategory))
                         // ReSharper disable once AccessToModifiedClosure
-                        yPos += 15;
+                        yPos += 10;
                     lastCategory = attribute.GroupName;
                     dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
                         AutoSize = true,
@@ -181,10 +181,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     tooltip.SetToolTip(toggleControl, attribute.Description + "<br><div class='ToolTipBottomGoTo'>Click to <b>toggle on/off</b> this feature<br>Your choice is automatically applied</div>");
                 }
 
-                yPos += label.Height + 20;
+                yPos += label.Height + 15;
             });
 
-            yPos += 20;
+            yPos += 15;
             var defaultButton = new YamuiButton {
                 Location = new Point(30, yPos),
                 Size = new Size(100, 23),
@@ -215,7 +215,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 dockedPanel.ContentPanel.Controls.Add(updateButton); 
             }
 
-            yPos += 25;
+            yPos += 15;
 
             if (yPos > Height) {
                 dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {

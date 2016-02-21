@@ -109,6 +109,18 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="MainFeatures\Appli\Pages\Options\ExportPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\ExportPage.Designer.cs">
+      <DependentUpon>ExportPage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
+      <DependentUpon>OthersPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -294,11 +306,17 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Home\HomePage.resx">
       <DependentUpon>HomePage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ExportPage.resx">
+      <DependentUpon>ExportPage.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OptionPage.resx">
       <DependentUpon>OptionPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ProfilesPage.resx">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
+      <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
@@ -358,13 +376,20 @@
     <Content Include="Html\Pages\home.html" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\Appli\Delete.png" />
+    <Content Include="Images\Appli\DownloadAll.png" />
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
     <Content Include="Images\Appli\EditDb.png" />
+    <Content Include="Images\Appli\Export.png" />
+    <Content Include="Images\Appli\Fetch.png" />
     <Content Include="Images\Appli\Help.png" />
+    <Content Include="Images\Appli\Historic.png" />
+    <Content Include="Images\Appli\Import.png" />
     <Content Include="Images\Appli\MinusDb.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
+    <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\PlusDb.png" />
+    <Content Include="Images\Appli\Push.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\Appli\UndoUserAction.png" />

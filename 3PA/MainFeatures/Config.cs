@@ -293,18 +293,7 @@ namespace _3PA.MainFeatures {
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
             public bool CodeShowSpaces = true;
-
-            [Display(Name = "Modification tag : opener",
-                Description = "You can set your custom modification tag here,<br>this part will be added before your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public string CodeModifTagOpener = "/* --- Modif #{&number} --- {&date} --- CS PROGRESS SOPRA ({&username}) --- [{&workpackage} - {&bugid}] --- */";
-
-            [Display(Name = "Modification tag : closer",
-                Description = "You can set your custom modification tag here,<br>this part will be appended to your selection<br>You can use the following values (taken from the file info form) :<br>{&appli}<br>{&version}<br>{&workpackage}<br>{&bugid}<br>{&number}<br>{&date}<br>{&username}",
-                GroupName = "Code edition",
-                AutoGenerateField = false)]
-            public string CodeModifTagCloser = "/* --- Fin modif #{&number} --- */";
+            
 
             #endregion
 
@@ -378,6 +367,22 @@ namespace _3PA.MainFeatures {
             public double ToolTipOpacity = 0.92;
 
             #endregion
+
+            // SHARED CONF
+            public string SharedConfFolder = "";
+
+            // TAGS
+            public string TagModifOpener = "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";
+            public string TagModifCloser = "/* --- Fin modif #{&n} --- */";
+            public string TagTitleBlock1 = 
+                "/* |      |            |           |                                                                | */\n" +
+                "/* | {&n }| {&da     } | CS-SOPRA  | {&w   } - {&b                                                } | */\n" +
+                "/* |      | {&v      } | {&u     } |                                                                | */";
+            public string TagTitleBlock2 =
+                "/* |      |            |           | {&de                                                         } | */";
+
+            public string TagTitleBlock3 =
+                "/* |______|____________|___________|________________________________________________________________| */";
 
             // ENV
             public string EnvLastDbInfoUsed = "";
@@ -502,6 +507,7 @@ namespace _3PA.MainFeatures {
         public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
         public static string FolderLibrary { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Libraries")); } }
         public static string FolderUpdate { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
+        public static string FolderTemplates { get { return Path.Combine(Npp.GetConfigDir(), "Templates"); } }
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
 
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }

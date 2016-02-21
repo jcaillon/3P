@@ -26,41 +26,41 @@ namespace _3PA.MainFeatures.Appli.Pages {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
-            this.yamuiScrollPage1.SuspendLayout();
+            this.scrollPage = new YamuiFramework.Controls.YamuiScrollPage();
+            this.scrollPage.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiScrollPage1
+            // scrollPage
             // 
             // 
-            // yamuiScrollPage1.ContentPanel
+            // scrollPage.ContentPanel
             // 
-            this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
-            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
-            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
-            this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiScrollPage1.Name = "yamuiScrollPage1";
-            this.yamuiScrollPage1.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.TabIndex = 0;
+            this.scrollPage.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPage.ContentPanel.Name = "ContentPanel";
+            this.scrollPage.ContentPanel.OwnerPage = this.scrollPage;
+            this.scrollPage.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPage.ContentPanel.TabIndex = 0;
+            this.scrollPage.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollPage.Location = new System.Drawing.Point(0, 0);
+            this.scrollPage.Name = "scrollPage";
+            this.scrollPage.Size = new System.Drawing.Size(720, 550);
+            this.scrollPage.TabIndex = 0;
             // 
             // template
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiScrollPage1);
+            this.Controls.Add(this.scrollPage);
             this.Name = "template";
             this.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.ResumeLayout(false);
+            this.scrollPage.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiScrollPage yamuiScrollPage1;
+        private YamuiScrollPage scrollPage;
 
     }
 }

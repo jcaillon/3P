@@ -111,9 +111,23 @@ namespace _3PA.Lib {
                 if (!Directory.Exists(path))
                     return true;
                 Directory.Delete(path, true);
-            } catch (Exception e) {
-                ErrorHandler.DirtyLog(e);
-                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder");
+            } catch (Exception) {
+                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Delete a file
+        /// </summary>
+        public static bool DeleteFile(string path) {
+            try {
+                if (!File.Exists(path))
+                    return true;
+                File.Delete(path);
+            } catch (Exception) {
+                UserCommunication.Notify("Failed to delete the following file :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete file", "Can't delete a file!");
                 return false;
             }
             return true;
@@ -148,6 +162,50 @@ namespace _3PA.Lib {
                 File.Move(sourceFile, targetFile);
             } catch (Exception) {
                 UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Copy a file, ensures the user gets a feedback is something goes wrong
+        /// return true if ok, false otherwise
+        /// </summary>
+        public static bool CopyFile(string sourceFile, string targetFile) {
+            try {
+                if (!File.Exists(sourceFile)) {
+                    UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + targetFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
+                    return false;
+                }
+                File.Delete(targetFile);
+                File.Copy(sourceFile, targetFile);
+            } catch (Exception) {
+                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
+                return false;
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Copy a file, ensures the user gets a feedback is something goes wrong
+        /// return true if ok, false otherwise
+        /// </summary>
+        public static bool CopyDirectory(string sourceFolder, string targetFolder, bool deleteExistingTarget = false) {
+            try {
+                if (!Directory.Exists(sourceFolder)) {
+                    UserCommunication.Notify("There was a problem when trying to copy a folder, the source doesn't exist :<br>" + targetFolder, MessageImg.MsgError, "Copy folder", "Couldn't find source folder");
+                    return false;
+                }
+                if (deleteExistingTarget)
+                    Directory.Delete(targetFolder, true);
+
+                Directory.CreateDirectory(targetFolder);
+
+                //Copy all the files & Replaces any files with the same name
+                foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.TopDirectoryOnly))
+                    File.Copy(newPath, newPath.Replace(sourceFolder, targetFolder), true);
+            } catch (Exception) {
+                UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
                 return false;
             }
             return true;
@@ -372,18 +430,6 @@ namespace _3PA.Lib {
         /// <param name="htmlLinkClickedEventArgs"></param>
         public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
             htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
-        }
-
-
-        private static DateTime Str2Date(string str) {
-            DateTime MyDateTime;
-            MyDateTime = new DateTime();
-            MyDateTime = DateTime.ParseExact(str, "yyyy-MM-dd HH:mm:ss", null);
-            return MyDateTime;
-        }
-
-        private static string Date2Str(DateTime mdate) {
-            return mdate.ToString("yyyy-MM-dd HH:mm:ss");
         }
 
         public static void SerializeToXml<T>(T obj, string fileName) {

@@ -37,6 +37,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #region public manage env
 
         /// <summary>
+        /// To call when the .xml file has changed and you want to reload it
+        /// </summary>
+        public static void Import() {
+            _listOfEnv.Clear();
+        }
+
+        /// <summary>
         /// Returns the list of all the progress envrionnements configured
         /// </summary>
         /// <returns></returns>

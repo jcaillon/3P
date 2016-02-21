@@ -165,19 +165,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btSaveDb
             // 
-            this.btSaveDb.Location = new System.Drawing.Point(481, 145);
+            this.btSaveDb.Location = new System.Drawing.Point(193, 145);
             this.btSaveDb.Name = "btSaveDb";
             this.btSaveDb.Size = new System.Drawing.Size(94, 23);
             this.btSaveDb.TabIndex = 144;
-            this.btSaveDb.Text = "Save";
+            this.btSaveDb.Text = "&Save";
             // 
             // btCancelDb
             // 
-            this.btCancelDb.Location = new System.Drawing.Point(581, 145);
+            this.btCancelDb.Location = new System.Drawing.Point(293, 145);
             this.btCancelDb.Name = "btCancelDb";
             this.btCancelDb.Size = new System.Drawing.Size(94, 23);
             this.btCancelDb.TabIndex = 143;
-            this.btCancelDb.Text = "Cancel";
+            this.btCancelDb.Text = "&Cancel";
             // 
             // htmlLabel8
             // 
@@ -186,7 +186,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel8.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel8.BaseStylesheet = null;
             this.htmlLabel8.IsSelectionEnabled = false;
-            this.htmlLabel8.Location = new System.Drawing.Point(33, 174);
+            this.htmlLabel8.Location = new System.Drawing.Point(30, 176);
             this.htmlLabel8.Name = "htmlLabel8";
             this.htmlLabel8.Size = new System.Drawing.Size(154, 60);
             this.htmlLabel8.TabIndex = 142;
@@ -198,7 +198,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.lblLocally.AutoSize = true;
             this.lblLocally.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.lblLocally.Location = new System.Drawing.Point(228, 376);
+            this.lblLocally.Location = new System.Drawing.Point(228, 378);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";
             this.lblLocally.Size = new System.Drawing.Size(90, 12);
@@ -209,7 +209,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbName
             // 
             this.cbName.ItemHeight = 15;
-            this.cbName.Location = new System.Drawing.Point(33, 27);
+            this.cbName.Location = new System.Drawing.Point(30, 27);
             this.cbName.Name = "cbName";
             this.cbName.Size = new System.Drawing.Size(169, 21);
             this.cbName.TabIndex = 141;
@@ -217,9 +217,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // cbSuffix
             // 
             this.cbSuffix.ItemHeight = 15;
-            this.cbSuffix.Location = new System.Drawing.Point(208, 27);
+            this.cbSuffix.Location = new System.Drawing.Point(205, 27);
             this.cbSuffix.Name = "cbSuffix";
-            this.cbSuffix.Size = new System.Drawing.Size(51, 21);
+            this.cbSuffix.Size = new System.Drawing.Size(73, 21);
             this.cbSuffix.TabIndex = 140;
             // 
             // cbDatabase
@@ -238,7 +238,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flName.CustomForeColor = System.Drawing.Color.Empty;
             this.flName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flName.Location = new System.Drawing.Point(33, 27);
+            this.flName.Location = new System.Drawing.Point(30, 27);
             this.flName.Name = "flName";
             this.flName.Size = new System.Drawing.Size(169, 21);
             this.flName.TabIndex = 136;
@@ -252,9 +252,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flSuffix.CustomForeColor = System.Drawing.Color.Empty;
             this.flSuffix.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flSuffix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flSuffix.Location = new System.Drawing.Point(208, 27);
+            this.flSuffix.Location = new System.Drawing.Point(205, 27);
             this.flSuffix.Name = "flSuffix";
-            this.flSuffix.Size = new System.Drawing.Size(51, 21);
+            this.flSuffix.Size = new System.Drawing.Size(73, 21);
             this.flSuffix.TabIndex = 135;
             this.flSuffix.WaterMark = "Suffix";
             // 
@@ -266,9 +266,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flLabel.CustomForeColor = System.Drawing.Color.Empty;
             this.flLabel.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flLabel.Location = new System.Drawing.Point(265, 27);
+            this.flLabel.Location = new System.Drawing.Point(284, 27);
             this.flLabel.Name = "flLabel";
-            this.flLabel.Size = new System.Drawing.Size(433, 21);
+            this.flLabel.Size = new System.Drawing.Size(414, 21);
             this.flLabel.TabIndex = 134;
             this.flLabel.WaterMark = "Label for this environment";
             // 
@@ -309,7 +309,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraPf.CustomForeColor = System.Drawing.Color.Empty;
             this.flExtraPf.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flExtraPf.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flExtraPf.Location = new System.Drawing.Point(193, 174);
+            this.flExtraPf.Location = new System.Drawing.Point(193, 176);
             this.flExtraPf.MultiLines = true;
             this.flExtraPf.Name = "flExtraPf";
             this.flExtraPf.Size = new System.Drawing.Size(482, 60);
@@ -324,7 +324,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox2.Location = new System.Drawing.Point(193, 240);
+            this.textbox2.Location = new System.Drawing.Point(193, 242);
             this.textbox2.Name = "textbox2";
             this.textbox2.Size = new System.Drawing.Size(482, 20);
             this.textbox2.TabIndex = 130;
@@ -334,7 +334,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // tgCompilLocl
             // 
             this.tgCompilLocl.AutoSize = true;
-            this.tgCompilLocl.Location = new System.Drawing.Point(193, 375);
+            this.tgCompilLocl.Location = new System.Drawing.Point(193, 377);
             this.tgCompilLocl.Name = "tgCompilLocl";
             this.tgCompilLocl.Size = new System.Drawing.Size(52, 15);
             this.tgCompilLocl.TabIndex = 137;
@@ -348,7 +348,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraProPath.CustomForeColor = System.Drawing.Color.Empty;
             this.flExtraProPath.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flExtraProPath.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flExtraProPath.Location = new System.Drawing.Point(193, 265);
+            this.flExtraProPath.Location = new System.Drawing.Point(193, 267);
             this.flExtraProPath.MultiLines = true;
             this.flExtraProPath.Name = "flExtraProPath";
             this.flExtraProPath.Size = new System.Drawing.Size(482, 45);
@@ -363,7 +363,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox3.Location = new System.Drawing.Point(193, 321);
+            this.textbox3.Location = new System.Drawing.Point(193, 323);
             this.textbox3.Name = "textbox3";
             this.textbox3.Size = new System.Drawing.Size(482, 20);
             this.textbox3.TabIndex = 128;
@@ -378,7 +378,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox4.Location = new System.Drawing.Point(193, 352);
+            this.textbox4.Location = new System.Drawing.Point(193, 354);
             this.textbox4.Name = "textbox4";
             this.textbox4.Size = new System.Drawing.Size(482, 20);
             this.textbox4.TabIndex = 127;
@@ -393,7 +393,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox5.Location = new System.Drawing.Point(193, 407);
+            this.textbox5.Location = new System.Drawing.Point(193, 409);
             this.textbox5.Name = "textbox5";
             this.textbox5.Size = new System.Drawing.Size(482, 20);
             this.textbox5.TabIndex = 126;
@@ -408,7 +408,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
             this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flCmdLine.Location = new System.Drawing.Point(193, 438);
+            this.flCmdLine.Location = new System.Drawing.Point(193, 440);
             this.flCmdLine.Name = "flCmdLine";
             this.flCmdLine.Size = new System.Drawing.Size(482, 45);
             this.flCmdLine.TabIndex = 125;
@@ -422,7 +422,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox6.Location = new System.Drawing.Point(193, 494);
+            this.textbox6.Location = new System.Drawing.Point(193, 496);
             this.textbox6.Name = "textbox6";
             this.textbox6.Size = new System.Drawing.Size(482, 20);
             this.textbox6.TabIndex = 124;
@@ -489,9 +489,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.txLabel.AutoSizeHeightOnly = true;
             this.txLabel.BackColor = System.Drawing.Color.Transparent;
             this.txLabel.BaseStylesheet = null;
-            this.txLabel.Location = new System.Drawing.Point(272, 30);
+            this.txLabel.Location = new System.Drawing.Point(291, 30);
             this.txLabel.Name = "txLabel";
-            this.txLabel.Size = new System.Drawing.Size(446, 15);
+            this.txLabel.Size = new System.Drawing.Size(407, 15);
             this.txLabel.TabIndex = 106;
             this.txLabel.TabStop = false;
             this.txLabel.Text = "?";
@@ -500,7 +500,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(678, 494);
+            this.btright6.Location = new System.Drawing.Point(678, 496);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -512,7 +512,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
-            this.btleft6.Location = new System.Drawing.Point(170, 494);
+            this.btleft6.Location = new System.Drawing.Point(170, 496);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
@@ -548,7 +548,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(678, 407);
+            this.btright5.Location = new System.Drawing.Point(678, 409);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -560,7 +560,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
-            this.btleft5.Location = new System.Drawing.Point(170, 407);
+            this.btleft5.Location = new System.Drawing.Point(170, 409);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
@@ -572,7 +572,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(678, 352);
+            this.btright4.Location = new System.Drawing.Point(678, 354);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -584,7 +584,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
-            this.btleft4.Location = new System.Drawing.Point(170, 352);
+            this.btleft4.Location = new System.Drawing.Point(170, 354);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
@@ -596,7 +596,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(678, 321);
+            this.btright3.Location = new System.Drawing.Point(678, 323);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -608,7 +608,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
-            this.btleft3.Location = new System.Drawing.Point(170, 321);
+            this.btleft3.Location = new System.Drawing.Point(170, 323);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
@@ -620,7 +620,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(678, 239);
+            this.btright2.Location = new System.Drawing.Point(678, 241);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -632,7 +632,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
-            this.btleft2.Location = new System.Drawing.Point(170, 239);
+            this.btleft2.Location = new System.Drawing.Point(170, 241);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
             this.btleft2.Size = new System.Drawing.Size(20, 20);
@@ -647,7 +647,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
             this.htmlLabel7.IsSelectionEnabled = false;
-            this.htmlLabel7.Location = new System.Drawing.Point(33, 494);
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 496);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel7.TabIndex = 116;
@@ -661,7 +661,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
             this.htmlLabel6.IsSelectionEnabled = false;
-            this.htmlLabel6.Location = new System.Drawing.Point(33, 438);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 440);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel6.TabIndex = 115;
@@ -675,7 +675,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
             this.htmlLabel5.IsSelectionEnabled = false;
-            this.htmlLabel5.Location = new System.Drawing.Point(33, 407);
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 409);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel5.TabIndex = 114;
@@ -689,7 +689,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
             this.htmlLabel4.IsSelectionEnabled = false;
-            this.htmlLabel4.Location = new System.Drawing.Point(33, 353);
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 354);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel4.TabIndex = 113;
@@ -703,7 +703,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
             this.htmlLabel3.IsSelectionEnabled = false;
-            this.htmlLabel3.Location = new System.Drawing.Point(33, 321);
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 323);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel3.TabIndex = 112;
@@ -717,7 +717,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
             this.htmlLabel2.IsSelectionEnabled = false;
-            this.htmlLabel2.Location = new System.Drawing.Point(33, 240);
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 242);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(122, 60);
             this.htmlLabel2.TabIndex = 111;
@@ -732,7 +732,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
             this.htmlLabel1.IsSelectionEnabled = false;
-            this.htmlLabel1.Location = new System.Drawing.Point(33, 97);
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 97);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(122, 45);
             this.htmlLabel1.TabIndex = 110;
@@ -743,7 +743,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.yamuiLabel4.AutoSize = true;
             this.yamuiLabel4.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel4.Location = new System.Drawing.Point(3, 69);
+            this.yamuiLabel4.Location = new System.Drawing.Point(0, 69);
             this.yamuiLabel4.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel4.Name = "yamuiLabel4";
             this.yamuiLabel4.Size = new System.Drawing.Size(191, 19);
@@ -754,7 +754,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.yamuiLabel1.AutoSize = true;
             this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel1.Location = new System.Drawing.Point(3, 2);
+            this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
             this.yamuiLabel1.Size = new System.Drawing.Size(186, 19);
@@ -764,7 +764,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btcontrol2
             // 
             this.btcontrol2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btcontrol2.Location = new System.Drawing.Point(504, 527);
+            this.btcontrol2.Location = new System.Drawing.Point(193, 522);
             this.btcontrol2.Name = "btcontrol2";
             this.btcontrol2.Size = new System.Drawing.Size(94, 23);
             this.btcontrol2.TabIndex = 123;
@@ -773,7 +773,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btcontrol1
             // 
             this.btcontrol1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btcontrol1.Location = new System.Drawing.Point(604, 527);
+            this.btcontrol1.Location = new System.Drawing.Point(293, 522);
             this.btcontrol1.Name = "btcontrol1";
             this.btcontrol1.Size = new System.Drawing.Size(94, 23);
             this.btcontrol1.TabIndex = 122;
@@ -782,7 +782,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDelete
             // 
             this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btDelete.Location = new System.Drawing.Point(33, 527);
+            this.btDelete.Location = new System.Drawing.Point(581, 522);
             this.btDelete.Name = "btDelete";
             this.btDelete.Size = new System.Drawing.Size(94, 23);
             this.btDelete.TabIndex = 121;

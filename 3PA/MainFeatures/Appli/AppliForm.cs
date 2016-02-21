@@ -73,12 +73,10 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
                     new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
                     new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
-                    new YamuiSecMenu("EXPLORERS", "explorers", new OptionPage(new List<string> { "File explorer", "Code explorer" })),
-                    new YamuiSecMenu("TOOLTIPS", "tooltips", new OptionPage(new List<string> { "Tooltip" })),
-                }),
-                //new YamuiMainMenuTab("About 3P", "about", true, new List<YamuiSecMenuTab> {
-                //    new YamuiSecMenuTab("SOFTWARE INFORMATION", "soft_info", new PageAbout())
-                //})
+                    new YamuiSecMenu("MISC", "misc", new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
+                    new YamuiSecMenu("OTHERS", "others", new OthersPage()),
+                    new YamuiSecMenu("SHARED/EXPORTED CONFIG", "exportedconf", new ExportPage()),
+                })
             });
 
             CreateTopLinks(new List<string> { "FEEDBACK", "REPORT A BUG", "HELP" }, (sender, tabArgs) => {
