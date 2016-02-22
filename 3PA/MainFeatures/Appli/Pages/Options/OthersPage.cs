@@ -27,9 +27,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region fields
 
-        public FileTagObject LocFileTagObject;
-        public string Filename;
-
         #endregion
 
         #region constructor

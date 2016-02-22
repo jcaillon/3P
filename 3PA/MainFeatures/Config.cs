@@ -376,7 +376,7 @@ namespace _3PA.MainFeatures {
             public string TagModifCloser = "/* --- Fin modif #{&n} --- */";
             public string TagTitleBlock1 = 
                 "/* |      |            |           |                                                                | */\n" +
-                "/* | {&n }| {&da     } | CS-SOPRA  | {&w   } - {&b                                                } | */\n" +
+                "/* | {&n }| {&da     } | CS-SOPRA  | {&w } - {&b                                                  } | */\n" +
                 "/* |      | {&v      } | {&u     } |                                                                | */";
             public string TagTitleBlock2 =
                 "/* |      |            |           | {&de                                                         } | */";

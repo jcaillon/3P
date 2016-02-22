@@ -42,6 +42,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.dockedPanel.ContentPanel.SuspendLayout();
             this.dockedPanel.SuspendLayout();
             this.SuspendLayout();
@@ -65,6 +66,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // dockedPanel.ContentPanel
             // 
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel4);
             this.dockedPanel.ContentPanel.Controls.Add(this.btDownloadAll);
             this.dockedPanel.ContentPanel.Controls.Add(this.btRefresh);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
@@ -101,7 +103,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // btRefresh
             // 
             this.btRefresh.BackGrndImage = null;
-            this.btRefresh.Location = new System.Drawing.Point(217, 189);
+            this.btRefresh.Location = new System.Drawing.Point(691, 192);
             this.btRefresh.Margin = new System.Windows.Forms.Padding(0);
             this.btRefresh.Name = "btRefresh";
             this.btRefresh.Size = new System.Drawing.Size(20, 20);
@@ -223,6 +225,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel1.TabIndex = 0;
             this.yamuiLabel1.Text = "ABOUT THIS FEATURE";
             // 
+            // htmlLabel4
+            // 
+            this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel4.BaseStylesheet = null;
+            this.htmlLabel4.Location = new System.Drawing.Point(198, 192);
+            this.htmlLabel4.Name = "htmlLabel4";
+            this.htmlLabel4.Size = new System.Drawing.Size(32, 15);
+            this.htmlLabel4.TabIndex = 118;
+            this.htmlLabel4.TabStop = false;
+            this.htmlLabel4.Text = "<b>Auto?</b>";
+            // 
             // ExportPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -254,5 +267,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private HtmlLabel htmlLabel1;
         private YamuiImageButton btDownloadAll;
         private YamuiImageButton btRefresh;
+        private HtmlLabel htmlLabel4;
     }
 }

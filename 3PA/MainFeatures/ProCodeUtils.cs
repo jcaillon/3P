@@ -335,7 +335,7 @@ namespace _3PA.MainFeatures {
             if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
-                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile)) {
+                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Prolint)) {
                 UserCommunication.Notify("This file is already being compiled, run or lint-ed,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
                 return;
             }

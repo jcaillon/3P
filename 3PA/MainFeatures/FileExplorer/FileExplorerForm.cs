@@ -786,7 +786,11 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // blink back color
             lbStatus.UseCustomBackColor = true;
-            Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; });
+            if (updatedOperationEventArgs.CurrentOperation > 0) {
+                Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.BackColor = ThemeManager.Current.AccentColor; lbStatus.Invalidate(); });
+            } else {
+                Transition.run(lbStatus, "BackColor", ThemeManager.Current.AccentColor, ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; lbStatus.Invalidate(); });
+            }
 
             _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
         }

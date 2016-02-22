@@ -203,6 +203,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 TempFullFilePathToExecute = Path.Combine(TempDir, "tmp" + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
                 File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
                 fileToExecute = TempFullFilePathToExecute;
+                
 
                 if (executionType == ExecutionType.Prolint) {
                     // prolint, we need to copy the StartProlint program
@@ -239,6 +240,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             ExecutionType = executionType;
             ExecutionDir = Path.GetDirectoryName(FullFilePathToExecute) ?? TempDir;
             ProgressWin32 = ProEnvironment.Current.ProwinPath;
+            if (executionType == ExecutionType.Database)
+                ExtractDbOutputPath = Path.Combine(ExecutionDir, ExtractDbOutputPath);
 
             // prepare the .p runner
             var runnerFileName = DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";

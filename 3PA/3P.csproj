@@ -148,6 +148,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="Tests\ParserLexerTests.cs" />
     <Compile Include="ThemeManager.cs" />
     <Content Include="Data\ThemesList.xml" />
