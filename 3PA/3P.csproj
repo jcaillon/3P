@@ -121,6 +121,12 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.Designer.cs">
+      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -319,6 +325,9 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.resx">
+      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
     </EmbeddedResource>
@@ -361,6 +370,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
+    <None Include="Data\CompilationPath" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\Progress\DumpDatabase.p" />
@@ -387,6 +397,8 @@
     <Content Include="Images\Appli\Historic.png" />
     <Content Include="Images\Appli\Import.png" />
     <Content Include="Images\Appli\MinusDb.png" />
+    <Content Include="Images\Appli\NotSaved.png" />
+    <Content Include="Images\Appli\Ok.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\PlusDb.png" />

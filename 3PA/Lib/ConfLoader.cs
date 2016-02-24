@@ -32,6 +32,7 @@ namespace _3PA.Lib {
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
         /// Apply the action toApplyOnEachLine to each line
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
+        /// Uses the char # as a comment line
         /// </summary>
         /// <param name="filePath"></param>
         /// <param name="dataResources"></param>
@@ -43,7 +44,8 @@ namespace _3PA.Lib {
                 using (StringReader reader = new StringReader((!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) ? File.ReadAllText(filePath, encoding) : encoding.GetString(dataResources))) {
                     string line;
                     while ((line = reader.ReadLine()) != null) {
-                        toApplyOnEachLine(line);
+                        if (line.Length > 0 && line[0] != '#')
+                            toApplyOnEachLine(line);
                     }
                 }
             } catch (Exception e) {

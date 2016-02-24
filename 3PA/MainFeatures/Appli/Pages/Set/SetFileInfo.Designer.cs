@@ -27,6 +27,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
+            this.bt_delete = new YamuiFramework.Controls.YamuiButton();
+            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.bt_SaveState = new YamuiFramework.Controls.YamuiImageButton();
+            this.lb_SaveState = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -35,19 +40,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiComboBox1 = new YamuiFramework.Controls.YamuiComboBox();
-            this.yamuiTextBox1 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox2 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox4 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox3 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox5 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox6 = new YamuiFramework.Controls.YamuiTextBox();
-            this.yamuiTextBox7 = new YamuiFramework.Controls.YamuiTextBox();
-            this.btok = new YamuiFramework.Controls.YamuiButton();
-            this.btcancel = new YamuiFramework.Controls.YamuiButton();
-            this.bttoday = new YamuiFramework.Controls.YamuiButton();
-            this.btdefault = new YamuiFramework.Controls.YamuiButton();
-            this.btclear = new YamuiFramework.Controls.YamuiButton();
+            this.cb_info = new YamuiFramework.Controls.YamuiComboBox();
+            this.fl_appliName = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_appliVersion = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_workPackage = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_bugId = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_correctionNb = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_correctionDate = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_correctionDesc = new YamuiFramework.Controls.YamuiTextBox();
+            this.bt_ok = new YamuiFramework.Controls.YamuiButton();
+            this.bt_cancel = new YamuiFramework.Controls.YamuiButton();
+            this.bt_today = new YamuiFramework.Controls.YamuiButton();
+            this.bt_default = new YamuiFramework.Controls.YamuiButton();
+            this.bt_clear = new YamuiFramework.Controls.YamuiButton();
+            this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -57,6 +63,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_delete);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel7);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.lb_FileName);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_SaveState);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.lb_SaveState);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel9);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel6);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel5);
@@ -65,19 +76,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel2);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel1);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiComboBox1);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox1);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox2);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox4);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox3);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox5);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox6);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox7);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.btok);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.btcancel);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bttoday);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.btdefault);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.btclear);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.cb_info);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_appliName);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_appliVersion);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_workPackage);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_bugId);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_correctionNb);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_correctionDate);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.fl_correctionDesc);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_ok);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_cancel);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_today);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_default);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_clear);
             this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
             this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
@@ -89,13 +100,70 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiScrollPage1.Size = new System.Drawing.Size(720, 550);
             this.yamuiScrollPage1.TabIndex = 0;
             // 
+            // bt_delete
+            // 
+            this.bt_delete.Location = new System.Drawing.Point(524, 403);
+            this.bt_delete.Name = "bt_delete";
+            this.bt_delete.Size = new System.Drawing.Size(46, 23);
+            this.bt_delete.TabIndex = 72;
+            this.bt_delete.TabStop = false;
+            this.bt_delete.Text = "Delete";
+            // 
+            // htmlLabel7
+            // 
+            this.htmlLabel7.AutoSize = false;
+            this.htmlLabel7.AutoSizeHeightOnly = true;
+            this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 102);
+            this.htmlLabel7.Name = "htmlLabel7";
+            this.htmlLabel7.Size = new System.Drawing.Size(157, 30);
+            this.htmlLabel7.TabIndex = 71;
+            this.htmlLabel7.TabStop = false;
+            this.htmlLabel7.Text = "<b>Current file</b><br>and file info state";
+            // 
+            // lb_FileName
+            // 
+            this.lb_FileName.AutoSize = false;
+            this.lb_FileName.AutoSizeHeightOnly = true;
+            this.lb_FileName.BackColor = System.Drawing.Color.Transparent;
+            this.lb_FileName.BaseStylesheet = null;
+            this.lb_FileName.Location = new System.Drawing.Point(193, 102);
+            this.lb_FileName.Name = "lb_FileName";
+            this.lb_FileName.Size = new System.Drawing.Size(519, 15);
+            this.lb_FileName.TabIndex = 70;
+            this.lb_FileName.TabStop = false;
+            this.lb_FileName.Text = "<b>Filename</b>";
+            // 
+            // bt_SaveState
+            // 
+            this.bt_SaveState.BackGrndImage = null;
+            this.bt_SaveState.Location = new System.Drawing.Point(193, 123);
+            this.bt_SaveState.Name = "bt_SaveState";
+            this.bt_SaveState.Size = new System.Drawing.Size(20, 20);
+            this.bt_SaveState.TabIndex = 69;
+            this.bt_SaveState.Text = "yamuiImageButton1";
+            // 
+            // lb_SaveState
+            // 
+            this.lb_SaveState.AutoSize = false;
+            this.lb_SaveState.AutoSizeHeightOnly = true;
+            this.lb_SaveState.BackColor = System.Drawing.Color.Transparent;
+            this.lb_SaveState.BaseStylesheet = null;
+            this.lb_SaveState.Location = new System.Drawing.Point(220, 126);
+            this.lb_SaveState.Name = "lb_SaveState";
+            this.lb_SaveState.Size = new System.Drawing.Size(492, 15);
+            this.lb_SaveState.TabIndex = 68;
+            this.lb_SaveState.TabStop = false;
+            this.lb_SaveState.Text = "<b>!</b>";
+            // 
             // htmlLabel9
             // 
             this.htmlLabel9.AutoSize = false;
             this.htmlLabel9.AutoSizeHeightOnly = true;
             this.htmlLabel9.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel9.BaseStylesheet = null;
-            this.htmlLabel9.Location = new System.Drawing.Point(30, 25);
+            this.htmlLabel9.Location = new System.Drawing.Point(30, 34);
             this.htmlLabel9.Name = "htmlLabel9";
             this.htmlLabel9.Size = new System.Drawing.Size(152, 60);
             this.htmlLabel9.TabIndex = 66;
@@ -109,7 +177,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.AutoSizeHeightOnly = true;
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
-            this.htmlLabel6.Location = new System.Drawing.Point(30, 231);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 289);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(157, 15);
             this.htmlLabel6.TabIndex = 57;
@@ -122,7 +190,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.AutoSizeHeightOnly = true;
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
-            this.htmlLabel5.Location = new System.Drawing.Point(30, 205);
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 263);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(157, 15);
             this.htmlLabel5.TabIndex = 56;
@@ -135,7 +203,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.AutoSizeHeightOnly = true;
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
-            this.htmlLabel4.Location = new System.Drawing.Point(30, 179);
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 237);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(157, 15);
             this.htmlLabel4.TabIndex = 55;
@@ -148,7 +216,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.AutoSizeHeightOnly = true;
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
-            this.htmlLabel3.Location = new System.Drawing.Point(30, 153);
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 211);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(157, 15);
             this.htmlLabel3.TabIndex = 54;
@@ -161,7 +229,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.AutoSizeHeightOnly = true;
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
-            this.htmlLabel2.Location = new System.Drawing.Point(30, 127);
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 185);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(157, 15);
             this.htmlLabel2.TabIndex = 53;
@@ -174,7 +242,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.AutoSizeHeightOnly = true;
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
-            this.htmlLabel1.Location = new System.Drawing.Point(30, 91);
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 149);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(139, 30);
             this.htmlLabel1.TabIndex = 52;
@@ -192,155 +260,166 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel1.TabIndex = 51;
             this.yamuiLabel1.Text = "INFORMATION ON THE CURRENT FILE";
             // 
-            // yamuiComboBox1
+            // cb_info
             // 
-            this.yamuiComboBox1.ItemHeight = 15;
-            this.yamuiComboBox1.Location = new System.Drawing.Point(193, 25);
-            this.yamuiComboBox1.Name = "yamuiComboBox1";
-            this.yamuiComboBox1.Size = new System.Drawing.Size(326, 21);
-            this.yamuiComboBox1.TabIndex = 50;
+            this.cb_info.ItemHeight = 15;
+            this.cb_info.Location = new System.Drawing.Point(193, 34);
+            this.cb_info.Name = "cb_info";
+            this.cb_info.Size = new System.Drawing.Size(394, 21);
+            this.cb_info.TabIndex = 50;
             // 
-            // yamuiTextBox1
+            // fl_appliName
             // 
-            this.yamuiTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox1.Location = new System.Drawing.Point(193, 91);
-            this.yamuiTextBox1.Name = "yamuiTextBox1";
-            this.yamuiTextBox1.Size = new System.Drawing.Size(266, 20);
-            this.yamuiTextBox1.TabIndex = 49;
-            this.yamuiTextBox1.WaterMark = "E.g. : BOI";
+            this.fl_appliName.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_appliName.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_appliName.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_appliName.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_appliName.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_appliName.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_appliName.Location = new System.Drawing.Point(193, 149);
+            this.fl_appliName.Name = "fl_appliName";
+            this.fl_appliName.Size = new System.Drawing.Size(266, 20);
+            this.fl_appliName.TabIndex = 49;
+            this.fl_appliName.WaterMark = "E.g. : BOI";
             // 
-            // yamuiTextBox2
+            // fl_appliVersion
             // 
-            this.yamuiTextBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox2.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox2.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox2.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox2.Location = new System.Drawing.Point(193, 127);
-            this.yamuiTextBox2.Name = "yamuiTextBox2";
-            this.yamuiTextBox2.Size = new System.Drawing.Size(266, 20);
-            this.yamuiTextBox2.TabIndex = 48;
-            this.yamuiTextBox2.WaterMark = "E.g. : 65.000";
+            this.fl_appliVersion.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_appliVersion.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_appliVersion.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_appliVersion.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_appliVersion.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_appliVersion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_appliVersion.Location = new System.Drawing.Point(193, 185);
+            this.fl_appliVersion.Name = "fl_appliVersion";
+            this.fl_appliVersion.Size = new System.Drawing.Size(266, 20);
+            this.fl_appliVersion.TabIndex = 48;
+            this.fl_appliVersion.WaterMark = "E.g. : 65.000";
             // 
-            // yamuiTextBox4
+            // fl_workPackage
             // 
-            this.yamuiTextBox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox4.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox4.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox4.Location = new System.Drawing.Point(193, 153);
-            this.yamuiTextBox4.Name = "yamuiTextBox4";
-            this.yamuiTextBox4.Size = new System.Drawing.Size(266, 20);
-            this.yamuiTextBox4.TabIndex = 47;
-            this.yamuiTextBox4.WaterMark = "E.g. : 101-33";
+            this.fl_workPackage.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_workPackage.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_workPackage.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_workPackage.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_workPackage.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_workPackage.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_workPackage.Location = new System.Drawing.Point(193, 211);
+            this.fl_workPackage.Name = "fl_workPackage";
+            this.fl_workPackage.Size = new System.Drawing.Size(266, 20);
+            this.fl_workPackage.TabIndex = 47;
+            this.fl_workPackage.WaterMark = "E.g. : 101-33";
             // 
-            // yamuiTextBox3
+            // fl_bugId
             // 
-            this.yamuiTextBox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox3.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox3.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox3.Location = new System.Drawing.Point(193, 179);
-            this.yamuiTextBox3.Name = "yamuiTextBox3";
-            this.yamuiTextBox3.Size = new System.Drawing.Size(266, 20);
-            this.yamuiTextBox3.TabIndex = 46;
-            this.yamuiTextBox3.WaterMark = "E.g. : INC0999999";
+            this.fl_bugId.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_bugId.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_bugId.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_bugId.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_bugId.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_bugId.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_bugId.Location = new System.Drawing.Point(193, 237);
+            this.fl_bugId.Name = "fl_bugId";
+            this.fl_bugId.Size = new System.Drawing.Size(266, 20);
+            this.fl_bugId.TabIndex = 46;
+            this.fl_bugId.WaterMark = "E.g. : INC0999999";
             // 
-            // yamuiTextBox5
+            // fl_correctionNb
             // 
-            this.yamuiTextBox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox5.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox5.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox5.Location = new System.Drawing.Point(193, 205);
-            this.yamuiTextBox5.Name = "yamuiTextBox5";
-            this.yamuiTextBox5.Size = new System.Drawing.Size(266, 20);
-            this.yamuiTextBox5.TabIndex = 45;
-            this.yamuiTextBox5.WaterMark = "E.g. : 9";
+            this.fl_correctionNb.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_correctionNb.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_correctionNb.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_correctionNb.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_correctionNb.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_correctionNb.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_correctionNb.Location = new System.Drawing.Point(193, 263);
+            this.fl_correctionNb.Name = "fl_correctionNb";
+            this.fl_correctionNb.Size = new System.Drawing.Size(266, 20);
+            this.fl_correctionNb.TabIndex = 45;
+            this.fl_correctionNb.WaterMark = "E.g. : 9";
             // 
-            // yamuiTextBox6
+            // fl_correctionDate
             // 
-            this.yamuiTextBox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox6.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox6.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox6.Location = new System.Drawing.Point(244, 231);
-            this.yamuiTextBox6.Name = "yamuiTextBox6";
-            this.yamuiTextBox6.Size = new System.Drawing.Size(103, 20);
-            this.yamuiTextBox6.TabIndex = 44;
-            this.yamuiTextBox6.WaterMark = null;
+            this.fl_correctionDate.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_correctionDate.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_correctionDate.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_correctionDate.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_correctionDate.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_correctionDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_correctionDate.Location = new System.Drawing.Point(244, 289);
+            this.fl_correctionDate.Name = "fl_correctionDate";
+            this.fl_correctionDate.Size = new System.Drawing.Size(103, 20);
+            this.fl_correctionDate.TabIndex = 44;
+            this.fl_correctionDate.WaterMark = null;
             // 
-            // yamuiTextBox7
+            // fl_correctionDesc
             // 
-            this.yamuiTextBox7.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox7.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox7.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox7.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox7.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox7.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox7.Location = new System.Drawing.Point(193, 257);
-            this.yamuiTextBox7.MultiLines = true;
-            this.yamuiTextBox7.Name = "yamuiTextBox7";
-            this.yamuiTextBox7.Size = new System.Drawing.Size(519, 82);
-            this.yamuiTextBox7.TabIndex = 43;
-            this.yamuiTextBox7.WaterMark = "E.g. : Fixing a small bug";
+            this.fl_correctionDesc.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_correctionDesc.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_correctionDesc.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_correctionDesc.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_correctionDesc.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_correctionDesc.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_correctionDesc.Location = new System.Drawing.Point(193, 315);
+            this.fl_correctionDesc.MultiLines = true;
+            this.fl_correctionDesc.Name = "fl_correctionDesc";
+            this.fl_correctionDesc.Size = new System.Drawing.Size(519, 82);
+            this.fl_correctionDesc.TabIndex = 43;
+            this.fl_correctionDesc.WaterMark = "E.g. : Fixing a small bug";
             // 
-            // btok
+            // bt_ok
             // 
-            this.btok.Location = new System.Drawing.Point(193, 345);
-            this.btok.Name = "btok";
-            this.btok.Size = new System.Drawing.Size(107, 23);
-            this.btok.TabIndex = 42;
-            this.btok.Text = "&Save and close";
+            this.bt_ok.Location = new System.Drawing.Point(193, 403);
+            this.bt_ok.Name = "bt_ok";
+            this.bt_ok.Size = new System.Drawing.Size(93, 23);
+            this.bt_ok.TabIndex = 42;
+            this.bt_ok.Text = "&Save and close";
             // 
-            // btcancel
+            // bt_cancel
             // 
-            this.btcancel.Location = new System.Drawing.Point(306, 345);
-            this.btcancel.Name = "btcancel";
-            this.btcancel.Size = new System.Drawing.Size(115, 23);
-            this.btcancel.TabIndex = 41;
-            this.btcancel.Text = "&Cancel and close";
+            this.bt_cancel.Location = new System.Drawing.Point(292, 403);
+            this.bt_cancel.Name = "bt_cancel";
+            this.bt_cancel.Size = new System.Drawing.Size(101, 23);
+            this.bt_cancel.TabIndex = 41;
+            this.bt_cancel.Text = "&Cancel and close";
             // 
-            // bttoday
+            // bt_today
             // 
-            this.bttoday.Location = new System.Drawing.Point(193, 231);
-            this.bttoday.Name = "bttoday";
-            this.bttoday.Size = new System.Drawing.Size(45, 20);
-            this.bttoday.TabIndex = 33;
-            this.bttoday.TabStop = false;
-            this.bttoday.Text = "&Today";
+            this.bt_today.Location = new System.Drawing.Point(193, 289);
+            this.bt_today.Name = "bt_today";
+            this.bt_today.Size = new System.Drawing.Size(45, 20);
+            this.bt_today.TabIndex = 33;
+            this.bt_today.TabStop = false;
+            this.bt_today.Text = "&Today";
             // 
-            // btdefault
+            // bt_default
             // 
-            this.btdefault.Location = new System.Drawing.Point(628, 345);
-            this.btdefault.Name = "btdefault";
-            this.btdefault.Size = new System.Drawing.Size(84, 23);
-            this.btdefault.TabIndex = 37;
-            this.btdefault.TabStop = false;
-            this.btdefault.Text = "Set as &default";
+            this.bt_default.Location = new System.Drawing.Point(628, 403);
+            this.bt_default.Name = "bt_default";
+            this.bt_default.Size = new System.Drawing.Size(84, 23);
+            this.bt_default.TabIndex = 37;
+            this.bt_default.TabStop = false;
+            this.bt_default.Text = "Set as &default";
             // 
-            // btclear
+            // bt_clear
             // 
-            this.btclear.Location = new System.Drawing.Point(576, 345);
-            this.btclear.Name = "btclear";
-            this.btclear.Size = new System.Drawing.Size(46, 23);
-            this.btclear.TabIndex = 36;
-            this.btclear.TabStop = false;
-            this.btclear.Text = "Clea&r";
+            this.bt_clear.Location = new System.Drawing.Point(576, 403);
+            this.bt_clear.Name = "bt_clear";
+            this.bt_clear.Size = new System.Drawing.Size(46, 23);
+            this.bt_clear.TabIndex = 36;
+            this.bt_clear.TabStop = false;
+            this.bt_clear.Text = "Clear";
+            // 
+            // toolTip
+            // 
+            this.toolTip.AllowLinksHandling = true;
+            this.toolTip.AutoPopDelay = 90000;
+            this.toolTip.BaseStylesheet = null;
+            this.toolTip.InitialDelay = 300;
+            this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this.toolTip.OwnerDraw = true;
+            this.toolTip.ReshowDelay = 100;
+            this.toolTip.TooltipCssClass = "htmltooltip";
             // 
             // SetFileInfo
             // 
@@ -359,19 +438,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         private YamuiScrollPage yamuiScrollPage1;
-        private YamuiComboBox yamuiComboBox1;
-        private YamuiTextBox yamuiTextBox1;
-        private YamuiTextBox yamuiTextBox2;
-        private YamuiTextBox yamuiTextBox4;
-        private YamuiTextBox yamuiTextBox3;
-        private YamuiTextBox yamuiTextBox5;
-        private YamuiTextBox yamuiTextBox6;
-        private YamuiTextBox yamuiTextBox7;
-        private YamuiButton btok;
-        private YamuiButton btcancel;
-        private YamuiButton bttoday;
-        private YamuiButton btdefault;
-        private YamuiButton btclear;
+        private YamuiComboBox cb_info;
+        private YamuiTextBox fl_appliName;
+        private YamuiTextBox fl_appliVersion;
+        private YamuiTextBox fl_workPackage;
+        private YamuiTextBox fl_bugId;
+        private YamuiTextBox fl_correctionNb;
+        private YamuiTextBox fl_correctionDate;
+        private YamuiTextBox fl_correctionDesc;
+        private YamuiButton bt_ok;
+        private YamuiButton bt_cancel;
+        private YamuiButton bt_today;
+        private YamuiButton bt_default;
+        private YamuiButton bt_clear;
         private YamuiLabel yamuiLabel1;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel1;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel2;
@@ -380,6 +459,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel6;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel5;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel9;
-
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lb_SaveState;
+        private YamuiImageButton bt_SaveState;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lb_FileName;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel7;
+        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
+        private YamuiButton bt_delete;
     }
 }

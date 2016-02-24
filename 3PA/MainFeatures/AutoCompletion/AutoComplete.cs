@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -191,8 +192,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region core mechanism
 
         /// <summary>
-        /// Call this method to asynchronously parse the current document 
-        /// (or set doNow = true to do it synchonously)
+        /// Call this method to parse the current document after a small delay 
+        /// (delay that is reset each time this function is called, so if you call it continously, nothing is done)
+        /// or set doNow = true to do it without waiting a timer
         /// </summary>
         /// <param name="doNow"></param>
         public static void ParseCurrentDocument(bool doNow = false) {
@@ -224,27 +226,29 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Called when the _parserTimer ticks
         /// </summary>
         private static void ParseCurrentDocumentTick() {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                // delete timer
-                if (_parserTimer != null) {
-                    _parserTimer.Dispose();
-                    _parserTimer = null;
-                }
+            Task.Factory.StartNew(() => {
+                if (_lock.TryEnterWriteLock(500)) {
+                    try {
+                        // delete timer
+                        if (_parserTimer != null) {
+                            _parserTimer.Dispose();
+                            _parserTimer = null;
+                        }
 
-                //------------
-                //var watch = Stopwatch.StartNew();
-                FillItems();
-                //watch.Stop();
-                //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
-                //------------
+                        //------------
+                        //var watch = Stopwatch.StartNew();
+                        FillItems();
+                        //watch.Stop();
+                        //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
+                        //------------
 
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
-                } finally {
-                    _lock.ExitWriteLock();
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                    } finally {
+                        _lock.ExitWriteLock();
+                    }
                 }
-            }
+            });
         }
 
         /// <summary>

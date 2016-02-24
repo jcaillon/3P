@@ -341,14 +341,8 @@ namespace _3PA.MainFeatures {
             }
 
             // prolint? check that the StartProlint.p program is created, or do it
-            if (!File.Exists(Config.FileStartProlint)) {
-                try {
-                    File.WriteAllBytes(Config.FileStartProlint, DataResources.StartProlint);
-                } catch (Exception e) {
-                    ErrorHandler.Log(e.Message);
-                    UserCommunication.Notify("Unable to create the following file :<br>" + Config.FileStartProlint + "<br>Please check the rights of this folder", MessageImg.MsgError, "Creation file failed", "Prolint interface program");
-                }
-            }
+            if (!File.Exists(Config.FileStartProlint)) 
+                Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint);
 
             // launch the compile process for the current file
             Plug.CurrentFileObject.ProgressExecution = new ProExecution {

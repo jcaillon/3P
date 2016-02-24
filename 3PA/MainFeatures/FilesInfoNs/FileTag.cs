@@ -100,48 +100,49 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         public static List<FileTagObject> GetFileTagsList(string filename) {
-            return Contains(filename) ? _filesInfo[filename].OrderByDescending(o => o.CorrectionNumber).ToList() : new List<FileTagObject> ();
+            return Contains(filename) ? _filesInfo[filename] : new List<FileTagObject> ();
         }
 
         public static FileTagObject GetLastFileTag(string filename) {
-            return Contains(filename) ? _filesInfo[filename].Last() : new FileTagObject();
+            return GetFileTagsList(filename).Last();
         }
 
         public static FileTagObject GetFileTags(string filename, string nb) {
-            return (filename == LastTag || filename == DefaultTag)
-                ? GetFileTagsList(filename).First()
-                : GetFileTagsList(filename).Find(x => (x.CorrectionNumber.Equals(nb)));
+            return (filename == LastTag || filename == DefaultTag) ? GetFileTagsList(filename).First() : GetFileTagsList(filename).Find(x => (x.CorrectionNumber.Equals(nb)));
         }
 
-        public static void SetFileTags(string filename, string nb, string date, string text, string nomAppli,
-            string version, string chantier, string jira) {
+        public static void SetFileTags(string filename, string nb, string date, string text, string nomAppli, string version, string chantier, string jira) {
             if (string.IsNullOrWhiteSpace(filename)) return;
+            var obj = new FileTagObject {
+                CorrectionNumber = nb,
+                CorrectionDate = date,
+                CorrectionDecription = text,
+                ApplicationName = nomAppli,
+                ApplicationVersion = version,
+                WorkPackage = chantier,
+                BugId = jira
+            };
+            // filename exists
+            if (Contains(filename)) {
+                if (filename == LastTag || filename == DefaultTag)
+                    _filesInfo[filename].Clear();
 
-            try {
-                var obj = new FileTagObject {
-                    CorrectionNumber = nb,
-                    CorrectionDate = date,
-                    CorrectionDecription = text,
-                    ApplicationName = nomAppli,
-                    ApplicationVersion = version,
-                    WorkPackage = chantier,
-                    BugId = jira
-                };
-                // filename exists
-                if (Contains(filename)) {
-                    if (filename == LastTag || filename == DefaultTag)
-                        _filesInfo[filename].Clear();
-
-                    // modif number exists
-                    _filesInfo[filename].RemoveAll(o => o.CorrectionNumber == nb);
-                    _filesInfo[filename].Add(obj);
-                } else {
-                    _filesInfo.Add(filename, new List<FileTagObject> { obj });
-                }
-                Export();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while setting a file info!");
+                // modif number exists
+                _filesInfo[filename].RemoveAll(o => o.CorrectionNumber == nb);
+                _filesInfo[filename].Add(obj);
+            } else {
+                _filesInfo.Add(filename, new List<FileTagObject> { obj });
             }
+        }
+
+        public static bool DeleteFileTags(string filename, string correctionNumber) {
+            if (string.IsNullOrWhiteSpace(filename) || filename == LastTag || filename == DefaultTag || !Contains(filename))
+                return false;
+
+            _filesInfo[filename].RemoveAll(o => o.CorrectionNumber == correctionNumber);
+            if (_filesInfo[filename].Count == 0)
+                _filesInfo.Remove(filename);
+            return true;
         }
 
         #endregion

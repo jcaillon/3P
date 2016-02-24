@@ -83,6 +83,8 @@ namespace YamuiFramework.Controls {
 
             _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
             _thumbRectangle = new Rectangle(Width - 10 + 2, 2, 6, Height - 4);
+
+            ContentPanel.Resize += (sender, args) => OnResizedContentPanel();
         }
 
         #endregion

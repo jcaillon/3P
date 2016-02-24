@@ -58,7 +58,7 @@ namespace _3PA.MainFeatures.Appli {
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", null, new SetEnvironment()),
                     new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
-                    //new YamuiSecMenu("COMPILATION PATH", null, new template()),
+                    new YamuiSecMenu("COMPILATION PATH", null, new SetCompilationPath()),
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
                 //new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
                     new YamuiSecMenu("MISC", "misc", new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
                     new YamuiSecMenu("OTHERS", "others", new OthersPage()),
-                    new YamuiSecMenu("SHARED/EXPORTED CONFIG", "exportedconf", new ExportPage()),
+                    new YamuiSecMenu("SHARED/EXPORTED CONFIG", PageNames.ExportShareConf.ToString(), new ExportPage()),
                 })
             });
 
@@ -224,7 +224,7 @@ namespace _3PA.MainFeatures.Appli {
     internal enum PageNames {
         Welcome,
         FileInfo,
-        OptionsProfile
-
+        OptionsProfile,
+        ExportShareConf,
     }
 }

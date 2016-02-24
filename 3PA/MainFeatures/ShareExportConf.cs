@@ -1,8 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
+using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
@@ -32,43 +37,68 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "List of snippets",
-                            HandledItem = Config.FileSnippets
-                        },
-                        new ConfLine {
                             Label = "Compilation path rerouting",
-                            HandledItem = Config.FileCompilPath
-                        },
-                        new ConfLine {
-                            Label = "Start prolint procedure",
-                            HandledItem = Config.FileStartProlint,
+                            HandledItem = Config.FileCompilPath,
+                            OnImport = line => ProCompilePath.Import(),
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileCompilPath, DataResources.CompilationPath),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
                         },
                         new ConfLine {
-                            Label = "4GL keywords list",
-                            HandledItem = Config.FileKeywordsList
-                        },
-                        new ConfLine {
-                            Label = "4GL keywords help list",
-                            HandledItem = Config.FileKeywordsHelp
-                        },
-                        new ConfLine {
-                            Label = "4GL abbreviations list",
-                            HandledItem = Config.FileAbbrev
-                        },
-                        new ConfLine {
-                            Label = "Templates for new files",
-                            HandledItem = Config.FolderTemplates,
-                            IsDir = true,
+                            Label = "Start prolint procedure",
+                            HandledItem = Config.FileStartProlint,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint),
+                            OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
-                        }
+                        },
+                        //new ConfLine {
+                        //    Label = "4GL keywords list",
+                        //    HandledItem = Config.FileKeywordsList,
+                        //    OnImport = ImportKeywords,
+                        //    OnDelete = DoDelete,
+                        //    OnFetch = DoFetch,
+                        //    OnPush = DoPush
+                        //},
+                        //new ConfLine {
+                        //    Label = "4GL keywords help list",
+                        //    HandledItem = Config.FileKeywordsHelp,
+                        //    OnImport = ImportKeywords,
+                        //    OnDelete = DoDelete,
+                        //    OnFetch = DoFetch,
+                        //    OnPush = DoPush
+                        //},
+                        //new ConfLine {
+                        //    Label = "4GL abbreviations list",
+                        //    HandledItem = Config.FileAbbrev,
+                        //    OnImport = ImportKeywords,
+                        //    OnDelete = DoDelete,
+                        //    OnFetch = DoFetch,
+                        //    OnPush = DoPush
+                        //},
+                        //new ConfLine {
+                        //    Label = "List of snippets",
+                        //    HandledItem = Config.FileSnippets
+                        //},
+                        //new ConfLine {
+                        //    Label = "Templates for new files",
+                        //    HandledItem = Config.FolderTemplates,
+                        //    IsDir = true,
+                        //    OnFetch = DoFetch,
+                        //    OnPush = DoPush
+                        //}
                     };
                 }
                 return _list;
             }
+        }
+
+        /// <summary>
+        /// Lors du startup de notepad++, on met à jour la conf avec le shared folder
+        /// </summary>
+        public static void OnNotepadStart() {
+            Task.Factory.StartNew(() => { UpdateList(Config.Instance.SharedConfFolder); });
         }
 
         /// <summary>
@@ -83,8 +113,13 @@ namespace _3PA.MainFeatures {
                     Config.Instance.SharedConfFolder = distantShareDirectory;
                 }
 
+                StringBuilder updateMessage = new StringBuilder();
+
                 // update each line of the list
                 foreach (var confLine in List) {
+                    // read the autoupdate status from the config
+                    confLine.AutoUpdate = Config.Instance.AutoUpdateConfList.ContainsFast(confLine.Label);
+
                     confLine.LocalPath = confLine.HandledItem;
                     confLine.DistantPath = sharedDirOk ? Path.Combine(distantShareDirectory, confLine.HandledItem.Replace(Npp.GetConfigDir(), "").Trim('\\')) : "";
 
@@ -130,7 +165,35 @@ namespace _3PA.MainFeatures {
                         }
 
                     }
+
+                    // if the difference between the two dates are small, correct it (it sometimes happen, even when the files are strictly identical)
+                    if (Math.Abs(confLine.LocalTime.Subtract(confLine.DistantTime).TotalSeconds) < 2) {
+                        confLine.LocalTime = confLine.DistantTime;
+                    }
+
+                    confLine.NeedUpdate = confLine.OnFetch != null && ((confLine.DistantExists && !confLine.LocalExists) || (confLine.LocalExists && confLine.DistantExists && confLine.DistantTime.CompareTo(confLine.LocalTime) > 0));
+
+                    // the line needs to be autoupdated
+                    if (confLine.AutoUpdate && confLine.NeedUpdate && confLine.OnFetch != null) {
+                        confLine.OnFetch(confLine);
+                        confLine.LocalTime = confLine.DistantTime;
+                        confLine.LocalNbFiles = confLine.DistantNbFiles;
+                        confLine.NeedUpdate = false;
+
+                        if (updateMessage.Length == 0)
+                            updateMessage.Append("The following configuration files have been updated from the shared folder:<br><br>");
+                        updateMessage.Append("<div><b>" + confLine.Label + "</b></div>");
+                    }
                 }
+
+                if (updateMessage.Length > 0) {
+                    updateMessage.Append("<br><br><i>You can set which config file gets auto-updated in <a href='go'>the option page</a></i>");
+                    UserCommunication.Notify(updateMessage.ToString(), MessageImg.MsgInfo, "Update notification", "Configuration auto-update", args => {
+                        Appli.Appli.GoToPage(PageNames.ExportShareConf);
+                        args.Handled = true;
+                    }, 10);
+                }
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while fetching info on the distant files");
             }
@@ -169,6 +232,13 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        private static void ImportKeywords(ConfLine conf) {
+            Keywords.Import();
+            // Update autocompletion
+            AutoComplete.FillStaticItems(false);
+            AutoComplete.ParseCurrentDocument();
+        }
+
         #endregion
 
     }
@@ -178,10 +248,25 @@ namespace _3PA.MainFeatures {
     internal class ConfLine {
         public string HandledItem { get; set; }
         public string Label { get; set; }
+        /// <summary>
+        /// Action executed when the user click on delete
+        /// </summary>
         public Action<ConfLine> OnDelete { get; set; }
+        /// <summary>
+        /// Action executed when the user click on export
+        /// </summary>
         public Action<ConfLine> OnExport { get; set; }
+        /// <summary>
+        /// Action executed when the user click on fetch
+        /// </summary>
         public Action<ConfLine> OnFetch { get; set; }
+        /// <summary>
+        /// Action executed when the user click on push
+        /// </summary>
         public Action<ConfLine> OnPush { get; set; }
+        /// <summary>
+        /// Action executed when the user click on import
+        /// </summary>
         public Action<ConfLine> OnImport { get; set; }
         public DateTime LocalTime { get; set; }
         public DateTime DistantTime { get; set; }
@@ -189,9 +274,17 @@ namespace _3PA.MainFeatures {
         public bool DistantExists { get; set; }
         public string LocalPath { get; set; }
         public string DistantPath { get; set; }
+        /// <summary>
+        /// true if the conf line is actually a directory
+        /// </summary>
         public bool IsDir { get; set; }
         public int LocalNbFiles { get; set; }
         public int DistantNbFiles { get; set; }
+        /// <summary>
+        /// true if the user checked this option to automatically update this conf line
+        /// </summary>
+        public bool AutoUpdate { get; set; }
+        public bool NeedUpdate { get; set; }
     }
 
     #endregion

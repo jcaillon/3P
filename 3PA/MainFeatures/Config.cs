@@ -370,6 +370,10 @@ namespace _3PA.MainFeatures {
 
             // SHARED CONF
             public string SharedConfFolder = "";
+            // a list of Label corresponding to confLine(s) that are auto-updated
+            public string AutoUpdateConfList = "";
+            // a list of folders used in the shared/exported conf
+            public string SharedConfHistoric = "";
 
             // TAGS
             public string TagModifOpener = "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";

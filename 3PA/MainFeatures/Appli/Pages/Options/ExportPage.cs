@@ -19,11 +19,15 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
+using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Images;
 using _3PA.Lib;
@@ -57,11 +61,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             btHistoric.BackGrndImage = ImageResources.Historic;
             btHistoric.ButtonPressed += BtHistoricOnButtonPressed;
             tooltip.SetToolTip(btHistoric, "Click to <b>browse</b> the previous folders");
-            btHistoric.Hide();
 
             btRefresh.BackGrndImage = ImageResources.refresh;
             btRefresh.ButtonPressed += BtRefreshOnButtonPressed;
-            tooltip.SetToolTip(btRefresh, "Click to <b>update</b> the local and distant file status");
+            tooltip.SetToolTip(btRefresh, "Click to <b>refresh</b> the local and distant file status");
 
             btDownloadAll.BackGrndImage = ImageResources.DownloadAll;
             btDownloadAll.ButtonPressed += BtDownloadAllOnButtonPressed;
@@ -69,7 +72,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             tooltip.SetToolTip(btDownloadAll, "Click to <b>fetch</b> all the distant versions newer than the local versions");
 
             fl_directory.Text = Config.Instance.SharedConfFolder;
-            fl_directory.TextChanged += FlDirectoryOnTextChanged;
 
             // build the interface
             var iNbLine = 0;
@@ -93,11 +95,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Location = new Point(215, yPos + 2),
                     Size = new Size(26, 15),
                     Text = @" ",
-                    Checked = (bool)true,
+                    Checked = confLine.AutoUpdate,
                     Tag = confLine
                 };
-                //toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
+                toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
                 dockedPanel.ContentPanel.Controls.Add(toggleControl);
+                tooltip.SetToolTip(toggleControl, "Check this option to automatically fetch the most recent version of the file<br>This update occurs on notepad++ startup and each time you refresh the local/distant file status");
 
                 // do we have an update available?
                 var strButton = new YamuiImageButton {
@@ -278,10 +281,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             RefreshList();
         }
 
-        private void FlDirectoryOnTextChanged(object sender, EventArgs eventArgs) {
-            RefreshList();
-        }
-
         private void OpenFileOnButtonPressed(object sender, EventArgs eventArgs) {
             var conf = (ConfLine)((YamuiImageButton)sender).Tag;
             var pathToOpen = ((YamuiImageButton) sender).Name.StartsWith("bto_") ? conf.LocalPath : conf.DistantPath;
@@ -306,12 +305,43 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             RefreshList();
         }
 
+        private void ToggleControlOnCheckedChanged(object sender, EventArgs eventArgs) {
+            var cb = (YamuiCheckBox)sender;
+            var confLine = (ConfLine)cb.Tag;
+            var list = Config.Instance.AutoUpdateConfList.Split(',').ToList();
+            if (cb.Checked) {
+                list.Add(confLine.Label);
+            } else {
+                if (list.Exists(s => s.Equals(confLine.Label)))
+                    list.Remove(confLine.Label);
+            }
+            Config.Instance.AutoUpdateConfList = string.Join(",", list);
+        }
+
+
         private void BtRefreshOnButtonPressed(object sender, EventArgs eventArgs) {
             RefreshList();
         }
 
+        /// <summary>
+        /// The historic button shows a menu that allows the user to select a previously selected folders
+        /// </summary>
         private void BtHistoricOnButtonPressed(object sender, EventArgs eventArgs) {
-            
+            List<YamuiMenuItem> itemList = new List<YamuiMenuItem>();
+            foreach (var path in Config.Instance.SharedConfHistoric.Split(',')) {
+                if (!string.IsNullOrEmpty(path)) {
+                    itemList.Add(new YamuiMenuItem {ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
+                        BeginInvoke((Action) delegate {
+                            fl_directory.Text = path;
+                            RefreshList();
+                        });
+                    }});
+                }
+            }
+            if (itemList.Count > 0) {
+                var menu = new YamuiMenu(Cursor.Position, itemList);
+                menu.Show();
+            }
         }
 
         private void BtOpenOnButtonPressed(object sender, EventArgs eventArgs) {
@@ -338,10 +368,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             _isCheckingDistant = true;
             Task.Factory.StartNew(() => {
                 try {
+                    bool sharedDirOk = !string.IsNullOrEmpty(fl_directory.Text) && Directory.Exists(fl_directory.Text);
+
+                    // we save the directory in the historic
+                    if (sharedDirOk) {
+                        var list = Config.Instance.SharedConfHistoric.Split(',').ToList();
+                        if (list.Exists(s => s.Equals(fl_directory.Text)))
+                            list.Remove(fl_directory.Text);
+                        list.Insert(0, fl_directory.Text);
+                        if (list.Count > 2)
+                            list.RemoveAt(list.Count - 1);
+                        Config.Instance.SharedConfHistoric = string.Join(",", list);
+                    }
+
                     // update the info we have on each item of the list
                     ShareExportConf.UpdateList(fl_directory.Text);
-
-                    bool sharedDirOk = !string.IsNullOrEmpty(fl_directory.Text) && Directory.Exists(fl_directory.Text);
 
                     // invoke on ui thread
                     BeginInvoke((Action)delegate {
@@ -382,8 +423,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                             ((HtmlLabel)dockedPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
 
                             // maj button
-                            bool majNeeded = (confLine.DistantExists && !confLine.LocalExists) || (confLine.LocalExists && confLine.DistantExists && confLine.DistantTime.CompareTo(confLine.LocalTime) > 0);
-                            if (confLine.OnFetch != null && majNeeded) {
+                            if (confLine.NeedUpdate) {
                                 nbMaj++;
                                 ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
                             } else

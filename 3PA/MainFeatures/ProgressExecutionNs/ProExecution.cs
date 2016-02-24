@@ -194,20 +194,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             string fileToExecute;
             if (executionType == ExecutionType.Database) {
                 // for database extraction, we need to copy the DumpDatabase program
-                TempFullFilePathToExecute = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
+                TempFullFilePathToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                 File.WriteAllBytes(Path.Combine(TempDir, TempFullFilePathToExecute), DataResources.DumpDatabase);
                 fileToExecute = TempFullFilePathToExecute;
 
             } else {
                 // Copy Npp.Text to a temp file to be executed
-                TempFullFilePathToExecute = Path.Combine(TempDir, "tmp" + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
+                TempFullFilePathToExecute = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + (Path.GetExtension(FullFilePathToExecute) ?? ".p"));
                 File.WriteAllText(TempFullFilePathToExecute, Npp.Text, Encoding.Default);
                 fileToExecute = TempFullFilePathToExecute;
                 
 
                 if (executionType == ExecutionType.Prolint) {
                     // prolint, we need to copy the StartProlint program
-                    fileToExecute = DateTime.Now.ToString("yyMMdd_HHmmssfff_") + ".p";
+                    fileToExecute = "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                     ProlintOutputPath = Path.Combine(TempDir, "prolint.log");
                     programContent = new StringBuilder();
                     programContent.AppendLine("&SCOPED-DEFINE PathFileToProlint " + TempFullFilePathToExecute.ProgressQuoter());

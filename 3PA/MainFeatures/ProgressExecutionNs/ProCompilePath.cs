@@ -44,32 +44,37 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             ConfLoader.ForEachLine(Config.FileCompilPath, new byte[0], Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 4) {
-                    _compilationPathList.Add(new CompilationPathItem {
-                        ApplicationFilter = items[0],
-                        EnvLetterFilter = items[1],
-                        InputPathPattern = items[2].Trim().Replace('/', '\\'),
-                        OutputPathAppend = items[3].Trim().Replace('/', '\\')
-                    });
+                    if (!string.IsNullOrEmpty(items[2].Trim()) && !string.IsNullOrEmpty(items[3].Trim())) { 
+                        _compilationPathList.Add(new CompilationPathItem {
+                            ApplicationFilter = items[0],
+                            EnvLetterFilter = items[1],
+                            InputPathPattern = items[2].Trim().Replace('/', '\\'),
+                            OutputPathAppend = items[3].Trim().Replace('/', '\\')
+                        });
+                    }
                 }
             });
-        }
-
-        /// <summary>
-        /// Export this class info to a config file 
-        /// </summary>
-        public static void Export() {
-            //if (_keywords.Count == 0) return;
-            //var strBuilder = new StringBuilder();
-            //foreach (var keyword in _keywords)
-            //{
-            //    strBuilder.AppendLine(keyword.DisplayText + "\t" + keyword.SubString + "\t" + ((keyword.Flag.HasFlag(ParseFlag.Reserved)) ? "1" : "0") + "\t" + keyword.Ranking);
-            //}
-            //File.WriteAllText(_filePath, strBuilder.ToString());
         }
 
         #endregion
 
         #region public methods
+
+        /// <summary>
+        /// returns a string containing an html representation of the compilation path table
+        /// </summary>
+        public static string BuildHtmlTable() {
+            var strBuilder = new StringBuilder();
+
+            strBuilder.Append("<table width='100%;'>");
+            strBuilder.Append("<tr><td class='CompPathHead'>Application</td><td class='CompPathHead'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' width='40%'>Output path append</td></tr>");
+            foreach (var compLine in _compilationPathList) {
+                strBuilder.Append("<tr><td>" + compLine.ApplicationFilter + "</td><td>" + compLine.EnvLetterFilter + "</td><td>" + compLine.InputPathPattern + "</td><td>" + compLine.OutputPathAppend + "</td></tr>");
+            }
+            strBuilder.Append("</table>");
+
+            return strBuilder.ToString();
+        }
 
         /// <summary>
         /// This method returns the correct compilation directory for the given source path,
@@ -84,8 +89,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             var baseComp = ProEnvironment.Current.BaseCompilationPath;
 
             // filter and sort the list
-            var filteredList = _compilationPathList.Where(Predicate).ToList();
-            filteredList.Sort(Comparison);
+            var filteredList = _compilationPathList.Where(FilterPredicate).ToList();
+            filteredList.Sort(SortComparison);
 
             // try to find the first item that match the input pattern
             if (filteredList.Count > 0) {
@@ -101,7 +106,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             return baseComp;
         }
 
-        private static int Comparison(CompilationPathItem compilationPathItem, CompilationPathItem pathItem) {
+        private static int SortComparison(CompilationPathItem compilationPathItem, CompilationPathItem pathItem) {
             int compare = string.IsNullOrWhiteSpace(compilationPathItem.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(pathItem.ApplicationFilter));
             if (compare != 0) return compare;
 
@@ -109,7 +114,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             return compare;
         }
 
-        private static bool Predicate(CompilationPathItem compilationPathItem) {
+        private static bool FilterPredicate(CompilationPathItem compilationPathItem) {
             // returns true if (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
             return string.IsNullOrWhiteSpace(compilationPathItem.ApplicationFilter) || (compilationPathItem.ApplicationFilter.EqualsCi(Config.Instance.EnvName) && (compilationPathItem.EnvLetterFilter.EqualsCi(Config.Instance.EnvSuffix) || string.IsNullOrWhiteSpace(compilationPathItem.EnvLetterFilter)));
         }

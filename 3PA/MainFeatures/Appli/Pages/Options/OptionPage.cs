@@ -225,6 +225,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @" "
                 });
                 yPos += 10;
+                dockedPanel.ContentPanel.Height = yPos;
             }
             Height = yPos;
         }

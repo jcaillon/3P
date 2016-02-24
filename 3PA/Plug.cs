@@ -146,6 +146,9 @@ namespace _3PA {
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
+            // Try to update the configuration from the distant shared folder
+            ShareExportConf.OnNotepadStart();
+
             // everything else can be async
             //Task.Factory.StartNew(() => {
 
@@ -182,6 +185,9 @@ namespace _3PA {
         /// </summary>
         internal static void OnNppShutdown() {
             try {
+                // export modified conf
+                FileTag.Export();
+
                 // uninstall hooks
                 UninstallHooks();
 

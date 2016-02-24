@@ -134,6 +134,20 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
+        /// File write all bytes
+        /// </summary>
+        public static bool FileWriteAllBytes(string path, byte[] bytes) {
+            try {
+                File.WriteAllBytes(path, bytes);
+                return true;
+            } catch (Exception e) {
+                ErrorHandler.Log(e.Message);
+                UserCommunication.Notify("Unable to create the following file :<br>" + Config.FileStartProlint + "<br>Please check the rights of this folder", MessageImg.MsgError, "Creation file failed", "Prolint interface program");
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Creates the directory
         /// </summary>
         public static bool CreateDirectory(string path) {

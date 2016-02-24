@@ -20,8 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows.Forms;
 using YamuiFramework.Controls;
+using _3PA.Images;
 using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
@@ -29,8 +29,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region fields
 
-        public FileTagObject LocFileTagObject;
-        public string Filename;
+        private FileTagObject _locFileTagObject;
+        private string _filename;
 
         #endregion
 
@@ -40,18 +40,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // add event handlers
-            yamuiComboBox1.SelectedIndexChanged += SelectedIndexChanged;
-            KeyDown += OnKeyDown;
-            btok.ButtonPressed += BtokOnButtonPressed;
-            btcancel.ButtonPressed += BtcancelOnButtonPressed;
-            btclear.ButtonPressed += BtclearOnButtonPressed;
-            btdefault.ButtonPressed += BtdefaultOnButtonPressed;
-            bttoday.ButtonPressed += BttodayOnButtonPressed;
-            bttoday.Click += (sender, args) => { yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy"); };
-            yamuiComboBox1.KeyDown += YamuiComboBox1OnKeyDown;
+            cb_info.SelectedIndexChanged += SelectedIndexChanged;
+            bt_ok.ButtonPressed += BtOkOnButtonPressed;
+            bt_cancel.ButtonPressed += BtCancelOnButtonPressed;
+            bt_clear.ButtonPressed += BtClearOnButtonPressed;
+            bt_default.ButtonPressed += BtDefaultOnButtonPressed;
+            bt_today.ButtonPressed += BtTodayOnButtonPressed;
+            bt_today.Click += (sender, args) => { fl_correctionDate.Text = DateTime.Now.ToString("dd/MM/yy"); };
+            bt_delete.ButtonPressed += BtDeleteOnButtonPressed;
+
+            toolTip.SetToolTip(bt_today, "Click to automatically fill the <i>date</i> field");
 
             // register to the document changed event
             Plug.OnDocumentChangedEnd += OnShow;
+
+            // changing a value set the state to not saved
+            fl_appliName.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_appliVersion.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_bugId.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_workPackage.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_correctionNb.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_correctionDate.TextChanged += YamuiTextBoxOnTextChanged;
+            fl_correctionDesc.TextChanged += YamuiTextBoxOnTextChanged;
         }
 
         #endregion
@@ -71,89 +81,96 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// Call this method to update the content of the form according to the current document
         /// </summary>
         public void UpdateInfo() {
-            Filename = Npp.GetCurrentFileName();
+            _filename = Npp.GetCurrentFileName();
 
             // populate combobox
-            var lst = new List<ItemCombo> {
+            var list = new List<ItemCombo> {
                 new ItemCombo {DisplayText = "Last info", Nb = FileTag.LastTag},
                 new ItemCombo {DisplayText = "Default info", Nb = FileTag.DefaultTag}
             };
-            yamuiComboBox1.DisplayMember = "DisplayText";
-            yamuiComboBox1.ValueMember = "Nb";
 
-            if (FileTag.Contains(Filename)) {
+            cb_info.DisplayMember = "DisplayText";
+            cb_info.ValueMember = "Nb";
 
-                var lastItem = FileTag.GetLastFileTag(Filename);
-                LocFileTagObject = lastItem;
+            if (FileTag.Contains(_filename)) {
+                var currentList = FileTag.GetFileTagsList(_filename);
+                _locFileTagObject = currentList.Last();
 
                 var i = 2;
                 var lastItemPos = 0;
-                foreach (var fileTag in FileTag.GetFileTagsList(Filename)) {
-                    lst.Add(new ItemCombo { DisplayText = Filename + " #" + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber });
-                    if (fileTag.CorrectionNumber == lastItem.CorrectionNumber) lastItemPos = i;
+                foreach (var fileTag in currentList.OrderByDescending(o => o.CorrectionNumber).ToList()) {
+                    list.Add(new ItemCombo { DisplayText = _filename + " # " + fileTag.CorrectionNumber, Nb = fileTag.CorrectionNumber });
+                    if (fileTag.CorrectionNumber.Equals(_locFileTagObject.CorrectionNumber))
+                        lastItemPos = i;
                     i++;
                 }
 
-                yamuiComboBox1.DataSource = lst;
-                yamuiComboBox1.SelectedIndex = lastItemPos;
+                cb_info.DataSource = list;
+                cb_info.SelectedIndex = lastItemPos;
 
-                var itemsOfFile = FileTag.GetFileTagsList(Filename);
-                lst.AddRange(itemsOfFile.Select(item => new ItemCombo { DisplayText = item.CorrectionNumber, Nb = item.CorrectionNumber }));
             } else {
-                LocFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
+                _locFileTagObject = FileTag.GetFileTags(Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? FileTag.DefaultTag : FileTag.LastTag, "");
 
-                yamuiComboBox1.DataSource = lst;
-                yamuiComboBox1.SelectedIndex = Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? 1 : 0;
+                cb_info.DataSource = list;
+                cb_info.SelectedIndex = Config.Instance.UseDefaultValuesInsteadOfLastValuesInEditTags ? 1 : 0;
             }
-            UpdateView();
 
-            ActiveControl = yamuiComboBox1;
+            UpdateView();
+            ActiveControl = cb_info;
         }
 
         #endregion
 
         #region private event
 
-        private void YamuiComboBox1OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
-            if (keyEventArgs.KeyCode == Keys.Escape) {
-                UpdateView();
-                Appli.ToggleView();
-            } else if (keyEventArgs.KeyCode == Keys.Enter) {
-                Save(Filename);
-                Save(FileTag.LastTag);
-                FileTag.Export();
-                Appli.ToggleView();
-            }
-        }
-
-        private void BtokOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            Save(Filename);
+        private void BtOkOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            Save(_filename);
             Save(FileTag.LastTag);
+            UpdateInfo();
             FileTag.Export();
             Appli.ToggleView();
         }
 
-        private void BtcancelOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            UpdateView();
+        private void BtCancelOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            UpdateInfo();
             Appli.ToggleView();
         }
 
-        private void BtclearOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            LocFileTagObject = new FileTagObject();
+        private void BtClearOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            _locFileTagObject = new FileTagObject();
             UpdateView();
+            FileHasChanged();
         }
 
-        private void BtdefaultOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+        private void BtDefaultOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Save(FileTag.DefaultTag);
         }
 
-        private void BttodayOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            yamuiTextBox6.Text = DateTime.Now.ToString("dd/MM/yy");
+        private void BtTodayOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            fl_correctionDate.Text = DateTime.Now.ToString("dd/MM/yy");
         }
 
-        private void OnKeyDown(object sender, KeyEventArgs keyEventArgs) {
-            if (keyEventArgs.KeyCode == Keys.Escape)
-                Appli.ToggleView();
+        private void BtDeleteOnButtonPressed(object sender, EventArgs eventArgs) {
+            if (FileTag.DeleteFileTags(_filename, _locFileTagObject.CorrectionNumber))
+                UpdateInfo();
+        }
+
+        /// <summary>
+        /// called when the user changes the value of the combo box
+        /// </summary>
+        private void SelectedIndexChanged(object sender, EventArgs e) {
+            var val = cb_info.SelectedValue.ToString();
+            if (val.Equals(FileTag.LastTag) || val.Equals(FileTag.DefaultTag))
+                _locFileTagObject = FileTag.GetFileTags(val, "");
+            else {
+                _locFileTagObject = FileTag.GetFileTags(_filename, val);
+                FileTag.SetFileTags(_filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
+            }
+            UpdateView();
+        }
+
+        private void YamuiTextBoxOnTextChanged(object sender, EventArgs eventArgs) {
+            FileHasChanged();
         }
 
         #endregion
@@ -166,41 +183,45 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="filename"></param>
         private void Save(string filename) {
             UpdateModel();
-            FileTag.SetFileTags(filename, LocFileTagObject.CorrectionNumber, LocFileTagObject.CorrectionDate, LocFileTagObject.CorrectionDecription, LocFileTagObject.ApplicationName, LocFileTagObject.ApplicationVersion, LocFileTagObject.WorkPackage, LocFileTagObject.BugId);
+            FileTag.SetFileTags(filename, _locFileTagObject.CorrectionNumber, _locFileTagObject.CorrectionDate, _locFileTagObject.CorrectionDecription, _locFileTagObject.ApplicationName, _locFileTagObject.ApplicationVersion, _locFileTagObject.WorkPackage, _locFileTagObject.BugId);
         }
 
         private void UpdateModel() {
-            LocFileTagObject.ApplicationName = yamuiTextBox1.Text;
-            LocFileTagObject.ApplicationVersion = yamuiTextBox2.Text;
-            LocFileTagObject.WorkPackage = yamuiTextBox4.Text;
-            LocFileTagObject.BugId = yamuiTextBox3.Text;
-            LocFileTagObject.CorrectionNumber = yamuiTextBox5.Text;
-            LocFileTagObject.CorrectionDecription = yamuiTextBox7.Text.Replace("\r", "");
-            LocFileTagObject.CorrectionDate = yamuiTextBox6.Text;
+            _locFileTagObject.ApplicationName = fl_appliName.Text;
+            _locFileTagObject.ApplicationVersion = fl_appliVersion.Text;
+            _locFileTagObject.WorkPackage = fl_workPackage.Text;
+            _locFileTagObject.BugId = fl_bugId.Text;
+            _locFileTagObject.CorrectionNumber = fl_correctionNb.Text;
+            _locFileTagObject.CorrectionDecription = fl_correctionDesc.Text.Replace("\r", "");
+            _locFileTagObject.CorrectionDate = fl_correctionDate.Text;
         }
 
         private void UpdateView() {
-            yamuiTextBox1.Text = LocFileTagObject.ApplicationName;
-            yamuiTextBox2.Text = LocFileTagObject.ApplicationVersion;
-            yamuiTextBox4.Text = LocFileTagObject.WorkPackage;
-            yamuiTextBox3.Text = LocFileTagObject.BugId;
-            yamuiTextBox5.Text = LocFileTagObject.CorrectionNumber;
-            yamuiTextBox7.Lines = (LocFileTagObject.CorrectionDecription ?? "").Split('\n');
-            yamuiTextBox6.Text = LocFileTagObject.CorrectionDate;
+            fl_appliName.Text = _locFileTagObject.ApplicationName;
+            fl_appliVersion.Text = _locFileTagObject.ApplicationVersion;
+            fl_workPackage.Text = _locFileTagObject.WorkPackage;
+            fl_bugId.Text = _locFileTagObject.BugId;
+            fl_correctionNb.Text = _locFileTagObject.CorrectionNumber;
+            fl_correctionDesc.Lines = (_locFileTagObject.CorrectionDecription ?? "").Split('\n');
+            fl_correctionDate.Text = _locFileTagObject.CorrectionDate;
+
+            lb_FileName.Text = @"<b>" + Npp.GetCurrentFileName() + @"</b>";
+            var val = cb_info.SelectedValue.ToString();
+            if (!val.Equals(FileTag.LastTag) && !val.Equals(FileTag.DefaultTag)) {
+                lb_SaveState.Text = @"<b>Info saved</b>";
+                bt_SaveState.BackGrndImage = ImageResources.Ok;
+                bt_SaveState.Invalidate();
+                toolTip.SetToolTip(bt_SaveState, "3P has access to info on the current file");
+            } else {
+                FileHasChanged();
+            }
         }
 
-        /// <summary>
-        /// called when the user changes the value of the combo box
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SelectedIndexChanged(object sender, EventArgs e) {
-            var val = yamuiComboBox1.SelectedValue.ToString();
-            if (val == FileTag.LastTag || val == FileTag.DefaultTag)
-                LocFileTagObject = FileTag.GetFileTags(val, "");
-            else
-                LocFileTagObject = FileTag.GetFileTags(Filename, val);
-            UpdateView();
+        private void FileHasChanged() {
+            lb_SaveState.Text = @"<b>The visible info are not saved!</b>";
+            bt_SaveState.BackGrndImage = ImageResources.NotSaved;
+            bt_SaveState.Invalidate();
+            toolTip.SetToolTip(bt_SaveState, "The info you see on this screen are not yet saved<br>and thus, not known to 3P<br>Click the <i>save and close</i> button");
         }
 
         #endregion

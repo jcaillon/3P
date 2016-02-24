@@ -73,6 +73,16 @@ namespace _3PA.Data {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Byte[].
         /// </summary>
+        internal static byte[] CompilationPath {
+            get {
+                object obj = ResourceManager.GetObject("CompilationPath", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Byte[].
+        /// </summary>
         internal static byte[] DumpDatabase {
             get {
                 object obj = ResourceManager.GetObject("DumpDatabase", resourceCulture);
