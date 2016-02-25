@@ -438,6 +438,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
+    <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />

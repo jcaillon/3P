@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (SetFileInfo.cs) is part of 3P.
+// This file (SetCompilationPath.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,13 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.IO;
 using YamuiFramework.Controls;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
@@ -44,11 +42,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             bt_import.ButtonPressed += BtImportOnButtonPressed;
             bt_modify.ButtonPressed += BtModifyOnButtonPressed;
-
-            UpdateList();
         }
 
         #endregion
+
+        #region On show
+
+        public override void OnShow() {
+            UpdateList();
+            base.OnShow();
+        }
+
+        #endregion
+
 
         #region private methods
 
@@ -57,6 +63,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             html_list.Text = ProCompilePath.BuildHtmlTable();
 
             dockedPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
+            dockedPanel.OnResizedContentPanel();
         }
 
         #endregion

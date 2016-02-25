@@ -68,16 +68,18 @@ namespace _3PA.MainFeatures {
         public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
             if (_anchorForm != null) {
                 // get npp's screen
-                _anchorForm.BeginInvoke((Action) delegate {
-                    var toastNotification = new YamuiNotifications(
-                        HtmlHandler.FormatMessage(html, imageType, title, subTitle)
-                        , duration, width, Npp.GetNppScreen());
-                    if (clickHandler != null)
-                        toastNotification.LinkClicked += (sender, args) => clickHandler(args);
-                    else
-                        toastNotification.LinkClicked += Utils.OpenPathClickHandler;
-                    toastNotification.Show();
-                });
+                if (_anchorForm.IsHandleCreated) {
+                    _anchorForm.BeginInvoke((Action) delegate {
+                        var toastNotification = new YamuiNotifications(
+                            HtmlHandler.FormatMessage(html, imageType, title, subTitle)
+                            , duration, width, Npp.GetNppScreen());
+                        if (clickHandler != null)
+                            toastNotification.LinkClicked += (sender, args) => clickHandler(args);
+                        else
+                            toastNotification.LinkClicked += Utils.OpenPathClickHandler;
+                        toastNotification.Show();
+                    });
+                }
             }
         }
 
@@ -104,9 +106,11 @@ namespace _3PA.MainFeatures {
                 if (waitResponse) {
                     clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, true, clickHandler);
                 } else {
-                    _anchorForm.BeginInvoke((Action) delegate {
-                        clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler);
-                    });
+                    if (_anchorForm.IsHandleCreated) {
+                        _anchorForm.BeginInvoke((Action) delegate {
+                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle), buttons, false, clickHandler);
+                        });
+                    }
                 }
             }
             return clickedButton;

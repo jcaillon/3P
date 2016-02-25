@@ -69,6 +69,30 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         private string _filterByText = "";
 
+        /// <summary>
+        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
+        /// </summary>
+        public bool Refreshing {
+            get { return _refreshing; }
+            set {
+                _refreshing = value;
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        if (_refreshing) {
+                            buttonRefresh.BackGrndImage = ImageResources.refreshing;
+                            buttonRefresh.Invalidate();
+                            toolTipHtml.SetToolTip(buttonRefresh, "The tree is being refreshed, please wait");
+                        } else {
+                            buttonRefresh.BackGrndImage = ImageResources.refresh;
+                            buttonRefresh.Invalidate();
+                            toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
+                        }
+                    });
+                }
+            }
+        }
+        private bool _refreshing;
+
         private bool _isFiltering;
 
         /// <summary>
@@ -96,7 +120,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private OLVColumn _displayText;
         private FastObjectListView _fastOlv;
-
+        
         #endregion
 
         #region constructor
@@ -363,6 +387,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     UpdateTreeDataAction();
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
+                } finally {
+                    Refreshing = false;
                 }
             });
         }
@@ -479,14 +505,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
             }
 
             // invoke on ui thread
-            BeginInvoke((Action) delegate {
-                try {
-                    TotalItems = _initialObjectsList.Count;
-                    ApplyFilter();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while displaying the code explorer content");
-                }
-            });
+            if (IsHandleCreated) {
+                BeginInvoke((Action) delegate {
+                    try {
+                        TotalItems = _initialObjectsList.Count;
+                        ApplyFilter();
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error while displaying the code explorer content");
+                    }
+                });
+            }
         }
 
         #endregion
@@ -695,6 +723,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         private void buttonRefresh_Click(object sender, EventArgs e) {
+            if (Refreshing) {
+                return;
+            }
+            _fastOlv.Refresh();
+            _fastOlv.BuildList();
+            Refresh();
             RefreshParserAndCodeExplorer();
 
             Npp.GrabFocus();

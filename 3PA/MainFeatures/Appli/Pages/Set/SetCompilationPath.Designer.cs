@@ -28,13 +28,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetCompilationPath));
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.bt_import = new YamuiFramework.Controls.YamuiButton();
+            this.bt_modify = new YamuiFramework.Controls.YamuiButton();
+            this.html_list = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.html_list = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.bt_modify = new YamuiFramework.Controls.YamuiButton();
-            this.bt_import = new YamuiFramework.Controls.YamuiButton();
             this.dockedPanel.ContentPanel.SuspendLayout();
             this.dockedPanel.SuspendLayout();
             this.SuspendLayout();
@@ -61,11 +61,40 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             // 
+            // bt_import
+            // 
+            this.bt_import.Location = new System.Drawing.Point(111, 102);
+            this.bt_import.Name = "bt_import";
+            this.bt_import.Size = new System.Drawing.Size(101, 23);
+            this.bt_import.TabIndex = 56;
+            this.bt_import.Text = "Read changes";
+            // 
+            // bt_modify
+            // 
+            this.bt_modify.Location = new System.Drawing.Point(30, 102);
+            this.bt_modify.Name = "bt_modify";
+            this.bt_modify.Size = new System.Drawing.Size(75, 23);
+            this.bt_modify.TabIndex = 55;
+            this.bt_modify.Text = "Modify";
+            // 
+            // html_list
+            // 
+            this.html_list.AutoSize = false;
+            this.html_list.AutoSizeHeightOnly = true;
+            this.html_list.BackColor = System.Drawing.Color.Transparent;
+            this.html_list.BaseStylesheet = null;
+            this.html_list.Location = new System.Drawing.Point(30, 179);
+            this.html_list.Name = "html_list";
+            this.html_list.Size = new System.Drawing.Size(682, 15);
+            this.html_list.TabIndex = 54;
+            this.html_list.TabStop = false;
+            this.html_list.Text = " ?";
+            // 
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
             this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel2.Location = new System.Drawing.Point(0, 140);
+            this.yamuiLabel2.Location = new System.Drawing.Point(0, 146);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";
             this.yamuiLabel2.Size = new System.Drawing.Size(298, 19);
@@ -106,35 +135,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
             this.toolTip.TooltipCssClass = "htmltooltip";
-            // 
-            // html_list
-            // 
-            this.html_list.AutoSize = false;
-            this.html_list.AutoSizeHeightOnly = true;
-            this.html_list.BackColor = System.Drawing.Color.Transparent;
-            this.html_list.BaseStylesheet = null;
-            this.html_list.Location = new System.Drawing.Point(30, 173);
-            this.html_list.Name = "html_list";
-            this.html_list.Size = new System.Drawing.Size(682, 15);
-            this.html_list.TabIndex = 54;
-            this.html_list.TabStop = false;
-            this.html_list.Text = " ?";
-            // 
-            // bt_modify
-            // 
-            this.bt_modify.Location = new System.Drawing.Point(30, 96);
-            this.bt_modify.Name = "bt_modify";
-            this.bt_modify.Size = new System.Drawing.Size(75, 23);
-            this.bt_modify.TabIndex = 55;
-            this.bt_modify.Text = "Modify";
-            // 
-            // bt_import
-            // 
-            this.bt_import.Location = new System.Drawing.Point(111, 96);
-            this.bt_import.Name = "bt_import";
-            this.bt_import.Size = new System.Drawing.Size(101, 23);
-            this.bt_import.TabIndex = 56;
-            this.bt_import.Text = "Read changes";
             // 
             // SetCompilationPath
             // 

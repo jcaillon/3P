@@ -150,107 +150,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-        #region Find file
-
-        /// <summary>
-        /// tries to find the specified file in the current propath
-        /// returns an empty string if nothing is found, otherwise returns the fullpath of the file
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        public static string FindFileInPropath(string fileName) {
-            try {
-                foreach (var item in Current.GetProPathDirList) {
-                    var curPath = Path.Combine(item, fileName);
-                    if (File.Exists(curPath))
-                        return curPath;
-                }
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
-            }
-            return "";
-        }
-
-        /// <summary>
-        /// Find a file in the propath and if it can't find it, in the env base local path
-        /// </summary>
-        /// <param name="fileToFind"></param>
-        /// <returns></returns>
-        public static string FindFirstFileInEnv(string fileToFind) {
-            var propathRes = FindFileInPropath(fileToFind);
-            if (!string.IsNullOrEmpty(propathRes)) return propathRes;
-            if (!Directory.Exists(Current.BaseLocalPath)) return "";
-            try {
-                var fileList = new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileToFind, SearchOption.AllDirectories);
-                return fileList.Any() ? fileList.Select(fileInfo => fileInfo.FullName).First() : "";
-            } catch (Exception x) {
-                if (!(x is DirectoryNotFoundException))
-                    ErrorHandler.DirtyLog(x);
-            }
-            return "";
-        }
-
-        /// <summary>
-        /// Returns the fullpath of all the files with the name fileName present either
-        /// in the propath (they would be on top of the list) or in the environnement local
-        /// base path
-        /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
-        /// fileName to match several files
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="extensions"></param>
-        /// <returns></returns>
-        public static List<string> FindLocalFiles(string fileName, string extensions = null) {
-            var output = new List<string>();
-            try {
-                if (string.IsNullOrEmpty(extensions)) {
-                    var propathFile = FindFileInPropath((fileName));
-                    if (!string.IsNullOrEmpty(propathFile))
-                        output.Add(propathFile);
-                } else {
-                    output.AddRange(extensions.Split(',').Select(s => FindFileInPropath(fileName + s)).Where(s => !string.IsNullOrEmpty(s)).ToList());
-                }
-                output.AddRange(FindAllFiles(Current.BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
-            } catch (Exception x) {
-                if (!(x is DirectoryNotFoundException))
-                    ErrorHandler.DirtyLog(x);
-            }
-            return output;
-        }
-
-        /// <summary>
-        /// Returns the fullpath of all files names fileName in the dirPath
-        /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
-        /// fileName to match several files
-        /// </summary>
-        /// <param name="dirPath"></param>
-        /// <param name="fileName"></param>
-        /// <param name="extensions"></param>
-        /// <returns></returns>
-        public static List<string> FindAllFiles(string dirPath, string fileName, string extensions = null) {
-            var output = new List<string>();
-            if (!Directory.Exists(dirPath))
-                return output;
-            try {
-                if (string.IsNullOrEmpty(extensions)) {
-                    output.AddRange(new DirectoryInfo(Current.BaseLocalPath).GetFiles(fileName, SearchOption.AllDirectories).Select(info => info.FullName).ToList());
-                } else {
-                    var dirInfo = new DirectoryInfo(Current.BaseLocalPath);
-                    var filesInfo = extensions.Split(',').SelectMany(s => dirInfo.GetFiles(fileName + s, SearchOption.AllDirectories));
-                    output.AddRange(filesInfo.Select(info => info.FullName));
-                }
-            } catch (Exception x) {
-                if (!(x is DirectoryNotFoundException))
-                    ErrorHandler.DirtyLog(x);
-            }
-            return output;
-        }
-
-        #endregion
-
         #region ProEnvironmentObject
 
         public class ProEnvironmentObject {
+
+            #region Exported fields
 
             // prim key
             public string Name = "";
@@ -278,13 +182,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string ProwinPath = "";
             public string LogFilePath = "";
 
-            /// <summary>
+            #endregion
 
             #region Handle pf
 
+            /// <summary>
             /// Returns the currently selected database's .pf for the current environment
             /// </summary>
-            /// <returns></returns>
             public string GetPfPath() {
                 return DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase) ?
                     DbConnectionInfo[Config.Instance.EnvDatabase] :
@@ -312,6 +216,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #region Get ProPath
 
             /// <summary>
+            /// Call this method to compute the propath again the next time we call GetProPathFileList
+            /// </summary>
+            public void ReComputeProPath() {
+                _currentProPathDirList = null;
+                _savedFoundFiles.Clear();
+            }
+
+            /// <summary>
             /// List the existing directories as they are listed in the .ini file + in the custom ProPath field,
             /// this returns an exhaustive list of EXISTING folders and .pl files and ensure each item is present only once
             /// It also take into account the relative path, using the BaseLocalPath (or currentFileFolder)
@@ -320,7 +232,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 get {
                     if (_currentProPathDirList == null) {
                         var curFilePath = Npp.GetCurrentFileFolder();
-                        var basePath = Directory.Exists(BaseLocalPath) ? BaseLocalPath : curFilePath;
+                        var basePath = (!string.IsNullOrEmpty(BaseLocalPath) && Directory.Exists(BaseLocalPath)) ? BaseLocalPath : curFilePath;
 
                         // get full propath (from .ini + from user custom field + current file folder)
                         IniReader ini = new IniReader(IniPath);
@@ -351,11 +263,111 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             private List<string> _currentProPathDirList;
 
+            #endregion
+
+            #region Find file
+
             /// <summary>
-            /// Call this method to compute the propath again the next time we call GetProPathFileList
+            /// Finding files in directories is actually a task that can take a long time,
+            /// if we get a match, we save it here so the next time we look for the file,
+            /// we already know its full path
             /// </summary>
-            public void ReComputeProPath() {
-                _currentProPathDirList = null;
+            private Dictionary<string, string> _savedFoundFiles = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+
+            /// <summary>
+            /// tries to find the specified file in the current propath
+            /// returns an empty string if nothing is found, otherwise returns the fullpath of the file
+            /// </summary>
+            public string FindFirstFileInPropath(string fileName) {
+
+                if (_savedFoundFiles.ContainsKey(fileName))
+                    return _savedFoundFiles[fileName];
+
+                try {
+                    foreach (var item in Current.GetProPathDirList) {
+                        var curPath = Path.Combine(item, fileName);
+                        if (File.Exists(curPath)) {
+                            _savedFoundFiles.Add(fileName, curPath);
+                            return curPath;
+                        }
+                    }
+                } catch (Exception) {
+                    // The path in invalid, well we don't really care
+                }
+                return "";
+            }
+            
+            /// <summary>
+            /// Find a file in the propath and if it can't find it, in the env base local path
+            /// </summary>
+            public string FindFirstFileInEnv(string fileToFind) {
+
+                if (_savedFoundFiles.ContainsKey(fileToFind))
+                    return _savedFoundFiles[fileToFind];
+
+                // find in propath
+                var propathRes = FindFirstFileInPropath(fileToFind);
+                if (!string.IsNullOrEmpty(propathRes))
+                    return propathRes;
+                
+                // find in local files
+                var listFilePathLoc = FindAllFiles(Current.BaseLocalPath, fileToFind);
+                if (listFilePathLoc.Any()) {
+                    _savedFoundFiles.Add(fileToFind, listFilePathLoc.First());
+                    return listFilePathLoc.First();
+                }
+
+                return "";
+            }
+
+            /// <summary>
+            /// Returns the fullpath of all the files with the name fileName present either
+            /// in the propath (they would be on top of the list) or in the environnement local
+            /// base path
+            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
+            /// fileName to match several files
+            /// </summary>
+            public List<string> FindFiles(string fileName, string extensions = null) {
+                var output = new List<string>();
+                try {
+                    // search in propath
+                    if (string.IsNullOrEmpty(extensions)) {
+                        var propathFile = FindFirstFileInPropath((fileName));
+                        if (!string.IsNullOrEmpty(propathFile))
+                            output.Add(propathFile);
+                    } else {
+                        output.AddRange(extensions.Split(',').Select(s => FindFirstFileInPropath(fileName + s)).Where(s => !string.IsNullOrEmpty(s)).ToList());
+                    }
+
+                    // search in local folder, do not add the same file twice
+                    output.AddRange(FindAllFiles(Current.BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
+                } catch (Exception x) {
+                    if (!(x is DirectoryNotFoundException))
+                        ErrorHandler.DirtyLog(x);
+                }
+                return output;
+            }
+
+            /// <summary>
+            /// Returns the fullpath of all files named fileName in the dirPath
+            /// You can specify comma separated extensions (ex: .p,.w,.i,.lst) and specifiy an extension-less
+            /// fileName to match several files
+            /// </summary>
+            public List<string> FindAllFiles(string dirPath, string fileName, string extensions = null) {
+                var output = new List<string>();
+                try {
+                    if (!Directory.Exists(dirPath))
+                        return output;
+                    if (string.IsNullOrEmpty(extensions)) {
+                        output.AddRange(Directory.EnumerateFiles(dirPath, fileName, SearchOption.AllDirectories));
+                    } else {
+                        output.AddRange(extensions.Split(',').SelectMany(s => Directory.EnumerateFiles(dirPath, fileName + s, SearchOption.AllDirectories)).ToList());
+                    }
+                } catch (Exception x) {
+                    if (!(x is DirectoryNotFoundException))
+                        ErrorHandler.DirtyLog(x);
+                }
+                return output;
             }
 
             #endregion

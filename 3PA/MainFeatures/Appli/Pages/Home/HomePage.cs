@@ -52,5 +52,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         #endregion
 
+        public override void OnShow() {
+            ActiveControl = html;
+            base.OnShow();
+        }
     }
 }

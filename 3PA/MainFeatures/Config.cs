@@ -71,19 +71,19 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df";
+            public string GlobalProgressExtension = ".p,.i,.w,.t,.d,.lst,.df,.cls";
 
             [Display(Name = "Compilable files extension list",
                 Description = "A comma separated list of progress file extensions that can be compiled : <br>It is used to check if you can compile / check syntax / execute the current file",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string GlobalCompilableExtension = ".p,.w,.t";
+            public string GlobalCompilableExtension = ".p,.w,.t,.cls";
 
             [Display(Name = "Npp openable extension",
                 Description = "A comma separated list of file extensions, describes the type of files that should be opened with notepad++ from the file explorer<br>If a file is associated to npp in the shell, it will also be opened with npp, no worries!",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string GlobalNppOpenableExtension = ".txt,.boi";
+            public string GlobalNppOpenableExtension = ".txt,.boi,.sh,.cmd";
 
             [Display(Name = "Path to the help file",
                 Description = "Should point to the progress documentation file (lgrfeng.chm)",

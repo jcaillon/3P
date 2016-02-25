@@ -190,7 +190,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     break;
                 case "trigger":
                     if (split.Length > 1) {
-                        var fullPath = ProEnvironment.FindFirstFileInEnv(split[1]);
+                        var fullPath = ProEnvironment.Current.FindFirstFileInEnv(split[1]);
                         Npp.Goto(string.IsNullOrEmpty(fullPath) ? split[1] : fullPath);
                         Close();
                     }

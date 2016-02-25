@@ -44,13 +44,22 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             ConfLoader.ForEachLine(Config.FileCompilPath, new byte[0], Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 4) {
-                    if (!string.IsNullOrEmpty(items[2].Trim()) && !string.IsNullOrEmpty(items[3].Trim())) { 
-                        _compilationPathList.Add(new CompilationPathItem {
-                            ApplicationFilter = items[0],
-                            EnvLetterFilter = items[1],
-                            InputPathPattern = items[2].Trim().Replace('/', '\\'),
-                            OutputPathAppend = items[3].Trim().Replace('/', '\\')
-                        });
+                    var obj = new CompilationPathItem {
+                        ApplicationFilter = items[0].Trim(),
+                        EnvLetterFilter = items[1].Trim(),
+                        InputPathPattern = items[2].Trim().Replace('/', '\\'),
+                        OutputPathAppend = items[3].Trim().Replace('/', '\\')
+                    };
+                    if (!string.IsNullOrEmpty(obj.InputPathPattern) && !string.IsNullOrEmpty(obj.OutputPathAppend)) {
+                        if (obj.ApplicationFilter.Equals("*"))
+                            obj.ApplicationFilter = "";
+                        if (obj.EnvLetterFilter.Equals("*"))
+                            obj.EnvLetterFilter = "";
+                        if (!_compilationPathList.Exists(item => 
+                            item.ApplicationFilter.Equals(obj.ApplicationFilter) &&
+                            item.EnvLetterFilter.Equals(obj.EnvLetterFilter) &&
+                            item.InputPathPattern.Equals(obj.InputPathPattern)))
+                        _compilationPathList.Add(obj);
                     }
                 }
             });
@@ -66,12 +75,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public static string BuildHtmlTable() {
             var strBuilder = new StringBuilder();
 
-            strBuilder.Append("<table width='100%;'>");
-            strBuilder.Append("<tr><td class='CompPathHead'>Application</td><td class='CompPathHead'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' width='40%'>Output path append</td></tr>");
-            foreach (var compLine in _compilationPathList) {
-                strBuilder.Append("<tr><td>" + compLine.ApplicationFilter + "</td><td>" + compLine.EnvLetterFilter + "</td><td>" + compLine.InputPathPattern + "</td><td>" + compLine.OutputPathAppend + "</td></tr>");
+            if (_compilationPathList.Any()) {
+
+                strBuilder.Append("<table width='100%;'>");
+                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' width='40%'>Append to output path</td></tr>");
+                foreach (var compLine in _compilationPathList) {
+                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.ApplicationFilter) ? "*" : compLine.ApplicationFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.EnvLetterFilter) ? "*" : compLine.EnvLetterFilter) + "</td><td>" + (compLine.InputPathPattern.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.InputPathPattern.Length - 40) : compLine.InputPathPattern) + "</td><td>" + (compLine.OutputPathAppend.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.OutputPathAppend.Length - 40) : compLine.OutputPathAppend) + "</td></tr>");
+                }
+                strBuilder.Append("</table>");
+
+            } else {
+                strBuilder.Append("<b>Start by clicking the <i>modify</i> button</b><br>When you are done modying the file, save it and click the <i>read changes</i> button to import it into 3P");
             }
-            strBuilder.Append("</table>");
 
             return strBuilder.ToString();
         }

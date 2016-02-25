@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (OptionPage.cs) is part of 3P.
+// This file (ExportPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -331,10 +330,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             foreach (var path in Config.Instance.SharedConfHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
                     itemList.Add(new YamuiMenuItem {ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
-                        BeginInvoke((Action) delegate {
-                            fl_directory.Text = path;
-                            RefreshList();
-                        });
+                        if (IsHandleCreated) {
+                            BeginInvoke((Action) delegate {
+                                fl_directory.Text = path;
+                                RefreshList();
+                            });
+                        }
                     }});
                 }
             }
@@ -385,59 +386,62 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     ShareExportConf.UpdateList(fl_directory.Text);
 
                     // invoke on ui thread
-                    BeginInvoke((Action)delegate {
-                        var nbMaj = 0;
-                        var iNbLine = 0;
+                    if (IsHandleCreated) {
+                        BeginInvoke((Action) delegate {
+                            var nbMaj = 0;
+                            var iNbLine = 0;
 
-                        foreach (var confLine in ShareExportConf.List) {
+                            foreach (var confLine in ShareExportConf.List) {
 
-                            // open
-                            ((YamuiImageButton)dockedPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
+                                // open
+                                ((YamuiImageButton) dockedPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
 
-                            // import
-                            ((YamuiImageButton)dockedPanel.ContentPanel.Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
+                                // import
+                                ((YamuiImageButton) dockedPanel.ContentPanel.Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
 
-                            if (confLine.IsDir) {
-                                // hide export/delete
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Hide();
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Hide();
-                            } else {
-                                // export
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
+                                if (confLine.IsDir) {
+                                    // hide export/delete
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Hide();
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Hide();
+                                } else {
+                                    // export
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
 
-                                // delete
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
+                                    // delete
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
+                                }
+
+                                // distant open
+                                ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
+
+                                // fetch
+                                ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+
+                                // push
+                                ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+
+                                ((HtmlLabel) dockedPanel.ContentPanel.Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
+
+                                ((HtmlLabel) dockedPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
+
+                                // maj button
+                                if (confLine.NeedUpdate) {
+                                    nbMaj++;
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
+                                } else
+                                    ((YamuiImageButton) dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Hide();
+
+                                iNbLine++;
                             }
 
-                            // distant open
-                            ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
 
-                            // fetch
-                            ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
-
-                            // push
-                            ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
-
-                            ((HtmlLabel)dockedPanel.ContentPanel.Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
-
-                            ((HtmlLabel)dockedPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
-
-                            // maj button
-                            if (confLine.NeedUpdate) {
-                                nbMaj++;
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
-                            } else
-                                ((YamuiImageButton)dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Hide();
-
-                            iNbLine++;
-                        }
-
-                        // download all button
-                        if (nbMaj > 0)
-                            btDownloadAll.Show();
-                        else
-                            btDownloadAll.Hide();
-                    });
+                            // download all button
+                            if (nbMaj > 0)
+                                btDownloadAll.Show();
+                            else
+                                btDownloadAll.Hide();
+                        });
+                    }
 
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while fetching distant files");

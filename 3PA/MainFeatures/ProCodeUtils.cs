@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures {
 
             // last resort, try to find a matching file in the propath
             // first look in the propath
-            var fullPaths = ProEnvironment.FindLocalFiles(curWord, Config.Instance.GlobalProgressExtension);
+            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.GlobalProgressExtension);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");

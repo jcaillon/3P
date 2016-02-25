@@ -131,7 +131,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // set the image list to use for the keywords
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData)rowObject;
-                return GetTypeImageFromStr(x.Type.ToString());
+                return GetTypeImageFromStr((x != null) ? x.Type.ToString() : "Error");
             };
 
             // overlay of empty list :

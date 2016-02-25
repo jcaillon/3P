@@ -158,7 +158,7 @@ namespace _3PA {
             ProCompilePath.Import();
 
             // initialize the list of objects of the autocompletion form
-            AutoComplete.FillStaticItems(true);
+            AutoComplete.RefreshStaticItems(true);
 
             // init database info
             DataBase.Init();

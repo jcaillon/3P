@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             Read(Path.Combine(Config.FolderDatabase, Config.Instance.EnvLastDbInfoUsed));
 
             // Update autocompletion
-            AutoComplete.FillStaticItems(false);
+            AutoComplete.RefreshStaticItems();
             AutoComplete.ParseCurrentDocument();
         }
 

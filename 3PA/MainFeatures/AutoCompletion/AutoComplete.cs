@@ -76,13 +76,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static bool _needToSetActiveTypes;
 
         // contains the list of items currently display in the form
-        private static List<CompletionData> _currentItems;
+        private static List<CompletionData> _currentItems = new List<CompletionData>();
 
         // contains the whole list of items (minus the fields) to show, can be updated through FillItems() method
-        private static List<CompletionData> _savedAllItems;
+        private static List<CompletionData> _savedAllItems = new List<CompletionData>();
 
         // contains the list of items that do not depend on the current file (keywords, database, snippets)
-        private static List<CompletionData> _staticItems;
+        private static List<CompletionData> _staticItems = new List<CompletionData>();
 
         // holds the display order of the CompletionType
         private static List<int> _completionTypePriority;
@@ -224,6 +224,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         /// <summary>
         /// Called when the _parserTimer ticks
+        /// refresh the Items list with all the static items
+        /// as well as the dynamic items found by the parser
         /// </summary>
         private static void ParseCurrentDocumentTick() {
             Task.Factory.StartNew(() => {
@@ -237,7 +239,31 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                         //------------
                         //var watch = Stopwatch.StartNew();
-                        FillItems();
+
+                        CodeExplorer.CodeExplorer.Refreshing = true;
+
+                        // init with static items
+                        _savedAllItems.Clear();
+                        _savedAllItems = _staticItems.ToList();
+
+                        do {
+
+                            // we launch the parser, that will fill the DynamicItems
+                            ParserHandler.RefreshParser();
+
+                            // we had the dynamic items to the list
+                            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList());
+
+                            // update autocompletion
+                            CurrentTypeOfList = TypeOfList.Reset;
+                            if (IsVisible)
+                                UpdateAutocompletion();
+
+                        } while (!ParserHandler.LastParsedFilePath.Equals(Plug.CurrentFilePath));
+
+                        // ## for the code explorer we ask it to update itself ##
+                        CodeExplorer.CodeExplorer.UpdateCodeExplorer();
+
                         //watch.Stop();
                         //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
                         //------------
@@ -252,42 +278,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// this method should be called to refresh the Items list with all the static items
-        /// as well as the dynamic items found by the parser
-        /// </summary>
-        private static void FillItems() {
-            if (_savedAllItems == null)
-                _savedAllItems = new List<CompletionData>();
-
-            // init with static items
-            _savedAllItems.Clear();
-            _savedAllItems = _staticItems.ToList();
-
-            // we launch the parser, that will fill the DynamicItems
-            ParserHandler.RefreshParser();
-
-            // we had the dynamic items to the list
-            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList());
-
-            // update autocompletion
-            CurrentTypeOfList = TypeOfList.Reset;
-            if (IsVisible)
-                UpdateAutocompletion();
-
-            // ## for the code explorer we update it from here ##
-            CodeExplorer.CodeExplorer.UpdateCodeExplorer();
-        }
-
-        /// <summary>
         /// this method should be called at the plugin's start and when we change the current database
+        /// It refreshed the "static" items of the autocompletion : keywords, snippets, databases, tables, sequences
         /// </summary>
-        public static void FillStaticItems(bool initializing) {
-            if (_savedAllItems == null)
-                _savedAllItems = new List<CompletionData>();
+        public static void RefreshStaticItems(bool initializing = false) {
 
-            // creates the static items list
-            if (_staticItems == null)
-                _staticItems = new List<CompletionData>();
             _staticItems.Clear();
             _staticItems = Keywords.GetList().ToList();
             _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
@@ -429,7 +424,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="keyword"></param>
         private static void ShowSuggestionList(string keyword) {
-            if (_currentItems == null) {
+            if (_currentItems.Count == 0) {
                 Close();
                 return;
             }

@@ -392,50 +392,43 @@ namespace _3PA.MainFeatures.FileExplorer {
             _initialObjectsList.Sort(new FilesSortingClass());
 
             // invoke on ui thread
-            BeginInvoke((Action)delegate {
-                try {
-                    // delete any existing buttons
-                    if (_displayedTypes != null) {
-                        foreach (var selectorButton in _displayedTypes) {
-                            selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                            if (Controls.Contains(selectorButton.Value))
-                                Controls.Remove(selectorButton.Value);
-                            selectorButton.Value.Dispose();
+            if (IsHandleCreated) {
+                BeginInvoke((Action) delegate {
+                    try {
+                        // delete any existing buttons
+                        if (_displayedTypes != null) {
+                            foreach (var selectorButton in _displayedTypes) {
+                                selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                                if (Controls.Contains(selectorButton.Value))
+                                    Controls.Remove(selectorButton.Value);
+                                selectorButton.Value.Dispose();
+                            }
                         }
-                    }
 
-                    // get distinct types, create a button for each
-                    int xPos = 59;
-                    int yPox = Height - 28;
-                    _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
-                    foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                        var but = new SelectorButton<FileType> {
-                            BackGrndImage = GetImageFromStr(type + "Type"),
-                            Activated = true,
-                            Size = new Size(24, 24),
-                            TabStop = false,
-                            Location = new Point(xPos, yPox),
-                            Type = type,
-                            AcceptsRightClick = true,
-                            Anchor = AnchorStyles.Left | AnchorStyles.Bottom
-                        };
-                        but.ButtonPressed += HandleTypeClick;
-                        toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                        _displayedTypes.Add(type, but);
-                        Controls.Add(but);
-                        xPos += but.Width;
-                    }
+                        // get distinct types, create a button for each
+                        int xPos = 59;
+                        int yPox = Height - 28;
+                        _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
+                        foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
+                            var but = new SelectorButton<FileType> {BackGrndImage = GetImageFromStr(type + "Type"), Activated = true, Size = new Size(24, 24), TabStop = false, Location = new Point(xPos, yPox), Type = type, AcceptsRightClick = true, Anchor = AnchorStyles.Left | AnchorStyles.Bottom};
+                            but.ButtonPressed += HandleTypeClick;
+                            toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                            _displayedTypes.Add(type, but);
+                            Controls.Add(but);
+                            xPos += but.Width;
+                        }
 
-                    // label for the number of items
-                    TotalItems = _initialObjectsList.Count;
-                    nbitems.Text = TotalItems + StrItems;
-                    fastOLV.SetObjects(_initialObjectsList);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while showing the list of files");
-                } finally {
-                    _isListing = false;
-                }
-            });
+                        // label for the number of items
+                        TotalItems = _initialObjectsList.Count;
+                        nbitems.Text = TotalItems + StrItems;
+                        fastOLV.SetObjects(_initialObjectsList);
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error while showing the list of files");
+                    } finally {
+                        _isListing = false;
+                    }
+                });
+            }
             ApplyFilter();
         }
 

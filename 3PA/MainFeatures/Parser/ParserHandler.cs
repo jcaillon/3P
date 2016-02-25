@@ -49,6 +49,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
 
+        public static string LastParsedFilePath;
+
         private static Parser _ablParser;
 
         private static ParserVisitor _parserVisitor;
@@ -110,15 +112,15 @@ namespace _3PA.MainFeatures.Parser {
             try {
                 // if this document is in the Saved parsed visitors, we remove it because it might change so
                 // we want to re parse it later
-                var currentFilePath = Plug.CurrentFilePath;
-                if (SavedParserVisitors.ContainsKey(currentFilePath))
-                    SavedParserVisitors.Remove(currentFilePath);
+                LastParsedFilePath = Plug.CurrentFilePath;
+                if (SavedParserVisitors.ContainsKey(LastParsedFilePath))
+                    SavedParserVisitors.Remove(LastParsedFilePath);
 
                 // Parse the document
-                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, currentFilePath, null, true);
+                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, LastParsedFilePath, null, true);
 
                 // visitor
-                _parserVisitor = new ParserVisitor(true, Path.GetFileName(currentFilePath), _ablParser.GetLineInfo);
+                _parserVisitor = new ParserVisitor(true, Path.GetFileName(LastParsedFilePath), _ablParser.GetLineInfo);
                 _ablParser.Accept(_parserVisitor);
 
                 // correct the internal/external type of run statements :

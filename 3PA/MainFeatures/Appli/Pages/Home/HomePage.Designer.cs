@@ -65,7 +65,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.html.Name = "html";
             this.html.Size = new System.Drawing.Size(744, 15);
             this.html.TabIndex = 3;
-            this.html.TabStop = false;
             this.html.Text = "home HTML";
             // 
             // yamuiTextBox1
@@ -76,7 +75,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.yamuiTextBox1.CustomForeColor = System.Drawing.Color.Empty;
             this.yamuiTextBox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.yamuiTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox1.Location = new System.Drawing.Point(3, 3);
+            this.yamuiTextBox1.Location = new System.Drawing.Point(702, 559);
             this.yamuiTextBox1.Name = "yamuiTextBox1";
             this.yamuiTextBox1.Size = new System.Drawing.Size(20, 24);
             this.yamuiTextBox1.TabIndex = 4;

@@ -83,8 +83,6 @@ namespace YamuiFramework.Controls {
 
             _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
             _thumbRectangle = new Rectangle(Width - 10 + 2, 2, 6, Height - 4);
-
-            ContentPanel.Resize += (sender, args) => OnResizedContentPanel();
         }
 
         #endregion
@@ -233,7 +231,7 @@ namespace YamuiFramework.Controls {
             base.OnResize(e);
         }
 
-        private void OnResizedContentPanel() {
+        public void OnResizedContentPanel() {
 
             // if the content is not too tall, no need to display the scroll bars
             if (_contentPanel.Height <= Height) {

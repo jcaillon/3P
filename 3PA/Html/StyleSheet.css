@@ -160,7 +160,8 @@ a:link {
 .CompPathHead {
     font-weight: bold;
     font-size: 13px;
-    padding-right: 20px;
+    padding-bottom: 20px;
+    padding-top: 20px;
 }
 
 

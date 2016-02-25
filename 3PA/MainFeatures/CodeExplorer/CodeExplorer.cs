@@ -65,6 +65,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
             Form.Refresh();
         }
 
+        /// <summary>
+        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
+        /// </summary>
+        public static bool Refreshing {
+            set {
+                if (Form == null) return;
+                Form.Refreshing = value;
+            }
+        }
+
         #endregion
 
         #region DockableDialog
