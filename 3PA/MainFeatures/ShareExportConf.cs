@@ -31,6 +31,7 @@ using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
 
+
     internal static class ShareExportConf {
 
         #region fields
@@ -42,7 +43,8 @@ namespace _3PA.MainFeatures {
         #region public
 
         /// <summary>
-        /// List of the exported/shared items
+        /// List of the exported/shared items, this allows to automatically build the Export/share config page
+        /// Each item corresponds to a line
         /// </summary>
         public static List<ConfLine> List {
             get {
@@ -195,6 +197,7 @@ namespace _3PA.MainFeatures {
                     // the line needs to be autoupdated
                     if (confLine.AutoUpdate && confLine.NeedUpdate && confLine.OnFetch != null) {
                         confLine.OnFetch(confLine);
+                        confLine.LocalExists = true;
                         confLine.LocalTime = confLine.DistantTime;
                         confLine.LocalNbFiles = confLine.DistantNbFiles;
                         confLine.NeedUpdate = false;

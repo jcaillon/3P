@@ -528,6 +528,7 @@
     <None Include="Images\Menu\Autocompletion.png" />
     <None Include="Images\Menu\CheckCode.png" />
     <None Include="Images\Menu\CompileCode.png" />
+    <Content Include="Images\Menu\Dictionary.png" />
     <Content Include="Images\Menu\ShowOptions.png" />
     <Content Include="Images\NotifAndMessages\MsgDebug.png" />
     <Content Include="Images\NotifAndMessages\MsgError.png" />

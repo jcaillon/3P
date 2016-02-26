@@ -22,20 +22,28 @@
 
 /* if ExecutionType not already defined */
 &IF DEFINED(ExecutionType) = 0 &THEN 
-    &SCOPED-DEFINE ExecutionType "RUN"
-    &SCOPED-DEFINE ToExecute "StartProlint.p"
-    &SCOPED-DEFINE TempDir "D:\Repo\3P\3PA\Data\Progress"
-    &SCOPED-DEFINE LogFile "P:\outils\cnaftools\prolint\3P-addon\derp.log"
-    &SCOPED-DEFINE LstFile ""
+    &SCOPED-DEFINE ExecutionType "DICTIONNARY"
+    &SCOPED-DEFINE ToExecute ""
+    &SCOPED-DEFINE LogFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.log"
     &SCOPED-DEFINE ExtractDbOutputPath ""
     &SCOPED-DEFINE propathToUse ""
     &SCOPED-DEFINE ExtraPf ""
     &SCOPED-DEFINE BasePfPath ""
     &SCOPED-DEFINE BaseIniPath ""
+    &SCOPED-DEFINE ToCompileListFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.d"
+    &SCOPED-DEFINE CreateFileIfConnectFails "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fail.log"
 &ENDIF
 
 
 /* ***************************  Definitions  ************************** */
+
+DEFINE TEMP-TABLE tt_files NO-UNDO
+    FIELD inPath AS CHARACTER /* Path to the file to compile */
+    FIELD outFolder AS CHARACTER /* Path to the output folder */
+    FIELD outLstPath AS CHARACTER /* Path to the *.lst file */
+    .
+
+DEFINE STREAM str_reader.
 DEFINE STREAM str_logout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 
@@ -58,32 +66,34 @@ PUT STREAM str_logout UNFORMATTED "".
 IF {&BaseIniPath} > "" THEN DO:
     LOAD {&BaseIniPath} NO-ERROR.
     fi_output_last_error().
-
+    
     USE {&BaseIniPath} NO-ERROR.
     fi_output_last_error().
 END.
 
 /* correct the PROPATH here */
-ASSIGN PROPATH = {&TempDir} + (IF {&propathToUse} > "" THEN "," + {&propathToUse} ELSE "").
+ASSIGN PROPATH = {&propathToUse}.
 
 /* connect the database(s) */
 IF {&BasePfPath} > "" THEN DO:
-    CONNECT -pf {&BasePfPath} -ct 2 NO-ERROR.
-    fi_output_last_error().
+    CONNECT -pf {&BasePfPath} -ct 1 NO-ERROR.
+    IF fi_output_last_error() THEN DO:
+        RUN pi_createFileIfConnectFails.
+        fi_output_last_error().
+    END.
 END.
 
 IF {&ExtraPf} > "" THEN DO:
-    CONNECT VALUE({&ExtraPf}) -ct 2 NO-ERROR.
-    fi_output_last_error().
+    CONNECT VALUE({&ExtraPf}) -ct 1 NO-ERROR.
+    IF fi_output_last_error() THEN DO:
+        RUN pi_createFileIfConnectFails.
+        fi_output_last_error().
+    END.
 END.
 
 CASE {&ExecutionType} :
-    WHEN "CHECKSYNTAX" OR
-    WHEN "COMPILE" THEN DO:
-        COMPILE VALUE({&ToExecute})
-            SAVE=TRUE INTO VALUE({&TempDir})
-            DEBUG-LIST VALUE({&LstFile})
-            NO-ERROR.
+    WHEN "CHECKSYNTAX" THEN DO:
+        COMPILE VALUE({&ToExecute}) NO-ERROR.
         fi_output_last_error().
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
@@ -100,6 +110,10 @@ CASE {&ExecutionType} :
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().
     END.
+    WHEN "COMPILE" THEN DO.
+        RUN pi_compileList NO-ERROR.
+        fi_output_last_error().
+    END.
     WHEN "DATABASE" THEN DO:
         /* for each connected db */
         REPEAT gi_db = 1 TO NUM-DBS:
@@ -107,6 +121,17 @@ CASE {&ExecutionType} :
             RUN {&ToExecute} (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)).
             DELETE ALIAS "DICTDB".
         END.
+    END.
+    WHEN "DICTIONARY" THEN DO:
+        RUN _dict.p.
+    END.
+    WHEN "APPBUILDER" THEN DO:
+        IF SEARCH("adeuib/_uibmain.p") <> ? THEN
+            RUN adeuib/_uibmain.p (INPUT {&ToExecute}).
+        ELSE IF SEARCH("_ab.p") <> ? THEN
+            RUN _ab.p.
+        ELSE
+            MESSAGE "Couldn't find adeuib/_uibmain.p!".
     END.
 END CASE.
 
@@ -126,9 +151,7 @@ QUIT.
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
-        DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
-        DEFINE VARIABLE li_ret AS INTEGER NO-UNDO.
 
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
             ASSIGN li_i = 1.
@@ -185,6 +208,50 @@ QUIT.
     END PROCEDURE.
 &ENDIF
 
+PROCEDURE pi_compileList:
+/*------------------------------------------------------------------------------
+  Purpose: allows to compile all the files listed in the {&ToCompileListFile}
+  Parameters:  <none>
+------------------------------------------------------------------------------*/
+
+    ASSIGN FILE-INFO:FILE-NAME = {&ToCompileListFile}.
+    IF FILE-INFO:FILE-TYPE = ? OR NOT FILE-INFO:FILE-TYPE MATCHES("*R*") OR NOT FILE-INFO:FILE-TYPE MATCHES("*F*") THEN
+        RETURN ERROR "Can't find the list of files to compile".
+
+    /* read the file into a temptable */
+    EMPTY TEMP-TABLE tt_files.
+    INPUT STREAM str_reader FROM VALUE({&ToCompileListFile}).
+    REPEAT:
+        CREATE tt_files.
+        IMPORT STREAM str_reader tt_files.
+        RELEASE tt_files.
+    END.
+    INPUT STREAM str_reader CLOSE.
+    
+    /* loop through all the files */
+    FOR EACH tt_files:
+        IF tt_files.inPath > "" THEN DO: 
+            COMPILE VALUE(tt_files.inPath)
+                SAVE=TRUE INTO VALUE(tt_files.outFolder)
+                DEBUG-LIST VALUE(tt_files.outLstPath)
+                NO-ERROR.
+            fi_output_last_error().
+            RUN pi_handleCompilErrors NO-ERROR.
+            fi_output_last_error().
+        END.
+    END.
+    
+    RETURN "".
+
+END PROCEDURE.
+
+PROCEDURE pi_createFileIfConnectFails:
+    
+    OUTPUT STREAM str_logout TO VALUE({&CreateFileIfConnectFails}) BINARY.
+    PUT STREAM str_logout UNFORMATTED "derp!".
+    OUTPUT STREAM str_logout CLOSE.
+    
+END PROCEDURE.
 
 /* ************************  Function Implementations ***************** */
 
@@ -219,11 +286,11 @@ FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT ipi_messNumber AS I
     IF cMsgFile = ? THEN
         RETURN "".
 
-    INPUT FROM VALUE(cMsgFile) NO-ECHO.
+    INPUT STREAM str_reader FROM VALUE(cMsgFile) NO-ECHO.
     DO iCount = 1 TO iPosition ON ENDKEY UNDO, LEAVE:
-        IMPORT cMsgNumber cText cDescription cCategory cKnowledgeBase.
+        IMPORT STREAM str_reader cMsgNumber cText cDescription cCategory cKnowledgeBase.
     END.
-    INPUT CLOSE.
+    INPUT STREAM str_reader CLOSE.
 
     ASSIGN
     cCategoryIndex = LOOKUP(cCategory, "C,D,I,M,O,P,S")
@@ -264,7 +331,7 @@ FUNCTION fi_output_last_error RETURNS LOGICAL ( ) :
                     ASSIGN ll_dbDown = TRUE.
             END.
             IF ll_dbDown THEN
-                PUT STREAM str_logout UNFORMATTED "Failed to connect to the database, check your connection parameters, more details below : " SKIP SKIP.
+                PUT STREAM str_logout UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
                 PUT STREAM str_logout UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.

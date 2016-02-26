@@ -233,6 +233,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Dictionary {
+            get {
+                object obj = ResourceManager.GetObject("Dictionary", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DownloadAll {
             get {
                 object obj = ResourceManager.GetObject("DownloadAll", resourceCulture);

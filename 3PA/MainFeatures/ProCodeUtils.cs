@@ -207,20 +207,21 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void OnExecutionEnded(ProExecution lastExec) {
             try {
+                var treatedFile = lastExec.ListToCompile.First();
                 CurrentOperation currentOperation;
                 if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
                     currentOperation = CurrentOperation.Run;
 
                 // Clear flag or we can't do any other actions on this file
-                FilesInfo.GetFileInfo(lastExec.FullFilePathToExecute).CurrentOperation &= ~currentOperation;
-                var isCurrentFile = lastExec.FullFilePathToExecute.EqualsCi(Plug.CurrentFilePath);
+                FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
 
                 // if log not found then something is messed up!
                 if (string.IsNullOrEmpty(lastExec.LogPath) ||
                     !File.Exists(lastExec.LogPath)) {
-                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div>" + lastExec.FullFilePathToExecute.ToHtmlLink() + "</div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Temporary directory :</b><br>" + lastExec.TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
+                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div>" + treatedFile.InputPath.ToHtmlLink() + "</div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Temporary directory :</b><br>" + lastExec.TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
                     return;
                 }
 
@@ -228,7 +229,7 @@ namespace _3PA.MainFeatures {
                 int nbErrors = 0;
 
                 // Read log info, correct file path...
-                var changePaths = new Dictionary<string, string> { { lastExec.TempFullFilePathToExecute, lastExec.FullFilePathToExecute } };
+                var changePaths = new Dictionary<string, string> { { treatedFile.TempInputPath, treatedFile.InputPath } };
                 Dictionary<string, List<FileError>> errorList;
                 if (lastExec.ExecutionType == ExecutionType.Prolint)
                     errorList = FilesInfo.ReadErrorsFromFile(lastExec.ProlintOutputPath, true, changePaths);
@@ -242,8 +243,8 @@ namespace _3PA.MainFeatures {
                         // the .log is not empty, maybe something went wrong in the runner, display errors
                         UserCommunication.Notify(
                             "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br><br><a href='" +
-                            lastExec.FullFilePathToExecute + "'>" +
-                            lastExec.FullFilePathToExecute +
+                            treatedFile.InputPath + "'>" +
+                            treatedFile.InputPath +
                             "</a><br><br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
                             Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
                             "Critical error", "Action failed");
@@ -265,7 +266,7 @@ namespace _3PA.MainFeatures {
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = (nbErrors > 0) ? nbErrors + " error(s) found" : ((nbWarnings > 0) ? nbWarnings + " warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + lastExec.FullFilePathToExecute + "#-1'>" + lastExec.FullFilePathToExecute + "</a></div>" : String.Empty);
+                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + treatedFile.InputPath + "#-1'>" + treatedFile.InputPath + "</a></div>" : String.Empty);
 
                 // has errors
                 var otherFilesInError = false;
@@ -274,7 +275,7 @@ namespace _3PA.MainFeatures {
                     foreach (var keyValue in errorList) {
                         notifMessage.Append("<div><b>[x" + keyValue.Value.Count() + "]</b> <a href='" + keyValue.Key + "#" + keyValue.Value.First().Line + "'>" + keyValue.Key + "</a></div>");
 
-                        otherFilesInError = otherFilesInError || !lastExec.FullFilePathToExecute.EqualsCi(keyValue.Key);
+                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
 
                         // feed FilesInfo
                         FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
@@ -287,25 +288,14 @@ namespace _3PA.MainFeatures {
 
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
-
-                    var targetDir = ProCompilePath.GetCompilationDirectory(lastExec.FullFilePathToExecute);
-                    // compile locally?
-                    if (Config.Instance.GlobalCompileFilesLocally)
-                        targetDir = Path.GetDirectoryName(lastExec.FullFilePathToExecute) ?? targetDir;
-
-                    // create target dir
-                    var success = Utils.CreateDirectory(targetDir);
-
                     // move .r file
-                    if (!string.IsNullOrEmpty(lastExec.DotRPath))
-                        success = success && Utils.MoveFile(lastExec.DotRPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".r"));
+                    var success = Utils.MoveFile(treatedFile.TempOutputR, treatedFile.OutputR);
 
                     // move .lst file
-                    if (!string.IsNullOrEmpty(lastExec.LstPath))
-                        success = success && Utils.MoveFile(lastExec.LstPath, Path.Combine(targetDir, Path.GetFileNameWithoutExtension(lastExec.FullFilePathToExecute) + ".lst"));
+                    success = success && Utils.MoveFile(treatedFile.TempOutputLst, treatedFile.OutputLst);
 
                     if (success)
-                        notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", targetDir.ToHtmlLink()));
+                        notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
                 }
 
                 // Notify the user, or not
@@ -331,7 +321,7 @@ namespace _3PA.MainFeatures {
             if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
                 currentOperation = CurrentOperation.Run;
 
-            // Can't compile and check syntax the same file at the same time
+            // check conditions
             if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
@@ -339,13 +329,31 @@ namespace _3PA.MainFeatures {
                 UserCommunication.Notify("This file is already being compiled, run or lint-ed,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
                 return;
             }
+            if (!Abl.IsCurrentProgressFile()) {
+                UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
+                return;
+            }
+            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
+                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
+                return;
+            }
+            if (!Config.Instance.GlobalCompilableExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+                return;
+            }
 
             // prolint? check that the StartProlint.p program is created, or do it
-            if (!File.Exists(Config.FileStartProlint)) 
-                Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint);
+            if (executionType == ExecutionType.Prolint) {
+                if (!File.Exists(Config.FileStartProlint))
+                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
+                        return;
+            }
 
             // launch the compile process for the current file
             Plug.CurrentFileObject.ProgressExecution = new ProExecution {
+                ListToCompile = new List<FileToCompile> {
+                    new FileToCompile { InputPath = Plug.CurrentFilePath }
+                },
                 OnExecutionEnd = OnExecutionEnded
             };
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))

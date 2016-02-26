@@ -93,6 +93,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
+        private static ReaderWriterLockSlim _lockShowList = new ReaderWriterLockSlim();
+
         private static Timer _parserTimer;
 
         private static string _lastRememberedKeyword = "";
@@ -333,90 +335,95 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// it is only called when the user adds or delete a char
         /// </summary>
         public static void UpdateAutocompletion() {
-            try {
-                if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
-                    return;
+            if (_lockShowList.TryEnterWriteLock(500)) {
+                try {
+                    if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
+                        return;
 
-                // dont show in string/comments..?
-                if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
-                    return;
+                    // dont show in string/comments..?
+                    if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+                        return;
 
-                // get current word, current previous word (table or database name)
-                int nbPoints;
-                string previousWord = "";
-                var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
-                var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
-                var splitted = keyword.Split('.');
-                string lastCharBeforeWord = "";
-                switch (nbPoints) {
-                    case 0:
-                        int startPos = strOnLeft.Length - 1 - keyword.Length;
-                        lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
-                        break;
-                    case 1:
-                        previousWord = splitted[0];
-                        keyword = splitted[1];
-                        break;
-                    case 2:
-                        previousWord = splitted[1];
-                        keyword = splitted[2];
-                        break;
-                    default:
-                        keyword = splitted[nbPoints];
-                        break;
-                }
+                    // get current word, current previous word (table or database name)
+                    int nbPoints;
+                    string previousWord = "";
+                    var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
+                    var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
+                    var splitted = keyword.Split('.');
+                    string lastCharBeforeWord = "";
+                    switch (nbPoints) {
+                        case 0:
+                            int startPos = strOnLeft.Length - 1 - keyword.Length;
+                            lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
+                            break;
+                        case 1:
+                            previousWord = splitted[0];
+                            keyword = splitted[1];
+                            break;
+                        case 2:
+                            previousWord = splitted[1];
+                            keyword = splitted[2];
+                            break;
+                        default:
+                            keyword = splitted[nbPoints];
+                            break;
+                    }
 
-                // list of fields or tables
-                if (!string.IsNullOrEmpty(previousWord)) {
-                    // are we entering a field from a known table?
-                    var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-                    if (foundTable != null) {
-                        if (CurrentTypeOfList != TypeOfList.Fields) {
-                            CurrentTypeOfList = TypeOfList.Fields;
-                            _currentItems = DataBase.GetFieldsList(foundTable).ToList();
+                    // list of fields or tables
+                    if (!string.IsNullOrEmpty(previousWord)) {
+                        // are we entering a field from a known table?
+                        var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+                        if (foundTable != null) {
+                            if (CurrentTypeOfList != TypeOfList.Fields) {
+                                CurrentTypeOfList = TypeOfList.Fields;
+                                _currentItems = DataBase.GetFieldsList(foundTable).ToList();
+                            }
+                            ShowSuggestionList(keyword);
+                            return;
+                        }
+
+                        // are we entering a table from a connected database?
+                        var foundDatabase = DataBase.FindDatabaseByName(previousWord);
+                        if (foundDatabase != null) {
+                            if (CurrentTypeOfList != TypeOfList.Tables) {
+                                CurrentTypeOfList = TypeOfList.Tables;
+                                _currentItems = DataBase.GetTablesList(foundDatabase).ToList();
+                            }
+                            ShowSuggestionList(keyword);
+                            return;
+                        }
+                    }
+
+                    // close if there is nothing to suggest
+                    if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                        Close();
+                        return;
+                    }
+
+                    // if the current is directly preceded by a :, we are entering an object field/method
+                    if (lastCharBeforeWord.Equals(":")) {
+                        if (CurrentTypeOfList != TypeOfList.KeywordObject) {
+                            CurrentTypeOfList = TypeOfList.KeywordObject;
+                            _currentItems = _savedAllItems;
                         }
                         ShowSuggestionList(keyword);
                         return;
                     }
 
-                    // are we entering a table from a connected database?
-                    var foundDatabase = DataBase.FindDatabaseByName(previousWord);
-                    if (foundDatabase != null) {
-                        if (CurrentTypeOfList != TypeOfList.Tables) {
-                            CurrentTypeOfList = TypeOfList.Tables;
-                            _currentItems = DataBase.GetTablesList(foundDatabase).ToList();
-                        }
-                        ShowSuggestionList(keyword);
-                        return;
-                    }
-                }
-
-                // close if there is nothing to suggest
-                if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
-                    Close();
-                    return;
-                }
-
-                // if the current is directly preceded by a :, we are entering an object field/method
-                if (lastCharBeforeWord.Equals(":")) {
-                    if (CurrentTypeOfList != TypeOfList.KeywordObject) {
-                        CurrentTypeOfList = TypeOfList.KeywordObject;
+                    // show normal complete list
+                    if (CurrentTypeOfList != TypeOfList.Complete) {
+                        CurrentTypeOfList = TypeOfList.Complete;
                         _currentItems = _savedAllItems;
                     }
                     ShowSuggestionList(keyword);
-                    return;
-                }
 
-                // show normal complete list
-                if (CurrentTypeOfList != TypeOfList.Complete) {
-                    CurrentTypeOfList = TypeOfList.Complete;
-                    _currentItems = _savedAllItems;
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error in UpdateAutocompletion");
+                } finally {
+                    _lockShowList.ExitWriteLock();
                 }
-                ShowSuggestionList(keyword);
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in UpdateAutocompletion");
             }
+            
         }
 
         /// <summary>
