@@ -37,6 +37,7 @@ using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 using MenuItem = _3PA.MainFeatures.MenuItem;
+using Timer = System.Timers.Timer;
 
 namespace _3PA {
 
@@ -621,7 +622,5 @@ namespace _3PA {
         }
 
         #endregion
-
-
     }
 }

@@ -191,6 +191,9 @@ namespace _3PA {
                 // uninstall hooks
                 UninstallHooks();
 
+                // disable hour timer
+                UpdateHandler.DeleteHourTimer();
+
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
 
@@ -348,6 +351,7 @@ namespace _3PA {
         }
 
         public static void Test() {
+
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",

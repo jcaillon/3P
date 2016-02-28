@@ -26,6 +26,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.Properties;
@@ -37,10 +38,107 @@ namespace _3PA.MainFeatures {
     /// </summary>
     internal static class UpdateHandler {
 
+        #region fields
+
         /// <summary>
         /// Holds the info about the latest release found on the distant update server
         /// </summary>
         public static ReleaseInfo LatestReleaseInfo { get; set; }
+
+        private static bool _alwaysGetFeedBack;
+        private static bool _checkStarted;
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Method to call when the user leaves notepad++,
+        /// check if there is an update to make
+        /// </summary>
+        public static void OnNotepadExit() {
+            if (File.Exists(Config.FileUpdaterExe)) {
+                try {
+                    var process = new Process {
+                        StartInfo = {
+                            FileName = Config.FileUpdaterExe,
+                            Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
+                            UseShellExecute = true,
+                            WindowStyle = ProcessWindowStyle.Hidden
+                        }
+                    };
+                    process.Start();
+                } catch (Exception e) {
+                    if (!(e is Win32Exception))
+                        ErrorHandler.ShowErrors(e, "OnNotepadExit");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method to call when the user starts notepad++,
+        /// check if an update has been done since the last time notepad was closed
+        /// </summary>
+        public static void OnNotepadStart() {
+
+            // if the UDL is not installed
+            if (!Style.InstallUdl(true)) {
+                Style.InstallUdl();
+            } else {
+                // first use message?
+                if (Config.Instance.UserFirstUse) {
+                    UserCommunication.Notify("Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P i invite you to read the <b><i>Getting started</b></i> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br><div align='right'>Enjoy!!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                        Appli.Appli.ToggleView();
+                        args.Handled = true;
+                    });
+                    Config.Instance.UserFirstUse = false;
+                }
+            }
+
+            // check Npp version, 3P requires version 6.8 or higher
+            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
+                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+            }
+
+            // an update has been done
+            if (File.Exists(Config.FileVersionLog)) {
+
+                // The dll is still in the update dir, something went wrong
+                if (File.Exists(Config.FileDownloadedPlugin)) {
+                    UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
+                        The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
+                        It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
+                        You will have to manually copy the new file and delete the old file :<br><br>
+                        <b>MOVE (delete the source and replace the target)</b> this file : <a href='" + Path.GetDirectoryName(Config.FileDownloadedPlugin) + "'>" + Config.FileDownloadedPlugin + @"</a></b><br>" + @"
+                        <i>This message will be shown at startup as long as the above-mentionned file exists)</i><br>
+                        <b>In this folder</b> (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
+                        Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
+                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
+                    return;
+                }
+
+                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(Config.FileVersionLog, TextEncodingDetect.GetFileEncoding(Config.FileVersionLog))).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok" },
+                    false);
+
+                // delete update related files/folders
+                Utils.DeleteFile(Config.FileVersionLog);
+                Utils.DeleteDirectory(Config.FolderUpdate, true);
+
+                // reset the log files
+                Utils.DeleteDirectory(Config.FolderLog, true);
+
+                // update UDL
+                if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
+                    Style.InstallUdl();
+            }
+
+            // start doing stuff every hour (checking for updates, pinging...)
+            EveryHour();
+        }
 
         /// <summary>
         /// Gets an object with the latest release info
@@ -48,9 +146,6 @@ namespace _3PA.MainFeatures {
         public static void GetLatestReleaseInfo() {
             GetLatestReleaseInfo(false);
         }
-
-        private static bool _alwaysGetFeedBack;
-        private static bool _checkStarted;
 
         /// <summary>
         /// To call when the user click on an update button
@@ -177,6 +272,11 @@ namespace _3PA.MainFeatures {
             _checkStarted = false;
         }
 
+        #endregion
+
+
+        #region private
+
         /// <summary>
         /// Called when the latest release download is done
         /// </summary>
@@ -234,95 +334,53 @@ namespace _3PA.MainFeatures {
                 Release name: <b>" + LatestReleaseInfo.Name + @"</b><br>
                 Available since: <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
                 Release URL: <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
-                ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
+                                     ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
+        }
+
+        #endregion
+
+
+        #region On hour
+
+        private static Timer _hourTimer;
+
+        /// <summary>
+        /// This method is called once every hour (and at the start)
+        /// </summary>
+        public static void EveryHour() {
+
+            // execute again in 1 hour
+            if (_hourTimer == null) {
+                _hourTimer = new Timer(1000 * 60 * 60) {
+                    AutoReset = true
+                };
+                _hourTimer.Elapsed += (sender, args) => EveryHour();
+                _hourTimer.Start();
+            }
+
+            // now do stuff async
+            Task.Factory.StartNew(() => {
+
+                // ping
+                User.Ping();
+
+                // Check for new updates
+                if (!Config.Instance.GlobalDontCheckUpdates)
+                    GetLatestReleaseInfo();
+            });
+
         }
 
         /// <summary>
-        /// Method to call when the user leaves notepad++,
-        /// check if there is an update to make
+        /// delete the hour timer
         /// </summary>
-        public static void OnNotepadExit() {
-            if (File.Exists(Config.FileUpdaterExe)) {
-                try {
-                    var process = new Process {
-                        StartInfo = {
-                            FileName = Config.FileUpdaterExe,
-                            Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
-                            UseShellExecute = true,
-                            WindowStyle = ProcessWindowStyle.Hidden
-                        }
-                    };
-                    process.Start();
-                } catch (Exception e) {
-                    if (!(e is Win32Exception))
-                        ErrorHandler.ShowErrors(e, "OnNotepadExit");
-                }
-            }
+        public static void DeleteHourTimer() {
+            _hourTimer.Stop();
+            _hourTimer.Close();
+            _hourTimer.Dispose();
         }
 
-        /// <summary>
-        /// Method to call when the user starts notepad++,
-        /// check if an update has been done since the last time notepad was closed
-        /// </summary>
-        public static void OnNotepadStart() {
-
-            // if the UDL is not installed
-            if (!Style.InstallUdl(true)) {
-                Style.InstallUdl();
-            } else {
-                // first use message?
-                if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P i invite you to read the <b><i>Getting started</b></i> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br><div align='right'>Enjoy!!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
-                        Appli.Appli.ToggleView();
-                        args.Handled = true;
-                    });
-                    Config.Instance.UserFirstUse = false;
-                }
-            }
-
-            // check Npp version, 3P requires version 6.8 or higher
-            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
-                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
-            }
-
-            // an update has been done
-            if (File.Exists(Config.FileVersionLog)) {
-                if (File.Exists(Config.FileDownloadedPlugin)) {
-                    UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
-                        The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
-                        It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
-                        You will have to manually copy the new file and delete the old file :<br><br>
-                        <b>MOVE (delete the source and replace the target)</b> this file : <a href='" + Path.GetDirectoryName(Config.FileDownloadedPlugin) + "'>" + Config.FileDownloadedPlugin + @"</a></b><br>" + @"
-                        <i>This message will be shown at startup as long as the above-mentionned file exists)</i><br>
-                        <b>In this folder</b> (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
-                        Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
-                    return;
-                }
-
-                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(Config.FileVersionLog, TextEncodingDetect.GetFileEncoding(Config.FileVersionLog))).MdToHtml(),
-                    MessageImg.MsgUpdate,
-                    "A new version has been installed!",
-                    "Updated to version " + AssemblyInfo.Version,
-                    new List<string> { "ok" },
-                    false);
-
-                try {
-                    File.Delete(Config.FileVersionLog);
-                    Utils.DeleteDirectory(Config.FolderUpdate, true);
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error when deleting a file/folder");
-                }
-
-                // update UDL
-                if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
-                    Style.InstallUdl();
-            }
-
-            // Check for new updates
-            if (!Config.Instance.GlobalDontCheckUpdates)
-                Task.Factory.StartNew(GetLatestReleaseInfo);
-        }
+        #endregion
 
         #region ReleaseInfo
 

@@ -105,7 +105,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
                 var exec = new ProExecution {
-                    OnExecutionEnd = ExtractionDone,
+                    OnExecutionEnd = execution => _outputFileName = null,
+                    OnExecutionEndOk = ExtractionDoneOk,
+                    NeedDatabaseConnection = true,
                     ExtractDbOutputPath = _outputFileName
                 };
                 _onExtractionDone = onExtractionDone;
@@ -120,18 +122,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Method called after the execution of the program extracting the db info
         /// </summary>
-        private static void ExtractionDone(ProExecution lastExec) {
+        private static void ExtractionDoneOk(ProExecution lastExec) {
             try {
-
-                if (!File.Exists(lastExec.ExtractDbOutputPath) || new FileInfo(lastExec.ExtractDbOutputPath).Length == 0) {
-                    UserCommunication.Notify("Something went wrong while extracting the database info, verify the connection info and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the progress error returned while trying to dump the database : " + Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgRip, "Database info", "Extracting database structure");
-                } else {
-                    var targetFile = Path.Combine(Config.FolderDatabase, _outputFileName);
-                    if (File.Exists(targetFile))
-                        File.Delete(targetFile);
-
-                    // copy to database dir
-                    File.Copy(lastExec.ExtractDbOutputPath, targetFile);
+                // copy the dump to the folder database
+                if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, _outputFileName))) {
 
                     // read
                     Config.Instance.EnvLastDbInfoUsed = _outputFileName;
@@ -149,7 +143,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-            _outputFileName = null;
+            
         }
 
         /// <summary>

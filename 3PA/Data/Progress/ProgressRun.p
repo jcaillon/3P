@@ -45,12 +45,15 @@ DEFINE TEMP-TABLE tt_files NO-UNDO
 
 DEFINE STREAM str_reader.
 DEFINE STREAM str_logout.
+DEFINE STREAM str_dbout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
+DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 
 
 /* Prototypes */
 FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT ipi_messNumber AS INTEGER) FORWARD.
 FUNCTION fi_output_last_error RETURNS LOGICAL ( ) FORWARD.
+FUNCTION fi_output_last_error_db RETURNS LOGICAL ( ) FORWARD.
 
 
 /* ***************************  Main Block  *************************** */
@@ -60,6 +63,7 @@ SESSION:SYSTEM-ALERT-BOXES = YES.
 SESSION:APPL-ALERT-BOXES = YES.
 
 OUTPUT STREAM str_logout TO VALUE({&LogFile}) BINARY.
+OUTPUT STREAM str_dbout TO VALUE({&CreateFileIfConnectFails}) BINARY.
 PUT STREAM str_logout UNFORMATTED "".
 
 /* load the .ini file */
@@ -77,18 +81,14 @@ ASSIGN PROPATH = {&propathToUse}.
 /* connect the database(s) */
 IF {&BasePfPath} > "" THEN DO:
     CONNECT -pf {&BasePfPath} -ct 1 NO-ERROR.
-    IF fi_output_last_error() THEN DO:
-        RUN pi_createFileIfConnectFails.
-        fi_output_last_error().
-    END.
+    IF fi_output_last_error_db() THEN
+        ASSIGN gl_dbKo = TRUE.
 END.
 
 IF {&ExtraPf} > "" THEN DO:
     CONNECT VALUE({&ExtraPf}) -ct 1 NO-ERROR.
-    IF fi_output_last_error() THEN DO:
-        RUN pi_createFileIfConnectFails.
-        fi_output_last_error().
-    END.
+    IF fi_output_last_error_db() THEN
+        ASSIGN gl_dbKo = TRUE.
 END.
 
 CASE {&ExecutionType} :
@@ -115,11 +115,17 @@ CASE {&ExecutionType} :
         fi_output_last_error().
     END.
     WHEN "DATABASE" THEN DO:
-        /* for each connected db */
-        REPEAT gi_db = 1 TO NUM-DBS:
-            CREATE ALIAS "DICTDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
-            RUN {&ToExecute} (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)).
-            DELETE ALIAS "DICTDB".
+        IF NOT gl_dbKo THEN DO:
+            IF NUM-DBS < 1 THEN DO:
+                PUT STREAM str_dbout UNFORMATTED "0 database(s) connected! There is nothing to be done." SKIP.
+                ASSIGN gl_dbKo = TRUE.
+            END.
+            /* for each connected db */
+            REPEAT gi_db = 1 TO NUM-DBS:
+                CREATE ALIAS "DICTDB" FOR DATABASE VALUE(LDBNAME(gi_db)).
+                RUN {&ToExecute} (INPUT {&ExtractDbOutputPath}, INPUT LDBNAME(gi_db), INPUT PDBNAME(gi_db)).
+                DELETE ALIAS "DICTDB".
+            END.
         END.
     END.
     WHEN "DICTIONARY" THEN DO:
@@ -131,11 +137,15 @@ CASE {&ExecutionType} :
         ELSE IF SEARCH("_ab.p") <> ? THEN
             RUN _ab.p.
         ELSE
-            MESSAGE "Couldn't find adeuib/_uibmain.p!".
+            PUT STREAM str_logout UNFORMATTED "Couldn't find adeuib/_uibmain.p!" SKIP.
     END.
 END CASE.
 
 OUTPUT STREAM str_logout CLOSE.
+OUTPUT STREAM str_dbout CLOSE.
+
+IF NOT gl_dbKo THEN
+    OS-DELETE VALUE({&CreateFileIfConnectFails}).
 
 /* Must be QUIT or prowin32.exe opens an empty editor! */
 QUIT.
@@ -245,14 +255,6 @@ PROCEDURE pi_compileList:
 
 END PROCEDURE.
 
-PROCEDURE pi_createFileIfConnectFails:
-    
-    OUTPUT STREAM str_logout TO VALUE({&CreateFileIfConnectFails}) BINARY.
-    PUT STREAM str_logout UNFORMATTED "derp!".
-    OUTPUT STREAM str_logout CLOSE.
-    
-END PROCEDURE.
-
 /* ************************  Function Implementations ***************** */
 
 FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT ipi_messNumber AS INTEGER):
@@ -318,12 +320,35 @@ FUNCTION fi_output_last_error RETURNS LOGICAL ( ) :
 ------------------------------------------------------------------------------*/
 
     DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
+
+    IF ERROR-STATUS:ERROR THEN DO:
+        IF RETURN-VALUE > "" THEN
+            PUT STREAM str_logout UNFORMATTED RETURN-VALUE SKIP.
+        IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
+            DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                PUT STREAM str_logout UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+            END.
+        END.
+        RETURN TRUE.
+    END.
+    ERROR-STATUS:ERROR = NO.
+    RETURN FALSE.
+
+END FUNCTION.
+
+FUNCTION fi_output_last_error_db RETURNS LOGICAL ( ) :
+/*------------------------------------------------------------------------------
+  Purpose: output the last error encountered
+    Notes:
+------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE li_ AS INTEGER NO-UNDO.
     DEFINE VARIABLE ll_dbDown AS LOGICAL NO-UNDO.
 
     IF ERROR-STATUS:ERROR THEN DO:
 
         IF RETURN-VALUE > "" THEN
-            PUT STREAM str_logout UNFORMATTED RETURN-VALUE SKIP.
+            PUT STREAM str_dbout UNFORMATTED RETURN-VALUE SKIP.
 
         IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
@@ -331,9 +356,9 @@ FUNCTION fi_output_last_error RETURNS LOGICAL ( ) :
                     ASSIGN ll_dbDown = TRUE.
             END.
             IF ll_dbDown THEN
-                PUT STREAM str_logout UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
+                PUT STREAM str_dbout UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_logout UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+                PUT STREAM str_dbout UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
         RETURN TRUE.

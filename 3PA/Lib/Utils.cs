@@ -182,7 +182,7 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Copy a file, ensures the user gets a feedback is something goes wrong
+        /// Copy a file (erase existing target), ensures the user gets a feedback is something goes wrong
         /// return true if ok, false otherwise
         /// </summary>
         public static bool CopyFile(string sourceFile, string targetFile) {

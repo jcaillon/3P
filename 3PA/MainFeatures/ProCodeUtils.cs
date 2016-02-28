@@ -203,7 +203,7 @@ namespace _3PA.MainFeatures {
         #region Compilation, Check syntax, Run, Prolint
 
         /// <summary>
-        /// Called after the compilation
+        /// Called after the execution of run/compile/check/prolint
         /// </summary>
         public static void OnExecutionEnded(ProExecution lastExec) {
             try {
@@ -217,13 +217,22 @@ namespace _3PA.MainFeatures {
                 var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
                 if (isCurrentFile)
                     FilesInfo.UpdateFileStatus();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
+            }
+        }
 
-                // if log not found then something is messed up!
-                if (string.IsNullOrEmpty(lastExec.LogPath) ||
-                    !File.Exists(lastExec.LogPath)) {
-                        UserCommunication.Notify("Something went terribly wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<div>" + treatedFile.InputPath.ToHtmlLink() + "</div><br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + lastExec.ProgressWin32 + " " + lastExec.ExeParameters + "</div><b>Temporary directory :</b><br>" + lastExec.TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in your config?<br>Is it possible that i don't have the rights to write in your %temp% directory?</i>", MessageImg.MsgError, "Critical error", "Action failed");
-                    return;
-                }
+        /// <summary>
+        /// Called after the execution of run/compile/check/prolint
+        /// </summary>
+        public static void OnExecutionEndedOk(ProExecution lastExec) {
+            try {
+                var treatedFile = lastExec.ListToCompile.First();
+                CurrentOperation currentOperation;
+                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                    currentOperation = CurrentOperation.Run;
+
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
 
                 int nbWarnings = 0;
                 int nbErrors = 0;
@@ -309,9 +318,10 @@ namespace _3PA.MainFeatures {
                     }, notifTimeOut);
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionEndOk");
             }
         }
+
 
         /// <summary>
         /// Called to run/compile/check/prolint the current program
@@ -354,7 +364,8 @@ namespace _3PA.MainFeatures {
                 ListToCompile = new List<FileToCompile> {
                     new FileToCompile { InputPath = Plug.CurrentFilePath }
                 },
-                OnExecutionEnd = OnExecutionEnded
+                OnExecutionEnd = OnExecutionEnded,
+                OnExecutionEndOk = OnExecutionEndedOk
             };
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
                 return;
@@ -443,10 +454,27 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        public static void NotImplemented() {
-            UserCommunication.Notify(
-                "<b>Oops!</b><br><br>This function is not implemented yet, come back later mate ;)<br><br><i>Sorry for the disappointment though!</i>",
-                MessageImg.MsgRip, "New action", "Function not implemented yet", 5);
+        #region Open in appbuilder / dictionary
+
+        /// <summary>
+        /// Opens the current file in the appbuilder
+        /// </summary>
+        public static void OpenCurrentInAppbuilder() {
+            new ProExecution {
+                ListToCompile = new List<FileToCompile> {
+                    new FileToCompile { InputPath = Plug.CurrentFilePath }
+                }
+            }.Do(ExecutionType.Appbuilder);
         }
+
+        /// <summary>
+        /// Opens the current file in the appbuilder
+        /// </summary>
+        public static void OpenDictionary() {
+            new ProExecution().Do(ExecutionType.Dictionary);
+        }
+
+        #endregion
+
     }
 }

@@ -396,6 +396,7 @@ namespace _3PA.MainFeatures {
 
             // TECHNICAL
             public bool LogError = true;
+            public string TechnicalLastPing = "";
 
             // THEMES
             public int ThemeId = 0;
@@ -500,6 +501,11 @@ namespace _3PA.MainFeatures {
         public static string SendLogApi { get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; } }
 
         public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
+
+        /// <summary>
+        /// Url for the ping webservice
+        /// </summary>
+        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/?action=ping"; } }
 
         public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
 
