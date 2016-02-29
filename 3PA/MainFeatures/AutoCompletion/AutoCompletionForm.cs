@@ -131,7 +131,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // set the image list to use for the keywords
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData)rowObject;
-                return GetTypeImageFromStr(x.Type.ToString());
+                return GetTypeImageFromStr(x == null ? "Error" : x.Type.ToString());
             };
 
             // overlay of empty list :
@@ -187,6 +187,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
             CompletionData data = (CompletionData)args.Model;
+            if (data == null)
+                return;
+
             // display the flags
             int offset = -5;
             foreach (var name in Enum.GetNames(typeof(ParseFlag))) {

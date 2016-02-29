@@ -150,7 +150,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // create target directory
                 fileToCompile.OutputDir = ProCompilePath.GetCompilationDirectory(fileToCompile.InputPath);
-                if (Config.Instance.GlobalCompileFilesLocally)
+                if (Config.Instance.GlobalCompileFilesLocally || string.IsNullOrEmpty(fileToCompile.OutputDir))
                     fileToCompile.OutputDir = Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.OutputDir;
                 if (!Utils.CreateDirectory(fileToCompile.OutputDir))
                     return false;
@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             Process.Exited += ProcessOnExited;
             Process.Start();
 
-            UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
+            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 
             // restore splashscreen
             MoveSplashScreenNoError(splashScreenPathMoved, splashScreenPath);

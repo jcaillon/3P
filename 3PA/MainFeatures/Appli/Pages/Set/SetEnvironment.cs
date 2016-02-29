@@ -76,7 +76,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(cbName, "Select the <b>environment to use</b><br><br>3P allows the user to define several work environment<br><i>(that can, for instance, correspond to several applications)</i><br>Each environment can also has several suffixes and each<br>environment/suffix couples have their own parameters (see 'details' below)");
             toolTip.SetToolTip(cbSuffix, "Select the <b>environment's suffix</b>");
             toolTip.SetToolTip(flLabel, "The label for this environment (has no use beside being more meaningful than the name)");
-            toolTip.SetToolTip(cbDatabase, "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
+
+            var textTool = "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>";
+            toolTip.SetToolTip(cbDatabase, textTool);
+            toolTip.SetToolTip(htmlLabel1, textTool);
 
             toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
             toolTip.SetToolTip(textbox1, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
@@ -89,14 +92,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
             toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
 
-            toolTip.SetToolTip(flExtraPf, "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db base2 -ld mylogicalName2 -H 127.0.0.1 -S 10</div>");
+            textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db base2 -ld mylogicalName2 -H 127.0.0.1 -S 10</div>";
+            toolTip.SetToolTip(flExtraPf, textTool);
+            toolTip.SetToolTip(htmlLabel8, textTool);
 
-            toolTip.SetToolTip(textbox2, "Path to an .ini file, which as a <b>PROPATH=</b> field<br>(the section in which this field is doesn't matter)<br>that lists the directories to use for the compilation/execution of your progress files");
+            textTool = "Path to an .ini file, which as a <b>PROPATH=</b> field<br>(the section in which this field is doesn't matter)<br>that lists the directories to use for the compilation/execution of your progress files";
+            toolTip.SetToolTip(textbox2, textTool);
+            toolTip.SetToolTip(htmlLabel2, textTool);
             toolTip.SetToolTip(flExtraProPath, "A list of directories to be used when compiling/executing your 4GL code<br>They can be separated by a ',' or ';' or new lines '\\n'<br><br><i>You can specify relative paths, the working directory (i.e. base path)<br>is the base local directory</i>");
 
-            toolTip.SetToolTip(textbox3, "Path to your project directory<br>It is used to find the .p or .w you RUN in your code");
-            toolTip.SetToolTip(textbox4, "Path to the directory where you want your .r and .lst files to be<br>moved after a successful compilation");
-            toolTip.SetToolTip(textbox5, "The path to the prowin.exe (or prowin32.exe), it is usually located in :<div class='ToolTipcodeSnippet'>%INSTALL_DIR%\\client\\vXXXX\\dlc\\bin\\</div>");
+            textTool = "Path to your project directory<br>This should be your repository folder, where you keep the source files<br>It is used (among other things) to find the .p or .w you RUN in your code";
+            toolTip.SetToolTip(textbox3, textTool);
+            toolTip.SetToolTip(htmlLabel3, textTool);
+
+            textTool = "Path to the directory where you want your .r and .lst files to be<br>moved after a successful compilation";
+            toolTip.SetToolTip(textbox4, textTool);
+            toolTip.SetToolTip(htmlLabel4, textTool);
+
+            textTool = "The path to the prowin.exe (or prowin32.exe), it is usually located in :<div class='ToolTipcodeSnippet'>%INSTALL_DIR%\\client\\vXXXX\\dlc\\bin\\</div>";
+            toolTip.SetToolTip(textbox5, textTool);
+            toolTip.SetToolTip(htmlLabel5, textTool);
+
+            toolTip.SetToolTip(htmlLabel6, "Appended to the prowin.exe command line<br>you can define custom options here");
+
             toolTip.SetToolTip(textbox6, "Path to your server.log file, for a quick access");
 
             toolTip.SetToolTip(tgCompilLocl, "<b>TOGGLE ON</b> to move .r and .lst files to the source folder after the compilation<br>Or <b>TOGGLE OFF</b> to move .r and .lst files to the above distant folder after the compilation");

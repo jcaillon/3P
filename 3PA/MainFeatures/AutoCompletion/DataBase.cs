@@ -46,6 +46,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static string _outputFileName;
 
+        private static bool _isExtracting;
+
         /// <summary>
         /// Action called when an extraction is done
         /// </summary>
@@ -94,7 +96,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void FetchCurrentDbInfo(Action onExtractionDone) {
             try {
                 // dont extract 2 db at once
-                if (!string.IsNullOrEmpty(_outputFileName)) {
+                if (_isExtracting) {
                     UserCommunication.Notify("Already fetching info for another environment, please wait the end of the previous execution!", MessageImg.MsgWarning, "Database info", "Extracting database structure", 5);
                     return;
                 }
@@ -105,18 +107,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
                 var exec = new ProExecution {
-                    OnExecutionEnd = execution => _outputFileName = null,
+                    OnExecutionEnd = execution => _isExtracting = false,
                     OnExecutionEndOk = ExtractionDoneOk,
                     NeedDatabaseConnection = true,
                     ExtractDbOutputPath = _outputFileName
                 };
                 _onExtractionDone = onExtractionDone;
-                if (exec.Do(ExecutionType.Database))
-                    return;
+                _isExtracting = exec.Do(ExecutionType.Database);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-            _outputFileName = null;
         }
 
         /// <summary>

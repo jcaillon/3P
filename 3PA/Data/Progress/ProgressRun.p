@@ -132,12 +132,11 @@ CASE {&ExecutionType} :
         RUN _dict.p.
     END.
     WHEN "APPBUILDER" THEN DO:
-        IF SEARCH("adeuib/_uibmain.p") <> ? THEN
-            RUN adeuib/_uibmain.p (INPUT {&ToExecute}).
-        ELSE IF SEARCH("_ab.p") <> ? THEN
-            RUN _ab.p.
-        ELSE
-            PUT STREAM str_logout UNFORMATTED "Couldn't find adeuib/_uibmain.p!" SKIP.
+        RUN adeuib/_uibmain.p (INPUT {&ToExecute}) NO-ERROR.
+        IF fi_output_last_error() THEN DO:
+            RUN _ab.p NO-ERROR.
+            fi_output_last_error().
+        END.
     END.
 END CASE.
 

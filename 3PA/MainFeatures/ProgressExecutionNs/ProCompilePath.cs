@@ -102,6 +102,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return null;
 
             var baseComp = ProEnvironment.Current.BaseCompilationPath;
+            if (string.IsNullOrEmpty(baseComp))
+                return null;
 
             // filter and sort the list
             var filteredList = _compilationPathList.Where(FilterPredicate).ToList();
