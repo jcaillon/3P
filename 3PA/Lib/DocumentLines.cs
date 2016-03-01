@@ -20,6 +20,7 @@
 using System;
 using System.Text;
 using _3PA.Interop;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -239,7 +240,25 @@ namespace _3PA.Lib {
             if (_oneByteCharEncoding)
                 return SciPositionFromLine(index);
 
-            index = Npp.Clamp(index, 0, _linesList.Count);
+            try {
+                return PrivateCharPositionFromLine(index);
+            } catch (Exception e) {
+                try {
+                    Reset();
+                    return PrivateCharPositionFromLine(index);
+                } catch (Exception) {
+                    // ignored
+                }
+                ErrorHandler.Log(e + "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
+                return 0;
+            }
+        }
+
+        /// <summary>
+        /// Returns the CHAR position where the line begins,
+        /// this is THE method of this class (since it is the only info we keep on the lines!)
+        /// </summary>
+        private int PrivateCharPositionFromLine(int index) {
             if (_holeLenght != 0 && index > _holeLine) {
                 return _linesList[index] + _holeLenght;
             }
@@ -314,8 +333,7 @@ namespace _3PA.Lib {
             // bypass the hard work for simple encoding
             if (_oneByteCharEncoding)
                 return pos;
-
-            //pos = Npp.Clamp(pos, 0, Npp.Sci.Send(SciMsg.SCI_GETLENGTH).ToInt32());
+            
             var line = SciLineFromPosition(pos);
             var byteStart = SciPositionFromLine(line);
             var count = CharPositionFromLine(line) + GetCharCount(byteStart, pos - byteStart);

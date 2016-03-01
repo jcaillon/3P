@@ -30,7 +30,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 fastOLV.DoubleClick -= FastOlvOnDoubleClick;
 
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 

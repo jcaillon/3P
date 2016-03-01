@@ -135,7 +135,8 @@ CASE {&ExecutionType} :
         RUN adeuib/_uibmain.p (INPUT {&ToExecute}) NO-ERROR.
         IF fi_output_last_error() THEN DO:
             RUN _ab.p NO-ERROR.
-            fi_output_last_error().
+            IF fi_output_last_error() THEN
+                PUT STREAM str_logout UNFORMATTED SKIP "_ab" SKIP.
         END.
     END.
 END CASE.

@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -463,6 +464,35 @@ namespace _3PA.MainFeatures {
             new ProExecution {
                 ListToCompile = new List<FileToCompile> {
                     new FileToCompile { InputPath = Plug.CurrentFilePath }
+                },
+                OnExecutionEndOk = execution => {
+                    try {
+                        if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && File.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
+                            // we need to start the appbuilder in another way
+                            StringBuilder Params = new StringBuilder();
+
+                            if (File.Exists(ProEnvironment.Current.IniPath))
+                                Params.Append(" -ini " + ProEnvironment.Current.IniPath.ProgressQuoter());
+                            if (File.Exists(Path.Combine(execution.TempDir, "base.pf")) || !string.IsNullOrWhiteSpace(ProEnvironment.Current.ExtraPf)) {
+                                File.AppendAllText(Path.Combine(execution.TempDir, "base.pf"), ProEnvironment.Current.ExtraPf);
+                                Params.Append(" -pf " + Path.Combine(execution.TempDir, "base.pf").ProgressQuoter());
+                            }
+                            Params.Append(" -p _ab -param " + Plug.CurrentFilePath.ProgressQuoter());
+                            if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
+                                Params.Append(" " + ProEnvironment.Current.CmdLineParameters.Trim());
+
+                            new Process {
+                                StartInfo = new ProcessStartInfo {
+                                    FileName = ProEnvironment.Current.ProwinPath,
+                                    Arguments = Params.ToString(),
+                                    WorkingDirectory = execution.ProcessStartDir
+                                }
+                            }.Start();
+
+                        }
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Failed to start the appbuilder");
+                    }
                 }
             }.Do(ExecutionType.Appbuilder);
         }

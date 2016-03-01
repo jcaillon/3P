@@ -235,6 +235,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="args"></param>
         private static void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
             FileListItem obj = (FileListItem)args.Model;
+            if (obj == null)
+                return;
 
             // currently document
             if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
@@ -662,6 +664,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
             var compData = (FileListItem)o;
+            if (compData == null)
+                return false;
             bool output = false;
             // check for the filter match, the activated category,
             if (compData.FilterFullyMatch && _displayedTypes.ContainsKey(compData.Type))
@@ -682,7 +686,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             try {
                 return (FileListItem)fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
             return null;
         }

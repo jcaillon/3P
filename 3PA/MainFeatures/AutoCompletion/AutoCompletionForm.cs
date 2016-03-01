@@ -131,7 +131,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // set the image list to use for the keywords
             Keyword.ImageGetter += rowObject => {
                 var x = (CompletionData)rowObject;
-                return GetTypeImageFromStr(x == null ? "Error" : x.Type.ToString());
+                if (x == null) return ImageResources.Error;
+                return GetTypeImageFromStr(x.Type.ToString());
             };
 
             // overlay of empty list :
@@ -379,7 +380,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 return (CompletionData) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
             return null;
         }
@@ -561,6 +562,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
             var compData = (CompletionData)o;
+            if (compData == null)
+                return false;
 
             // check for the filter match
             bool output = !_useTextFiltering || compData.FilterFullyMatch;

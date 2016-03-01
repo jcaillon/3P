@@ -47,7 +47,7 @@ namespace _3PA.MainFeatures {
         /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
             Log(e.ToString());
-            MessageBox.Show("Attention user! An error has occurred while loading in the following file :" + "\n\n"
+            MessageBox.Show("Attention user! An error has occurred while loading the following file :" + "\n\n"
                 + fileName +
                 "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             if (File.Exists(fileName + "_errors"))
@@ -61,62 +61,41 @@ namespace _3PA.MainFeatures {
         /// <param name="e"></param>
         /// <param name="message"></param>
         public static void ShowErrors(Exception e, string message) {
-            var errorToStr = e.ToString();
-
-            // don't show/store the same error twice in a session
-            if (_catchedErrors.Contains(errorToStr))
-                return;
-            _catchedErrors.Add(errorToStr);
-
             // log the error into a file
             if (Log(message + "\r\n" + e)) {
-                Task.Factory.StartNew(() => {
-                    try {
-                        if (Config.Instance.LogError) {
-                            if (!Config.Instance.GlobalDontAutoPostLog && UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
-                                if (File.Exists(Config.FileErrorToSend))
-                                    File.Delete(Config.FileErrorToSend);
-                            }
-                        }
-                    } catch (Exception exception) {
-                        Log(exception.ToString());
-                    }
-                });
-            }
-
-            try {
-                // show it to the user, conditionally
-                if (Config.Instance.UserGetsPreReleases)
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                        (File.Exists(Config.FileErrorLog) ? "<br><a href='" + Config.FileErrorLog + "'>Link to the error log</a>" : "") +
-                        "<br>Consider opening an issue on GitHub :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
-                        MessageImg.MsgPoison, "Unexpected error", message,
-                        args => {
-                            Npp.Goto(args.Link);
-                            args.Handled = true;
-                        },
-                        0, 500);
-                else
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>",
-                        MessageImg.MsgPoison, "Unexpected error", message,
-                        args => {
-                            Npp.Goto(args.Link);
-                            args.Handled = true;
-                        },
-                        0, 500);
-            } catch (Exception x) {
-                DirtyLog(x);
-                // display the error message the old way
-                MessageBox.Show("An unidentified error has occurred, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try {
+                    // show it to the user
+                    if (Config.Instance.UserGetsPreReleases)
+                        UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
+                            (File.Exists(Config.FileErrorLog) ? "<br><a href='" + Config.FileErrorLog + "'>Link to the error log</a>" : "") +
+                            "<br>Consider opening an issue on GitHub :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                            MessageImg.MsgPoison, "Unexpected error", message,
+                            args => {
+                                Npp.Goto(args.Link);
+                                args.Handled = true;
+                            },
+                            0, 500);
+                    else
+                        UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>", MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
+                } catch (Exception) {
+                    // display the error message the old way
+                    MessageBox.Show("An unidentified error has occurred, probably while loading the plugin.\n\nThere is a hugh probability that it will cause the plugin to not operate normally.\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
         /// <summary>
         /// Log a piece of information
+        /// returns false if the error already occured during the session, true otherwise
         /// </summary>
         /// <param name="message"></param>
         public static bool Log(string message) {
-            bool success = true;
+
+            // don't show/store the same error twice in a session
+            if (_catchedErrors.Contains(message))
+                return false;
+            _catchedErrors.Add(message);
+
             var toAppend = new StringBuilder("***************************\r\n");
 
             try {
@@ -125,7 +104,7 @@ namespace _3PA.MainFeatures {
                 var callingClass = method.DeclaringType;
                 var callingMethod = method.Name;
 
-                toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
+                toAppend.AppendLine("**" + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + "**");
                 if (method.DeclaringType != null && !method.DeclaringType.Name.Equals("ErrorHandler"))
                     toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
                 toAppend.AppendLine("```");
@@ -133,59 +112,35 @@ namespace _3PA.MainFeatures {
                 toAppend.AppendLine("```\r\n");
 
                 File.AppendAllText(Config.FileErrorLog, toAppend.ToString());
-            } catch (Exception x) {
-                DirtyLog(x);
-                success = false;
+            } catch (Exception) {
+                // nothing to do
             }
-
             try {
                 File.AppendAllText(Config.FileErrorToSend, toAppend.ToString());
+
+                // send to github
+                Task.Factory.StartNew(() => {
+                    if (Config.Instance.GlobalDontAutoPostLog || UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
+                        Utils.DeleteFile(Config.FileErrorToSend);
+                    }
+                });
             } catch (Exception) {
-                // hm it's ok..
+                // nothing to do
             }
 
-            return success;
-        }
-
-        /// <summary>
-        /// Log a piece of information
-        /// </summary>
-        public static void DirtyLog(Exception e) {
-            if (File.Exists(Config.FileDirtyErrors)) {
-                FileInfo f = new FileInfo(Config.FileDirtyErrors);
-                if (f.Length > 10000000)
-                    return;
-            }
-            var toAppend = new StringBuilder("***************************\r\n");
-            try {
-                StackFrame frame = new StackFrame(1);
-                var method = frame.GetMethod();
-                var callingClass = method.DeclaringType;
-                var callingMethod = method.Name;
-
-                toAppend.AppendLine("**" + DateTime.UtcNow.ToString("yy-MM-dd HH:mm:ss.fff zzz") + "**");
-                if (method.DeclaringType != null)
-                    toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
-                toAppend.AppendLine("```");
-                toAppend.AppendLine(e.ToString());
-                toAppend.AppendLine("```\r\n");
-
-                File.AppendAllText(Config.FileDirtyErrors, toAppend.ToString());
-            } catch (Exception) {
-                // ok
-            }
+            return true;
         }
 
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
-            ShowErrors((Exception)args.ExceptionObject, "Unhandled error!");
+            ShowErrors((Exception)args.ExceptionObject, "Unhandled error");
         }
 
         public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {
-            ShowErrors(e.Exception, "Thread error!");
+            ShowErrors(e.Exception, "Thread error");
         }
 
         public static void UnobservedErrorHandler(object sender, UnobservedTaskExceptionEventArgs e) {
-            ShowErrors(e.Exception, "Unobserved task error!");
+            ShowErrors(e.Exception, "Unobserved task error");
         }
     }
 }

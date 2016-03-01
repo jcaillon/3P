@@ -63,14 +63,13 @@ namespace _3PA.MainFeatures {
                         StartInfo = {
                             FileName = Config.FileUpdaterExe,
                             Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
-                            UseShellExecute = true,
                             WindowStyle = ProcessWindowStyle.Hidden
                         }
                     };
                     process.Start();
                 } catch (Exception e) {
                     if (!(e is Win32Exception))
-                        ErrorHandler.ShowErrors(e, "OnNotepadExit");
+                        ErrorHandler.Log("OnNotepadExit\r\n" + e);
                 }
             }
         }
@@ -130,6 +129,9 @@ namespace _3PA.MainFeatures {
 
                 // reset the log files
                 Utils.DeleteDirectory(Config.FolderLog, true);
+
+                // make sure to use up to date lib
+                Utils.DeleteDirectory(Config.FolderLibrary, true);
 
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
@@ -251,7 +253,7 @@ namespace _3PA.MainFeatures {
                                 releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("updated_at")).Item2.Substring(0, 10)
                                 );
                         } catch (Exception x) {
-                            ErrorHandler.DirtyLog(x);
+                            ErrorHandler.Log(x.Message);
                         }
 
                         // Hookup DownloadFileCompleted Event, download the release .zip

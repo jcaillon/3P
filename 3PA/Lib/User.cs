@@ -92,7 +92,7 @@ namespace _3PA.Lib {
                 mac = (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
             } catch (Exception e) {
                 if (!(e is ArgumentNullException)) {
-                    ErrorHandler.DirtyLog(e);
+                    ErrorHandler.Log(e.Message);
                 }
             }
             return mac;

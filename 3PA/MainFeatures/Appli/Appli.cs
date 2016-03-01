@@ -112,7 +112,7 @@ namespace _3PA.MainFeatures.Appli {
                     _form.ForceClose();
                 _form = null;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 

@@ -567,7 +567,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // closing the autocompletion form also closes the tooltip
                 InfoToolTip.InfoToolTip.CloseIfOpenedForCompletion();
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 
@@ -580,7 +580,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _form.ForceClose();
                 _form = null;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 

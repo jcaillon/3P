@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
                 _checkButton.Checked = false;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             } finally {
                 Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
                 PlsRefresh();
@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             try {
                 Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             } finally {
                 Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
                 if (Plug.IsCurrentFileProgress)

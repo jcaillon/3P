@@ -567,7 +567,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _currentCompletionList = null;
                 GoToDefinitionFile = null;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 
@@ -588,7 +588,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     _form.ForceClose();
                 _form = null;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
         }
 

@@ -677,7 +677,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             try {
                 return (CodeExplorerItem)_fastOlv.SelectedItem.RowObject;
             } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+                ErrorHandler.Log(x.Message);
             }
             return null;
         }

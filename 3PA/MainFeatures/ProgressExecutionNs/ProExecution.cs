@@ -43,7 +43,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public Action<ProExecution> OnExecutionEnd { private get; set; }
 
         /// <summary>
-        /// The action to execute at the end of the execution if it went well
+        /// The action to execute at the end of the execution if it went well = we found a .log and the database is connected or is not mandatory
         /// </summary>
         public Action<ProExecution> OnExecutionEndOk { private get; set; }
 

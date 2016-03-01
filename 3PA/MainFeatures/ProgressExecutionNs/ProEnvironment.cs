@@ -248,7 +248,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                                     try {
                                         propath = Path.GetFullPath(Path.Combine(basePath, propath));
                                     } catch (Exception x) {
-                                        ErrorHandler.DirtyLog(x);
+                                        ErrorHandler.Log(x.Message);
                                     }
                                 if (Directory.Exists(propath) || File.Exists(propath))
                                     if (!uniqueDirList.Contains(propath))
@@ -343,7 +343,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     output.AddRange(FindAllFiles(Current.BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
                 } catch (Exception x) {
                     if (!(x is DirectoryNotFoundException))
-                        ErrorHandler.DirtyLog(x);
+                        ErrorHandler.Log(x.Message);
                 }
                 return output;
             }
@@ -365,7 +365,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     }
                 } catch (Exception x) {
                     if (!(x is DirectoryNotFoundException))
-                        ErrorHandler.DirtyLog(x);
+                        ErrorHandler.Log(x.Message);
                 }
                 return output;
             }

@@ -123,8 +123,8 @@ namespace _3PA.MainFeatures {
         /// <param name="url"></param>
         public static bool SendIssue(string message, string url) {
             try {
-                // handle spam (50s min between 2 posts)
-                if (Utils.IsSpamming("SendIssue", 50000))
+                // handle spam (10s min between 2 posts)
+                if (Utils.IsSpamming("SendIssue", 10000))
                     return false;
 
                 HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;

@@ -157,8 +157,10 @@ namespace _3PA.MainFeatures {
                 new MenuItem("Run program", () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1", ImageResources.RunCode),
 
                 new MenuItem("Prolint code",  () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12", ImageResources.ProlintCode),
-                new MenuItem("Send to AppBuilder", ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O", ImageResources.SendToAppbuilder),
-                new MenuItem("Open progress dictionary", ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D", ImageResources.Dictionary),
+                new MenuItem("Open in the AppBuilder", ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O", ImageResources.SendToAppbuilder),
+                new MenuItem("Open progress dictionary", ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D", ImageResources.Dictionary) {
+                    Generic = true
+                },
 
                 new MenuItem(true), // --------------------------
 

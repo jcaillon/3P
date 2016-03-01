@@ -220,8 +220,8 @@ namespace _3PA.Lib {
                         return false;
                     i++;
                 }
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+            } catch (Exception) {
+                // would happen if the input strings are incorrect
             }
             return false;
         }

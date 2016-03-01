@@ -97,8 +97,7 @@ namespace _3PA.Lib {
 
             try {
                 buffer = File.ReadAllBytes(srcFile);
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
+            } catch (Exception) {
                 return encoding;
             }
 

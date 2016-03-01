@@ -404,12 +404,11 @@ namespace _3PA.Lib {
             if (string.IsNullOrEmpty(link)) return false;
 
             // open the file if it has a progress extension or Known extension
-            string ext = null;
+            string ext;
             try {
                 ext = Path.GetExtension(link);
-            } catch (Exception e) {
-                if (!(e is ArgumentException))
-                    ErrorHandler.DirtyLog(e);
+            } catch (Exception) {
+                ext = null;
             }
             if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.GlobalProgressExtension.Contains(ext)) && File.Exists(link)) {
                 Npp.Goto(link);

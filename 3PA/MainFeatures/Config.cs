@@ -395,7 +395,6 @@ namespace _3PA.MainFeatures {
             public string EnvDatabase = "";
 
             // TECHNICAL
-            public bool LogError = true;
             public string TechnicalLastPing = "";
 
             // THEMES
@@ -505,7 +504,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Url for the ping webservice
         /// </summary>
-        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/?action=ping"; } }
+        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.3.1/?action=ping"; } }
 
         public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
 

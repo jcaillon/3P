@@ -39,18 +39,8 @@ namespace _3PA.Lib {
             _pathToOlv = Path.Combine(Config.FolderLibrary, @"ObjectListView.dll");
 
             // delete existing libs so we are sure to use up to date libs
-            ResetLib();
-        }
-
-        public static void ResetLib() {
-            try {
-                if (File.Exists(_pathToYamui))
-                    File.Delete(_pathToYamui);
-                if (File.Exists(_pathToOlv))
-                    File.Delete(_pathToOlv);
-            } catch (Exception x) {
-                ErrorHandler.DirtyLog(x);
-            }
+            Utils.DeleteFile(_pathToYamui);
+            Utils.DeleteFile(_pathToOlv);
         }
 
         /// <summary>
