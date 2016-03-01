@@ -130,9 +130,6 @@ namespace _3PA.MainFeatures {
                 // reset the log files
                 Utils.DeleteDirectory(Config.FolderLog, true);
 
-                // make sure to use up to date lib
-                Utils.DeleteDirectory(Config.FolderLibrary, true);
-
                 // update UDL
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
                     Style.InstallUdl();
