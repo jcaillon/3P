@@ -292,7 +292,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 EnableRaisingEvents = true
             };
             Process.Exited += ProcessOnExited;
-            Process.Start();
+            try {
+                Process.Start();
+            } catch (Exception e) {
+                UserCommunication.Notify("Couldn't start a new prowin process!<br>Please check that the file path to prowin32.exe is correct in the <a href='go'>set environment page</a>.<br><br>Below is the technical error that occured :<br><div class='ToolTipcodeSnippet'>" + e.Message +"</div>", MessageImg.MsgError, "Execution error", "Can't start a prowin process", args => {
+                    Appli.Appli.GoToPage(PageNames.SetEnvironment); args.Handled = true;
+                }, 10);
+            }
 
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 

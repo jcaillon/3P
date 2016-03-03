@@ -233,8 +233,6 @@ namespace _3PA.MainFeatures.Parser {
             }
         }
 
-
-
         /// <summary>
         /// Main block, definitions block...
         /// </summary>
@@ -341,15 +339,11 @@ namespace _3PA.MainFeatures.Parser {
             });
         }
 
-
-
-
         /// <summary>
         /// Preprocessed variables
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
-
             // to completion data
             ParsedItemsList.Add(new CompletionData {
                 DisplayText = "&" + pars.Name,
@@ -388,7 +382,6 @@ namespace _3PA.MainFeatures.Parser {
             ParsedItemsList.Add(new CompletionData {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
-                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
                 Flag = 0,
                 Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
@@ -574,12 +567,9 @@ namespace _3PA.MainFeatures.Parser {
         /// Remarks : it doesn't parse the document against known words since this is only useful for
         /// the CURRENT document and not for the others
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="ownerName"></param>
-        /// <returns></returns>
         public static ParserVisitor ParseFile(string fileName, string ownerName) {
             ParserVisitor parserVisitor;
-
+            
             // did we already parsed this file in a previous parse session?
             if (ParserHandler.SavedParserVisitors.ContainsKey(fileName)) {
                 parserVisitor = ParserHandler.SavedParserVisitors[fileName];
@@ -593,6 +583,7 @@ namespace _3PA.MainFeatures.Parser {
                 // save it for future uses
                 ParserHandler.SavedParserVisitors.Add(fileName, parserVisitor);
             }
+
             return parserVisitor;
         }
 
@@ -602,9 +593,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Set runPersistentIsInFile = false (default) to add items only to the completion list,
         /// set to true to also display proc/func in the code explorer tree if asked
         /// </summary>
-        /// <param name="fileName"></param>
-        /// <param name="ownerName"></param>
-        /// <param name="runPersistentIsInFile"></param>
         public void LoadProcPersistent(string fileName, string ownerName, bool runPersistentIsInFile = false) {
 
             ParserVisitor parserVisitor = ParseFile(fileName, ownerName);
@@ -630,8 +618,6 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Adds the "external" flag if needed
         /// </summary>
-        /// <param name="flag"></param>
-        /// <returns></returns>
         private ParseFlag AddExternalFlag(ParseFlag flag) {
             if (_isBaseFile) return flag;
             return flag | ParseFlag.External;
@@ -649,9 +635,6 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Determines flags
         /// </summary>
-        /// <param name="flag"></param>
-        /// <param name="lcFlagString"></param>
-        /// <returns></returns>
         private static ParseFlag SetFlags(ParseFlag flag, string lcFlagString) {
             if (lcFlagString.Contains("global")) flag = flag | ParseFlag.Global;
             if (lcFlagString.Contains("shared")) flag = flag | ParseFlag.Shared;
@@ -664,9 +647,6 @@ namespace _3PA.MainFeatures.Parser {
         /// To test if a proc or a function has too much char in it, because this would make the
         /// appbuilder unable to open it correctly
         /// </summary>
-        /// <param name="startLine"></param>
-        /// <param name="endLine"></param>
-        /// <returns></returns>
         private bool HasTooMuchChar(int startLine, int endLine) {
             if (!_isBaseFile) return false;
             return NbExtraCharBetweenLines(startLine, endLine) > 0;
@@ -675,9 +655,6 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// returns the number of chars between two lines in the current document
         /// </summary>
-        /// <param name="startLine"></param>
-        /// <param name="endLine"></param>
-        /// <returns></returns>
         private static int NbExtraCharBetweenLines(int startLine, int endLine) {
             return (Npp.StartBytePosOfLine(endLine) - Npp.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
         }

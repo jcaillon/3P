@@ -129,6 +129,9 @@ namespace _3PA.MainFeatures.Parser {
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
 
+                // save the info for uses in an another file, where this file is run in persistent or included
+                SavedParserVisitors.Add(LastParsedFilePath, _parserVisitor);
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");
             }

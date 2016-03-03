@@ -61,7 +61,7 @@ namespace _3PA {
         public static bool IsCurrentFileProgress { get; private set; }
 
         /// <summary>
-        /// Stores the current filename when switching document
+        /// Stores the current file path when switching document
         /// </summary>
         public static string CurrentFilePath { get; private set; }
 

@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.FilteredLists {
             FilterFullyMatch = true;
             FilterDispertionLevel = 0;
 
-            if (string.IsNullOrEmpty(lowerCaseFilterString))
+            if (string.IsNullOrEmpty(lowerCaseFilterString) || string.IsNullOrEmpty(DisplayText))
                 return;
 
             var lcText = DisplayText.ToLower();

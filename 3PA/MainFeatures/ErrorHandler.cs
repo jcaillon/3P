@@ -88,8 +88,7 @@ namespace _3PA.MainFeatures {
         /// Log a piece of information
         /// returns false if the error already occured during the session, true otherwise
         /// </summary>
-        /// <param name="message"></param>
-        public static bool Log(string message) {
+        public static bool Log(string message, bool offlineLogOnly = false) {
 
             // don't show/store the same error twice in a session
             if (_catchedErrors.Contains(message))
@@ -115,17 +114,20 @@ namespace _3PA.MainFeatures {
             } catch (Exception) {
                 // nothing to do
             }
-            try {
-                File.AppendAllText(Config.FileErrorToSend, toAppend.ToString());
 
-                // send to github
-                Task.Factory.StartNew(() => {
-                    if (Config.Instance.GlobalDontAutoPostLog || UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
-                        Utils.DeleteFile(Config.FileErrorToSend);
-                    }
-                });
-            } catch (Exception) {
-                // nothing to do
+            if (!offlineLogOnly) {
+                try {
+                    File.AppendAllText(Config.FileErrorToSend, toAppend.ToString());
+
+                    // send to github
+                    Task.Factory.StartNew(() => {
+                        if (Config.Instance.GlobalDontAutoPostLog || UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
+                            Utils.DeleteFile(Config.FileErrorToSend);
+                        }
+                    });
+                } catch (Exception) {
+                    // nothing to do
+                }
             }
 
             return true;
