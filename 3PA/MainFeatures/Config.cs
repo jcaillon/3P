@@ -143,8 +143,8 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool GlobalDontCheckUpdates = false;
 
-            [Display(Name = "Get pre-release builds",
-                Description = "Check this option if you want to update 3P with the latest pre-release <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
+            [Display(Name = "I want to get beta releases",
+                Description = "Check this option if you want to update 3P with the latest beta version <b>(i.e. NOT STABLE)</b><br>Otherwise, you will only have update notifications for stable releases",
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
