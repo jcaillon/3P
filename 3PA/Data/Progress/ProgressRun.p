@@ -67,7 +67,7 @@ OUTPUT STREAM str_dbout TO VALUE({&CreateFileIfConnectFails}) BINARY.
 PUT STREAM str_logout UNFORMATTED "".
 
 /* load the .ini file */
-IF {&BaseIniPath} > "" THEN DO:
+IF {&BaseIniPath} > "" AND {&ExecutionType} <> "APPBUILDER" THEN DO:
     LOAD {&BaseIniPath} NO-ERROR.
     fi_output_last_error().
     

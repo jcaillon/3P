@@ -15,7 +15,8 @@ body {
 hr {
     border: 0;
     height: 1px;
-    background: %FORMBORDER%;
+    background: %FORMBORDER% no-repeat scroll center;
+    width: 70%;
 }
 
 a:link {
@@ -25,7 +26,11 @@ a:link {
     padding: 0px;*/
 }
 
-
+code {
+    background-color: %ALTERNATEBGCOLOR%;
+    padding-left: 5px;
+    padding-right: 5px;
+}
 
 
 /* this decorates the htmllabels */

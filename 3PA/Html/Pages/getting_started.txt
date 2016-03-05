@@ -1,6 +1,6 @@
 # Getting started #
 
-**I'll keep this short.** The full documentation can be found [here](http://jcaillon.github.io/3P/).
+**I'll keep this short.** A more detailed documentation can be found [here](http://jcaillon.github.io/3P/).
 
 
 ## Main menu ##
@@ -29,8 +29,14 @@ Read the info below concerning the page `SET` > `ENVIRONMENT` :
 
 *The following screenshots might not be up to date with the latest version of 3P, however the general idea will still be true*
 
+
+
 ![image](getting_started_1)
 
+---
+
 ![image](getting_started_2)
+
+---
 
 ![image](getting_started_3)

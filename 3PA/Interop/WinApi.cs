@@ -731,11 +731,15 @@ namespace _3PA.Interop {
             }
 
             public void Dispose() {
-                if (!_disposed) {
-                    for (int i = 0; i < _nativeItems.Count; i++)
-                        if (_nativeItems[i] != IntPtr.Zero) Marshal.FreeHGlobal(_nativeItems[i]);
-                    if (_nativeArray != IntPtr.Zero) Marshal.FreeHGlobal(_nativeArray);
-                    _disposed = true;
+                try {
+                    if (!_disposed) {
+                        for (int i = 0; i < _nativeItems.Count; i++)
+                            if (_nativeItems[i] != IntPtr.Zero) Marshal.FreeHGlobal(_nativeItems[i]);
+                        if (_nativeArray != IntPtr.Zero) Marshal.FreeHGlobal(_nativeArray);
+                        _disposed = true;
+                    }
+                } catch (Exception) {
+                    // ignored
                 }
             }
 

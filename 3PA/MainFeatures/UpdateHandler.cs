@@ -86,7 +86,7 @@ namespace _3PA.MainFeatures {
             } else {
                 // first use message?
                 if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P i invite you to read the <b><i>Getting started</b></i> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br><div align='right'>Enjoy!!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                    UserCommunication.Notify("<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
                         Appli.Appli.ToggleView();
                         args.Handled = true;
                     });
@@ -376,9 +376,15 @@ namespace _3PA.MainFeatures {
         /// delete the hour timer
         /// </summary>
         public static void DeleteHourTimer() {
-            _hourTimer.Stop();
-            _hourTimer.Close();
-            _hourTimer.Dispose();
+            try {
+                if (_hourTimer != null) {
+                    _hourTimer.Stop();
+                    _hourTimer.Close();
+                    _hourTimer.Dispose();
+                }
+            } catch (Exception) {
+                // clean up proc
+            }
         }
 
         #endregion

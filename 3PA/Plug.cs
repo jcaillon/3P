@@ -72,7 +72,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region Init
 
         /// <summary>
@@ -177,7 +176,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region Clean up
 
         /// <summary>
@@ -225,7 +223,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region Hooks and WndProc override
 
@@ -285,7 +282,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region Apply Npp options
 
         private static bool _indentWithTabs;
@@ -330,7 +326,6 @@ namespace _3PA {
 
         #endregion
 
-
         #region utils
 
         /// <summary>
@@ -342,7 +337,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region tests
 
