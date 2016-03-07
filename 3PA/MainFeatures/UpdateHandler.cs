@@ -215,9 +215,7 @@ namespace _3PA.MainFeatures {
                             var releaseVersion = releaseVersionTuple.Item2;
 
                             // is it the highest version ? for prereleases or full releases depending on the user config
-                            if (((Config.Instance.UserGetsPreReleases && prereleaseTuple.Item2.EqualsCi("true"))
-                                 || (!Config.Instance.UserGetsPreReleases && prereleaseTuple.Item2.EqualsCi("false")))
-                                && releaseVersion.IsHigherVersionThan(highestVersion)) {
+                            if (releaseVersion.IsHigherVersionThan(highestVersion) && (Config.Instance.UserGetsPreReleases || prereleaseTuple.Item2.EqualsCi("false"))) {
                                 highestVersion = releaseVersion;
                                 highestVersionInt = iCount;
                             }
