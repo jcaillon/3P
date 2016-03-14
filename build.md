@@ -2,9 +2,8 @@
 
 **To be able to compile this project you need to**
 
+- You might have a missing librairy/exe when compiling, install the [SDK for .net 4.0](https://www.microsoft.com/en-us/download/details.aspx?id=8279)
 - Your system envVar path must be extended to include ILDasm.exe directory (e.g. "c:\Program Files (x86)\Microsoft SDKs\Windows\v8.0A\bin\NETFX 4.0 Tools")
-- You might also have a missing librairy/exe when compiling, i invite you to google it :) fyi, it is used here : `LibToolPath="$(DevEnvDir)\..\..\VC\bin"` in `3P\3PA\Interop\DllExport\NppPlugin.DllExport.targets`
-
 
 ## When releasing (Note to myself) : ##
 

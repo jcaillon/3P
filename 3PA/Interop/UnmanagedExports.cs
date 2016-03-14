@@ -19,9 +19,8 @@
 #endregion
 using System;
 using System.Runtime.InteropServices;
-using NppPlugin.DllExport;
+using RGiesecke.DllExport;
 using _3PA.Lib;
-using _3PA.MainFeatures;
 
 // ReSharper disable InconsistentNaming
 // ReSharper disable UnusedMember.Local

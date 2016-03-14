@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -55,12 +56,12 @@ namespace _3PA.Lib {
                         StreamWriter writer = new StreamWriter(req.GetRequestStream());
                         JavaScriptSerializer serializer = new JavaScriptSerializer();
                         writer.Write("{" +
-                                     "\"computerId\": " + serializer.Serialize(Environment.MachineName + GetMacAddress()) + "," +
-                                     "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
-                                     "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
-                                     "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
-                                     "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.Now) ? TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName) +
-                                     "}");
+                            "\"computerId\": " + serializer.Serialize(GetWindowsUniqueId()) + "," +
+                            "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
+                            "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
+                            "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
+                            "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.Now) ? TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName + " (" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now) + ")") +
+                            "}");
                         writer.Close();
                         string result = null;
                         using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
@@ -84,17 +85,37 @@ namespace _3PA.Lib {
         /// Returns the mac address of the computer
         /// </summary>
         public static string GetMacAddress() {
-            string mac = string.Empty;
             try {
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled=true");
                 IEnumerable<ManagementObject> objects = searcher.Get().Cast<ManagementObject>();
-                mac = (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
+                return (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
             } catch (Exception e) {
                 if (!(e is ArgumentNullException)) {
                     ErrorHandler.Log(e.Message);
                 }
             }
-            return mac;
+            return string.Empty;
+        }
+
+        /// <summary>
+        /// Returns an identifier that is supposed to be unique for each computer
+        /// </summary>
+        public static string GetWindowsUniqueId() {
+            try {
+                var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                var proc = new Process { StartInfo = procStartInfo };
+                proc.Start();
+                return proc.StandardOutput.ReadToEnd().Replace("UUID", string.Empty).Trim().ToUpper();
+            } catch (Exception e) {
+                if (!(e is ArgumentNullException)) {
+                    ErrorHandler.Log(e.Message);
+                }
+            }
+            return Environment.MachineName + GetMacAddress();
         }
 
     }

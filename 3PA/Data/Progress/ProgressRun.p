@@ -80,13 +80,13 @@ ASSIGN PROPATH = {&propathToUse}.
 
 /* connect the database(s) */
 IF {&BasePfPath} > "" THEN DO:
-    CONNECT -pf {&BasePfPath} -ct 1 NO-ERROR.
+    CONNECT -pf {&BasePfPath} -ct 2 NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
 END.
 
 IF {&ExtraPf} > "" THEN DO:
-    CONNECT VALUE({&ExtraPf}) -ct 1 NO-ERROR.
+    CONNECT VALUE({&ExtraPf}) -ct 2 NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
 END.
