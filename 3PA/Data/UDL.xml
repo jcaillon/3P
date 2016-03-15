@@ -6,8 +6,8 @@
     <KeywordLists>
       <Keywords name="Comments">00&amp;ANALYZE-SUSPEND 00&amp;GLOBAL-DEFINE 00&amp;SCOPED-DEFINE 00&amp;SCOPED 00&amp;GLOB 00&amp;GLOBAL 00&amp;MESSAGE 00&amp;UNDEFINE 01~ 01~ 01~ 01~ 01~ 01~ 01~ 01~ 02 03/* 04*/</Keywords>
       <Keywords name="Numbers, prefix1"></Keywords>
-      <Keywords name="Numbers, prefix2"></Keywords>
-      <Keywords name="Numbers, extras1"></Keywords>
+      <Keywords name="Numbers, prefix2">0x</Keywords>
+      <Keywords name="Numbers, extras1">A B C D E F a b c d e f</Keywords>
       <Keywords name="Numbers, extras2"></Keywords>
       <Keywords name="Numbers, suffix1"></Keywords>
       <Keywords name="Numbers, suffix2"></Keywords>
@@ -38,7 +38,7 @@
       <WordsStyle name="COMMENTS" fgColor="718C00" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="0" nesting="131456" />
       <WordsStyle name="LINE COMMENTS" fgColor="EAB700" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="2" nesting="117702652" />
       <WordsStyle name="NUMBERS" fgColor="C82829" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="0" nesting="0" />
-      <WordsStyle name="KEYWORDS1" fgColor="183E56" bgColor="bbdaff" fontName="" fontStyle="1" nesting="0" />
+      <WordsStyle name="KEYWORDS1" fgColor="183E56" bgColor="BBDAFF" fontName="" fontStyle="1" nesting="0" />
       <WordsStyle name="KEYWORDS2" fgColor="183E56" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="1" nesting="0" />
       <WordsStyle name="KEYWORDS3" fgColor="2F5E9B" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="1" nesting="0" />
       <WordsStyle name="KEYWORDS4" fgColor="2F5E9B" bgColor="FFFFFF" colorStyle="1" fontName="" fontStyle="1" nesting="0" />

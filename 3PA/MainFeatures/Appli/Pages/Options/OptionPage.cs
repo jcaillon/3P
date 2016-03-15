@@ -107,6 +107,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                     dockedPanel.ContentPanel.Controls.Add(strControl);
                     var strButton = new YamuiImageButton {
+                        Text = @"save",
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
                         Location = new Point(545, yPos),

@@ -67,13 +67,13 @@ namespace _3PA.MainFeatures.Appli {
                 //    new YamuiSecMenu("COMPILE MANY", null, new template()),
                 //}),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
-                    //new YamuiSecMenu("PROFILES", PageNames.OptionsProfile.ToString(), new ProfilesPage()),
-                    new YamuiSecMenu("GENERAL", PageNames.OptionsProfile.ToString(), new OptionPage(new List<string> { "General" })), //TODO change the page name!
+                    //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
+                    new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General" })), //TODO change the page name!
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
                     new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
                     new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
-                    new YamuiSecMenu("MISC", "misc", new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
+                    new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
                     new YamuiSecMenu("OTHERS", "others", new OthersPage()),
                     new YamuiSecMenu("SHARE/EXPORT CONFIG", PageNames.ExportShareConf.ToString(), new ExportPage()),
                 })
@@ -224,7 +224,8 @@ namespace _3PA.MainFeatures.Appli {
     internal enum PageNames {
         Welcome,
         FileInfo,
-        OptionsProfile,
+        OptionsGeneral,
+        OptionsMisc,
         ExportShareConf,
         SetEnvironment
     }

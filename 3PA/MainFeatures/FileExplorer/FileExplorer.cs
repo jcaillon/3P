@@ -26,9 +26,11 @@ using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal static class FileExplorer {
@@ -153,7 +155,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             }
 
             if (firstCall && DateTime.Now.Subtract(_startTime).TotalMilliseconds > Config.Instance.FileExplorerListFilesTimeOutInMs) {
-                UserCommunication.Notify("The file explorer was listing all the files of the requested folder but has been interrupted because it was taking too long.<br><br>You can set a value for this time out in the option page.", MessageImg.MsgInfo, "Listing files", "Time out reached");
+                UserCommunication.Notify("The file explorer was listing all the files of the requested folder but has been interrupted because it was taking too long.<br><br>You can set a value for this time out in the option page.", MessageImg.MsgInfo, "Listing files", "Time out reached", args => {
+                    Appli.Appli.GoToPage(PageNames.OptionsMisc); args.Handled = true;
+                });
             }
 
             return output;

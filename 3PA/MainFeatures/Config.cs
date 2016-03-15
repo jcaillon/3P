@@ -317,8 +317,12 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool FileExplorerAutoHideOnNonProgressFile = false;
 
+            [Display(Name = "File listing time out",
+                Description = "The maximum time given to 3P to list the files of your current directory<br>This option is here to limit the amount of time spent to build<br>a list of you files. This time can be huge if you select<br>a folder with a lot of files or if you select a folder on a windows server",
+                GroupName = "File explorer",
+                AutoGenerateField = false)]
             [Range(1000, 30000)]
-            public int FileExplorerListFilesTimeOutInMs = 5000;
+            public int FileExplorerListFilesTimeOutInMs = 3000;
 
             #endregion
 
@@ -401,6 +405,7 @@ namespace _3PA.MainFeatures {
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
+            public bool GlobalDontUseSyntaxHighlightTheme = false;
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();

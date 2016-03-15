@@ -380,7 +380,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 return (CompletionData) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+                if (!(x is NullReferenceException))
+                    ErrorHandler.Log(x.Message);
             }
             return null;
         }
@@ -523,7 +524,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
 
             // apply filter to each item in the list then set the list
-            _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            try {
+                _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            } catch (Exception e) {
+                if (!(e is NullReferenceException))
+                    ErrorHandler.Log(e.ToString());
+            }
             if (string.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
             } else {

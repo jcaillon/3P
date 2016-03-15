@@ -55,33 +55,56 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // themes combo box
-            comboTheme.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
-            comboTheme.SelectedIndex = ThemeManager.GetThemesList().FindIndex(theme => theme.UniqueId == Config.Instance.ThemeId);
-            comboTheme.SelectedIndexChanged += ComboThemeOnSelectedIndexChanged;
+            cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
+            cbApplication.SelectedIndex = ThemeManager.GetThemesList().FindIndex(theme => theme.UniqueId == Config.Instance.ThemeId);
+            cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
 
             // syntax combo
             cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
 
+            // toggle
+            tg_colorOn.CheckedChanged += TgColorOnOnCheckedChanged;
+            tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
+            UpdateToggle();
+
             // tooltips
-            toolTip.SetToolTip(comboTheme, "Choose the theme you wish to use for the software");
+            toolTip.SetToolTip(cbApplication, "Choose the theme you wish to use for the software");
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
+            toolTip.SetToolTip(tg_colorOn, "Toggle this option on if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this on, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this, select the UDL to use from the Language menu before you can see any changes</i>");
+        }
+
+        /// <summary>
+        /// Toggle on/off the use of a custom UDL
+        /// </summary>
+        private void TgColorOnOnCheckedChanged(object sender, EventArgs eventArgs) {
+            Config.Instance.GlobalDontUseSyntaxHighlightTheme = tg_colorOn.Checked;
+            UpdateToggle();
+        }
+
+        private void UpdateToggle() {
+            if (tg_colorOn.Checked) {
+                tg_colorOn.Text = "Use a custom User Defined Language";
+                cbSyntax.Hide();
+            } else {
+                tg_colorOn.Text = "Use the themes provided by 3P, select one below : ";
+                cbSyntax.Show();
+            }
         }
 
         /// <summary>
         /// Changing theme
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
-        private void ComboThemeOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
+        private void CbApplicationOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
-                ThemeManager.Current = ThemeManager.GetThemesList()[comboTheme.SelectedIndex];
+                ThemeManager.Current = ThemeManager.GetThemesList()[cbApplication.SelectedIndex];
                 ThemeManager.Current.AccentColor = ThemeManager.Current.ThemeAccentColor;
                 Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
                 _checkButton.Checked = false;
             } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+                if (!(x is NullReferenceException))
+                    ErrorHandler.Log(x.Message);
             } finally {
                 Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
                 PlsRefresh();
@@ -92,8 +115,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <summary>
         /// Changing syntax theme
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
         private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
             try {
                 Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
@@ -109,8 +130,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// <summary>
         /// Changing accent Color
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
         private void NewColorPickerOnCheckedChanged(object sender, EventArgs eventArgs) {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {

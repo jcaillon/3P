@@ -195,7 +195,7 @@ namespace _3PA.MainFeatures {
 
                new MenuItem(true), // --------------------------
 
-               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsProfile), "Go_to_options", null, ImageResources.ShowOptions),
+               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions),
             };
 
             if (Config.IsDevelopper) {

@@ -621,7 +621,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
             var curPos = new Point(_fastOlv.SelectedIndex, _fastOlv.TopItemIndex);
 
             // apply filter to each item in the list then set the list
-            _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            try {
+                _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
+            } catch (Exception e) {
+                if (!(e is NullReferenceException))
+                    ErrorHandler.Log(e.ToString());
+            }
             if (!_isFiltering) {
                 _fastOlv.SetObjects(_initialObjectsList);
             } else {

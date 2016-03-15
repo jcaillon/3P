@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -402,36 +403,43 @@ namespace _3PA.Lib {
         /// <param name="link"></param>
         public static bool OpenAnyLink(string link) {
             if (string.IsNullOrEmpty(link)) return false;
-
-            // open the file if it has a progress extension or Known extension
-            string ext;
             try {
-                ext = Path.GetExtension(link);
-            } catch (Exception) {
-                ext = null;
-            }
-            if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.GlobalProgressExtension.Contains(ext)) && File.Exists(link)) {
-                Npp.Goto(link);
-                return true;
-            }
 
-            // url?
-            if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link).Success) {
-                Process.Start(link);
-                return true;
-            }
+                // open the file if it has a progress extension or Known extension
+                string ext;
+                try {
+                    ext = Path.GetExtension(link);
+                } catch (Exception) {
+                    ext = null;
+                }
+                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.GlobalProgressExtension.Contains(ext)) && File.Exists(link)) {
+                    Npp.Goto(link);
+                    return true;
+                }
 
-            // open with default shell action
-            if (!File.Exists(link)) {
-                if (!Directory.Exists(link))
-                    return false;
-                OpenFolder(link);
-            }
+                // url?
+                if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link).Success) {
+                    Process.Start(link);
+                    return true;
+                }
 
-            var process = new ProcessStartInfo(link) {
-                UseShellExecute = true
-            };
-            Process.Start(process);
+                // open with default shell action
+                if (!File.Exists(link)) {
+                    if (!Directory.Exists(link))
+                        return false;
+                    OpenFolder(link);
+                }
+
+            
+                var process = new ProcessStartInfo(link) {
+                    UseShellExecute = true
+                };
+                Process.Start(process);
+
+            } catch (Exception e) {
+                if (!(e is Win32Exception))
+                    ErrorHandler.Log(e.ToString());
+            }
             return true;
         }
 
