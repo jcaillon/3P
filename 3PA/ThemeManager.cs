@@ -17,10 +17,15 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Linq;
 using YamuiFramework.Themes;
 using _3PA.Data;
+using _3PA.Images;
 using _3PA.MainFeatures;
 
 namespace _3PA {
@@ -33,7 +38,7 @@ namespace _3PA {
         public static Theme Current {
             get {
                 if (_currentTheme == null) {
-                    Current = GetThemesList().Find(theme => theme.UniqueId == Config.Instance.ThemeId) ?? GetThemesList()[0];
+                    Current = GetThemesList().ElementAt(Config.Instance.ThemeId) ?? GetThemesList()[0];
                 }
                 return _currentTheme;
             }
@@ -52,10 +57,36 @@ namespace _3PA {
         public static List<Theme> GetThemesList() {
             if (_listOfThemes.Count == 0) {
                 Class2Xml<Theme>.LoadFromRaw(_listOfThemes, DataResources.ThemesList, true);
+
+                // get background image event
+                YamuiTheme.OnImageNeeded = YamuiThemeOnOnImageNeeded;
+
+
             }
             return _listOfThemes;
         }
+
         private static List<Theme> _listOfThemes = new List<Theme>();
+
+        /// <summary>
+        /// Event called when the YamuiFramework requests the background image,
+        /// Tries to find the image in the ressources of the assembly, otherwise look for a file
+        /// in the Config/3P/Themes folder
+        /// </summary>
+        private static Image YamuiThemeOnOnImageNeeded(string imageToLoad) {
+            try {
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(imageToLoad);
+                if (tryImg != null)
+                    return tryImg;
+                var path = Path.Combine(Config.FolderThemes, imageToLoad);
+                if (File.Exists(path)) {
+                    return Image.FromFile(path);
+                }
+            } catch (Exception e) {
+                ErrorHandler.Log(e.ToString());
+            }
+            return null;
+        }
 
         /// <summary>
         /// Returns a list of accent colors to choose from

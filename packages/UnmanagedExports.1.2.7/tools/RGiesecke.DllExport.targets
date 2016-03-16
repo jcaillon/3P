@@ -30,7 +30,6 @@
       e.g.:
       DllExportAttributeAssemblyName="$(MyDllExportAttributeAssemblyName)"
       DllExportAttributeFullName="$(MyDllExportAttributeFullName)"
-
     -->
     <PropertyGroup>
 
@@ -61,8 +60,6 @@
                                     CpuType="$(DllExportCpuType)"
                                     EmitDebugSymbols="$(DllExportEmitDebugSymbols)"
                                     LeaveIntermediateFiles="$(DllExportLeaveIntermediateFiles)"
-                                    DllExportAttributeAssemblyName="$(DllExportAttributeAssemblyName)"
-                                    DllExportAttributeFullName="$(DllExportAttributeFullName)"
                                     Timeout="$(DllExportTimeout)"
                                     KeyContainer="$(DllExportKeyContainer)"
                                     KeyFile="$(DllExportKeyFile)"

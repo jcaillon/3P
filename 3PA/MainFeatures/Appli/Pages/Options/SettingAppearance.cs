@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // themes combo box
             cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
-            cbApplication.SelectedIndex = ThemeManager.GetThemesList().FindIndex(theme => theme.UniqueId == Config.Instance.ThemeId);
+            cbApplication.SelectedIndex = Config.Instance.ThemeId;
             cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
 
             // syntax combo
@@ -106,7 +106,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 if (!(x is NullReferenceException))
                     ErrorHandler.Log(x.Message);
             } finally {
-                Config.Instance.ThemeId = ThemeManager.Current.UniqueId;
+                Config.Instance.ThemeId = cbApplication.SelectedIndex;
                 PlsRefresh();
             }
             

@@ -521,16 +521,22 @@ namespace _3PA.MainFeatures {
         public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
         public static string FolderLibrary { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Libraries")); } }
         public static string FolderUpdate { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
-        public static string FolderTemplates { get { return Path.Combine(Npp.GetConfigDir(), "Templates"); } }
+        public static string FolderTemplates { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Templates")); } }
+        public static string FolderThemes { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Themes")); } }
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
 
+        // themes
+        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_SyntaxThemes.conf"); } }
+
+        // errors
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }
         public static string FileErrorToSend { get { return Path.Combine(FolderLog, "error_.log"); } }
-        public static string FileDirtyErrors { get { return Path.Combine(FolderLog, "dirty_errors.log"); } }
 
+        // dumps
         public static string FileFilesInfo { get { return Path.Combine(FolderTechnical, "filesInfo.dump"); } }
         public static string FileKeywordsRank { get { return Path.Combine(FolderTechnical, "keywordsRank.dump"); } }
 
+        // general config
         public static string FileKeywordsList { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsList.conf"); } }
         public static string FileKeywordsHelp { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsHelp.conf"); } }
         public static string FileAbbrev { get { return Path.Combine(Npp.GetConfigDir(), "_Abbreviations.conf"); } }
@@ -541,6 +547,7 @@ namespace _3PA.MainFeatures {
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
 
+        // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
         public static string FileDownloadedPlugin { get { return Path.Combine(FolderUpdate, "3P.dll"); } }
         public static string FileZipExe { get { return Path.Combine(FolderUpdate, "7z.exe"); } }

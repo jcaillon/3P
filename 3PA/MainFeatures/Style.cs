@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -62,6 +63,40 @@ namespace _3PA.MainFeatures {
                 _currentTheme = GetThemesList().ElementAt(Config.Instance.SyntaxHighlightThemeId) ?? GetThemesList()[0];
                 return _currentTheme;
             }
+        }
+
+        /// <summary>
+        /// Returns the list of all available themes
+        /// </summary>
+        /// <returns></returns>
+        public static List<StyleTheme> GetThemesList() {
+            if (_listOfThemes.Count == 0) {
+                StyleTheme curTheme = null;
+                ConfLoader.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxHighlighting, Encoding.Default, s => {
+                    // beggining of a new theme, read its name
+                    if (s.Length > 2 && s[0] == '>') {
+                        _listOfThemes.Add(new StyleTheme());
+                        curTheme = _listOfThemes.Last();
+                        curTheme.Name = s.Substring(2);
+                    }
+                    if (curTheme == null)
+                        return;
+                    // fill the theme
+                    var items = s.Split('\t');
+                    if (items.Count() == 4) {
+                        curTheme.SetValueOf(items[0], new StyleThemeItem {
+                            ForeColor = ColorTranslator.FromHtml(items[1]),
+                            BackColor = ColorTranslator.FromHtml(items[2]),
+                            FontType = int.Parse(items[3])
+                        });
+                    }
+                });
+            }
+
+            if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
+                Config.Instance.SyntaxHighlightThemeId = 0;
+
+            return _listOfThemes;
         }
 
         #endregion
@@ -121,90 +156,75 @@ namespace _3PA.MainFeatures {
 
         #region set styles
 
-        public static Npp.Style StyleDefault = Npp.GetStyle((byte)UdlStyles.Default);
-        public static Npp.Style StyleComment = Npp.GetStyle((byte)UdlStyles.Comment);
-        public static Npp.Style StyleCommentLine = Npp.GetStyle((byte)UdlStyles.CommentLine);
-        public static Npp.Style StyleNumber = Npp.GetStyle((byte)UdlStyles.Number);
-        public static Npp.Style StyleJumpInCode = Npp.GetStyle((byte)UdlStyles.KeyWordsList1);
-        public static Npp.Style StyleWordStatement = Npp.GetStyle((byte)UdlStyles.KeyWordsList2);
-        public static Npp.Style StyleVarType = Npp.GetStyle((byte)UdlStyles.KeyWordsList3);
-        public static Npp.Style StyleOtherKeyword = Npp.GetStyle((byte)UdlStyles.KeyWordsList4);
-        public static Npp.Style StylePreprocessed = Npp.GetStyle((byte)UdlStyles.KeyWordsList5);
-        public static Npp.Style StyleVariablesPrefix = Npp.GetStyle((byte)UdlStyles.KeyWordsList6);
-        public static Npp.Style StyleAbbreviation = Npp.GetStyle((byte)UdlStyles.KeyWordsList7);
-        public static Npp.Style StyleTrigram = Npp.GetStyle((byte)UdlStyles.KeyWordsList8);
-        public static Npp.Style StyleOperators = Npp.GetStyle((byte)UdlStyles.Operators);
-        public static Npp.Style StyleBlockStartKeyword = Npp.GetStyle((byte)UdlStyles.FolderInCode2);
-        public static Npp.Style StyleStrDoubleQuote = Npp.GetStyle((byte)UdlStyles.Delimiter1);
-        public static Npp.Style StyleStrSimple = Npp.GetStyle((byte)UdlStyles.Delimiter2);
-        public static Npp.Style StyleInclude = Npp.GetStyle((byte)UdlStyles.Delimiter3);
-        public static Npp.Style StyleStrDoubleQuoteComm = Npp.GetStyle((byte)UdlStyles.Delimiter4);
-        public static Npp.Style StyleStrSimpleComm = Npp.GetStyle((byte)UdlStyles.Delimiter5);
-        public static Npp.Style StyleNestedComment = Npp.GetStyle((byte)UdlStyles.Delimiter8);
 
-        public static List<Color> BgErrorLevelColors;
-        public static List<Color> FgErrorLevelColors;
 
         public static void SetSyntaxStyles() {
 
             var curTheme = CurrentTheme;
 
             // setting styles for the syntax highlighting
-            StyleDefault.ForeColor = curTheme.FgDefault;
-            StyleComment.ForeColor = curTheme.FgComment;
-            StyleCommentLine.ForeColor = curTheme.FgLineComment;
-            StyleNumber.ForeColor = curTheme.FgNumbers;
-            StyleJumpInCode.ForeColor = curTheme.FgKeyword1;
-            StyleWordStatement.ForeColor = curTheme.FgKeyword2;
-            StyleVarType.ForeColor = curTheme.FgKeyword3;
-            StyleOtherKeyword.ForeColor = curTheme.FgKeyword4;
-            StylePreprocessed.ForeColor = curTheme.FgKeyword5;
-            StyleVariablesPrefix.ForeColor = curTheme.FgKeyword6;
-            StyleAbbreviation.ForeColor = curTheme.FgKeyword7;
-            StyleTrigram.ForeColor = curTheme.FgKeyword8;
-            StyleOperators.ForeColor = curTheme.FgOperators;
-            StyleBlockStartKeyword.ForeColor = curTheme.FgFoldInCode2;
-            StyleStrDoubleQuote.ForeColor = curTheme.FgDelimiters1;
-            StyleStrSimple.ForeColor = curTheme.FgDelimiters2;
-            StyleInclude.ForeColor = curTheme.FgDelimiters3;
-            StyleStrDoubleQuoteComm.ForeColor = curTheme.FgDelimiters4;
-            StyleStrSimpleComm.ForeColor = curTheme.FgDelimiters5;
-            StyleNestedComment.ForeColor = curTheme.FgDelimiters8;
+            SetFontStyle((byte)UdlStyles.Default, curTheme.Default);
+            SetFontStyle((byte)UdlStyles.Comment, curTheme.Comment);
+            SetFontStyle((byte)UdlStyles.CommentLine, curTheme.PreProcessed);
+            SetFontStyle((byte)UdlStyles.Number, curTheme.Numbers);
+            SetFontStyle((byte)UdlStyles.KeyWordsList1, curTheme.JumpStatement);
+            SetFontStyle((byte)UdlStyles.KeyWordsList2, curTheme.Statement);
+            SetFontStyle((byte)UdlStyles.KeyWordsList3, curTheme.VarType);
+            SetFontStyle((byte)UdlStyles.KeyWordsList4, curTheme.OtherKeywords);
+            SetFontStyle((byte)UdlStyles.KeyWordsList5, curTheme.PreProcessed);
+            SetFontStyle((byte)UdlStyles.KeyWordsList6, curTheme.NormedVariables);
+            SetFontStyle((byte)UdlStyles.KeyWordsList7, curTheme.Abbreviations);
+            SetFontStyle((byte)UdlStyles.KeyWordsList8, curTheme.SpecialWord);
+            SetFontStyle((byte)UdlStyles.Operators, curTheme.Operators);
+            SetFontStyle((byte)UdlStyles.FolderInCode2, curTheme.Statement);
+            SetFontStyle((byte)UdlStyles.Delimiter1, curTheme.DoubleQuote);
+            SetFontStyle((byte)UdlStyles.Delimiter2, curTheme.SimpleQuote);
+            SetFontStyle((byte)UdlStyles.Delimiter3, curTheme.Includes);
+            SetFontStyle((byte)UdlStyles.Delimiter4, curTheme.DoubleQuote);
+            SetFontStyle((byte)UdlStyles.Delimiter5, curTheme.SimpleQuote);
+            SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
+            SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
 
-            StyleDefault.BackColor = curTheme.BgDefault;
-            StyleJumpInCode.BackColor = curTheme.BgKeyword1;
-            StyleTrigram.BackColor = curTheme.BgKeyword8;
-            StyleInclude.BackColor = curTheme.BgDelimiters3;
-            
             // set style 33 for the margin with line numbers
         }
+
+        private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
+            var nppStyle = Npp.GetStyle(styleNumber);
+            nppStyle.BackColor = styleItem.BackColor;
+            nppStyle.ForeColor = styleItem.ForeColor;
+            nppStyle.Bold = styleItem.FontType.IsBitSet(1);
+            nppStyle.Italic = styleItem.FontType.IsBitSet(2);
+        }
+
+        public static List<Color> BgErrorLevelColors;
+        public static List<Color> FgErrorLevelColors;
 
         public static void SetGeneralStyles() {
 
             var curTheme = CurrentTheme;
             
             // Setting styles for errors 
-            SetErrorStyles((byte)ErrorLevel.Information, curTheme.BgError0, curTheme.FgError0);
-            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.BgError1, curTheme.FgError1);
-            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.BgError2, curTheme.FgError2);
-            SetErrorStyles((byte)ErrorLevel.Error, curTheme.BgError3, curTheme.FgError3);
-            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.BgError4, curTheme.FgError4);
+            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
 
             BgErrorLevelColors = new List<Color> {
-                curTheme.BgNoError,
-                curTheme.BgError0,
-                curTheme.BgError1,
-                curTheme.BgError2,
-                curTheme.BgError3,
-                curTheme.BgError4
+                curTheme.NoError.BackColor,
+                curTheme.Error0.BackColor,
+                curTheme.Error1.BackColor,
+                curTheme.Error2.BackColor,
+                curTheme.Error3.BackColor,
+                curTheme.Error4.BackColor
             };
             FgErrorLevelColors = new List<Color> {
-                curTheme.FgNoError,
-                curTheme.FgError0,
-                curTheme.FgError1,
-                curTheme.FgError2,
-                curTheme.FgError3,
-                curTheme.FgError4
+                curTheme.NoError.ForeColor,
+                curTheme.Error0.ForeColor,
+                curTheme.Error1.ForeColor,
+                curTheme.Error2.ForeColor,
+                curTheme.Error3.ForeColor,
+                curTheme.Error4.ForeColor
             };
         }
 
@@ -274,22 +294,8 @@ namespace _3PA.MainFeatures {
                     && context != UdlStyles.Delimiter2
                     && context != UdlStyles.Delimiter4
                     && context != UdlStyles.Delimiter5
+                    && context != UdlStyles.Delimiter7
                     && context != UdlStyles.Delimiter8);
-        }
-
-        /// <summary>
-        /// Returns the list of all available themes
-        /// </summary>
-        /// <returns></returns>
-        public static List<StyleTheme> GetThemesList() {
-            if (_listOfThemes.Count == 0) {
-                Object2Xml<StyleTheme>.LoadFromString(_listOfThemes, DataResources.SyntaxHighlighting, true);
-            }
-
-            if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
-                Config.Instance.SyntaxHighlightThemeId = 0;
-
-            return _listOfThemes;
         }
 
         #endregion
@@ -323,7 +329,7 @@ namespace _3PA.MainFeatures {
         Delimiter4 = 19, // string double quote in single line comment (preproc definition)
         Delimiter5 = 20, // string simple quote in single line comment (preproc definition)
         Delimiter6 = 21, // 
-        Delimiter7 = 22, // 
+        Delimiter7 = 22, // single line comment for Progress 11.6
         Delimiter8 = 23, // nested comment
         Idk = 24 // ??
     }
@@ -333,53 +339,52 @@ namespace _3PA.MainFeatures {
     #region StyleTheme class
 
     public class StyleTheme {
+
         public string Name = "Default";
-        public int UniqueId = 0;
+        public StyleThemeItem Default;
+        public StyleThemeItem Comment;
+        public StyleThemeItem NestedComment;
+        public StyleThemeItem SingleLineComment;
+        public StyleThemeItem PreProcessed;
+        public StyleThemeItem JumpStatement;
+        public StyleThemeItem Statement;
+        public StyleThemeItem VarType;
+        public StyleThemeItem OtherKeywords;
+        public StyleThemeItem Operators;
+        public StyleThemeItem Abbreviations;
+        public StyleThemeItem Includes;
+        public StyleThemeItem DoubleQuote;
+        public StyleThemeItem SimpleQuote;
+        public StyleThemeItem NormedVariables;
+        public StyleThemeItem SpecialWord;
+        public StyleThemeItem Numbers;
+        public StyleThemeItem NoError;
+        public StyleThemeItem Error0;
+        public StyleThemeItem Error1;
+        public StyleThemeItem Error2;
+        public StyleThemeItem Error3;
+        public StyleThemeItem Error4;
 
-        public Color BgDefault = ColorTranslator.FromHtml("#FFFFFF");
-        public Color FgDefault = ColorTranslator.FromHtml("#4D4D4C");
-        public Color FgComment = ColorTranslator.FromHtml("#718C00");
-        public Color FgLineComment = ColorTranslator.FromHtml("#EAB700");
-        public Color FgNumbers = ColorTranslator.FromHtml("#C82829");
+        /// <summary>
+        /// Set a value to this instance, by its property name
+        /// </summary>
+        /// <param name="propertyName"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public bool SetValueOf(string propertyName, object value) {
+            var property = typeof(StyleTheme).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+            if (property == null) {
+                return false;
+            }
+            property.SetValue(this, value);
+            return true;
+        }
+    }
 
-        public Color FgKeyword1 = ColorTranslator.FromHtml("#183E56");
-        public Color BgKeyword1 = ColorTranslator.FromHtml("#bbdaff");
-        public Color FgKeyword2 = ColorTranslator.FromHtml("#183E56");
-        public Color FgKeyword3 = ColorTranslator.FromHtml("#2F5E9B");
-        public Color FgKeyword4 = ColorTranslator.FromHtml("#2F5E9B");
-        public Color FgKeyword5 = ColorTranslator.FromHtml("#EAB700");
-        public Color FgKeyword6 = ColorTranslator.FromHtml("#3E999F");
-        public Color FgKeyword7 = ColorTranslator.FromHtml("#C82829");
-        public Color FgKeyword8 = ColorTranslator.FromHtml("#000000");
-        public Color BgKeyword8 = ColorTranslator.FromHtml("#ADFF2F");
-
-        public Color FgOperators = ColorTranslator.FromHtml("#000000");
-        public Color FgFoldInCode1 = ColorTranslator.FromHtml("#183E56");
-        public Color FgFoldInCode2 = ColorTranslator.FromHtml("#183E56");
-        public Color FgFoldInComment = ColorTranslator.FromHtml("#000000");
-
-        public Color FgDelimiters1 = ColorTranslator.FromHtml("#8959A8");
-        public Color FgDelimiters2 = ColorTranslator.FromHtml("#CA81B5");
-        public Color FgDelimiters3 = ColorTranslator.FromHtml("#4D4D4C");
-        public Color BgDelimiters3 = ColorTranslator.FromHtml("#FFEEAD");
-        public Color FgDelimiters4 = ColorTranslator.FromHtml("#8959A8");
-        public Color FgDelimiters5 = ColorTranslator.FromHtml("#CA81B5");
-        public Color FgDelimiters6 = ColorTranslator.FromHtml("#000000");
-        public Color FgDelimiters7 = ColorTranslator.FromHtml("#000000");
-        public Color FgDelimiters8 = ColorTranslator.FromHtml("#8E908C");
-
-        public Color FgNoError = ColorTranslator.FromHtml("#007B74");
-        public Color BgNoError = ColorTranslator.FromHtml("#C6EFCE");
-        public Color FgError0 = ColorTranslator.FromHtml("#3F3F3F");
-        public Color BgError0 = ColorTranslator.FromHtml("#F2F2F2");
-        public Color FgError1 = ColorTranslator.FromHtml("#9C6500");
-        public Color BgError1 = ColorTranslator.FromHtml("#FFEB9C");
-        public Color FgError2 = ColorTranslator.FromHtml("#833C0C");
-        public Color BgError2 = ColorTranslator.FromHtml("#FFCC99");
-        public Color FgError3 = ColorTranslator.FromHtml("#9C0006");
-        public Color BgError3 = ColorTranslator.FromHtml("#FFC7CE");
-        public Color FgError4 = ColorTranslator.FromHtml("#58267E");
-        public Color BgError4 = ColorTranslator.FromHtml("#CC99FF");
+    public class StyleThemeItem {
+        public Color BackColor = Color.Azure;
+        public Color ForeColor = Color.Black;
+        public int FontType;
     }
 
     #endregion

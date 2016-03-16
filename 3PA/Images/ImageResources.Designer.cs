@@ -83,6 +83,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap bg_hellokitty {
+            get {
+                object obj = ResourceManager.GetObject("bg_hellokitty", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Block {
             get {
                 object obj = ResourceManager.GetObject("Block", resourceCulture);

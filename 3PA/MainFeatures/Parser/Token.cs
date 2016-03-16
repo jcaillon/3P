@@ -45,7 +45,10 @@ namespace _3PA.MainFeatures.Parser {
     // Symbol is a single char
 
     internal class TokenComment : Token {
-        public TokenComment(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public bool IsSingleLine { get; private set; }
+        public TokenComment(string value, int line, int column, int startPosition, int endPosition, bool isSingleLine) : base(value, line, column, startPosition, endPosition) {
+            IsSingleLine = isSingleLine;
+        }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }

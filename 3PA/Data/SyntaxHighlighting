@@ -2,55 +2,79 @@
 # follow the format below : (tab separated values)
 #
 # > Style name
-# keyword type	bg color	fg color	font style (0 normal, 1 bold, 2 italic)
+# keyword type	bg color	fg color	font style (0 normal, 2 bold, 4 italic)
 #
-> The classic
-Default	#000000	#FFFFFF	1
+> Default
+Default	#000000	#FFFFFF	0
 Comment	#008000	#FFFFFF	0
 NestedComment	#408080	#FFFFFF	0
-PreProcessed	#804000	#FFFFFF	2
-JumpStatement	#000080	#FCD54B	1
-Statement	#000080	#FFFFFF	1
-VarType	#0075EA	#FFFFFF	1
-OtherKeywords	#005EBB	#FFFFFF	1
-Operators	#408080	#FFFFFF	1
-Abbreviations	#EC4D00	#FFFFFF	1
-Includes	#0000A0	#FFFFAA	2
+SingleLineComment	#408080	#FFFFFF	0
+PreProcessed	#804000	#FFFFFF	4
+JumpStatement	#000080	#FCD54B	2
+Statement	#000080	#FFFFFF	2
+VarType	#0075EA	#FFFFFF	2
+OtherKeywords	#005EBB	#FFFFFF	2
+Operators	#408080	#FFFFFF	2
+Abbreviations	#EC4D00	#FFFFFF	2
+Includes	#0000A0	#FFFFAA	4
 DoubleQuote	#FF42FF	#FFFFFF	0
 SimpleQuote	#CE00CE	#FFFFFF	0
 NormedVariables	#2D2DFF	#FFFFFF	0
-UserName	#000000	#9EE41B	1
+SpecialWord	#000000	#9EE41B	2
+Numbers	#FF0000	#FFFFFF	0
+NoError	#007B74	#C6EFCE	0
+Error0	#3F3F3F	#F2F2F2	0
+Error1	#9C6500	#FFEB9C	0
+Error2	#833C0C	#FFCC99	0
+Error3	#9C0006	#FFC7CE	0
+Error4	#58267E	#CC99FF	0
 
-> Mono-kawaaiii
-Default	#000000	#FFFFFF	1
-Comment	#008000	#FFFFFF	0
-NestedComment	#408080	#FFFFFF	0
-PreProcessed	#804000	#FFFFFF	2
-JumpStatement	#000080	#FCD54B	1
-Statement	#000080	#FFFFFF	1
-VarType	#0075EA	#FFFFFF	1
-OtherKeywords	#005EBB	#FFFFFF	1
-Operators	#408080	#FFFFFF	1
-Abbreviations	#EC4D00	#FFFFFF	1
-Includes	#0000A0	#FFFFAA	2
-DoubleQuote	#FF42FF	#FFFFFF	0
-SimpleQuote	#CE00CE	#FFFFFF	0
-NormedVariables	#2D2DFF	#FFFFFF	0
-UserName	#000000	#9EE41B	1
+> Tomorrow
+Default	#4D4D4C	#FFFFFF	0
+Comment	#718C00	#FFFFFF	0
+NestedComment	#8E908C	#FFFFFF	0
+SingleLineComment	#8E908C	#FFFFFF	0
+PreProcessed	#EAB700	#FFFFFF	4
+JumpStatement	#183E56	#BBDAFF	2
+Statement	#183E56	#FFFFFF	2
+VarType	#2F5E9B	#FFFFFF	2
+OtherKeywords	#2F5E9B	#FFFFFF	2
+Operators	#F5871F	#FFFFFF	2
+Abbreviations	#F5871F	#FFFFFF	2
+Includes	#4D4D4C	#FFEEAD	4
+DoubleQuote	#c82829	#FFFFFF	0
+SimpleQuote	#F60000	#FFFFFF	0
+NormedVariables	#8959a8	#FFFFFF	0
+SpecialWord	#000000	#ADFF2F	2
+Numbers	#C82829	#FFFFFF	0
+NoError	#007B74	#C6EFCE	0
+Error0	#3F3F3F	#F2F2F2	0
+Error1	#9C6500	#FFEB9C	0
+Error2	#833C0C	#FFCC99	0
+Error3	#9C0006	#FFC7CE	0
+Error4	#58267E	#CC99FF	0
 
 > Michael Knight
-Default	#000000	#FFFFFF	1
-Comment	#008000	#FFFFFF	0
-NestedComment	#408080	#FFFFFF	0
-PreProcessed	#804000	#FFFFFF	2
-JumpStatement	#000080	#FCD54B	1
-Statement	#000080	#FFFFFF	1
-VarType	#0075EA	#FFFFFF	1
-OtherKeywords	#005EBB	#FFFFFF	1
-Operators	#408080	#FFFFFF	1
-Abbreviations	#EC4D00	#FFFFFF	1
-Includes	#0000A0	#FFFFAA	2
-DoubleQuote	#FF42FF	#FFFFFF	0
-SimpleQuote	#CE00CE	#FFFFFF	0
-NormedVariables	#2D2DFF	#FFFFFF	0
-UserName	#000000	#9EE41B	1
+Default	#C5C8C6	#1D1F21	0
+Comment	#969896	#1D1F21	0
+NestedComment	#969896	#1D1F21	0
+SingleLineComment	#969896	#1D1F21	0
+PreProcessed	#DE935F	#1D1F21	4
+JumpStatement	#81A2BE	#1D1F21	2
+Statement	#B294BB	#1D1F21	2
+VarType	#B294BB	#1D1F21	2
+OtherKeywords	#B294BB	#1D1F21	2
+Operators	#8ABEB7	#1D1F21	2
+Abbreviations	#F5871F	#1D1F21	2
+Includes	#4D4D4C	#C5C8C6	4
+DoubleQuote	#B5BD68	#1D1F21	0
+SimpleQuote	#73EC0F	#1D1F21	0
+NormedVariables	#CC6666	#1D1F21	0
+SpecialWord	#000000	#9EE41B	2
+Numbers	#000000	#FFFFFF	0
+NoError	#007B74	#C6EFCE	0
+Error0	#3F3F3F	#F2F2F2	0
+Error1	#9C6500	#FFEB9C	0
+Error2	#833C0C	#FFCC99	0
+Error3	#9C0006	#FFC7CE	0
+Error4	#58267E	#CC99FF	0

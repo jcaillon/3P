@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -345,7 +346,7 @@ namespace _3PA {
         }
 
         public static void Test() {
-            UserCommunication.Notify("id! = " + User.GetWindowsUniqueId());
+            UserCommunication.Notify(((int)1).IsBitSet(1) + " " + (4).IsBitSet(2));
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",

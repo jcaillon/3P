@@ -148,6 +148,13 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
+        /// peek backward x chars
+        /// </summary>
+        private char PeekAtReverse(int x) {
+            return _pos - x < 0 ? Eof : _data[_pos - x];
+        }
+
+        /// <summary>
         /// Read to the next char,
         /// indirectly adding the current char (_data[_pos]) to the current token
         /// </summary>
@@ -200,8 +207,9 @@ namespace _3PA.MainFeatures.Parser {
 
             switch (ch) {
                 case '/':
-                    // comment
-                    return PeekAt(1) == '*' ? CreateCommentToken() : CreateSymbolToken();
+                    var nextChar = PeekAt(1);
+                    // comment or single line comment (if previous char is a whitespace) or symbol by default
+                    return nextChar == '*' ? CreateCommentToken() : ((char.IsWhiteSpace(PeekAtReverse(1)) && nextChar == '/') ? CreateSingleLineCommentToken() : CreateSymbolToken());
                
                 case '{':
                     // include file or preproc variable
@@ -412,7 +420,22 @@ namespace _3PA.MainFeatures.Parser {
                 } else
                     Read();
             }
-            return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos, false);
+        }
+
+        /// <summary>
+        /// create a comment token, for a single line comment
+        /// </summary>
+        /// <returns></returns>
+        private Token CreateSingleLineCommentToken() {
+            // read until the end of the line
+            while (true) {
+                var ch = PeekAt(0);
+                if (ch == Eof || ch == '\r' || ch == '\n')
+                    break;
+                Read();
+            }
+            return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos, true);
         }
 
         /// <summary>
@@ -432,18 +455,30 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// create a number token, accepts decimal value with a '.'
+        /// create a number token, accepts decimal value with a '.' and hexadecimal notation 0xNNN
         /// </summary>
         /// <returns></returns>
         private Token CreateNumberToken() {
-            var isDecimal = false;
+            var hasPoint = false;
+            var isHexa = false;
+
+            // we can also read hexadecimal notation (i.e. 0xNNN)
+            if (PeekAt(0) == '0' && PeekAt(1) == 'x') {
+                Read();
+                isHexa = true;
+                hasPoint = true; // don't allow to have a point
+            }
             Read();
+
             while (true) {
                 var ch = PeekAt(0);
                 if (char.IsDigit(ch))
                     Read();
-                else if (ch == '.' && !isDecimal && char.IsDigit(PeekAt(1))) {
-                    isDecimal = true;
+                // for hexadecimal numbers, we don't check if the number is correct, we just read letters and digits...
+                else if (isHexa && char.IsLetter(ch))
+                    Read();
+                else if (ch == '.' && !hasPoint && char.IsDigit(PeekAt(1))) {
+                    hasPoint = true;
                     Read();
                 } else
                     break;
@@ -458,6 +493,7 @@ namespace _3PA.MainFeatures.Parser {
             Read();
             while (true) {
                 var ch = PeekAt(0);
+
                 // normal word
                 if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-')
                     Read();
@@ -485,6 +521,7 @@ namespace _3PA.MainFeatures.Parser {
                 var ch = PeekAt(0);
                 if (ch == Eof)
                     break;
+
                 // new line
                 if (ch == '\r' || ch == '\n') {
                     ReadEol(ch);
@@ -515,6 +552,7 @@ namespace _3PA.MainFeatures.Parser {
                 var ch = PeekAt(0);
                 if (ch == Eof)
                     break;
+
                 // we don't care if the descriptor is valid or not, just read while it's a letter or digit
                 if (!char.IsLetterOrDigit(ch))
                     break;

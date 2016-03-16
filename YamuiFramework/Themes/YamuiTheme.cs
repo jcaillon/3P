@@ -23,8 +23,8 @@ namespace YamuiFramework.Themes {
 
     public class YamuiTheme {
 
-        public delegate Image ImageGetter();
-        public static event ImageGetter OnImageNeeded;
+        public delegate Image ImageGetter(string imageToLoad);
+        public static ImageGetter OnImageNeeded;
 
         /// <summary>
         /// This field is dynamic and can be modified by the calling program
@@ -39,12 +39,10 @@ namespace YamuiFramework.Themes {
         /// </summary>
         public string ThemeName;
 
-        public int UniqueId = 0;
-
-        public int RankNeeded = 0;
         public string PageBackGroundImage = "";
 
         public Color ThemeAccentColor = Color.DarkSlateGray;
+
         public Color FormBack = Color.FromArgb(230, 230, 230);
         public Color FormAltBack = Color.FromArgb(200, 200, 200);
         public Color FormFore = Color.FromArgb(30, 30, 30);
@@ -87,7 +85,7 @@ namespace YamuiFramework.Themes {
             var yamuiImage = (!string.IsNullOrEmpty(PageBackGroundImage) ? (Image)Resources.Resources.ResourceManager.GetObject(PageBackGroundImage) : null);
             // can't find the image locally (in Yamui), use the event to try and find one from the user program
             if (yamuiImage == null && OnImageNeeded != null) {
-                yamuiImage = OnImageNeeded();
+                yamuiImage = OnImageNeeded(PageBackGroundImage);
             }
             return yamuiImage;
         }

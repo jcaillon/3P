@@ -152,7 +152,7 @@ namespace _3PA.MainFeatures {
         public static void CheckForUpdates() {
             if (!Utils.IsSpamming("updates", 1000)) {
                 UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
-                GetLatestReleaseInfo(true);
+                Task.Factory.StartNew(() => { GetLatestReleaseInfo(true); });
             }
         }
 

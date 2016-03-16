@@ -141,45 +141,28 @@ namespace _3PA.Data {
         }
         
         /// <summary>
-        ///   Recherche une chaîne localisée semblable à &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;Root&gt;
-        ///  &lt;StyleTheme&gt;
-        ///    &lt;Name Value=&quot;Default&quot; /&gt;
-        ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
-        ///    &lt;BgDefault Value=&quot;#FFFFFF&quot; /&gt;
-        ///    &lt;FgDefault Value=&quot;#000000&quot; /&gt;
-        ///    &lt;FgComment Value=&quot;#008000&quot; /&gt;
-        ///    &lt;FgLineComment Value=&quot;#804000&quot; /&gt;
-        ///    &lt;FgNumbers Value=&quot;#FF0000&quot; /&gt;
-        ///    &lt;FgKeyword1 Value=&quot;#000080&quot; /&gt;
-        ///    &lt;BgKeyword1 Value=&quot;#FCD54B&quot; /&gt;
-        ///    &lt;FgKeyword2 Value=&quot;#000080&quot; /&gt;
-        ///    &lt;FgKeyword3 Value=&quot;#0075EA&quot; /&gt;
-        ///    &lt;FgKeyword4 Value=&quot;#005EBB&quot; /&gt;
-        ///    &lt;FgKeyword5 Value=&quot;#804000&quot; [le reste de la chaîne a été tronqué]&quot;;.
+        ///   Recherche une ressource localisée de type System.Byte[].
         /// </summary>
-        internal static string SyntaxHighlighting {
+        internal static byte[] SyntaxHighlighting {
             get {
-                return ResourceManager.GetString("SyntaxHighlighting", resourceCulture);
+                object obj = ResourceManager.GetObject("SyntaxHighlighting", resourceCulture);
+                return ((byte[])(obj));
             }
         }
         
         /// <summary>
         ///   Recherche une chaîne localisée semblable à &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;!-- You can personnalize your theme here, only HTML colors are accepted --&gt;
+        ///&lt;!-- ThemeName : should be the name of your theme, can be any string --&gt;
+        ///&lt;!-- PageBackGroundImage : the name of an image file that should be located in $PLUGINS/Config/3P/Themes/ --&gt;
         ///&lt;Root&gt;
         ///  &lt;Item&gt;
         ///    &lt;ThemeName Value=&quot;The classic&quot; /&gt;
-        ///    &lt;UniqueId Value=&quot;0&quot; /&gt;
-        ///    &lt;RankNeeded Value=&quot;0&quot; /&gt;
         ///    &lt;PageBackGroundImage Value=&quot;&quot; /&gt;
-        ///    &lt;UseCurrentAccentColor Value=&quot;true&quot; /&gt;
         ///    &lt;ThemeAccentColor Value=&quot;#1BA1E2&quot; /&gt;
         ///    &lt;FormBack Value=&quot;#E6E6E6&quot; /&gt;
         ///    &lt;FormFore Value=&quot;#1E1E1E&quot; /&gt;
-        ///    &lt;FormBorder Value=&quot;#647687&quot; /&gt;
-        ///    &lt;ScrollBarNormalBack Value=&quot;#CCCCCC&quot; /&gt;
-        ///    &lt;ScrollThumbNormalBack Value=&quot;#666666&quot; /&gt;
-        ///    &lt;ScrollBarHoverBack Value=&quot;#CCCCC [le reste de la chaîne a été tronqué]&quot;;.
+        ///     [le reste de la chaîne a été tronqué]&quot;;.
         /// </summary>
         internal static string ThemesList {
             get {

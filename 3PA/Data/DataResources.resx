@@ -121,9 +121,6 @@
   <data name="UDL" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>udl.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="SyntaxHighlighting" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>syntaxhighlighting.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
   <data name="ProgressRun" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>progress\progressrun.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -150,5 +147,8 @@
   </data>
   <data name="CompilationPath" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>compilationpath;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SyntaxHighlighting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>syntaxhighlighting;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

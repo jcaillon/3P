@@ -296,7 +296,6 @@
   <ItemGroup>
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
-    <Content Include="Resources\BackGround\hellokitty.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Error.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\HighImportance.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Info.png" />

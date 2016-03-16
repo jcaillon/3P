@@ -2,10 +2,7 @@
 <Root>
   <Item>
     <ThemeName Value="The classic" />
-    <UniqueId Value="0" />
-    <RankNeeded Value="0" />
     <PageBackGroundImage Value="" />
-    <UseCurrentAccentColor Value="true" />
     <ThemeAccentColor Value="#1BA1E2" />
     <FormBack Value="#E6E6E6" />
     <FormFore Value="#1E1E1E" />
@@ -42,10 +39,7 @@
   </Item>
   <Item>
     <ThemeName Value="Monokawai" />
-    <UniqueId Value="1" />
-    <RankNeeded Value="0" />
     <PageBackGroundImage Value="" />
-    <UseCurrentAccentColor Value="true" />
     <ThemeAccentColor Value="#F0A30A" />
     <FormBack Value="#252526" />
     <FormFore Value="#D2D2D2" />
@@ -82,10 +76,7 @@
   </Item>
   <Item>
     <ThemeName Value="Hi kitty" />
-    <UniqueId Value="2" />
-    <RankNeeded Value="0" />
     <PageBackGroundImage Value="hellokitty" />
-    <UseCurrentAccentColor Value="false" />
     <ThemeAccentColor Value="#FF1493" />
     <FormBack Value="#E6E6E6" />
     <FormFore Value="#1E1E1E" />

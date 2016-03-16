@@ -23,11 +23,13 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Web.Script.Serialization;
+using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
+// ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
 
@@ -66,21 +68,29 @@ namespace _3PA.MainFeatures {
         /// <param name="imageType"></param>
         /// <param name="title"></param>
         public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
-            if (_anchorForm != null) {
-                // get npp's screen
-                if (_anchorForm.IsHandleCreated) {
-                    _anchorForm.BeginInvoke((Action) delegate {
-                        var toastNotification = new YamuiNotifications(
-                            HtmlHandler.FormatMessage(html, imageType, title, subTitle)
-                            , duration, width, Npp.GetNppScreen());
-                        if (clickHandler != null)
-                            toastNotification.LinkClicked += (sender, args) => clickHandler(args);
-                        else
-                            toastNotification.LinkClicked += Utils.OpenPathClickHandler;
-                        toastNotification.Show();
-                    });
+            try {
+                if (_anchorForm != null) {
+                    // get npp's screen
+                    if (_anchorForm.IsHandleCreated) {
+                        _anchorForm.BeginInvoke((Action) delegate {
+                            var toastNotification = new YamuiNotifications(
+                                HtmlHandler.FormatMessage(html, imageType, title, subTitle)
+                                , duration, width, Npp.GetNppScreen());
+                            if (clickHandler != null)
+                                toastNotification.LinkClicked += (sender, args) => clickHandler(args);
+                            else
+                                toastNotification.LinkClicked += Utils.OpenPathClickHandler;
+                            toastNotification.Show();
+                        });
+                        return;
+                    }
                 }
+            } catch (Exception e) {
+                ErrorHandler.Log(e.Message);
             }
+
+            // if we are here, display the error message the old way
+            MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         public static void Notify(string html, MessageImg imageType, string title, string subTitle, int duration = 0, int width = 450) {

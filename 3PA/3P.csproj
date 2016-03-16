@@ -384,7 +384,6 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\SyntaxHighlighting.xml" />
     <Content Include="Data\UDL.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -442,6 +441,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
+    <Content Include="Images\Backgrounds\bg_hellokitty.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />

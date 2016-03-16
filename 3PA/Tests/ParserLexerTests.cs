@@ -30,11 +30,11 @@ namespace _3PA.Tests {
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
+            /*
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            var inputFile = @"C:\Users\Julien\Desktop\in.p";
+            var inputFile = @"C:\Temp\in.p";
             Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
 
             OutputVis vis = new OutputVis();
@@ -45,8 +45,8 @@ namespace _3PA.Tests {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
+            File.WriteAllText(@"C:\Temp\out.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            */
 
             // OUTPUT INFO ON EACH LINE
             /*
@@ -58,19 +58,19 @@ namespace _3PA.Tests {
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
                     i++;
                 }
-                File.WriteAllText(@"C:\Users\Julien\Desktop\test.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+                File.WriteAllText(@"C:\Temp\out.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
             */
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            /*
+            
             //------------
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\blabla.p"));
+            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Temp\in.p"));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -78,8 +78,8 @@ namespace _3PA.Tests {
             //--------------
             watch2.Stop();
 
-            File.WriteAllText(@"d:\Profiles\jcaillon\Desktop\test.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-            */
+            File.WriteAllText(@"C:\Temp\out.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
+            
         }
     }
 
@@ -108,7 +108,7 @@ namespace _3PA.Tests {
         public void Visit(ParsedFunction pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
-
+        
         public void Visit(ParsedProcedure pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
@@ -146,7 +146,7 @@ namespace _3PA.Tests {
         public StringBuilder Output = new StringBuilder();
 
         public void Visit(TokenComment tok) {
-            //output.AppendLine(tok.Value);
+            Output.AppendLine("C" + (tok.IsSingleLine ? "S" : "M") + " " + tok.Value);
         }
 
         public void Visit(TokenEol tok) {
@@ -162,7 +162,7 @@ namespace _3PA.Tests {
         }
 
         public void Visit(TokenNumber tok) {
-            
+            Output.AppendLine("N  " + tok.Value);
         }
 
         public void Visit(TokenString tok) {
