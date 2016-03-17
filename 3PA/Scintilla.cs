@@ -1821,19 +1821,27 @@ namespace _3PA {
         /// <param name="bg">r</param>
         /// <param name="fg"></param>
         public static void SetSelectionColor(bool use, Color bg, Color fg) {
-            Sci.Send(SciMsg.SCI_SETSELBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
-            Sci.Send(SciMsg.SCI_SETSELFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+            Sci.Send(SciMsg.SCI_SETSELBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETSELFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
-        /// Sets a global override to the  additional selections background + foreground color.
+        /// The selection can be drawn translucently in the selection background colour by setting an alpha value.
+        /// </summary>
+        public static int SelectionBackAlpha {
+            get { return Sci.Send(SciMsg.SCI_GETSELALPHA).ToInt32(); }
+            set { Sci.Send(SciMsg.SCI_SETSELALPHA, new IntPtr(value)); }
+        }
+
+        /// <summary>
+        /// Sets a global override to the additional selections background + foreground color.
         /// </summary>
         /// <param name="use"></param>
         /// <param name="bg">r</param>
         /// <param name="fg"></param>
         public static void SetAdditionalSelectionColor(bool use, Color bg, Color fg) {
-            Sci.Send(SciMsg.SCI_SETADDITIONALSELBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
-            Sci.Send(SciMsg.SCI_SETADDITIONALSELFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+            Sci.Send(SciMsg.SCI_SETADDITIONALSELBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETADDITIONALSELFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
@@ -1843,8 +1851,8 @@ namespace _3PA {
         /// <param name="bg"></param>
         /// <param name="fg"></param>
         public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
-            Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
-            Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+            Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
+            Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
         }
 
         /// <summary>
@@ -1858,7 +1866,7 @@ namespace _3PA {
 
         /// <summary>
         /// You can choose to make the background colour of the line containing the caret different with these messages
-        /// See CaretLineBackColor to set the color
+        /// See CaretLineBackColor to set the color and use this to activate
         /// </summary>
         public static bool CaretLineVisible {
             get { return Sci.Send(SciMsg.SCI_GETCARETLINEVISIBLE).IsTrue(); }

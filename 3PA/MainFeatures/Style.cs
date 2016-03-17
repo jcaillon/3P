@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures {
                     if (s.Length > 2 && s[0] == '>') {
                         _listOfThemes.Add(new StyleTheme());
                         curTheme = _listOfThemes.Last();
-                        curTheme.Name = s.Substring(2);
+                        curTheme.Name = s.Substring(2).Trim();
                     }
                     if (curTheme == null)
                         return;
@@ -85,9 +85,9 @@ namespace _3PA.MainFeatures {
                     var items = s.Split('\t');
                     if (items.Count() == 4) {
                         curTheme.SetValueOf(items[0], new StyleThemeItem {
-                            ForeColor = ColorTranslator.FromHtml(items[1]),
-                            BackColor = ColorTranslator.FromHtml(items[2]),
-                            FontType = int.Parse(items[3])
+                            ForeColor = ColorTranslator.FromHtml(items[1].Trim()),
+                            BackColor = ColorTranslator.FromHtml(items[2].Trim()),
+                            FontType = int.Parse(items[3].Trim())
                         });
                     }
                 });
@@ -156,14 +156,57 @@ namespace _3PA.MainFeatures {
 
         #region set styles
 
+        private static bool _needReset;
+        private static StyleThemeItem _defIndentGuide = new StyleThemeItem();
+        private static StyleThemeItem _defCaretLine = new StyleThemeItem();
 
+        /// <summary>
+        /// Call this method to reset the styles to their default value when moving to a non progress file
+        /// </summary>
+        public static void ResetSyntaxStyles() {
 
+            if (!_needReset)
+                return;
+
+            Npp.SetWhiteSpaceColor(false, Color.Transparent, Color.Transparent);
+            SetFontStyle((byte)SciMsg.STYLE_INDENTGUIDE, _defIndentGuide);
+            Npp.SetSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
+            Npp.SelectionBackAlpha = 90;
+            Npp.SetAdditionalSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
+            Npp.CaretLineBackColor = _defCaretLine.BackColor;
+            Npp.CaretLineBackAlpha = _defCaretLine.FontType;
+
+            Npp.StyleResetDefault();
+            
+        }
+
+        /// <summary>
+        /// Call this method to set the back/fore color and font type of each type used in 3P according to the 
+        /// styles defined in the SyntaxHighlighting file
+        /// </summary>
         public static void SetSyntaxStyles() {
+
+            // save current values, to reset them when we switch on a non progress file
+            if (!_needReset) {
+                var nppStyle = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE);
+                _defIndentGuide.BackColor = nppStyle.BackColor;
+                _defIndentGuide.ForeColor = nppStyle.ForeColor;
+                _defCaretLine.BackColor = Npp.CaretLineBackColor;
+                _defCaretLine.FontType = Npp.CaretLineBackAlpha;
+                _needReset = true;
+            }
 
             var curTheme = CurrentTheme;
 
-            // setting styles for the syntax highlighting
+            // Default
+            SetFontStyle((byte)SciMsg.STYLE_DEFAULT, curTheme.Default);
+            SetFontStyle((byte)SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
+            SetFontStyle((byte)UdlStyles.Idk, curTheme.Default);
             SetFontStyle((byte)UdlStyles.Default, curTheme.Default);
+            Npp.SetWhiteSpaceColor(true, curTheme.WhiteSpace.BackColor, curTheme.WhiteSpace.ForeColor);
+            SetFontStyle((byte)SciMsg.STYLE_INDENTGUIDE, curTheme.WhiteSpace);
+
+            // categories
             SetFontStyle((byte)UdlStyles.Comment, curTheme.Comment);
             SetFontStyle((byte)UdlStyles.CommentLine, curTheme.PreProcessed);
             SetFontStyle((byte)UdlStyles.Number, curTheme.Numbers);
@@ -185,7 +228,14 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
             SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
 
-            // set style 33 for the margin with line numbers
+            // Extra
+            Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
+            Npp.SetAdditionalSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
+            Npp.SelectionBackAlpha = 90;
+            Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
+            Npp.CaretLineBackAlpha = 90;
+            Npp.CaretLineVisible = true;
+
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
@@ -357,6 +407,9 @@ namespace _3PA.MainFeatures {
         public StyleThemeItem SimpleQuote;
         public StyleThemeItem NormedVariables;
         public StyleThemeItem SpecialWord;
+        public StyleThemeItem CaretLine;
+        public StyleThemeItem Selection;
+        public StyleThemeItem WhiteSpace;
         public StyleThemeItem Numbers;
         public StyleThemeItem NoError;
         public StyleThemeItem Error0;

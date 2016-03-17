@@ -1,8 +1,25 @@
-# This allows to configure styles for the syntax highlighting feature 
+# ========================================================================
+# Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+# This file is part of 3P.
+# 
+# 3P is a free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# 3P is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with 3P. If not, see <http://www.gnu.org/licenses/>.
+# ========================================================================
+# This file allows to configure styles for the syntax highlighting feature 
 # follow the format below : (tab separated values)
 #
 # > Style name
-# keyword type	bg color	fg color	font style (0 normal, 2 bold, 4 italic)
+# keyword_type	foreground_color	background_color	font_style (0 normal, 2 bold, 4 italic)
 #
 > Default
 Default	#000000	#FFFFFF	0
@@ -22,6 +39,9 @@ SimpleQuote	#CE00CE	#FFFFFF	0
 NormedVariables	#2D2DFF	#FFFFFF	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#FF0000	#FFFFFF	0
+CaretLine	#000000	#7887F5	0
+Selection	#000000	#919191	0
+WhiteSpace	#E2AE3E	#FFFFFF	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
@@ -47,6 +67,9 @@ SimpleQuote	#F60000	#FFFFFF	0
 NormedVariables	#8959a8	#FFFFFF	0
 SpecialWord	#000000	#ADFF2F	2
 Numbers	#C82829	#FFFFFF	0
+CaretLine	#000000	#7887F5	0
+Selection	#000000	#919191	0
+WhiteSpace	#E2AE3E	#FFFFFF	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
@@ -60,18 +83,21 @@ Comment	#969896	#1D1F21	0
 NestedComment	#969896	#1D1F21	0
 SingleLineComment	#969896	#1D1F21	0
 PreProcessed	#DE935F	#1D1F21	4
-JumpStatement	#81A2BE	#1D1F21	2
-Statement	#B294BB	#1D1F21	2
-VarType	#B294BB	#1D1F21	2
-OtherKeywords	#B294BB	#1D1F21	2
+JumpStatement	#B294BB	#3E4356	2
+Statement	#81A2BE	#1D1F21	2
+VarType	#81A2A3	#1D1F21	2
+OtherKeywords	#81A2BE	#1D1F21	2
 Operators	#8ABEB7	#1D1F21	2
 Abbreviations	#F5871F	#1D1F21	2
-Includes	#4D4D4C	#C5C8C6	4
+Includes	#FFEDF9	#525352	4
 DoubleQuote	#B5BD68	#1D1F21	0
 SimpleQuote	#73EC0F	#1D1F21	0
 NormedVariables	#CC6666	#1D1F21	0
 SpecialWord	#000000	#9EE41B	2
-Numbers	#000000	#FFFFFF	0
+Numbers	#84AFE4	#1D1F21	0
+CaretLine	#000000	#D2691E	0
+Selection	#000000	#1E417D	0
+WhiteSpace	#7D7679	#1D1F21	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
