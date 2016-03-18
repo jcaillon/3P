@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Windows.Forms;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Interop;
@@ -171,10 +172,10 @@ namespace _3PA.MainFeatures {
             Npp.SetWhiteSpaceColor(false, Color.Transparent, Color.Transparent);
             SetFontStyle((byte)SciMsg.STYLE_INDENTGUIDE, _defIndentGuide);
             Npp.SetSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
-            Npp.SelectionBackAlpha = 90;
             Npp.SetAdditionalSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
-            Npp.CaretLineBackColor = _defCaretLine.BackColor;
-            Npp.CaretLineBackAlpha = _defCaretLine.FontType;
+            //Npp.SelectionBackAlpha = 120;
+            Npp.CaretLineBackColor = ControlPaint.Light(_defCaretLine.BackColor, 1.2f);
+            //Npp.CaretLineBackAlpha = 60;
 
             Npp.StyleResetDefault();
             
@@ -192,7 +193,6 @@ namespace _3PA.MainFeatures {
                 _defIndentGuide.BackColor = nppStyle.BackColor;
                 _defIndentGuide.ForeColor = nppStyle.ForeColor;
                 _defCaretLine.BackColor = Npp.CaretLineBackColor;
-                _defCaretLine.FontType = Npp.CaretLineBackAlpha;
                 _needReset = true;
             }
 
@@ -231,10 +231,10 @@ namespace _3PA.MainFeatures {
             // Extra
             Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
             Npp.SetAdditionalSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
-            Npp.SelectionBackAlpha = 90;
+            //Npp.SelectionBackAlpha = 120;
             Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
-            Npp.CaretLineBackAlpha = 90;
-            Npp.CaretLineVisible = true;
+            //Npp.CaretLineBackAlpha = 70;
+            //Npp.CaretLineVisible = true;
 
         }
 
