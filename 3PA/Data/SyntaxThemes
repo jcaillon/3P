@@ -39,8 +39,8 @@ SimpleQuote	#CE00CE	#FFFFFF	0
 NormedVariables	#2D2DFF	#FFFFFF	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#FF0000	#FFFFFF	0
-CaretLine	#000000	#7887F5	0
-Selection	#000000	#919191	0
+CaretLine	#000000	#D1D7FF	0
+Selection	#000000	#E3E3E3	0
 WhiteSpace	#E2AE3E	#FFFFFF	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
@@ -67,8 +67,8 @@ SimpleQuote	#F60000	#FFFFFF	0
 NormedVariables	#8959a8	#FFFFFF	0
 SpecialWord	#000000	#ADFF2F	2
 Numbers	#C82829	#FFFFFF	0
-CaretLine	#000000	#7887F5	0
-Selection	#000000	#919191	0
+CaretLine	#000000	#D1D7FF	0
+Selection	#000000	#E3E3E3	0
 WhiteSpace	#E2AE3E	#FFFFFF	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
@@ -95,9 +95,9 @@ SimpleQuote	#73EC0F	#1D1F21	0
 NormedVariables	#CC6666	#1D1F21	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#84AFE4	#1D1F21	0
-CaretLine	#000000	#D2691E	0
+CaretLine	#000000	#623A1E	0
 Selection	#000000	#1E417D	0
-WhiteSpace	#7D7679	#1D1F21	0
+WhiteSpace	#4C5156	#1D1F21	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
@@ -125,7 +125,7 @@ DoubleQuote	#E6DB74	#26292C	0
 SimpleQuote	#FFEF62	#26292C	0
 CaretLine	#000000	#373835	0
 Selection	#000000	#49483E	0
-WhiteSpace	#7D7679	#26292C	0
+WhiteSpace	#4F565C	#26292C	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0

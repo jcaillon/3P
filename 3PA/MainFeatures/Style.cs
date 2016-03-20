@@ -60,8 +60,9 @@ namespace _3PA.MainFeatures {
             get {
                 if (_currentTheme != null)
                     return _currentTheme;
+
                 // instanciation of current theme
-                _currentTheme = GetThemesList().ElementAt(Config.Instance.SyntaxHighlightThemeId) ?? GetThemesList()[0];
+                _currentTheme = GetThemesList().ElementAt(Config.Instance.SyntaxHighlightThemeId);
                 return _currentTheme;
             }
         }
@@ -71,9 +72,10 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <returns></returns>
         public static List<StyleTheme> GetThemesList() {
+
             if (_listOfThemes.Count == 0) {
                 StyleTheme curTheme = null;
-                ConfLoader.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxHighlighting, Encoding.Default, s => {
+                ConfLoader.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxThemes, Encoding.Default, s => {
                     // beggining of a new theme, read its name
                     if (s.Length > 2 && s[0] == '>') {
                         _listOfThemes.Add(new StyleTheme());
@@ -85,7 +87,7 @@ namespace _3PA.MainFeatures {
                     // fill the theme
                     var items = s.Split('\t');
                     if (items.Count() == 4) {
-                        curTheme.SetValueOf(items[0], new StyleThemeItem {
+                        curTheme.SetValueOf(items[0].Trim(), new StyleThemeItem {
                             ForeColor = ColorTranslator.FromHtml(items[1].Trim()),
                             BackColor = ColorTranslator.FromHtml(items[2].Trim()),
                             FontType = int.Parse(items[3].Trim())
@@ -98,6 +100,12 @@ namespace _3PA.MainFeatures {
                 Config.Instance.SyntaxHighlightThemeId = 0;
 
             return _listOfThemes;
+        }
+
+        public static void ImportList() {
+            _listOfThemes.Clear();
+            _currentTheme = null;
+            Plug.OnDocumentSwitched();
         }
 
         #endregion

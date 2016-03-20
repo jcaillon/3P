@@ -116,6 +116,11 @@ namespace _3PA.MainFeatures.Appli {
             }
         }
 
+        public static void Refresh() {
+            if (_form != null)
+                _form.Refresh();
+        }
+
         /// <summary>
         /// Returns true if the cursor is within the form window
         /// </summary>

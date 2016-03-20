@@ -94,6 +94,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abl.cs" />
+    <Compile Include="Data\DataResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>DataResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Html\HtmlHandler.cs" />
     <Compile Include="Html\HtmlResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -161,7 +166,6 @@
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="Tests\ParserLexerTests.cs" />
     <Compile Include="ThemeManager.cs" />
-    <Content Include="Data\ThemesList.xml" />
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="Images\ImageResources.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -255,11 +259,6 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.Designer.cs">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
     </Compile>
-    <Compile Include="Data\DataResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>DataResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Interop\ScintillaHelper.cs" />
     <Compile Include="Interop\WinApi.cs" />
     <Compile Include="Interop\WindowWrapper.cs" />
@@ -342,8 +341,8 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Data\DataResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>DataResources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
+      <LastGenOutput>DataResources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <EmbeddedResource Include="Images\ImageResources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -380,7 +379,8 @@
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\Progress\StartProlint.p" />
     <None Include="Data\Snippets" />
-    <None Include="Data\SyntaxHighlighting" />
+    <None Include="Data\SyntaxThemes" />
+    <None Include="Data\ApplicationThemes" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -442,6 +442,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\Backgrounds\bg_hellokitty.png" />
+    <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />

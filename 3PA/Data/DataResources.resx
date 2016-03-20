@@ -136,9 +136,6 @@
   <data name="Snippets" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>snippets;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="ThemesList" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>themeslist.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
-  </data>
   <data name="KeywordsList" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>keywordslist;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -148,7 +145,10 @@
   <data name="CompilationPath" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>compilationpath;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="SyntaxHighlighting" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>syntaxhighlighting;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="ApplicationThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>applicationthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="SyntaxThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>syntaxthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

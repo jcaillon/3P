@@ -41,18 +41,25 @@ namespace _3PA.Lib {
         public static void ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
             // TODO: check file size
             try {
-                using (StringReader reader = new StringReader((!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) ? File.ReadAllText(filePath, encoding) : encoding.GetString(dataResources))) {
-                    string line;
-                    while ((line = reader.ReadLine()) != null) {
-                        if (line.Length > 0 && line[0] != '#')
-                            toApplyOnEachLine(line);
-                    }
-                }
+                SubForEachLine(filePath, dataResources, encoding, toApplyOnEachLine);
             } catch (Exception e) {
-                if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath))
+                if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
                     ErrorHandler.ShowErrors(e, "Error reading file", filePath);
-                else
+
+                    // read default file
+                    SubForEachLine(null, dataResources, encoding, toApplyOnEachLine);
+                } else
                     ErrorHandler.ShowErrors(e, "Error data resource for " + filePath);
+            }
+        }
+
+        public static void SubForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
+            using (StringReader reader = new StringReader((!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) ? File.ReadAllText(filePath, encoding) : encoding.GetString(dataResources))) {
+                string line;
+                while ((line = reader.ReadLine()) != null) {
+                    if (line.Length > 0 && line[0] != '#')
+                        toApplyOnEachLine(line);
+                }
             }
         }
     }

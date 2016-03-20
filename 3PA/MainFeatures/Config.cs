@@ -527,6 +527,7 @@ namespace _3PA.MainFeatures {
 
         // themes
         public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_SyntaxThemes.conf"); } }
+        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ApplicationThemes.conf"); } }
 
         // errors
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }

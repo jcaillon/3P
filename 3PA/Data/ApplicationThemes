@@ -1,0 +1,182 @@
+# ========================================================================
+# Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+# This file is part of 3P.
+# 
+# 3P is a free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# 3P is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with 3P. If not, see <http://www.gnu.org/licenses/>.
+# ========================================================================
+# This file allows to configure styles for the syntax highlighting feature 
+# follow the format below : (tab separated values)
+#
+# > Style name
+# color_type	color
+#
+# For the field "PageBackGroundImage" you can put the file name of an image that would be located in /Config/3p/Themes
+# 
+> The classic
+PageBackGroundImage	
+ThemeAccentColor	#1BA1E2
+FormBack	#E6E6E6
+FormFore	#1E1E1E
+FormBorder	#647687
+ScrollBarNormalBack	#CCCCCC
+ScrollThumbNormalBack	#666666
+ScrollBarHoverBack	#CCCCCC
+ScrollThumbHoverBack	#252526
+ScrollBarDisabledBack	#E6E6E6
+ScrollThumbDisabledBack	#B3B3B3
+LabelNormalFore	#1E1E1E
+LabelPressedFore	#000000
+LabelDisabledFore	#969696
+TabNormalBack	#E6E6E6
+TabNormalFore	#6E6E6E
+TabHoverFore	#3C3C3C
+TabPressedFore	#1E1E1E
+ButtonNormalBack	#E6E6E6
+ButtonNormalFore	#1E1E1E
+ButtonNormalBorder	#BEBEBE
+ButtonHoverBack	#D2D2D2
+ButtonHoverFore	#1E1E1E
+ButtonHoverBorder	#BEBEBE
+ButtonPressedFore	#1E1E1E
+ButtonDisabledBack	#E6E6E6
+ButtonDisabledFore	#646464
+ButtonDisabledBorder	#BEBEBE
+
+FormAltBack	#FAFAFA
+SubTextFore	#471212
+MenuHoverBack	#CEE2FC
+MenuHoverFore	#000000
+MenuFocusBack	#9AC2F9
+MenuFocusFore	#000000
+AutoCompletionHighlightBack	#FEE465
+AutoCompletionHighlightBorder	#FFAB00
+
+
+> Monokawai
+PageBackGroundImage	
+ThemeAccentColor	#F0A30A
+FormBack	#252526
+FormFore	#D2D2D2
+FormBorder	#647687
+ScrollBarNormalBack	#333333
+ScrollThumbNormalBack	#999999
+ScrollBarHoverBack	#333333
+ScrollThumbHoverBack	#CCCCCC
+ScrollBarDisabledBack	#222222
+ScrollThumbDisabledBack	#555555
+LabelNormalFore	#B4B4B5
+LabelPressedFore	#5D5D5D
+LabelDisabledFore	#505050
+TabNormalBack	#252526
+TabNormalFore	#505050
+TabHoverFore	#8C8C8C
+TabPressedFore	#C1C1C2
+ButtonNormalBack	#333333
+ButtonNormalFore	#D1D1D1
+ButtonNormalBorder	#333333
+ButtonHoverBack	#3E3E42
+ButtonHoverFore	#D1D1D1
+ButtonHoverBorder	#3E3E42
+ButtonPressedFore	#D1D1D1
+ButtonDisabledBack	#333333
+ButtonDisabledFore	#545454
+ButtonDisabledBorder	#333333
+
+FormAltBack	#333333
+SubTextFore	#649AD1
+MenuHoverBack	#181718
+MenuHoverFore	#D7D2D8
+MenuFocusBack	#0A3259
+MenuFocusFore	#F5CDA6
+AutoCompletionHighlightBack	#5F0005
+AutoCompletionHighlightBorder	#9D0008
+
+
+> Hi kitty
+PageBackGroundImage	bg_hellokitty
+ThemeAccentColor	#FF1493
+FormBack	#E6E6E6
+FormFore	#1E1E1E
+FormBorder	#647687
+ScrollBarNormalBack	#CCCCCC
+ScrollThumbNormalBack	#666666
+ScrollBarHoverBack	#CCCCCC
+ScrollThumbHoverBack	#252526
+ScrollBarDisabledBack	#E6E6E6
+ScrollThumbDisabledBack	#B3B3B3
+LabelNormalFore	#1E1E1E
+LabelPressedFore	#000000
+LabelDisabledFore	#969696
+TabNormalBack	#E6E6E6
+TabNormalFore	#6E6E6E
+TabHoverFore	#3C3C3C
+TabPressedFore	#1E1E1E
+ButtonNormalBack	#E6E6E6
+ButtonNormalFore	#1E1E1E
+ButtonNormalBorder	#BEBEBE
+ButtonHoverBack	#D2D2D2
+ButtonHoverFore	#1E1E1E
+ButtonHoverBorder	#BEBEBE
+ButtonPressedFore	#1E1E1E
+ButtonDisabledBack	#E6E6E6
+ButtonDisabledFore	#646464
+ButtonDisabledBorder	#BEBEBE
+
+FormAltBack	#FAFAFA
+SubTextFore	#471212
+MenuHoverBack	#CEE2FC
+MenuHoverFore	#000000
+MenuFocusBack	#9AC2F9
+MenuFocusFore	#000000
+AutoCompletionHighlightBack	#FEE465
+AutoCompletionHighlightBorder	#FFAB00
+
+> QBI's dream
+PageBackGroundImage	bg_darkmaul
+ThemeAccentColor	#F0A30A
+FormBack	#000000
+FormFore	#D2D2D2
+FormBorder	#647687
+ScrollBarNormalBack	#333333
+ScrollThumbNormalBack	#999999
+ScrollBarHoverBack	#333333
+ScrollThumbHoverBack	#CCCCCC
+ScrollBarDisabledBack	#222222
+ScrollThumbDisabledBack	#555555
+LabelNormalFore	#B4B4B5
+LabelPressedFore	#5D5D5D
+LabelDisabledFore	#505050
+TabNormalBack	#000000
+TabNormalFore	#505050
+TabHoverFore	#8C8C8C
+TabPressedFore	#C1C1C2
+ButtonNormalBack	#333333
+ButtonNormalFore	#D1D1D1
+ButtonNormalBorder	#333333
+ButtonHoverBack	#3E3E42
+ButtonHoverFore	#D1D1D1
+ButtonHoverBorder	#3E3E42
+ButtonPressedFore	#D1D1D1
+ButtonDisabledBack	#333333
+ButtonDisabledFore	#545454
+ButtonDisabledBorder	#333333
+
+FormAltBack	#333333
+SubTextFore	#649AD1
+MenuHoverBack	#181718
+MenuHoverFore	#D7D2D8
+MenuFocusBack	#0A3259
+MenuFocusFore	#F5CDA6
+AutoCompletionHighlightBack	#5F0005
+AutoCompletionHighlightBorder	#9D0008

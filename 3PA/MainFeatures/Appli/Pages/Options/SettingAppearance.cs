@@ -23,7 +23,6 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
@@ -54,16 +53,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 toolTip.SetToolTip(newColorPicker, "Click me to set a new accent color for the current theme");
             }
 
-            // themes combo box
-            cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
-            cbApplication.SelectedIndex = Config.Instance.ThemeId;
-            cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
-
-            // syntax combo
-            cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
-            cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
-            cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
-
             // toggle
             tg_colorOn.CheckedChanged += TgColorOnOnCheckedChanged;
             tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
@@ -73,6 +62,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             toolTip.SetToolTip(cbApplication, "Choose the theme you wish to use for the software");
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
             toolTip.SetToolTip(tg_colorOn, "Toggle this option on if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this on, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this, select the UDL to use from the Language menu before you can see any changes</i>");
+        }
+
+        public override void OnShow() {
+            // themes combo box
+            cbApplication.SelectedIndexChanged -= CbApplicationOnSelectedIndexChanged;
+            cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
+            cbApplication.SelectedIndex = Config.Instance.ThemeId;
+            cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
+
+            // syntax combo
+            cbSyntax.SelectedIndexChanged -= CbSyntaxSelectedIndexChanged;
+            cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
+            cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
+            cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
 
         /// <summary>
@@ -107,7 +110,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     ErrorHandler.Log(x.Message);
             } finally {
                 Config.Instance.ThemeId = cbApplication.SelectedIndex;
-                PlsRefresh();
+                ThemeManager.PlsRefresh();
             }
             
         }
@@ -136,33 +139,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 ThemeManager.Current.AccentColor = rb.BackColor;
                 Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
                 _checkButton = rb;
-                PlsRefresh();
+                ThemeManager.PlsRefresh();
             }
-        }
-
-        /// <summary>
-        /// force all the html panel/label to refresh and try to refresh the main window
-        /// </summary>
-        private void PlsRefresh() {
-
-            // Allows to refresh stuff corrrectly (mainly, it sets the baseCssData to null so it can be recomputed)
-            ThemeManager.Current = ThemeManager.Current;
-
-            var thisForm = FindForm();
-            if (thisForm == null || Appli.Form == null)
-                return;
-
-            Style.SetGeneralStyles();
-
-            // force the autocomplete to redraw
-            AutoComplete.ForceClose();
-
-            // force the dockable to redraw
-            CodeExplorer.CodeExplorer.ApplyColorSettings();
-            FileExplorer.FileExplorer.ApplyColorSettings();
-
-            Application.DoEvents();
-            thisForm.Refresh();
         }
     }
 }

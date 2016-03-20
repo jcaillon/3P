@@ -74,6 +74,24 @@ namespace _3PA.MainFeatures {
                             OnFetch = DoFetch,
                             OnPush = DoPush
                         },
+                        new ConfLine {
+                            Label = "Syntax highlighting themes list",
+                            HandledItem = Config.FileSyntaxThemes,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileSyntaxThemes, DataResources.SyntaxThemes),
+                            OnImport = line => Style.ImportList(),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
+                        new ConfLine {
+                            Label = "Application themes list",
+                            HandledItem = Config.FileApplicationThemes,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileApplicationThemes, DataResources.ApplicationThemes),
+                            OnImport = line => ThemeManager.ImportList(),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
                         //new ConfLine {
                         //    Label = "4GL keywords list",
                         //    HandledItem = Config.FileKeywordsList,
