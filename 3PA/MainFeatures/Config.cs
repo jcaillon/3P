@@ -288,8 +288,8 @@ namespace _3PA.MainFeatures {
             [Range(0, 10)]
             public int CodeTabSpaceNb = 4;
 
-            [Display(Name = "Activate 'Show spaces' on start-up",
-                Description = "Toggle on/off to activate the 'show spaces' notepad++ option on 3P's startup<br>This option let the user see the spaces as dots and tabs as arrows in its document",
+            [Display(Name = "Activate 'Show spaces' on progress files",
+                Description = "Toggle on/off to activate the 'show spaces' notepad++ option when switching to a progress file<br>This option let the user see the spaces as dots and tabs as arrows in its document",
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
             public bool CodeShowSpaces = true;
@@ -509,7 +509,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Url for the ping webservice
         /// </summary>
-        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.3.1/?action=ping"; } }
+        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.4.1/?action=ping"; } }
 
         public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
 

@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Management;
@@ -39,7 +40,7 @@ namespace _3PA.Lib {
         public static void Ping() {
             try {
                 DateTime lastPing;
-                if (!DateTime.TryParseExact(Config.Instance.TechnicalLastPing, "yyyy-MM-dd HH:mm:ss", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out lastPing)) {
+                if (!DateTime.TryParseExact(Config.Instance.TechnicalLastPing, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.None, out lastPing)) {
                     lastPing = DateTime.MinValue;
                 }
                 // ping once every hour
@@ -60,7 +61,8 @@ namespace _3PA.Lib {
                             "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
                             "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
                             "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
-                            "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.IsDaylightSavingTime(DateTime.Now) ? TimeZone.CurrentTimeZone.DaylightName : TimeZone.CurrentTimeZone.StandardName + " (" + TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now) + ")") +
+                            "\"lang\": " + serializer.Serialize(CultureInfo.InstalledUICulture.EnglishName) + "," +
+                            "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString()) +
                             "}");
                         writer.Close();
                         string result = null;

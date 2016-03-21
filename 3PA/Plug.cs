@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Drawing;
+using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -287,8 +288,9 @@ namespace _3PA {
         #region Apply Npp options
 
         private static bool _indentWithTabs;
-        private static int _indentWidth;
+        private static int _indentWidth = -1;
         private static Annotation _annotationMode;
+        private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
@@ -297,17 +299,15 @@ namespace _3PA {
         /// <param name="forceToDefault"></param>
         public static void ApplyPluginSpecificOptions(bool forceToDefault) {
 
-            if (_indentWidth == 0) {
+            if (_indentWidth == -1) {
                 _indentWidth = Npp.IndentWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
+                _whitespaceMode = Npp.ViewWhitespace;
 
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
-                if (Config.Instance.CodeShowSpaces) {
-                    Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
-                }
                 Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
             }
 
@@ -316,6 +316,7 @@ namespace _3PA {
                 Npp.AnnotationVisible = _annotationMode;
                 Npp.UseTabs = _indentWithTabs;
                 Npp.TabWidth = _indentWidth;
+                Npp.ViewWhitespace = _whitespaceMode;
             } else {
                 // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
@@ -323,6 +324,9 @@ namespace _3PA {
                 Npp.AnnotationVisible = Annotation.Boxed;
                 Npp.UseTabs = false;
                 Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
+                if (Config.Instance.CodeShowSpaces) {
+                    Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                }
             }
         }
 
@@ -346,7 +350,12 @@ namespace _3PA {
             //Debug.Assert(false);
         }
 
+
+
         public static void Test() {
+
+            UserCommunication.Notify(CultureInfo.InstalledUICulture.DisplayName + " " + CultureInfo.InstalledUICulture.EnglishName + " " + CultureInfo.InstalledUICulture.ThreeLetterISOLanguageName + " " + CultureInfo.InstalledUICulture.Name);
+
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",

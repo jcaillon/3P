@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU General Public License
 # along with 3P. If not, see <http://www.gnu.org/licenses/>.
 # ========================================================================
-# This file allows to configure styles for the syntax highlighting feature 
+# This file allows you to configure the style of the application
 # follow the format below : (tab separated values)
 #
 # > Style name
-# color_type	color
+# color_type	color_in_html_format
 #
 # For the field "PageBackGroundImage" you can put the file name of an image that would be located in /Config/3p/Themes
 # 

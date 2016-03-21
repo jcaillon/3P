@@ -166,8 +166,8 @@ namespace _3PA.MainFeatures {
         #region set styles
 
         private static bool _needReset;
-        private static StyleThemeItem _defIndentGuide = new StyleThemeItem();
-        private static StyleThemeItem _defCaretLine = new StyleThemeItem();
+        private static Color _indentGuideColor;
+        private static Color _caretLineColor;
 
         /// <summary>
         /// Call this method to reset the styles to their default value when moving to a non progress file
@@ -177,16 +177,15 @@ namespace _3PA.MainFeatures {
             if (!_needReset)
                 return;
 
-            Npp.SetWhiteSpaceColor(false, Color.Transparent, Color.Transparent);
-            SetFontStyle((byte)SciMsg.STYLE_INDENTGUIDE, _defIndentGuide);
-            Npp.SetSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
-            Npp.SetAdditionalSelectionColor(true, _defCaretLine.BackColor, Color.Transparent);
-            //Npp.SelectionBackAlpha = 120;
-            Npp.CaretLineBackColor = ControlPaint.Light(_defCaretLine.BackColor, 1.2f);
-            //Npp.CaretLineBackAlpha = 60;
+            Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
 
-            Npp.StyleResetDefault();
-            
+            // selection and caret line, we can't restore the previous colors because we don't have the selection color! (it's a npp setting)
+            if (CurrentTheme.Selection.BackColor != Color.Transparent) {
+                Npp.SetSelectionColor(true, _caretLineColor, Color.Transparent);
+            }
+            if (CurrentTheme.CaretLine.BackColor != Color.Transparent) {
+                Npp.CaretLineBackColor = ControlPaint.Light(_caretLineColor, 1.2f);
+            }
         }
 
         /// <summary>
@@ -197,10 +196,8 @@ namespace _3PA.MainFeatures {
 
             // save current values, to reset them when we switch on a non progress file
             if (!_needReset) {
-                var nppStyle = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE);
-                _defIndentGuide.BackColor = nppStyle.BackColor;
-                _defIndentGuide.ForeColor = nppStyle.ForeColor;
-                _defCaretLine.BackColor = Npp.CaretLineBackColor;
+                _indentGuideColor = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor;
+                _caretLineColor = Npp.CaretLineBackColor;
                 _needReset = true;
             }
 
@@ -211,8 +208,12 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
             SetFontStyle((byte)UdlStyles.Idk, curTheme.Default);
             SetFontStyle((byte)UdlStyles.Default, curTheme.Default);
-            Npp.SetWhiteSpaceColor(true, curTheme.WhiteSpace.BackColor, curTheme.WhiteSpace.ForeColor);
-            SetFontStyle((byte)SciMsg.STYLE_INDENTGUIDE, curTheme.WhiteSpace);
+
+            // whitespaces
+            if (curTheme.WhiteSpace.ForeColor != Color.Transparent) {
+                Npp.SetWhiteSpaceColor(true, Color.Transparent, curTheme.WhiteSpace.ForeColor);
+                Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = curTheme.WhiteSpace.ForeColor;
+            }
 
             // categories
             SetFontStyle((byte)UdlStyles.Comment, curTheme.Comment);
@@ -236,20 +237,21 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
             SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
 
-            // Extra
-            Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
-            Npp.SetAdditionalSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
-            //Npp.SelectionBackAlpha = 120;
-            Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
-            //Npp.CaretLineBackAlpha = 70;
-            //Npp.CaretLineVisible = true;
-
+            // Selection and caret line
+            if (curTheme.Selection.BackColor != Color.Transparent) {
+                Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
+            }
+            if (curTheme.CaretLine.BackColor != Color.Transparent) {
+                Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
+            }
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
             var nppStyle = Npp.GetStyle(styleNumber);
-            nppStyle.BackColor = styleItem.BackColor;
-            nppStyle.ForeColor = styleItem.ForeColor;
+            if (styleItem.BackColor != Color.Transparent)
+                nppStyle.BackColor = styleItem.BackColor;
+            if (styleItem.ForeColor != Color.Transparent)
+                nppStyle.ForeColor = styleItem.ForeColor;
             nppStyle.Bold = styleItem.FontType.IsBitSet(1);
             nppStyle.Italic = styleItem.FontType.IsBitSet(2);
         }
@@ -399,32 +401,32 @@ namespace _3PA.MainFeatures {
     public class StyleTheme {
 
         public string Name = "Default";
-        public StyleThemeItem Default;
-        public StyleThemeItem Comment;
-        public StyleThemeItem NestedComment;
-        public StyleThemeItem SingleLineComment;
-        public StyleThemeItem PreProcessed;
-        public StyleThemeItem JumpStatement;
-        public StyleThemeItem Statement;
-        public StyleThemeItem VarType;
-        public StyleThemeItem OtherKeywords;
-        public StyleThemeItem Operators;
-        public StyleThemeItem Abbreviations;
-        public StyleThemeItem Includes;
-        public StyleThemeItem DoubleQuote;
-        public StyleThemeItem SimpleQuote;
-        public StyleThemeItem NormedVariables;
-        public StyleThemeItem SpecialWord;
-        public StyleThemeItem CaretLine;
-        public StyleThemeItem Selection;
-        public StyleThemeItem WhiteSpace;
-        public StyleThemeItem Numbers;
-        public StyleThemeItem NoError;
-        public StyleThemeItem Error0;
-        public StyleThemeItem Error1;
-        public StyleThemeItem Error2;
-        public StyleThemeItem Error3;
-        public StyleThemeItem Error4;
+        public StyleThemeItem Default = new StyleThemeItem();
+        public StyleThemeItem Comment = new StyleThemeItem();
+        public StyleThemeItem NestedComment = new StyleThemeItem();
+        public StyleThemeItem SingleLineComment = new StyleThemeItem();
+        public StyleThemeItem PreProcessed = new StyleThemeItem();
+        public StyleThemeItem JumpStatement = new StyleThemeItem();
+        public StyleThemeItem Statement = new StyleThemeItem();
+        public StyleThemeItem VarType = new StyleThemeItem();
+        public StyleThemeItem OtherKeywords = new StyleThemeItem();
+        public StyleThemeItem Operators = new StyleThemeItem();
+        public StyleThemeItem Abbreviations = new StyleThemeItem();
+        public StyleThemeItem Includes = new StyleThemeItem();
+        public StyleThemeItem DoubleQuote = new StyleThemeItem();
+        public StyleThemeItem SimpleQuote = new StyleThemeItem();
+        public StyleThemeItem NormedVariables = new StyleThemeItem();
+        public StyleThemeItem SpecialWord = new StyleThemeItem();
+        public StyleThemeItem CaretLine = new StyleThemeItem();
+        public StyleThemeItem Selection = new StyleThemeItem();
+        public StyleThemeItem WhiteSpace = new StyleThemeItem();
+        public StyleThemeItem Numbers = new StyleThemeItem();
+        public StyleThemeItem NoError = new StyleThemeItem();
+        public StyleThemeItem Error0 = new StyleThemeItem();
+        public StyleThemeItem Error1 = new StyleThemeItem();
+        public StyleThemeItem Error2 = new StyleThemeItem();
+        public StyleThemeItem Error3 = new StyleThemeItem();
+        public StyleThemeItem Error4 = new StyleThemeItem();
 
         /// <summary>
         /// Set a value to this instance, by its property name
@@ -443,8 +445,8 @@ namespace _3PA.MainFeatures {
     }
 
     public class StyleThemeItem {
-        public Color BackColor = Color.Azure;
-        public Color ForeColor = Color.Black;
+        public Color BackColor = Color.Transparent;
+        public Color ForeColor = Color.Transparent;
         public int FontType;
     }
 
