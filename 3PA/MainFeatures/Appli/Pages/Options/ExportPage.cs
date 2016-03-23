@@ -30,6 +30,7 @@ using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
 
@@ -138,8 +139,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Name = "bto_" + iNbLine
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
+                strButton.MouseDown += OpenFileOnMouseDown;
                 dockedPanel.ContentPanel.Controls.Add(strButton);
-                tooltip.SetToolTip(strButton, "Click to <b>open</b> this file / folder in the explorer");
+                tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
 
                 // local import
                 strButton = new YamuiImageButton {
@@ -206,8 +208,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Name = "btz_" + iNbLine
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
+                strButton.MouseDown += OpenFileOnMouseDown;
                 dockedPanel.ContentPanel.Controls.Add(strButton);
-                tooltip.SetToolTip(strButton, "Click to <b>open</b> this file / folder in the explorer");
+                tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
 
                 // distant fetch
                 strButton = new YamuiImageButton {
@@ -286,7 +289,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (conf.IsDir)
                 Utils.OpenFolder(pathToOpen);
             else
-                Utils.OpenFileInFolder(pathToOpen);
+                Npp.OpenFile(pathToOpen);
+        }
+
+
+        private void OpenFileOnMouseDown(object sender, MouseEventArgs e) {
+            if (e.Button == MouseButtons.Right) {
+                var conf = (ConfLine)((YamuiImageButton)sender).Tag;
+                var pathToOpen = ((YamuiImageButton)sender).Name.StartsWith("bto_") ? conf.LocalPath : conf.DistantPath;
+                if (conf.IsDir)
+                    Utils.OpenFolder(pathToOpen);
+                else
+                    Utils.OpenFileInFolder(pathToOpen);
+            }
         }
 
         /// <summary>
