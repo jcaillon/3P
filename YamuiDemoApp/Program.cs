@@ -1,15 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Drawing;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Windows.Forms;
-using System.Xml.Linq;
-using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Forms;
 using YamuiFramework.Themes;
 
@@ -31,11 +21,15 @@ namespace YamuiDemoApp {
         [STAThread]
         static void Main() {
 
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
 
-            _3PA.Tests.ParserLexerTests.Run();
+            YamuiThemeManager.TabAnimationAllowed = true;
+            MainForm = new Form1();
 
-            return;
+            Application.Run(MainForm);
 
+            //_3PA.Tests.ParserLexerTests.Run();
 
             /*
             Ship ship = new Ship();
@@ -108,13 +102,7 @@ namespace YamuiDemoApp {
 
             return;
             */
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-             
-            YamuiThemeManager.TabAnimationAllowed = true;
-            MainForm = new Form1();
 
-            Application.Run(MainForm);
         }
     }
 

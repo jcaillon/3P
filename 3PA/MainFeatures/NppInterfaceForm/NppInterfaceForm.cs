@@ -85,6 +85,8 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
 
+            CurrentForegroundWindow = Npp.HandleScintilla;
+
             Opacity = 0;
             Visible = false;
             Tag = false;
@@ -202,7 +204,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
             // draw the border with Style color
             var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, borderWidth) { Alignment = PenAlignment.Inset }; ;
+            var pen = new Pen(borderColor, borderWidth) { Alignment = PenAlignment.Inset };
             e.Graphics.DrawRectangle(pen, rect);
         }
 

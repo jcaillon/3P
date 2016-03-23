@@ -123,9 +123,9 @@ namespace _3PA.MainFeatures {
 
         #region fields
 
-        public List<MenuItem> MainMenuList { get; }
+        public List<MenuItem> MainMenuList { get; set; }
 
-        public List<MenuItem> GenerateCodeMenuList { get; }
+        public List<MenuItem> GenerateCodeMenuList { get; set; }
 
         #endregion
 

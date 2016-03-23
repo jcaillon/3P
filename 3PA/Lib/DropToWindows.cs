@@ -210,8 +210,7 @@ namespace _3PA.Lib {
     }
 
     public class MmdDropFile {
-        public string FileName {
-            get; }
+        public string FileName { get; set; }
 
         public string FullName {
             get {
@@ -219,8 +218,7 @@ namespace _3PA.Lib {
             }
         }
 
-        public Stream Stream {
-            get; }
+        public Stream Stream { get; set; }
 
         public bool IsPipe {
             get {

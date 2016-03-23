@@ -76,7 +76,7 @@ namespace _3PA.MainFeatures {
                         },
                         0, 500);
                 else
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br>If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>Otherwise, another try will probably fail as well.<br>Consider restarting Notepad++ as it might solve this problem.<br>Finally, you can use the link below to open an issue on GitHub and thus help programmers debugging 3P :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>", MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>If you didn't ask anything from 3P then you can ignore this message.<br>If you did, another try will probably fail as well.<br><br>Consider restarting Notepad++ as it might solve this problem!<br><br><i>You can use the link below to open an issue on GitHub and help us debug 3P :</i><br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>", MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
             }
         }
 
