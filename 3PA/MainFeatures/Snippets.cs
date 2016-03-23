@@ -23,7 +23,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using _3PA.Data;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;

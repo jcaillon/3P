@@ -17,10 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Properties;
 

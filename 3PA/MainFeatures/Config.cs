@@ -406,6 +406,7 @@ namespace _3PA.MainFeatures {
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
             public bool GlobalDontUseSyntaxHighlightTheme = false;
+            public bool GlobalOverrideNppTheme = true;
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();

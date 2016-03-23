@@ -2346,7 +2346,7 @@ namespace _3PA {
             /// Gets the line index.
             /// </summary>
             /// <returns>The zero-based line index within the LineCollection that created it.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets the length of the line.
@@ -2648,7 +2648,7 @@ namespace _3PA {
             /// Gets the selection index.
             /// </summary>
             /// <returns>The zero-based selection index within the SelectionCollection that created it.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets or sets the start position of the selection.
@@ -2813,7 +2813,7 @@ namespace _3PA {
             /// Gets the zero-based marker index this object represents.
             /// </summary>
             /// <returns>The marker index within the MarkerCollection.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets or sets the marker symbol.
@@ -2890,7 +2890,7 @@ namespace _3PA {
             /// Gets the zero-based margin index this object represents.
             /// </summary>
             /// <returns>The margin index within the MarginCollection.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets or sets whether the margin is sensitive to mouse clicks.
@@ -3165,7 +3165,7 @@ namespace _3PA {
             /// Gets the zero-based indicator index this object represents.
             /// </summary>
             /// <returns>The indicator definition index within the IndicatorCollection.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets or sets the alpha transparency of the indicator outline used for drawing the outline colour
@@ -3476,7 +3476,7 @@ namespace _3PA {
             /// Gets the zero-based style definition index.
             /// </summary>
             /// <returns>The style definition index within the StyleCollection.</returns>
-            public int Index { get; private set; }
+            public int Index { get; }
 
             /// <summary>
             /// Gets or sets whether the style font is italic.

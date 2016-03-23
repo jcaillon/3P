@@ -23,6 +23,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+
 namespace _3PA.Interop {
 
     [StructLayout(LayoutKind.Sequential)]
@@ -584,7 +585,7 @@ namespace _3PA.Interop {
         NPPN_READONLYCHANGED = NppMsg.NPPN_READONLYCHANGED,
         DOCSTAUS_READONLY = NppMsg.DOCSTAUS_READONLY,
         DOCSTAUS_BUFFERDIRTY = NppMsg.DOCSTAUS_BUFFERDIRTY,
-        NPPN_DOCORDERCHANGED = NppMsg.NPPN_DOCORDERCHANGED,
+        NPPN_DOCORDERCHANGED = NppMsg.NPPN_DOCORDERCHANGED
     }
 
     internal class Idm {

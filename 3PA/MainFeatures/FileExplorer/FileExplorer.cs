@@ -27,10 +27,8 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
-using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.FileExplorer {
     internal static class FileExplorer {

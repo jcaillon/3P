@@ -22,7 +22,6 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using _3PA.Interop;
-using WinApi = _3PA.Interop.WinApi;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
 

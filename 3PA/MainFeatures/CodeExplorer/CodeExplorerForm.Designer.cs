@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using BrightIdeasSoftware;
+﻿using System.ComponentModel;
 using YamuiFramework.Controls;
-using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.CodeExplorer {

@@ -123,9 +123,9 @@ namespace _3PA.MainFeatures {
 
         #region fields
 
-        public List<MenuItem> MainMenuList { get; private set; }
+        public List<MenuItem> MainMenuList { get; }
 
-        public List<MenuItem> GenerateCodeMenuList { get; private set; }
+        public List<MenuItem> GenerateCodeMenuList { get; }
 
         #endregion
 
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures {
 
             GenerateCodeMenuList = new List<MenuItem> {
                 new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
-                new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure),
+                new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure)
             };
 
             var goToDefItem = new MenuItem("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B", ImageResources.GoToDefinition);
@@ -150,7 +150,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(true), // --------------------------
 
                 new MenuItem("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1", ImageResources.ProgressHelp) {
-                    Generic = true,
+                    Generic = true
                 },
                 new MenuItem("Check syntax", () => ProCodeUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1", ImageResources.CheckCode),
                 new MenuItem("Compile", () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1", ImageResources.CompileCode),
@@ -165,11 +165,11 @@ namespace _3PA.MainFeatures {
                 new MenuItem(true), // --------------------------
 
                 new MenuItem("Start searching files", FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q", ImageResources.Search) {
-                    Generic = true,
+                    Generic = true
                 },
                 goToDefItem,
                 new MenuItem("Go to previous jump point", Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B", ImageResources.GoBackward) {
-                    Generic = true,
+                    Generic = true
                 },
 
                 new MenuItem(true), // --------------------------
@@ -195,14 +195,14 @@ namespace _3PA.MainFeatures {
 
                new MenuItem(true), // --------------------------
 
-               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions),
+               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions)
             };
 
             if (Config.IsDevelopper) {
                 MainMenuList.Add(
                     new MenuItem("Tests", ImageResources.Tests, new List<MenuItem> {
                         new MenuItem("Test", Plug.Test, "Test", "Ctrl+D", ImageResources.TestTube),
-                        new MenuItem("DEBUG", Plug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube),
+                        new MenuItem("DEBUG", Plug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube)
                     }));
             }
         }

@@ -91,7 +91,7 @@ namespace _3PA.MainFeatures {
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
-                        },
+                        }
                         //new ConfLine {
                         //    Label = "4GL keywords list",
                         //    HandledItem = Config.FileKeywordsList,

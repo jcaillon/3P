@@ -29,6 +29,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
+
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {
@@ -42,7 +43,7 @@ namespace _3PA.MainFeatures {
         /// from a back groundthread, use : BeginInvoke()
         /// </summary>
         public static void Init() {
-            _anchorForm = new EmptyForm() {
+            _anchorForm = new EmptyForm {
                 Location = new Point(-10000, -10000),
                 Visible = false
             };

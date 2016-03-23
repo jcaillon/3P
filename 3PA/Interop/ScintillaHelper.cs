@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Runtime.InteropServices;
+
 // ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
@@ -1577,7 +1578,7 @@ namespace _3PA.Interop {
         SCN_HOTSPOTRELEASECLICK = SciMsg.SCN_HOTSPOTRELEASECLICK,
         SCN_FOCUSIN = SciMsg.SCN_FOCUSIN,
         SCN_FOCUSOUT = SciMsg.SCN_FOCUSOUT,
-        SCN_AUTOCCOMPLETED = SciMsg.SCN_AUTOCCOMPLETED,
+        SCN_AUTOCCOMPLETED = SciMsg.SCN_AUTOCCOMPLETED
     }
 
     [Flags]

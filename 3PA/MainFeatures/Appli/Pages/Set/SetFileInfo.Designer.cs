@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetFileInfo {
@@ -452,18 +453,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButton bt_default;
         private YamuiButton bt_clear;
         private YamuiLabel yamuiLabel1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel2;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel3;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel4;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel6;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel5;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel9;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lb_SaveState;
+        private HtmlLabel htmlLabel1;
+        private HtmlLabel htmlLabel2;
+        private HtmlLabel htmlLabel3;
+        private HtmlLabel htmlLabel4;
+        private HtmlLabel htmlLabel6;
+        private HtmlLabel htmlLabel5;
+        private HtmlLabel htmlLabel9;
+        private HtmlLabel lb_SaveState;
         private YamuiImageButton bt_SaveState;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lb_FileName;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel7;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
+        private HtmlLabel lb_FileName;
+        private HtmlLabel htmlLabel7;
+        private HtmlToolTip toolTip;
         private YamuiButton bt_delete;
     }
 }

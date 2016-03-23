@@ -15,13 +15,19 @@
 # You should have received a copy of the GNU General Public License
 # along with 3P. If not, see <http://www.gnu.org/licenses/>.
 # ========================================================================
-# This file allows you to configure the style of the application
+# This file allows you to configure the styles of the application
 # follow the format below : (tab separated values)
 #
 # > Style name
 # color_type	color_in_html_format
+# color_type2	color_in_html_format2
+# ...
 #
-# For the field "PageBackGroundImage" you can put the file name of an image that would be located in /Config/3p/Themes
+# For the field "PageBackGroundImage" you can put the file name of an image that would be located in /plugins/config/3p/Themes
+# for instance :
+# PageBackGroundImage	my_pic.png
+#
+# If you create cool themes, don't hesitate to submit them to me :)
 # 
 > The classic
 PageBackGroundImage	
@@ -144,7 +150,7 @@ AutoCompletionHighlightBorder	#FFAB00
 
 > QBI's dream
 PageBackGroundImage	bg_darkmaul
-ThemeAccentColor	#F0A30A
+ThemeAccentColor	#E51400
 FormBack	#000000
 FormFore	#D2D2D2
 FormBorder	#647687

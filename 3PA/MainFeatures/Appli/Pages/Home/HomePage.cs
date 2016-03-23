@@ -17,8 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
-using MarkdownDeep;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Html;

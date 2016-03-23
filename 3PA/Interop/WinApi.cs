@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Windows.Forms;
 
 // ReSharper disable InconsistentNaming
 
@@ -302,7 +301,7 @@ namespace _3PA.Interop {
             WM_NCMBUTTONDBLCLK = WindowsMessage.WM_NCMBUTTONDBLCLK,
             WM_NCXBUTTONDOWN = WindowsMessage.WM_NCXBUTTONDOWN,
             WM_NCXBUTTONUP = WindowsMessage.WM_NCXBUTTONUP,
-            WM_NCXBUTTONDBLCLK = WindowsMessage.WM_NCXBUTTONDBLCLK,
+            WM_NCXBUTTONDBLCLK = WindowsMessage.WM_NCXBUTTONDBLCLK
         }
 
         #endregion
@@ -571,7 +570,7 @@ namespace _3PA.Interop {
 
             WM_USER = 0x0400,
 
-            WM_REFLECT = WM_USER + 0x1C00,
+            WM_REFLECT = WM_USER + 0x1C00
         }
 
         #endregion

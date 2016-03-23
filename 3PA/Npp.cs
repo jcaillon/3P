@@ -391,7 +391,7 @@ namespace _3PA {
         /// </summary>
         /// <returns></returns>
         public static string GetNppVersion() {
-            int nppVersion = WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
+            int nppVersion = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
             var lowWord = (nppVersion & 0x0000FFFF).ToString();
             return "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
         }

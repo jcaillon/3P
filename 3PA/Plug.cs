@@ -18,9 +18,7 @@
 // ========================================================================
 #endregion
 using System;
-using System.Drawing;
 using System.Globalization;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -321,7 +319,7 @@ namespace _3PA {
                 // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-                Npp.AnnotationVisible = Annotation.Boxed;
+                Npp.AnnotationVisible = Annotation.Indented;
                 Npp.UseTabs = false;
                 Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
                 if (Config.Instance.CodeShowSpaces) {

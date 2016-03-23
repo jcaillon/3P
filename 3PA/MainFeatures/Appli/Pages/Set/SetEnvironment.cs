@@ -239,7 +239,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             Delete,
             DbEdit,
             DbAddNew,
-            DbDelete,
+            DbDelete
         }
 
         private void ToggleMode(ViewMode mode) {

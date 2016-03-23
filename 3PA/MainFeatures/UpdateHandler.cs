@@ -393,13 +393,13 @@ namespace _3PA.MainFeatures {
         /// Contains info about the latest release
         /// </summary>
         public class ReleaseInfo {
-            public string Version { private set; get; }
-            public string Name { private set; get; }
-            public bool IsPreRelease { private set; get; }
+            public string Version { get; }
+            public string Name { get; }
+            public bool IsPreRelease { get; }
             public bool IsDraft { private set; get; }
-            public string ReleaseUrl { private set; get; }
-            public string Body { private set; get; }
-            public string ReleaseDate { private set; get; }
+            public string ReleaseUrl { get; }
+            public string Body { get; }
+            public string ReleaseDate { get; }
 
             public ReleaseInfo(string version, string name, bool isPreRelease, string releaseUrl, string body, bool isDraft, string releaseDate) {
                 Version = version;

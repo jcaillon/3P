@@ -27,6 +27,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Html;
 using _3PA.Lib;
+
 // ReSharper disable LocalizableElement
 
 namespace _3PA.MainFeatures {

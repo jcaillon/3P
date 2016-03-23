@@ -20,9 +20,7 @@
 using System;
 using System.Drawing;
 using System.Linq;
-using System.Windows.Forms;
 using YamuiFramework.Controls;
-using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
@@ -40,7 +38,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 PanelAccentColor.Controls.Add(newColorPicker);
                 newColorPicker.CheckedChanged += NewColorPickerOnCheckedChanged;
                 newColorPicker.BackColor = accentColor;
-                newColorPicker.Bounds = new Rectangle(x, y, 50, 50);
+                newColorPicker.Location = new Point(x, y);
+                newColorPicker.Size = new Size(50, 50);
+                //newColorPicker.Bounds = new Rectangle(x, y, 50, 50);
                 if (y + 2*newColorPicker.Height > PanelAccentColor.Height) {
                     x += newColorPicker.Width;
                     y = 0;
@@ -54,14 +54,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // toggle
-            tg_colorOn.CheckedChanged += TgColorOnOnCheckedChanged;
+            tg_colorOn.CheckedChanged += TgOnCheckedChanged;
             tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
+
+            tg_override.CheckedChanged += TgOnCheckedChanged;
+            tg_override.Checked = Config.Instance.GlobalOverrideNppTheme;
             UpdateToggle();
 
             // tooltips
             toolTip.SetToolTip(cbApplication, "Choose the theme you wish to use for the software");
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
             toolTip.SetToolTip(tg_colorOn, "Toggle this option on if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this on, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this, select the UDL to use from the Language menu before you can see any changes</i>");
+            toolTip.SetToolTip(tg_override, "Toggle this option on if don't want 3P to override certain colors of Notepad++<br>like the selection / caret line color for instance<br>In that case, you will continue using the style settings of Notepad++ and 3P<br>will only control the colors of the language itself.<br><br><i>You need to restart Notepad++ to see any changes</i>");
         }
 
         public override void OnShow() {
@@ -78,11 +82,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
 
-        /// <summary>
-        /// Toggle on/off the use of a custom UDL
-        /// </summary>
-        private void TgColorOnOnCheckedChanged(object sender, EventArgs eventArgs) {
+        private void TgOnCheckedChanged(object sender, EventArgs eventArgs) {
             Config.Instance.GlobalDontUseSyntaxHighlightTheme = tg_colorOn.Checked;
+            Config.Instance.GlobalOverrideNppTheme = tg_override.Checked;
             UpdateToggle();
         }
 
@@ -93,6 +95,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             } else {
                 tg_colorOn.Text = "Use the themes provided by 3P, select one below : ";
                 cbSyntax.Show();
+            }
+            if (tg_override.Checked) {
+                tg_override.Text = "Let 3P override notepad++ themes (for instance, replace selection color)";
+            } else {
+                tg_override.Text = "Use the theme of 3P strictly for the syntax highlighting";
             }
         }
 

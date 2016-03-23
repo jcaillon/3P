@@ -162,7 +162,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 new Tuple<string, string>(@"({&de\s*})", fileTagObject.CorrectionDecription),
                 new Tuple<string, string>(@"({&n\s*})", fileTagObject.CorrectionNumber),
                 new Tuple<string, string>(@"({&w\s*})", fileTagObject.WorkPackage),
-                new Tuple<string, string>(@"({&u\s*})", Config.Instance.UserName),
+                new Tuple<string, string>(@"({&u\s*})", Config.Instance.UserName)
             }) {
                 var regex = new Regex(tuple.Item1);
                 var match = regex.Match(output);

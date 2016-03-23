@@ -19,7 +19,6 @@
 #endregion
 using System;
 using YamuiFramework.Controls;
-using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {

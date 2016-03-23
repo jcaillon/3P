@@ -186,7 +186,7 @@ namespace _3PA {
                         OnDwellEnd();
                         return;
 
-                    case (uint) NppNotif.NPPN_FILESAVED:
+                    case (uint) NppNotif.NPPN_FILEBEFORESAVE:
                         // on file saved
                         OnFileSaved();
                         return;
@@ -602,10 +602,12 @@ namespace _3PA {
         /// Called when the user saves the current document
         /// </summary>
         public static void OnFileSaved() {
+    
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder() && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
                 var explorerItemsList = ParserHandler.GetParsedExplorerItemsList();
+
                 if (explorerItemsList != null) {
                     foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))
                         warningMessage.AppendLine("<div><img src='IsTooLong'><img src='" + codeExplorerItem.Branch + "' style='padding-right: 10px'><a href='" + codeExplorerItem.GoToLine + "'>" + codeExplorerItem.DisplayText + "</a></div>");

@@ -18,9 +18,7 @@
 // ========================================================================
 #endregion
 using System;
-using System.Drawing;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.Appli {

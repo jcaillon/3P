@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     partial class SetCompilationPath {
@@ -154,11 +155,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private YamuiScrollPage dockedPanel;
         private YamuiLabel yamuiLabel1;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel lbl_about;
+        private HtmlToolTip toolTip;
+        private HtmlLabel lbl_about;
         private YamuiLabel yamuiLabel2;
         private YamuiButton bt_modify;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel html_list;
+        private HtmlLabel html_list;
         private YamuiButton bt_import;
     }
 }

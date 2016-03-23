@@ -23,7 +23,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using _3PA.Interop;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 

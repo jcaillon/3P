@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli {

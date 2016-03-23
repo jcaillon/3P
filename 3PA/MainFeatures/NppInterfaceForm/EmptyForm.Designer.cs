@@ -1,11 +1,11 @@
-﻿using _3PA.Interop;
+﻿using System.ComponentModel;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
     partial class EmptyForm {
         /// <summary>
         /// Required designer variable.
         /// </summary>
-        private System.ComponentModel.IContainer components = null;
+        private IContainer components = null;
 
         /// <summary>
         /// Clean up any resources being used.

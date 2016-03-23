@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using YamuiFramework.Controls;
+using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     partial class OthersPage {
@@ -268,18 +269,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiScrollPage yamuiScrollPage1;
         private YamuiLabel yamuiLabel3;
         private YamuiTextBox fl_tagopen;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel7;
+        private HtmlLabel htmlLabel7;
         private YamuiTextBox fl_tagclose;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel8;
+        private HtmlLabel htmlLabel8;
         private YamuiTextBox fl_tagtitle1;
         private YamuiButton bttagcancel;
         private YamuiButton bttagsave;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel10;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip toolTip;
+        private HtmlLabel htmlLabel10;
+        private HtmlToolTip toolTip;
         private YamuiTextBox fl_tagtitle3;
         private YamuiTextBox fl_tagtitle2;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel2;
-        private YamuiFramework.HtmlRenderer.WinForms.HtmlLabel htmlLabel1;
+        private HtmlLabel htmlLabel2;
+        private HtmlLabel htmlLabel1;
 
     }
 }

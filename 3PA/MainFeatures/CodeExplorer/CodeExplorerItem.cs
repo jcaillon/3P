@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using _3PA.Lib;
 using _3PA.MainFeatures.FilteredLists;
 
@@ -106,7 +105,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         [DisplayAttr(Name = "Program parameters")]
         ProgramParameter,
         [DisplayAttr(Name = "Temp-tables used")]
-        TempTableUsed,
+        TempTableUsed
     }
 
     /// <summary>
@@ -149,6 +148,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         // private proc
         Private = 128,
         // is a buffer
-        Buffer = 256,
+        Buffer = 256
     }
 }

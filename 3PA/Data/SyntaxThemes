@@ -15,11 +15,16 @@
 # You should have received a copy of the GNU General Public License
 # along with 3P. If not, see <http://www.gnu.org/licenses/>.
 # ========================================================================
-# This file allows you to configure the styles for the syntax highlighting feature 
+# This file allows you to configure the styles of the syntax highlighting feature 
 # follow the format below : (tab separated values)
 #
 # > Style name
 # keyword_type	foreground_color	background_color	font_style (0 normal, 2 bold, 4 italic)
+# ...
+#
+# You must specify the colors in html format (#000000)
+#
+# If you create cool themes, don't hesitate to submit them to me :)
 #
 > Default
 Default	#000000	#FFFFFF	0
@@ -39,7 +44,6 @@ SimpleQuote	#CE00CE	#FFFFFF	0
 NormedVariables	#2D2DFF	#FFFFFF	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#FF0000	#FFFFFF	0
-# you can comment the 3 lines below if you want to use the settings of Npp
 CaretLine	#000000	#E8E8FF	0
 Selection	#000000	#E3E3E3	0
 WhiteSpace	#E2AE3E	#FFFFFF	0
@@ -68,7 +72,6 @@ SimpleQuote	#F60000	#FFFFFF	0
 NormedVariables	#8959a8	#FFFFFF	0
 SpecialWord	#000000	#ADFF2F	2
 Numbers	#C82829	#FFFFFF	0
-# you can comment the 3 lines below if you want to use the settings of Npp
 CaretLine	#000000	#E8E8FF	0
 Selection	#000000	#E3E3E3	0
 WhiteSpace	#E2AE3E	#FFFFFF	0
@@ -97,7 +100,6 @@ SimpleQuote	#73EC0F	#1D1F21	0
 NormedVariables	#CC6666	#1D1F21	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#84AFE4	#1D1F21	0
-# you can comment the 3 lines below if you want to use the settings of Npp
 CaretLine	#000000	#623A1E	0
 Selection	#000000	#1E417D	0
 WhiteSpace	#4C5156	#1D1F21	0
@@ -126,7 +128,6 @@ NormedVariables	#FD971F	#26292C	0
 SpecialWord	#000000	#9EE41B	2
 DoubleQuote	#E6DB74	#26292C	0
 SimpleQuote	#FFEF62	#26292C	0
-# you can comment the 3 lines below if you want to use the settings of Npp
 CaretLine	#000000	#373835	0
 Selection	#000000	#49483E	0
 WhiteSpace	#4F565C	#26292C	0

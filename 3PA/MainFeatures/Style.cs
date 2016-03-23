@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -171,20 +170,25 @@ namespace _3PA.MainFeatures {
 
         /// <summary>
         /// Call this method to reset the styles to their default value when moving to a non progress file
+        /// We don't need to reset the actual syntax colors, but stuff like selection color, caret line color and so on...
+        /// we have to reset them. They actually are Npp settings!
         /// </summary>
         public static void ResetSyntaxStyles() {
 
             if (!_needReset)
                 return;
 
-            Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
+            if (Config.Instance.GlobalOverrideNppTheme) {
 
-            // selection and caret line, we can't restore the previous colors because we don't have the selection color! (it's a npp setting)
-            if (CurrentTheme.Selection.BackColor != Color.Transparent) {
-                Npp.SetSelectionColor(true, _caretLineColor, Color.Transparent);
-            }
-            if (CurrentTheme.CaretLine.BackColor != Color.Transparent) {
-                Npp.CaretLineBackColor = ControlPaint.Light(_caretLineColor, 1.2f);
+                Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
+
+                // selection and caret line, we can't restore the previous colors because we don't have the selection color! (it's a npp setting)
+                if (CurrentTheme.Selection.BackColor != Color.Transparent) {
+                    Npp.SetSelectionColor(true, _caretLineColor, Color.Transparent);
+                }
+                if (CurrentTheme.CaretLine.BackColor != Color.Transparent) {
+                    Npp.CaretLineBackColor = ControlPaint.Light(_caretLineColor, 1.2f);
+                }
             }
         }
 
@@ -194,13 +198,6 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void SetSyntaxStyles() {
 
-            // save current values, to reset them when we switch on a non progress file
-            if (!_needReset) {
-                _indentGuideColor = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor;
-                _caretLineColor = Npp.CaretLineBackColor;
-                _needReset = true;
-            }
-
             var curTheme = CurrentTheme;
 
             // Default
@@ -208,12 +205,6 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
             SetFontStyle((byte)UdlStyles.Idk, curTheme.Default);
             SetFontStyle((byte)UdlStyles.Default, curTheme.Default);
-
-            // whitespaces
-            if (curTheme.WhiteSpace.ForeColor != Color.Transparent) {
-                Npp.SetWhiteSpaceColor(true, Color.Transparent, curTheme.WhiteSpace.ForeColor);
-                Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = curTheme.WhiteSpace.ForeColor;
-            }
 
             // categories
             SetFontStyle((byte)UdlStyles.Comment, curTheme.Comment);
@@ -237,13 +228,30 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
             SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
 
-            // Selection and caret line
-            if (curTheme.Selection.BackColor != Color.Transparent) {
-                Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
+            if (Config.Instance.GlobalOverrideNppTheme) {
+
+                // save current values, to reset them when we switch on a non progress file
+                if (!_needReset) {
+                    _indentGuideColor = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor;
+                    _caretLineColor = Npp.CaretLineBackColor;
+                    _needReset = true;
+                }
+
+                // whitespaces and indent guides
+                if (curTheme.WhiteSpace.ForeColor != Color.Transparent) {
+                    Npp.SetWhiteSpaceColor(true, Color.Transparent, curTheme.WhiteSpace.ForeColor);
+                    Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor = curTheme.WhiteSpace.ForeColor;
+                }
+
+                // Selection and caret line
+                if (curTheme.Selection.BackColor != Color.Transparent) {
+                    Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
+                }
+                if (curTheme.CaretLine.BackColor != Color.Transparent) {
+                    Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
+                }
             }
-            if (curTheme.CaretLine.BackColor != Color.Transparent) {
-                Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
-            }
+
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
