@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.Appli {
                 //new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
                 //    new YamuiSecMenu("3P COMMANDS", null, new template()),
                 //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
-                //    new YamuiSecMenu("COMPILE MANY", null, new template()),
+                //    new YamuiSecMenu("COMPILER", null, new template()),
                 //}),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
@@ -75,6 +75,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("CODE EDITION", "codeedition", new OptionPage(new List<string> { "Code edition" })),
                     new YamuiSecMenu("MISC", PageNames.OptionsMisc.ToString(), new OptionPage(new List<string> { "File explorer", "Code explorer", "Tooltip" })),
                     new YamuiSecMenu("OTHERS", "others", new OthersPage()),
+                    new YamuiSecMenu("SHORTCUTS", null, new ShortCutsPage()),
                     new YamuiSecMenu("SHARE/EXPORT CONFIG", PageNames.ExportShareConf.ToString(), new ExportPage())
                 })
             });

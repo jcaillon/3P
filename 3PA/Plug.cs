@@ -233,7 +233,7 @@ namespace _3PA {
         /// It either install the hooks (if they are not installed yet) or just refresh the keyboard keys / mouse messages
         /// to watch, so it can be called several times safely
         /// </summary>
-        private static void SetHooks() {
+        public static void SetHooks() {
             
             // Install a WM_KEYDOWN hook
             KeyboardMonitor.Instance.Clear();
@@ -350,6 +350,7 @@ namespace _3PA {
 
 
         public static void Test() {
+            UserCommunication.Notify("coucou");
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",

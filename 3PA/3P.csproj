@@ -118,6 +118,12 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="MainFeatures\Appli\Pages\Options\ShortCutsPage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Options\ShortCutsPage.Designer.cs">
+      <DependentUpon>ShortCutsPage.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Options\ExportPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -314,6 +320,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Home\HomePage.resx">
       <DependentUpon>HomePage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ShortCutsPage.resx">
+      <DependentUpon>ShortCutsPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\ExportPage.resx">
       <DependentUpon>ExportPage.cs</DependentUpon>

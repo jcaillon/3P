@@ -20,14 +20,14 @@
 Credits to SMarmotte Labs for the original dump program 
 */
 
-DEFINE INPUT PARAMETER gc_FileName      AS CHARACTER NO-UNDO.
-DEFINE INPUT PARAMETER ipc_baseName     AS CHARACTER NO-UNDO. /* */
+DEFINE INPUT PARAMETER gc_FileName AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER ipc_baseName AS CHARACTER NO-UNDO. /* */
 DEFINE INPUT PARAMETER ipc_physicalName AS CHARACTER NO-UNDO. /* */
 
-DEFINE VARIABLE gc_sep            AS CHARACTER    NO-UNDO     INITIAL "~t".
-DEFINE VARIABLE gc_fieldList      AS CHARACTER    NO-UNDO     INITIAL "".
-DEFINE VARIABLE gc_champIndex   AS CHARACTER    NO-UNDO     INITIAL "".
-DEFINE VARIABLE gc_champPK      AS CHARACTER    NO-UNDO     INITIAL "".
+DEFINE VARIABLE gc_sep AS CHARACTER NO-UNDO INITIAL "~t".
+DEFINE VARIABLE gc_fieldList AS CHARACTER NO-UNDO INITIAL "".
+DEFINE VARIABLE gc_champIndex AS CHARACTER NO-UNDO INITIAL "".
+DEFINE VARIABLE gc_champPK AS CHARACTER NO-UNDO INITIAL "".
 
 DEFINE STREAM str_out.
 OUTPUT STREAM str_out TO VALUE(gc_FileName) APPEND BINARY.
@@ -44,7 +44,7 @@ PUT STREAM str_out UNFORMATTED "#I|<Parent table>|<Index name>|<Primary? 0/1>|<U
 PUT STREAM str_out UNFORMATTED "#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>" SKIP.
 
 /* Write database info */
-PUT STREAM str_out UNFORMATTED    "H" + gc_sep +
+PUT STREAM str_out UNFORMATTED "H" + gc_sep +
     STRING(YEAR(TODAY), "9999") + "." + STRING(MONTH(TODAY), "99") + "." + STRING(DAY(TODAY), "99") + gc_sep +
     STRING(TIME, "HH:MM:SS") + gc_sep +
     TRIM(ipc_baseName) + gc_sep +
@@ -91,7 +91,7 @@ FOR EACH DICTDB._FILE NO-LOCK WHERE NOT DICTDB._FILE._HIDDEN AND DICTDB._FILE._T
         gc_champPK = "".
     
     /* Write index information */
-    /* Format is: I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %> */
+    /* Format is: I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fields separated with %> */
     FOR EACH DICTDB._INDEX OF DICTDB._FILE NO-LOCK WHERE DICTDB._INDEX._ACTIVE:
         ASSIGN gc_fieldList = "".
         FOR EACH DICTDB._INDEX-FIELD OF DICTDB._INDEX NO-LOCK,

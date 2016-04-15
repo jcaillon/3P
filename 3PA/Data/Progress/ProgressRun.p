@@ -48,12 +48,14 @@ DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
-
+DEFINE VARIABLE gc_conn AS CHARACTER NO-UNDO.
+DEFINE VARIABLE gc_line AS CHARACTER NO-UNDO.
 
 /* Prototypes */
 FUNCTION fi_get_message_description RETURNS CHARACTER ( INPUT ipi_messNumber AS INTEGER) FORWARD.
 FUNCTION fi_output_last_error RETURNS LOGICAL ( ) FORWARD.
 FUNCTION fi_output_last_error_db RETURNS LOGICAL ( ) FORWARD.
+FUNCTION fi_add_connec_try RETURNS CHARACTER ( INPUT ipc_conn AS CHARACTER) FORWARD.
 
 
 /* ***************************  Main Block  *************************** */
@@ -75,18 +77,31 @@ IF {&BaseIniPath} > "" AND {&ExecutionType} <> "APPBUILDER" THEN DO:
     fi_output_last_error().
 END.
 
-/* correct the PROPATH here */
+/* assign the PROPATH here */
 ASSIGN PROPATH = {&propathToUse}.
 
 /* connect the database(s) */
 IF {&BasePfPath} > "" THEN DO:
-    CONNECT -pf {&BasePfPath} -ct 2 NO-ERROR.
+    ASSIGN gc_conn = "".
+    INPUT STREAM str_reader FROM VALUE({&BasePfPath}).
+    REPEAT:
+        IMPORT STREAM str_reader UNFORMATTED gc_line.
+        ASSIGN gc_line = TRIM(gc_line).
+        IF gc_line BEGINS "#" THEN 
+            NEXT.
+        IF INDEX(gc_line, "#") > 0 THEN
+            gc_line = TRIM(SUBSTRING(gc_line, 1, INDEX(gc_line, "#") - 1)).
+        IF gc_line > "" THEN
+            gc_conn = gc_conn + " " + gc_line.
+    END.
+    INPUT STREAM str_reader CLOSE.
+    CONNECT VALUE(fi_add_connec_try(TRIM(gc_conn))) NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
 END.
 
 IF {&ExtraPf} > "" THEN DO:
-    CONNECT VALUE({&ExtraPf}) -ct 2 NO-ERROR.
+    CONNECT VALUE(fi_add_connec_try({&ExtraPf})) NO-ERROR.
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
 END.
@@ -365,5 +380,24 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL ( ) :
     END.
     ERROR-STATUS:ERROR = NO.
     RETURN FALSE.
+
+END FUNCTION.
+
+FUNCTION fi_add_connec_try RETURNS CHARACTER ( INPUT ipc_conn AS CHARACTER) :
+/*------------------------------------------------------------------------------
+  Purpose: adds a -ct 2 option for each connection
+    Notes:
+------------------------------------------------------------------------------*/
+
+    DEFINE VARIABLE lc_conn AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_toAdd AS CHARACTER NO-UNDO INITIAL "-ct 1".
+    
+    ASSIGN 
+        lc_conn = REPLACE(ipc_conn, "  ", " ")
+        lc_conn = REPLACE(lc_conn, "-db", lc_toAdd + " -db")
+        lc_conn = IF lc_conn BEGINS (" " + lc_toAdd) THEN SUBSTRING(lc_conn, 7) ELSE lc_conn
+        lc_conn = lc_conn + " " + lc_toAdd.
+        
+    RETURN lc_conn.
 
 END FUNCTION.

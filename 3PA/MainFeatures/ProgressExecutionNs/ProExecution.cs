@@ -158,8 +158,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 fileToCompile.OutputLst = Path.Combine(fileToCompile.OutputDir, baseFileName + ".lst");
                 fileToCompile.OutputR = Path.Combine(fileToCompile.OutputDir, baseFileName + ".r");
 
-                // if current file, we copy the content to a temp file, otherwise we just use the input path
-                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath)) {
+                // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
+                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && Npp.GetModify && !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
+                    // for cls, the file name is important so don't change it, otherwise, get a temporary name
                     fileToCompile.TempInputPath = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + (Path.GetExtension(fileToCompile.InputPath)));
                     File.WriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
                 } else {
@@ -246,9 +247,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnvironment.Current.GetProPathDirList)).ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.Trim().ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + Path.Combine(TempDir, "db.ko").ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));

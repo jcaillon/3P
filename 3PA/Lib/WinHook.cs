@@ -50,6 +50,8 @@ namespace _3PA.Lib {
         /// </summary>
         public event KeyDownHandler KeyDown;
 
+        public event KeyDownHandler KeyDownByPass;
+
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
         /// </summary>
@@ -77,17 +79,28 @@ namespace _3PA.Lib {
             var key = (Keys)((int)wParam);
             int context = (int) lParam;
 
-            if (KeyDown == null)
-                return false;
-
-            if (_keysToIntercept.Contains(key)) {
+            // bypass the normal keydown handler
+            if (KeyDownByPass != null) {
                 // on key down
                 if (!context.IsBitSet(31)) {
                     bool handled = false;
-                    KeyDown(key, GetModifiers, ref handled);
+                    KeyDownByPass(key, GetModifiers, ref handled);
                     return handled;
-                } 
+                }
+            } else {
+                if (KeyDown == null)
+                    return false;
+
+                if (_keysToIntercept.Contains(key)) {
+                    // on key down
+                    if (!context.IsBitSet(31)) {
+                        bool handled = false;
+                        KeyDown(key, GetModifiers, ref handled);
+                        return handled;
+                    }
+                }
             }
+
             return false;
         }
 

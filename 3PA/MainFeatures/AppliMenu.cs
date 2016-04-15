@@ -54,6 +54,8 @@ namespace _3PA.MainFeatures {
 
         public static int DockableCommandIndex { get; set; }
 
+        public static List<Tuple<string, string, string>> ListOfItems = new List<Tuple<string, string, string>>(); 
+
         /// <summary>
         /// Show the appli main menu at the cursor location
         /// </summary>
@@ -132,6 +134,8 @@ namespace _3PA.MainFeatures {
         #region Life and death
 
         private AppliMenu() {
+
+            ListOfItems.Clear();
 
             GenerateCodeMenuList = new List<MenuItem> {
                 new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
@@ -229,11 +233,13 @@ namespace _3PA.MainFeatures {
             ItemId = itemId;
             OnClic = action;
             ItemSpec = defaultKey;
-            if (!string.IsNullOrEmpty(defaultKey)) {
-                if (Config.Instance.ShortCuts.ContainsKey(ItemId)) {
-                    ItemSpec = Config.Instance.ShortCuts[ItemId];
-                    Config.Instance.ShortCuts.Remove(ItemId);
-                }
+            
+            if (Config.Instance.ShortCuts.ContainsKey(ItemId)) {
+                ItemSpec = Config.Instance.ShortCuts[ItemId];
+                Config.Instance.ShortCuts.Remove(ItemId);
+            }
+
+            if (!string.IsNullOrEmpty(ItemSpec)) {
                 Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
                 Shortcut = new ShortcutKey(ItemSpec);
                 SubText = ItemSpec;
@@ -249,6 +255,9 @@ namespace _3PA.MainFeatures {
                     }
                 }
             };
+
+            // we set up a list of itemId / name to use in the shortcut page
+            AppliMenu.ListOfItems.Add(new Tuple<string, string, string>(itemId, name, ItemSpec));
         }
 
         public MenuItem(string name, Image img, List<MenuItem> children) {
