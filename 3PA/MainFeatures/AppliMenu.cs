@@ -138,8 +138,8 @@ namespace _3PA.MainFeatures {
             ListOfItems.Clear();
 
             GenerateCodeMenuList = new List<MenuItem> {
-                new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
-                new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure)
+                //new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
+                //new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure)
             };
 
             var goToDefItem = new MenuItem("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B", ImageResources.GoToDefinition);

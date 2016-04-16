@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
-            this.bt_set = new YamuiFramework.Controls.YamuiButton();
             this.lbl_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lbl_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
@@ -56,7 +55,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.bt_set);
             this.dockedPanel.ContentPanel.Controls.Add(this.lbl_name);
             this.dockedPanel.ContentPanel.Controls.Add(this.lbl_keys);
             this.dockedPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
@@ -70,14 +68,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.dockedPanel.Name = "dockedPanel";
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
-            // 
-            // bt_set
-            // 
-            this.bt_set.Location = new System.Drawing.Point(469, 50);
-            this.bt_set.Name = "bt_set";
-            this.bt_set.Size = new System.Drawing.Size(142, 23);
-            this.bt_set.TabIndex = 119;
-            this.bt_set.Text = "Click to set";
             // 
             // lbl_name
             // 
@@ -134,6 +124,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiLabel yamuiLabel1;
         private HtmlLabel lbl_keys;
         private HtmlLabel lbl_name;
-        private YamuiButton bt_set;
     }
 }

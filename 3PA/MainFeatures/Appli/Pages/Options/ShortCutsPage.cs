@@ -18,16 +18,13 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
-using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.WinForms;
+using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -41,7 +38,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region fields
 
-        private bool _isCheckingDistant;
+        private string _currentItemId;
 
         #endregion
 
@@ -50,74 +47,118 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             InitializeComponent();
 
             // build the interface
-            var iNbLine = 0;
             var yPos = lbl_name.Location.Y + 35;
-            foreach (var confLine in AppliMenu.ListOfItems) {
+            foreach (var item in AppliMenu.ListOfItems) {
 
-                // label
+                // name
                 var label = new HtmlLabel {
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
                     Location = new Point(lbl_name.Location.X, yPos + 2),
                     Size = new Size(400, 10),
                     IsSelectionEnabled = false,
-                    Text = confLine.Item2
+                    Text = item.Item2
                 };
                 dockedPanel.ContentPanel.Controls.Add(label);
 
-                // label
-                label = new HtmlLabel {
-                    AutoSizeHeightOnly = true,
-                    BackColor = Color.Transparent,
-                    Location = new Point(lbl_keys.Location.X, yPos + 2),
-                    Size = new Size(130, 10),
-                    IsSelectionEnabled = false,
-                    Text = confLine.Item3 ?? ""
+                // keys
+                var button = new YamuiButton {
+                    Location = new Point(lbl_keys.Location.X, yPos - 1),
+                    Size = new Size(130, 23),
+                    Tag = item.Item1,
+                    Text = item.Item3 ?? "",
+                    Name = "bt" + item.Item1
                 };
-                dockedPanel.ContentPanel.Controls.Add(label);
+                dockedPanel.ContentPanel.Controls.Add(button);
+                button.ButtonPressed += ButtonOnButtonPressed;
+                tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
-                // local open
-                var strButton = new YamuiImageButton {
-                    BackGrndImage = ImageResources.OpenInExplorer,
+                // reset
+                var undoButton = new YamuiImageButton {
+                    BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
-                    Location = new Point(lbl_keys.Location.X + 150, yPos),
-                    Tag = confLine,
+                    Location = new Point(lbl_keys.Location.X + 140, yPos),
+                    Tag = item.Item1,
                     TabStop = false,
-                    Enabled = false,
-                    Name = "bto_" + iNbLine
                 };
-                //strButton.ButtonPressed += OpenFileOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
-                tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
+                dockedPanel.ContentPanel.Controls.Add(undoButton);
+                undoButton.ButtonPressed += UndoButtonOnButtonPressed;
+                tooltip.SetToolTip(undoButton, "Click this button to reset the shortcut to its default value");
                 
                 yPos += label.Height + 15;
-                iNbLine++;
             }
 
-            bt_set.ButtonPressed += BtSetOnButtonPressed;
+            // Activate scrollbars
+            yPos += 15;
+            if (yPos > Height) {
+                dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
+                    AutoSize = true,
+                    Location = new Point(0, yPos),
+                    Text = @" "
+                });
+                yPos += 10;
+                dockedPanel.ContentPanel.Height = yPos;
+            }
+            Height = yPos;
         }
 
-        private void BtSetOnButtonPressed(object sender, EventArgs eventArgs) {
-            KeyboardMonitor.Instance.KeyDownByPass += OnKeyDownByPass;
+        #endregion
+
+        #region events
+
+        private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
+            _currentItemId = (string)((YamuiImageButton)sender).Tag;
+
+            if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
+                Config.Instance.ShortCuts.Remove(_currentItemId);
+
+            // take into account the changes
+            Plug.SetHooks();
+
+            ((YamuiButton)dockedPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = (Config.Instance.ShortCuts.ContainsKey(_currentItemId)) ? Config.Instance.ShortCuts[_currentItemId] : "";
         }
+
+        private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
+            _currentItemId = (string)((YamuiButton)sender).Tag;
+
+            KeyboardMonitor.Instance.KeyDownByPass += OnKeyDownByPass;
+
+            var button = ((YamuiButton)dockedPanel.ContentPanel.Controls["bt" + _currentItemId]);
+
+            button.Text = @"Enter a new shortcut";
+            button.UseCustomBackColor = true;
+            button.BackColor = ThemeManager.Current.AccentColor;
+        }
+
+        #endregion
+
+        #region private methods
 
         private void OnKeyDownByPass(Keys key, KeyModifiers modifiers, ref bool handled) {
             bool stopListening = true;
-            
+            var button = (YamuiButton) dockedPanel.ContentPanel.Controls["bt" + _currentItemId];
+
             // the user presses escape to cancel the current shortcut modification
             if (key == Keys.Escape) {
-                UserCommunication.Notify("Escape!");
+                button.Text = Config.Instance.ShortCuts[_currentItemId];
             } else if (key != Keys.ControlKey && key != Keys.ShiftKey && key != Keys.Menu) {
-                // register the new shortcut chosen by the user
-                UserCommunication.Notify(key.ToString() + " " + modifiers.IsAlt + " " + modifiers.IsCtrl + " " + modifiers.IsShift);
+                var newSpec = (new ShortcutKey(modifiers.IsCtrl, modifiers.IsAlt, modifiers.IsShift, key)).ToString();
+
+                // don't override an existing shortcut
+                if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
+                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.ListOfItems.First(tuple => tuple.Item3.Equals(newSpec)).Item2, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
+                    return;;
+                }
 
                 // change the shortcut in the settings
-                Config.Instance.ShortCuts["Test"] = (new ShortcutKey(modifiers.IsCtrl, modifiers.IsAlt, modifiers.IsShift, key)).ToString();
-
-                Config.Instance.ShortCuts.Remove("Test");
+                if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
+                    Config.Instance.ShortCuts[_currentItemId] = newSpec;
+                else
+                    Config.Instance.ShortCuts.Add(_currentItemId, newSpec);
 
                 // take into account the changes
                 Plug.SetHooks();
+                button.Text = Config.Instance.ShortCuts[_currentItemId];
             } else {
                 stopListening = false;
             }
@@ -125,24 +166,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // stop listening to button pressed
             if (stopListening) {
                 KeyboardMonitor.Instance.KeyDownByPass -= OnKeyDownByPass;
+                BlinkButton(button, ThemeManager.Current.ThemeAccentColor);
             }
         }
 
-        #endregion
-
-        #region events
-
-
-        #endregion
-
-        #region private methods
-
         /// <summary>
-        /// Makes the given textbox blink
+        /// Makes the given button blink
         /// </summary>
-        private void BlinkTextBox(YamuiTextBox textBox, Color blinkColor) {
-            textBox.UseCustomBackColor = true;
-            Transition.run(textBox, "CustomBackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { textBox.UseCustomBackColor = false; });
+        private void BlinkButton(YamuiButton button, Color blinkColor) {
+            button.UseCustomBackColor = true;
+            Transition.run(button, "BackColor", ThemeManager.Current.ButtonNormalBack, blinkColor, new TransitionType_Flash(3, 300), (o, args) => { button.UseCustomBackColor = false; });
         }
 
         #endregion
