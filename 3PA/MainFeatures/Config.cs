@@ -400,6 +400,7 @@ namespace _3PA.MainFeatures {
 
             // TECHNICAL
             public string TechnicalLastPing = "";
+            public bool LastCheckUpdateOk = true;
 
             // THEMES
             public int ThemeId = 0;

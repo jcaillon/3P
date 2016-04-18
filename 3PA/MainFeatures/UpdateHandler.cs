@@ -183,8 +183,12 @@ namespace _3PA.MainFeatures {
                     string json = "";
                     try {
                         json = wc.DownloadString(Config.ReleasesApi);
+                        Config.Instance.LastCheckUpdateOk = true;
                     } catch (WebException e) {
-                        UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesApi + "'>" + Config.ReleasesApi + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed");
+                        if (alwaysGetFeedBack || Config.Instance.LastCheckUpdateOk) {
+                            UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesApi + "'>" + Config.ReleasesApi + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed");
+                            Config.Instance.LastCheckUpdateOk = false;
+                        }
                         ErrorHandler.Log(e.ToString(), true);
                     }
 

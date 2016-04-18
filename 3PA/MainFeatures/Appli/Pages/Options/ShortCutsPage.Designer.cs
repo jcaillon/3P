@@ -86,10 +86,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.lbl_keys.BaseStylesheet = null;
             this.lbl_keys.Location = new System.Drawing.Point(469, 29);
             this.lbl_keys.Name = "lbl_keys";
-            this.lbl_keys.Size = new System.Drawing.Size(26, 15);
+            this.lbl_keys.Size = new System.Drawing.Size(103, 15);
             this.lbl_keys.TabIndex = 114;
             this.lbl_keys.TabStop = false;
-            this.lbl_keys.Text = "<b>Keys</b>";
+            this.lbl_keys.Text = "<b>Keyboard shortcut</b>";
             // 
             // yamuiLabel1
             // 
@@ -98,9 +98,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel1.Name = "yamuiLabel1";
-            this.yamuiLabel1.Size = new System.Drawing.Size(144, 19);
+            this.yamuiLabel1.Size = new System.Drawing.Size(203, 19);
             this.yamuiLabel1.TabIndex = 0;
-            this.yamuiLabel1.Text = "LIST OF SHORTCUTS";
+            this.yamuiLabel1.Text = "SHORTCUT CUSTOMIZATION";
             // 
             // ShortCutsPage
             // 
