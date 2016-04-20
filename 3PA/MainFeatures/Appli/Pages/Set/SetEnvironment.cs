@@ -65,9 +65,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     } else if (x.Name.StartsWith("btright")) {
                         // right button
                         x.BackGrndImage = ImageResources.OpenInExplorer;
-                        x.ButtonPressed += BtrightOnButtonPressed;
-                        string tag = (string)(x.Tag ?? string.Empty);
-                        toolTip.SetToolTip(x, "Click to " + (tag.Equals("true") ? "<b>open this folder in the explorer</b>" : "<b>to open the containing folder in the explorer</b>"));
+                        x.ButtonPressed += OpenFileOnButtonPressed;
+                        x.MouseDown += OpenFileOnMouseDown;
+                        toolTip.SetToolTip(x, (string.IsNullOrEmpty((string)(x.Tag ?? string.Empty)) ? "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer" : "Click to <b>open the directory</b> in the windows explorer"));
                     }
                 }
             }
@@ -608,16 +608,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <summary>
         /// Open file in folder
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="buttonPressedEventArgs"></param>
-        private void BtrightOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+        private void OpenFileOnButtonPressed(object sender, EventArgs eventArgs) {
             var associatedTextBox = GetTextBoxByName(((Control)sender).Name);
             if (associatedTextBox == null) return;
-
             string tag = (string)(associatedTextBox.Tag ?? string.Empty);
-            var hasOpened = tag.Equals("true") ? Utils.OpenFolder(associatedTextBox.Text) : Utils.OpenFileInFolder(associatedTextBox.Text);
+
+            var hasOpened = tag.Equals("true") ? Utils.OpenFolder(associatedTextBox.Text) : Npp.OpenFile(associatedTextBox.Text);
             if (!hasOpened)
                 BlinkTextBox(associatedTextBox, ThemeManager.Current.GenericErrorColor);
+        }
+
+        /// <summary>
+        /// open file in npp
+        /// </summary>
+        private void OpenFileOnMouseDown(object sender, MouseEventArgs e) {
+            var associatedTextBox = GetTextBoxByName(((Control)sender).Name);
+            if (associatedTextBox == null) return;
+            string tag = (string)(associatedTextBox.Tag ?? string.Empty);
+
+            if (e.Button == MouseButtons.Right) {
+                var hasOpened = tag.Equals("true") ? Utils.OpenFolder(associatedTextBox.Text) : Utils.OpenFileInFolder(associatedTextBox.Text);
+                if (!hasOpened)
+                    BlinkTextBox(associatedTextBox, ThemeManager.Current.GenericErrorColor);
+            }
         }
 
         #endregion

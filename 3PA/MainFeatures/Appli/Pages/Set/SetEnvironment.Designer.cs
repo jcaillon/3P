@@ -578,6 +578,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.Size = new System.Drawing.Size(20, 20);
             this.btright4.TabIndex = 101;
             this.btright4.TabStop = false;
+            this.btright4.Tag = "dir";
             this.btright4.Text = "yamuiImageButton5";
             // 
             // btleft4
@@ -602,6 +603,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.Size = new System.Drawing.Size(20, 20);
             this.btright3.TabIndex = 99;
             this.btright3.TabStop = false;
+            this.btright3.Tag = "dir";
             this.btright3.Text = "yamuiImageButton3";
             // 
             // btleft3

@@ -29,9 +29,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
-            this.lbl_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.lbl_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
+            this.static_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.static_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.static_title = new YamuiFramework.Controls.YamuiLabel();
             this.dockedPanel.ContentPanel.SuspendLayout();
             this.dockedPanel.SuspendLayout();
             this.SuspendLayout();
@@ -55,9 +55,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_name);
-            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_keys);
-            this.dockedPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
+            this.dockedPanel.ContentPanel.Controls.Add(this.static_name);
+            this.dockedPanel.ContentPanel.Controls.Add(this.static_keys);
+            this.dockedPanel.ContentPanel.Controls.Add(this.static_title);
             this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.dockedPanel.ContentPanel.Name = "ContentPanel";
             this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
@@ -69,38 +69,38 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             // 
-            // lbl_name
+            // static_name
             // 
-            this.lbl_name.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_name.BaseStylesheet = null;
-            this.lbl_name.Location = new System.Drawing.Point(30, 29);
-            this.lbl_name.Name = "lbl_name";
-            this.lbl_name.Size = new System.Drawing.Size(33, 15);
-            this.lbl_name.TabIndex = 118;
-            this.lbl_name.TabStop = false;
-            this.lbl_name.Text = "<b>Name</b>";
+            this.static_name.BackColor = System.Drawing.Color.Transparent;
+            this.static_name.BaseStylesheet = null;
+            this.static_name.Location = new System.Drawing.Point(60, 29);
+            this.static_name.Name = "static_name";
+            this.static_name.Size = new System.Drawing.Size(33, 15);
+            this.static_name.TabIndex = 118;
+            this.static_name.TabStop = false;
+            this.static_name.Text = "<b>Name</b>";
             // 
-            // lbl_keys
+            // static_keys
             // 
-            this.lbl_keys.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_keys.BaseStylesheet = null;
-            this.lbl_keys.Location = new System.Drawing.Point(469, 29);
-            this.lbl_keys.Name = "lbl_keys";
-            this.lbl_keys.Size = new System.Drawing.Size(103, 15);
-            this.lbl_keys.TabIndex = 114;
-            this.lbl_keys.TabStop = false;
-            this.lbl_keys.Text = "<b>Keyboard shortcut</b>";
+            this.static_keys.BackColor = System.Drawing.Color.Transparent;
+            this.static_keys.BaseStylesheet = null;
+            this.static_keys.Location = new System.Drawing.Point(420, 29);
+            this.static_keys.Name = "static_keys";
+            this.static_keys.Size = new System.Drawing.Size(103, 15);
+            this.static_keys.TabIndex = 114;
+            this.static_keys.TabStop = false;
+            this.static_keys.Text = "<b>Keyboard shortcut</b>";
             // 
-            // yamuiLabel1
+            // static_title
             // 
-            this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
-            this.yamuiLabel1.Name = "yamuiLabel1";
-            this.yamuiLabel1.Size = new System.Drawing.Size(203, 19);
-            this.yamuiLabel1.TabIndex = 0;
-            this.yamuiLabel1.Text = "SHORTCUT CUSTOMIZATION";
+            this.static_title.AutoSize = true;
+            this.static_title.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.static_title.Location = new System.Drawing.Point(0, 0);
+            this.static_title.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
+            this.static_title.Name = "static_title";
+            this.static_title.Size = new System.Drawing.Size(203, 19);
+            this.static_title.TabIndex = 0;
+            this.static_title.Text = "SHORTCUT CUSTOMIZATION";
             // 
             // ShortCutsPage
             // 
@@ -121,8 +121,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private HtmlToolTip tooltip;
         private YamuiScrollPage dockedPanel;
-        private YamuiLabel yamuiLabel1;
-        private HtmlLabel lbl_keys;
-        private HtmlLabel lbl_name;
+        private YamuiLabel static_title;
+        private HtmlLabel static_keys;
+        private HtmlLabel static_name;
     }
 }

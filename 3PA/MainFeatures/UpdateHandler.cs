@@ -47,6 +47,7 @@ namespace _3PA.MainFeatures {
 
         private static bool _alwaysGetFeedBack;
         private static bool _checkStarted;
+        private static bool _warnedUserAboutUpdateAvail = false;
 
         #endregion
 
@@ -168,7 +169,10 @@ namespace _3PA.MainFeatures {
 
             if (LatestReleaseInfo != null) {
                 // we already checked and there is a new version
-                NotifyUpdateAvailable();
+                if (!_warnedUserAboutUpdateAvail || alwaysGetFeedBack) {
+                    NotifyUpdateAvailable();
+                    _warnedUserAboutUpdateAvail = true;
+                }
                 return;
             }
 

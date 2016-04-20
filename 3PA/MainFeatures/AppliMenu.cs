@@ -52,9 +52,12 @@ namespace _3PA.MainFeatures {
             }
         }
 
-        public static int DockableCommandIndex { get; set; }
+        /// <summary>
+        /// We keep a list with ALL the menu items, to use them in the shortcut settings page
+        /// </summary>
+        public static List<MenuItem> CompleteMenuList { get; set; }
 
-        public static List<Tuple<string, string, string>> ListOfItems = new List<Tuple<string, string, string>>(); 
+        public static int DockableCommandIndex { get; set; }
 
         /// <summary>
         /// Show the appli main menu at the cursor location
@@ -135,7 +138,7 @@ namespace _3PA.MainFeatures {
 
         private AppliMenu() {
 
-            ListOfItems.Clear();
+            CompleteMenuList = new List<MenuItem>();
 
             GenerateCodeMenuList = new List<MenuItem> {
                 //new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
@@ -256,8 +259,8 @@ namespace _3PA.MainFeatures {
                 }
             };
 
-            // we set up a list of itemId / name to use in the shortcut page
-            AppliMenu.ListOfItems.Add(new Tuple<string, string, string>(itemId, name, ItemSpec));
+            // we set up a list of items to use in the shortcut page
+            AppliMenu.CompleteMenuList.Add(this);
         }
 
         public MenuItem(string name, Image img, List<MenuItem> children) {

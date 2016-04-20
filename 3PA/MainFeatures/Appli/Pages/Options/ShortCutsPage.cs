@@ -40,51 +40,76 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private string _currentItemId;
 
+        private bool _waitingInput;
+
         #endregion
 
         #region constructor
         public ShortCutsPage() {
             InitializeComponent();
+        }
+
+        #endregion
+
+        #region on show
+
+        public override void OnShow() {
+
+            foreach (Control control in dockedPanel.ContentPanel.Controls) {
+                if (!control.Name.StartsWith("static"))
+                    control.Dispose();
+            }
 
             // build the interface
-            var yPos = lbl_name.Location.Y + 35;
-            foreach (var item in AppliMenu.ListOfItems) {
+            var yPos = static_name.Location.Y + 35;
+            foreach (var item in AppliMenu.CompleteMenuList) {
+
+                // icon
+                var imgButton = new YamuiImageButton {
+                    BackGrndImage = item.ItemImage,
+                    Size = new Size(20, 20),
+                    Location = new Point(static_name.Location.X - 30, yPos),
+                    Tag = item.ItemId,
+                    TabStop = false
+                };
+                dockedPanel.ContentPanel.Controls.Add(imgButton);
 
                 // name
                 var label = new HtmlLabel {
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
-                    Location = new Point(lbl_name.Location.X, yPos + 2),
-                    Size = new Size(400, 10),
+                    Location = new Point(static_name.Location.X, yPos + 2),
+                    Size = new Size(340, 10),
                     IsSelectionEnabled = false,
-                    Text = item.Item2
+                    Text = item.ItemName
                 };
                 dockedPanel.ContentPanel.Controls.Add(label);
 
                 // keys
                 var button = new YamuiButton {
-                    Location = new Point(lbl_keys.Location.X, yPos - 1),
-                    Size = new Size(130, 23),
-                    Tag = item.Item1,
-                    Text = item.Item3 ?? "",
-                    Name = "bt" + item.Item1
+                    Location = new Point(static_keys.Location.X, yPos - 1),
+                    Size = new Size(220, 23),
+                    Tag = item.ItemId,
+                    Text = item.ItemSpec ?? "",
+                    Name = "bt" + item.ItemId,
+                    TabStop = false
                 };
                 dockedPanel.ContentPanel.Controls.Add(button);
-                button.ButtonPressed += ButtonOnButtonPressed;
+                button.Click += ButtonOnButtonPressed;
                 tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
                 var undoButton = new YamuiImageButton {
                     BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
-                    Location = new Point(lbl_keys.Location.X + 140, yPos),
-                    Tag = item.Item1,
+                    Location = new Point(button.Location.X + button.Width + 10, yPos),
+                    Tag = item.ItemId,
                     TabStop = false,
                 };
                 dockedPanel.ContentPanel.Controls.Add(undoButton);
                 undoButton.ButtonPressed += UndoButtonOnButtonPressed;
                 tooltip.SetToolTip(undoButton, "Click this button to reset the shortcut to its default value");
-                
+
                 yPos += label.Height + 15;
             }
 
@@ -100,9 +125,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 dockedPanel.ContentPanel.Height = yPos;
             }
             Height = yPos;
+
         }
 
         #endregion
+
 
         #region events
 
@@ -121,11 +148,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             _currentItemId = (string)((YamuiButton)sender).Tag;
 
+            if (_waitingInput)
+                return;
+
+            _waitingInput = true;
             KeyboardMonitor.Instance.KeyDownByPass += OnKeyDownByPass;
 
             var button = ((YamuiButton)dockedPanel.ContentPanel.Controls["bt" + _currentItemId]);
 
-            button.Text = @"Enter a new shortcut";
+            button.Text = @"Enter a new shortcut (or press ESCAPE)";
             button.UseCustomBackColor = true;
             button.BackColor = ThemeManager.Current.AccentColor;
         }
@@ -146,7 +177,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
-                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.ListOfItems.First(tuple => tuple.Item3.Equals(newSpec)).Item2, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
+                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.CompleteMenuList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
                     return;;
                 }
 
@@ -165,6 +196,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // stop listening to button pressed
             if (stopListening) {
+                _waitingInput = false;
                 KeyboardMonitor.Instance.KeyDownByPass -= OnKeyDownByPass;
                 BlinkButton(button, ThemeManager.Current.ThemeAccentColor);
             }
