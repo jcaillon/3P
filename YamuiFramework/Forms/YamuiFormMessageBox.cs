@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
+using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 
@@ -56,7 +57,6 @@ namespace YamuiFramework.Forms {
         }
 
         private static int _dialogResult = -1;
-        private const int ButtonWidth = 110;
 
         #endregion
 
@@ -73,16 +73,20 @@ namespace YamuiFramework.Forms {
 
             // Set buttons
             int i = 0;
+            int cumButtonWidth = 0;
             foreach (var buttonText in buttonsList) {
+                var size = TextRenderer.MeasureText(buttonText, FontManager.GetStandardFont());
+
                 var yamuiButton1 = new YamuiButton {
                     Anchor = AnchorStyles.Bottom | AnchorStyles.Right,
-                    Size = new Size(ButtonWidth, 25),
+                    Size = new Size(Math.Max(size.Width + 10, 80), 25),
                     Name = "yamuiButton" + i,
                     TabIndex = buttonsList.Count - i,
                     Tag = i,
                     Text = buttonText
                 };
-                yamuiButton1.Location = new Point(Width - 12 - ButtonWidth - (ButtonWidth + 5)*i, Height - 12 - yamuiButton1.Height);
+                yamuiButton1.Location = new Point(Width - 12 - yamuiButton1.Width - cumButtonWidth, Height - 12 - yamuiButton1.Height);
+                cumButtonWidth += yamuiButton1.Width + 5;
                 yamuiButton1.ButtonPressed += (sender, args) => {
                     _dialogResult = (int) ((YamuiButton) sender).Tag;
                     Close();
@@ -92,7 +96,7 @@ namespace YamuiFramework.Forms {
             }
 
             // set label size
-            contentLabel.SetNeededSize(htmlContent, Math.Max((ButtonWidth + 5) * buttonsList.Count + 12 + 30, minWidth), maxWidth);
+            contentLabel.SetNeededSize(htmlContent, Math.Max(cumButtonWidth + 12 + 30, minWidth), maxWidth);
             contentPanel.ContentPanel.Size = contentLabel.Size;
 
             // set form size
@@ -119,6 +123,18 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
+
+        #region override
+
+        // allow the user to use the scroll directly when the messagebox shows, instead of having to click on the scroller
+        protected override void OnShown(EventArgs e) {
+            base.OnShown(e);
+            ActiveControl = contentLabel;
+            contentLabel.Focus();
+        }
+
+        #endregion
+
 
         /// <summary>
         /// Show a message box dialog

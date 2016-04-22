@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using YamuiFramework.Fonts;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -232,8 +233,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
             //if (data == null) return;
 
             // Measure the max size of the title (ensure that the title isn't cropped
-            var size = TextRenderer.MeasureText(data.DisplayText, new Font(@"Segoe UI", 13, FontStyle.Bold, GraphicsUnit.Pixel));
-            var size2 = TextRenderer.MeasureText(data.Type.ToString(), new Font(@"Segoe UI", 13, FontStyle.Bold, GraphicsUnit.Pixel));
+            var size = TextRenderer.MeasureText(data.DisplayText, FontManager.GetFont(FontStyle.Bold, 13));
+            var size2 = TextRenderer.MeasureText(data.Type.ToString(), FontManager.GetFont(FontStyle.Bold, 13));
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");

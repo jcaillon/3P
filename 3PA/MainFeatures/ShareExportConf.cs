@@ -245,14 +245,24 @@ namespace _3PA.MainFeatures {
         #region generic methods
 
         private static void DoDelete(ConfLine conf) {
-            var answ = UserCommunication.Message("Do you really want to delete this file, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
+            var answ = UserCommunication.Message("Do you really want to delete this file?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
             if (answ == 0) {
                 Utils.DeleteFile(conf.LocalPath);
             }
         }
 
+        private static bool _dontWarnFetch;
+
         private static void DoFetch(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.DistantPath)) {
+                if (!_dontWarnFetch) {
+                    var answ = UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> {"Yes, don't ask again", "Cancel", "Yes"}, true);
+                    if (answ == 0)
+                        _dontWarnFetch = true;
+                    if (answ == 1)
+                        return;
+                }
+
                 if (conf.IsDir)
                     Utils.CopyDirectory(conf.DistantPath, conf.LocalPath);
                 else {
@@ -263,8 +273,18 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        private static bool _dontWarnPush;
+
         private static void DoPush(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.LocalPath)) {
+                if (!_dontWarnPush) {
+                    var answ = UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Fetch", "Confirmation", new List<string> { "Yes, don't ask again", "Cancel", "Yes" }, true);
+                    if (answ == 0)
+                        _dontWarnPush = true;
+                    if (answ == 1)
+                        return;
+                }
+
                 if (conf.IsDir)
                     Utils.CopyDirectory(conf.LocalPath, conf.DistantPath);
                 else

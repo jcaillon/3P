@@ -30,7 +30,6 @@ using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
 

@@ -18,6 +18,9 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -350,7 +353,7 @@ namespace _3PA {
 
 
         public static void Test() {
-            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", TextEncodingDetect.GetFileEncoding(@"C:\Users\Julien\Desktop\content.md"))).MdToHtml(),
+            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",
             //        "Updated to version " + AssemblyInfo.Version,

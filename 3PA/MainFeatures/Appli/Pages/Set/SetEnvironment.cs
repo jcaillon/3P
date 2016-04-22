@@ -524,7 +524,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = UserCommunication.Message("Do you really want to delete the current environment, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "No, Cancel"}, true);
+            var answ = UserCommunication.Message("Do you really want to delete the current environment?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "No, Cancel"}, true);
             if (answ == 0) {
                 _currentMode = ViewMode.Delete;
                 if (Save())
@@ -533,7 +533,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = UserCommunication.Message("Do you really want to delete the current database info, or did your finger slipped?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
+            var answ = UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
             if (answ == 0) {
                 _currentMode = ViewMode.DbDelete;
                 if (Save())
