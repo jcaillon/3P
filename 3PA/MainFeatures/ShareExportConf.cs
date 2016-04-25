@@ -278,7 +278,7 @@ namespace _3PA.MainFeatures {
         private static void DoPush(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.LocalPath)) {
                 if (!_dontWarnPush) {
-                    var answ = UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Fetch", "Confirmation", new List<string> { "Yes, don't ask again", "Cancel", "Yes" }, true);
+                    var answ = UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Push", "Confirmation", new List<string> { "Yes, don't ask again", "Cancel", "Yes" }, true);
                     if (answ == 0)
                         _dontWarnPush = true;
                     if (answ == 1)
