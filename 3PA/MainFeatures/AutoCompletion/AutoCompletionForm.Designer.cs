@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.nbitems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.nbitems.Enabled = false;
             this.nbitems.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.nbitems.Location = new System.Drawing.Point(329, 431);
+            this.nbitems.Location = new System.Drawing.Point(329, 433);
             this.nbitems.Margin = new System.Windows.Forms.Padding(3);
             this.nbitems.Name = "nbitems";
             this.nbitems.Size = new System.Drawing.Size(60, 12);
@@ -130,7 +130,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.yamuiLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel1.Enabled = false;
             this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel1.Location = new System.Drawing.Point(329, 418);
+            this.yamuiLabel1.Location = new System.Drawing.Point(329, 420);
             this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel1.Name = "yamuiLabel1";
             this.yamuiLabel1.Size = new System.Drawing.Size(60, 12);

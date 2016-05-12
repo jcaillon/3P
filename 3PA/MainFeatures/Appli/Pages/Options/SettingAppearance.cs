@@ -66,6 +66,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
             toolTip.SetToolTip(tg_colorOn, "Toggle this option on if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this on, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this, select the UDL to use from the Language menu before you can see any changes</i>");
             toolTip.SetToolTip(tg_override, "Toggle this option on if don't want 3P to override certain colors of Notepad++<br>like the selection / caret line color for instance<br>In that case, you will continue using the style settings of Notepad++ and 3P<br>will only control the colors of the language itself.<br><br><i>You need to restart Notepad++ to see any changes</i>");
+
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpCustomThemes + @"'>How to customize the look of 3P?</a>";
         }
 
         public override void OnShow() {

@@ -172,7 +172,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 fileToCompile.TempOutputDir = TempDir;
 
                 // feed files list
-                filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst);
+                filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst.ProgressQuoter());
             }
             File.WriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
 

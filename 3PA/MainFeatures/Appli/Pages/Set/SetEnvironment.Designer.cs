@@ -29,6 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.mainPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btSaveDb = new YamuiFramework.Controls.YamuiButton();
             this.btCancelDb = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel8 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -101,6 +102,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // mainPanel.ContentPanel
             // 
+            this.mainPanel.ContentPanel.Controls.Add(this.linkurl);
             this.mainPanel.ContentPanel.Controls.Add(this.btSaveDb);
             this.mainPanel.ContentPanel.Controls.Add(this.btCancelDb);
             this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel8);
@@ -162,6 +164,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.Name = "mainPanel";
             this.mainPanel.Size = new System.Drawing.Size(720, 550);
             this.mainPanel.TabIndex = 0;
+            // 
+            // linkurl
+            // 
+            this.linkurl.BackColor = System.Drawing.Color.Transparent;
+            this.linkurl.BaseStylesheet = null;
+            this.linkurl.Location = new System.Drawing.Point(232, 2);
+            this.linkurl.Name = "linkurl";
+            this.linkurl.Size = new System.Drawing.Size(184, 15);
+            this.linkurl.TabIndex = 145;
+            this.linkurl.TabStop = false;
+            this.linkurl.Text = "How to set up a new environment?";
             // 
             // btSaveDb
             // 
@@ -859,5 +872,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel8;
         private YamuiButton btSaveDb;
         private YamuiButton btCancelDb;
+        private HtmlLabel linkurl;
     }
 }

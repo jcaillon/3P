@@ -92,7 +92,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
             toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
 
-            textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db base2 -ld mylogicalName2 -H 127.0.0.1 -S 10</div>";
+            textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1</div>";
             toolTip.SetToolTip(flExtraPf, textTool);
             toolTip.SetToolTip(htmlLabel8, textTool);
 
@@ -145,6 +145,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btCancelDb.ButtonPressed += BtCancelDbOnButtonPressed;
 
             ToggleMode(ViewMode.Select);
+
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpSetEnv + @"'>How to set up a new environment?</a>";
         }
 
         #endregion

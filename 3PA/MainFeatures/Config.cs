@@ -508,6 +508,10 @@ namespace _3PA.MainFeatures {
 
         public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
 
+        public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
+
+        public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
+
         /// <summary>
         /// Url for the ping webservice
         /// </summary>

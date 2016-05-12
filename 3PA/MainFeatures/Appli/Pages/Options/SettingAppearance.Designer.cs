@@ -28,6 +28,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
+            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.tg_override = new YamuiFramework.Controls.YamuiToggle();
             this.tg_colorOn = new YamuiFramework.Controls.YamuiToggle();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -38,7 +39,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.PanelAccentColor = new YamuiFramework.Controls.YamuiPanel();
             this.yamuiLabel20 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel2);
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.linkurl);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.tg_override);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.tg_colorOn);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.htmlLabel1);
@@ -68,6 +68,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiScrollPage1.Name = "yamuiScrollPage1";
             this.yamuiScrollPage1.Size = new System.Drawing.Size(720, 550);
             this.yamuiScrollPage1.TabIndex = 0;
+            // 
+            // linkurl
+            // 
+            this.linkurl.BackColor = System.Drawing.Color.Transparent;
+            this.linkurl.BaseStylesheet = null;
+            this.linkurl.Location = new System.Drawing.Point(144, 2);
+            this.linkurl.Name = "linkurl";
+            this.linkurl.Size = new System.Drawing.Size(177, 15);
+            this.linkurl.TabIndex = 65;
+            this.linkurl.TabStop = false;
+            this.linkurl.Text = "How to customize the look of 3P?";
             // 
             // tg_override
             // 
@@ -170,18 +181,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.toolTip.ReshowDelay = 100;
             this.toolTip.TooltipCssClass = "htmltooltip";
             // 
-            // htmlLabel2
-            // 
-            this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
-            this.htmlLabel2.BaseStylesheet = null;
-            this.htmlLabel2.Location = new System.Drawing.Point(25, 518);
-            this.htmlLabel2.Name = "htmlLabel2";
-            this.htmlLabel2.Size = new System.Drawing.Size(266, 15);
-            this.htmlLabel2.TabIndex = 65;
-            this.htmlLabel2.TabStop = false;
-            this.htmlLabel2.Text = "<a href=\'http://jcaillon.github.io/3P/#/custom-themes\'>Click here to learn how to" +
-    " customize those themes</a>";
-            // 
             // SettingAppearance
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -209,6 +208,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private HtmlLabel htmlLabel1;
         private YamuiToggle tg_colorOn;
         private YamuiToggle tg_override;
-        private HtmlLabel htmlLabel2;
+        private HtmlLabel linkurl;
     }
 }

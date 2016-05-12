@@ -108,7 +108,9 @@ END.
 
 CASE {&ExecutionType} :
     WHEN "CHECKSYNTAX" THEN DO:
-        COMPILE VALUE({&ToExecute}) NO-ERROR.
+        COMPILE VALUE({&ToExecute})
+            SAVE INTO VALUE(ENTRY(1, {&propathToUse}, ","))
+            NO-ERROR.
         fi_output_last_error().
         RUN pi_handleCompilErrors NO-ERROR.
         fi_output_last_error().

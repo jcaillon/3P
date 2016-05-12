@@ -170,7 +170,7 @@ namespace _3PA.Lib {
         public static bool MoveFile(string sourceFile, string targetFile) {
             try {
                 if (!File.Exists(sourceFile)) {
-                    UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + targetFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
+                    UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
                     return false;
                 }
                 File.Delete(targetFile);
@@ -189,7 +189,7 @@ namespace _3PA.Lib {
         public static bool CopyFile(string sourceFile, string targetFile) {
             try {
                 if (!File.Exists(sourceFile)) {
-                    UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + targetFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
+                    UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
                     return false;
                 }
                 File.Delete(targetFile);
@@ -208,7 +208,7 @@ namespace _3PA.Lib {
         public static bool CopyDirectory(string sourceFolder, string targetFolder, bool deleteExistingTarget = false) {
             try {
                 if (!Directory.Exists(sourceFolder)) {
-                    UserCommunication.Notify("There was a problem when trying to copy a folder, the source doesn't exist :<br>" + targetFolder, MessageImg.MsgError, "Copy folder", "Couldn't find source folder");
+                    UserCommunication.Notify("There was a problem when trying to copy a folder, the source doesn't exist :<br>" + sourceFolder, MessageImg.MsgError, "Copy folder", "Couldn't find source folder");
                     return false;
                 }
                 if (deleteExistingTarget)
