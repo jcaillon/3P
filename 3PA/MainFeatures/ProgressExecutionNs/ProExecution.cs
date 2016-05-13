@@ -154,12 +154,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     fileToCompile.OutputDir = Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.OutputDir;
                 if (!Utils.CreateDirectory(fileToCompile.OutputDir))
                     return false;
+
+                // get base file name and set the output .r and .lst file path
                 var baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.InputPath);
                 fileToCompile.OutputLst = Path.Combine(fileToCompile.OutputDir, baseFileName + ".lst");
                 fileToCompile.OutputR = Path.Combine(fileToCompile.OutputDir, baseFileName + ".r");
 
                 // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
-                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && Npp.GetModify && !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
+                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && (Npp.GetModify || (baseFileName ?? "").StartsWith("_")) && !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
                     // for cls, the file name is important so don't change it, otherwise, get a temporary name
                     fileToCompile.TempInputPath = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + (Path.GetExtension(fileToCompile.InputPath)));
                     File.WriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
