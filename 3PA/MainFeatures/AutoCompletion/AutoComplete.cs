@@ -510,6 +510,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
                     replacementText = fullKeyword ?? data.DisplayText;
                 }
+                replacementText = CorrectKeywordCase(replacementText, Npp.CurrentPosition) ?? replacementText;
                 Npp.ReplaceKeywordWrapped(replacementText, 0);
 
                 // Remember this item to show it higher in the list later

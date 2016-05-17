@@ -491,6 +491,7 @@
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
     <Content Include="Images\FileExplorer\ClearAll.png" />
+    <Content Include="Images\FileExplorer\ClsType.png" />
     <Content Include="Images\FileExplorer\DfType.png" />
     <Content Include="Images\FileExplorer\DType.png" />
     <Content Include="Images\FileExplorer\ExplorerDir0.png" />

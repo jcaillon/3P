@@ -255,6 +255,7 @@ namespace _3PA.MainFeatures.FileExplorer {
     /// </summary>
     internal enum FileType {
         Unknow,
+        Cls,
         Df,
         D,
         Folder,
