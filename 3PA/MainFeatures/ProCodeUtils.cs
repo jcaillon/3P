@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures {
 
             // last resort, try to find a matching file in the propath
             // first look in the propath
-            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.GlobalProgressExtension);
+            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.KnownProgressExtension);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");
@@ -297,14 +297,62 @@ namespace _3PA.MainFeatures {
 
                 // when compiling, if no errors, move .r to compilation dir
                 if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
-                    // move .r file
-                    var success = Utils.MoveFile(treatedFile.TempOutputR, treatedFile.OutputR);
 
-                    // move .lst file
-                    success = success && Utils.MoveFile(treatedFile.TempOutputLst, treatedFile.OutputLst);
+                    // Is the input file a class file?
+                    if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
+                        // if the file we compiled inherits from another class or if another class inherits of our file, 
+                        // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
+                        
+                        List<string> listOfRFiles = null;
+                        try {
+                            listOfRFiles = Directory.EnumerateFiles(treatedFile.TempOutputDir, "*.r", SearchOption.AllDirectories).ToList();
+                        } catch (Exception x) {
+                            ErrorHandler.ShowErrors(x, "Error while reading the compilation temporary directory");
+                        }
+                        if (listOfRFiles != null) {
 
-                    if (success)
-                        notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
+                            notifMessage.Append("<br>List of the files compiled :");
+
+                            // for each *.r file
+                            foreach (var file in listOfRFiles) {
+                                var relativePath = file.Replace(treatedFile.TempOutputDir, "").TrimStart('\\');
+                                var sourcePath = ProEnvironment.Current.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
+                                if (string.IsNullOrEmpty(sourcePath)) {
+                                    UserCommunication.Notify("Couldn't locate the source file (.cls) for :<div>" + relativePath + "</div>in the propath", MessageImg.MsgError, "Post compilation error", "File not found");
+                                } else {
+                                    var outputDir = ProCompilePath.GetCompilationDirectory(Path.ChangeExtension(sourcePath, ".r").Replace(relativePath, ""));
+
+                                    //UserCommunication.Notify("Relative path = " + relativePath + "<br>Source path = " + sourcePath + "<br>Source dir = " + outputDir);
+
+                                    string outputRPath;
+                                    if (!Config.Instance.GlobalCompileFilesLocally && !string.IsNullOrEmpty(outputDir)) {
+                                        // move the *.r file in the compilation directory (create the needed subdirectories...)
+                                        outputRPath = Path.Combine(outputDir, relativePath);
+                                        Utils.CreateDirectory(Path.GetDirectoryName(outputRPath));
+                                    } else {
+                                        // move the *.r file next to his source
+                                        outputRPath = Path.ChangeExtension(sourcePath, ".r");
+                                    }
+
+                                    // move the *.r and *.lst
+                                    if (Utils.MoveFile(file, outputRPath)) {
+                                        // if we don't want the lst file, OR this is not the file we were compiling OR if we moved correctly the .lst file
+                                        if (!Config.Instance.CompileWithLst || 
+                                            !Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath)) || 
+                                            Utils.MoveFile(treatedFile.TempOutputLst, Path.ChangeExtension(outputRPath, ".lst"))) {
+                                            notifMessage.Append(string.Format("<br>{0}{1}", Path.GetDirectoryName(outputRPath).ToHtmlLink(), "\\" + Path.GetFileName(outputRPath)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                    } else {
+                        // if we moved the .r file correctly AND (we don't want .lst OR we moved it correctly)
+                        if (Utils.MoveFile(treatedFile.TempOutputR, treatedFile.OutputR) &&
+                            (!Config.Instance.CompileWithLst || Utils.MoveFile(treatedFile.TempOutputLst, treatedFile.OutputLst)))
+                            notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
+                    }
                 }
 
                 // Notify the user, or not
@@ -347,7 +395,7 @@ namespace _3PA.MainFeatures {
                 UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
                 return;
             }
-            if (!Config.Instance.GlobalCompilableExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
+            if (!Config.Instance.KnownCompilableExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
                 UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
             }

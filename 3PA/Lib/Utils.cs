@@ -412,7 +412,7 @@ namespace _3PA.Lib {
                 } catch (Exception) {
                     ext = null;
                 }
-                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.GlobalProgressExtension.Contains(ext)) && File.Exists(link)) {
+                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.KnownProgressExtension.Contains(ext)) && File.Exists(link)) {
                     Npp.Goto(link);
                     return true;
                 }

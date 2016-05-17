@@ -39,7 +39,7 @@ namespace _3PA {
         /// <returns></returns>
         public static bool IsCurrentProgressFile() {
             var ext = Npp.GetCurrentFileExtension();
-            return !string.IsNullOrEmpty(ext) && Config.Instance.GlobalProgressExtension.Contains(ext);
+            return !string.IsNullOrEmpty(ext) && Config.Instance.KnownProgressExtension.Contains(ext);
         }
 
         /// <summary>

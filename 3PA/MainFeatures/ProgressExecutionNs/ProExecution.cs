@@ -142,11 +142,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // for each file of the list
             var filesListPath = Path.Combine(TempDir, "files.list");
             StringBuilder filesListcontent = new StringBuilder();
+            var count = 1;
             foreach (var fileToCompile in ListToCompile) {
+
                 if (!File.Exists(fileToCompile.InputPath)) {
-                    UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
+                    UserCommunication.Notify("Couldn't find the following file :<br>" + fileToCompile.InputPath, MessageImg.MsgError, "Execution error", "File not found", 10);
                     return false;
                 }
+
+                // each file gets his own sub tempDir, because for .cls files, there can be several *.r generated, we need to know which *.r files were generated for each input file
+                var subTempDir = Path.Combine(TempDir, count.ToString());
+                if (!Utils.CreateDirectory(subTempDir))
+                    return false;
 
                 // create target directory
                 fileToCompile.OutputDir = ProCompilePath.GetCompilationDirectory(fileToCompile.InputPath);
@@ -161,31 +168,36 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 fileToCompile.OutputR = Path.Combine(fileToCompile.OutputDir, baseFileName + ".r");
 
                 // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
-                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && (Npp.GetModify || (baseFileName ?? "").StartsWith("_")) && !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
+                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && 
+                    (Npp.GetModify || (baseFileName ?? "").StartsWith("_")) && 
+                    !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
                     // for cls, the file name is important so don't change it, otherwise, get a temporary name
-                    fileToCompile.TempInputPath = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + (Path.GetExtension(fileToCompile.InputPath)));
+                    fileToCompile.TempInputPath = Path.Combine(subTempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + (Path.GetExtension(fileToCompile.InputPath)));
                     File.WriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
                 } else {
                     fileToCompile.TempInputPath = fileToCompile.InputPath;
                 }
                 baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.TempInputPath);
-                fileToCompile.TempOutputLst = Path.Combine(TempDir, baseFileName + ".lst");
-                fileToCompile.TempOutputR = Path.Combine(TempDir, baseFileName + ".r");
-                fileToCompile.TempOutputDir = TempDir;
+                fileToCompile.TempOutputLst = Path.Combine(subTempDir, baseFileName + ".lst");
+                fileToCompile.TempOutputR = Path.Combine(subTempDir, baseFileName + ".r");
+                fileToCompile.TempOutputDir = subTempDir;
 
                 // feed files list
                 filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst.ProgressQuoter());
+
+                count++;
             }
             File.WriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
 
 
-            // Move context files into the execution dir
+            // Move ini file into the execution dir
             var baseIniPath = "";
             if (File.Exists(ProEnvironment.Current.IniPath)) {
                 baseIniPath = Path.Combine(TempDir, "base.ini");
                 File.Copy(ProEnvironment.Current.IniPath, baseIniPath);
             }
 
+            // Move pf file into the execution dir
             var basePfPath = "";
             if (File.Exists(ProEnvironment.Current.GetPfPath())) {
                 basePfPath = Path.Combine(TempDir, "base.pf");
