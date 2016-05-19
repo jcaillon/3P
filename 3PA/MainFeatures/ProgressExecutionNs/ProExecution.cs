@@ -84,6 +84,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public string ExtractDbOutputPath { get; set; }
 
         /// <summary>
+        /// Path to a file used to determine the progression of a compilation (useful when compiling multiple programs)
+        /// 1 byte = 1 file treated
+        /// </summary>
+        public string ProgressionFilePath { get; set; }
+
+        /// <summary>
         /// Full file path to the output file of Prolint
         /// </summary>
         public string ProlintOutputPath { get; set; }
@@ -252,6 +258,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             ProgressWin32 = ProEnvironment.Current.ProwinPath;
             if (executionType == ExecutionType.Database)
                 ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
+            ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
 
             // prepare the .p runner
             var runnerPath = Path.Combine(TempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
@@ -266,6 +273,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + Path.Combine(TempDir, "db.ko").ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
             File.WriteAllText(runnerPath, programContent.ToString(), Encoding.Default);
@@ -382,8 +390,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         Database = 10,
         Appbuilder = 11,
-        Dictionary = 12,
-        CompileList = 13
+        Dictionary = 12
     }
 
     internal class FileToCompile {

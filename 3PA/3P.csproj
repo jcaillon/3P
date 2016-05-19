@@ -169,6 +169,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="Tests\ParserLexerTests.cs" />
     <Compile Include="ThemeManager.cs" />

@@ -143,6 +143,12 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileWithLst = true;
 
+            [Display(Name = "Number of processes by core",
+                Description = "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by the number of core on your computer",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public int NbOfProcessesByCore = 3;
+
             #endregion
 
             #region UPDATES

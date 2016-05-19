@@ -32,6 +32,7 @@
     &SCOPED-DEFINE BaseIniPath ""
     &SCOPED-DEFINE ToCompileListFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.d"
     &SCOPED-DEFINE CreateFileIfConnectFails "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fail.log"
+    &SCOPED-DEFINE CompileProgressionFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\compile.progression"
 &ENDIF
 
 
@@ -46,6 +47,7 @@ DEFINE TEMP-TABLE tt_files NO-UNDO
 DEFINE STREAM str_reader.
 DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
+DEFINE STREAM str_progres.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 DEFINE VARIABLE gc_conn AS CHARACTER NO-UNDO.
@@ -255,9 +257,12 @@ PROCEDURE pi_compileList:
     END.
     INPUT STREAM str_reader CLOSE.
     
-    /* loop through all the files */
+    /* the following stream / file is used to inform the C# side of the progression of the compilation */
+    OUTPUT STREAM str_progres TO VALUE({&CompileProgressionFile}) BINARY.
+    
+    /* loop through all the files to compile */
     FOR EACH tt_files:
-        IF tt_files.inPath > "" THEN DO: 
+        IF tt_files.inPath > "" THEN DO:
             COMPILE VALUE(tt_files.inPath)
                 SAVE=TRUE INTO VALUE(tt_files.outFolder)
                 DEBUG-LIST VALUE(tt_files.outLstPath)
@@ -265,8 +270,11 @@ PROCEDURE pi_compileList:
             fi_output_last_error().
             RUN pi_handleCompilErrors NO-ERROR.
             fi_output_last_error().
+            PUT STREAM str_progres UNFORMATTED "x".
         END.
     END.
+    
+    OUTPUT STREAM str_progres CLOSE.
     
     RETURN "".
 

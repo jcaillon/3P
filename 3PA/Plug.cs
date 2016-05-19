@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -356,6 +357,9 @@ namespace _3PA {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
+
+            var comp = new ProCompilation();
+            comp.CompileFolders(new List<string> { ProEnvironment.Current.BaseLocalPath });
 
         }
 
