@@ -29,7 +29,6 @@
     &SCOPED-DEFINE propathToUse ""
     &SCOPED-DEFINE ExtraPf ""
     &SCOPED-DEFINE BasePfPath ""
-    &SCOPED-DEFINE BaseIniPath ""
     &SCOPED-DEFINE ToCompileListFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.d"
     &SCOPED-DEFINE CreateFileIfConnectFails "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fail.log"
     &SCOPED-DEFINE CompileProgressionFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\compile.progression"
@@ -69,15 +68,6 @@ SESSION:APPL-ALERT-BOXES = YES.
 OUTPUT STREAM str_logout TO VALUE({&LogFile}) BINARY.
 OUTPUT STREAM str_dbout TO VALUE({&CreateFileIfConnectFails}) BINARY.
 PUT STREAM str_logout UNFORMATTED "".
-
-/* load the .ini file */
-IF {&BaseIniPath} > "" AND {&ExecutionType} <> "APPBUILDER" THEN DO:
-    LOAD {&BaseIniPath} NO-ERROR.
-    fi_output_last_error().
-    
-    USE {&BaseIniPath} NO-ERROR.
-    fi_output_last_error().
-END.
 
 /* assign the PROPATH here */
 ASSIGN PROPATH = {&propathToUse}.
@@ -187,7 +177,7 @@ QUIT.
             DO WHILE li_i <= COMPILER:NUM-MESSAGES:
                 PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
                 COMPILER:GET-FILE-NAME(li_i),
-                IF COMPILER:GET-MESSAGE-TYPE(li_i) = 2 THEN "Warning" ELSE "Critical",
+                IF COMPILER:GET-MESSAGE-TYPE(li_i) = 1 THEN "Critical" ELSE "Warning",
                 COMPILER:GET-ERROR-ROW(li_i),
                 COMPILER:GET-ERROR-COLUMN(li_i),
                 COMPILER:GET-NUMBER(li_i),
@@ -257,24 +247,23 @@ PROCEDURE pi_compileList:
     END.
     INPUT STREAM str_reader CLOSE.
     
-    /* the following stream / file is used to inform the C# side of the progression of the compilation */
-    OUTPUT STREAM str_progres TO VALUE({&CompileProgressionFile}) BINARY.
-    
     /* loop through all the files to compile */
     FOR EACH tt_files:
         IF tt_files.inPath > "" THEN DO:
             COMPILE VALUE(tt_files.inPath)
-                SAVE=TRUE INTO VALUE(tt_files.outFolder)
+                SAVE INTO VALUE(tt_files.outFolder)
                 DEBUG-LIST VALUE(tt_files.outLstPath)
                 NO-ERROR.
             fi_output_last_error().
             RUN pi_handleCompilErrors NO-ERROR.
             fi_output_last_error().
+            
+            /* the following stream / file is used to inform the C# side of the progression of the compilation */
+            OUTPUT STREAM str_progres TO VALUE({&CompileProgressionFile}) APPEND BINARY.
             PUT STREAM str_progres UNFORMATTED "x".
+            OUTPUT STREAM str_progres CLOSE.
         END.
     END.
-    
-    OUTPUT STREAM str_progres CLOSE.
     
     RETURN "".
 

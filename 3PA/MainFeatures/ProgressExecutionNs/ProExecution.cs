@@ -270,7 +270,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnvironment.Current.GetProPathDirList)).ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE BaseIniPath " + baseIniPath.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + Path.Combine(TempDir, "db.ko").ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
@@ -285,7 +284,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             StringBuilder Params = new StringBuilder();
             
             Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
-            if (executionType == ExecutionType.Appbuilder && !string.IsNullOrEmpty(baseIniPath))
+            if (!string.IsNullOrEmpty(baseIniPath))
                 Params.Append(" -ini " + baseIniPath.ProgressQuoter());
             if (batchMode && Config.Instance.UseBatchModeToCompile)
                 Params.Append(" -b");
@@ -315,13 +314,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 EnableRaisingEvents = true
             };
             Process.Exited += ProcessOnExited;
+
             try {
                 Process.Start();
             } catch (Exception e) {
-                UserCommunication.Notify("Couldn't start a new prowin process!<br>Please check that the file path to prowin32.exe is correct in the <a href='go'>set environment page</a>.<br><br>Below is the technical error that occured :<br><div class='ToolTipcodeSnippet'>" + e.Message +"</div>", MessageImg.MsgError, "Execution error", "Can't start a prowin process", args => {
-                    Appli.Appli.GoToPage(PageNames.SetEnvironment); args.Handled = true;
+                UserCommunication.Notify("Couldn't start a new prowin process!<br>Please check that the file path to prowin32.exe is correct in the <a href='go'>set environment page</a>.<br><br>Below is the technical error that occured :<br><div class='ToolTipcodeSnippet'>" + e.Message + "</div>", MessageImg.MsgError, "Execution error", "Can't start a prowin process", args => {
+                    Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                    args.Handled = true;
                 }, 10);
             }
+
 
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 

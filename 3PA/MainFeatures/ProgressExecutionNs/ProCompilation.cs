@@ -39,6 +39,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         private int _processesRunning;
 
+        private int _nbFilesToCompile;
+
         #endregion
 
 
@@ -91,8 +93,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     currentProcess = 0;
             }
 
-            UserCommunication.Notify("Compiling X files = " + filesToCompile.Count + "<br>using X process " + _listOfCompilationProcess.Count);
-
+            _nbFilesToCompile = filesToCompile.Count;
             _startingTime = DateTime.Now;
             _processesRunning = _listOfCompilationProcess.Count;
 
@@ -115,7 +116,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // if this process was the last one running
             if (_processesRunning == 0) {
-                UserCommunication.Notify("end = " + DateTime.Now.Subtract(_startingTime).TotalSeconds);
+                UserCommunication.Notify("Compiling X files = " + _nbFilesToCompile + "<br>using X process " + _listOfCompilationProcess.Count + "<br>end in X s = " + DateTime.Now.Subtract(_startingTime).TotalSeconds, 0);
             }
         }
 
