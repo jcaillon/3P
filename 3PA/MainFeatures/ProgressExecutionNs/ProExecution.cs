@@ -189,7 +189,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 fileToCompile.TempOutputDir = subTempDir;
 
                 // feed files list
-                filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst.ProgressQuoter());
+                filesListcontent.AppendLine(fileToCompile.TempInputPath + "|" + fileToCompile.TempOutputDir + "|" + fileToCompile.TempOutputLst);
 
                 count++;
             }
@@ -323,7 +323,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     args.Handled = true;
                 }, 10);
             }
-
 
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 

@@ -37,12 +37,6 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE TEMP-TABLE tt_files NO-UNDO
-    FIELD inPath AS CHARACTER /* Path to the file to compile */
-    FIELD outFolder AS CHARACTER /* Path to the output folder */
-    FIELD outLstPath AS CHARACTER /* Path to the *.lst file */
-    .
-
 DEFINE STREAM str_reader.
 DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
@@ -233,26 +227,22 @@ PROCEDURE pi_compileList:
   Parameters:  <none>
 ------------------------------------------------------------------------------*/
 
+    DEFINE VARIABLE lc_from AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_to AS CHARACTER NO-UNDO.
+    DEFINE VARIABLE lc_lst AS CHARACTER NO-UNDO.
+
     ASSIGN FILE-INFO:FILE-NAME = {&ToCompileListFile}.
     IF FILE-INFO:FILE-TYPE = ? OR NOT FILE-INFO:FILE-TYPE MATCHES("*R*") OR NOT FILE-INFO:FILE-TYPE MATCHES("*F*") THEN
         RETURN ERROR "Can't find the list of files to compile".
 
-    /* read the file into a temptable */
-    EMPTY TEMP-TABLE tt_files.
+    /* loop through all the files to compile */
     INPUT STREAM str_reader FROM VALUE({&ToCompileListFile}).
     REPEAT:
-        CREATE tt_files.
-        IMPORT STREAM str_reader tt_files.
-        RELEASE tt_files.
-    END.
-    INPUT STREAM str_reader CLOSE.
-    
-    /* loop through all the files to compile */
-    FOR EACH tt_files:
-        IF tt_files.inPath > "" THEN DO:
-            COMPILE VALUE(tt_files.inPath)
-                SAVE INTO VALUE(tt_files.outFolder)
-                DEBUG-LIST VALUE(tt_files.outLstPath)
+        IMPORT STREAM str_reader DELIMITER "|" lc_from lc_to lc_lst.
+        IF lc_from > "" THEN DO:
+            COMPILE VALUE(lc_from)
+                SAVE INTO VALUE(lc_to)
+                DEBUG-LIST VALUE(lc_lst)
                 NO-ERROR.
             fi_output_last_error().
             RUN pi_handleCompilErrors NO-ERROR.
@@ -264,6 +254,7 @@ PROCEDURE pi_compileList:
             OUTPUT STREAM str_progres CLOSE.
         END.
     END.
+    INPUT STREAM str_reader CLOSE.
     
     RETURN "".
 

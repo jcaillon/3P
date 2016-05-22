@@ -216,7 +216,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 dockedPanel.ContentPanel.Controls.Add(updateButton); 
             }
 
-            yPos += 15;
+            yPos += 25;
 
             if (yPos > Height) {
                 dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {

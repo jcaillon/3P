@@ -351,7 +351,7 @@ namespace _3PA.MainFeatures {
                         // if we moved the .r file correctly AND (we don't want .lst OR we moved it correctly)
                         if (Utils.MoveFile(treatedFile.TempOutputR, treatedFile.OutputR) &&
                             (!Config.Instance.CompileWithLst || Utils.MoveFile(treatedFile.TempOutputLst, treatedFile.OutputLst)))
-                            notifMessage.Append(string.Format("<br>The .r and .lst files have been moved to :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
+                            notifMessage.Append(string.Format(Config.Instance.CompileWithLst ? "<br>The .r and .lst files have been moved to :<br>{0}" : "<br>The .r file has been moved to :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
                     }
                 }
 

@@ -20,6 +20,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using _3PA.Html;
@@ -109,6 +110,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 if (!compilationProcess.ProExecutionObject.Do(ExecutionType.Compile))
                     return;
             }
+
         }
 
         private void OnExecutionEnded(ProExecution lastExecution) {
