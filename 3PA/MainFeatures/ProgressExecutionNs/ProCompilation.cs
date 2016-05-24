@@ -29,6 +29,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     internal class ProCompilation {
 
+        #region public fields
+
+        public bool MonoProcess = false;
+
+        #endregion
+
+
         #region private fields
 
         // list of all the started processes
@@ -40,7 +47,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         private int _processesRunning;
 
-        private int _nbFilesToCompile;
+        private long _nbFilesToCompile;
 
         #endregion
 
@@ -57,9 +64,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // constructs the list of all the files (unique) accross the different folders
             var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
             foreach (var folderPath in listOfFolderPath) {
-                foreach (var filePath in Config.Instance.KnownCompilableExtension.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, SearchOption.AllDirectories)).ToList()) {
-                    if (!filesToCompile.Contains(filePath))
-                        filesToCompile.Add(filePath);
+                if (Directory.Exists(folderPath)) {
+                    foreach (var filePath in Config.Instance.KnownCompilableExtension.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, SearchOption.AllDirectories)).ToList()) {
+                        if (!filesToCompile.Contains(filePath))
+                            filesToCompile.Add(filePath);
+                    }
                 }
             }
 
@@ -77,7 +86,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
-            _numberOfProcesses = Config.Instance.NbOfProcessesByCore*Environment.ProcessorCount;
+            _numberOfProcesses = MonoProcess ? 1 : Config.Instance.NbOfProcessesByCore * Environment.ProcessorCount;
             _listOfCompilationProcess.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
@@ -113,6 +122,23 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         }
 
+        /// <summary>
+        /// Use this method to get the overall progression of the compilation (from 0 to 100)
+        /// </summary>
+        /// <returns></returns>
+        public int GetOverallProgression() {
+
+            long nbFilesDone = 0;
+            foreach (var compilationProcess in _listOfCompilationProcess) {
+                nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
+            }
+            return (int) (nbFilesDone / _nbFilesToCompile * 100);
+        }
+
+        #endregion
+
+        #region private methods
+
         private void OnExecutionEnded(ProExecution lastExecution) {
             _processesRunning--;
 
@@ -124,16 +150,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
+        #region internal class
 
         private struct ProCompilationFile {
             public string Path { get; set; }
-            public long Size { get; set; } 
+            public long Size { get; set; }
         }
 
         internal class CompilationProcess {
             public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
             public ProExecution ProExecutionObject;
         }
+
+        #endregion
+
 
     }
 }

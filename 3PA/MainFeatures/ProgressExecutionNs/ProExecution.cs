@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
@@ -189,7 +190,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 fileToCompile.TempOutputDir = subTempDir;
 
                 // feed files list
-                filesListcontent.AppendLine(fileToCompile.TempInputPath + "|" + fileToCompile.TempOutputDir + "|" + fileToCompile.TempOutputLst);
+                filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst.ProgressQuoter());
 
                 count++;
             }
@@ -200,7 +201,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             var baseIniPath = "";
             if (File.Exists(ProEnvironment.Current.IniPath)) {
                 baseIniPath = Path.Combine(TempDir, "base.ini");
-                File.Copy(ProEnvironment.Current.IniPath, baseIniPath);
+                // we need to copy the .ini but we must delete the PROPATH= part, as stupid as it sounds, if we leave a huge PROPATH 
+                // in this file, it increases the compilation time by a stupid amount... unbelievable i know, but trust me, it does...
+                var fileContent = File.ReadAllText(ProEnvironment.Current.IniPath, Encoding.Default);
+                var regex = new Regex("^PROPATH=.*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
+                var matches = regex.Match(fileContent);
+                if (matches.Success) 
+                    fileContent = regex.Replace(fileContent, @"PROPATH=");
+                File.WriteAllText(baseIniPath, fileContent, Encoding.Default);
             }
 
             // Move pf file into the execution dir

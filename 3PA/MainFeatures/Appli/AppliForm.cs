@@ -28,6 +28,7 @@ using YamuiFramework.Forms;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli.Pages.Actions;
 using _3PA.MainFeatures.Appli.Pages.Home;
 using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Appli.Pages.Set;
@@ -61,11 +62,11 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("COMPILATION PATH", null, new SetCompilationPath())
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
-                //new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
+                new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
                 //    new YamuiSecMenu("3P COMMANDS", null, new template()),
                 //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
-                //    new YamuiSecMenu("COMPILER", null, new template()),
-                //}),
+                    new YamuiSecMenu("MASS COMPILER", null, new CompilePage()),
+                }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
                     new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General", "Compilation" })), //TODO change the page name!

@@ -27,6 +27,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     internal static class ProEnvironment {
 
+        #region events
+
+        /// <summary>
+        /// Subscribe to this event, published when the current environment changes
+        /// </summary>
+        public static event Action OnEnvironmentChange;
+
+        #endregion
+
         #region fields
 
         private static ProEnvironmentObject _currentEnv;
@@ -146,6 +155,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // need to compute the propath again
             Current.ReComputeProPath();
+
+            if (OnEnvironmentChange != null)
+                OnEnvironmentChange();
         }
 
         #endregion

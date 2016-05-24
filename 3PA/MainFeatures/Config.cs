@@ -149,6 +149,8 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public int NbOfProcessesByCore = 3;
 
+            public string CompilationDirectoriesHistoric = "";
+
             #endregion
 
             #region UPDATES

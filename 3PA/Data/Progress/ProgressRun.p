@@ -38,6 +38,7 @@
 /* ***************************  Definitions  ************************** */
 
 DEFINE STREAM str_reader.
+DEFINE STREAM str_reader2.
 DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
 DEFINE STREAM str_progres.
@@ -236,9 +237,9 @@ PROCEDURE pi_compileList:
         RETURN ERROR "Can't find the list of files to compile".
 
     /* loop through all the files to compile */
-    INPUT STREAM str_reader FROM VALUE({&ToCompileListFile}).
+    INPUT STREAM str_reader2 FROM VALUE({&ToCompileListFile}) NO-ECHO.
     REPEAT:
-        IMPORT STREAM str_reader DELIMITER "|" lc_from lc_to lc_lst.
+        IMPORT STREAM str_reader2 lc_from lc_to lc_lst.
         IF lc_from > "" THEN DO:
             COMPILE VALUE(lc_from)
                 SAVE INTO VALUE(lc_to)
@@ -254,7 +255,7 @@ PROCEDURE pi_compileList:
             OUTPUT STREAM str_progres CLOSE.
         END.
     END.
-    INPUT STREAM str_reader CLOSE.
+    INPUT STREAM str_reader2 CLOSE.
     
     RETURN "".
 

@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -109,7 +110,7 @@ namespace _3PA {
                 AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
                 Application.ThreadException += ErrorHandler.ThreadErrorHandler;
                 TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
-
+                
                 // initialize plugin (why another method for this? because otherwise the LibLoader can't do his job...)
                 InitPlugin();
             } catch (Exception e) {
@@ -142,7 +143,7 @@ namespace _3PA {
             } else if (Config.Instance.FileExplorerVisible) {
                 FileExplorer.Toggle();
             }
-
+            
             // Try to update 3P
             UpdateHandler.OnNotepadStart();
 
