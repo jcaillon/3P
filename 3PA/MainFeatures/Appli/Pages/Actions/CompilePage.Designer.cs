@@ -30,8 +30,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.toggleRecurs = new YamuiFramework.Controls.YamuiToggle();
+            this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btUndo = new YamuiFramework.Controls.YamuiImageButton();
-            this.lbl_rapport = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btStart = new YamuiFramework.Controls.YamuiButton();
             this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
             this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -63,8 +65,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
+            this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
             this.dockedPanel.ContentPanel.Controls.Add(this.btUndo);
-            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_rapport);
+            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_report);
             this.dockedPanel.ContentPanel.Controls.Add(this.btStart);
             this.dockedPanel.ContentPanel.Controls.Add(this.progressBar);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel3);
@@ -84,6 +88,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             // 
+            // toggleRecurs
+            // 
+            this.toggleRecurs.AutoSize = true;
+            this.toggleRecurs.Location = new System.Drawing.Point(197, 55);
+            this.toggleRecurs.Name = "toggleRecurs";
+            this.toggleRecurs.Size = new System.Drawing.Size(52, 15);
+            this.toggleRecurs.TabIndex = 121;
+            this.toggleRecurs.Text = " ";
+            // 
+            // htmlLabel2
+            // 
+            this.htmlLabel2.AutoSize = false;
+            this.htmlLabel2.AutoSizeHeightOnly = true;
+            this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel2.BaseStylesheet = null;
+            this.htmlLabel2.IsSelectionEnabled = false;
+            this.htmlLabel2.Location = new System.Drawing.Point(30, 55);
+            this.htmlLabel2.Name = "htmlLabel2";
+            this.htmlLabel2.Size = new System.Drawing.Size(161, 15);
+            this.htmlLabel2.TabIndex = 120;
+            this.htmlLabel2.TabStop = false;
+            this.htmlLabel2.Text = "Explore files recursively?";
+            // 
             // btUndo
             // 
             this.btUndo.BackGrndImage = null;
@@ -94,23 +121,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.btUndo.TabIndex = 118;
             this.btUndo.Text = "yamuiImageButton1";
             // 
-            // lbl_rapport
+            // lbl_report
             // 
-            this.lbl_rapport.AutoSize = false;
-            this.lbl_rapport.AutoSizeHeightOnly = true;
-            this.lbl_rapport.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_rapport.BaseStylesheet = null;
-            this.lbl_rapport.IsSelectionEnabled = false;
-            this.lbl_rapport.Location = new System.Drawing.Point(30, 110);
-            this.lbl_rapport.Name = "lbl_rapport";
-            this.lbl_rapport.Size = new System.Drawing.Size(681, 45);
-            this.lbl_rapport.TabIndex = 117;
-            this.lbl_rapport.TabStop = false;
-            this.lbl_rapport.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
+            this.lbl_report.AutoSize = false;
+            this.lbl_report.AutoSizeHeightOnly = true;
+            this.lbl_report.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_report.BaseStylesheet = null;
+            this.lbl_report.Location = new System.Drawing.Point(30, 125);
+            this.lbl_report.Name = "lbl_report";
+            this.lbl_report.Size = new System.Drawing.Size(681, 45);
+            this.lbl_report.TabIndex = 117;
+            this.lbl_report.TabStop = false;
+            this.lbl_report.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
             // 
             // btStart
             // 
-            this.btStart.Location = new System.Drawing.Point(30, 52);
+            this.btStart.Location = new System.Drawing.Point(30, 85);
             this.btStart.Name = "btStart";
             this.btStart.Size = new System.Drawing.Size(139, 23);
             this.btStart.TabIndex = 116;
@@ -118,7 +144,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // progressBar
             // 
-            this.progressBar.Location = new System.Drawing.Point(30, 81);
+            this.progressBar.Location = new System.Drawing.Point(30, 85);
             this.progressBar.MarqueeWidth = 50;
             this.progressBar.Name = "progressBar";
             this.progressBar.Progress = 0F;
@@ -190,9 +216,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(106, 19);
+            this.yamuiLabel2.Size = new System.Drawing.Size(209, 19);
             this.yamuiLabel2.TabIndex = 2;
-            this.yamuiLabel2.Text = "COMPILATION";
+            this.yamuiLabel2.Text = "COMPILE ENTIRE DIRECTORIES";
             // 
             // CompilePage
             // 
@@ -221,7 +247,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private HtmlLabel htmlLabel3;
         private YamuiProgressBar progressBar;
         private YamuiButton btStart;
-        private HtmlLabel lbl_rapport;
+        private HtmlLabel lbl_report;
         private YamuiImageButton btUndo;
+        private HtmlLabel htmlLabel2;
+        private YamuiToggle toggleRecurs;
     }
 }

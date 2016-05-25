@@ -358,10 +358,6 @@ namespace _3PA {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
-
-            var comp = new ProCompilation();
-            comp.CompileFolders(new List<string> { ProEnvironment.Current.BaseLocalPath });
-
         }
 
         #endregion

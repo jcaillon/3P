@@ -29,7 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         private void InitializeComponent() {
             this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
             this.html = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiTextBox1 = new YamuiFramework.Controls.YamuiTextBox();
+            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiImageButton();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -39,8 +39,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiImageButton1);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.html);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiTextBox1);
             this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
             this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
@@ -65,21 +65,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.html.Name = "html";
             this.html.Size = new System.Drawing.Size(744, 15);
             this.html.TabIndex = 3;
+            this.html.TabStop = false;
             this.html.Text = "home HTML";
             // 
-            // yamuiTextBox1
+            // yamuiImageButton1
             // 
-            this.yamuiTextBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
-            this.yamuiTextBox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.yamuiTextBox1.CustomBackColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox1.CustomForeColor = System.Drawing.Color.Empty;
-            this.yamuiTextBox1.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
-            this.yamuiTextBox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.yamuiTextBox1.Location = new System.Drawing.Point(702, 559);
-            this.yamuiTextBox1.Name = "yamuiTextBox1";
-            this.yamuiTextBox1.Size = new System.Drawing.Size(20, 24);
-            this.yamuiTextBox1.TabIndex = 4;
-            this.yamuiTextBox1.WaterMark = null;
+            this.yamuiImageButton1.BackGrndImage = null;
+            this.yamuiImageButton1.Location = new System.Drawing.Point(734, 587);
+            this.yamuiImageButton1.Name = "yamuiImageButton1";
+            this.yamuiImageButton1.Size = new System.Drawing.Size(10, 10);
+            this.yamuiImageButton1.TabIndex = 4;
+            this.yamuiImageButton1.Text = "yamuiImageButton1";
             // 
             // HomePage
             // 
@@ -89,7 +85,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.Name = "HomePage";
             this.Size = new System.Drawing.Size(750, 600);
             this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
-            this.yamuiScrollPage1.ContentPanel.PerformLayout();
             this.yamuiScrollPage1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -99,6 +94,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         private YamuiScrollPage yamuiScrollPage1;
         private HtmlLabel html;
-        private YamuiTextBox yamuiTextBox1;
+        private YamuiImageButton yamuiImageButton1;
     }
 }

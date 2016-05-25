@@ -395,7 +395,7 @@ namespace _3PA.MainFeatures {
                 UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
                 return;
             }
-            if (!Config.Instance.KnownCompilableExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
+            if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
                 UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
             }

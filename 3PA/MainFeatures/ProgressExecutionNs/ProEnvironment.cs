@@ -21,6 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
@@ -380,6 +382,27 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         ErrorHandler.Log(x.Message);
                 }
                 return output;
+            }
+
+            /// <summary>
+            /// Use this method to know if the CONNECT define for the current environment connects the database in
+            /// single user mode (returns false if not or if no database connection is set)
+            /// </summary>
+            /// <returns></returns>
+            public bool IsDatabaseSingleUser() {
+                bool singleUserMode = false;
+
+                if (!string.IsNullOrEmpty(ExtraPf)) {
+                    if (ExtraPf.MatchRegex(@"\s-1", RegexOptions.Singleline))
+                        singleUserMode = true;
+                }
+
+                if (!string.IsNullOrEmpty(GetPfPath()) && File.Exists(GetPfPath())) {
+                    if (File.ReadAllText(GetPfPath(), Encoding.Default).MatchRegex(@"\s-1", RegexOptions.Singleline))
+                        singleUserMode = true;
+                }
+
+                return singleUserMode;
             }
 
             #endregion

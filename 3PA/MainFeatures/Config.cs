@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures {
                 Description = "A comma separated list of progress file extensions that can be compiled : <br>It is used to check if you can compile / check syntax / execute the current file",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-            public string KnownCompilableExtension = ".p,.w,.t,.cls";
+            public string CompileKnownExtension = ".p,.w,.t,.cls";
 
             [Display(Name = "Compile with .lst",
                 Description = "Toggle on to compile your code with the listing option, generating a .lst file<br>see the DEBUG-LIST option of the Progress compiler for more info",
@@ -144,12 +144,20 @@ namespace _3PA.MainFeatures {
             public bool CompileWithLst = true;
 
             [Display(Name = "Number of processes by core",
-                Description = "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by the number of core on your computer",
+                Description = "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
             public int NbOfProcessesByCore = 3;
 
-            public string CompilationDirectoriesHistoric = "";
+            [Display(Name = "Force mono process for mass compilation",
+                Description = "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot<br>You can use this option if you want to limit the number of connections made to your database during compilation...",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileForceMonoProcess = false;
+
+            public string CompileDirectoriesHistoric = "";
+
+            public bool CompileExploreDirRecursiv = true;
 
             #endregion
 

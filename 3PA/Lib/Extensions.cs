@@ -139,6 +139,18 @@ namespace _3PA.Lib {
         #region string extensions
 
         /// <summary>
+        /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
+        /// </summary>
+        /// <param name="toCheck"></param>
+        /// <param name="regex"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        public static bool MatchRegex(this string toCheck, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
+            var reg = new Regex(regex);
+            return reg.Match(toCheck).Success;
+        }
+
+        /// <summary>
         /// Returns the html link representation from a url
         /// </summary>
         /// <param name="url"></param>
