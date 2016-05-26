@@ -20,13 +20,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
+using System.Threading;
 using _3PA.Html;
-using _3PA.Interop;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
 
@@ -53,7 +50,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         // total number of processes finished ok
         public int NumberOfProcessesEndedOk { get; private set; }
 
-        public event Action OnCompilationEnded;
+        // has the compilation been canceled / processes killed?
+        public bool HasBeenKilled { get; private set; }
+
+        public event Action OnCompilationEnd;
+
+        public string ExecutionTime { get; private set; }
 
         #endregion
 
@@ -68,6 +70,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         // total number of processes still running
         private int _processesRunning;
+
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         #endregion
 
@@ -128,6 +132,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             NbFilesToCompile = filesToCompile.Count;
             _startingTime = DateTime.Now;
             _processesRunning = _listOfCompilationProcess.Count;
+            NumberOfProcesses = _listOfCompilationProcess.Count;
             NumberOfProcessesEndedOk = 0;
 
             // lets start the compilation on each process
@@ -136,8 +141,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // launch the compile process
                 compilationProcess.ProExecutionObject = new ProExecution {
                     ListToCompile = compilationProcess.FilesToCompile,
-                    OnExecutionEnd = OnExecutionEnded,
-                    OnExecutionEndOk = OnExecutionEndedOk
+                    OnExecutionEnd = OnExecutionEnd,
+                    OnExecutionOk = OnExecutionOk,
+                    OnExecutionFailed = OnExecutionFailed
                 };
                 if (!compilationProcess.ProExecutionObject.Do(ExecutionType.Compile))
                     return false;
@@ -149,22 +155,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Use this method to get the overall progression of the compilation (from 0 to 100)
         /// </summary>
-        /// <returns></returns>
-        public int GetOverallProgression() {
-
+        public float GetOverallProgression() {
             long nbFilesDone = 0;
             foreach (var compilationProcess in _listOfCompilationProcess) {
                 if (File.Exists(compilationProcess.ProExecutionObject.ProgressionFilePath))
-                    //nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
-                    nbFilesDone += WinApi.GetFileSizeOnDisk(compilationProcess.ProExecutionObject.ProgressionFilePath);
+                    nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
             }
-            return (int) (nbFilesDone / NbFilesToCompile * 100);
+            return (float) nbFilesDone / NbFilesToCompile * 100;
         }
 
         /// <summary>
         /// Get the time elapsed since the beggining of the compilation in a human readable format
         /// </summary>
-        /// <returns></returns>
         public string GetElapsedTime() {
             TimeSpan t = TimeSpan.FromMilliseconds(DateTime.Now.Subtract(_startingTime).TotalMilliseconds);
             if (t.Hours > 0)
@@ -176,21 +178,73 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             return string.Format("{0:D3}ms", t.Milliseconds);
         }
 
+        /// <summary>
+        /// This method "cancel" the compilation by killing the associated processes
+        /// </summary>
+        public void KillProcesses() {
+            HasBeenKilled = true;
+            foreach (var compilationProcess in _listOfCompilationProcess) {
+                compilationProcess.ProExecutionObject.KillProcess();
+            }
+        }
+
         #endregion
 
         #region private methods
 
-        private void OnExecutionEndedOk(ProExecution obj) {
-            NumberOfProcessesEndedOk++;
+        /// <summary>
+        /// This method is executed when the overall compilation is over and allows to do more treatments
+        /// </summary>
+        private void TestEndOfCompilation() {
+            // only do stuff we have reached the last running process
+            if (_processesRunning > 0)
+                return;
+
+            ExecutionTime = GetElapsedTime();
+
+            //TODO move files to comp dir if everything went well, stores results of move actions
+
+            if (OnCompilationEnd != null)
+                OnCompilationEnd();
         }
 
-        private void OnExecutionEnded(ProExecution lastExecution) {
-            _processesRunning--;
+        /// <summary>
+        /// Called when a process has finished
+        /// </summary>
+        private void OnExecutionEnd(ProExecution lastExecution) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    _processesRunning--;
+                } finally {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
 
-            // if this process was the last one running
-            if (_processesRunning == 0) {
-                if (OnCompilationEnded != null)
-                    OnCompilationEnded();
+        /// <summary>
+        /// Called when a process has finished successfully
+        /// </summary>
+        private void OnExecutionOk(ProExecution obj) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    NumberOfProcessesEndedOk++;
+                    TestEndOfCompilation();
+                } finally {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a process has finished UNsuccessfully
+        /// </summary>
+        private void OnExecutionFailed(ProExecution obj) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    TestEndOfCompilation();
+                } finally {
+                    _lock.ExitWriteLock();
+                }
             }
         }
 

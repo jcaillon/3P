@@ -108,7 +108,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 var exec = new ProExecution {
                     OnExecutionEnd = execution => _isExtracting = false,
-                    OnExecutionEndOk = ExtractionDoneOk,
+                    OnExecutionOk = ExtractionDoneOk,
                     NeedDatabaseConnection = true,
                     ExtractDbOutputPath = _outputFileName
                 };

@@ -39,14 +39,19 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #region public fields
 
         /// <summary>
-        /// The action to execute at the end of the execution
+        /// The action to execute just after the end of a prowin process
         /// </summary>
         public Action<ProExecution> OnExecutionEnd { private get; set; }
 
         /// <summary>
-        /// The action to execute at the end of the execution if it went well = we found a .log and the database is connected or is not mandatory
+        /// The action to execute at the end of the process if it went well = we found a .log and the database is connected or is not mandatory
         /// </summary>
-        public Action<ProExecution> OnExecutionEndOk { private get; set; }
+        public Action<ProExecution> OnExecutionOk { private get; set; }
+
+        /// <summary>
+        /// The action to execute at the end of the process if something went wrong (no .log or database down)
+        /// </summary>
+        public Action<ProExecution> OnExecutionFailed { private get; set; }
 
         /// <summary>
         /// Full path to the directory containing all the files needed for the execution
@@ -99,6 +104,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// set to true if a valid database connection is mandatory
         /// </summary>
         public bool NeedDatabaseConnection { get; set; }
+
+        /// <summary>
+        /// set to true if a the execution process has been killed
+        /// </summary>
+        public bool HasBeenKilled { get; set; }
 
         #endregion
 
@@ -341,10 +351,30 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         }
 
         /// <summary>
+        /// Allows to kill the process of this execution (be careful, the OnExecutionEnd, Ok, Fail events are not executed in that case!) 
+        /// </summary>
+        public void KillProcess() {
+            HasBeenKilled = true;
+            try {
+                Process.Kill();
+                Process.Close();
+            } catch (Exception) {
+                // ignored
+            }
+        }
+
+        #endregion
+
+        #region private methods
+
+        /// <summary>
         /// Called by the process's thread when it is over, execute the ProcessOnExited event
         /// </summary>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
 
+            bool endedSuccessfully = true;
+
+            // end of execution action
             if (OnExecutionEnd != null) {
                 OnExecutionEnd(this);
             }
@@ -352,25 +382,38 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // if log not found then something is messed up!
             if (string.IsNullOrEmpty(LogPath) || !File.Exists(LogPath)) {
                 UserCommunication.Notify("Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProgressWin32 + " " + ExeParameters + "</div><b>Temporary directory :</b><br>" + TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Critical error", "Action failed", args => {
-                    if (args.Link.Equals("go")) { Appli.Appli.GoToPage(PageNames.SetEnvironment); args.Handled = true;}
+                    if (args.Link.Equals("go")) {
+                        Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                        args.Handled = true;
+                    }
                 }, 0, 600);
 
-                return;
+                endedSuccessfully = false;
             }
 
             // if this file exists, then the connect statement failed, warn the user
             var dbKoPath = Path.Combine(TempDir, "db.ko");
-            if (File.Exists(dbKoPath) && new FileInfo(dbKoPath).Length > 0) {
+            if (endedSuccessfully && File.Exists(dbKoPath) && new FileInfo(dbKoPath).Length > 0) {
                 UserCommunication.Notify("Failed to connect to the progress database!<br>Verify / correct the connection info <a href='go'>in the environment page</a> and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the error returned while trying to connect to the database : " + Utils.ReadAndFormatLogToHtml(Path.Combine(TempDir, "db.ko")), MessageImg.MsgRip, "Database connection", "Connection failed", args => {
-                    if (args.Link.Equals("go")) { Appli.Appli.GoToPage(PageNames.SetEnvironment); args.Handled = true; }
+                    if (args.Link.Equals("go")) {
+                        Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                        args.Handled = true;
+                    }
                 }, 10, 600);
 
                 if (NeedDatabaseConnection)
-                    return;
+                    endedSuccessfully = false;
             }
 
-            if (OnExecutionEndOk != null) {
-                OnExecutionEndOk(this);
+            // end of successful/unsuccessful execution action
+            if (endedSuccessfully) {
+                if (OnExecutionOk != null) {
+                    OnExecutionOk(this);
+                }
+            } else {
+                if (OnExecutionFailed != null) {
+                    OnExecutionFailed(this);
+                }
             }
         }
 
@@ -385,9 +428,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     // if it fails it is not really a problem
                 }
             }
-        } 
+        }
 
         #endregion
+
 
     }
 

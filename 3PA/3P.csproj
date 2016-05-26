@@ -425,8 +425,10 @@
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\PlusDb.png" />
     <Content Include="Images\Appli\Push.png" />
+    <Content Include="Images\Appli\Report.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
+    <Content Include="Images\Appli\Time.png" />
     <Content Include="Images\Appli\UndoUserAction.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />

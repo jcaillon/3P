@@ -30,6 +30,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.toggleRecurs = new YamuiFramework.Controls.YamuiToggle();
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btUndo = new YamuiFramework.Controls.YamuiImageButton();
@@ -65,6 +66,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
+            this.dockedPanel.ContentPanel.Controls.Add(this.btCancel);
             this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
             this.dockedPanel.ContentPanel.Controls.Add(this.btUndo);
@@ -87,6 +89,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.dockedPanel.Name = "dockedPanel";
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
+            // 
+            // btCancel
+            // 
+            this.btCancel.Location = new System.Drawing.Point(638, 85);
+            this.btCancel.Name = "btCancel";
+            this.btCancel.Size = new System.Drawing.Size(73, 23);
+            this.btCancel.TabIndex = 122;
+            this.btCancel.Text = "Cancel";
             // 
             // toggleRecurs
             // 
@@ -123,6 +133,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // lbl_report
             // 
+            this.lbl_report.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbl_report.AutoSize = false;
             this.lbl_report.AutoSizeHeightOnly = true;
             this.lbl_report.BackColor = System.Drawing.Color.Transparent;
@@ -144,11 +156,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // progressBar
             // 
+            this.progressBar.GradientIntensity = 5;
             this.progressBar.Location = new System.Drawing.Point(30, 85);
             this.progressBar.MarqueeWidth = 50;
             this.progressBar.Name = "progressBar";
             this.progressBar.Progress = 0F;
-            this.progressBar.Size = new System.Drawing.Size(681, 23);
+            this.progressBar.Size = new System.Drawing.Size(602, 23);
             this.progressBar.TabIndex = 114;
             // 
             // htmlLabel3
@@ -251,5 +264,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private YamuiImageButton btUndo;
         private HtmlLabel htmlLabel2;
         private YamuiToggle toggleRecurs;
+        private YamuiButton btCancel;
     }
 }

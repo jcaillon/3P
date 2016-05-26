@@ -205,7 +205,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint
         /// </summary>
-        public static void OnExecutionEnded(ProExecution lastExec) {
+        public static void OnExecutionEnd(ProExecution lastExec) {
             try {
                 var treatedFile = lastExec.ListToCompile.First();
                 CurrentOperation currentOperation;
@@ -225,7 +225,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Called after the execution of run/compile/check/prolint
         /// </summary>
-        public static void OnExecutionEndedOk(ProExecution lastExec) {
+        public static void OnExecutioOk(ProExecution lastExec) {
             try {
                 var treatedFile = lastExec.ListToCompile.First();
                 CurrentOperation currentOperation;
@@ -366,7 +366,7 @@ namespace _3PA.MainFeatures {
                     }, notifTimeOut);
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnExecutionEndOk");
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
             }
         }
 
@@ -412,8 +412,8 @@ namespace _3PA.MainFeatures {
                 ListToCompile = new List<FileToCompile> {
                     new FileToCompile { InputPath = Plug.CurrentFilePath }
                 },
-                OnExecutionEnd = OnExecutionEnded,
-                OnExecutionEndOk = OnExecutionEndedOk
+                OnExecutionEnd = OnExecutionEnd,
+                OnExecutionOk = OnExecutioOk
             };
             if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
                 return;
@@ -512,7 +512,7 @@ namespace _3PA.MainFeatures {
                 ListToCompile = new List<FileToCompile> {
                     new FileToCompile { InputPath = Plug.CurrentFilePath }
                 },
-                OnExecutionEndOk = execution => {
+                OnExecutionOk = execution => {
                     try {
                         if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && File.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
                             UserCommunication.Notify("Faile to start the appbuilder, the following commands both failed :<br><div class='ToolTipcodeSnippet'>RUN adeuib/_uibmain.p.<br>RUN _ab.p.</div><br>Your version of progress might be uncompatible with those statements? If this problem looks anormal to you, please open a new issue on github.", MessageImg.MsgRip, "Start Appbuilder", "The command failed");
