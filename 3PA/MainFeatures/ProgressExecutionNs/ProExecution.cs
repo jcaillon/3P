@@ -447,11 +447,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     }
 
     internal class FileToCompile {
+        // stores the final path for each file
         public string InputPath { get; set; }
         public string OutputDir { get; set; }
         public string OutputR { get; set; }
         public string OutputLst { get; set; }
 
+        // stores temporary path used during the execution
         public string TempInputPath { get; set; }
         public string TempOutputDir { get; set; }
         public string TempOutputR { get; set; }

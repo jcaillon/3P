@@ -113,18 +113,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // the execution ended successfully
             if (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk) {
                 currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='MsgOk' height='15px'>All the processes ended correctly</div>");
-                currentReport.Append("<br>");
+                currentReport.Append("<br><h3>Summary :</h3>");
+
+
 
             } else {
                 if (_currentCompil.HasBeenKilled) {
+                    // the process has been cancelled
                     currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='MsgWarning' height='15px'>The compilation has been cancelled by the user</div>");
                 } else {
-                    // provide info the possible error!
+                    // provide info on the possible error!
                     currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='MsgError' height='15px'>Only " + _currentCompil.NumberOfProcessesEndedOk + " on a total of " + _currentCompil.NumberOfProcesses + " ended correctly...</div>");
                     currentReport.Append(@"<div>A possible explanation is....................... TODO</div>");
                 }
-
-
             }
 
             UpdateReport(currentReport.ToString());

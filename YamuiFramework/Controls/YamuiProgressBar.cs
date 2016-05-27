@@ -337,7 +337,7 @@ namespace YamuiFramework.Controls {
                 text = Text;
 
             Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, false, false, false, Enabled);
-            Font font = FontManager.GetFont(FontFunction.Small);
+            Font font = FontManager.GetFont(FontStyle.Bold, 10f);
 
             float strWidth = _bufGraphics.Graphics.MeasureString(text, font).Width;
             float strHeight = _bufGraphics.Graphics.MeasureString(text, font).Height;

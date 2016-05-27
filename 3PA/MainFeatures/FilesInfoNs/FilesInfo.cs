@@ -79,6 +79,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 _sessionInfo[fullPath].FileErrors.Clear();
             _sessionInfo[fullPath].FileErrors = errorsList.ToList();
             _sessionInfo[fullPath].FileErrors.Sort(new FileErrorSortingClass());
+
+            // Update info on the current file
+            if (fullPath.EqualsCi(Plug.CurrentFilePath))
+                UpdateErrorsInScintilla();
         }
 
         /// <summary>
@@ -226,13 +230,26 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// returns true if it actually cleared something, false it there was no errors
         /// </summary>
         public static bool ClearAllErrors(bool updateVisual = true) {
-            var currentFilePath = Plug.CurrentFilePath;
-            if (_sessionInfo.ContainsKey(currentFilePath) && _sessionInfo[currentFilePath].FileErrors != null) {
-                _sessionInfo[currentFilePath].FileErrors.Clear();
+            return ClearAllErrors(Plug.CurrentFilePath, updateVisual);
+        }
+
+        /// <summary>
+        /// Clear all the errors for the given document and then update the view,
+        /// returns true if it actually cleared something, false it there was no errors
+        /// </summary>
+        public static bool ClearAllErrors(string filePath, bool updateVisual = true) {
+            if (string.IsNullOrEmpty(filePath))
+                return false;
+            if (_sessionInfo.ContainsKey(filePath) && _sessionInfo[filePath].FileErrors != null) {
+                _sessionInfo[filePath].FileErrors.Clear();
+
                 if (updateVisual) {
                     ClearAnnotationsAndMarkers();
                     UpdateFileStatus();
+                } else {
+                    _sessionInfo[filePath].NeedToCleanScintilla = true;
                 }
+
                 return true;
             }
             return false;
@@ -261,7 +278,6 @@ namespace _3PA.MainFeatures.FilesInfoNs {
             } else {
                 // we didn't manage to clear the error, (only visually, not in our records), so clear everything 
                 ClearAllErrors(false);
-                _sessionInfo[Plug.CurrentFilePath].NeedToCleanScintilla = true;
             }
             return jobDone;
         }
@@ -366,21 +382,29 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 return output;
 
             var lastLineNbCouple = new[] { -10, -10 };
-            foreach (var items in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7)) {
+            foreach (var lineFields in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7 || items.Count() == 8)) {
+                var fields = lineFields.ToList();
+
+                // the first field should be the file that was compiled, it might not be there for PROLINT.log 
+                // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
+                if (fields.Count() == 7) {
+                    fields.Insert(0, permutePaths.First().Value);
+                }
 
                 // new file
-                var filePath = (permutePaths.ContainsKey(items[0]) ? permutePaths[items[0]] : items[0]);
+                var filePath = (permutePaths.ContainsKey(fields[1]) ? permutePaths[fields[1]] : fields[1]);
+
                 if (!output.ContainsKey(filePath)) {
                     output.Add(filePath, new List<FileError>());
                     lastLineNbCouple = new[] { -10, -10 };
                 }
 
                 ErrorLevel errorLevel;
-                if (!Enum.TryParse(items[1], true, out errorLevel))
+                if (!Enum.TryParse(fields[2], true, out errorLevel))
                     errorLevel = ErrorLevel.Error;
 
                 // we store the line/error number couple because we don't want two identical messages to appear
-                var thisLineNbCouple = new[] { items[2].Equals("?") ? 0 : int.Parse(items[2]) - 1, items[4].Equals("?") ? 0 : int.Parse(items[4]) };
+                var thisLineNbCouple = new[] { fields[3].Equals("?") ? 0 : int.Parse(fields[3]) - 1, fields[5].Equals("?") ? 0 : int.Parse(fields[5]) };
 
                 if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
                     // same line/error number as previously
@@ -397,7 +421,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 lastLineNbCouple = thisLineNbCouple;
 
                 int column;
-                if (!int.TryParse(items[3], out column)) column = 0;
+                if (!int.TryParse(fields[4], out column)) column = 0;
                 if (column > 0) column--;
 
                 // add error
@@ -406,9 +430,10 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                     Line = lastLineNbCouple[0],
                     Column = column,
                     ErrorNumber = lastLineNbCouple[1],
-                    Message = items[5].Replace("<br>", "\n").Trim(),
-                    Help = items[6].Replace("<br>", "\n").Trim(),
-                    FromProlint = fromProlint
+                    Message = fields[6].Replace("<br>", "\n").Replace(fields[1], filePath).Trim(),
+                    Help = fields[7].Replace("<br>", "\n").Trim(),
+                    FromProlint = fromProlint,
+                    CompiledFilePath = fields[0]
                 });
             }
             return output;
@@ -504,6 +529,8 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// indicates if the error appears several times
         /// </summary>
         public int Times { get; set; }
+        // the path to the file that was compiled to generate this error
+        public string CompiledFilePath { get; set; }
     }
 
     /// <summary>

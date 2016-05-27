@@ -50,7 +50,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public int GoToColumn { get; set; }
 
         /// <summary>
-        /// the document in which the item was found, for example if we found a procedure block in a .i
+        /// path of the document in which the item was found, for example if we found a procedure block in a .i
         /// we want to switch to the owning document before going to the line
         /// </summary>
         public string DocumentOwner { get; set; }

@@ -99,7 +99,7 @@ CASE {&ExecutionType} :
             SAVE INTO VALUE(ENTRY(1, {&propathToUse}, ","))
             NO-ERROR.
         fi_output_last_error().
-        RUN pi_handleCompilErrors NO-ERROR.
+        RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
         fi_output_last_error().
     END.
     WHEN "PROLINT" OR
@@ -111,7 +111,7 @@ CASE {&ExecutionType} :
             RUN VALUE({&ToExecute}) NO-ERROR.
         END.
         fi_output_last_error().
-        RUN pi_handleCompilErrors NO-ERROR.
+        RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
         fi_output_last_error().
     END.
     WHEN "COMPILE" THEN DO.
@@ -165,12 +165,14 @@ QUIT.
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
+        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO. 
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
 
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
             ASSIGN li_i = 1.
             DO WHILE li_i <= COMPILER:NUM-MESSAGES:
-                PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
+                PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+                lc_from,
                 COMPILER:GET-FILE-NAME(li_i),
                 IF COMPILER:GET-MESSAGE-TYPE(li_i) = 1 THEN "Critical" ELSE "Warning",
                 COMPILER:GET-ERROR-ROW(li_i),
@@ -193,6 +195,7 @@ QUIT.
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
+        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO. 
         DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
 
         IF COMPILER:ERROR OR COMPILER:WARNING THEN DO:
@@ -205,7 +208,8 @@ QUIT.
                 END.
             END.
         
-            lc_msg = SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
+            lc_msg = SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+                lc_from,
                 COMPILER:FILE-NAME,
                 IF COMPILER:ERROR THEN "Critical" ELSE "Warning",
                 COMPILER:ERROR-ROW,
@@ -246,7 +250,7 @@ PROCEDURE pi_compileList:
                 DEBUG-LIST VALUE(lc_lst)
                 NO-ERROR.
             fi_output_last_error().
-            RUN pi_handleCompilErrors NO-ERROR.
+            RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
             fi_output_last_error().
             
             /* the following stream / file is used to inform the C# side of the progression of the compilation */
