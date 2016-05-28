@@ -833,7 +833,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            FilesInfo.ClearAllErrors();
+            FilesInfo.ClearAllErrors(Plug.CurrentFilePath);
             Npp.GrabFocus();
         }
 

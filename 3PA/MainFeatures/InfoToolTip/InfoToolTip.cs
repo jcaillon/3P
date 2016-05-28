@@ -245,7 +245,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         <table width='100%' style='margin: 0; padding: 0;'>
                             <tr>
                                 <td rowspan='2' style='width: 25px;'>
-                                    <img src ='" + data.Type + @"'>
+                                    <img src='" + data.Type + @"'>
                                 </td>
                                 <td>
                                     " + data.DisplayText + @"
@@ -514,7 +514,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         private static string FormatRowWithImg(string image, string text) {
-            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='" + image + "' height='15px'>" + text + "</div>";
+            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 
         private static string FormatRowParam(string paramType, string text) {
@@ -523,7 +523,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 image = "InputOutput";
             else if (paramType.ContainsFast("input"))
                 image = "Input";
-            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src ='" + image + "' height='15px'>" + text + "</div>";
+            return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 
         private static string FormatSubtitle(string text) {

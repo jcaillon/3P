@@ -70,8 +70,8 @@ namespace _3PA.Html {
                         <td class='NotificationSubTitle'>" + subtitle + @"</td>
                     </tr>
                 </table>
-                <div style='margin-left: 8px; margin-right: 8px;'>
-                    <br>" + content + @"
+                <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px;'>
+                    " + content + @"
                 </div>
             </div>";
         }

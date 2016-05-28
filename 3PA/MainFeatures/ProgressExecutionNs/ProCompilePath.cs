@@ -111,7 +111,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // try to find the first item that match the input pattern
             if (filteredList.Count > 0) {
-                var canFind = filteredList.FirstOrDefault(item => sourcePath.Contains(item.InputPathPattern));
+                var canFind = filteredList.FirstOrDefault(item => sourcePath.ContainsFast(item.InputPathPattern));
                 if (canFind != null) {
                     if (Path.IsPathRooted(canFind.OutputPathAppend)) {
                         baseComp = canFind.OutputPathAppend;

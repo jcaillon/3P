@@ -235,12 +235,12 @@ namespace _3PA.MainFeatures {
                     currentOperation = CurrentOperation.Run;
 
                 var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
-
+                var otherFilesInError = false;
                 int nbWarnings = 0;
                 int nbErrors = 0;
 
                 // Read log info
-                var errorList = ProCompilation.LoadErrorLog(lastExec);
+                var errorList = ProExecution.LoadErrorLog(lastExec);
 
                 if (!errorList.Any()) {
                     // the compiler messages are empty
@@ -248,22 +248,19 @@ namespace _3PA.MainFeatures {
                     if (fileInfo.Length > 0) {
                         // the .log is not empty, maybe something went wrong in the runner, display errors
                         UserCommunication.Notify(
-                            "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br><br><a href='" +
-                            treatedFile.InputPath + "'>" +
-                            treatedFile.InputPath +
-                            "</a><br><br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
+                            "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
                             Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
                             "Critical error", "Action failed");
                         return;
                     }
                 } else {
-                    // count number of warnings/errors, loop through files
+                    // count number of warnings/errors, loop through files > loop through errors in each file
                     foreach (var keyValue in errorList) {
-                        // loop through errors in said file
                         foreach (var fileError in keyValue.Value) {
                             if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
                             else nbErrors++;
                         }
+                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
                     }
                 }
 
@@ -271,58 +268,29 @@ namespace _3PA.MainFeatures {
                 var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
-                var notifSubtitle = (nbErrors > 0) ? nbErrors + " error(s) found" : ((nbWarnings > 0) ? nbWarnings + " warning(s) found" : "No errors, no warnings!");
-                var notifMessage = new StringBuilder((!errorList.Any()) ? "<b>Initial source file :</b><div><a href='" + treatedFile.InputPath + "#-1'>" + treatedFile.InputPath + "</a></div>" : String.Empty);
+                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problems detected" :
+                    (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
+                        ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" : 
+                            "Syntax correct");
 
-                // has errors
-                var otherFilesInError = false;
-                if (errorList.Any()) {
-                    notifMessage.Append("<b>Find the incriminated files below :</b>");
-                    foreach (var keyValue in errorList) {
-                        notifMessage.Append("<div><b>[x" + keyValue.Value.Count() + "]</b> <a href='" + keyValue.Key + "#" + keyValue.Value.First().Line + "'>" + keyValue.Key + "</a></div>");
-
-                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
-
-                        // feed FilesInfo
-                        FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
-                    }
+                // build the error list
+                var errorsList = new List<FileError>();
+                foreach (var keyValue in errorList) {
+                    errorsList.AddRange(keyValue.Value);
                 }
 
-                // when compiling, if no errors, move .r to compilation dir
-                if (lastExec.ExecutionType == ExecutionType.Compile && nbErrors == 0) {
-
-                    var listOfFilesToMove = ProCompilation.CreateListOfFilesToMove(lastExec);
-                    var isMoveOk = true;
-
-                    foreach (var fileToMove in listOfFilesToMove) {
-                        isMoveOk = isMoveOk && Utils.MoveFile(fileToMove.From, fileToMove.To);
-                    }
-
-                    if (isMoveOk) {
-                        // Is the input file a class file?
-                        if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
-                            if (listOfFilesToMove.Count > 0) {
-                                notifMessage.Append("<br>List of the files generated :");
-                                foreach (var fileToMove in listOfFilesToMove) {
-                                    notifMessage.Append(string.Format("<br>{0}{1}", Path.GetDirectoryName(fileToMove.To).ToHtmlLink(), "\\" + Path.GetFileName(fileToMove.To)));
-                                }
-                            }
-
-                        } else {
-                            notifMessage.Append(string.Format(Config.Instance.CompileWithLst ? "<br>The .r and .lst files have been generated in :<br>{0}" : "<br>The .r file has been generated in :<br>{0}", treatedFile.OutputDir.ToHtmlLink()));
-                        }
+                // when compiling, move .r/.lst to compilation dir
+                var fileToMoveList = new List<FileToMove>();
+                if (lastExec.ExecutionType == ExecutionType.Compile) {
+                    fileToMoveList = ProExecution.CreateListOfFilesToMove(lastExec);
+                    foreach (var fileToMove in fileToMoveList) {
+                        fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
                     }
                 }
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.Notify(notifMessage.ToString(), notifImg, notifTitle, notifSubtitle, args => {
-                        if (args.Link.Contains("#")) {
-                            var splitted = args.Link.Split('#');
-                            Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
-                            args.Handled = true;
-                        }
-                    }, notifTimeOut);
+                    UserCommunication.Notify("Was compiling :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
@@ -343,7 +311,10 @@ namespace _3PA.MainFeatures {
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Prolint)) {
-                UserCommunication.Notify("This file is already being compiled, run or lint-ed,<br>please wait the end of the previous action!", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", 5);
+                UserCommunication.Notify("This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a><b", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
+                    Plug.CurrentFileObject.ProgressExecution.KillProcess();
+                    OnExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+                }, 5);
                 return;
             }
             if (!Abl.IsCurrentProgressFile()) {
@@ -382,8 +353,9 @@ namespace _3PA.MainFeatures {
             FilesInfo.UpdateFileStatus();
 
             // clear current errors (updates the current file info)
-            FilesInfo.ClearAllErrors();
+            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
 
+            /*
             // clear error on include files as well
             var explorerItemsList = ParserHandler.GetParsedExplorerItemsList();
             if (explorerItemsList != null) {
@@ -391,6 +363,7 @@ namespace _3PA.MainFeatures {
                     FilesInfo.ClearAllErrors(ProEnvironment.Current.FindFirstFileInPropath(codeExplorerItem.DisplayText), false);
                 }
             }
+             * */
         }
 
 

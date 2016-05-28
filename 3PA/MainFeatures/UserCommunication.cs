@@ -68,15 +68,13 @@ namespace _3PA.MainFeatures {
         /// <param name="width"></param>
         /// <param name="imageType"></param>
         /// <param name="title"></param>
-        public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler,int duration = 0, int width = 450) {
+        public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
             try {
                 if (_anchorForm != null) {
                     // get npp's screen
                     if (_anchorForm.IsHandleCreated) {
                         _anchorForm.BeginInvoke((Action) delegate {
-                            var toastNotification = new YamuiNotifications(
-                                HtmlHandler.FormatMessage(html, imageType, title, subTitle)
-                                , duration, width, Npp.GetNppScreen());
+                            var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle) , duration, width, Npp.GetNppScreen());
                             if (clickHandler != null)
                                 toastNotification.LinkClicked += (sender, args) => clickHandler(args);
                             else

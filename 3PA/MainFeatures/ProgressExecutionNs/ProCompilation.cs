@@ -26,10 +26,14 @@ using System.Text;
 using System.Threading;
 using _3PA.Html;
 using _3PA.Lib;
+using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
 
+    /// <summary>
+    /// Class used for the mass compiler
+    /// </summary>
     internal class ProCompilation {
 
         #region public fields
@@ -60,12 +64,30 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         public string ExecutionTime { get; private set; }
 
+        /// <summary>
+        /// After the compilation, each file is moved to its destination folder (distant or source folder)
+        /// This list keeps tracks of the moved files and the success of the move command
+        /// </summary>
+        public List<FileToMove> MovedFiles { get; private set; }
+
+        /// <summary>
+        /// After the compilation, stores each compilation errors found here
+        /// </summary>
+        public List<FileError> ErrorsList { get; private set; }
+
+        /// <summary>
+        /// Returns true if the compilation is done (the move of files can still be on going tho)
+        /// </summary>
+        public bool CompilationDone {
+            get { return _processesRunning == 0; }
+        }
+
         #endregion
 
         #region private fields
 
         // list of all the started processes
-        private List<CompilationProcess> _listOfCompilationProcess = new List<CompilationProcess>();
+        private List<CompilationProcess> _listOfCompilationProcesses = new List<CompilationProcess>();
 
         // remember the time when the compilation started
         private DateTime _startingTime;
@@ -75,122 +97,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        #endregion
-
-        #region public static
-
-        /// <summary>
-        /// Allows to read all the compilation/prolint errors of a given execution
-        /// </summary>
-        public static Dictionary<string, List<FileError>> LoadErrorLog(ProExecution lastExec) {
-
-            Dictionary<string, List<FileError>> outputErrorList = new Dictionary<string, List<FileError>>(StringComparer.CurrentCultureIgnoreCase);
-
-            foreach (var treatedFile in lastExec.ListToCompile) {
-                // we correct the file path in the log if needed
-                var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase) {{treatedFile.TempInputPath, treatedFile.InputPath}};
-                Dictionary<string, List<FileError>> errorList;
-                if (lastExec.ExecutionType == ExecutionType.Prolint)
-                    errorList = FilesInfo.ReadErrorsFromFile(lastExec.ProlintOutputPath, true, changePaths);
-                else
-                    errorList = FilesInfo.ReadErrorsFromFile(lastExec.LogPath, false, changePaths);
-
-                foreach (var kpv in errorList.Where(kpv => !outputErrorList.ContainsKey(kpv.Key))) {
-                    outputErrorList.Add(kpv.Key, kpv.Value);
-                }
-            }
-
-            return outputErrorList;
-        }
-
-        /// <summary>
-        /// Creates a list of files to move after a compilation
-        /// </summary>
-        public static List<FileToMove> CreateListOfFilesToMove(ProExecution lastExec) {
-
-            var outputList = new List<FileToMove>();
-            var clsNotFound = new StringBuilder();
-
-            foreach (var treatedFile in lastExec.ListToCompile) {
-
-                // Is the input file a class file?
-                if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
-                    // if the file we compiled inherits from another class or if another class inherits of our file, 
-                    // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
-
-                    List<string> listOfRFiles = null;
-                    try {
-                        listOfRFiles = Directory.EnumerateFiles(treatedFile.TempOutputDir, "*.r", SearchOption.AllDirectories).ToList();
-                    } catch (Exception x) {
-                        ErrorHandler.Log(x.ToString());
-                    }
-                    if (listOfRFiles != null) {
-
-                        // for each *.r file
-                        foreach (var file in listOfRFiles) {
-
-                            var relativePath = file.Replace(treatedFile.TempOutputDir, "").TrimStart('\\');
-                            var sourcePath = ProEnvironment.Current.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
-
-                            if (string.IsNullOrEmpty(sourcePath)) {
-                                clsNotFound.Append("<div>" + relativePath + "</div>");
-                            } else {
-                                var outputDir = ProCompilePath.GetCompilationDirectory(Path.ChangeExtension(sourcePath, ".r").Replace(relativePath, ""));
-
-                                //UserCommunication.Notify("Relative path = " + relativePath + "<br>Source path = " + sourcePath + "<br>Source dir = " + outputDir);
-
-                                string outputRPath;
-                                if (!Config.Instance.GlobalCompileFilesLocally && !string.IsNullOrEmpty(outputDir)) {
-                                    // move the *.r file in the compilation directory (create the needed subdirectories...)
-                                    outputRPath = Path.Combine(outputDir, relativePath);
-                                    Utils.CreateDirectory(Path.GetDirectoryName(outputRPath));
-                                } else {
-                                    // move the *.r file next to his source
-                                    outputRPath = Path.ChangeExtension(sourcePath, ".r");
-                                }
-
-                                // add .r and .lst (if needed) to the list of files to move
-                                outputList.Add(new FileToMove {
-                                    Origin = treatedFile.InputPath,
-                                    From = file,
-                                    To = outputRPath
-                                });
-                                if (Config.Instance.CompileWithLst && Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath))) {
-                                    outputList.Add(new FileToMove {
-                                        Origin = treatedFile.InputPath,
-                                        From = treatedFile.TempOutputLst,
-                                        To = Path.ChangeExtension(outputRPath, ".lst")
-                                    });
-                                }
-
-                            }
-                        }
-                    }
-
-                } else {
-                    // add .r and .lst (if needed) to the list of files to move
-                    outputList.Add(new FileToMove {
-                        Origin = treatedFile.InputPath,
-                        From = treatedFile.TempOutputR,
-                        To = treatedFile.OutputR
-                    });
-                    if (Config.Instance.CompileWithLst) {
-                        outputList.Add(new FileToMove {
-                            Origin = treatedFile.InputPath,
-                            From = treatedFile.TempOutputLst,
-                            To = treatedFile.OutputLst
-                        });
-                    }
-                }
-            }
-
-            if (clsNotFound.Length > 0)
-                UserCommunication.Notify("Couldn't locate the source file (.cls) for :" + clsNotFound + "in the propath", MessageImg.MsgError, "Post compilation error", "File not found");
-
-            return outputList;
-        }
+        private long _nbFilesMoved;
 
         #endregion
+
 
         #region public methods
 
@@ -229,15 +139,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
             NumberOfProcesses = MonoProcess ? 1 : Config.Instance.NbOfProcessesByCore * Environment.ProcessorCount;
-            _listOfCompilationProcess.Clear();
+            _listOfCompilationProcesses.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
                 // create a new process when needed
-                if (currentProcess >= _listOfCompilationProcess.Count)
-                    _listOfCompilationProcess.Add(new CompilationProcess());
+                if (currentProcess >= _listOfCompilationProcesses.Count)
+                    _listOfCompilationProcesses.Add(new CompilationProcess());
 
                 // assign the file to the current process
-                _listOfCompilationProcess[currentProcess].FilesToCompile.Add(new FileToCompile { InputPath = file.Path });
+                _listOfCompilationProcesses[currentProcess].FilesToCompile.Add(new FileToCompile { InputPath = file.Path });
 
                 // we will assign the next file to the next process...
                 currentProcess++;
@@ -245,14 +155,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     currentProcess = 0;
             }
 
+            // init
             NbFilesToCompile = filesToCompile.Count;
             _startingTime = DateTime.Now;
-            _processesRunning = _listOfCompilationProcess.Count;
-            NumberOfProcesses = _listOfCompilationProcess.Count;
+            _processesRunning = _listOfCompilationProcesses.Count;
+            NumberOfProcesses = _listOfCompilationProcesses.Count;
             NumberOfProcessesEndedOk = 0;
+            MovedFiles = new List<FileToMove>();
+            ErrorsList = new List<FileError>();
 
             // lets start the compilation on each process
-            foreach (var compilationProcess in _listOfCompilationProcess) {
+            foreach (var compilationProcess in _listOfCompilationProcesses) {
 
                 // launch the compile process
                 compilationProcess.ProExecutionObject = new ProExecution {
@@ -272,8 +185,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Use this method to get the overall progression of the compilation (from 0 to 100)
         /// </summary>
         public float GetOverallProgression() {
+
+            // if the compilation is over, we need to dipslay the progression of the files being moved...
+            if (CompilationDone)
+                return (float)_nbFilesMoved / MovedFiles.Count * 100;
+
+            // else we find the total of files that have already been compiled by ready the size of compilation.progress files...
             long nbFilesDone = 0;
-            foreach (var compilationProcess in _listOfCompilationProcess) {
+            foreach (var compilationProcess in _listOfCompilationProcesses) {
                 if (File.Exists(compilationProcess.ProExecutionObject.ProgressionFilePath))
                     nbFilesDone += (new FileInfo(compilationProcess.ProExecutionObject.ProgressionFilePath)).Length;
             }
@@ -299,10 +218,37 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public void KillProcesses() {
             HasBeenKilled = true;
-            foreach (var compilationProcess in _listOfCompilationProcess) {
+            foreach (var compilationProcess in _listOfCompilationProcesses) {
                 compilationProcess.ProExecutionObject.KillProcess();
             }
         }
+
+        /// <summary>
+        /// returns the list of the processes that have been started
+        /// </summary>
+        public List<FileToCompile> GetListOfFileToCompile {
+            get { return _listOfCompilationProcesses.SelectMany(compProcess => compProcess.ProExecutionObject.ListToCompile).ToList(); }
+        }
+
+        /// <summary>
+        /// Allows to know how many files of each file type there is
+        /// </summary>
+        public Dictionary<FileType, int> GetNbFilesPerType() {
+
+            Dictionary<FileType, int> output = new Dictionary<FileType, int>();
+
+            foreach (var fileToCompile in GetListOfFileToCompile) {
+                FileType fileType;
+                if (!Enum.TryParse((Path.GetExtension(fileToCompile.InputPath) ?? "").Replace(".", ""), true, out fileType))
+                    fileType = FileType.Unknow;
+                if (output.ContainsKey(fileType))
+                    output[fileType]++;
+                else
+                    output.Add(fileType, 1);
+            }
+
+            return output;
+        } 
 
         #endregion
 
@@ -311,32 +257,30 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// This method is executed when the overall compilation is over and allows to do more treatments
         /// </summary>
-        private void TestEndOfCompilation() {
+        private void EndOfCompilation() {
+
             // only do stuff we have reached the last running process
             if (_processesRunning > 0)
                 return;
 
-            ExecutionTime = GetElapsedTime();
-
             // we need to move all the files...
-            var fileNotMoved = new StringBuilder();
-            foreach (var compilationProcess in _listOfCompilationProcess) {
-                var listOfFilesToMove = CreateListOfFilesToMove(compilationProcess.ProExecutionObject);
-                foreach (var fileToMove in listOfFilesToMove) {
-                    try {
-                        if (File.Exists(fileToMove.From)) {
-                            File.Delete(fileToMove.To);
-                            File.Move(fileToMove.From, fileToMove.To);
-                            fileToMove.IsOk = true;
-                        } 
-                    } catch (Exception) {
-                        fileNotMoved.Append("<div>" + fileToMove.To.ToHtmlLink() + "</div>");
-                    }
+            foreach (var compilationProcess in _listOfCompilationProcesses) {
+                MovedFiles.AddRange(ProExecution.CreateListOfFilesToMove(compilationProcess.ProExecutionObject));
+            }
+            foreach (var fileToMove in MovedFiles) {
+                _nbFilesMoved++;
+                fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+            }
+
+            // Read all the log files stores the errors
+            foreach (var compilationProcess in _listOfCompilationProcesses) {
+                var errorList = ProExecution.LoadErrorLog(compilationProcess.ProExecutionObject);
+                foreach (var keyValue in errorList) {
+                    ErrorsList.AddRange(keyValue.Value);
                 }
             }
-            if (fileNotMoved.Length > 0) {
-                UserCommunication.Notify("There was a problem when i tried to write the following file:" + fileNotMoved + "<br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
-            }
+
+            ExecutionTime = GetElapsedTime();
 
             if (OnCompilationEnd != null)
                 OnCompilationEnd();
@@ -362,7 +306,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (_lock.TryEnterWriteLock(500)) {
                 try {
                     NumberOfProcessesEndedOk++;
-                    TestEndOfCompilation();
+                    EndOfCompilation();
                 } finally {
                     _lock.ExitWriteLock();
                 }
@@ -375,7 +319,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         private void OnExecutionFailed(ProExecution obj) {
             if (_lock.TryEnterWriteLock(500)) {
                 try {
-                    TestEndOfCompilation();
+                    EndOfCompilation();
                 } finally {
                     _lock.ExitWriteLock();
                 }
@@ -396,18 +340,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public ProExecution ProExecutionObject;
         }
 
-        internal class FileToMove {
-            /// <summary>
-            /// The file that was originally compiled to trigger this move
-            /// </summary>
-            public string Origin { get; set; }
-            public string From { get; set; }
-            public string To { get; set; }
-            /// <summary>
-            /// true if the move went fine
-            /// </summary>
-            public bool IsOk { get; set; }
-        }
 
         #endregion
 

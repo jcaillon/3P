@@ -167,16 +167,18 @@ namespace _3PA.Lib {
         /// Move a file, ensures the user gets a feedback is something goes wrong
         /// return true if ok, false otherwise
         /// </summary>
-        public static bool MoveFile(string sourceFile, string targetFile) {
+        public static bool MoveFile(string sourceFile, string targetFile, bool silent = false) {
             try {
                 if (!File.Exists(sourceFile)) {
-                    UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
+                    if (!silent)
+                        UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
                     return false;
                 }
                 File.Delete(targetFile);
                 File.Move(sourceFile, targetFile);
             } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                if (!silent)
+                    UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
                 return false;
             }
             return true;
@@ -427,7 +429,8 @@ namespace _3PA.Lib {
                 if (!File.Exists(link)) {
                     if (!Directory.Exists(link))
                         return false;
-                    OpenFolder(link);
+                    if (OpenFolder(link))
+                        return true;
                 }
 
             
@@ -450,7 +453,13 @@ namespace _3PA.Lib {
         /// <param name="sender"></param>
         /// <param name="htmlLinkClickedEventArgs"></param>
         public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
+            if (htmlLinkClickedEventArgs.Link.Contains("|")) {
+                var splitted = htmlLinkClickedEventArgs.Link.Split('|');
+                Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                htmlLinkClickedEventArgs.Handled = true;
+            } else {
+                htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
+            }
         }
 
         public static void SerializeToXml<T>(T obj, string fileName) {

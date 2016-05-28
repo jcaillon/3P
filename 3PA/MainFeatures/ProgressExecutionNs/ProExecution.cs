@@ -432,6 +432,163 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
+        #region public static
+
+        /// <summary>
+        /// Read the compilation/prolint errors of a given execution through its .log file
+        /// update the FilesInfo accordingly so the user can see the errors in npp
+        /// </summary>
+        public static Dictionary<string, List<FileError>> LoadErrorLog(ProExecution lastExec) {
+
+            // we need to correct the files path in the log if needed
+            var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+            foreach (var treatedFile in lastExec.ListToCompile.Where(treatedFile => !treatedFile.TempInputPath.Equals(treatedFile.InputPath))) {
+                changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
+            }
+
+            // read the log file
+            Dictionary<string, List<FileError>> errorsList;
+            if (lastExec.ExecutionType == ExecutionType.Prolint)
+                errorsList = FilesInfo.ReadErrorsFromFile(lastExec.ProlintOutputPath, true, changePaths);
+            else
+                errorsList = FilesInfo.ReadErrorsFromFile(lastExec.LogPath, false, changePaths);
+
+            // clear errors on each compiled file
+            foreach (var fileToCompile in lastExec.ListToCompile) {
+                FilesInfo.ClearAllErrors(fileToCompile.InputPath, true);
+            }
+
+            // update the errors
+            foreach (var keyValue in errorsList) {
+                FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
+            }
+
+            return errorsList;
+        }
+
+        /// <summary>
+        /// Creates a list of files to move after a compilation,
+        /// for each Origin file will correspond one (or more if it's a .cls) .r file,
+        /// and one .lst if the option has been checked
+        /// </summary>
+        public static List<FileToMove> CreateListOfFilesToMove(ProExecution lastExec) {
+
+            var outputList = new List<FileToMove>();
+            var clsNotFound = new StringBuilder();
+
+            foreach (var treatedFile in lastExec.ListToCompile) {
+
+                // Is the input file a class file?
+                if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
+
+                    // if the file we compiled inherits from another class or if another class inherits of our file, 
+                    // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
+
+                    List<string> listOfRFiles = null;
+                    try {
+                        listOfRFiles = Directory.EnumerateFiles(treatedFile.TempOutputDir, "*.r", SearchOption.AllDirectories).ToList();
+                    } catch (Exception x) {
+                        ErrorHandler.Log(x.ToString());
+                    }
+                    if (listOfRFiles != null) {
+
+                        // for each *.r file
+                        foreach (var file in listOfRFiles) {
+
+                            var relativePath = file.Replace(treatedFile.TempOutputDir, "").TrimStart('\\');
+                            var sourcePath = ProEnvironment.Current.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
+
+                            if (string.IsNullOrEmpty(sourcePath)) {
+                                clsNotFound.Append("<div>" + relativePath + "</div>");
+                            } else {
+                                var outputDir = ProCompilePath.GetCompilationDirectory(Path.ChangeExtension(sourcePath, ".r").Replace(relativePath, ""));
+
+                                //UserCommunication.Notify("Relative path = " + relativePath + "<br>Source path = " + sourcePath + "<br>Source dir = " + outputDir);
+
+                                string outputRPath;
+                                if (!Config.Instance.GlobalCompileFilesLocally && !string.IsNullOrEmpty(outputDir)) {
+                                    // move the *.r file in the compilation directory (create the needed subdirectories...)
+                                    outputRPath = Path.Combine(outputDir, relativePath);
+                                    Utils.CreateDirectory(Path.GetDirectoryName(outputRPath));
+                                } else {
+                                    // move the *.r file next to his source
+                                    outputRPath = Path.ChangeExtension(sourcePath, ".r");
+                                }
+
+                                // add .r and .lst (if needed) to the list of files to move
+                                outputList.Add(new FileToMove {
+                                    Origin = treatedFile.InputPath,
+                                    From = file,
+                                    To = outputRPath
+                                });
+                                if (Config.Instance.CompileWithLst && Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath))) {
+                                    outputList.Add(new FileToMove {
+                                        Origin = treatedFile.InputPath,
+                                        From = treatedFile.TempOutputLst,
+                                        To = Path.ChangeExtension(outputRPath, ".lst")
+                                    });
+                                }
+
+                            }
+                        }
+                    }
+
+                } else {
+                    // add .r and .lst (if needed) to the list of files to move
+                    outputList.Add(new FileToMove {
+                        Origin = treatedFile.InputPath,
+                        From = treatedFile.TempOutputR,
+                        To = treatedFile.OutputR
+                    });
+                    if (Config.Instance.CompileWithLst) {
+                        outputList.Add(new FileToMove {
+                            Origin = treatedFile.InputPath,
+                            From = treatedFile.TempOutputLst,
+                            To = treatedFile.OutputLst
+                        });
+                    }
+                }
+            }
+
+            if (clsNotFound.Length > 0)
+                UserCommunication.Notify("Couldn't locate the source file (.cls) for :" + clsNotFound + "in the propath", MessageImg.MsgError, "Post compilation error", "File not found");
+
+            return outputList;
+        }
+
+        /// <summary>
+        /// Allows to format a small text to explain the errors found in a file and the generated files...
+        /// </summary>
+        /// <param name="fileToCompile"></param>
+        /// <param name="errorsOfTheFile"></param>
+        /// <param name="movedFilesOfTheFile"></param>
+        /// <returns></returns>
+        public static string FormatCompilationResult(FileToCompile fileToCompile, List<FileError> errorsOfTheFile, List<FileToMove> movedFilesOfTheFile) {
+
+            var line = new StringBuilder();
+            var nbErrors = 0;
+
+            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileToCompile.InputPath, Path.GetFileName(fileToCompile.InputPath)) + "</b> in " + Path.GetDirectoryName(fileToCompile.InputPath).ToHtmlLink() + "</div>");
+
+            foreach (var fileError in errorsOfTheFile) {
+                nbErrors += fileError.Level > ErrorLevel.StrongWarning ? 1 : 0;
+                line.Append("<div style='padding-left: 10px'>" + "<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>" + (!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? "in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileError.SourcePath, Path.GetFileName(fileError.SourcePath)) + ", " : "") + (fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message + "</div>");
+            }
+
+            foreach (var movedFile in movedFilesOfTheFile) {
+                var ext = Path.GetExtension(movedFile.To).Replace(".", "");
+                if (movedFile.IsOk) {
+                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + (ext.EqualsCi("lst") ? movedFile.To.ToHtmlLink() : Path.GetDirectoryName(movedFile.To).ToHtmlLink(movedFile.To)) + "</div>");
+                } else if (nbErrors == 0) {
+                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Error writing " + Path.GetDirectoryName(movedFile.To).ToHtmlLink(movedFile.To) + "</div>");
+                }
+
+            }
+
+            return line.ToString();
+        }
+
+        #endregion
 
     }
 
@@ -459,4 +616,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public string TempOutputR { get; set; }
         public string TempOutputLst { get; set; }
     }
+
+    internal class FileToMove {
+        /// <summary>
+        /// The path of input file that was originally compiled to trigger this move
+        /// </summary>
+        public string Origin { get; set; }
+        public string From { get; set; }
+        public string To { get; set; }
+        /// <summary>
+        /// true if the move went fine
+        /// </summary>
+        public bool IsOk { get; set; }
+    }
+
 }

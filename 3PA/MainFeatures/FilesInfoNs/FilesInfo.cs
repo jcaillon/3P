@@ -74,9 +74,12 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <param name="fullPath"></param>
         /// <param name="errorsList"></param>
         public static void UpdateFileErrors(string fullPath, List<FileError> errorsList) {
+
             AddIfNew(fullPath);
+
             if (_sessionInfo[fullPath].FileErrors != null)
                 _sessionInfo[fullPath].FileErrors.Clear();
+
             _sessionInfo[fullPath].FileErrors = errorsList.ToList();
             _sessionInfo[fullPath].FileErrors.Sort(new FileErrorSortingClass());
 
@@ -226,33 +229,45 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         }
 
         /// <summary>
-        /// Clear all the errors for the current document and then update the view,
+        /// Clear all the errors for the given document and then update the view (immediatly if current doc, delay on doc change otherwise),
         /// returns true if it actually cleared something, false it there was no errors
+        /// 
+        /// if clearForCompil = true, then it also the clear the errors the include files that were in errors
+        /// because of the compilation of the given file...
         /// </summary>
-        public static bool ClearAllErrors(bool updateVisual = true) {
-            return ClearAllErrors(Plug.CurrentFilePath, updateVisual);
-        }
+        public static bool ClearAllErrors(string filePath, bool clearForCompil = false) {
 
-        /// <summary>
-        /// Clear all the errors for the given document and then update the view,
-        /// returns true if it actually cleared something, false it there was no errors
-        /// </summary>
-        public static bool ClearAllErrors(string filePath, bool updateVisual = true) {
             if (string.IsNullOrEmpty(filePath))
                 return false;
+
+            bool jobDone = false;
+
             if (_sessionInfo.ContainsKey(filePath) && _sessionInfo[filePath].FileErrors != null) {
                 _sessionInfo[filePath].FileErrors.Clear();
+                jobDone = true;
 
-                if (updateVisual) {
+                if (filePath.Equals(Plug.CurrentFilePath)) {
                     ClearAnnotationsAndMarkers();
                     UpdateFileStatus();
-                } else {
+                } else
                     _sessionInfo[filePath].NeedToCleanScintilla = true;
-                }
-
-                return true;
             }
-            return false;
+
+            if (clearForCompil) { 
+            // for each file info that has an error generated when compiling the "filePath"
+            foreach (var kpv in _sessionInfo.Where(pair => pair.Value.FileErrors != null && pair.Value.FileErrors.Exists(error => error.CompiledFilePath.EqualsCi(filePath)))) {
+                kpv.Value.FileErrors.Clear();
+                jobDone = true;
+
+                if (kpv.Key.Equals(Plug.CurrentFilePath)) {
+                    ClearAnnotationsAndMarkers();
+                    UpdateFileStatus();
+                } else
+                    kpv.Value.NeedToCleanScintilla = true;
+            }
+}
+
+            return jobDone;
         }
 
         /// <summary>
@@ -266,18 +281,22 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         public static bool ClearLineErrors(int line) {
             if (!_sessionInfo.ContainsKey(Plug.CurrentFilePath))
                 return false;
+
             bool jobDone = false;
             if (_sessionInfo[Plug.CurrentFilePath].FileErrors.Exists(error => error.Line == line)) {
                 _sessionInfo[Plug.CurrentFilePath].FileErrors.RemoveAll(error => error.Line == line);
                 jobDone = true;
             }
+
             // visually clear line
             ClearLine(line);
             if (jobDone) {
                 UpdateErrorsInScintilla();
             } else {
-                // we didn't manage to clear the error, (only visually, not in our records), so clear everything 
-                ClearAllErrors(false);
+                // we didn't manage to clear the error, (only visually, not in our records), 
+                // so clear everything, the user will have to compile again
+                _sessionInfo[Plug.CurrentFilePath].FileErrors.Clear();
+                _sessionInfo[Plug.CurrentFilePath].NeedToCleanScintilla = true;
             }
             return jobDone;
         }
@@ -288,6 +307,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
         /// <param name="line"></param>
         public static void ClearLine(int line) {
             var lineObj = Npp.GetLine(line);
+
             lineObj.AnnotationText = null;
             foreach (var errorLevelMarker in Enum.GetValues(typeof(ErrorLevel)))
                 if (((int)lineObj.MarkerGet()).IsBitSet((int)errorLevelMarker))
@@ -393,7 +413,6 @@ namespace _3PA.MainFeatures.FilesInfoNs {
 
                 // new file
                 var filePath = (permutePaths.ContainsKey(fields[1]) ? permutePaths[fields[1]] : fields[1]);
-
                 if (!output.ContainsKey(filePath)) {
                     output.Add(filePath, new List<FileError>());
                     lastLineNbCouple = new[] { -10, -10 };
@@ -424,16 +443,19 @@ namespace _3PA.MainFeatures.FilesInfoNs {
                 if (!int.TryParse(fields[4], out column)) column = 0;
                 if (column > 0) column--;
 
+                var baseFileName = Path.GetFileName(filePath);
+
                 // add error
                 output[filePath].Add(new FileError {
+                    SourcePath = filePath,
                     Level = errorLevel,
                     Line = lastLineNbCouple[0],
                     Column = column,
                     ErrorNumber = lastLineNbCouple[1],
-                    Message = fields[6].Replace("<br>", "\n").Replace(fields[1], filePath).Trim(),
+                    Message = fields[6].Replace("<br>", "\n").Replace(fields[1], baseFileName).Replace(filePath, baseFileName).Trim(),
                     Help = fields[7].Replace("<br>", "\n").Trim(),
                     FromProlint = fromProlint,
-                    CompiledFilePath = fields[0]
+                    CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])
                 });
             }
             return output;
@@ -518,6 +540,7 @@ namespace _3PA.MainFeatures.FilesInfoNs {
     /// Errors found for this file, either from compilation or from prolint
     /// </summary>
     internal class FileError {
+        public string SourcePath { get; set; }
         public ErrorLevel Level { get; set; }
         public int Line { get; set; }
         public int Column { get; set; }
