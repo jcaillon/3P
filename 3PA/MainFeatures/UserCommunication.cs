@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
@@ -37,6 +38,11 @@ namespace _3PA.MainFeatures {
     internal static class UserCommunication {
 
         private static EmptyForm _anchorForm;
+
+        /// <summary>
+        /// Allows to keep track of opened notifications (when its ID is set)
+        /// </summary>
+        private static Dictionary<string, YamuiNotifications> _registeredNotif = new Dictionary<string, YamuiNotifications>(StringComparer.CurrentCultureIgnoreCase); 
 
         /// <summary>
         /// init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
@@ -59,8 +65,26 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
+        /// Closes the notification represented by the given id
+        /// </summary>
+        /// <param name="id"></param>
+        public static void CloseUniqueNotif(string id) {
+            if (_registeredNotif.ContainsKey(id)) {
+                try {
+                    if (_registeredNotif[id] != null) {
+                        _registeredNotif[id].Close();
+                    }
+                } catch (Exception) {
+                    // ignored
+                }
+                _registeredNotif.Remove(id);
+            }
+        }
+
+        /// <summary>
         /// Displays a notification on the bottom right of the screen
         /// </summary>
+        /// <param name="id"></param>
         /// <param name="html"></param>
         /// <param name="clickHandler"></param>
         /// <param name="subTitle"></param>
@@ -68,32 +92,48 @@ namespace _3PA.MainFeatures {
         /// <param name="width"></param>
         /// <param name="imageType"></param>
         /// <param name="title"></param>
-        public static void Notify(string html, MessageImg imageType, string title, string subTitle,  Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
-            try {
-                if (_anchorForm != null) {
-                    // get npp's screen
-                    if (_anchorForm.IsHandleCreated) {
-                        _anchorForm.BeginInvoke((Action) delegate {
-                            var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle) , duration, width, Npp.GetNppScreen());
-                            if (clickHandler != null)
-                                toastNotification.LinkClicked += (sender, args) => clickHandler(args);
-                            else
-                                toastNotification.LinkClicked += Utils.OpenPathClickHandler;
-                            toastNotification.Show();
-                        });
-                        return;
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.Log(e.Message);
-            }
+        public static void NotifyUnique(string id, string html, MessageImg imageType, string title, string subTitle, Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
+            Task.Factory.StartNew(() => {
 
-            // if we are here, display the error message the old way
-            MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                try {
+                    if (_anchorForm != null) {
+                        // get npp's screen
+                        if (_anchorForm.IsHandleCreated) {
+                            _anchorForm.BeginInvoke((Action) delegate {
+                                var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
+
+                                if (id != null) {
+                                    // close existing notification with the same id
+                                    CloseUniqueNotif(id);
+                                    // Remember this notification
+                                    _registeredNotif.Add(id, toastNotification);
+                                }
+
+                                if (clickHandler != null)
+                                    toastNotification.LinkClicked += (sender, args) => clickHandler(args);
+                                else
+                                    toastNotification.LinkClicked += Utils.OpenPathClickHandler;
+
+                                toastNotification.Show();
+                            });
+                            return;
+                        }
+                    }
+                } catch (Exception e) {
+                    ErrorHandler.Log(e.Message);
+                }
+
+                // if we are here, display the error message the old way
+                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            });
+        }
+
+        public static void Notify(string html, MessageImg imageType, string title, string subTitle, Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
+            NotifyUnique(null, html, imageType, title, subTitle, clickHandler, duration, width);
         }
 
         public static void Notify(string html, MessageImg imageType, string title, string subTitle, int duration = 0, int width = 450) {
-            Notify(html, imageType, title, subTitle, null, duration, width);
+            NotifyUnique(null, html, imageType, title, subTitle, null, duration, width);
         }
 
         public static void Notify(string html, int duration = 10, int width = 450) {

@@ -219,7 +219,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
       <DependentUpon>EmptyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FilesInfo.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\FilesInfo.cs" />
     <Compile Include="MainFeatures\ProgressExecutionNs\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
@@ -245,7 +245,7 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\FilesInfoNs\FileTag.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\FileTag.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
     <Compile Include="MainFeatures\ProCodeUtils.cs" />

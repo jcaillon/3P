@@ -32,7 +32,6 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -615,8 +614,9 @@ namespace _3PA {
                         warningMessage.Insert(0, "<h2>Friendly warning :</h2>It seems that your file can be opened in the appbuilder as a structured procedure, but i detected that one or several procedure/function blocks contains more than " + Config.Instance.GlobalMaxNbCharInBlock + " characters. A direct consequence is that you won't be able to open this file in the appbuilder, it will generate errors and it will be unreadable. Below is a list of incriminated blocks :<br><br>");
                         warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                         var curPath = CurrentFilePath;
-                        UserCommunication.Notify(warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
+                        UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
                             Npp.Goto(curPath, int.Parse(args.Link));
+                            UserCommunication.CloseUniqueNotif("AppBuilderLimit");
                         }, 20);
                         CurrentFileObject.WarnedTooLong = true;
                     }

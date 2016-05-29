@@ -32,6 +32,7 @@
     &SCOPED-DEFINE ToCompileListFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.d"
     &SCOPED-DEFINE CreateFileIfConnectFails "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fail.log"
     &SCOPED-DEFINE CompileProgressionFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\compile.progression"
+    &SCOPED-DEFINE DbConnectionMandatory FALSE
 &ENDIF
 
 
@@ -93,33 +94,34 @@ IF {&ExtraPf} > "" THEN DO:
         ASSIGN gl_dbKo = TRUE.
 END.
 
-CASE {&ExecutionType} :
-    WHEN "CHECKSYNTAX" THEN DO:
-        COMPILE VALUE({&ToExecute})
-            SAVE INTO VALUE(ENTRY(1, {&propathToUse}, ","))
-            NO-ERROR.
-        fi_output_last_error().
-        RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
-        fi_output_last_error().
-    END.
-    WHEN "PROLINT" OR
-    WHEN "RUN" THEN DO:
-        DO  ON STOP   UNDO, LEAVE
-            ON ERROR  UNDO, LEAVE
-            ON ENDKEY UNDO, LEAVE
-            ON QUIT   UNDO, LEAVE:
-            RUN VALUE({&ToExecute}) NO-ERROR.
+IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
+
+    CASE {&ExecutionType} :
+        WHEN "CHECKSYNTAX" THEN DO:
+            COMPILE VALUE({&ToExecute})
+                SAVE INTO VALUE(ENTRY(1, {&propathToUse}, ","))
+                NO-ERROR.
+            fi_output_last_error().
+            RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
+            fi_output_last_error().
         END.
-        fi_output_last_error().
-        RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
-        fi_output_last_error().
-    END.
-    WHEN "COMPILE" THEN DO.
-        RUN pi_compileList NO-ERROR.
-        fi_output_last_error().
-    END.
-    WHEN "DATABASE" THEN DO:
-        IF NOT gl_dbKo THEN DO:
+        WHEN "PROLINT" OR
+        WHEN "RUN" THEN DO:
+            DO  ON STOP   UNDO, LEAVE
+                ON ERROR  UNDO, LEAVE
+                ON ENDKEY UNDO, LEAVE
+                ON QUIT   UNDO, LEAVE:
+                RUN VALUE({&ToExecute}) NO-ERROR.
+            END.
+            fi_output_last_error().
+            RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
+            fi_output_last_error().
+        END.
+        WHEN "COMPILE" THEN DO.
+            RUN pi_compileList NO-ERROR.
+            fi_output_last_error().
+        END.
+        WHEN "DATABASE" THEN DO:
             IF NUM-DBS < 1 THEN DO:
                 PUT STREAM str_dbout UNFORMATTED "0 database(s) connected! There is nothing to be done." SKIP.
                 ASSIGN gl_dbKo = TRUE.
@@ -131,19 +133,20 @@ CASE {&ExecutionType} :
                 DELETE ALIAS "DICTDB".
             END.
         END.
-    END.
-    WHEN "DICTIONARY" THEN DO:
-        RUN _dict.p.
-    END.
-    WHEN "APPBUILDER" THEN DO:
-        RUN adeuib/_uibmain.p (INPUT {&ToExecute}) NO-ERROR.
-        IF fi_output_last_error() THEN DO:
-            RUN _ab.p NO-ERROR.
-            IF fi_output_last_error() THEN
-                PUT STREAM str_logout UNFORMATTED SKIP "_ab" SKIP.
+        WHEN "DICTIONARY" THEN DO:
+            RUN _dict.p.
         END.
-    END.
-END CASE.
+        WHEN "APPBUILDER" THEN DO:
+            RUN adeuib/_uibmain.p (INPUT {&ToExecute}) NO-ERROR.
+            IF fi_output_last_error() THEN DO:
+                RUN _ab.p NO-ERROR.
+                IF fi_output_last_error() THEN
+                    PUT STREAM str_logout UNFORMATTED SKIP "_ab" SKIP.
+            END.
+        END.
+    END CASE.
+
+END.
 
 OUTPUT STREAM str_logout CLOSE.
 OUTPUT STREAM str_dbout CLOSE.
@@ -368,7 +371,7 @@ FUNCTION fi_output_last_error_db RETURNS LOGICAL ( ) :
             IF ll_dbDown THEN
                 PUT STREAM str_dbout UNFORMATTED "Failed to connect to the database, check your connection parameters!" SKIP "More details below : " SKIP SKIP.
             DO li_ = 1 TO ERROR-STATUS:NUM-MESSAGES:
-                PUT STREAM str_dbout UNFORMATTED "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
+                PUT STREAM str_dbout UNFORMATTED "(" + STRING(ERROR-STATUS:GET-NUMBER(li_)) + "): " + ERROR-STATUS:GET-MESSAGE(li_) SKIP.
             END.
         END.
         RETURN TRUE.

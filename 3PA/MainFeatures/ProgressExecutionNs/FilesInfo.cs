@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -25,10 +26,9 @@ using System.Text;
 using System.Threading;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
-namespace _3PA.MainFeatures.FilesInfoNs {
+namespace _3PA.MainFeatures.ProgressExecutionNs {
 
     /// <summary>
     /// Keeps info on the files currently opened in notepad++

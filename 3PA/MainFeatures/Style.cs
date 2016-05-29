@@ -29,7 +29,7 @@ using _3PA.Data;
 using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.FilesInfoNs;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
 

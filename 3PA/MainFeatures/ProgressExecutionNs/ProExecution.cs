@@ -28,7 +28,6 @@ using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.FilesInfoNs;
 
 // ReSharper disable LocalizableElement
 
@@ -106,9 +105,24 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public bool NeedDatabaseConnection { get; set; }
 
         /// <summary>
+        /// log to the database connection log
+        /// </summary>
+        public string DatabaseConnectionLog { get; private set; }
+
+        /// <summary>
         /// set to true if a the execution process has been killed
         /// </summary>
         public bool HasBeenKilled { get; set; }
+
+        /// <summary>
+        /// Set to true after the process is over if the execution failed
+        /// </summary>
+        public bool ExecutionFailed { get; private set; }
+
+        /// <summary>
+        /// Set to true after the process is over if the database connection has failed
+        /// </summary>
+        public bool ConnectionFailed { get; private set; }
 
         #endregion
 
@@ -121,7 +135,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             try {
                 if (Process != null)
                     Process.Close();
+                
                 Utils.DeleteDirectory(TempDir, true);
+
+                // restore splashscreen
+                if (!string.IsNullOrEmpty(ProgressWin32))
+                    MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp"));
             } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
@@ -144,8 +163,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // check prowin32.exe
             if (!File.Exists(ProEnvironment.Current.ProwinPath)) {
-                UserCommunication.Notify("The file path to prowin32.exe is incorrect : <br><br>" + ProEnvironment.Current.ProwinPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
-                    Appli.Appli.GoToPage(PageNames.SetEnvironment); args.Handled = true;
+                UserCommunication.NotifyUnique("NoProwin32", "The file path to prowin32.exe is incorrect : <br><br>" + ProEnvironment.Current.ProwinPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
+                    Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                    UserCommunication.CloseUniqueNotif("NoProwin32");
+                    args.Handled = true;
                 }, 10);
                 return false;
             }
@@ -277,6 +298,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (executionType == ExecutionType.Database)
                 ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
             ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
+            DatabaseConnectionLog = Path.Combine(TempDir, "db.ko");
 
             // prepare the .p runner
             var runnerPath = Path.Combine(TempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
@@ -289,22 +311,23 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + Path.Combine(TempDir, "db.ko").ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE DbConnectionMandatory " + NeedDatabaseConnection);
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
             File.WriteAllText(runnerPath, programContent.ToString(), Encoding.Default);
 
 
-            var batchMode = !(executionType == ExecutionType.Run || executionType == ExecutionType.Prolint || executionType == ExecutionType.Appbuilder || executionType == ExecutionType.Dictionary);
+            var batchMode = Config.Instance.UseProwinInBatchMode && !(executionType == ExecutionType.Run || executionType == ExecutionType.Prolint || executionType == ExecutionType.Appbuilder || executionType == ExecutionType.Dictionary);
 
             // Parameters
             StringBuilder Params = new StringBuilder();
             
-            Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
+            //Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
                 Params.Append(" -ini " + baseIniPath.ProgressQuoter());
-            if (batchMode && Config.Instance.UseBatchModeToCompile)
+            if (batchMode)
                 Params.Append(" -b");
             Params.Append(" -p " + runnerPath.ProgressQuoter());
             if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
@@ -313,9 +336,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
 
             // we supress the splashscreen
-            var splashScreenPath = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp");
-            var splashScreenPathMoved = Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp");
-            MoveSplashScreenNoError(splashScreenPath, splashScreenPathMoved);
+            if (!batchMode)
+                MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp"), Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp"));
 
             // Start a process
             var pInfo = new ProcessStartInfo {
@@ -336,16 +358,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             try {
                 Process.Start();
             } catch (Exception e) {
-                UserCommunication.Notify("Couldn't start a new prowin process!<br>Please check that the file path to prowin32.exe is correct in the <a href='go'>set environment page</a>.<br><br>Below is the technical error that occured :<br><div class='ToolTipcodeSnippet'>" + e.Message + "</div>", MessageImg.MsgError, "Execution error", "Can't start a prowin process", args => {
+                UserCommunication.NotifyUnique("ProwinFailed", "Couldn't start a new prowin process!<br>Please check that the file path to prowin32.exe is correct in the <a href='go'>set environment page</a>.<br><br>Below is the technical error that occured :<br><div class='ToolTipcodeSnippet'>" + e.Message + "</div>", MessageImg.MsgError, "Execution error", "Can't start a prowin process", args => {
                     Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                    UserCommunication.CloseUniqueNotif("ProwinFailed");
                     args.Handled = true;
                 }, 10);
             }
 
             //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
-
-            // restore splashscreen
-            MoveSplashScreenNoError(splashScreenPathMoved, splashScreenPath);
 
             return true;
         }
@@ -372,8 +392,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         private void ProcessOnExited(object sender, EventArgs eventArgs) {
 
-            bool endedSuccessfully = true;
-
             // end of execution action
             if (OnExecutionEnd != null) {
                 OnExecutionEnd(this);
@@ -381,38 +399,38 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // if log not found then something is messed up!
             if (string.IsNullOrEmpty(LogPath) || !File.Exists(LogPath)) {
-                UserCommunication.Notify("Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProgressWin32 + " " + ExeParameters + "</div><b>Temporary directory :</b><br>" + TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Critical error", "Action failed", args => {
+                UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProgressWin32 + " " + ExeParameters + "</div><b>Temporary directory :</b><br>" + TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Critical error", "Action failed", args => {
                     if (args.Link.Equals("go")) {
                         Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                        UserCommunication.CloseUniqueNotif("ExecutionFailed");
                         args.Handled = true;
                     }
                 }, 0, 600);
 
-                endedSuccessfully = false;
+                ExecutionFailed = true;
             }
 
             // if this file exists, then the connect statement failed, warn the user
-            var dbKoPath = Path.Combine(TempDir, "db.ko");
-            if (endedSuccessfully && File.Exists(dbKoPath) && new FileInfo(dbKoPath).Length > 0) {
-                UserCommunication.Notify("Failed to connect to the progress database!<br>Verify / correct the connection info <a href='go'>in the environment page</a> and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the error returned while trying to connect to the database : " + Utils.ReadAndFormatLogToHtml(Path.Combine(TempDir, "db.ko")), MessageImg.MsgRip, "Database connection", "Connection failed", args => {
+            if (File.Exists(DatabaseConnectionLog) && new FileInfo(DatabaseConnectionLog).Length > 0) {
+                UserCommunication.NotifyUnique("ConnectFailed", "Failed to connect to the progress database!<br>Verify / correct the connection info <a href='go'>in the environment page</a> and try again<br><br><i>Also, make sure that the database for the current environment is connected!</i><br><br>Below is the error returned while trying to connect to the database : " + Utils.ReadAndFormatLogToHtml(DatabaseConnectionLog), MessageImg.MsgRip, "Database connection", "Connection failed", args => {
                     if (args.Link.Equals("go")) {
                         Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                        UserCommunication.CloseUniqueNotif("ConnectFailed");
                         args.Handled = true;
                     }
-                }, 10, 600);
+                }, NeedDatabaseConnection ? 0 : 10, 600);
 
-                if (NeedDatabaseConnection)
-                    endedSuccessfully = false;
+                ConnectionFailed = true;
             }
 
             // end of successful/unsuccessful execution action
-            if (endedSuccessfully) {
-                if (OnExecutionOk != null) {
-                    OnExecutionOk(this);
-                }
-            } else {
+            if (ExecutionFailed || (ConnectionFailed && NeedDatabaseConnection)) {
                 if (OnExecutionFailed != null) {
                     OnExecutionFailed(this);
+                }
+            } else {
+                if (OnExecutionOk != null) {
+                    OnExecutionOk(this);
                 }
             }
         }
@@ -576,7 +594,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             foreach (var movedFile in movedFilesOfTheFile) {
-                var ext = Path.GetExtension(movedFile.To).Replace(".", "");
+                var ext = (Path.GetExtension(movedFile.To) ?? "").Replace(".", "");
                 if (movedFile.IsOk) {
                     line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + (ext.EqualsCi("lst") ? movedFile.To.ToHtmlLink() : Path.GetDirectoryName(movedFile.To).ToHtmlLink(movedFile.To)) + "</div>");
                 } else if (nbErrors == 0) {

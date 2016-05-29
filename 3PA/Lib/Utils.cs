@@ -455,7 +455,10 @@ namespace _3PA.Lib {
         public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
             if (htmlLinkClickedEventArgs.Link.Contains("|")) {
                 var splitted = htmlLinkClickedEventArgs.Link.Split('|');
-                Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                if (splitted.Length == 2)
+                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                else
+                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]), Int32.Parse(splitted[2]));
                 htmlLinkClickedEventArgs.Handled = true;
             } else {
                 htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);

@@ -17,6 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.Parser;
 
@@ -67,6 +69,19 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// This field is only used when Type == CompletionType.Keyword, it contains the keyword type...
         /// </summary>
         public KeywordType KeywordType { get; set; }
+
+
+        /// <summary>
+        /// Use this method to do an action for each flag of the item...
+        /// </summary>
+        /// <param name="toApplyOnFlag"></param>
+        public void DoForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
+            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                toApplyOnFlag(name, flag);
+            }
+        }
 
     }
 

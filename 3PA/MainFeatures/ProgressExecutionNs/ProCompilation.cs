@@ -27,7 +27,6 @@ using System.Threading;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.FilesInfoNs;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
 
@@ -41,7 +40,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Is the compilation mono process?
         /// </summary>
-        public bool MonoProcess { private get; set; }
+        public bool MonoProcess { get; set; }
 
         /// <summary>
         /// Set to true if you want to explore the folders recursively to find all the compilable files
@@ -82,15 +81,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             get { return _processesRunning == 0; }
         }
 
+        // remember the time when the compilation started
+        public DateTime StartingTime { get; private set; }
+
         #endregion
 
         #region private fields
 
         // list of all the started processes
         private List<CompilationProcess> _listOfCompilationProcesses = new List<CompilationProcess>();
-
-        // remember the time when the compilation started
-        private DateTime _startingTime;
 
         // total number of processes still running
         private int _processesRunning;
@@ -118,8 +117,32 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             foreach (var folderPath in listOfFolderPath) {
                 if (Directory.Exists(folderPath)) {
                     foreach (var filePath in Config.Instance.CompileKnownExtension.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions)).ToList()) {
-                        if (!filesToCompile.Contains(filePath))
-                            filesToCompile.Add(filePath);
+                        if (!filesToCompile.Contains(filePath)) {
+                            bool toAdd = true;
+
+                            // test include filters
+                            if (!string.IsNullOrEmpty(Config.Instance.CompileIncludeList)) {
+                                var hasMatch = false;
+                                foreach (var pattern in Config.Instance.CompileIncludeList.Split(',')) {
+                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                        hasMatch = true;
+                                }
+                                toAdd = hasMatch;
+                            }
+
+                            // test exclude filters
+                            if (!string.IsNullOrEmpty(Config.Instance.CompileExcludeList)) {
+                                var hasNoMatch = true;
+                                foreach (var pattern in Config.Instance.CompileExcludeList.Split(',')) {
+                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                        hasNoMatch = false;
+                                }
+                                toAdd = toAdd && hasNoMatch;
+                            }
+
+                            if (toAdd)
+                                filesToCompile.Add(filePath);
+                        }
                     }
                 }
             }
@@ -157,7 +180,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // init
             NbFilesToCompile = filesToCompile.Count;
-            _startingTime = DateTime.Now;
+            StartingTime = DateTime.Now;
             _processesRunning = _listOfCompilationProcesses.Count;
             NumberOfProcesses = _listOfCompilationProcesses.Count;
             NumberOfProcessesEndedOk = 0;
@@ -170,6 +193,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // launch the compile process
                 compilationProcess.ProExecutionObject = new ProExecution {
                     ListToCompile = compilationProcess.FilesToCompile,
+                    NeedDatabaseConnection = true,
                     OnExecutionEnd = OnExecutionEnd,
                     OnExecutionOk = OnExecutionOk,
                     OnExecutionFailed = OnExecutionFailed
@@ -203,7 +227,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Get the time elapsed since the beggining of the compilation in a human readable format
         /// </summary>
         public string GetElapsedTime() {
-            TimeSpan t = TimeSpan.FromMilliseconds(DateTime.Now.Subtract(_startingTime).TotalMilliseconds);
+            TimeSpan t = TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds);
             if (t.Hours > 0)
                 return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
             if (t.Minutes > 0)
@@ -216,11 +240,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// This method "cancel" the compilation by killing the associated processes
         /// </summary>
-        public void KillProcesses() {
+        public void CancelCompilation() {
             HasBeenKilled = true;
-            foreach (var compilationProcess in _listOfCompilationProcesses) {
+            KillProcesses();
+        }
+
+        public void KillProcesses() {
+            foreach (var compilationProcess in _listOfCompilationProcesses.Where(compilationProcess => compilationProcess.ProExecutionObject != null)) {
                 compilationProcess.ProExecutionObject.KillProcess();
             }
+            _processesRunning = 0;
+            EndOfCompilation();
         }
 
         /// <summary>
@@ -248,7 +278,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             return output;
-        } 
+        }
+
+        /// <summary>
+        /// Returns true if at least one process failed because of a failed database connection
+        /// and one of the error was the error number 748 (lack of ressources) 
+        /// this error is caused by too much connection on the same database (too much processes started!)
+        /// </summary>
+        /// <returns></returns>
+        public bool CompilationFailedOnMaxUser() {
+            return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && File.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog, Encoding.Default).Contains("(748)"));
+        }
 
         #endregion
 
@@ -263,21 +303,26 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (_processesRunning > 0)
                 return;
 
-            // we need to move all the files...
-            foreach (var compilationProcess in _listOfCompilationProcesses) {
-                MovedFiles.AddRange(ProExecution.CreateListOfFilesToMove(compilationProcess.ProExecutionObject));
-            }
-            foreach (var fileToMove in MovedFiles) {
-                _nbFilesMoved++;
-                fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
-            }
+            // everything ended ok, we do postprocess actions
+            if (NumberOfProcesses == NumberOfProcessesEndedOk) {
 
-            // Read all the log files stores the errors
-            foreach (var compilationProcess in _listOfCompilationProcesses) {
-                var errorList = ProExecution.LoadErrorLog(compilationProcess.ProExecutionObject);
-                foreach (var keyValue in errorList) {
-                    ErrorsList.AddRange(keyValue.Value);
+                // we need to move all the files...
+                foreach (var compilationProcess in _listOfCompilationProcesses) {
+                    MovedFiles.AddRange(ProExecution.CreateListOfFilesToMove(compilationProcess.ProExecutionObject));
                 }
+                foreach (var fileToMove in MovedFiles) {
+                    _nbFilesMoved++;
+                    fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+                }
+
+                // Read all the log files stores the errors
+                foreach (var compilationProcess in _listOfCompilationProcesses) {
+                    var errorList = ProExecution.LoadErrorLog(compilationProcess.ProExecutionObject);
+                    foreach (var keyValue in errorList) {
+                        ErrorsList.AddRange(keyValue.Value);
+                    }
+                }
+
             }
 
             ExecutionTime = GetElapsedTime();
@@ -319,7 +364,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         private void OnExecutionFailed(ProExecution obj) {
             if (_lock.TryEnterWriteLock(500)) {
                 try {
-                    EndOfCompilation();
+                    // we kill all the processes we don't want to do anything more...
+                    KillProcesses();
                 } finally {
                     _lock.ExitWriteLock();
                 }

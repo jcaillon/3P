@@ -67,16 +67,18 @@ namespace _3PA.MainFeatures {
                 // show it to the user
                 if (Config.Instance.UserGetsPreReleases)
                     UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                        (File.Exists(Config.FileErrorLog) ? "<br><a href='" + Config.FileErrorLog + "'>Link to the error log</a>" : "") +
-                        "<br>Consider opening an issue on GitHub :<br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>" + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                        (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") +
+                        "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
                         MessageImg.MsgPoison, "Unexpected error", message,
                         args => {
-                            Npp.Goto(args.Link);
-                            args.Handled = true;
+                            if (args.Link.EndsWith(".log")) {
+                                Npp.Goto(args.Link);
+                                args.Handled = true;
+                            }
                         },
                         0, 500);
                 else
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>If you didn't ask anything from 3P then you can ignore this message.<br>If you did, another try will probably fail as well.<br><br>Consider restarting Notepad++ as it might solve this problem!<br><br><i>You can use the link below to open an issue on GitHub and help us debug 3P :</i><br><a href='" + Config.IssueUrl + "'>" + Config.IssueUrl + "</a>", MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>If you didn't ask anything from 3P then you can ignore this message.<br>If you did, another try will probably fail as well.<br><br>Consider restarting Notepad++ as it might solve this problem!<br><br><i>You can use the link below to open an issue on GitHub and help us debug 3P :</i><br>" + Config.IssueUrl.ToHtmlLink(), MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
             }
         }
 

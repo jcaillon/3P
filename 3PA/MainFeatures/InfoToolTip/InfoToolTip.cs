@@ -477,12 +477,9 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // Flags
             var flagStrBuilder = new StringBuilder();
-            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                if (flag == 0) continue;
-                if (!data.Flag.HasFlag(flag)) continue;
+            data.DoForEachFlag((name, flag) => {
                 flagStrBuilder.Append(FormatRowWithImg(name, "<b>" + name + "</b>"));
-            }
+            });
             if (flagStrBuilder.Length > 0) {
                 toDisplay.Append(FormatSubtitle("FLAGS"));
                 toDisplay.Append(flagStrBuilder);

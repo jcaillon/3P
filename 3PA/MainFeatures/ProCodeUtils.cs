@@ -28,8 +28,6 @@ using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.CodeExplorer;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
@@ -64,25 +62,51 @@ namespace _3PA.MainFeatures {
             // match a word in the autocompletion? go to definition
             var data = AutoComplete.FindInCompletionData(curWord, position, true);
             if (data != null && data.Count > 0) {
-                foreach (var completionData in data) {
-                    if (completionData.FromParser) {
-                        Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
-                        return;
+
+                var nbFound = data.Count(data2 => data2.FromParser);
+
+                // only one match, then go to the definition
+                if (nbFound == 1) {
+                    var completionData = data.First(data1 => data1.FromParser);
+                    Npp.Goto(completionData.ParsedItem.FilePath, completionData.ParsedItem.Line, completionData.ParsedItem.Column);
+                    return;
+                } 
+                if (nbFound > 1) {
+
+                    // otherwise, list the items and notify the user
+                    var output = new StringBuilder(@"Found several matching items, please choose the correct one :<br>");
+                    foreach (var cData in data.Where(data2 => data2.FromParser)) {
+                        output.Append("<div>" + (cData.ParsedItem.FilePath + "|" + cData.ParsedItem.Line + "|" + cData.ParsedItem.Column).ToHtmlLink("In " + Path.GetFileName(cData.ParsedItem.FilePath) + " (line " + cData.ParsedItem.Line + ")"));
+                        cData.DoForEachFlag((s, flag) => {
+                            output.Append("<img style='padding-right: 0px; padding-left: 5px;' src='" + s + "' height='15px'>");
+                        });
+                        output.Append("</div>");
                     }
+                    UserCommunication.NotifyUnique("GoToDefinition", output.ToString(), MessageImg.MsgQuestion, "Question", "Go to the definition", args => {
+                        Utils.OpenPathClickHandler(null, args);
+                        UserCommunication.CloseUniqueNotif("GoToDefinition");
+                    }, 0, 500);
+                    return;
                 }
             }
 
             // last resort, try to find a matching file in the propath
+
+            // if in a string, read the whole string
+
+            // try to read all the . and \
+
             // first look in the propath
             var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.KnownProgressExtension);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
-                    var output = new StringBuilder(@"Found several files matching this name, please choose the correct one and i will open it for you :<br>");
+                    var output = new StringBuilder(@"Found several files matching this name, please choose the correct one :<br>");
                     foreach (var fullPath in fullPaths) {
-                        output.Append("<br><a class='ToolGotoDefinition' href='" + fullPath + "'>" + fullPath + "</a>");
+                        output.Append("<div>" + fullPath.ToHtmlLink() + "</div>");
                     }
-                    UserCommunication.Notify(output.ToString(), MessageImg.MsgQuestion, "Question", "Open a file", args => {
+                    UserCommunication.NotifyUnique("GoToDefinition", output.ToString(), MessageImg.MsgQuestion, "Question", "Open a file", args => {
                         Npp.Goto(args.Link);
+                        UserCommunication.CloseUniqueNotif("GoToDefinition");
                         args.Handled = true;
                     }, 0, 500);
                 } else
@@ -91,6 +115,14 @@ namespace _3PA.MainFeatures {
             }
 
             UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "information", "Failed to find an origin", 5);
+        }
+
+        public static void ForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {
+            foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                if (flag == 0) continue;
+                toApplyOnFlag(name, flag);
+            }
         }
 
         public static void GoToDefinition() {
@@ -268,7 +300,7 @@ namespace _3PA.MainFeatures {
                 var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
-                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problems detected" :
+                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
                     (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
                         ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" : 
                             "Syntax correct");
@@ -290,7 +322,7 @@ namespace _3PA.MainFeatures {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.Notify("Was compiling :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
@@ -311,8 +343,9 @@ namespace _3PA.MainFeatures {
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
                 Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Prolint)) {
-                UserCommunication.Notify("This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a><b", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
+                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a><b", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
                     Plug.CurrentFileObject.ProgressExecution.KillProcess();
+                    UserCommunication.CloseUniqueNotif("KillExistingProcess");
                     OnExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
                 }, 5);
                 return;
@@ -455,7 +488,7 @@ namespace _3PA.MainFeatures {
                 OnExecutionOk = execution => {
                     try {
                         if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && File.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
-                            UserCommunication.Notify("Faile to start the appbuilder, the following commands both failed :<br><div class='ToolTipcodeSnippet'>RUN adeuib/_uibmain.p.<br>RUN _ab.p.</div><br>Your version of progress might be uncompatible with those statements? If this problem looks anormal to you, please open a new issue on github.", MessageImg.MsgRip, "Start Appbuilder", "The command failed");
+                            UserCommunication.Notify("Failed to start the appbuilder, the following commands both failed :<br><div class='ToolTipcodeSnippet'>RUN adeuib/_uibmain.p.<br>RUN _ab.p.</div><br>Your version of progress might be uncompatible with those statements? If this problem looks anormal to you, please open a new issue on github.", MessageImg.MsgRip, "Start Appbuilder", "The command failed");
                         }
                     } catch (Exception e) {
                         ErrorHandler.ShowErrors(e, "Failed to start the appbuilder");

@@ -70,6 +70,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// image on the right
         /// </summary>
         public bool IsNotBlock { get; set; }
+
+        /// <summary>
+        /// Apply an action for each flag of the item
+        /// </summary>
+        /// <param name="toApplyOnFlag"></param>
+        public void DoForEachFlag(Action<string, CodeExplorerFlag> toApplyOnFlag) {
+            foreach (var name in Enum.GetNames(typeof(CodeExplorerFlag))) {
+                CodeExplorerFlag flag = (CodeExplorerFlag)Enum.Parse(typeof(CodeExplorerFlag), name);
+                if (flag == 0 || !Flag.HasFlag(flag)) continue;
+                toApplyOnFlag(name, flag);
+            }
+        }
     }
 
     /// <summary>

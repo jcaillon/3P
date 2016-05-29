@@ -30,7 +30,6 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
@@ -356,7 +355,6 @@ namespace _3PA {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
-
         }
 
         #endregion

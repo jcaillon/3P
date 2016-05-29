@@ -50,7 +50,10 @@ namespace _3PA.MainFeatures {
             if (ParserHandler.CanIndent()) {
                 
             } else {
-                UserCommunication.Notify("This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br><a href='#about'>Open the about window to get the github url</a>", MessageImg.MsgRip, "Format document", "Incorrect grammar", args => { Appli.Appli.GoToPage(PageNames.Welcome); }, 20);
+                UserCommunication.NotifyUnique("FormatDocumentFail", "This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br><a href='#about'>Open the about window to get the github url</a>", MessageImg.MsgRip, "Format document", "Incorrect grammar", args => {
+                    Appli.Appli.GoToPage(PageNames.Welcome); 
+                    UserCommunication.CloseUniqueNotif("FormatDocumentFail");
+                }, 20);
             }
         }
     }

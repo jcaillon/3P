@@ -302,21 +302,19 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
             // display the flags
             int offset = -5;
-            foreach (var name in Enum.GetNames(typeof (CodeExplorerFlag))) {
-                CodeExplorerFlag flag = (CodeExplorerFlag) Enum.Parse(typeof (CodeExplorerFlag), name);
-                if (flag == 0) continue;
-                if (!obj.Flag.HasFlag(flag)) continue;
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(name);
-                if (tryImg == null) continue;
-                ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
-                    Offset = new Size(offset, 0)
-                };
-                if (args.SubItem.Decoration == null)
-                    args.SubItem.Decoration = decoration;
-                else
-                    args.SubItem.Decorations.Add(decoration);
-                offset -= 20;
-            }
+            obj.DoForEachFlag((name, flag) => {
+                Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                if (tryImg != null) {
+                    ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
+                        Offset = new Size(offset, 0)
+                    };
+                    if (args.SubItem.Decoration == null)
+                        args.SubItem.Decoration = decoration;
+                    else
+                        args.SubItem.Decorations.Add(decoration);
+                    offset -= 20;
+                }
+            });
 
             // display the sub string
             if (offset < -5) offset -= 5;

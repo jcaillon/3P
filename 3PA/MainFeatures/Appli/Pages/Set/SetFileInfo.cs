@@ -22,7 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
-using _3PA.MainFeatures.FilesInfoNs;
+using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFileInfo : YamuiPage {

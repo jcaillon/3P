@@ -87,8 +87,9 @@ namespace _3PA.MainFeatures {
             } else {
                 // first use message?
                 if (Config.Instance.UserFirstUse) {
-                    UserCommunication.Notify("<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                    UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
                         Appli.Appli.ToggleView();
+                        UserCommunication.CloseUniqueNotif("welcome");
                         args.Handled = true;
                     });
                     Config.Instance.UserFirstUse = false;

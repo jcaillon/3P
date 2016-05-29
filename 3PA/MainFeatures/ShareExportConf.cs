@@ -228,8 +228,9 @@ namespace _3PA.MainFeatures {
 
                 if (updateMessage.Length > 0) {
                     updateMessage.Append("<br><br><i>You can set which config file gets auto-updated in <a href='go'>the option page</a></i>");
-                    UserCommunication.Notify(updateMessage.ToString(), MessageImg.MsgInfo, "Update notification", "Configuration auto-update", args => {
+                    UserCommunication.NotifyUnique("ExportConfUpdate", updateMessage.ToString(), MessageImg.MsgInfo, "Update notification", "Configuration auto-update", args => {
                         Appli.Appli.GoToPage(PageNames.ExportShareConf);
+                        UserCommunication.CloseUniqueNotif("ExportConfUpdate");
                         args.Handled = true;
                     }, 10);
                 }

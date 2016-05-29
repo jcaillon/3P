@@ -32,7 +32,6 @@ using YamuiFramework.Fonts;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
 using _3PA.MainFeatures.ProgressExecutionNs;

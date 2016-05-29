@@ -85,11 +85,11 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string GlobalHelpFilePath = "";
 
-            [Display(Name = "Use batch mode to compile",
-                Description = "In order to avoid the prowin32 splash screen when compiling, 3P starts the process in<br>batch mode (-b option).<br>However, if you manually disabled the splash screen (by renaming the file<br>/dlc/bin/splashscreen.bmp for instance), you can set this option to false to avoid<br>having the prowin32 process creating a window in the taskbar",
+            [Display(Name = "Use Prowin in batch mode",
+                Description = "In order to avoid the prowin32 splash screen when compiling, you can start a Prowin process in<br>batch mode (-b option).<br>However, if you disabled the splash screen (by renaming the file<br>/dlc/bin/splashscreen.bmp for instance),<br>you can avoid having the prowin32 process creating a window in the taskbar<br>This is what 3P does if it has the rights to access your dlc folder, turn this option on and see if it works for you",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public bool UseBatchModeToCompile = true;
+            public bool UseProwinInBatchMode = true;
 
             [Display(Name = "Use default values in file info",
                 Description = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
@@ -143,21 +143,18 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileWithLst = true;
 
-            [Display(Name = "Number of processes by core",
-                Description = "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
+
             public int NbOfProcessesByCore = 3;
 
-            [Display(Name = "Force mono process for mass compilation",
-                Description = "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot<br>You can use this option if you want to limit the number of connections made to your database during compilation...",
-                GroupName = "Compilation",
-                AutoGenerateField = false)]
             public bool CompileForceMonoProcess = false;
 
             public string CompileDirectoriesHistoric = "";
 
             public bool CompileExploreDirRecursiv = true;
+
+            public string CompileIncludeList = "";
+
+            public string CompileExcludeList = "";
 
             #endregion
 

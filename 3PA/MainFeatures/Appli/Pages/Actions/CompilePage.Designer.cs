@@ -30,6 +30,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.btReset = new YamuiFramework.Controls.YamuiButton();
+            this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.fl_exclude = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_include = new YamuiFramework.Controls.YamuiTextBox();
+            this.fl_nbProcess = new YamuiFramework.Controls.YamuiTextBox();
+            this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.toggleMono = new YamuiFramework.Controls.YamuiToggle();
+            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.toggleRecurs = new YamuiFramework.Controls.YamuiToggle();
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -66,6 +75,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
+            this.dockedPanel.ContentPanel.Controls.Add(this.btReset);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel6);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel5);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_exclude);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_include);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel4);
+            this.dockedPanel.ContentPanel.Controls.Add(this.toggleMono);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel1);
             this.dockedPanel.ContentPanel.Controls.Add(this.btCancel);
             this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
@@ -90,9 +108,128 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             // 
+            // btReset
+            // 
+            this.btReset.Location = new System.Drawing.Point(175, 189);
+            this.btReset.Name = "btReset";
+            this.btReset.Size = new System.Drawing.Size(100, 23);
+            this.btReset.TabIndex = 131;
+            this.btReset.Text = "Reset options";
+            // 
+            // htmlLabel6
+            // 
+            this.htmlLabel6.AutoSize = false;
+            this.htmlLabel6.AutoSizeHeightOnly = true;
+            this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel6.BaseStylesheet = null;
+            this.htmlLabel6.IsSelectionEnabled = false;
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 159);
+            this.htmlLabel6.Name = "htmlLabel6";
+            this.htmlLabel6.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel6.TabIndex = 130;
+            this.htmlLabel6.TabStop = false;
+            this.htmlLabel6.Text = "Filter for files to <b>exclude</b>";
+            // 
+            // htmlLabel5
+            // 
+            this.htmlLabel5.AutoSize = false;
+            this.htmlLabel5.AutoSizeHeightOnly = true;
+            this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel5.BaseStylesheet = null;
+            this.htmlLabel5.IsSelectionEnabled = false;
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 133);
+            this.htmlLabel5.Name = "htmlLabel5";
+            this.htmlLabel5.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel5.TabIndex = 129;
+            this.htmlLabel5.TabStop = false;
+            this.htmlLabel5.Text = "Filter for files to <b>include</b>";
+            // 
+            // fl_exclude
+            // 
+            this.fl_exclude.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.fl_exclude.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_exclude.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_exclude.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_exclude.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_exclude.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_exclude.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_exclude.Location = new System.Drawing.Point(268, 159);
+            this.fl_exclude.Name = "fl_exclude";
+            this.fl_exclude.Size = new System.Drawing.Size(400, 20);
+            this.fl_exclude.TabIndex = 128;
+            this.fl_exclude.WaterMark = "No filter";
+            // 
+            // fl_include
+            // 
+            this.fl_include.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.fl_include.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_include.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_include.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_include.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_include.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_include.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_include.Location = new System.Drawing.Point(268, 133);
+            this.fl_include.Name = "fl_include";
+            this.fl_include.Size = new System.Drawing.Size(400, 20);
+            this.fl_include.TabIndex = 127;
+            this.fl_include.WaterMark = "No filter";
+            // 
+            // fl_nbProcess
+            // 
+            this.fl_nbProcess.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.fl_nbProcess.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fl_nbProcess.CustomBackColor = System.Drawing.Color.Empty;
+            this.fl_nbProcess.CustomForeColor = System.Drawing.Color.Empty;
+            this.fl_nbProcess.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.fl_nbProcess.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
+            this.fl_nbProcess.Location = new System.Drawing.Point(268, 107);
+            this.fl_nbProcess.Name = "fl_nbProcess";
+            this.fl_nbProcess.Size = new System.Drawing.Size(34, 20);
+            this.fl_nbProcess.TabIndex = 126;
+            this.fl_nbProcess.WaterMark = null;
+            // 
+            // htmlLabel4
+            // 
+            this.htmlLabel4.AutoSize = false;
+            this.htmlLabel4.AutoSizeHeightOnly = true;
+            this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel4.BaseStylesheet = null;
+            this.htmlLabel4.IsSelectionEnabled = false;
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 107);
+            this.htmlLabel4.Name = "htmlLabel4";
+            this.htmlLabel4.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel4.TabIndex = 125;
+            this.htmlLabel4.TabStop = false;
+            this.htmlLabel4.Text = "Number of processes for each core";
+            // 
+            // toggleMono
+            // 
+            this.toggleMono.AutoSize = true;
+            this.toggleMono.Location = new System.Drawing.Point(268, 81);
+            this.toggleMono.Name = "toggleMono";
+            this.toggleMono.Size = new System.Drawing.Size(52, 15);
+            this.toggleMono.TabIndex = 124;
+            this.toggleMono.Text = " ";
+            // 
+            // htmlLabel1
+            // 
+            this.htmlLabel1.AutoSize = false;
+            this.htmlLabel1.AutoSizeHeightOnly = true;
+            this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
+            this.htmlLabel1.Location = new System.Drawing.Point(30, 81);
+            this.htmlLabel1.Name = "htmlLabel1";
+            this.htmlLabel1.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel1.TabIndex = 123;
+            this.htmlLabel1.TabStop = false;
+            this.htmlLabel1.Text = "Force to mono-process compilation?";
+            // 
             // btCancel
             // 
-            this.btCancel.Location = new System.Drawing.Point(638, 85);
+            this.btCancel.Location = new System.Drawing.Point(30, 189);
             this.btCancel.Name = "btCancel";
             this.btCancel.Size = new System.Drawing.Size(73, 23);
             this.btCancel.TabIndex = 122;
@@ -101,7 +238,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleRecurs
             // 
             this.toggleRecurs.AutoSize = true;
-            this.toggleRecurs.Location = new System.Drawing.Point(197, 55);
+            this.toggleRecurs.Location = new System.Drawing.Point(268, 55);
             this.toggleRecurs.Name = "toggleRecurs";
             this.toggleRecurs.Size = new System.Drawing.Size(52, 15);
             this.toggleRecurs.TabIndex = 121;
@@ -124,7 +261,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btUndo
             // 
             this.btUndo.BackGrndImage = null;
-            this.btUndo.Location = new System.Drawing.Point(217, 29);
+            this.btUndo.Location = new System.Drawing.Point(245, 29);
             this.btUndo.Margin = new System.Windows.Forms.Padding(0);
             this.btUndo.Name = "btUndo";
             this.btUndo.Size = new System.Drawing.Size(20, 20);
@@ -139,7 +276,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.lbl_report.AutoSizeHeightOnly = true;
             this.lbl_report.BackColor = System.Drawing.Color.Transparent;
             this.lbl_report.BaseStylesheet = null;
-            this.lbl_report.Location = new System.Drawing.Point(30, 125);
+            this.lbl_report.Location = new System.Drawing.Point(30, 223);
             this.lbl_report.Name = "lbl_report";
             this.lbl_report.Size = new System.Drawing.Size(681, 45);
             this.lbl_report.TabIndex = 117;
@@ -148,7 +285,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // btStart
             // 
-            this.btStart.Location = new System.Drawing.Point(30, 85);
+            this.btStart.Location = new System.Drawing.Point(30, 189);
             this.btStart.Name = "btStart";
             this.btStart.Size = new System.Drawing.Size(139, 23);
             this.btStart.TabIndex = 116;
@@ -156,8 +293,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // progressBar
             // 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.progressBar.GradientIntensity = 5;
-            this.progressBar.Location = new System.Drawing.Point(30, 85);
+            this.progressBar.Location = new System.Drawing.Point(109, 189);
             this.progressBar.MarqueeWidth = 50;
             this.progressBar.Name = "progressBar";
             this.progressBar.Progress = 0F;
@@ -180,6 +319,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // btHistoric
             // 
+            this.btHistoric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btHistoric.BackGrndImage = null;
             this.btHistoric.Location = new System.Drawing.Point(691, 29);
             this.btHistoric.Margin = new System.Windows.Forms.Padding(0);
@@ -190,6 +330,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // btOpen
             // 
+            this.btOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btOpen.BackGrndImage = null;
             this.btOpen.Location = new System.Drawing.Point(671, 29);
             this.btOpen.Margin = new System.Windows.Forms.Padding(0);
@@ -200,22 +341,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // fl_directory
             // 
+            this.fl_directory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.fl_directory.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.fl_directory.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.fl_directory.CustomBackColor = System.Drawing.Color.Empty;
             this.fl_directory.CustomForeColor = System.Drawing.Color.Empty;
             this.fl_directory.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.fl_directory.Location = new System.Drawing.Point(240, 29);
+            this.fl_directory.Location = new System.Drawing.Point(268, 29);
             this.fl_directory.Name = "fl_directory";
-            this.fl_directory.Size = new System.Drawing.Size(428, 20);
+            this.fl_directory.Size = new System.Drawing.Size(400, 20);
             this.fl_directory.TabIndex = 4;
             this.fl_directory.WaterMark = "Path to the directory to compile";
             // 
             // btBrowse
             // 
             this.btBrowse.BackGrndImage = null;
-            this.btBrowse.Location = new System.Drawing.Point(197, 29);
+            this.btBrowse.Location = new System.Drawing.Point(225, 29);
             this.btBrowse.Margin = new System.Windows.Forms.Padding(0);
             this.btBrowse.Name = "btBrowse";
             this.btBrowse.Size = new System.Drawing.Size(20, 20);
@@ -265,5 +408,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private HtmlLabel htmlLabel2;
         private YamuiToggle toggleRecurs;
         private YamuiButton btCancel;
+        private HtmlLabel htmlLabel1;
+        private YamuiToggle toggleMono;
+        private HtmlLabel htmlLabel4;
+        private YamuiTextBox fl_nbProcess;
+        private HtmlLabel htmlLabel6;
+        private HtmlLabel htmlLabel5;
+        private YamuiTextBox fl_exclude;
+        private YamuiTextBox fl_include;
+        private YamuiButton btReset;
     }
 }

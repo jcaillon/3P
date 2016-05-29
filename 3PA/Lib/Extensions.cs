@@ -139,6 +139,17 @@ namespace _3PA.Lib {
         #region string extensions
 
         /// <summary>
+        /// Allows to tranform a matching string using * and ? (wildcards) into a valid regex expression
+        /// it escapes regex special char so it will work as you expect!
+        /// Ex: foo*.xls? will become ^foo.*\.xls.$
+        /// </summary>
+        /// <param name="pattern"></param>
+        /// <returns></returns>
+        public static string WildCardToRegex(this string pattern) {
+            return "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
+        }
+
+        /// <summary>
         /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
         /// </summary>
         /// <param name="toCheck"></param>

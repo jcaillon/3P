@@ -32,7 +32,6 @@ using YamuiFramework.Forms;
 using _3PA.Html;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.FilesInfoNs;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Actions {
@@ -77,6 +76,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // default values
             fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
             toggleRecurs.Checked = Config.Instance.CompileExploreDirRecursiv;
+            toggleMono.Checked = Config.Instance.CompileForceMonoProcess;
+            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
+            fl_include.Text = Config.Instance.CompileIncludeList;
+            fl_exclude.Text = Config.Instance.CompileExcludeList;
 
             // compilation
             tooltip.SetToolTip(btStart, "Click to <b>start</b> the compilation of all executable progress files<br>for the selected folder");
@@ -96,6 +99,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             lbl_report.Visible = false;
             lbl_report.LinkClicked += Utils.OpenPathClickHandler;
 
+
+            tooltip.SetToolTip(toggleRecurs, "Toggle this option on to compile all the files contained in the selected folder<br>and in its subfolders (recursive search)<br>Toggle off and you will only compile the files directly under the selected folder");
+            tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
+            tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
+            tooltip.SetToolTip(fl_include, "A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
+            tooltip.SetToolTip(fl_exclude, "A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>excluded</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,\\*my_sub_directory\\*,*proc_???.p</div>");
+
+            // reset
+            tooltip.SetToolTip(btReset, "Click to reset the options to their default values");
+            btReset.ButtonPressed += BtResetOnButtonPressed;
+
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
         }
@@ -109,12 +123,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             currentReport.Append(@"<h2>Results :</h2>");
 
-            // compilation time
-            currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
-
             // the execution ended successfully
             if (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk) {
-                currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>All the processes ended correctly</div>");
+                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>All the processes ended correctly</div>");
+
+                // compilation time
+                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
 
                 var listLines = new List<Tuple<int, string>>();
 
@@ -122,15 +136,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 var nbFailed = 0;
                 var nbWarning = 0;
-                
-                foreach (var fileToCompile in _currentCompil.GetListOfFileToCompile) {
+
+                foreach (var fileToCompile in _currentCompil.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
 
                     var toCompile = fileToCompile;
 
                     bool moveFail = _currentCompil.MovedFiles.Exists(move => move.Origin.Equals(fileToCompile.InputPath) && !move.IsOk);
                     var errorsOfTheFile = _currentCompil.ErrorsList.Where(error => error.CompiledFilePath.Equals(toCompile.InputPath)).ToList();
                     bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
-                    bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning); ;
+                    bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
 
                     line.Clear();
 
@@ -151,11 +165,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 currentReport.Append("<br><h3 style='padding-top: 0px; margin-top: 0px'>Summary :</h3>");
 
                 if (nbFailed > 0)
-                    currentReport.Append("<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>" + nbFailed + " files with error(s)</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>" + nbFailed + " files with error(s)</div>");
                 if (nbWarning > 0)
-                    currentReport.Append("<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>" + nbWarning + " files with warning(s)</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>" + nbWarning + " files with warning(s)</div>");
                 if ((_currentCompil.NbFilesToCompile - nbFailed - nbWarning) > 0)
-                    currentReport.Append("<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (_currentCompil.NbFilesToCompile - nbFailed - nbWarning) + " files ok!</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (_currentCompil.NbFilesToCompile - nbFailed - nbWarning) + " files ok!</div>");
 
                 currentReport.Append("<br><h3 style='padding-top: 0px; margin-top: 0px'>Details per program :</h3>");
 
@@ -170,11 +184,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             } else {
                 if (_currentCompil.HasBeenKilled) {
                     // the process has been cancelled
-                    currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>The compilation has been cancelled by the user</div>");
+                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>The compilation has been cancelled by the user</div>");
                 } else {
                     // provide info on the possible error!
-                    currentReport.Append(@"<div class='ToolTipRowWithImg'><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>Only " + _currentCompil.NumberOfProcessesEndedOk + " on a total of " + _currentCompil.NumberOfProcesses + " ended correctly...</div>");
-                    currentReport.Append(@"<div>A possible explanation is....................... TODO</div>");
+                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>At least one process has ended in error, the compilation has been cancelled</div>");
+
+                    if (_currentCompil.CompilationFailedOnMaxUser()) {
+                        currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Help' height='15px'>One or more processes started for this compilation tried to connect to the database and failed because the maximum number of connection has been reached (error 748). To correct this problem, you can either :<br><li>reduce the number of processes to use for each core of your computer</li><li>or increase the maximum of connections for your database (-n parameter in the proserve command)</li></div>");
+                    }
+                    currentReport.Append(@"<div></div>");
                 }
             }
 
@@ -192,8 +210,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // we can only cancel the compilation part, when the file start to be moved to their destination it's done...
             if (!_currentCompil.CompilationDone) {
                 btCancel.Visible = false;
-                _currentCompil.KillProcesses();
-                OnCompilationEnd();
+                _currentCompil.CancelCompilation();
             }
         }
 
@@ -204,46 +221,58 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // remember options
             Config.Instance.CompileExploreDirRecursiv = toggleRecurs.Checked;
+            Config.Instance.CompileForceMonoProcess = toggleMono.Checked;
+            int nbProc;
+            if (int.TryParse(fl_nbProcess.Text, out nbProc)) {
+                Config.Instance.NbOfProcessesByCore = Math.Max(15, nbProc);
+            } else {
+                fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
+            }
+            Config.Instance.CompileIncludeList = fl_include.Text;
+            Config.Instance.CompileExcludeList = fl_exclude.Text;
 
             // init screen
             btStart.Visible = false;
+            btReset.Visible = false;
             progressBar.Visible = true;
             progressBar.Progress = 0;
-            progressBar.Text = @"The compilation is starting, please wait...";
+            progressBar.Text = @"Please wait, the compilation is starting...";
             lbl_report.Visible = false;
             Application.DoEvents();
 
             // start the compilation
             Task.Factory.StartNew(() => {
-                if (IsHandleCreated) {
-                    BeginInvoke((Action)delegate {
 
-                        // new mass compilation
-                        _currentCompil = new ProCompilation {
-                            // check if we need to force the compiler to only use 1 process 
-                            // (either because the user want to, or because we have a single user mode database)
-                            MonoProcess = Config.Instance.CompileForceMonoProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
-                            RecursInDirectories = Config.Instance.CompileExploreDirRecursiv
-                        };
-                        _currentCompil.OnCompilationEnd += OnCompilationEnd;
+                // new mass compilation
+                _currentCompil = new ProCompilation {
+                    // check if we need to force the compiler to only use 1 process 
+                    // (either because the user want to, or because we have a single user mode database)
+                    MonoProcess = Config.Instance.CompileForceMonoProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
+                    RecursInDirectories = Config.Instance.CompileExploreDirRecursiv
+                };
+                _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
-                        if (_currentCompil.CompileFolders(new List<string> { fl_directory.Text })) {
-                            // display the progress bar
+                if (_currentCompil.CompileFolders(new List<string> { fl_directory.Text })) {
+
+                    UpdateReport("");
+                    UpdateProgressBar();
+
+                    if (IsHandleCreated) {
+                        BeginInvoke((Action)delegate {
                             btCancel.Visible = true;
-
-                            UpdateReport("");
 
                             // start a recurrent event (every second) to update the progression of the compilation
                             _progressTimer = new Timer();
-                            _progressTimer.Interval = 500;
+                            _progressTimer.Interval = 1000;
                             _progressTimer.Tick += (o, args) => UpdateProgressBar();
                             _progressTimer.Start();
-                        } else {
-                            // nothing started
-                            ResetScreen();
-                        }
 
-                    });
+                        });
+                    }
+                    
+                } else {
+                    // nothing started
+                    ResetScreen();
                 }
             });
         }
@@ -267,10 +296,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             ResetScreen();
 
             // notify the user
-            Task.Factory.StartNew(() => {
-                if (!_currentCompil.HasBeenKilled)
-                    UserCommunication.Notify("The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => { Appli.GoToPage(PageNames.MassCompiler); }, Appli.IsFocused() ? 10 : 0);
-            });
+            if (!_currentCompil.HasBeenKilled)
+                UserCommunication.NotifyUnique("ReportAvailable", "The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => {
+                    Appli.GoToPage(PageNames.MassCompiler); 
+                    UserCommunication.CloseUniqueNotif("ReportAvailable");
+                }, Appli.IsFocused() ? 10 : 0);
         }
 
         /// <summary>
@@ -338,7 +368,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     } else if (progressBar.Style != ProgressStyle.Normal)
                         progressBar.Style = ProgressStyle.Normal;
 
-                    progressBar.Text = (Math.Abs(progression) < 0.01 ? "Initialization" : (_currentCompil.CompilationDone ? "Compiling... " : "Moving files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                    progressBar.Text = (Math.Abs(progression) < 0.01 ? "Initialization" : (!_currentCompil.CompilationDone ? "Compiling... " : "Moving files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
                     progressBar.Progress = progression;
                 });
             }
@@ -364,10 +394,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
                             <br><h2 style='margin-top: 0px; padding-top: 0;'>Parameters :</h2>
                             <table style='width: 100%'>
+                                <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
                                 <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
                                 <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + _currentCompil.GetNbFilesPerType().Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + kpv.Key + "Type' height='15px'><span style='padding-right: 15px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
                                 <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
                                 <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
+                                <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (ProEnvironment.Current.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
                             </table>
                             " + htmlContent + @"                    
                         </div>";
@@ -389,9 +421,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void ResetScreen() {
-            btStart.Visible = true;
-            btCancel.Visible = false;
-            progressBar.Visible = false;
+            if (IsHandleCreated) {
+                BeginInvoke((Action) delegate {
+                    btStart.Visible = true;
+                    btReset.Visible = true;
+                    btCancel.Visible = false;
+                    progressBar.Visible = false;
+                });
+            }
         }
 
         private void SaveHistoric() {
@@ -405,6 +442,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     list.RemoveAt(list.Count - 1);
                 Config.Instance.CompileDirectoriesHistoric = string.Join(",", list);
             }
+        }
+
+        private void BtResetOnButtonPressed(object sender, EventArgs eventArgs) {
+            var def = new Config.ConfigObject();
+            toggleRecurs.Checked = def.CompileExploreDirRecursiv;
+            toggleMono.Checked = def.CompileForceMonoProcess;
+            fl_nbProcess.Text = def.NbOfProcessesByCore.ToString();
+            fl_include.Text = def.CompileIncludeList;
+            fl_exclude.Text = def.CompileExcludeList;
         }
 
         /// <summary>
