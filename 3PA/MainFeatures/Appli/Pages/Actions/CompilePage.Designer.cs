@@ -30,6 +30,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.bt_export = new YamuiFramework.Controls.YamuiButton();
             this.btReset = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -75,6 +76,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
+            this.dockedPanel.ContentPanel.Controls.Add(this.bt_export);
             this.dockedPanel.ContentPanel.Controls.Add(this.btReset);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel6);
             this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel5);
@@ -107,6 +109,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.dockedPanel.Name = "dockedPanel";
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
+            // 
+            // bt_export
+            // 
+            this.bt_export.Location = new System.Drawing.Point(281, 189);
+            this.bt_export.Name = "bt_export";
+            this.bt_export.Size = new System.Drawing.Size(148, 23);
+            this.bt_export.TabIndex = 132;
+            this.bt_export.Text = "Export report to html";
             // 
             // btReset
             // 
@@ -417,5 +427,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private YamuiTextBox fl_exclude;
         private YamuiTextBox fl_include;
         private YamuiButton btReset;
+        private YamuiButton bt_export;
     }
 }

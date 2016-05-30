@@ -24,6 +24,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
@@ -48,6 +49,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // Stores the current compilation info
         private ProCompilation _currentCompil;
+
+        private string _reportExportPath;
 
         #endregion
 
@@ -96,6 +99,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             progressBar.Visible = false;
 
             // report
+            bt_export.Visible = false;
+            bt_export.ButtonPressed += BtExportOnButtonPressed;
             lbl_report.Visible = false;
             lbl_report.LinkClicked += Utils.OpenPathClickHandler;
 
@@ -182,7 +187,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 currentReport.Append("</table>");
 
             } else {
-                if (_currentCompil.HasBeenKilled) {
+                if (_currentCompil.HasBeenCancelled) {
                     // the process has been cancelled
                     currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>The compilation has been cancelled by the user</div>");
                 } else {
@@ -224,10 +229,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             Config.Instance.CompileForceMonoProcess = toggleMono.Checked;
             int nbProc;
             if (int.TryParse(fl_nbProcess.Text, out nbProc)) {
-                Config.Instance.NbOfProcessesByCore = Math.Max(15, nbProc);
-            } else {
-                fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
+                Config.Instance.NbOfProcessesByCore = Math.Min(15, nbProc);
             }
+            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
             Config.Instance.CompileIncludeList = fl_include.Text;
             Config.Instance.CompileExcludeList = fl_exclude.Text;
 
@@ -237,7 +241,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             progressBar.Visible = true;
             progressBar.Progress = 0;
             progressBar.Text = @"Please wait, the compilation is starting...";
+            bt_export.Visible = false;
             lbl_report.Visible = false;
+            _reportExportPath = null;
             Application.DoEvents();
 
             // start the compilation
@@ -296,11 +302,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             ResetScreen();
 
             // notify the user
-            if (!_currentCompil.HasBeenKilled)
+            if (!_currentCompil.HasBeenCancelled)
                 UserCommunication.NotifyUnique("ReportAvailable", "The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => {
                     Appli.GoToPage(PageNames.MassCompiler); 
                     UserCommunication.CloseUniqueNotif("ReportAvailable");
                 }, Appli.IsFocused() ? 10 : 0);
+
+            bt_export.Visible = true;
         }
 
         /// <summary>
@@ -349,6 +357,44 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 
+        private void BtExportOnButtonPressed(object sender, EventArgs eventArgs) {
+
+            // report already generated
+            if (!string.IsNullOrEmpty(_reportExportPath)) {
+                Utils.OpenAnyLink(_reportExportPath);
+                return;
+            }
+
+            var reportDir = Path.Combine(Config.FolderTemp, "Export_html", DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+            if (!Utils.CreateDirectory(reportDir))
+                return;
+            _reportExportPath = Path.Combine(reportDir, "index.html");
+
+            var html = lbl_report.GetHtml();
+
+            var regex1 = new Regex("src=\"(.*?)\"", RegexOptions.Compiled);
+            foreach (Match match in regex1.Matches(html)) {
+                if (match.Groups.Count >= 2) {
+                    var imgFile = Path.Combine(reportDir, match.Groups[1].Value);
+                    if (!File.Exists(imgFile)) {
+                        var tryImg = (Image)ImageResources.ResourceManager.GetObject(match.Groups[1].Value);
+                        if (tryImg != null) {
+                            tryImg.Save(imgFile);
+                        }
+                    }
+                }
+            }
+
+            regex1 = new Regex("<a href=\"(.*?)[|\"]", RegexOptions.Compiled);
+            html = regex1.Replace(html, "<a href=\"file:///$1\"");
+
+            File.WriteAllText(_reportExportPath, html, Encoding.Default);
+
+            // open it
+            Utils.OpenAnyLink(_reportExportPath);
+
+        }
+
         #endregion
 
         #region private methods
@@ -388,7 +434,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 <td class='NotificationTitle'>Compilation report</td>
                             </tr>
                             <tr>
-                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenKilled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
+                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
                             </tr>
                         </table>                
                         <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>

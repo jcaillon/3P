@@ -143,6 +143,11 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileWithLst = true;
 
+            [Display(Name = "Always use a temp directory to compile",
+                Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
+                GroupName = "Compilation",
+                AutoGenerateField = false)]
+            public bool CompileForceUseOfTemp = false;
 
             public int NbOfProcessesByCore = 3;
 

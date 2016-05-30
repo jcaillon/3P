@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
@@ -57,7 +58,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public int NumberOfProcessesEndedOk { get; private set; }
 
         // has the compilation been canceled / processes killed?
-        public bool HasBeenKilled { get; private set; }
+        public bool HasBeenCancelled { get; private set; }
 
         public event Action OnCompilationEnd;
 
@@ -97,6 +98,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         private long _nbFilesMoved;
+
+        private bool _hasBeenKilled;
 
         #endregion
 
@@ -241,7 +244,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// This method "cancel" the compilation by killing the associated processes
         /// </summary>
         public void CancelCompilation() {
-            HasBeenKilled = true;
+            HasBeenCancelled = true;
             KillProcesses();
         }
 
@@ -251,13 +254,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
             _processesRunning = 0;
             EndOfCompilation();
+            _hasBeenKilled = true;
         }
 
         /// <summary>
         /// returns the list of the processes that have been started
         /// </summary>
         public List<FileToCompile> GetListOfFileToCompile {
-            get { return _listOfCompilationProcesses.SelectMany(compProcess => compProcess.ProExecutionObject.ListToCompile).ToList(); }
+            get { return (_listOfCompilationProcesses ?? new List<CompilationProcess>()).SelectMany(compProcess => compProcess.ProExecutionObject.ListToCompile).ToList(); }
         }
 
         /// <summary>
@@ -300,7 +304,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         private void EndOfCompilation() {
 
             // only do stuff we have reached the last running process
-            if (_processesRunning > 0)
+            if (_processesRunning > 0 || _hasBeenKilled)
                 return;
 
             // everything ended ok, we do postprocess actions
@@ -310,9 +314,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
                     MovedFiles.AddRange(ProExecution.CreateListOfFilesToMove(compilationProcess.ProExecutionObject));
                 }
-                foreach (var fileToMove in MovedFiles) {
-                    _nbFilesMoved++;
-                    fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+
+                try {
+                    Parallel.ForEach(MovedFiles, fileToMove => {
+                        _nbFilesMoved++;
+                        fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+                    });
+                } catch (Exception) {
+                    _nbFilesMoved = 0;
+                    foreach (var fileToMove in MovedFiles) {
+                        _nbFilesMoved++;
+                        if (!fileToMove.IsOk) {
+                            fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+                        }
+                    }
                 }
 
                 // Read all the log files stores the errors

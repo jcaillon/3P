@@ -149,13 +149,14 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Creates the directory
+        /// Creates the directory, can apply attributes
         /// </summary>
-        public static bool CreateDirectory(string path) {
+        public static bool CreateDirectory(string path, FileAttributes attributes = FileAttributes.Directory) {
             try {
                 if (Directory.Exists(path))
                     return true;
-                Directory.CreateDirectory(path);
+                var dirInfo = Directory.CreateDirectory(path);
+                dirInfo.Attributes |= attributes;
             } catch (Exception) {
                 UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
                 return false;
@@ -174,6 +175,8 @@ namespace _3PA.Lib {
                         UserCommunication.Notify("There was a problem when trying to move a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Move file", "Couldn't find source file");
                     return false;
                 }
+                if (sourceFile.Equals(targetFile))
+                    return true;
                 File.Delete(targetFile);
                 File.Move(sourceFile, targetFile);
             } catch (Exception) {
@@ -380,6 +383,27 @@ namespace _3PA.Lib {
             g.Dispose();
 
             return b;
+        }
+
+        /// <summary>
+        /// Allows to hide a directory
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static bool HideDirectory(string path) {
+
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+                return false;
+
+            var dirInfo = new DirectoryInfo(path);
+
+            // See if directory has hidden flag, if not, make hidden
+            if ((dirInfo.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden) {
+                // Add Hidden flag    
+                dirInfo.Attributes |= FileAttributes.Hidden;
+            }
+
+            return true;
         }
 
         /// <summary>

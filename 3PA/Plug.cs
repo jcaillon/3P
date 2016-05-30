@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -355,6 +356,9 @@ namespace _3PA {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
+
+            var dir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+            UserCommunication.Notify(dir.Replace(Path.GetDirectoryName(dir), ""));
         }
 
         #endregion
