@@ -71,7 +71,18 @@ code {
 
 .AlternatBackColor {
     background-color: %ALTERNATEBGCOLOR%;
+    color: %FGCOLOR%;
 }
+
+.NormalBackColor {
+    background-color: %BGCOLOR%;
+    color: %FGCOLOR%;
+}
+
+.NormalForeColor {
+    color: %FGCOLOR%;
+}
+
 
 
 
@@ -146,6 +157,7 @@ code {
 .NotificationTitle {
     font-size: 24px;
     font-weight: bold;
+    color: %FGCOLOR%;
 }
 
 .NotificationSubTitle {

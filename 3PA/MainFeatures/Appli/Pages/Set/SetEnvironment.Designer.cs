@@ -29,6 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.mainPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.btduplicate = new YamuiFramework.Controls.YamuiButton();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btSaveDb = new YamuiFramework.Controls.YamuiButton();
             this.btCancelDb = new YamuiFramework.Controls.YamuiButton();
@@ -102,6 +103,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // mainPanel.ContentPanel
             // 
+            this.mainPanel.ContentPanel.Controls.Add(this.btduplicate);
             this.mainPanel.ContentPanel.Controls.Add(this.linkurl);
             this.mainPanel.ContentPanel.Controls.Add(this.btSaveDb);
             this.mainPanel.ContentPanel.Controls.Add(this.btCancelDb);
@@ -164,6 +166,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.Name = "mainPanel";
             this.mainPanel.Size = new System.Drawing.Size(720, 550);
             this.mainPanel.TabIndex = 0;
+            // 
+            // btduplicate
+            // 
+            this.btduplicate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btduplicate.Location = new System.Drawing.Point(393, 522);
+            this.btduplicate.Name = "btduplicate";
+            this.btduplicate.Size = new System.Drawing.Size(94, 23);
+            this.btduplicate.TabIndex = 146;
+            this.btduplicate.Text = "Duplicate";
             // 
             // linkurl
             // 
@@ -709,7 +720,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.Size = new System.Drawing.Size(122, 30);
             this.htmlLabel4.TabIndex = 113;
             this.htmlLabel4.TabStop = false;
-            this.htmlLabel4.Text = "<b>Compilation base directory</b>";
+            this.htmlLabel4.Text = "<b>Compilation base directory and options</b>";
             // 
             // htmlLabel3
             // 
@@ -873,5 +884,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButton btSaveDb;
         private YamuiButton btCancelDb;
         private HtmlLabel linkurl;
+        private YamuiButton btduplicate;
     }
 }

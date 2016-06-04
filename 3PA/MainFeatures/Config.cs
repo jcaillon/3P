@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures {
         /// generates the pages
         /// Set AutoGenerateField to refresh certain options that need special treatment to appear changed (see option page)
         /// </summary>
-        public class ConfigObject {
+        internal class ConfigObject {
 
             //[StringLength(15)]
             //[RegularExpression(@"^\$?\d+(\.(\d{2}))?$")]
@@ -124,7 +124,6 @@ namespace _3PA.MainFeatures {
             public bool AppliAllowTabAnimation = true;
 
             public bool GlobalShowDetailedHelpForErrors = true;
-            public bool GlobalCompileFilesLocally = false;
             public bool UserFirstUse = true;
 
             #endregion

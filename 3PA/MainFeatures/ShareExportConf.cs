@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures {
                         new ConfLine {
                             Label = "Compilation path rerouting",
                             HandledItem = Config.FileCompilPath,
-                            OnImport = line => ProCompilePath.Import(),
+                            OnImport = line => CompilationPath.Import(),
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileCompilPath, DataResources.CompilationPath),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,

@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -90,7 +91,6 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region ui thread safe invoke
 
         /* http://www.codeproject.com/Articles/52752/Updating-Your-Form-from-Another-Thread-without-Cre */
@@ -111,7 +111,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region Enum extensions
 
@@ -135,18 +134,20 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region string extensions
 
         /// <summary>
         /// Allows to tranform a matching string using * and ? (wildcards) into a valid regex expression
         /// it escapes regex special char so it will work as you expect!
         /// Ex: foo*.xls? will become ^foo.*\.xls.$
+        /// if the pattern doesn't start with a * and doesn't end with a *, it adds both
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>
         public static string WildCardToRegex(this string pattern) {
-            return "^" + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + "$";
+            var startStar = pattern[0].Equals('*');
+            var endStar = pattern[pattern.Length - 1].Equals('*');
+            return (!startStar ? (endStar ? "^" : "") : "") + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + (!endStar ? (startStar ? "$" : "") : "");
         }
 
         /// <summary>

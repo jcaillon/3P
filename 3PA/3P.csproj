@@ -118,6 +118,8 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Lib\Ftp\ftp.cs" />
+    <Compile Include="Lib\Ftp\Sftp.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -237,7 +239,7 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilePath.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
@@ -576,6 +578,7 @@
     <Content Include="Lib\3pUpdater\7z.dll" />
     <Content Include="Lib\3pUpdater\7z.exe" />
     <Content Include="Lib\ObjectListView\ObjectListView.dll" />
+    <Content Include="Lib\Ftp\psftp.exe" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>

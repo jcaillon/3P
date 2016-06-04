@@ -124,6 +124,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btSaveDb, "Click to <b>save</b> your modifications");
             toolTip.SetToolTip(btCancelDb, "Click to <b>cancel</b> your modifications");
 
+            toolTip.SetToolTip(btduplicate, "Click to <b>duplicate</b> the current environment");
+
             // buttons
             btDbAdd.BackGrndImage = ImageResources.PlusDb;
             btDbDelete.BackGrndImage = ImageResources.MinusDb;
@@ -132,7 +134,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             btcontrol2.ButtonPressed += Btcontrol2OnButtonPressed;
             btcontrol1.ButtonPressed += Btcontrol1ButtonPressed;
-            btcontrol1.MouseDown += Btcontrol1OnMouseDown;
+            btduplicate.ButtonPressed += BtduplicateOnButtonPressed;
             btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
             btDbEdit.ButtonPressed += BtDbEditOnButtonPressed;
             btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
@@ -165,8 +167,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     break;
 
                 case ViewMode.Delete:
-                    ProEnvironment.DeleteCurrentEnv();
-                    ProEnvironment.SetCurrent();
+                    ProEnvironment.DeleteCurrent();
                     break;
 
                 case ViewMode.DbAddNew:
@@ -187,7 +188,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         BlinkTextBox(flDatabase, ThemeManager.Current.GenericErrorColor);
                     } else {
                         Config.Instance.EnvDatabase = flDatabase.Text;
-                        ProEnvironment.SaveList();
                     }
                     break;
 
@@ -220,10 +220,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         return false;
                     }
 
-                    ProEnvironment.SaveEnv((_currentMode == ViewMode.Edit) ? ProEnvironment.Current : null, newEnv);
-                    Config.Instance.EnvName = newEnv.Name;
-                    Config.Instance.EnvSuffix = newEnv.Suffix;
-                    ProEnvironment.SetCurrent();
+                    ProEnvironment.Modify((_currentMode == ViewMode.Edit) ? ProEnvironment.Current : null, newEnv);
                     break;
             }
 
@@ -377,13 +374,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btcontrol2.Text = ModifyStr;
                 toolTip.SetToolTip(btcontrol2, "Click to <b>modify</b> the information for the current environment");
                 btcontrol1.Text = AddNewStr;
-                toolTip.SetToolTip(btcontrol1, "Click to <b>add a new</b> environment<br><i>Right click to duplicate the current environment</i>");
+                toolTip.SetToolTip(btcontrol1, "Click to <b>add a new</b> environment<br>");
+                btduplicate.Visible = true;
                 btDelete.Show();
             } else {
                 btcontrol2.Text = SaveStr;
                 toolTip.SetToolTip(btcontrol2, "Click to <b>save</b> your modifications");
                 btcontrol1.Text = CancelStr;
                 toolTip.SetToolTip(btcontrol1, "Click to <b>cancel</b> your modifications");
+                btduplicate.Visible = false;
                 btDelete.Hide();
             }
             
@@ -407,7 +406,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textbox5.Text = ProEnvironment.Current.ProwinPath;
             textbox6.Text = ProEnvironment.Current.LogFilePath;
 
-            tgCompilLocl.Checked = Config.Instance.GlobalCompileFilesLocally;
+            tgCompilLocl.Checked = ProEnvironment.Current.CompileLocally;
             lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
 
             // download database information
@@ -474,8 +473,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="sender"></param>
         /// <param name="eventArgs"></param>
         private void TgCompilLoclOnCheckedChanged(object sender, EventArgs eventArgs) {
-            Config.Instance.GlobalCompileFilesLocally = tgCompilLocl.Checked;
+            ProEnvironment.Current.CompileLocally = tgCompilLocl.Checked;
             lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
+            ProEnvironment.SaveList();
         }
 
 
@@ -502,13 +502,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 ToggleMode(ViewMode.Select);
         }
 
-        private void Btcontrol1OnMouseDown(object sender, MouseEventArgs mouseEventArgs) {
-            btcontrol1.UseCustomBackColor = false;
-            if (mouseEventArgs.Button == MouseButtons.Right && _currentMode == ViewMode.Select) {
-                // duplicate
-                ToggleMode(ViewMode.Edit);
-                _currentMode = ViewMode.AddNew;
-            }
+        private void BtduplicateOnButtonPressed(object sender, EventArgs eventArgs) {
+            // duplicate
+            ToggleMode(ViewMode.Edit);
+            _currentMode = ViewMode.AddNew;
         }
 
         /// <summary>
@@ -560,8 +557,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void cbName_SelectedIndexChanged(object sender, EventArgs e) {
             if (Config.Instance.EnvName.Equals(cbName.SelectedItem.ToString()))
                 return;
-            Config.Instance.EnvName = cbName.SelectedItem.ToString();
-            ProEnvironment.SetCurrent();
+            ProEnvironment.SetCurrent(cbName.SelectedItem.ToString(), null, null);
             ToggleMode(ViewMode.Select);
         }
 
@@ -573,8 +569,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void cbSuffix_SelectedIndexChanged(object sender, EventArgs e) {
             if (Config.Instance.EnvSuffix.Equals(cbSuffix.SelectedItem.ToString()))
                 return;
-            Config.Instance.EnvSuffix = cbSuffix.SelectedItem.ToString();
-            ProEnvironment.SetCurrent();
+            ProEnvironment.SetCurrent(null, cbSuffix.SelectedItem.ToString(), null);
             ToggleMode(ViewMode.Select);
         }
 
@@ -586,8 +581,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void cbDatabase_SelectedIndexChanged(object sender, EventArgs e) {
             if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
-            Config.Instance.EnvDatabase = cbDatabase.SelectedItem.ToString();
-            ProEnvironment.SetCurrent();
+            ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
             ToggleMode(ViewMode.Select);
         }
 

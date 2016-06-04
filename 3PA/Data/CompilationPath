@@ -26,6 +26,11 @@
 # the application name, as well as the application suffix can be left blank
 # in that case, the rerouting will be applied for every compilation
 #
+# You can use the wildcards * and ? for your filters!
+# * matches any character 0 or more times
+# ? matches any character 1 time exactly
+# Example of filter : *foo*.cls,*\\my_sub_directory\\*,*proc_???.p
+#
 # For instance, if i have the following line :
 # 		src\client-sources\	client\
 # If i compile a source file located in D:\Repo\src\client-sources\
@@ -34,3 +39,4 @@
 # since the 2 first fields are left blank, this setting applies for everything i compile
 # easy right?!
 # ========================================================================
+# application_name	application_suffix	source_path_to_match	path_to_append_to_compilation_dir

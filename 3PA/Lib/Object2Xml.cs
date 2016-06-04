@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -41,7 +42,6 @@ namespace _3PA.Lib {
         private const string PrefixToParentOfDico = "Dico";
 
         #endregion
-
 
         #region Save methods
 
@@ -125,7 +125,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region Load methods
 
@@ -223,7 +222,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region Dictionnary
 

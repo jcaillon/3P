@@ -181,7 +181,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 currentReport.Append("<table style='margin-bottom: 0px; width: 100%'>");
                 var boolAlternate = false;
                 foreach (var listLine in listLines.OrderByDescending(tuple => tuple.Item1)) {
-                    currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : ""));
+                    currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
                     boolAlternate = !boolAlternate;
                 }
                 currentReport.Append("</table>");
@@ -428,26 +428,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     lbl_report.Visible = true;
 
                     lbl_report.Text = @"
-                        <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
-                            <tr>
-                                <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report' width='64' height='64' /></td>
-                                <td class='NotificationTitle'>Compilation report</td>
-                            </tr>
-                            <tr>
-                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
-                            </tr>
-                        </table>                
-                        <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
-                            <br><h2 style='margin-top: 0px; padding-top: 0;'>Parameters :</h2>
-                            <table style='width: 100%'>
-                                <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
-                                <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + _currentCompil.GetNbFilesPerType().Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + kpv.Key + "Type' height='15px'><span style='padding-right: 15px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (ProEnvironment.Current.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
-                            </table>
-                            " + htmlContent + @"                    
+                        <div class='NormalBackColor'>
+                            <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
+                                <tr>
+                                    <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report' width='64' height='64' /></td>
+                                    <td class='NotificationTitle'>Compilation report</td>
+                                </tr>
+                                <tr>
+                                    <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
+                                </tr>
+                            </table>                
+                            <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
+                                <br><h2 style='margin-top: 0px; padding-top: 0;'>Parameters :</h2>
+                                <table style='width: 100%' class='NormalBackColor'>
+                                    <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
+                                    <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
+                                    <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + _currentCompil.GetNbFilesPerType().Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + kpv.Key + "Type' height='15px'><span style='padding-right: 15px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
+                                    <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
+                                    <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
+                                    <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (ProEnvironment.Current.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
+                                </table>
+                                " + htmlContent + @"                    
+                            </div>
                         </div>";
 
                     // Activate scrollbars if needed

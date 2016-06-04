@@ -124,6 +124,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public bool ConnectionFailed { get; private set; }
 
+        /// <summary>
+        /// The pro environment used at the moment the execution was created
+        /// </summary>
+        public ProEnvironment.ProEnvironmentObject ProEnv { get; private set; }
+
         #endregion
 
         #region constructors and destructor
@@ -141,9 +146,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // restore splashscreen
                 if (!string.IsNullOrEmpty(ProgressWin32))
                     MoveSplashScreenNoError(Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen-3p-disabled.bmp"), Path.Combine(Path.GetDirectoryName(ProgressWin32) ?? "", "splashscreen.bmp"));
+
             } catch (Exception) {
                 // it's only a clean up operation, we don't care if it crashes
             }
+        }
+
+        public ProExecution() {
+            // create a copy of the current environment
+            ProEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
         }
 
         #endregion
@@ -162,10 +173,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 ListToCompile = new List<FileToCompile>();
 
             // check prowin32.exe
-            if (!File.Exists(ProEnvironment.Current.ProwinPath)) {
-                UserCommunication.NotifyUnique("NoProwin32", "The file path to prowin32.exe is incorrect : <br><br>" + ProEnvironment.Current.ProwinPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
+            if (!File.Exists(ProEnv.ProwinPath)) {
+                UserCommunication.NotifyUnique("NoProwin32", "The file path to prowin32.exe is incorrect : <br><br>" + ProEnv.ProwinPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
                     Appli.Appli.GoToPage(PageNames.SetEnvironment);
                     UserCommunication.CloseUniqueNotif("NoProwin32");
+                    args.Handled = true;
+                }, 10);
+                return false;
+            }
+
+            // check compilation dir
+            if (!ProEnv.CompileLocally && (!Path.IsPathRooted(ProEnv.BaseCompilationPath))) {
+                UserCommunication.NotifyUnique("Compilationdirectory", "The path for the compilation base directory is incorrect : <br><br>" + ProEnv.BaseCompilationPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
+                    Appli.Appli.GoToPage(PageNames.SetEnvironment);
+                    UserCommunication.CloseUniqueNotif("Compilationdirectory");
                     args.Handled = true;
                 }, 10);
                 return false;
@@ -177,7 +198,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 TempDir += "_";
             if (!Utils.CreateDirectory(TempDir))
                 return false;
-
+            
             // for each file of the list
             var filesListPath = Path.Combine(TempDir, "files.list");
             StringBuilder filesListcontent = new StringBuilder();
@@ -190,9 +211,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
 
                 // create target directory
-                fileToCompile.OutputDir = ProCompilePath.GetCompilationDirectory(fileToCompile.InputPath);
-                if (Config.Instance.GlobalCompileFilesLocally || string.IsNullOrEmpty(fileToCompile.OutputDir))
-                    fileToCompile.OutputDir = Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.OutputDir;
+                fileToCompile.OutputDir = ProEnv.GetCompilationDirectory(fileToCompile.InputPath);
                 if (!Utils.CreateDirectory(fileToCompile.OutputDir))
                     return false;
 
@@ -240,11 +259,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Move ini file into the execution dir
             var baseIniPath = "";
-            if (File.Exists(ProEnvironment.Current.IniPath)) {
+            if (File.Exists(ProEnv.IniPath)) {
                 baseIniPath = Path.Combine(TempDir, "base.ini");
                 // we need to copy the .ini but we must delete the PROPATH= part, as stupid as it sounds, if we leave a huge PROPATH 
                 // in this file, it increases the compilation time by a stupid amount... unbelievable i know, but trust me, it does...
-                var fileContent = File.ReadAllText(ProEnvironment.Current.IniPath, Encoding.Default);
+                var fileContent = File.ReadAllText(ProEnv.IniPath, Encoding.Default);
                 var regex = new Regex("^PROPATH=.*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                 var matches = regex.Match(fileContent);
                 if (matches.Success) 
@@ -254,9 +273,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Move pf file into the execution dir
             var basePfPath = "";
-            if (File.Exists(ProEnvironment.Current.GetPfPath())) {
+            if (File.Exists(ProEnv.GetPfPath())) {
                 basePfPath = Path.Combine(TempDir, "base.pf");
-                File.Copy(ProEnvironment.Current.GetPfPath(), basePfPath);
+                File.Copy(ProEnv.GetPfPath(), basePfPath);
             }
 
             StringBuilder programContent = new StringBuilder();
@@ -304,7 +323,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             LogPath = Path.Combine(TempDir, "run.log");
             ExecutionType = executionType;
             ProcessStartDir = (ListToCompile.Count == 1) ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? TempDir : TempDir;
-            ProgressWin32 = ProEnvironment.Current.ProwinPath;
+            ProgressWin32 = ProEnv.ProwinPath;
             if (executionType == ExecutionType.Database)
                 ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
             ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
@@ -317,8 +336,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE ToExecute " + fileToExecute.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnvironment.Current.GetProPathDirList)).ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnvironment.Current.ExtraPf.Trim().ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnv.ExtraPf.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
@@ -340,8 +359,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (batchMode)
                 Params.Append(" -b");
             Params.Append(" -p " + runnerPath.ProgressQuoter());
-            if (!string.IsNullOrWhiteSpace(ProEnvironment.Current.CmdLineParameters))
-                Params.Append(" " + ProEnvironment.Current.CmdLineParameters.Trim());
+            if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
+                Params.Append(" " + ProEnv.CmdLineParameters.Trim());
             ExeParameters = Params.ToString();
 
 
@@ -351,7 +370,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Start a process
             var pInfo = new ProcessStartInfo {
-                FileName = ProEnvironment.Current.ProwinPath,
+                FileName = ProEnv.ProwinPath,
                 Arguments = ExeParameters,
                 WorkingDirectory = ProcessStartDir
             };
@@ -375,7 +394,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }, 10);
             }
 
-            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnvironment.Current.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
+            //UserCommunication.Notify("New process starting...<br><br><b>FileName :</b><br>" + ProEnv.ProwinPath + "<br><br><b>Parameters :</b><br>" + ExeParameters + "<br><br><b>Temporary directory :</b><br><a href='" + TempDir + "'>" + TempDir + "</a>");
 
             return true;
         }
@@ -466,25 +485,25 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Read the compilation/prolint errors of a given execution through its .log file
         /// update the FilesInfo accordingly so the user can see the errors in npp
         /// </summary>
-        public static Dictionary<string, List<FileError>> LoadErrorLog(ProExecution lastExec) {
+        public Dictionary<string, List<FileError>> LoadErrorLog() {
 
             // we need to correct the files path in the log if needed
             var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-            foreach (var treatedFile in lastExec.ListToCompile.Where(treatedFile => !treatedFile.TempInputPath.Equals(treatedFile.InputPath))) {
+            foreach (var treatedFile in ListToCompile.Where(treatedFile => !treatedFile.TempInputPath.Equals(treatedFile.InputPath))) {
                 changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
             }
 
             // read the log file
             Dictionary<string, List<FileError>> errorsList;
-            if (lastExec.ExecutionType == ExecutionType.Prolint) {
-                var treatedFile = lastExec.ListToCompile.First();
+            if (ExecutionType == ExecutionType.Prolint) {
+                var treatedFile = ListToCompile.First();
                 changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
-                errorsList = FilesInfo.ReadErrorsFromFile(lastExec.ProlintOutputPath, true, changePaths);
+                errorsList = FilesInfo.ReadErrorsFromFile(ProlintOutputPath, true, changePaths);
             } else
-                errorsList = FilesInfo.ReadErrorsFromFile(lastExec.LogPath, false, changePaths);
+                errorsList = FilesInfo.ReadErrorsFromFile(LogPath, false, changePaths);
 
             // clear errors on each compiled file
-            foreach (var fileToCompile in lastExec.ListToCompile) {
+            foreach (var fileToCompile in ListToCompile) {
                 FilesInfo.ClearAllErrors(fileToCompile.InputPath, true);
             }
 
@@ -501,12 +520,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// for each Origin file will correspond one (or more if it's a .cls) .r file,
         /// and one .lst if the option has been checked
         /// </summary>
-        public static List<FileToMove> CreateListOfFilesToMove(ProExecution lastExec) {
+        public List<FileToMove> CreateListOfFilesToMove() {
 
             var outputList = new List<FileToMove>();
             var clsNotFound = new StringBuilder();
 
-            foreach (var treatedFile in lastExec.ListToCompile) {
+            foreach (var treatedFile in ListToCompile) {
 
                 // Is the input file a class file?
                 if (treatedFile.InputPath.EndsWith(".cls", StringComparison.CurrentCultureIgnoreCase)) {
@@ -526,23 +545,23 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         foreach (var file in listOfRFiles) {
 
                             var relativePath = file.Replace(treatedFile.TempOutputDir, "").TrimStart('\\');
-                            var sourcePath = ProEnvironment.Current.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
+                            var sourcePath = ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
 
                             if (string.IsNullOrEmpty(sourcePath)) {
                                 clsNotFound.Append("<div>" + relativePath + "</div>");
                             } else {
-                                var outputDir = ProCompilePath.GetCompilationDirectory(Path.ChangeExtension(sourcePath, ".r").Replace(relativePath, ""));
-
+                                var outputDir = ProEnv.GetCompilationDirectory(sourcePath);
+                                
                                 //UserCommunication.Notify("Relative path = " + relativePath + "<br>Source path = " + sourcePath + "<br>Source dir = " + outputDir);
 
                                 string outputRPath;
-                                if (!Config.Instance.GlobalCompileFilesLocally && !string.IsNullOrEmpty(outputDir)) {
+                                if (!ProEnv.CompileLocally) {
                                     // move the *.r file in the compilation directory (create the needed subdirectories...)
                                     outputRPath = Path.Combine(outputDir, relativePath);
                                     Utils.CreateDirectory(Path.GetDirectoryName(outputRPath));
                                 } else {
                                     // move the *.r file next to his source
-                                    outputRPath = Path.ChangeExtension(sourcePath, ".r");
+                                    outputRPath = Path.Combine(outputDir, Path.GetFileName(file));
                                 }
 
                                 // add .r and .lst (if needed) to the list of files to move

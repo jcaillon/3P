@@ -272,7 +272,7 @@ namespace _3PA.MainFeatures {
                 int nbErrors = 0;
 
                 // Read log info
-                var errorList = ProExecution.LoadErrorLog(lastExec);
+                var errorList = lastExec.LoadErrorLog();
 
                 if (!errorList.Any()) {
                     // the compiler messages are empty
@@ -314,7 +314,7 @@ namespace _3PA.MainFeatures {
                 // when compiling, move .r/.lst to compilation dir
                 var fileToMoveList = new List<FileToMove>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
-                    fileToMoveList = ProExecution.CreateListOfFilesToMove(lastExec);
+                    fileToMoveList = lastExec.CreateListOfFilesToMove();
                     foreach (var fileToMove in fileToMoveList) {
                         fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
                     }

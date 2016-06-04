@@ -103,7 +103,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-
         #region public methods
 
         /// <summary>
@@ -310,10 +309,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // everything ended ok, we do postprocess actions
             if (NumberOfProcesses == NumberOfProcessesEndedOk) {
 
-                // we need to move all the files...
+                // we need to move all the files... (keep only distinct target files)
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
-                    MovedFiles.AddRange(ProExecution.CreateListOfFilesToMove(compilationProcess.ProExecutionObject));
+                    MovedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToMove());
                 }
+                MovedFiles = MovedFiles.GroupBy(move => move.To).Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First()).ToList();
 
                 try {
                     Parallel.ForEach(MovedFiles, fileToMove => {
@@ -332,7 +332,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // Read all the log files stores the errors
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
-                    var errorList = ProExecution.LoadErrorLog(compilationProcess.ProExecutionObject);
+                    var errorList = compilationProcess.ProExecutionObject.LoadErrorLog();
                     foreach (var keyValue in errorList) {
                         ErrorsList.AddRange(keyValue.Value);
                     }
@@ -400,7 +400,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
             public ProExecution ProExecutionObject;
         }
-
 
         #endregion
 

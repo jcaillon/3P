@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateList() {
             // build the html
-            html_list.Text = ProCompilePath.BuildHtmlTable();
+            html_list.Text = CompilationPath.BuildHtmlTable();
 
             dockedPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
             dockedPanel.OnResizedContentPanel();
@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtImportOnButtonPressed(object sender, EventArgs eventArgs) {
-            ProCompilePath.Import();
+            CompilationPath.Import();
             UpdateList();
         }
 
