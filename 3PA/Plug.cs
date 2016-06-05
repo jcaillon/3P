@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -26,6 +25,7 @@ using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
@@ -154,7 +154,6 @@ namespace _3PA {
             Keywords.Import();
             Snippets.Init();
             FileTag.Import();
-            ProCompilePath.Import();
 
             // initialize the list of objects of the autocompletion form
             AutoComplete.RefreshStaticItems(true);
@@ -357,8 +356,60 @@ namespace _3PA {
             //        new List<string> { "ok", "cancel" },
             //        true);
 
-            var dir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
-            UserCommunication.Notify(dir.Replace(Path.GetDirectoryName(dir), ""));
+            /*
+            string[] remoteFiles = new string[] {
+                @"/etc/remote-file1.txt",
+                @"/etc/remote-file2.txt",
+                @"/etc/remote-file3.txt"
+            };
+
+            string[] localFiles = new string[] {
+                @"C:\local-file1.txt",
+                @"C:\local-file2.txt",
+                @"C:\local-file3.txt"
+            };
+
+            string[] commands = new string[] {
+                @"cd /home",
+                @"dir"
+            };
+
+            Sftp PsftpClient = new Sftp(@"10.10.10.10", @"root", @"password");
+
+            PsftpClient.Get(remoteFiles, localFiles);
+
+            PsftpClient.Put(remoteFiles, localFiles);
+
+            PsftpClient.SendCommands(commands);
+
+            Console.WriteLine(PsftpClient.Outputs);
+
+            PsftpClient = null;
+            */
+
+
+            Task.Factory.StartNew(() => {
+
+                /* Create Object Instance */
+                Ftp ftpClient = new Ftp {
+                    Host = "localhost",
+                    User = "progress",
+                    Pass = "progress",
+                    UseSssl = true
+                };
+                if (ftpClient.CanConnect) {
+
+                    UserCommunication.Notify(ftpClient.CreateDirectory("/fuck/more/stuff").ToString());
+                    UserCommunication.Notify(ftpClient.Upload(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\compile\_underescore.r").ToString());
+                    UserCommunication.Notify(ftpClient.Download(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\program.r").ToString());
+
+                    UserCommunication.Notify(ftpClient.ErrorLog.ToString().Replace("\n", "<br>"));
+                    UserCommunication.Notify(ftpClient.Log.ToString().Replace("\n", "<br>"));
+                } else {
+                    // coulnd't connect
+                    UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
+                }
+            });
         }
 
         #endregion

@@ -523,6 +523,8 @@ namespace _3PA.MainFeatures {
             get { return _instance ?? (_instance = Init()); }
         }
 
+        public static string GetUserAgent { get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; } }
+
         /// <summary>
         /// Url to request to get info on the latest releases
         /// </summary>

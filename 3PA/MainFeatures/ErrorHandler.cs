@@ -131,6 +131,12 @@ namespace _3PA.MainFeatures {
             return true;
         }
 
+        public static string GetHtmlLogLink {
+            get {
+                return Config.Instance.UserGetsPreReleases ? "<br>More details can be found in log file below :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") : "";
+            }
+        } 
+
         public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
             ShowErrors((Exception)args.ExceptionObject, "Unhandled error");
         }

@@ -182,7 +182,7 @@ namespace _3PA.MainFeatures {
                 req.Proxy = Config.Instance.GetWebClientProxy();
                 req.Method = "POST";
                 req.ContentType = "application/json";
-                req.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)";
+                req.UserAgent = Config.GetUserAgent;
                 req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
                 StreamWriter writer = new StreamWriter(req.GetRequestStream());
                 JavaScriptSerializer serializer = new JavaScriptSerializer();

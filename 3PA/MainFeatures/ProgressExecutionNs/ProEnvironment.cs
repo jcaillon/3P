@@ -92,6 +92,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 ProwinPath = toCopy.ProwinPath;
                 LogFilePath = toCopy.LogFilePath;
                 _currentProPathDirList = toCopy._currentProPathDirList;
+                _compilationPathList = toCopy._compilationPathList;
             }
 
             #endregion
