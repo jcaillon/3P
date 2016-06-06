@@ -114,18 +114,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // Activate scrollbars
-            yPos += 15;
-            if (yPos > Height) {
-                dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
-                    AutoSize = true,
-                    Location = new Point(0, yPos),
-                    Text = @" "
-                });
-                yPos += 10;
-                dockedPanel.ContentPanel.Height = yPos;
-            }
+            dockedPanel.ContentPanel.Height = yPos + 20;
             Height = yPos;
-
         }
 
         #endregion

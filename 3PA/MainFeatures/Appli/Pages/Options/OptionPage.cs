@@ -45,6 +45,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private List<string> _allowedGroups;
 
+        private YamuiButton _btSave;
+
         #endregion
 
         #region constructor
@@ -186,16 +188,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             });
 
             yPos += 15;
-            var defaultButton = new YamuiButton {
+            _btSave = new YamuiButton {
                 Location = new Point(30, yPos),
                 Size = new Size(100, 23),
                 Text = @"Save everything"
             };
-            defaultButton.ButtonPressed += SaveAllButtonOnButtonPressed;
-            tooltip.SetToolTip(defaultButton, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
-            dockedPanel.ContentPanel.Controls.Add(defaultButton);
+            _btSave.ButtonPressed += SaveAllButtonOnButtonPressed;
+            tooltip.SetToolTip(_btSave, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
+            dockedPanel.ContentPanel.Controls.Add(_btSave);
 
-            defaultButton = new YamuiButton {
+            var defaultButton = new YamuiButton {
                 Location = new Point(135, yPos),
                 Size = new Size(100, 23),
                 Text = @"Reset to default"
@@ -216,19 +218,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 dockedPanel.ContentPanel.Controls.Add(updateButton); 
             }
 
-            yPos += 25;
+            dockedPanel.ContentPanel.Height = yPos + 50;
+        }
 
-            if (yPos > Height) {
-                dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
-                    AutoSize = true,
-                    Function = FontFunction.Heading,
-                    Location = new Point(0, yPos),
-                    Text = @" "
-                });
-                yPos += 10;
-                dockedPanel.ContentPanel.Height = yPos;
-            }
-            Height = yPos;
+        public override void OnShow() {
+            if (_btSave != null)
+                ActiveControl = _btSave;
+            base.OnShow();
         }
 
         #region on events

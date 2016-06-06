@@ -8,15 +8,10 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.CodeDom.Compiler;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
-using System.Resources;
-using System.Runtime.CompilerServices;
-
 namespace _3PA.Data {
+    using System;
+    
+    
     /// <summary>
     ///   A strongly-typed resource class, for looking up localized strings, etc.
     /// </summary>
@@ -24,27 +19,27 @@ namespace _3PA.Data {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [GeneratedCode("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
-    [DebuggerNonUserCode()]
-    [CompilerGenerated()]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class DataResources {
         
-        private static ResourceManager resourceMan;
+        private static global::System.Resources.ResourceManager resourceMan;
         
-        private static CultureInfo resourceCulture;
+        private static global::System.Globalization.CultureInfo resourceCulture;
         
-        [SuppressMessage("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
+        [global::System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("Microsoft.Performance", "CA1811:AvoidUncalledPrivateCode")]
         internal DataResources() {
         }
         
         /// <summary>
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        internal static ResourceManager ResourceManager {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Resources.ResourceManager ResourceManager {
             get {
-                if (ReferenceEquals(resourceMan, null)) {
-                    ResourceManager temp = new ResourceManager("_3PA.Data.DataResources", typeof(DataResources).Assembly);
+                if (object.ReferenceEquals(resourceMan, null)) {
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("_3PA.Data.DataResources", typeof(DataResources).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -55,8 +50,8 @@ namespace _3PA.Data {
         ///   Overrides the current thread's CurrentUICulture property for all
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        internal static CultureInfo Culture {
+        [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
+        internal static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -156,6 +151,45 @@ namespace _3PA.Data {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to /* ==================================== */
+        ////* GENRAL STUFF */
+        ///html {
+        ///    padding: 0;
+        ///    margin: 0;
+        ///    Font: 12px &quot;Segoe UI&quot;;
+        ///    color: %FGCOLOR%;
+        ///}
+        ///
+        ///body {
+        ///    padding: 0;
+        ///    margin: 0;
+        ///}
+        ///
+        ///hr {
+        ///    border: 0;
+        ///    height: 1px;
+        ///    background: %FORMBORDER% no-repeat scroll center;
+        ///    width: 70%;
+        ///}
+        ///
+        ///a:link {
+        ///    color: %LINKCOLOR%;
+        ///    text-decoration: underline;
+        ///    /*margin: 0px;
+        ///    padding: 0px;*/
+        ///}
+        ///
+        ///code {
+        ///    background-color: %ALTERNATEBGCOLOR%;
+        ///    padding-left: 5px;        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string StyleSheet {
+            get {
+                return ResourceManager.GetString("StyleSheet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] SyntaxThemes {
@@ -166,13 +200,13 @@ namespace _3PA.Data {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to   &lt;UserLang name=&quot;OpenEdgeABL&quot; ext=&quot;p i t w cls lst&quot; udlVersion=&quot;2.1&quot;&gt;
+        ///   Looks up a localized string similar to   &lt;UserLang name=&quot;OpenEdgeABL&quot; ext=&quot;p i t w cls lst d df&quot; udlVersion=&quot;2.1&quot;&gt;
         ///    &lt;Settings&gt;
         ///      &lt;Global caseIgnored=&quot;yes&quot; allowFoldOfComments=&quot;no&quot; foldCompact=&quot;no&quot; forcePureLC=&quot;0&quot; decimalSeparator=&quot;0&quot; /&gt;
         ///      &lt;Prefix Keywords1=&quot;no&quot; Keywords2=&quot;no&quot; Keywords3=&quot;no&quot; Keywords4=&quot;no&quot; Keywords5=&quot;no&quot; Keywords6=&quot;yes&quot; Keywords7=&quot;no&quot; Keywords8=&quot;no&quot; /&gt;
         ///    &lt;/Settings&gt;
         ///    &lt;KeywordLists&gt;
-        ///      &lt;Keywords name=&quot;Comments&quot;&gt;00&amp;amp;ANALYZE-SUSPEND 00&amp;amp;GLOBAL-DEFINE 00&amp;amp;SCOPED-DEFINE 00&amp;amp;SCOPED 00&amp;amp;GLOB 00&amp;amp;GLO [rest of string was truncated]&quot;;.
+        ///      &lt;Keywords name=&quot;Comments&quot;&gt;00&amp;amp;ANALYZE-SUSPEND 00&amp;amp;GLOBAL-DEFINE 00&amp;amp;SCOPED-DEFINE 00&amp;amp;SCOPED 00&amp;amp;GLOB 00&amp;am [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string UDL {
             get {

@@ -344,6 +344,9 @@ namespace _3PA {
 
         public static void StartDebug() {
             //Debug.Assert(false);
+
+            UserCommunication.Notify(ZipStorer.ExtractAll(@"C:\Users\Julien\Downloads\3P.zip", @"C:\Users\Julien\Downloads\").ToString());
+
         }
 
 
@@ -355,38 +358,6 @@ namespace _3PA {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
-
-            /*
-            string[] remoteFiles = new string[] {
-                @"/etc/remote-file1.txt",
-                @"/etc/remote-file2.txt",
-                @"/etc/remote-file3.txt"
-            };
-
-            string[] localFiles = new string[] {
-                @"C:\local-file1.txt",
-                @"C:\local-file2.txt",
-                @"C:\local-file3.txt"
-            };
-
-            string[] commands = new string[] {
-                @"cd /home",
-                @"dir"
-            };
-
-            Sftp PsftpClient = new Sftp(@"10.10.10.10", @"root", @"password");
-
-            PsftpClient.Get(remoteFiles, localFiles);
-
-            PsftpClient.Put(remoteFiles, localFiles);
-
-            PsftpClient.SendCommands(commands);
-
-            Console.WriteLine(PsftpClient.Outputs);
-
-            PsftpClient = null;
-            */
-
 
             Task.Factory.StartNew(() => {
 

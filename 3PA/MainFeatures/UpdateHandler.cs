@@ -292,40 +292,33 @@ namespace _3PA.MainFeatures {
         /// <param name="asyncCompletedEventArgs"></param>
         private static void WcOnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
-                // copy 7zip.exe
-                if (!File.Exists(Config.FileZipExe))
-                    File.WriteAllBytes(Config.FileZipExe, Resources._7z);
-                if (!File.Exists(Config.FileZipDll))
-                    File.WriteAllBytes(Config.FileZipDll, Resources._7zdll);
 
                 // Extract the .zip file
-                var process = Process.Start(new ProcessStartInfo {
-                    FileName = Config.FileZipExe,
-                    Arguments = string.Format("x -y \"-o{0}\" \"{1}\"", Config.FolderUpdate, Config.FileLatestReleaseZip),
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    WindowStyle = ProcessWindowStyle.Hidden
-                });
-                if (process != null)
-                    process.WaitForExit();
+                if (!ZipStorer.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
 
-                // check the presence of the plugin file
-                if (!File.Exists(Config.FileDownloadedPlugin)) {
-                    Utils.DeleteDirectory(Config.FolderUpdate, true);
-                    return;
+                    // check the presence of the plugin file
+                    if (File.Exists(Config.FileDownloadedPlugin)) {
+
+                        // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
+                        if (!File.Exists(Config.FileUpdaterExe))
+                            File.WriteAllBytes(Config.FileUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
+
+                        // configure the update
+                        File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", Config.FileDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
+
+                        // write the version log
+                        File.WriteAllText(Config.FileVersionLog, LatestReleaseInfo.Body, Encoding.Default);
+
+                        NotifyUpdateAvailable();
+
+                    } else {
+                        Utils.DeleteDirectory(Config.FolderUpdate, true);
+                    }
+
+                } else {
+                    ErrorHandler.Log("Failed to unzip : " + Config.FileLatestReleaseZip);
+                    UserCommunication.Notify("I failed to unzip the following file : <br>" + Config.FileLatestReleaseZip + "<br>It contains the update for 3P, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
                 }
-
-                // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                if (!File.Exists(Config.FileUpdaterExe))
-                    File.WriteAllBytes(Config.FileUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
-
-                // configure the update
-                File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", Config.FileDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
-
-                // write the version log
-                File.WriteAllText(Config.FileVersionLog, LatestReleaseInfo.Body, Encoding.Default);
-
-                NotifyUpdateAvailable();
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");

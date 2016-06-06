@@ -19,6 +19,7 @@
 #endregion
 using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Data;
 using _3PA.Images;
 using _3PA.Properties;
 
@@ -38,7 +39,7 @@ namespace _3PA.Html {
         }
 
         public static string YamuiThemeManagerOnOnGetCssSheet() {
-            var cssStyleSheet = Resources.StyleSheet;
+            var cssStyleSheet = DataResources.StyleSheet;
             cssStyleSheet = cssStyleSheet.Replace("%FGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormFore));
             cssStyleSheet = cssStyleSheet.Replace("%BGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormBack));
             cssStyleSheet = cssStyleSheet.Replace("%ALTERNATEBGCOLOR%", ColorTranslator.ToHtml(ThemeManager.Current.FormAltBack));

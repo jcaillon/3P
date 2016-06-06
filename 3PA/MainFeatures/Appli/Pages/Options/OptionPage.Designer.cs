@@ -29,8 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
-            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiImageButton();
-            this.dockedPanel.ContentPanel.SuspendLayout();
             this.dockedPanel.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -53,7 +51,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.yamuiImageButton1);
             this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.dockedPanel.ContentPanel.Name = "ContentPanel";
             this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
@@ -65,15 +62,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.dockedPanel.Size = new System.Drawing.Size(720, 550);
             this.dockedPanel.TabIndex = 0;
             // 
-            // yamuiImageButton1
-            // 
-            this.yamuiImageButton1.BackGrndImage = null;
-            this.yamuiImageButton1.Location = new System.Drawing.Point(707, 537);
-            this.yamuiImageButton1.Name = "yamuiImageButton1";
-            this.yamuiImageButton1.Size = new System.Drawing.Size(10, 10);
-            this.yamuiImageButton1.TabIndex = 0;
-            this.yamuiImageButton1.Text = "yamuiImageButton1";
-            // 
             // OptionPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -82,7 +70,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.Controls.Add(this.dockedPanel);
             this.Name = "OptionPage";
             this.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.ContentPanel.ResumeLayout(false);
             this.dockedPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -92,6 +79,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private HtmlToolTip tooltip;
         private YamuiScrollPage dockedPanel;
-        private YamuiImageButton yamuiImageButton1;
     }
 }

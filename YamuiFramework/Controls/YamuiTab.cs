@@ -151,9 +151,6 @@ namespace YamuiFramework.Controls {
                 _currentPage.Dock = DockStyle.Fill;
                 _currentPage.Invalidate();
 
-                // Execute the page OnShow method
-                _currentPage.OnShow();
-
                 Application.DoEvents();
 
                 // tab animation (do if needed)
@@ -162,6 +159,9 @@ namespace YamuiFramework.Controls {
 
                 ActiveControl = _currentPage;
                 _currentPage.Focus();
+
+                // Execute the page OnShow method
+                _currentPage.OnShow();
             }
         }
 

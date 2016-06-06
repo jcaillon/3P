@@ -453,17 +453,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         </div>";
 
                     // Activate scrollbars if needed
-                    var yPos = lbl_report.Location.Y + lbl_report.Height;
-                    if (yPos > Height) {
-                        dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
-                            AutoSize = true,
-                            Location = new Point(0, yPos),
-                            Text = @" "
-                        });
-                        yPos += 10;
-                        dockedPanel.ContentPanel.Height = yPos;
-                    }
-                    Height = yPos;
+                    dockedPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
+
                 });
             }
         }

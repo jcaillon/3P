@@ -91,6 +91,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.XML" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Abl.cs" />
@@ -118,8 +119,15 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Lib\Ftp\Common.cs" />
+    <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
+    <Compile Include="Lib\Ftp\Exceptions.cs" />
+    <Compile Include="Lib\Ftp\FileTransfert.cs" />
     <Compile Include="Lib\Ftp\ftp.cs" />
-    <Compile Include="Lib\Ftp\Sftp.cs" />
+    <Compile Include="Lib\Ftp\FtpsClient.cs" />
+    <Compile Include="Lib\Ftp\FtpStream.cs" />
+    <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\ZipStorer.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -575,10 +583,7 @@
     <Content Include="Images\tooltips\Input.png" />
     <Content Include="Lib\3pUpdater\3pUpdater.exe" />
     <Content Include="Lib\3pUpdater\3pUpdater_user.exe" />
-    <Content Include="Lib\3pUpdater\7z.dll" />
-    <Content Include="Lib\3pUpdater\7z.exe" />
     <Content Include="Lib\ObjectListView\ObjectListView.dll" />
-    <Content Include="Lib\Ftp\psftp.exe" />
     <Content Include="Lib\YamuiFolder\YamuiFramework.dll" />
   </ItemGroup>
   <ItemGroup>

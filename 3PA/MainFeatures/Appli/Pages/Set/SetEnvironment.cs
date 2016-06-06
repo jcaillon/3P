@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
@@ -602,20 +603,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         /// <summary>
-        /// Open file in folder
+        /// Open folder or open in npp
         /// </summary>
         private void OpenFileOnButtonPressed(object sender, EventArgs eventArgs) {
             var associatedTextBox = GetTextBoxByName(((Control)sender).Name);
             if (associatedTextBox == null) return;
             string tag = (string)(associatedTextBox.Tag ?? string.Empty);
 
-            var hasOpened = tag.Equals("true") ? Utils.OpenFolder(associatedTextBox.Text) : Npp.OpenFile(associatedTextBox.Text);
+            var ext = Path.GetExtension(associatedTextBox.Text) ?? "";
+            var hasOpened = tag.Equals("true") ? Utils.OpenFolder(associatedTextBox.Text) : (!ext.Equals(".exe") ? Npp.OpenFile(associatedTextBox.Text) : Utils.OpenFileInFolder(associatedTextBox.Text));
             if (!hasOpened)
                 BlinkTextBox(associatedTextBox, ThemeManager.Current.GenericErrorColor);
         }
 
         /// <summary>
-        /// open file in npp
+        /// open folder or file in folder
         /// </summary>
         private void OpenFileOnMouseDown(object sender, MouseEventArgs e) {
             var associatedTextBox = GetTextBoxByName(((Control)sender).Name);

@@ -48,6 +48,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
+        public override void OnShow() {
+            ActiveControl = bttagsave;
+            base.OnShow();
+        }
+
         #region private event
 
         private void UpdateView() {
