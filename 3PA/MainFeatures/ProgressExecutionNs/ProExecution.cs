@@ -490,7 +490,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // we need to correct the files path in the log if needed
             var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
             foreach (var treatedFile in ListToCompile.Where(treatedFile => !treatedFile.TempInputPath.Equals(treatedFile.InputPath))) {
-                changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
+                if (!changePaths.ContainsKey(treatedFile.TempInputPath))
+                    changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
             }
 
             // read the log file

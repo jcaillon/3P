@@ -80,7 +80,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             var textTool = "Select <b>the database</b> to use for the current environment<br><br>For each environment, you can have several database definition<br>that consists of a database name <i>(it doesn't have to be the physical<br>or logical name of the actual db, it is just a name you are giving it in 3P!)</i><br>and the path to a .pf file that contains the connection info to the data<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>";
             toolTip.SetToolTip(cbDatabase, textTool);
-            toolTip.SetToolTip(htmlLabel1, textTool);
+            toolTip.SetToolTip(lbl_listdb, textTool);
 
             toolTip.SetToolTip(flDatabase, "Enter the name for this database definition");
             toolTip.SetToolTip(textbox1, "Path to your parameter file (.pf) containing the database<br>connection information<br><br>This .pf file is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT -pf 'your.pf'.</div>");
@@ -320,6 +320,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 }
             }
 
+            // database
+            var isOn = !(mode == ViewMode.AddNew || mode == ViewMode.Edit);
+            lbl_listdb.Visible = isOn;
+            btleft1.Visible = isOn;
+            textbox1.Visible = isOn;
+            btright1.Visible = isOn;
+            cbDatabase.Visible = isOn;
+            flDatabase.Visible = isOn;
+            btDbAdd.Visible = isOn;
+            btDbEdit.Visible = isOn;
+            btDbDelete.Visible = isOn;
+            btDownload.Visible = isOn;
+            btDeleteDownload.Visible = isOn;
+            btSaveDb.Visible = isOn;
+            btCancelDb.Visible = isOn;
+
             // all database buttons
             if (mode == ViewMode.Select) {
                 btDbAdd.Show();
@@ -386,7 +402,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 btduplicate.Visible = false;
                 btDelete.Hide();
             }
-            
+
             // fill details
             flName.Text = ProEnvironment.Current.Name;
             flSuffix.Text = ProEnvironment.Current.Suffix;

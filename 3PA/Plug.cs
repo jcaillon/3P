@@ -18,6 +18,8 @@
 // ========================================================================
 #endregion
 using System;
+using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -345,8 +347,6 @@ namespace _3PA {
         public static void StartDebug() {
             //Debug.Assert(false);
 
-            UserCommunication.Notify(ZipStorer.ExtractAll(@"C:\Users\Julien\Downloads\3P.zip", @"C:\Users\Julien\Downloads\").ToString());
-
         }
 
 
@@ -361,7 +361,22 @@ namespace _3PA {
 
             Task.Factory.StartNew(() => {
 
-                /* Create Object Instance */
+                var ftp = new FtpsClient();
+
+                string welcomeTxt = "";
+
+                foreach (var mode in Extensions.EnumUtil.GetValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                    try {
+                        ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
+                        UserCommunication.Notify(((EsslSupportModeAttr)mode.GetAttributes()).Value + " : " + welcomeTxt);
+                    } catch (Exception) {
+                        //ignored
+                    }
+                }
+
+                ftp.Close();
+
+                /*
                 Ftp ftpClient = new Ftp {
                     Host = "localhost",
                     User = "progress",
@@ -380,6 +395,7 @@ namespace _3PA {
                     // coulnd't connect
                     UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
                 }
+                */
             });
         }
 

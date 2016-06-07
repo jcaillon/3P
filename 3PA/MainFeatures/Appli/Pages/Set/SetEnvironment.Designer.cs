@@ -76,7 +76,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lbl_listdb = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.btcontrol2 = new YamuiFramework.Controls.YamuiButton();
@@ -150,7 +150,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel4);
             this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel3);
             this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel1);
+            this.mainPanel.ContentPanel.Controls.Add(this.lbl_listdb);
             this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel4);
             this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
             this.mainPanel.ContentPanel.Controls.Add(this.btcontrol2);
@@ -751,19 +751,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.Text = "<b>Ini and ProPath</b><br>Use an .ini file and add extra directories / .pl to the" +
     " ProPath";
             // 
-            // htmlLabel1
+            // lbl_listdb
             // 
-            this.htmlLabel1.AutoSize = false;
-            this.htmlLabel1.AutoSizeHeightOnly = true;
-            this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
-            this.htmlLabel1.BaseStylesheet = null;
-            this.htmlLabel1.IsSelectionEnabled = false;
-            this.htmlLabel1.Location = new System.Drawing.Point(30, 97);
-            this.htmlLabel1.Name = "htmlLabel1";
-            this.htmlLabel1.Size = new System.Drawing.Size(122, 45);
-            this.htmlLabel1.TabIndex = 110;
-            this.htmlLabel1.TabStop = false;
-            this.htmlLabel1.Text = "<b>List of databases (.pf)</b><br>associated to the current environment";
+            this.lbl_listdb.AutoSize = false;
+            this.lbl_listdb.AutoSizeHeightOnly = true;
+            this.lbl_listdb.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_listdb.BaseStylesheet = null;
+            this.lbl_listdb.IsSelectionEnabled = false;
+            this.lbl_listdb.Location = new System.Drawing.Point(30, 97);
+            this.lbl_listdb.Name = "lbl_listdb";
+            this.lbl_listdb.Size = new System.Drawing.Size(122, 45);
+            this.lbl_listdb.TabIndex = 110;
+            this.lbl_listdb.TabStop = false;
+            this.lbl_listdb.Text = "<b>List of databases (.pf)</b><br>associated to the current environment";
             // 
             // yamuiLabel4
             // 
@@ -808,7 +808,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btDelete
             // 
             this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btDelete.Location = new System.Drawing.Point(581, 522);
+            this.btDelete.Location = new System.Drawing.Point(493, 522);
             this.btDelete.Name = "btDelete";
             this.btDelete.Size = new System.Drawing.Size(94, 23);
             this.btDelete.TabIndex = 121;
@@ -874,7 +874,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel4;
         private HtmlLabel htmlLabel3;
         private HtmlLabel htmlLabel2;
-        private HtmlLabel htmlLabel1;
+        private HtmlLabel lbl_listdb;
         private YamuiLabel yamuiLabel4;
         private YamuiLabel yamuiLabel1;
         private YamuiButton btcontrol2;

@@ -472,6 +472,34 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
+        /// This methods extract a zip file in the given directory
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="targetDir"></param>
+        public static bool ExtractAll(string filename, string targetDir) {
+
+            // Opens existing zip file
+            ZipStorer zip = ZipStorer.Open(filename, FileAccess.Read);
+            if (string.IsNullOrEmpty(filename) || string.IsNullOrEmpty(targetDir))
+                return false;
+
+            if (!CreateDirectory(targetDir))
+                return false;
+
+            // Extract all files in target directory
+            bool result = true;
+            foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
+                var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
+                if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
+                    return false;
+                result = result && zip.ExtractFile(entry, outputPath);
+            }
+            zip.Close();
+
+            return result;
+        }
+
+        /// <summary>
         /// Simple click handler that opens any link as a file (either in notepad++ if the extension is known,
         /// or with the default program, or as a folder in the explorer)
         /// </summary>

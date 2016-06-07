@@ -158,6 +158,12 @@
     <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.Designer.cs">
       <DependentUpon>SetCompilationPath.cs</DependentUpon>
     </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.Designer.cs">
+      <DependentUpon>SetFtp.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFileInfo.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -358,6 +364,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.resx">
       <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
+      <DependentUpon>SetFtp.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>

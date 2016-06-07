@@ -132,6 +132,15 @@ namespace _3PA.Lib {
             return atts.Length > 0 ? atts[0] : null;
         }
 
+        /// <summary>
+        /// Usage :  Extensions.EnumUtil.GetValues<MyEnum>()
+        /// </summary>
+        public static class EnumUtil {
+            public static IEnumerable<T> GetValues<T>() {
+                return Enum.GetValues(typeof(T)).Cast<T>();
+            }
+        }
+
         #endregion
 
         #region string extensions

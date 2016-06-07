@@ -51,14 +51,20 @@ namespace _3PA.Lib.Ftp {
      *  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA 
      */
 
+    internal class EsslSupportModeAttr : Extensions.EnumAttr {
+        public string Value { get; set; }
+    }
+
     /// <summary>
     /// The SSL/TLS support requested or required for a connection.
+    /// ((EsslSupportModeAttr)EsslSupportModeType.GetAttributes()).Value
     /// </summary>
     [Flags]
     public enum EsslSupportMode {
         /// <summary>
         /// No SSL/TLS support. Used for standard FTP connections.
         /// </summary>
+        [EsslSupportModeAttr(Value = "No SSL/TLS support. Used for standard FTP connections.")]
         ClearText = 0,
 
         /// <summary>
@@ -66,12 +72,14 @@ namespace _3PA.Lib.Ftp {
         /// Authentication is performed using <see cref="ClearText"/> if SSL/TLS is not supported by the server.
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requests a SSL/TLS connection during authentication.")]
         CredentialsRequested = 1,
 
         /// <summary>
         /// Requires a SSL/TLS connection during authentication. 
         /// Reverts to <see cref="ClearText"/> after authetication if the CCC command is supported by the server.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requires a SSL/TLS connection during authentication.")]
         CredentialsRequired = 2 | CredentialsRequested,
 
         /// <summary>
@@ -80,6 +88,7 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequested"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
+        [EsslSupportModeAttr(Value = "Requests a SSL/TLS connection on the control channel.")]
         ControlChannelRequested = 4 | CredentialsRequested,
 
         /// <summary>
@@ -88,38 +97,39 @@ namespace _3PA.Lib.Ftp {
         /// <remarks>
         /// Acts like <see cref="CredentialsRequired"/> but does not revert to <see cref="ClearText"/> after authentication.
         /// </remarks>
+        [EsslSupportModeAttr(Value = "Requires a SSL/TLS connection on the control channel.")]
         ControlChannelRequired = CredentialsRequired | ControlChannelRequested,
 
         /// <summary>
         /// Requests a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequested"/>.
         /// Data transfers are not encrypted is not supported by the server.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requests a SSL/TLS connection on the data channel.")]
         DataChannelRequested = 8 | CredentialsRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on the data channel, implies <see cref="CredentialsRequired"/>.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requires a SSL/TLS connection on the data channel.")]
         DataChannelRequired = 16 | DataChannelRequested | CredentialsRequired,
 
         /// <summary>
         /// Requests a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequested"/> and <see cref="DataChannelRequested"/>.
         /// Control channel commands and data transfers are not encrypted is not supported by the server.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requests a SSL/TLS connection on both control and data channels.")]
         ControlAndDataChannelsRequested = ControlChannelRequested | DataChannelRequested,
 
         /// <summary>
         /// Requires a SSL/TLS connection on both control and data channels, implies <see cref="ControlChannelRequired"/> and <see cref="DataChannelRequired"/>.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Requires a SSL/TLS connection on both control and data channels.")]
         ControlAndDataChannelsRequired = ControlChannelRequired | DataChannelRequired,
-
-        /// <summary>
-        /// An alias for <see cref="ControlAndDataChannelsRequired"/>
-        /// </summary>
-        All = ControlAndDataChannelsRequired,
 
         /// <summary>
         /// Implicit SSL/TLS, not supported by RFC 4217. Both control channel and data channel are always encrypted.
         /// </summary>
+        [EsslSupportModeAttr(Value = "Implicit SSL/TLS. Both control channel and data channel are always encrypted.")]
         Implicit = 32 | ControlAndDataChannelsRequired
     }
 
@@ -190,6 +200,7 @@ namespace _3PA.Lib.Ftp {
     /// Requirements: MS Framework 2.0 and above or Mono 2.0 and above.
     /// </remarks>
     public sealed class FtpsClient : IDisposable {
+
         #region Private Enums
 
         enum EProtCode { C, S, E, P }
@@ -220,9 +231,9 @@ namespace _3PA.Lib.Ftp {
         string _hostname;
 
         const string AnonUsername = "anonymous";
-        const string AnonPassword = "anonymous@FTPSClient.org"; // dummy password
+        const string AnonPassword = "randompwd"; // dummy password
 
-        const string ClntName = "AlexFTPS";
+        const string ClntName = "3P";
 
         const EsslSupportMode DefaultSslSupportMode = EsslSupportMode.CredentialsRequired | EsslSupportMode.DataChannelRequested;
 
@@ -403,6 +414,10 @@ namespace _3PA.Lib.Ftp {
 
         public string Connect(string hostname, NetworkCredential credential, EsslSupportMode sslSupportMode) {
             return Connect(hostname, credential, sslSupportMode, null);
+        }
+
+        public string Connect(string hostname, int port, NetworkCredential credential, EsslSupportMode sslSupportMode, int? timeout) {
+            return Connect(hostname, port, credential, sslSupportMode, null, null, 0, 0, 0, timeout);
         }
 
         public string Connect(string hostname, NetworkCredential credential, EsslSupportMode sslSupportMode,

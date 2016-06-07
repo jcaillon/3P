@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures {
             try {
 
                 // Extract the .zip file
-                if (!ZipStorer.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
+                if (!Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
 
                     // check the presence of the plugin file
                     if (File.Exists(Config.FileDownloadedPlugin)) {
