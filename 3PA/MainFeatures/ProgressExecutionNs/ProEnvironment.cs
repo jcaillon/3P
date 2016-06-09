@@ -103,13 +103,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             /// Returns the currently selected database's .pf for the current environment
             /// </summary>
             public string GetPfPath() {
-                return DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase) ?
+                return (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) ?
                     DbConnectionInfo[Config.Instance.EnvDatabase] :
                     string.Empty;
             }
 
             public bool RemoveCurrentPfPath() {
-                if (DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
+                if (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
                     DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
                     return true;
                 }
@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             public bool AddPfPath(string name, string path) {
-                if (!DbConnectionInfo.ContainsKey(name)) {
+                if (!string.IsNullOrEmpty(name) && !DbConnectionInfo.ContainsKey(name)) {
                     DbConnectionInfo.Add(name, path);
                     return true;
                 }
@@ -490,7 +490,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             Config.Instance.EnvSuffix = _currentEnv.Suffix;
 
             // set database
-            if (!_currentEnv.DbConnectionInfo.ContainsKey(database ?? Config.Instance.EnvDatabase))
+            if (!string.IsNullOrEmpty(database) && _currentEnv.DbConnectionInfo.ContainsKey(database))
+                Config.Instance.EnvDatabase = database;
+            else
                 Config.Instance.EnvDatabase = (_currentEnv.DbConnectionInfo.Count > 0) ? _currentEnv.DbConnectionInfo.First().Key : String.Empty;
 
             if (OnEnvironmentChange != null)

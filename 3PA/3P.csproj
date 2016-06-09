@@ -427,6 +427,7 @@
     </Content>
     <Content Include="Html\Pages\home.html" />
     <Content Include="Html\StyleSheet.css" />
+    <Content Include="Images\Appli\Configuration.png" />
     <Content Include="Images\Appli\Delete.png" />
     <Content Include="Images\Appli\DownloadAll.png" />
     <Content Include="Images\Appli\DownloadDbNok.png" />

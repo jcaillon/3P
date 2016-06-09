@@ -42,9 +42,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private const string SaveStr = "Save";
         private const string CancelStr = "Cancel";
 
-        private const string CompileLocallyTrue = "Compile to source directory";
-        private const string CompileLocallyFalse = "Compile to distant directory";
-
         private ViewMode _currentMode = ViewMode.Select;
 
         #endregion
@@ -120,28 +117,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             toolTip.SetToolTip(tgCompilLocl, "<b>TOGGLE ON</b> to move .r and .lst files to the source folder after the compilation<br>Or <b>TOGGLE OFF</b> to move .r and .lst files to the above distant folder after the compilation");
 
-            toolTip.SetToolTip(btDelete, "Click here to <b>delete</b> the current environment");
+            toolTip.SetToolTip(btEnv4del, "Click here to <b>delete</b> the current environment");
 
             toolTip.SetToolTip(btSaveDb, "Click to <b>save</b> your modifications");
             toolTip.SetToolTip(btCancelDb, "Click to <b>cancel</b> your modifications");
 
-            toolTip.SetToolTip(btduplicate, "Click to <b>duplicate</b> the current environment");
+            toolTip.SetToolTip(btEnv3dupli, "Click to <b>duplicate</b> the current environment");
 
             // buttons
             btDbAdd.BackGrndImage = ImageResources.PlusDb;
             btDbDelete.BackGrndImage = ImageResources.MinusDb;
             btDbEdit.BackGrndImage = ImageResources.EditDb;
             btDeleteDownload.BackGrndImage = ImageResources.Delete;
+            btConfFtp.BackGrndImage = ImageResources.Configuration;
 
-            btcontrol2.ButtonPressed += Btcontrol2OnButtonPressed;
-            btcontrol1.ButtonPressed += Btcontrol1ButtonPressed;
-            btduplicate.ButtonPressed += BtduplicateOnButtonPressed;
+            btEnv1.ButtonPressed += Btcontrol2OnButtonPressed;
+            btEnv2.ButtonPressed += Btcontrol1ButtonPressed;
+            btEnv3dupli.ButtonPressed += BtduplicateOnButtonPressed;
             btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
             btDbEdit.ButtonPressed += BtDbEditOnButtonPressed;
             btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
             tgCompilLocl.CheckedChanged += TgCompilLoclOnCheckedChanged;
             btDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
-            btDelete.ButtonPressed += BtDeleteOnButtonPressed;
+            btEnv4del.ButtonPressed += BtDeleteOnButtonPressed;
             btDownload.ButtonPressed += btDownload_Click;
 
             btSaveDb.ButtonPressed += BtSaveDbOnButtonPressed;
@@ -298,109 +296,66 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         }
                     } else {
                         // the user needs to add a new one
-                        btcontrol1.UseCustomBackColor = true;
-                        btcontrol1.BackColor = ThemeManager.Current.AccentColor;
+                        btEnv2.UseCustomBackColor = true;
+                        btEnv2.BackColor = ThemeManager.Current.AccentColor;
                     }
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error when filling comboboxes");
                 }
             }
 
-            // btleft
+            // hide/show btleft
             foreach (var control in mainPanel.ContentPanel.Controls) {
                 if (control is YamuiImageButton) {
                     var x = (YamuiImageButton)control;
                     if (x.Name.StartsWith("btleft")) {
-                        if (mode == ViewMode.Select || mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit) {
-                            x.Hide();
-                        } else {
-                            x.Show();
-                        }
+                        x.Visible = !(mode == ViewMode.Select || mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit);
                     }
                 }
             }
 
-            // database
-            var isOn = !(mode == ViewMode.AddNew || mode == ViewMode.Edit);
-            lbl_listdb.Visible = isOn;
-            btleft1.Visible = isOn;
-            textbox1.Visible = isOn;
-            btright1.Visible = isOn;
-            cbDatabase.Visible = isOn;
-            flDatabase.Visible = isOn;
-            btDbAdd.Visible = isOn;
-            btDbEdit.Visible = isOn;
-            btDbDelete.Visible = isOn;
-            btDownload.Visible = isOn;
-            btDeleteDownload.Visible = isOn;
-            btSaveDb.Visible = isOn;
-            btCancelDb.Visible = isOn;
+            // hide stuff
+            var isAddOrEdit = (mode == ViewMode.AddNew || mode == ViewMode.Edit);
+            var isDbAddOrEdit = (mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit);
 
-            // all database buttons
-            if (mode == ViewMode.Select) {
-                btDbAdd.Show();
-                btDbDelete.Show();
-                btDbEdit.Show();
-                btDownload.Show();
-                btDeleteDownload.Show();
-            } else {
-                btDbAdd.Hide();
-                btDbDelete.Hide();
-                btDbEdit.Hide();
-                btDownload.Hide();
-                btDeleteDownload.Hide();
-            }
-            
-            // editing pf?
-            if (mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit) {
-                flDatabase.Show();
-                cbDatabase.Hide();
-                flDatabase.Enabled = true;
-                cbDatabase.Enabled = false;
-                textbox1.Enabled = true;
-                btleft1.Show();
-                cbName.Enabled = false;
-                cbSuffix.Enabled = false;
+            // handle pf
+            lbl_listdb.Visible = !isAddOrEdit;
+            btleft1.Visible = !isAddOrEdit && isDbAddOrEdit;
+            textbox1.Visible = !isAddOrEdit;
+            btright1.Visible = !isAddOrEdit;
+            cbDatabase.Visible = !isAddOrEdit && !isDbAddOrEdit;
+            flDatabase.Visible = !isAddOrEdit && isDbAddOrEdit;
 
-                btcontrol2.Visible = false;
-                btcontrol1.Visible = false;
-                btDelete.Visible = false;
+            textbox1.Enabled = isDbAddOrEdit;
+            flDatabase.Enabled = isDbAddOrEdit;
 
-                btSaveDb.Visible = true;
-                btCancelDb.Visible = true;
-            } else {
-                flDatabase.Hide();
-                cbDatabase.Show();
-                flDatabase.Enabled = false;
-                cbDatabase.Enabled = (mode == ViewMode.Select);
-                textbox1.Enabled = false;
-                btleft1.Hide();
-                cbName.Enabled = true;
-                cbSuffix.Enabled = true;
+            // buttons to handle pf files and download db structure
+            btDbAdd.Visible = (mode == ViewMode.Select);
+            btDbEdit.Visible = (mode == ViewMode.Select);
+            btDbDelete.Visible = (mode == ViewMode.Select);
+            btDownload.Visible = (mode == ViewMode.Select);
+            btDeleteDownload.Visible = (mode == ViewMode.Select);
 
-                btcontrol2.Visible = true;
-                btcontrol1.Visible = true;
-                btDelete.Visible = true;
+            btSaveDb.Visible = isDbAddOrEdit;
+            btCancelDb.Visible = isDbAddOrEdit;
 
-                btSaveDb.Visible = false;
-                btCancelDb.Visible = false;
-            }
+            // buttons modify/new/duplicate/delete
+            btEnv1.Visible = !isDbAddOrEdit;
+            btEnv2.Visible = !isDbAddOrEdit;
+            btEnv4del.Visible = (mode == ViewMode.Select);
+            btEnv3dupli.Visible = (mode == ViewMode.Select);
 
             // bottom buttons
             if (mode == ViewMode.Select) {
-                btcontrol2.Text = ModifyStr;
-                toolTip.SetToolTip(btcontrol2, "Click to <b>modify</b> the information for the current environment");
-                btcontrol1.Text = AddNewStr;
-                toolTip.SetToolTip(btcontrol1, "Click to <b>add a new</b> environment<br>");
-                btduplicate.Visible = true;
-                btDelete.Show();
+                btEnv1.Text = ModifyStr;
+                toolTip.SetToolTip(btEnv1, "Click to <b>modify</b> the information for the current environment");
+                btEnv2.Text = AddNewStr;
+                toolTip.SetToolTip(btEnv2, "Click to <b>add a new</b> environment<br>");
             } else {
-                btcontrol2.Text = SaveStr;
-                toolTip.SetToolTip(btcontrol2, "Click to <b>save</b> your modifications");
-                btcontrol1.Text = CancelStr;
-                toolTip.SetToolTip(btcontrol1, "Click to <b>cancel</b> your modifications");
-                btduplicate.Visible = false;
-                btDelete.Hide();
+                btEnv1.Text = SaveStr;
+                toolTip.SetToolTip(btEnv1, "Click to <b>save</b> your modifications");
+                btEnv2.Text = CancelStr;
+                toolTip.SetToolTip(btEnv2, "Click to <b>cancel</b> your modifications");
             }
 
             // fill details
@@ -422,13 +377,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
             textbox5.Text = ProEnvironment.Current.ProwinPath;
             textbox6.Text = ProEnvironment.Current.LogFilePath;
-
             tgCompilLocl.Checked = ProEnvironment.Current.CompileLocally;
-            lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
 
-            // download database information
+            // update the download database button
             UpdateDownloadButton();
 
+            // reset fields when adding a new env
             if (mode == ViewMode.AddNew) {
                 foreach (var control in mainPanel.ContentPanel.Controls) {
                     if (control is YamuiTextBox)
@@ -437,11 +391,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.DataSource = new List<string>();
             }
 
-            btDelete.Enabled = ProEnvironment.GetList.Count > 1;
+            btEnv4del.Enabled = ProEnvironment.GetList.Count > 1;
 
-            if (mode != _currentMode) {
-                BlinkButton(btcontrol1, ThemeManager.Current.AccentColor);
-                BlinkButton(btcontrol2, ThemeManager.Current.AccentColor);
+            // blink when changing mode
+            if (mode != _currentMode && mode != ViewMode.Select) {
+                BlinkButton(btEnv2, ThemeManager.Current.AccentColor);
+                BlinkButton(btEnv1, ThemeManager.Current.AccentColor);
 
                 BlinkButton(btSaveDb, ThemeManager.Current.AccentColor);
                 BlinkButton(btCancelDb, ThemeManager.Current.AccentColor);
@@ -491,7 +446,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="eventArgs"></param>
         private void TgCompilLoclOnCheckedChanged(object sender, EventArgs eventArgs) {
             ProEnvironment.Current.CompileLocally = tgCompilLocl.Checked;
-            lblLocally.Text = tgCompilLocl.Checked ? CompileLocallyTrue : CompileLocallyFalse;
             ProEnvironment.SaveList();
         }
 
@@ -500,7 +454,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         ///  Click on "CANCEL" or "ADD NEW"
         /// </summary>
         private void Btcontrol1ButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            btcontrol1.UseCustomBackColor = false;
+            btEnv2.UseCustomBackColor = false;
             if (_currentMode == ViewMode.Select) {
                 // Add new
                 ToggleMode(ViewMode.AddNew);
@@ -596,6 +550,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void cbDatabase_SelectedIndexChanged(object sender, EventArgs e) {
+            UserCommunication.Notify(Config.Instance.EnvDatabase + " vs<br> " + cbDatabase.SelectedItem.ToString());
             if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
