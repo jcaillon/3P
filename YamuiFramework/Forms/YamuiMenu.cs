@@ -37,9 +37,15 @@ namespace YamuiFramework.Forms {
     /// </summary>
     public sealed class YamuiMenu : Form {
 
-        #region Fields
+        #region public fields
 
         public bool IamMain = true;
+
+        public int SubTextOpacity = 100;
+
+        #endregion
+
+        #region private fields
 
         private YamuiMenu _parentMenu;
         private YamuiMenu _childMenu;
@@ -130,7 +136,8 @@ namespace YamuiFramework.Forms {
                         NoIconImage = !useImageIcon,
                         IconImage = item.ItemImage,
                         SubText = item.SubText,
-                        Tag = index
+                        Tag = index,
+                        SubTextOpacity = SubTextOpacity
                     };
                     button.Click += ButtonOnButtonPressed;
                     button.PreviewKeyDown += OnPreviewKeyDown;
@@ -349,8 +356,10 @@ namespace YamuiFramework.Forms {
             public bool NoChildren { private get; set; }
             public Image IconImage { private get; set; }
             public string SubText { get; set; }
+            public int SubTextOpacity { get; set; }
 
             protected override void OnPaint(PaintEventArgs e) {
+
                 // background
                 var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered);
                 e.Graphics.Clear(backColor);
@@ -371,14 +380,19 @@ namespace YamuiFramework.Forms {
                     e.Graphics.DrawImage(img, new Rectangle(8, 1, 20, 20));
                 }
 
-                // text
-                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(NoIconImage ? 8 : 35, 0, ClientRectangle.Width - (NoIconImage ? 8 : 35), ClientRectangle.Height), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
-
                 // sub text 
                 if (!string.IsNullOrEmpty(SubText)) {
-                    var textWidth = TextRenderer.MeasureText(SubText, FontManager.GetFont(FontFunction.Small)).Width;
-                    TextRenderer.DrawText(e.Graphics, SubText, FontManager.GetFont(FontFunction.Small), new Rectangle(Width - (NoChildren ? 0 : 12) - textWidth - 3, 0, textWidth + 3, ClientRectangle.Height), YamuiThemeManager.Current.SubTextFore, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+                    var textFont = FontManager.GetFont(FontStyle.Bold, 10);
+                    var textSize = TextRenderer.MeasureText(SubText, textFont);
+                    var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
+                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb(SubTextOpacity, YamuiThemeManager.Current.SubTextFore)), drawPoint);
+
+                    var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8), YamuiThemeManager.Current.SubTextFore), 1) { Alignment = PenAlignment.Left };
+                    e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
                 }
+
+                // text
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(NoIconImage ? 8 : 35, 0, ClientRectangle.Width - (NoIconImage ? 8 : 35), ClientRectangle.Height), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
 
                 // arrow
                 if (!NoChildren) {

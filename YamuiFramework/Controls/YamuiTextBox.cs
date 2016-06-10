@@ -84,7 +84,14 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool MultiLines { get; set; }
+        public bool MultiLines {
+            get { return _multiLines; }
+            set {
+                _multiLines = value;
+                WordWrap = MultiLines;
+            }
+        }
+        private bool _multiLines;
 
         #endregion
 
@@ -98,6 +105,7 @@ namespace YamuiFramework.Controls {
             Multiline = true;
             Size = new Size(100, 20);
             MinimumSize = new Size(20, 20);
+            WordWrap = false;
         }
 
         #endregion
@@ -121,7 +129,11 @@ namespace YamuiFramework.Controls {
         private bool _appliedPadding;
 
         protected override void WndProc(ref Message m) {
-            base.WndProc(ref m);
+
+            // Send WM_MOUSEWHEEL messages to the parent
+            if (!MultiLines && m.Msg == 0x20a) WinApi.SendMessage(Parent.Handle, m.Msg, m.WParam, m.LParam);
+            else base.WndProc(ref m);
+
             if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
@@ -144,6 +156,7 @@ namespace YamuiFramework.Controls {
         }
 
         private void CustomPaint(Graphics g) {
+
             if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
                 TextFormatFlags flags = TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis;
                 Rectangle clientRectangle = ClientRectangle;
@@ -244,6 +257,7 @@ namespace YamuiFramework.Controls {
     internal class YamuiTextBox2Designer : ControlDesigner {
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("Multiline");
+            properties.Remove("WordWrap");
             properties.Remove("MinimumSize");
             base.PreFilterProperties(properties);
         }

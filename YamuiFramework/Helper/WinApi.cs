@@ -460,6 +460,9 @@ namespace YamuiFramework.Helper {
         public static extern int SendMessage(IntPtr wnd, int msg, bool param, int lparam);
 
         [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
+
+        [DllImport("user32.dll")]
         public static extern bool ShowScrollBar(IntPtr hWnd, int bar, int cmd);
         #endregion
     }

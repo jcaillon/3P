@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             foreach (var item in AppliMenu.CompleteMenuList) {
 
                 // icon
-                var imgButton = new YamuiImageButton {
+                var imgButton = new YamuiImage {
                     BackGrndImage = item.ItemImage,
                     Size = new Size(20, 20),
                     Location = new Point(static_name.Location.X - 30, yPos),
@@ -168,7 +168,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
                     UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.CompleteMenuList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
-                    return;;
+                    return;
                 }
 
                 // change the shortcut in the settings

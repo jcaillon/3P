@@ -172,12 +172,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     // bool
                     var toggleControl = new YamuiToggle {
                         Location = new Point(240, yPos),
-                        Size = new Size(80, 15),
-                        Text = @" ",
+                        Size = new Size(40, 16),
+                        Text = null,
                         Checked = (bool)valObj,
                         Tag = property.Name
                     };
-                    toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
+                    toggleControl.ButtonPressed += ToggleControlOnCheckedChanged;
                     dockedPanel.ContentPanel.Controls.Add(toggleControl);
 
                     // tooltip

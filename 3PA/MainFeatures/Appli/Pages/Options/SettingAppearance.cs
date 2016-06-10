@@ -54,10 +54,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
 
             // toggle
-            tg_colorOn.CheckedChanged += TgOnCheckedChanged;
+            tg_colorOn.ButtonPressed += TgOnCheckedChanged;
             tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
 
-            tg_override.CheckedChanged += TgOnCheckedChanged;
+            tg_override.ButtonPressed += TgOnCheckedChanged;
             tg_override.Checked = Config.Instance.GlobalOverrideNppTheme;
             UpdateToggle();
 
@@ -92,16 +92,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private void UpdateToggle() {
             if (tg_colorOn.Checked) {
-                tg_colorOn.Text = "Use a custom User Defined Language";
+                tg_colorOn.Text = @"Use a custom User Defined Language";
                 cbSyntax.Hide();
             } else {
-                tg_colorOn.Text = "Use the themes provided by 3P, select one below : ";
+                tg_colorOn.Text = @"Use the themes provided by 3P, select one below : ";
                 cbSyntax.Show();
             }
             if (tg_override.Checked) {
-                tg_override.Text = "Let 3P override notepad++ themes (for instance, replace selection color)";
+                tg_override.Text = @"Let 3P override notepad++ themes (for instance, replace selection color)";
             } else {
-                tg_override.Text = "Use the theme of 3P strictly for the syntax highlighting";
+                tg_override.Text = @"Use the theme of 3P strictly for the syntax highlighting";
             }
         }
 

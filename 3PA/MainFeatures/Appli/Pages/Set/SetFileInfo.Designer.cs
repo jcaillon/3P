@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_delete = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.bt_SaveState = new YamuiFramework.Controls.YamuiImageButton();
+            this.bt_SaveState = new YamuiFramework.Controls.YamuiImage();
             this.lb_SaveState = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -57,6 +57,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).BeginInit();
             this.SuspendLayout();
             // 
             // yamuiScrollPage1
@@ -143,6 +144,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_SaveState.Name = "bt_SaveState";
             this.bt_SaveState.Size = new System.Drawing.Size(20, 20);
             this.bt_SaveState.TabIndex = 69;
+            this.bt_SaveState.TabStop = false;
             this.bt_SaveState.Text = "yamuiImageButton1";
             // 
             // lb_SaveState
@@ -432,6 +434,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
             this.yamuiScrollPage1.ContentPanel.PerformLayout();
             this.yamuiScrollPage1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -461,7 +464,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel5;
         private HtmlLabel htmlLabel9;
         private HtmlLabel lb_SaveState;
-        private YamuiImageButton bt_SaveState;
+        private YamuiImage bt_SaveState;
         private HtmlLabel lb_FileName;
         private HtmlLabel htmlLabel7;
         private HtmlToolTip toolTip;

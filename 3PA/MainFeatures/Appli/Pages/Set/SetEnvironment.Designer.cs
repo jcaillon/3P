@@ -29,9 +29,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.mainPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.yamuiToggle1 = new YamuiFramework.Controls.YamuiToggle();
+            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
+            this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.btConfFtp = new YamuiFramework.Controls.YamuiImageButton();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.tgftp = new YamuiFramework.Controls.YamuiToggle();
             this.btEnv3dupli = new YamuiFramework.Controls.YamuiButton();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -107,62 +109,64 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // mainPanel.ContentPanel
             // 
-            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
-            this.mainPanel.ContentPanel.Controls.Add(this.btConfFtp);
-            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.mainPanel.ContentPanel.Controls.Add(this.tgftp);
-            this.mainPanel.ContentPanel.Controls.Add(this.btEnv3dupli);
+            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
             this.mainPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.mainPanel.ContentPanel.Controls.Add(this.btSaveDb);
-            this.mainPanel.ContentPanel.Controls.Add(this.btCancelDb);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel8);
-            this.mainPanel.ContentPanel.Controls.Add(this.lblLocally);
+            this.mainPanel.ContentPanel.Controls.Add(this.flName);
             this.mainPanel.ContentPanel.Controls.Add(this.cbName);
             this.mainPanel.ContentPanel.Controls.Add(this.cbSuffix);
-            this.mainPanel.ContentPanel.Controls.Add(this.cbDatabase);
-            this.mainPanel.ContentPanel.Controls.Add(this.flName);
             this.mainPanel.ContentPanel.Controls.Add(this.flSuffix);
             this.mainPanel.ContentPanel.Controls.Add(this.flLabel);
-            this.mainPanel.ContentPanel.Controls.Add(this.flDatabase);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox1);
-            this.mainPanel.ContentPanel.Controls.Add(this.flExtraPf);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox2);
-            this.mainPanel.ContentPanel.Controls.Add(this.tgCompilLocl);
-            this.mainPanel.ContentPanel.Controls.Add(this.flExtraProPath);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox3);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox4);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox5);
-            this.mainPanel.ContentPanel.Controls.Add(this.flCmdLine);
-            this.mainPanel.ContentPanel.Controls.Add(this.textbox6);
-            this.mainPanel.ContentPanel.Controls.Add(this.btDeleteDownload);
-            this.mainPanel.ContentPanel.Controls.Add(this.btDbDelete);
-            this.mainPanel.ContentPanel.Controls.Add(this.btDbAdd);
-            this.mainPanel.ContentPanel.Controls.Add(this.btDbEdit);
-            this.mainPanel.ContentPanel.Controls.Add(this.btDownload);
             this.mainPanel.ContentPanel.Controls.Add(this.txLabel);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright6);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft6);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright1);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft1);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright5);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft5);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright4);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft4);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright3);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft3);
-            this.mainPanel.ContentPanel.Controls.Add(this.btright2);
-            this.mainPanel.ContentPanel.Controls.Add(this.btleft2);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel7);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel6);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.mainPanel.ContentPanel.Controls.Add(this.lbl_listdb);
             this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel4);
-            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
+            this.mainPanel.ContentPanel.Controls.Add(this.lbl_listdb);
+            this.mainPanel.ContentPanel.Controls.Add(this.flDatabase);
+            this.mainPanel.ContentPanel.Controls.Add(this.cbDatabase);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft1);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox1);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright1);
+            this.mainPanel.ContentPanel.Controls.Add(this.btSaveDb);
+            this.mainPanel.ContentPanel.Controls.Add(this.btDbEdit);
+            this.mainPanel.ContentPanel.Controls.Add(this.btDbAdd);
+            this.mainPanel.ContentPanel.Controls.Add(this.btDbDelete);
+            this.mainPanel.ContentPanel.Controls.Add(this.btCancelDb);
+            this.mainPanel.ContentPanel.Controls.Add(this.btDeleteDownload);
+            this.mainPanel.ContentPanel.Controls.Add(this.btDownload);
+            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel8);
+            this.mainPanel.ContentPanel.Controls.Add(this.flExtraPf);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel2);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft2);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright2);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox2);
+            this.mainPanel.ContentPanel.Controls.Add(this.flExtraProPath);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel3);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft3);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox3);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright3);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel4);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft4);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox4);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright4);
+            this.mainPanel.ContentPanel.Controls.Add(this.btConfFtp);
+            this.mainPanel.ContentPanel.Controls.Add(this.tgCompilLocl);
+            this.mainPanel.ContentPanel.Controls.Add(this.yamuiToggle1);
+            this.mainPanel.ContentPanel.Controls.Add(this.tgftp);
+            this.mainPanel.ContentPanel.Controls.Add(this.lblLocally);
+            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel5);
+            this.mainPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel5);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft5);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox5);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright5);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel6);
+            this.mainPanel.ContentPanel.Controls.Add(this.flCmdLine);
+            this.mainPanel.ContentPanel.Controls.Add(this.htmlLabel7);
+            this.mainPanel.ContentPanel.Controls.Add(this.btleft6);
+            this.mainPanel.ContentPanel.Controls.Add(this.textbox6);
+            this.mainPanel.ContentPanel.Controls.Add(this.btright6);
             this.mainPanel.ContentPanel.Controls.Add(this.btEnv1);
             this.mainPanel.ContentPanel.Controls.Add(this.btEnv2);
+            this.mainPanel.ContentPanel.Controls.Add(this.btEnv3dupli);
             this.mainPanel.ContentPanel.Controls.Add(this.btEnv4del);
             this.mainPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.mainPanel.ContentPanel.Name = "ContentPanel";
@@ -175,11 +179,45 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.mainPanel.Size = new System.Drawing.Size(720, 550);
             this.mainPanel.TabIndex = 0;
             // 
+            // yamuiToggle1
+            // 
+            this.yamuiToggle1.Checked = false;
+            this.yamuiToggle1.Location = new System.Drawing.Point(456, 372);
+            this.yamuiToggle1.Name = "yamuiToggle1";
+            this.yamuiToggle1.Size = new System.Drawing.Size(30, 16);
+            this.yamuiToggle1.TabIndex = 155;
+            this.yamuiToggle1.ToggleSize = 30;
+            // 
+            // yamuiLabel2
+            // 
+            this.yamuiLabel2.AutoSize = true;
+            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.yamuiLabel2.Location = new System.Drawing.Point(499, 373);
+            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3);
+            this.yamuiLabel2.Name = "yamuiLabel2";
+            this.yamuiLabel2.Size = new System.Drawing.Size(86, 12);
+            this.yamuiLabel2.TabIndex = 150;
+            this.yamuiLabel2.Text = "Push to ftp server?";
+            this.yamuiLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // yamuiLabel5
+            // 
+            this.yamuiLabel5.AutoSize = true;
+            this.yamuiLabel5.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.yamuiLabel5.Location = new System.Drawing.Point(336, 373);
+            this.yamuiLabel5.Margin = new System.Windows.Forms.Padding(3);
+            this.yamuiLabel5.Name = "yamuiLabel5";
+            this.yamuiLabel5.Size = new System.Drawing.Size(114, 12);
+            this.yamuiLabel5.TabIndex = 154;
+            this.yamuiLabel5.Text = "Compile with listing (.lst)?";
+            this.yamuiLabel5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // yamuiLabel3
             // 
+            this.yamuiLabel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel3.AutoSize = true;
             this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel3.Location = new System.Drawing.Point(524, 152);
+            this.yamuiLabel3.Location = new System.Drawing.Point(540, 151);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel3.Name = "yamuiLabel3";
             this.yamuiLabel3.Size = new System.Drawing.Size(108, 12);
@@ -191,7 +229,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btConfFtp.BackColor = System.Drawing.Color.Transparent;
             this.btConfFtp.BackGrndImage = null;
-            this.btConfFtp.Location = new System.Drawing.Point(478, 364);
+            this.btConfFtp.Location = new System.Drawing.Point(628, 369);
             this.btConfFtp.Margin = new System.Windows.Forms.Padding(0);
             this.btConfFtp.Name = "btConfFtp";
             this.btConfFtp.Size = new System.Drawing.Size(20, 20);
@@ -200,31 +238,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btConfFtp.Tag = "dir";
             this.btConfFtp.Text = "yamuiImageButton5";
             // 
-            // yamuiLabel2
-            // 
-            this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel2.Location = new System.Drawing.Point(349, 368);
-            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3);
-            this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(86, 12);
-            this.yamuiLabel2.TabIndex = 150;
-            this.yamuiLabel2.Text = "Push to ftp server?";
-            this.yamuiLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
             // tgftp
             // 
-            this.tgftp.AutoSize = true;
-            this.tgftp.Location = new System.Drawing.Point(441, 367);
+            this.tgftp.Checked = false;
+            this.tgftp.Location = new System.Drawing.Point(591, 372);
             this.tgftp.Name = "tgftp";
-            this.tgftp.Size = new System.Drawing.Size(52, 15);
+            this.tgftp.Size = new System.Drawing.Size(30, 16);
             this.tgftp.TabIndex = 149;
-            this.tgftp.Text = " ";
+            this.tgftp.ToggleSize = 30;
+            this.tgftp.Click += new System.EventHandler(this.tgftp_Click);
             // 
             // btEnv3dupli
             // 
             this.btEnv3dupli.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btEnv3dupli.Location = new System.Drawing.Point(355, 499);
+            this.btEnv3dupli.Location = new System.Drawing.Point(355, 479);
             this.btEnv3dupli.Name = "btEnv3dupli";
             this.btEnv3dupli.Size = new System.Drawing.Size(75, 23);
             this.btEnv3dupli.TabIndex = 146;
@@ -276,7 +303,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.lblLocally.AutoSize = true;
             this.lblLocally.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.lblLocally.Location = new System.Drawing.Point(193, 368);
+            this.lblLocally.Location = new System.Drawing.Point(193, 373);
             this.lblLocally.Margin = new System.Windows.Forms.Padding(3);
             this.lblLocally.Name = "lblLocally";
             this.lblLocally.Size = new System.Drawing.Size(94, 12);
@@ -338,6 +365,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // flLabel
             // 
+            this.flLabel.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flLabel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.flLabel.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.flLabel.CustomBackColor = System.Drawing.Color.Empty;
@@ -366,6 +395,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // textbox1
             // 
+            this.textbox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox1.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox1.CustomBackColor = System.Drawing.Color.Empty;
@@ -374,13 +405,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox1.Location = new System.Drawing.Point(193, 122);
             this.textbox1.Name = "textbox1";
-            this.textbox1.Size = new System.Drawing.Size(482, 20);
+            this.textbox1.Size = new System.Drawing.Size(498, 20);
             this.textbox1.TabIndex = 132;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
             this.textbox1.WaterMark = "Path to your .pf file (containing database connection info)";
             // 
             // flExtraPf
             // 
+            this.flExtraPf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flExtraPf.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.flExtraPf.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.flExtraPf.CustomBackColor = System.Drawing.Color.Empty;
@@ -391,12 +424,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraPf.Margin = new System.Windows.Forms.Padding(1);
             this.flExtraPf.MultiLines = true;
             this.flExtraPf.Name = "flExtraPf";
-            this.flExtraPf.Size = new System.Drawing.Size(482, 60);
+            this.flExtraPf.Size = new System.Drawing.Size(498, 60);
             this.flExtraPf.TabIndex = 131;
             this.flExtraPf.WaterMark = "Extra connection info";
             // 
             // textbox2
             // 
+            this.textbox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox2.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox2.CustomBackColor = System.Drawing.Color.Empty;
@@ -405,22 +440,24 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox2.Location = new System.Drawing.Point(193, 238);
             this.textbox2.Name = "textbox2";
-            this.textbox2.Size = new System.Drawing.Size(482, 20);
+            this.textbox2.Size = new System.Drawing.Size(498, 20);
             this.textbox2.TabIndex = 130;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
             this.textbox2.WaterMark = null;
             // 
             // tgCompilLocl
             // 
-            this.tgCompilLocl.AutoSize = true;
-            this.tgCompilLocl.Location = new System.Drawing.Point(293, 367);
+            this.tgCompilLocl.Checked = false;
+            this.tgCompilLocl.Location = new System.Drawing.Point(293, 372);
             this.tgCompilLocl.Name = "tgCompilLocl";
-            this.tgCompilLocl.Size = new System.Drawing.Size(52, 15);
+            this.tgCompilLocl.Size = new System.Drawing.Size(30, 16);
             this.tgCompilLocl.TabIndex = 137;
-            this.tgCompilLocl.Text = " ";
+            this.tgCompilLocl.ToggleSize = 30;
             // 
             // flExtraProPath
             // 
+            this.flExtraProPath.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flExtraProPath.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.flExtraProPath.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.flExtraProPath.CustomBackColor = System.Drawing.Color.Empty;
@@ -430,89 +467,100 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraProPath.Location = new System.Drawing.Point(193, 264);
             this.flExtraProPath.MultiLines = true;
             this.flExtraProPath.Name = "flExtraProPath";
-            this.flExtraProPath.Size = new System.Drawing.Size(482, 45);
+            this.flExtraProPath.Size = new System.Drawing.Size(498, 50);
             this.flExtraProPath.TabIndex = 129;
             this.flExtraProPath.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
             // 
             // textbox3
             // 
+            this.textbox3.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox3.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox3.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox3.CustomBackColor = System.Drawing.Color.Empty;
             this.textbox3.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox3.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox3.Location = new System.Drawing.Point(193, 315);
+            this.textbox3.Location = new System.Drawing.Point(193, 320);
             this.textbox3.Name = "textbox3";
-            this.textbox3.Size = new System.Drawing.Size(482, 20);
+            this.textbox3.Size = new System.Drawing.Size(498, 20);
             this.textbox3.TabIndex = 128;
             this.textbox3.Tag = "true";
             this.textbox3.WaterMark = null;
             // 
             // textbox4
             // 
+            this.textbox4.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox4.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox4.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox4.CustomBackColor = System.Drawing.Color.Empty;
             this.textbox4.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox4.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox4.Location = new System.Drawing.Point(193, 341);
+            this.textbox4.Location = new System.Drawing.Point(193, 346);
             this.textbox4.Name = "textbox4";
-            this.textbox4.Size = new System.Drawing.Size(482, 20);
+            this.textbox4.Size = new System.Drawing.Size(498, 20);
             this.textbox4.TabIndex = 127;
             this.textbox4.Tag = "true";
             this.textbox4.WaterMark = null;
             // 
             // textbox5
             // 
+            this.textbox5.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox5.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox5.CustomBackColor = System.Drawing.Color.Empty;
             this.textbox5.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox5.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox5.Location = new System.Drawing.Point(193, 396);
+            this.textbox5.Location = new System.Drawing.Point(193, 401);
             this.textbox5.Name = "textbox5";
-            this.textbox5.Size = new System.Drawing.Size(482, 20);
+            this.textbox5.Size = new System.Drawing.Size(498, 20);
             this.textbox5.TabIndex = 126;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             this.textbox5.WaterMark = null;
             // 
             // flCmdLine
             // 
+            this.flCmdLine.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flCmdLine.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.flCmdLine.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.flCmdLine.CustomBackColor = System.Drawing.Color.Empty;
             this.flCmdLine.CustomForeColor = System.Drawing.Color.Empty;
             this.flCmdLine.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.flCmdLine.Location = new System.Drawing.Point(193, 422);
+            this.flCmdLine.Location = new System.Drawing.Point(193, 427);
             this.flCmdLine.Name = "flCmdLine";
-            this.flCmdLine.Size = new System.Drawing.Size(482, 45);
+            this.flCmdLine.Size = new System.Drawing.Size(498, 20);
             this.flCmdLine.TabIndex = 125;
             this.flCmdLine.WaterMark = "Appended to the prowin command line when running or compiling";
             // 
             // textbox6
             // 
+            this.textbox6.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.textbox6.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
             this.textbox6.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.textbox6.CustomBackColor = System.Drawing.Color.Empty;
             this.textbox6.CustomForeColor = System.Drawing.Color.Empty;
             this.textbox6.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.textbox6.Location = new System.Drawing.Point(193, 473);
+            this.textbox6.Location = new System.Drawing.Point(193, 453);
             this.textbox6.Name = "textbox6";
-            this.textbox6.Size = new System.Drawing.Size(482, 20);
+            this.textbox6.Size = new System.Drawing.Size(498, 20);
             this.textbox6.TabIndex = 124;
             this.textbox6.Tag = "log file (*.log)|*.log";
             this.textbox6.WaterMark = null;
             // 
             // btDeleteDownload
             // 
+            this.btDeleteDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDeleteDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDeleteDownload.BackGrndImage = null;
-            this.btDeleteDownload.Location = new System.Drawing.Point(635, 148);
+            this.btDeleteDownload.Location = new System.Drawing.Point(651, 147);
             this.btDeleteDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDeleteDownload.Name = "btDeleteDownload";
             this.btDeleteDownload.Size = new System.Drawing.Size(20, 20);
@@ -552,9 +600,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btDownload
             // 
+            this.btDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDownload.BackColor = System.Drawing.Color.Transparent;
             this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(655, 148);
+            this.btDownload.Location = new System.Drawing.Point(671, 147);
             this.btDownload.Margin = new System.Windows.Forms.Padding(0);
             this.btDownload.Name = "btDownload";
             this.btDownload.Size = new System.Drawing.Size(20, 20);
@@ -579,7 +628,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(678, 473);
+            this.btright6.Location = new System.Drawing.Point(694, 453);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.Size = new System.Drawing.Size(20, 20);
@@ -591,7 +640,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
-            this.btleft6.Location = new System.Drawing.Point(170, 473);
+            this.btleft6.Location = new System.Drawing.Point(170, 453);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
             this.btleft6.Size = new System.Drawing.Size(20, 20);
@@ -601,9 +650,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright1
             // 
+            this.btright1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(678, 122);
+            this.btright1.Location = new System.Drawing.Point(694, 122);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.Size = new System.Drawing.Size(20, 20);
@@ -625,9 +675,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright5
             // 
+            this.btright5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(678, 396);
+            this.btright5.Location = new System.Drawing.Point(694, 401);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.Size = new System.Drawing.Size(20, 20);
@@ -639,7 +690,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
-            this.btleft5.Location = new System.Drawing.Point(170, 396);
+            this.btleft5.Location = new System.Drawing.Point(170, 401);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
             this.btleft5.Size = new System.Drawing.Size(20, 20);
@@ -649,9 +700,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright4
             // 
+            this.btright4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(678, 341);
+            this.btright4.Location = new System.Drawing.Point(694, 346);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.Size = new System.Drawing.Size(20, 20);
@@ -664,7 +716,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
-            this.btleft4.Location = new System.Drawing.Point(170, 341);
+            this.btleft4.Location = new System.Drawing.Point(170, 346);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
             this.btleft4.Size = new System.Drawing.Size(20, 20);
@@ -674,9 +726,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright3
             // 
+            this.btright3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(678, 315);
+            this.btright3.Location = new System.Drawing.Point(694, 320);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.Size = new System.Drawing.Size(20, 20);
@@ -689,7 +742,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
-            this.btleft3.Location = new System.Drawing.Point(170, 315);
+            this.btleft3.Location = new System.Drawing.Point(170, 320);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
             this.btleft3.Size = new System.Drawing.Size(20, 20);
@@ -699,9 +752,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright2
             // 
+            this.btright2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(678, 237);
+            this.btright2.Location = new System.Drawing.Point(694, 237);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.Size = new System.Drawing.Size(20, 20);
@@ -728,7 +782,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
             this.htmlLabel7.IsSelectionEnabled = false;
-            this.htmlLabel7.Location = new System.Drawing.Point(30, 473);
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 453);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel7.TabIndex = 116;
@@ -742,12 +796,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
             this.htmlLabel6.IsSelectionEnabled = false;
-            this.htmlLabel6.Location = new System.Drawing.Point(30, 422);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 427);
             this.htmlLabel6.Name = "htmlLabel6";
-            this.htmlLabel6.Size = new System.Drawing.Size(122, 30);
+            this.htmlLabel6.Size = new System.Drawing.Size(154, 15);
             this.htmlLabel6.TabIndex = 115;
             this.htmlLabel6.TabStop = false;
-            this.htmlLabel6.Text = "<b>Progress command line extra parameters</b>";
+            this.htmlLabel6.Text = "<b>Prowin extra params</b>";
             // 
             // htmlLabel5
             // 
@@ -756,7 +810,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
             this.htmlLabel5.IsSelectionEnabled = false;
-            this.htmlLabel5.Location = new System.Drawing.Point(30, 396);
+            this.htmlLabel5.Location = new System.Drawing.Point(30, 401);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel5.TabIndex = 114;
@@ -770,7 +824,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
             this.htmlLabel4.IsSelectionEnabled = false;
-            this.htmlLabel4.Location = new System.Drawing.Point(30, 341);
+            this.htmlLabel4.Location = new System.Drawing.Point(30, 346);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(137, 45);
             this.htmlLabel4.TabIndex = 113;
@@ -784,7 +838,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
             this.htmlLabel3.IsSelectionEnabled = false;
-            this.htmlLabel3.Location = new System.Drawing.Point(30, 315);
+            this.htmlLabel3.Location = new System.Drawing.Point(30, 320);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel3.TabIndex = 112;
@@ -845,7 +899,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btEnv1
             // 
             this.btEnv1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btEnv1.Location = new System.Drawing.Point(193, 499);
+            this.btEnv1.Location = new System.Drawing.Point(193, 479);
             this.btEnv1.Name = "btEnv1";
             this.btEnv1.Size = new System.Drawing.Size(75, 23);
             this.btEnv1.TabIndex = 123;
@@ -854,7 +908,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btEnv2
             // 
             this.btEnv2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btEnv2.Location = new System.Drawing.Point(274, 499);
+            this.btEnv2.Location = new System.Drawing.Point(274, 479);
             this.btEnv2.Name = "btEnv2";
             this.btEnv2.Size = new System.Drawing.Size(75, 23);
             this.btEnv2.TabIndex = 122;
@@ -863,7 +917,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // btEnv4del
             // 
             this.btEnv4del.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btEnv4del.Location = new System.Drawing.Point(437, 499);
+            this.btEnv4del.Location = new System.Drawing.Point(437, 479);
             this.btEnv4del.Name = "btEnv4del";
             this.btEnv4del.Size = new System.Drawing.Size(75, 23);
             this.btEnv4del.TabIndex = 121;
@@ -944,5 +998,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiToggle tgftp;
         private YamuiImageButton btConfFtp;
         private YamuiLabel yamuiLabel3;
+        private YamuiLabel yamuiLabel5;
+        private YamuiToggle yamuiToggle1;
     }
 }

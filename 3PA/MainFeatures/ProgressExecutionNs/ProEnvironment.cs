@@ -441,7 +441,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
             }
             _listOfEnv.Add(after);
-            SetCurrent(null, null, null);
+            SetCurrent(after.Name, after.Suffix, null);
         }
 
         /// <summary>

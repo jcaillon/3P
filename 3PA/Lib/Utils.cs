@@ -259,19 +259,11 @@ namespace _3PA.Lib {
         /// <param name="initialFolder"></param>
         /// <returns></returns>
         public static string ShowFolderSelection(string initialFolder) {
-            // Prepare a dummy string, thos would appear in the dialog
-            string dummyFileName = "Select a folder";
-            SaveFileDialog sf = new SaveFileDialog {
-                FileName = dummyFileName,
-                Title = "Select a folder"
-            };
+            var fsd = new FolderSelectDialog();
             if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
-                sf.InitialDirectory = initialFolder;
-            return sf.ShowDialog() == DialogResult.OK ? Path.GetDirectoryName(sf.FileName) : string.Empty;
-            //var fbd = new FolderBrowserDialog();
-            //if (Directory.Exists(initialFolder))
-            //    fbd.SelectedPath = initialFolder;
-            //return fbd.ShowDialog() == DialogResult.OK ? fbd.SelectedPath : string.Empty;
+                fsd.InitialDirectory = initialFolder;
+            fsd.ShowDialog();
+            return fsd.FileName ?? string.Empty;
         }
 
         /// <summary>

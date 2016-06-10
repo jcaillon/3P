@@ -137,7 +137,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
             btDbEdit.ButtonPressed += BtDbEditOnButtonPressed;
             btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
-            tgCompilLocl.CheckedChanged += TgCompilLoclOnCheckedChanged;
+            tgCompilLocl.ButtonPressed += TgCompilLoclOnCheckedChanged;
             btDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
             btEnv4del.ButtonPressed += BtDeleteOnButtonPressed;
             btDownload.ButtonPressed += btDownload_Click;
@@ -550,7 +550,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void cbDatabase_SelectedIndexChanged(object sender, EventArgs e) {
-            UserCommunication.Notify(Config.Instance.EnvDatabase + " vs<br> " + cbDatabase.SelectedItem.ToString());
             if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
@@ -657,8 +656,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
         }
 
+
         #endregion
 
-
+        private void tgftp_Click(object sender, EventArgs e) {
+            SetTabOrder.CopyAddingOrderToClipBoard(mainPanel.ContentPanel);
+        }
     }
 }

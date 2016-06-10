@@ -119,6 +119,7 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
     <Compile Include="Lib\Ftp\Exceptions.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\ZipStorer.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
       <SubType>UserControl</SubType>

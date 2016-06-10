@@ -216,10 +216,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // toggleMono
             // 
-            this.toggleMono.AutoSize = true;
+            this.toggleMono.Checked = false;
             this.toggleMono.Location = new System.Drawing.Point(268, 81);
             this.toggleMono.Name = "toggleMono";
-            this.toggleMono.Size = new System.Drawing.Size(52, 15);
+            this.toggleMono.Size = new System.Drawing.Size(40, 16);
             this.toggleMono.TabIndex = 124;
             this.toggleMono.Text = " ";
             // 
@@ -247,10 +247,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // toggleRecurs
             // 
-            this.toggleRecurs.AutoSize = true;
+            this.toggleRecurs.Checked = false;
             this.toggleRecurs.Location = new System.Drawing.Point(268, 55);
             this.toggleRecurs.Name = "toggleRecurs";
-            this.toggleRecurs.Size = new System.Drawing.Size(52, 15);
+            this.toggleRecurs.Size = new System.Drawing.Size(40, 16);
             this.toggleRecurs.TabIndex = 121;
             this.toggleRecurs.Text = " ";
             // 

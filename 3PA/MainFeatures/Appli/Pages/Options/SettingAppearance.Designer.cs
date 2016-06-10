@@ -82,21 +82,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // tg_override
             // 
-            this.tg_override.AutoSize = true;
-            this.tg_override.Location = new System.Drawing.Point(25, 309);
+            this.tg_override.Checked = false;
+            this.tg_override.Location = new System.Drawing.Point(25, 307);
             this.tg_override.Name = "tg_override";
-            this.tg_override.Size = new System.Drawing.Size(232, 15);
+            this.tg_override.Size = new System.Drawing.Size(276, 16);
             this.tg_override.TabIndex = 64;
             this.tg_override.Text = "Let 3P override notepad++ themes";
+            this.tg_override.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.tg_override.ToggleSize = 30;
             // 
             // tg_colorOn
             // 
-            this.tg_colorOn.AutoSize = true;
+            this.tg_colorOn.Checked = false;
             this.tg_colorOn.Location = new System.Drawing.Point(25, 251);
             this.tg_colorOn.Name = "tg_colorOn";
-            this.tg_colorOn.Size = new System.Drawing.Size(269, 15);
+            this.tg_colorOn.Size = new System.Drawing.Size(287, 16);
             this.tg_colorOn.TabIndex = 63;
             this.tg_colorOn.Text = "I\'m using my own User Defined Language";
+            this.tg_colorOn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.tg_colorOn.ToggleSize = 30;
             // 
             // htmlLabel1
             // 
@@ -127,7 +131,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // cbSyntax
             // 
             this.cbSyntax.ItemHeight = 15;
-            this.cbSyntax.Location = new System.Drawing.Point(25, 272);
+            this.cbSyntax.Location = new System.Drawing.Point(25, 273);
             this.cbSyntax.Name = "cbSyntax";
             this.cbSyntax.Size = new System.Drawing.Size(180, 21);
             this.cbSyntax.TabIndex = 21;
