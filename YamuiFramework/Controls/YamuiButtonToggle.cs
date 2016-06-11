@@ -29,8 +29,8 @@ namespace YamuiFramework.Controls {
 
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
-    [DefaultEvent("Click")]
-    public class YamuiToggle : YamuiButton {
+    [DefaultEvent("ButtonPressed")]
+    public class YamuiButtonToggle : YamuiButton {
 
         #region public field
 
@@ -48,10 +48,9 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-
         #region Constructor
 
-        public YamuiToggle() {
+        public YamuiButtonToggle() {
             SetStyle(ControlStyles.SupportsTransparentBackColor |
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
@@ -61,7 +60,7 @@ namespace YamuiFramework.Controls {
             ButtonPressed += OnButtonPressed;
         }
 
-        ~YamuiToggle() {
+        ~YamuiButtonToggle() {
             ButtonPressed -= OnButtonPressed;
         }
 

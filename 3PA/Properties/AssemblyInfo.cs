@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("3P - Progress Programmers Pal - Julien Caillon")]
 [assembly: AssemblyDescription("Progress Programmers Pal")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("BullAnt")]
+[assembly: AssemblyCompany("LeCavalierCasta")]
 [assembly: AssemblyProduct("3P")]
 [assembly: AssemblyCopyright("Copyright (c) 2016 - Julien Caillon - GNU General Public License v3")]
 [assembly: AssemblyTrademark("")]

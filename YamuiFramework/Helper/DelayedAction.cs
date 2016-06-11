@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Threading.Tasks;
 using System.Timers;
 
 namespace YamuiFramework.Helper {
@@ -25,24 +26,49 @@ namespace YamuiFramework.Helper {
     /// <summary>
     /// Simple class to delay an action
     /// </summary>
-    internal class DelayedAction {
+    public class DelayedAction {
 
         private Timer _timer;
 
+        private Action _toDo;
+
+        /// <summary>
+        /// Use this class to do an action after a given delay
+        /// </summary>
         public DelayedAction(int msDelay, Action toDo) {
+            _toDo = toDo;
             _timer = new Timer {
                 AutoReset = false,
                 Interval = msDelay
             };
-            _timer.Elapsed += (sender, args) => toDo();
+            _timer.Elapsed += TimerOnElapsed;
             _timer.Start();
         }
 
-        ~DelayedAction() {
-            if (_timer != null) {
-                _timer.Dispose();
-                _timer = null;
+        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
+            Task.Factory.StartNew(() => {
+                _toDo();
+            });
+            CleanUp();
+        }
+
+        /// <summary>
+        /// Stop the recurrent action
+        /// </summary>
+        public void CleanUp() {
+            try {
+                if (_timer != null) {
+                    _timer.Stop();
+                    _timer.Close();
+                    _timer.Dispose();
+                }
+            } catch (Exception) {
+                // clean up proc
             }
+        }
+
+        ~DelayedAction() {
+            CleanUp();
         }
 
     }

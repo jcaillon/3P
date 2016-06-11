@@ -26,6 +26,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiFormMessageBox : YamuiForm {
@@ -92,6 +93,8 @@ namespace YamuiFramework.Forms {
                     Close();
                 };
                 Controls.Add(yamuiButton1);
+                if (i == 0)
+                    ActiveControl = yamuiButton1;
                 i++;
             }
 
@@ -135,6 +138,7 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
+        #region ShwDlg
 
         /// <summary>
         /// Show a message box dialog
@@ -152,13 +156,17 @@ namespace YamuiFramework.Forms {
                     </tr>
                 </table><br>" + text;
 
-            return ShwDlg(screen, ownerHandle, text, buttonsList, waitResponse, onLinkClicked);
+            return ShwDlg(screen, ownerHandle, text, heading, buttonsList, waitResponse, onLinkClicked);
         }
 
-        public static int ShwDlg(Screen screen, IntPtr ownerHandle, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
+        public static int ShwDlg(Screen screen, IntPtr ownerHandle, string title, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
 
             // new message box
-            var msgbox = new YamuiFormMessageBox(text, buttonsList, screen.WorkingArea.Height * 8/10, screen.WorkingArea.Width * 8 / 10) { ShowInTaskbar = !waitResponse, TopMost = true };
+            var msgbox = new YamuiFormMessageBox(text, buttonsList, screen.WorkingArea.Height*8/10, screen.WorkingArea.Width*8/10) {
+                ShowInTaskbar = !waitResponse, 
+                TopMost = true,
+                Text = title
+            };
 
             if (onLinkClicked != null)
                 msgbox.LinkClicked += onLinkClicked;
@@ -166,7 +174,7 @@ namespace YamuiFramework.Forms {
             var ownerRect = WinApi.GetWindowRect(ownerHandle);
 
             // center parent
-            msgbox.Location = new Point((ownerRect.Width - msgbox.Width) / 2 + ownerRect.X, (ownerRect.Height - msgbox.Height) / 2 + ownerRect.Y);
+            msgbox.Location = new Point((ownerRect.Width - msgbox.Width)/2 + ownerRect.X, (ownerRect.Height - msgbox.Height)/2 + ownerRect.Y);
 
             // get yamui form
             var curForm = FromHandle(ownerHandle);
@@ -189,6 +197,9 @@ namespace YamuiFramework.Forms {
             }
             return _dialogResult;
         }
+
+        #endregion
+
     }
 
     public enum MessageImage {

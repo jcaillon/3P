@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_timeout = new YamuiFramework.Controls.YamuiTextBox();
             this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btleft1 = new YamuiFramework.Controls.YamuiImageButton();
+            this.btleft1 = new YamuiFramework.Controls.YamuiButtonImage();
             this.htmlLabel8 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.fl_remoteDir = new YamuiFramework.Controls.YamuiTextBox();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -50,6 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_user = new YamuiFramework.Controls.YamuiTextBox();
             this.bt_test = new YamuiFramework.Controls.YamuiButton();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -59,6 +60,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
+            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiButton1);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.bt_reset);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel2);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.lbl_about);
@@ -92,8 +94,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // bt_reset
             // 
-            this.bt_reset.Location = new System.Drawing.Point(305, 350);
-            this.bt_reset.Margin = new System.Windows.Forms.Padding(3, 15, 3, 3);
+            this.bt_reset.Location = new System.Drawing.Point(371, 350);
             this.bt_reset.Name = "bt_reset";
             this.bt_reset.Size = new System.Drawing.Size(58, 23);
             this.bt_reset.TabIndex = 111;
@@ -350,6 +351,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.ReshowDelay = 100;
             this.toolTip.TooltipCssClass = "htmltooltip";
             // 
+            // yamuiButton1
+            // 
+            this.yamuiButton1.Location = new System.Drawing.Point(305, 350);
+            this.yamuiButton1.Name = "yamuiButton1";
+            this.yamuiButton1.Size = new System.Drawing.Size(60, 23);
+            this.yamuiButton1.TabIndex = 112;
+            this.yamuiButton1.Text = "&Save";
+            // 
             // SetFtp
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -381,12 +390,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiTextBox fl_password;
         private HtmlLabel htmlLabel8;
         private YamuiTextBox fl_remoteDir;
-        private YamuiImageButton btleft1;
+        private YamuiButtonImage btleft1;
         private HtmlLabel htmlLabel9;
         private YamuiTextBox fl_timeout;
         private HtmlLabel htmlLabel4;
         private HtmlLabel lbl_about;
         private YamuiLabel yamuiLabel2;
         private YamuiButton bt_reset;
+        private YamuiButton yamuiButton1;
     }
 }

@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiLink.cs) is part of YamuiFramework.
+// This file (YamuiDateTime.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -18,20 +18,16 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
-    [Designer("YamuiFramework.Controls.YamuiLinkDesigner")]
-    [ToolboxBitmap(typeof(LinkLabel))]
-    [DefaultEvent("Click")]
-    public class YamuiLink : Button {
+    [ToolboxBitmap(typeof(DateTimePicker))]
+    public class YamuiDateTimePicker : DateTimePicker {
         #region Fields
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -41,29 +37,21 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool UseCustomForeColor { get; set; }
 
-        private FontFunction _function = FontFunction.Link;
-        [DefaultValue(FontFunction.Normal)]
-        [Category("Yamui")]
-        public FontFunction Function {
-            get { return _function; }
-            set { _function = value; }
-        }
-
         private bool _isHovered;
         private bool _isPressed;
         private bool _isFocused;
+
         #endregion
 
         #region Constructor
-
-        public YamuiLink() {
+        public YamuiDateTimePicker() {
             SetStyle(ControlStyles.SupportsTransparentBackColor |
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
+                ControlStyles.Selectable |
                 ControlStyles.AllPaintingInWmPaint, true);
         }
-
         #endregion
 
         #region Paint Methods
@@ -89,7 +77,7 @@ namespace YamuiFramework.Controls {
 
         protected void CustomOnPaintBackground(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
+                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
                 if (backColor != Color.Transparent)
                     e.Graphics.Clear(backColor);
                 else
@@ -109,8 +97,47 @@ namespace YamuiFramework.Controls {
         }
 
         protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color foreColor = YamuiThemeManager.Current.LabelsFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
+            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
+
+            if (borderColor != Color.Transparent)
+                using (Pen p = new Pen(borderColor)) {
+                    Rectangle borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
+                    e.Graphics.DrawRectangle(p, borderRect);
+                }
+
+            using (SolidBrush b = new SolidBrush(foreColor)) {
+                e.Graphics.FillPolygon(b, new[] { new Point(Width - 20, (Height / 2) - 2), new Point(Width - 9, (Height / 2) - 2), new Point(Width - 15, (Height / 2) + 4) });
+                //e.Graphics.FillPolygon(b, new Point[] { new Point(Width - 15, (Height / 2) - 5), new Point(Width - 21, (Height / 2) + 2), new Point(Width - 9, (Height / 2) + 2) });
+            }
+
+            int check = 0;
+
+            if (ShowCheckBox) {
+                check = 15;
+                using (Pen p = new Pen(borderColor)) {
+                    Rectangle boxRect = new Rectangle(3, Height / 2 - 6, 12, 12);
+                    e.Graphics.DrawRectangle(p, boxRect);
+                }
+                if (Checked) {
+                    Color fillColor = YamuiThemeManager.Current.AccentColor;
+                    using (SolidBrush b = new SolidBrush(fillColor)) {
+                        Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
+                        e.Graphics.FillRectangle(b, boxRect);
+                    }
+                } else {
+                    foreColor = YamuiThemeManager.Current.ButtonDisabledFore;
+                }
+            }
+
+            Rectangle textRect = new Rectangle(2 + check, 2, Width - 20, Height - 4);
+
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+        }
+
+        protected override void OnValueChanged(EventArgs eventargs) {
+            base.OnValueChanged(eventargs);
+            Invalidate();
         }
 
         #endregion
@@ -151,22 +178,17 @@ namespace YamuiFramework.Controls {
 
         #region Keyboard Methods
 
-        // This is mandatory to be able to handle the ENTER key in key events!!
-        protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            if (e.KeyCode == Keys.Enter) e.IsInputKey = true;
-            base.OnPreviewKeyDown(e);
-        }
-
         protected override void OnKeyDown(KeyEventArgs e) {
-            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
+            if (e.KeyCode == Keys.Space) {
                 _isPressed = true;
                 Invalidate();
-                e.Handled = true;
             }
+
             base.OnKeyDown(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
+            //Remove this code cause this prevents the focus color
             _isPressed = false;
             Invalidate();
             base.OnKeyUp(e);
@@ -208,37 +230,19 @@ namespace YamuiFramework.Controls {
 
         #region Overridden Methods
 
-        protected override void OnEnabledChanged(EventArgs e) {
-            base.OnEnabledChanged(e);
-            Invalidate();
-        }
+        public override Size GetPreferredSize(Size proposedSize) {
+            Size preferredSize;
+            base.GetPreferredSize(proposedSize);
 
+            using (var g = CreateGraphics()) {
+                string measureText = Text.Length > 0 ? Text : "MeasureText";
+                proposedSize = new Size(int.MaxValue, int.MaxValue);
+                preferredSize = TextRenderer.MeasureText(g, measureText, FontManager.GetStandardFont(), proposedSize, TextFormatFlags.Left | TextFormatFlags.LeftAndRightPadding | TextFormatFlags.VerticalCenter);
+                preferredSize.Height += 10;
+            }
+
+            return preferredSize;
+        }
         #endregion
-    }
-
-    internal class YamuiLinkDesigner : ControlDesigner {
-
-        protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("ImeMode");
-            properties.Remove("Padding");
-            properties.Remove("FlatAppearance");
-            properties.Remove("FlatStyle");
-            properties.Remove("AutoEllipsis");
-            properties.Remove("UseCompatibleTextRendering");
-
-            properties.Remove("Image");
-            properties.Remove("ImageAlign");
-            properties.Remove("ImageIndex");
-            properties.Remove("ImageKey");
-            properties.Remove("ImageList");
-            properties.Remove("TextImageRelation");
-
-            properties.Remove("UseVisualStyleBackColor");
-
-            properties.Remove("Font");
-            properties.Remove("RightToLeft");
-
-            base.PreFilterProperties(properties);
-        }
     }
 }

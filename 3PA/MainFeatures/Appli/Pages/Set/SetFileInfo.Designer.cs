@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_delete = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.bt_SaveState = new YamuiFramework.Controls.YamuiImage();
+            this.bt_SaveState = new YamuiFramework.Controls.YamuiPictureBox();
             this.lb_SaveState = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -464,7 +464,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private HtmlLabel htmlLabel5;
         private HtmlLabel htmlLabel9;
         private HtmlLabel lb_SaveState;
-        private YamuiImage bt_SaveState;
+        private YamuiPictureBox bt_SaveState;
         private HtmlLabel lb_FileName;
         private HtmlLabel htmlLabel7;
         private HtmlToolTip toolTip;

@@ -38,20 +38,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_include = new YamuiFramework.Controls.YamuiTextBox();
             this.fl_nbProcess = new YamuiFramework.Controls.YamuiTextBox();
             this.htmlLabel4 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.toggleMono = new YamuiFramework.Controls.YamuiToggle();
+            this.toggleMono = new YamuiFramework.Controls.YamuiButtonToggle();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btCancel = new YamuiFramework.Controls.YamuiButton();
-            this.toggleRecurs = new YamuiFramework.Controls.YamuiToggle();
+            this.toggleRecurs = new YamuiFramework.Controls.YamuiButtonToggle();
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btUndo = new YamuiFramework.Controls.YamuiImageButton();
+            this.btUndo = new YamuiFramework.Controls.YamuiButtonImage();
             this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btStart = new YamuiFramework.Controls.YamuiButton();
             this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
             this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btHistoric = new YamuiFramework.Controls.YamuiImageButton();
-            this.btOpen = new YamuiFramework.Controls.YamuiImageButton();
+            this.btHistoric = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btOpen = new YamuiFramework.Controls.YamuiButtonImage();
             this.fl_directory = new YamuiFramework.Controls.YamuiTextBox();
-            this.btBrowse = new YamuiFramework.Controls.YamuiImageButton();
+            this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.dockedPanel.ContentPanel.SuspendLayout();
             this.dockedPanel.SuspendLayout();
@@ -76,29 +76,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.bt_export);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btReset);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel6);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_exclude);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_include);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.dockedPanel.ContentPanel.Controls.Add(this.toggleMono);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btCancel);
-            this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
+            this.dockedPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.dockedPanel.ContentPanel.Controls.Add(this.btBrowse);
             this.dockedPanel.ContentPanel.Controls.Add(this.btUndo);
-            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_report);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_directory);
+            this.dockedPanel.ContentPanel.Controls.Add(this.btOpen);
+            this.dockedPanel.ContentPanel.Controls.Add(this.btHistoric);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel3);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
+            this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel1);
+            this.dockedPanel.ContentPanel.Controls.Add(this.toggleMono);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel4);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel5);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_include);
+            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel6);
+            this.dockedPanel.ContentPanel.Controls.Add(this.fl_exclude);
+            this.dockedPanel.ContentPanel.Controls.Add(this.btCancel);
             this.dockedPanel.ContentPanel.Controls.Add(this.btStart);
             this.dockedPanel.ContentPanel.Controls.Add(this.progressBar);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btHistoric);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btOpen);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_directory);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btBrowse);
-            this.dockedPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.dockedPanel.ContentPanel.Controls.Add(this.btReset);
+            this.dockedPanel.ContentPanel.Controls.Add(this.bt_export);
+            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_report);
             this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.dockedPanel.ContentPanel.Name = "ContentPanel";
             this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
@@ -221,7 +221,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.toggleMono.Name = "toggleMono";
             this.toggleMono.Size = new System.Drawing.Size(40, 16);
             this.toggleMono.TabIndex = 124;
-            this.toggleMono.Text = " ";
+            this.toggleMono.ToggleSize = 30;
             // 
             // htmlLabel1
             // 
@@ -252,7 +252,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.toggleRecurs.Name = "toggleRecurs";
             this.toggleRecurs.Size = new System.Drawing.Size(40, 16);
             this.toggleRecurs.TabIndex = 121;
-            this.toggleRecurs.Text = " ";
+            this.toggleRecurs.ToggleSize = 30;
             // 
             // htmlLabel2
             // 
@@ -406,20 +406,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private HtmlToolTip tooltip;
         private YamuiScrollPage dockedPanel;
         private YamuiLabel yamuiLabel2;
-        private YamuiImageButton btHistoric;
-        private YamuiImageButton btOpen;
+        private YamuiButtonImage btHistoric;
+        private YamuiButtonImage btOpen;
         private YamuiTextBox fl_directory;
-        private YamuiImageButton btBrowse;
+        private YamuiButtonImage btBrowse;
         private HtmlLabel htmlLabel3;
         private YamuiProgressBar progressBar;
         private YamuiButton btStart;
         private HtmlLabel lbl_report;
-        private YamuiImageButton btUndo;
+        private YamuiButtonImage btUndo;
         private HtmlLabel htmlLabel2;
-        private YamuiToggle toggleRecurs;
+        private YamuiButtonToggle toggleRecurs;
         private YamuiButton btCancel;
         private HtmlLabel htmlLabel1;
-        private YamuiToggle toggleMono;
+        private YamuiButtonToggle toggleMono;
         private HtmlLabel htmlLabel4;
         private YamuiTextBox fl_nbProcess;
         private HtmlLabel htmlLabel6;

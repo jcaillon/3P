@@ -64,21 +64,26 @@ namespace _3PA.MainFeatures {
         public static void ShowErrors(Exception e, string message) {
             // log the error into a file
             if (Log(message + "\r\n" + e)) {
-                // show it to the user
-                if (Config.Instance.UserGetsPreReleases)
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
-                        (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") +
-                        "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
-                        MessageImg.MsgPoison, "Unexpected error", message,
-                        args => {
-                            if (args.Link.EndsWith(".log")) {
-                                Npp.Goto(args.Link);
-                                args.Handled = true;
-                            }
-                        },
-                        0, 500);
-                else
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>If you didn't ask anything from 3P then you can ignore this message.<br>If you did, another try will probably fail as well.<br><br>Consider restarting Notepad++ as it might solve this problem!<br><br><i>You can use the link below to open an issue on GitHub and help us debug 3P :</i><br>" + Config.IssueUrl.ToHtmlLink(), MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
+                if (UserCommunication.Ready) {
+                    // show it to the user
+                    if (Config.Instance.UserGetsPreReleases)
+                        UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message and go on with your work.<br>2. Otherwise, you might want to check out the error log below :" +
+                                                 (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") +
+                                                 "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br><b>Level 0 support : restart Notepad++ and see if things are getting better!</b>",
+                            MessageImg.MsgPoison, "Unexpected error", message,
+                            args => {
+                                if (args.Link.EndsWith(".log")) {
+                                    Npp.Goto(args.Link);
+                                    args.Handled = true;
+                                }
+                            },
+                            0, 500);
+                    else
+                        UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>If you didn't ask anything from 3P then you can ignore this message.<br>If you did, another try will probably fail as well.<br><br>Consider restarting Notepad++ as it might solve this problem!<br><br><i>You can use the link below to open an issue on GitHub and help us debug 3P :</i><br>" + Config.IssueUrl.ToHtmlLink(), MessageImg.MsgPoison, "Unexpected error", message, 0, 500);
+                } else {
+                    // show an old school message
+                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
         }
 
@@ -119,7 +124,7 @@ namespace _3PA.MainFeatures {
 
                     // send to github
                     Task.Factory.StartNew(() => {
-                        if (Config.Instance.GlobalDontAutoPostLog || UserCommunication.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
+                        if (Config.Instance.GlobalDontAutoPostLog || User.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
                             Utils.DeleteFile(Config.FileErrorToSend);
                         }
                     });

@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -32,6 +31,8 @@ using _3PA.MainFeatures;
 namespace _3PA.Lib {
 
     public static class User {
+
+        #region Ping
 
         /// <summary>
         /// This method pings a webservice deployed for 3P, it simply allows to do
@@ -58,13 +59,13 @@ namespace _3PA.Lib {
                         StreamWriter writer = new StreamWriter(req.GetRequestStream());
                         JavaScriptSerializer serializer = new JavaScriptSerializer();
                         writer.Write("{" +
-                            "\"computerId\": " + serializer.Serialize(GetWindowsUniqueId()) + "," +
-                            "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
-                            "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
-                            "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
-                            "\"lang\": " + serializer.Serialize(CultureInfo.InstalledUICulture.EnglishName) + "," +
-                            "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString()) +
-                            "}");
+                                     "\"computerId\": " + serializer.Serialize(GetWindowsUniqueId()) + "," +
+                                     "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
+                                     "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
+                                     "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
+                                     "\"lang\": " + serializer.Serialize(CultureInfo.InstalledUICulture.EnglishName) + "," +
+                                     "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString()) +
+                                     "}");
                         writer.Close();
                         string result = null;
                         using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
@@ -84,6 +85,31 @@ namespace _3PA.Lib {
             }
         }
 
+        #endregion
+
+        #region GetUniqueId
+
+        /// <summary>
+        /// Returns an identifier that is supposed to be unique for each computer
+        /// </summary>
+        public static string GetWindowsUniqueId() {
+            try {
+                var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+                var proc = new Process {StartInfo = procStartInfo};
+                proc.Start();
+                return proc.StandardOutput.ReadToEnd().Replace("UUID", String.Empty).Trim().ToUpper();
+            } catch (Exception e) {
+                if (!(e is ArgumentNullException)) {
+                    ErrorHandler.Log(e.Message);
+                }
+            }
+            return Environment.MachineName + GetMacAddress();
+        }
+
         /// <summary>
         /// Returns the mac address of the computer
         /// </summary>
@@ -97,30 +123,61 @@ namespace _3PA.Lib {
                     ErrorHandler.Log(e.Message);
                 }
             }
-            return string.Empty;
+            return String.Empty;
         }
+
+        #endregion
+
+        #region SendIssue
 
         /// <summary>
-        /// Returns an identifier that is supposed to be unique for each computer
+        /// Sends an comment to a given GITHUB issue url
         /// </summary>
-        public static string GetWindowsUniqueId() {
+        /// <param name="message"></param>
+        /// <param name="url"></param>
+        public static bool SendIssue(string message, string url) {
             try {
-                var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                var proc = new Process { StartInfo = procStartInfo };
-                proc.Start();
-                return proc.StandardOutput.ReadToEnd().Replace("UUID", string.Empty).Trim().ToUpper();
-            } catch (Exception e) {
-                if (!(e is ArgumentNullException)) {
-                    ErrorHandler.Log(e.Message);
+                // handle spam (10s min between 2 posts)
+                if (Utils.IsSpamming("SendIssue", 10000))
+                    return false;
+
+                HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
+                if (req == null)
+                    return false;
+                req.Proxy = Config.Instance.GetWebClientProxy();
+                req.Method = "POST";
+                req.ContentType = "application/json";
+                req.UserAgent = Config.GetUserAgent;
+                req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
+                StreamWriter writer = new StreamWriter(req.GetRequestStream());
+                JavaScriptSerializer serializer = new JavaScriptSerializer();
+                writer.Write("{\"body\": " + serializer.Serialize(
+                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
+                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion() + " ####\r\n" +
+                    message
+                    ) + "}");
+                writer.Close();
+                string result = null;
+                using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
+                    if (resp != null && resp.GetResponseStream() != null) {
+                        var respStream = resp.GetResponseStream();
+                        if (respStream != null) {
+                            StreamReader reader = new StreamReader(respStream);
+                            result = reader.ReadToEnd();
+                            reader.Close();
+                        }
+                    }
                 }
+                if (result != null) {
+                    return true;
+                }
+            } catch (Exception ex) {
+                ErrorHandler.Log(ex.ToString());
             }
-            return Environment.MachineName + GetMacAddress();
+            return false;
         }
 
+        #endregion
     }
 
 }

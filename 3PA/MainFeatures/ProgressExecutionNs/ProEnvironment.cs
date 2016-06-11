@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             #region Exported fields
 
-            // prim key
+            // primary key
             public string Name = "";
             public string Suffix = "";
 
@@ -50,8 +50,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string IniPath = "";
             public string ExtraProPath = "";
 
-            public string CmdLineParameters = "";
-
             /// <summary>
             /// Path to the workarea, we can find the .p, .t, .w there
             /// </summary>
@@ -59,9 +57,21 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             public string BaseCompilationPath = "";
             public bool CompileLocally;
+            public bool CompileWithListing = true;
+            public bool PushToFtpOnCompile;
 
             public string ProwinPath = "";
+            public string CmdLineParameters = "";
             public string LogFilePath = "";
+
+            // FTP options
+            public string FtpHostName = "";
+            public string FtpHostPort = "";
+            public string FtpUserName = "";
+            public string FtpUserPassword = "";
+            public string FtpRemoteDir = "";
+            public string FtpSslSupportMode = "";
+            public string FtpTimeOut = "";
 
             #endregion
 
@@ -364,7 +374,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         }
 
         #endregion
-
 
         #region events
 

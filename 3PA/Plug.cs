@@ -17,9 +17,8 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
-using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
@@ -27,7 +26,6 @@ using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
@@ -87,6 +85,9 @@ namespace _3PA {
             Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
             FileExplorer.DockableCommandIndex = cmdIndex;
             Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
+
+            // subscribe to notorious events
+            OnNppShutDown += PlugShutDown;
         }
 
         /// <summary>
@@ -125,6 +126,7 @@ namespace _3PA {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.OnGetCssSheet += HtmlHandler.YamuiThemeManagerOnOnGetCssSheet;
             YamuiThemeManager.OnHtmlImageNeeded += HtmlHandler.YamuiThemeManagerOnOnHtmlImageNeeded;
+            YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
 
             // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
             // from a back groundthread, use : BeginInvoke()
@@ -173,6 +175,9 @@ namespace _3PA {
 
             // this is done async anyway
             FileExplorer.RebuildItemList();
+
+            // ReSharper disable once ObjectCreationAsStatement
+            new ReccurentAction(User.Ping, 1000 * 60 * 120);
         }
 
         #endregion
@@ -182,16 +187,13 @@ namespace _3PA {
         /// <summary>
         /// Called on Npp shutdown
         /// </summary>
-        internal static void OnNppShutdown() {
+        internal static void PlugShutDown() {
             try {
                 // export modified conf
                 FileTag.Export();
 
                 // uninstall hooks
                 UninstallHooks();
-
-                // disable hour timer
-                UpdateHandler.DeleteHourTimer();
 
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
@@ -214,9 +216,6 @@ namespace _3PA {
                 AppliMenu.ForceClose();
 
                 PluginIsFullyLoaded = false;
-
-                // runs exit program if any
-                UpdateHandler.OnNotepadExit();
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");
@@ -338,65 +337,6 @@ namespace _3PA {
         public static void ClosePopups() {
             AutoComplete.Close();
             InfoToolTip.Close();
-        }
-
-        #endregion
-
-        #region tests
-
-        public static void StartDebug() {
-            //Debug.Assert(false);
-
-        }
-
-
-
-        public static void Test() {
-            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
-            //        MessageImg.MsgUpdate,
-            //        "A new version has been installed!",
-            //        "Updated to version " + AssemblyInfo.Version,
-            //        new List<string> { "ok", "cancel" },
-            //        true);
-
-            Task.Factory.StartNew(() => {
-
-                var ftp = new FtpsClient();
-
-                string welcomeTxt = "";
-
-                foreach (var mode in Extensions.EnumUtil.GetValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
-                    try {
-                        ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
-                        UserCommunication.Notify(((EsslSupportModeAttr)mode.GetAttributes()).Value + " : " + welcomeTxt);
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-
-                ftp.Close();
-
-                /*
-                Ftp ftpClient = new Ftp {
-                    Host = "localhost",
-                    User = "progress",
-                    Pass = "progress",
-                    UseSssl = true
-                };
-                if (ftpClient.CanConnect) {
-
-                    UserCommunication.Notify(ftpClient.CreateDirectory("/fuck/more/stuff").ToString());
-                    UserCommunication.Notify(ftpClient.Upload(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\compile\_underescore.r").ToString());
-                    UserCommunication.Notify(ftpClient.Download(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\program.r").ToString());
-
-                    UserCommunication.Notify(ftpClient.ErrorLog.ToString().Replace("\n", "<br>"));
-                    UserCommunication.Notify(ftpClient.Log.ToString().Replace("\n", "<br>"));
-                } else {
-                    // coulnd't connect
-                    UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
-                }
-                */
-            });
         }
 
         #endregion

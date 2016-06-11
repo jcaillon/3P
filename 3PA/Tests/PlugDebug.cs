@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (ParserLexerTests.cs) is part of 3P.
+// This file (Tests.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,15 +17,93 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+using System;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
+using YamuiFramework.Controls;
+using _3PA.Lib;
+using _3PA.Lib.Ftp;
+using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.Tests {
-    public class ParserLexerTests {
 
-        public static void Run() {
+    /// <summary>
+    /// This class is only for debug/dev purposes, it will not be used in production
+    /// </summary>
+    internal class PlugDebug {
+
+        #region tests and dev
+
+        public static void GetCurrentScrollPageAddOrder() {
+            try {
+                (new SetTabOrder()).CopyAddingOrderToClipBoard(Utils.GetControlsOfType<YamuiScrollPage>(Appli.Form).FirstOrDefault());
+            } catch {
+                // ignored, this method is only for the dev
+            }
+        }
+
+        public static void StartDebug() {
+            //Debug.Assert(false);
+        }
+
+        public static void Test() {
+            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
+            //        MessageImg.MsgUpdate,
+            //        "A new version has been installed!",
+            //        "Updated to version " + AssemblyInfo.Version,
+            //        new List<string> { "ok", "cancel" },
+            //        true);
+
+            Task.Factory.StartNew(() => {
+
+                var ftp = new FtpsClient();
+                bool connected = false;
+                foreach (var mode in Extensions.EnumUtil.GetValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                    try {
+                        ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
+                        connected = true;
+                        UserCommunication.Notify(((EsslSupportModeAttr)mode.GetAttributes()).Value);
+                    } catch (Exception) {
+                        //ignored
+                    }
+                }
+
+                if (connected) {
+                    //ftp.PutFiles();
+                }
+
+                ftp.Close();
+
+                /*
+                Ftp ftpClient = new Ftp {
+                    Host = "localhost",
+                    User = "progress",
+                    Pass = "progress",
+                    UseSssl = true
+                };
+                if (ftpClient.CanConnect) {
+
+                    UserCommunication.Notify(ftpClient.CreateDirectory("/fuck/more/stuff").ToString());
+                    UserCommunication.Notify(ftpClient.Upload(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\compile\_underescore.r").ToString());
+                    UserCommunication.Notify(ftpClient.Download(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\program.r").ToString());
+
+                    UserCommunication.Notify(ftpClient.ErrorLog.ToString().Replace("\n", "<br>"));
+                    UserCommunication.Notify(ftpClient.Log.ToString().Replace("\n", "<br>"));
+                } else {
+                    // coulnd't connect
+                    UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
+                }
+                */
+            });
+        }
+
+        public static void RunParserTests() {
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
@@ -65,7 +143,7 @@ namespace _3PA.Tests {
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-            
+
             //------------
             var watch2 = Stopwatch.StartNew();
             //------------
@@ -79,9 +157,13 @@ namespace _3PA.Tests {
             watch2.Stop();
 
             File.WriteAllText(@"C:\Temp\out.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-            
+
         }
+
+        #endregion
     }
+
+    #region Parser
 
     internal class OutputVis : IParserVisitor {
         public void Visit(ParsedBlock pars) {
@@ -101,6 +183,7 @@ namespace _3PA.Tests {
         }
 
         public StringBuilder Output = new StringBuilder();
+
         public void Visit(ParsedOnEvent pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
         }
@@ -108,7 +191,7 @@ namespace _3PA.Tests {
         public void Visit(ParsedFunction pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
-        
+
         public void Visit(ParsedProcedure pars) {
             //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
@@ -149,9 +232,7 @@ namespace _3PA.Tests {
             Output.AppendLine("C" + (tok.IsSingleLine ? "S" : "M") + " " + tok.Value);
         }
 
-        public void Visit(TokenEol tok) {
-           
-        }
+        public void Visit(TokenEol tok) {}
 
         public void Visit(TokenEos tok) {
             Output.AppendLine("EOS " + tok.Value);
@@ -177,25 +258,21 @@ namespace _3PA.Tests {
             Output.AppendLine("S  " + tok.Value);
         }
 
-        public void Visit(TokenWhiteSpace tok) {
-            
-        }
+        public void Visit(TokenWhiteSpace tok) {}
 
         public void Visit(TokenWord tok) {
             Output.AppendLine("W  " + tok.Value);
         }
 
-        public void Visit(TokenEof tok) {
-            
-        }
+        public void Visit(TokenEof tok) {}
 
-        public void Visit(TokenUnknown tok) {
-            
-        }
+        public void Visit(TokenUnknown tok) {}
 
         public void Visit(TokenPreProcStatement tok) {
             //Output.AppendLine(tok.Value);
         }
     }
+
+    #endregion
 
 }

@@ -29,8 +29,8 @@ namespace YamuiFramework.Controls {
 
     [Designer("YamuiFramework.Controls.YamuiGoBackButtonDesigner")]
     [ToolboxBitmap(typeof(Button))]
-    [DefaultEvent("Click")]
-    public class YamuiCharButton : YamuiButton {
+    [DefaultEvent("ButtonPressed")]
+    public class YamuiButtonChar : YamuiButton {
        
         #region Fields
         [DefaultValue(false)]

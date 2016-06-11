@@ -119,6 +119,7 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Lib\3pUpdater\3PUpdater.cs" />
     <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
@@ -128,6 +129,7 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\ReccurentAction.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\ZipStorer.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
@@ -195,7 +197,7 @@
     </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
-    <Compile Include="Tests\ParserLexerTests.cs" />
+    <Compile Include="Tests\PlugDebug.cs" />
     <Compile Include="ThemeManager.cs" />
     <Content Include="Html\Pages\disclaimer.html" />
     <Compile Include="Images\ImageResources.Designer.cs">
@@ -552,6 +554,7 @@
     <Content Include="Images\Html\getting-started-2.png" />
     <Content Include="Images\Html\getting-started-3.png" />
     <Content Include="Images\Html\Update26x26.png" />
+    <Content Include="Images\logo\icon\3p_icon.ico" />
     <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />

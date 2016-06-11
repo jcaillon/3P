@@ -30,15 +30,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ExportPage));
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
-            this.btDownloadAll = new YamuiFramework.Controls.YamuiImageButton();
-            this.btRefresh = new YamuiFramework.Controls.YamuiImageButton();
+            this.btDownloadAll = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btRefresh = new YamuiFramework.Controls.YamuiButtonImage();
             this.htmlLabel2 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel3 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.btHistoric = new YamuiFramework.Controls.YamuiImageButton();
-            this.btOpen = new YamuiFramework.Controls.YamuiImageButton();
+            this.btHistoric = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btOpen = new YamuiFramework.Controls.YamuiButtonImage();
             this.fl_directory = new YamuiFramework.Controls.YamuiTextBox();
-            this.btBrowse = new YamuiFramework.Controls.YamuiImageButton();
+            this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
@@ -258,15 +258,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiLabel yamuiLabel1;
         private HtmlLabel lbl_about;
         private YamuiLabel yamuiLabel2;
-        private YamuiImageButton btHistoric;
-        private YamuiImageButton btOpen;
+        private YamuiButtonImage btHistoric;
+        private YamuiButtonImage btOpen;
         private YamuiTextBox fl_directory;
-        private YamuiImageButton btBrowse;
+        private YamuiButtonImage btBrowse;
         private HtmlLabel htmlLabel3;
         private HtmlLabel htmlLabel2;
         private HtmlLabel htmlLabel1;
-        private YamuiImageButton btDownloadAll;
-        private YamuiImageButton btRefresh;
+        private YamuiButtonImage btDownloadAll;
+        private YamuiButtonImage btRefresh;
         private HtmlLabel htmlLabel4;
     }
 }

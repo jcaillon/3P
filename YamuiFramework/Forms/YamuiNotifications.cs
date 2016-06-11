@@ -54,6 +54,20 @@ namespace YamuiFramework.Forms {
         }
         #endregion
 
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= 0x80;
+                return Params;
+            }
+        }
+
+        #endregion
+
+        #region constructor
+
         /// <summary>
         /// Create a new notification, to be displayed with Show() later
         /// </summary>
@@ -77,9 +91,9 @@ namespace YamuiFramework.Forms {
             // close all notif button
             ShowCloseAllVisibleButton = true;
             OnCloseAllVisible = OnCloseAllVisibleNotif;
-            
+
             // find max height taken by the html
-            Width = _screen.WorkingArea.Width / 2;
+            Width = _screen.WorkingArea.Width/2;
             contentLabel.Text = body;
             var prefHeight = Math.Min(contentLabel.Height + 18 + ((duration > 0) ? 10 : 0), _screen.WorkingArea.Height - 50);
 
@@ -89,7 +103,7 @@ namespace YamuiFramework.Forms {
             int curWidth = Width;
             do {
                 curWidth -= detla;
-                Width = Math.Min(_screen.WorkingArea.Width / 2, curWidth);
+                Width = Math.Min(_screen.WorkingArea.Width/2, curWidth);
                 contentLabel.Text = body;
                 if (contentLabel.Height > prefHeight) {
                     curWidth += detla;
@@ -124,6 +138,9 @@ namespace YamuiFramework.Forms {
             // fade in animation
             Transition.run(this, "Opacity", 1d, new TransitionType_Acceleration(200));
         }
+
+        #endregion
+
 
         #region Methods
 

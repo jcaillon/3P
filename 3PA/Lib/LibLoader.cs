@@ -39,9 +39,16 @@ namespace _3PA.Lib {
             _pathToYamui = Path.Combine(Config.FolderLibrary, @"YamuiFramework.dll");
             _pathToOlv = Path.Combine(Config.FolderLibrary, @"ObjectListView.dll");
 
-            // delete existing libs so we are sure to use up to date libs
-            Utils.DeleteFile(_pathToYamui);
-            Utils.DeleteFile(_pathToOlv);
+            // we reset the lib if we are the single instance of Npp and (we just updated 3P or we are in dev)
+            if ((!Config.Instance.PreviousStart3PVersion.Equals(AssemblyInfo.Version) || Config.IsDevelopper) &&
+                Npp.NumberOfNppStarted() <= 1) {
+
+                // delete existing libs so we are sure to use up to date libs
+                Utils.DeleteFile(_pathToYamui);
+                Utils.DeleteFile(_pathToOlv);
+
+                Config.Instance.PreviousStart3PVersion = AssemblyInfo.Version;
+            }
         }
 
         /// <summary>
@@ -69,5 +76,6 @@ namespace _3PA.Lib {
             }
             return null;
         }
+
     }
 }

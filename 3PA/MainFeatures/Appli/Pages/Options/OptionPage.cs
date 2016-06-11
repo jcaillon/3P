@@ -108,7 +108,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     };
 
                     dockedPanel.ContentPanel.Controls.Add(strControl);
-                    var strButton = new YamuiImageButton {
+                    var strButton = new YamuiButtonImage {
                         Text = @"save",
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     dockedPanel.ContentPanel.Controls.Add(strButton);
                     tooltip.SetToolTip(strButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
-                    var undoButton = new YamuiImageButton {
+                    var undoButton = new YamuiButtonImage {
                         BackGrndImage = ImageResources.UndoUserAction,
                         Size = new Size(20, 20),
                         Location = new Point(565, yPos),
@@ -143,7 +143,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     };
 
                     dockedPanel.ContentPanel.Controls.Add(numControl);
-                    var numButton = new YamuiImageButton {
+                    var numButton = new YamuiButtonImage {
                         Text = @"save",
                         BackGrndImage = ImageResources.Save,
                         Size = new Size(20, 20),
@@ -155,7 +155,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     dockedPanel.ContentPanel.Controls.Add(numButton);
                     tooltip.SetToolTip(numButton, "Click to <b>set the value</b> of this field<br>Otherwise, your modifications will not be saved");
 
-                    var undoButton = new YamuiImageButton {
+                    var undoButton = new YamuiButtonImage {
                         BackGrndImage = ImageResources.UndoUserAction,
                         Size = new Size(20, 20),
                         Location = new Point(565, yPos),
@@ -170,7 +170,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 } else if (valObj is bool) {
                     // bool
-                    var toggleControl = new YamuiToggle {
+                    var toggleControl = new YamuiButtonToggle {
                         Location = new Point(240, yPos),
                         Size = new Size(40, 16),
                         Text = null,
@@ -233,7 +233,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // refresh stuff on screen
             foreach (var control in dockedPanel.ContentPanel.Controls) {
                 var ctrl = (Control)control;
-                if (ctrl is YamuiImageButton && ((YamuiImageButton)ctrl).Text.Equals(@"save")) {
+                if (ctrl is YamuiButtonImage && ((YamuiButtonImage)ctrl).Text.Equals(@"save")) {
                     SaveButtonOnButtonPressed(ctrl, new EventArgs());
                 }
             }
@@ -241,7 +241,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
             // find the corresponding control
-            var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
+            var textBox = (YamuiTextBox) ((YamuiButtonImage) sender).Tag;
             var propertyName = (string) textBox.Tag;
             textBox.Text = ((new Config.ConfigObject()).GetValueOf(propertyName)).ToString();
             Config.Instance.SetValueOf(propertyName, ((new Config.ConfigObject()).GetValueOf(propertyName)));
@@ -254,7 +254,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         private void SaveButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            var textBox = (YamuiTextBox) ((YamuiImageButton) sender).Tag;
+            var textBox = (YamuiTextBox) ((YamuiButtonImage) sender).Tag;
             var propertyName = (string) textBox.Tag;
             if (Config.Instance.GetValueOf(propertyName) is string) {
                 // set value
@@ -299,7 +299,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         private void ToggleControlOnCheckedChanged(object sender, EventArgs eventArgs) {
-            var toggle = (YamuiToggle) sender;
+            var toggle = (YamuiButtonToggle) sender;
             var propertyName = (string) toggle.Tag;
             // set value
             Config.Instance.SetValueOf(propertyName, toggle.Checked);
@@ -321,9 +321,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 if (ctrl.Tag != null && ctrl.Tag is string) {
                     var propertyName = (string) ctrl.Tag;
                     var value = new Config.ConfigObject().GetValueOf(propertyName);
-                    if (ctrl is YamuiToggle) {
+                    if (ctrl is YamuiButtonToggle) {
                         Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
-                        ((YamuiToggle)ctrl).Checked = (bool) value;
+                        ((YamuiButtonToggle)ctrl).Checked = (bool) value;
                     } else if (ctrl is YamuiTextBox) {
                         Config.Instance.SetValueOf(propertyName, defaultConfig.GetValueOf(propertyName));
                         ((YamuiTextBox)ctrl).Text = value.ToString();

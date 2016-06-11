@@ -7,7 +7,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("YamuiDemoApp")]
 [assembly: AssemblyDescription("Demo application")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("BullAnt")]
+[assembly: AssemblyCompany("LeCavalierCasta")]
 [assembly: AssemblyProduct("YamuiDemoApp")]
 [assembly: AssemblyCopyright("")]
 [assembly: AssemblyTrademark("")]

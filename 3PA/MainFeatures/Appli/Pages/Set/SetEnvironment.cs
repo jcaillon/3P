@@ -53,8 +53,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             // sets buttons behavior
             foreach (var control in mainPanel.ContentPanel.Controls) {
-                if (control is YamuiImageButton) {
-                    var x = (YamuiImageButton)control;
+                if (control is YamuiButtonImage) {
+                    var x = (YamuiButtonImage)control;
                     if (x.Name.StartsWith("btleft")) {
                         // Left button
                         x.BackGrndImage = ImageResources.SelectFile;
@@ -306,8 +306,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             // hide/show btleft
             foreach (var control in mainPanel.ContentPanel.Controls) {
-                if (control is YamuiImageButton) {
-                    var x = (YamuiImageButton)control;
+                if (control is YamuiButtonImage) {
+                    var x = (YamuiButtonImage)control;
                     if (x.Name.StartsWith("btleft")) {
                         x.Visible = !(mode == ViewMode.Select || mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit);
                     }
@@ -659,8 +659,5 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #endregion
 
-        private void tgftp_Click(object sender, EventArgs e) {
-            SetTabOrder.CopyAddingOrderToClipBoard(mainPanel.ContentPanel);
-        }
     }
 }

@@ -68,16 +68,16 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
-    <Compile Include="Controls\YamuiImage.cs">
+    <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiScrollPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiImageButton.cs">
+    <Compile Include="Controls\YamuiButtonImage.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiCharButton.cs">
+    <Compile Include="Controls\YamuiButtonChar.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiButton.cs">
@@ -89,13 +89,13 @@
     <Compile Include="Controls\YamuiComboBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiDateTime.cs">
+    <Compile Include="Controls\YamuiDateTimePicker.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiLink.cs">
+    <Compile Include="Controls\YamuiButtonLink.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiPanel.cs">
@@ -125,7 +125,7 @@
     <Compile Include="Controls\YamuiTextBoxAlt.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiToggle.cs">
+    <Compile Include="Controls\YamuiButtonToggle.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiSlider.cs">

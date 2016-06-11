@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (ExportPage.cs) is part of 3P.
+// This file (ShortCutsPage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             foreach (var item in AppliMenu.CompleteMenuList) {
 
                 // icon
-                var imgButton = new YamuiImage {
+                var imgButton = new YamuiPictureBox {
                     BackGrndImage = item.ItemImage,
                     Size = new Size(20, 20),
                     Location = new Point(static_name.Location.X - 30, yPos),
@@ -99,7 +99,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
-                var undoButton = new YamuiImageButton {
+                var undoButton = new YamuiButtonImage {
                     BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width + 10, yPos),
@@ -124,7 +124,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region events
 
         private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
-            _currentItemId = (string)((YamuiImageButton)sender).Tag;
+            _currentItemId = (string)((YamuiButtonImage)sender).Tag;
 
             if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
                 Config.Instance.ShortCuts.Remove(_currentItemId);

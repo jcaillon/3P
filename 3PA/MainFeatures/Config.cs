@@ -399,16 +399,18 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
-            // SHARED CONF
+            // Shared configuration last folder selected
             public string SharedConfFolder = "";
             // a list of Label corresponding to confLine(s) that are auto-updated
             public string AutoUpdateConfList = "";
             // a list of folders used in the shared/exported conf
             public string SharedConfHistoric = "";
 
-            // TAGS
-            public string TagModifOpener = "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";
-            public string TagModifCloser = "/* --- Fin modif #{&n} --- */";
+            // Values for the Tags
+            public string TagModifOpener = 
+                "/* --- Modif #{&n} --- {&da} --- CS PROGRESS SOPRA ({&u}) --- [{&w} - {&b}] --- */";
+            public string TagModifCloser = 
+                "/* --- Fin modif #{&n} --- */";
             public string TagTitleBlock1 = 
                 "/* |      |            |           |                                                                | */\n" +
                 "/* | {&n }| {&da     } | CS-SOPRA  | {&w } - {&b                                                  } | */\n" +
@@ -419,15 +421,20 @@ namespace _3PA.MainFeatures {
             public string TagTitleBlock3 =
                 "/* |______|____________|___________|________________________________________________________________| */";
 
-            // ENV
+            // Current environment
             public string EnvLastDbInfoUsed = "";
             public string EnvName = "";
             public string EnvSuffix = "";
             public string EnvDatabase = "";
 
-            // TECHNICAL
+            // last ping time
             public string TechnicalLastPing = "";
+
+            // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
+
+            // allows to delete the lib after an update to make sure we get the last lib
+            public string PreviousStart3PVersion = "";
 
             // THEMES
             public int ThemeId = 0;
@@ -438,6 +445,8 @@ namespace _3PA.MainFeatures {
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
+
+            #region methods
 
             /// <summary>
             /// Returns the proxy defined by the user in the configuration
@@ -462,7 +471,7 @@ namespace _3PA.MainFeatures {
             /// <param name="propertyName"></param>
             /// <returns></returns>
             public object GetValueOf(string propertyName) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
                     return null;
                 }
@@ -476,7 +485,7 @@ namespace _3PA.MainFeatures {
             /// <param name="value"></param>
             /// <returns></returns>
             public bool SetValueOf(string propertyName, object value) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
                     return false;
                 }
@@ -492,15 +501,15 @@ namespace _3PA.MainFeatures {
             /// <param name="propertyName"></param>
             /// <returns></returns>
             public T GetAttributeOf<T>(string propertyName) {
-                var property = typeof(ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
+                var property = typeof (ConfigObject).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
                 if (property == null) {
-                    return (T)Convert.ChangeType(null, typeof(T));
+                    return (T) Convert.ChangeType(null, typeof (T));
                 }
-                var listCustomAttr = property.GetCustomAttributes(typeof(T), false);
+                var listCustomAttr = property.GetCustomAttributes(typeof (T), false);
                 if (!listCustomAttr.Any()) {
-                    return (T)Convert.ChangeType(null, typeof(T));
+                    return (T) Convert.ChangeType(null, typeof (T));
                 }
-                var displayAttr = (T)listCustomAttr.FirstOrDefault();
+                var displayAttr = (T) listCustomAttr.FirstOrDefault();
                 return displayAttr;
             }
 
@@ -510,6 +519,9 @@ namespace _3PA.MainFeatures {
             public string GetShortcutSpecFromName(string itemId) {
                 return (ShortCuts.ContainsKey(itemId) ? ShortCuts[itemId] : "Unknown shortcut?");
             }
+
+            #endregion
+
         }
 
         #endregion
@@ -546,7 +558,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.4.1/?action=ping"; } }
 
-        public static bool IsDevelopper { get { return Instance.UserName.Equals("JCA"); } }
+        public static bool IsDevelopper { get { return File.Exists(Path.Combine(Npp.GetConfigDir(), "debug")); } }
 
         /// <summary>
         /// Path to important files / folders

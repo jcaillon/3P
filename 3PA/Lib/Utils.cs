@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -49,46 +48,47 @@ namespace _3PA.Lib {
         #endregion
      */
 
+    #region Enumeration attributes
+
     /// <summary>
     /// in an enumeration, above the item:
     /// [DisplayAttr(Name = "my stuff")]
     /// how to use it:
     /// ((DisplayAttr)myenumValue.GetAttributes()).Name)
     /// </summary>
-    public class DisplayAttr : Extensions.EnumAttr {
+    internal class DisplayAttr : Extensions.EnumAttr {
         public string Name { get; set; }
         public string ActionText { get; set; }
     }
 
+    #endregion
+
     /// <summary>
     /// Class that exposes utility methods
     /// </summary>
-    public static class Utils {
+    internal static class Utils {
 
-        private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
+        #region File manipulation wrappers
 
         /// <summary>
-        /// register a feature's last execution datetime and prevent the user from using it too often 
-        /// by setting a minimum amount of time to wait between two calls
+        /// Allows to hide a directory
         /// </summary>
-        /// <param name="featureName"></param>
-        /// <param name="minIntervalInMilliseconds"></param>
+        /// <param name="path"></param>
         /// <returns></returns>
-        public static bool IsSpamming(string featureName, int minIntervalInMilliseconds, bool resetOnSpam = false) {
-            // first use, no problem
-            if (!_registeredEvents.ContainsKey(featureName)) {
-                _registeredEvents.Add(featureName, DateTime.Now);
+        public static bool HideDirectory(string path) {
+
+            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                 return false;
+
+            var dirInfo = new DirectoryInfo(path);
+
+            // See if directory has hidden flag, if not, make hidden
+            if ((dirInfo.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden) {
+                // Add Hidden flag    
+                dirInfo.Attributes |= FileAttributes.Hidden;
             }
-            // minimum interval not respected
-            if (DateTime.Now.Subtract(_registeredEvents[featureName]).TotalMilliseconds < minIntervalInMilliseconds) {
-                if (resetOnSpam) {
-                    _registeredEvents[featureName] = DateTime.Now;
-                }
-                return true;
-            }
-            _registeredEvents[featureName] = DateTime.Now;
-            return false;
+
+            return true;
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static bool IsDirectoryWritable(string dirPath) {
             try {
-                using (FileStream fs = File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose)) { }
+                File.Create(Path.Combine(dirPath, Path.GetRandomFileName()), 1, FileOptions.DeleteOnClose);
                 return true;
             } catch {
                 return false;
@@ -232,6 +232,10 @@ namespace _3PA.Lib {
             return true;
         }
 
+        #endregion
+
+        #region File/directory selection
+
         /// <summary>
         /// Shows a dialog that allows the user to pick a file
         /// </summary>
@@ -242,14 +246,13 @@ namespace _3PA.Lib {
             OpenFileDialog dialog = new OpenFileDialog {
                 Multiselect = false,
                 Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
-                Title = "Select a file"
+                Title = @"Select a file"
             };
             var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
             if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                 dialog.InitialDirectory = initialFolder;
             if (File.Exists(initialFile))
                 dialog.FileName = initialFile;
-            //dialog.Title = "Select a file";
             return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : string.Empty;
         }
 
@@ -265,6 +268,10 @@ namespace _3PA.Lib {
             fsd.ShowDialog();
             return fsd.FileName ?? string.Empty;
         }
+
+        #endregion
+
+        #region Link/file/directories opening
 
         /// <summary>
         /// Opens a file's folder and select the file in it
@@ -289,6 +296,79 @@ namespace _3PA.Lib {
             Process.Start("explorer.exe", argument);
             return true;
         }
+
+        /// <summary>
+        /// Open the given link either in notepad++ (if the file extension is know)
+        /// or with window (opens a folder if it is a folder, or open a file with correct program
+        /// using shell extension)
+        /// also works for urls
+        /// </summary>
+        /// <param name="link"></param>
+        public static bool OpenAnyLink(string link) {
+            if (string.IsNullOrEmpty(link)) return false;
+            try {
+
+                // open the file if it has a progress extension or Known extension
+                string ext;
+                try {
+                    ext = Path.GetExtension(link);
+                } catch (Exception) {
+                    ext = null;
+                }
+                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.KnownProgressExtension.Contains(ext)) && File.Exists(link)) {
+                    Npp.Goto(link);
+                    return true;
+                }
+
+                // url?
+                if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link).Success) {
+                    Process.Start(link);
+                    return true;
+                }
+
+                // open with default shell action
+                if (!File.Exists(link)) {
+                    if (!Directory.Exists(link))
+                        return false;
+                    if (OpenFolder(link))
+                        return true;
+                }
+
+
+                var process = new ProcessStartInfo(link) {
+                    UseShellExecute = true
+                };
+                Process.Start(process);
+
+            } catch (Exception e) {
+                if (!(e is Win32Exception))
+                    ErrorHandler.Log(e.ToString());
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Simple click handler that opens any link as a file (either in notepad++ if the extension is known,
+        /// or with the default program, or as a folder in the explorer)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="htmlLinkClickedEventArgs"></param>
+        public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
+            if (htmlLinkClickedEventArgs.Link.Contains("|")) {
+                var splitted = htmlLinkClickedEventArgs.Link.Split('|');
+                if (splitted.Length == 2)
+                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
+                else
+                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]), Int32.Parse(splitted[2]));
+                htmlLinkClickedEventArgs.Handled = true;
+            } else {
+                htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
+            }
+        }
+
+        #endregion
+
+        #region Image manipulation
 
         /// <summary>
         /// Returns the given image... but in grayscale
@@ -360,13 +440,13 @@ namespace _3PA.Lib {
             int sourceWidth = imgToResize.Width;
             int sourceHeight = imgToResize.Height;
 
-            var nPercentW = (size.Width / (float)sourceWidth);
-            var nPercentH = (size.Height / (float)sourceHeight);
+            var nPercentW = (size.Width/(float) sourceWidth);
+            var nPercentH = (size.Height/(float) sourceHeight);
 
             var nPercent = nPercentH < nPercentW ? nPercentH : nPercentW;
 
-            int destWidth = (int)(sourceWidth * nPercent);
-            int destHeight = (int)(sourceHeight * nPercent);
+            int destWidth = (int) (sourceWidth*nPercent);
+            int destHeight = (int) (sourceHeight*nPercent);
 
             Bitmap b = new Bitmap(destWidth, destHeight);
             Graphics g = Graphics.FromImage(b);
@@ -378,25 +458,51 @@ namespace _3PA.Lib {
             return b;
         }
 
+        #endregion
+
+        #region Misc
+
+        private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
+
         /// <summary>
-        /// Allows to hide a directory
+        /// register a feature's last execution datetime and prevent the user from using it too often 
+        /// by setting a minimum amount of time to wait between two calls
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="featureName"></param>
+        /// <param name="minIntervalInMilliseconds"></param>
         /// <returns></returns>
-        public static bool HideDirectory(string path) {
-
-            if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
+        public static bool IsSpamming(string featureName, int minIntervalInMilliseconds, bool resetOnSpam = false) {
+            // first use, no problem
+            if (!_registeredEvents.ContainsKey(featureName)) {
+                _registeredEvents.Add(featureName, DateTime.Now);
                 return false;
-
-            var dirInfo = new DirectoryInfo(path);
-
-            // See if directory has hidden flag, if not, make hidden
-            if ((dirInfo.Attributes & FileAttributes.Hidden) != FileAttributes.Hidden) {
-                // Add Hidden flag    
-                dirInfo.Attributes |= FileAttributes.Hidden;
             }
+            // minimum interval not respected
+            if (DateTime.Now.Subtract(_registeredEvents[featureName]).TotalMilliseconds < minIntervalInMilliseconds) {
+                if (resetOnSpam) {
+                    _registeredEvents[featureName] = DateTime.Now;
+                }
+                return true;
+            }
+            _registeredEvents[featureName] = DateTime.Now;
+            return false;
+        }
 
-            return true;
+        /// <summary>
+        /// Returns the list of control of given typ
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        public static IEnumerable<T> GetControlsOfType<T>(Control root) where T : Control {
+            var t = root as T;
+            if (t != null)
+                yield return t;
+            var container = root as ContainerControl;
+            if (container != null)
+                foreach (Control c in container.Controls)
+                    foreach (var i in GetControlsOfType<T>(c))
+                        yield return i;
         }
 
         /// <summary>
@@ -413,55 +519,24 @@ namespace _3PA.Lib {
             return output;
         }
 
-        /// <summary>
-        /// Open the given link either in notepad++ (if the file extension is know)
-        /// or with window (opens a folder if it is a folder, or open a file with correct program
-        /// using shell extension)
-        /// also works for urls
-        /// </summary>
-        /// <param name="link"></param>
-        public static bool OpenAnyLink(string link) {
-            if (string.IsNullOrEmpty(link)) return false;
-            try {
-
-                // open the file if it has a progress extension or Known extension
-                string ext;
-                try {
-                    ext = Path.GetExtension(link);
-                } catch (Exception) {
-                    ext = null;
-                }
-                if (!string.IsNullOrEmpty(ext) && (Config.Instance.GlobalNppOpenableExtension.Contains(ext) || Config.Instance.KnownProgressExtension.Contains(ext)) && File.Exists(link)) {
-                    Npp.Goto(link);
-                    return true;
-                }
-
-                // url?
-                if (new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(link).Success) {
-                    Process.Start(link);
-                    return true;
-                }
-
-                // open with default shell action
-                if (!File.Exists(link)) {
-                    if (!Directory.Exists(link))
-                        return false;
-                    if (OpenFolder(link))
-                        return true;
-                }
-
-            
-                var process = new ProcessStartInfo(link) {
-                    UseShellExecute = true
-                };
-                Process.Start(process);
-
-            } catch (Exception e) {
-                if (!(e is Win32Exception))
-                    ErrorHandler.Log(e.ToString());
-            }
-            return true;
+        public static void SerializeToXml<T>(T obj, string fileName) {
+            var fileStream = new FileStream(fileName, FileMode.Create);
+            var ser = new XmlSerializer(typeof (T));
+            ser.Serialize(fileStream, obj);
+            fileStream.Close();
         }
+
+        public static T DeserializeFromXml<T>(string fileName) {
+            var deserializer = new XmlSerializer(typeof (T));
+            TextReader reader = new StreamReader(fileName);
+            var obj = deserializer.Deserialize(reader);
+            reader.Close();
+            return (T) obj;
+        }
+
+        #endregion
+
+        #region ZipStorer wrapper
 
         /// <summary>
         /// This methods extract a zip file in the given directory
@@ -470,59 +545,33 @@ namespace _3PA.Lib {
         /// <param name="targetDir"></param>
         public static bool ExtractAll(string filename, string targetDir) {
 
-            // Opens existing zip file
-            ZipStorer zip = ZipStorer.Open(filename, FileAccess.Read);
-            if (string.IsNullOrEmpty(filename) || string.IsNullOrEmpty(targetDir))
-                return false;
-
-            if (!CreateDirectory(targetDir))
-                return false;
-
-            // Extract all files in target directory
             bool result = true;
-            foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
-                var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
-                if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
+
+            try {
+                // Opens existing zip file
+                ZipStorer zip = ZipStorer.Open(filename, FileAccess.Read);
+                if (string.IsNullOrEmpty(filename) || string.IsNullOrEmpty(targetDir))
                     return false;
-                result = result && zip.ExtractFile(entry, outputPath);
+
+                if (!CreateDirectory(targetDir))
+                    return false;
+
+                // Extract all files in target directory
+                foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
+                    var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
+                    if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
+                        return false;
+                    result = result && zip.ExtractFile(entry, outputPath);
+                }
+                zip.Close();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Unzipping " + Path.GetFileName(filename));
             }
-            zip.Close();
 
             return result;
         }
 
-        /// <summary>
-        /// Simple click handler that opens any link as a file (either in notepad++ if the extension is known,
-        /// or with the default program, or as a folder in the explorer)
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="htmlLinkClickedEventArgs"></param>
-        public static void OpenPathClickHandler(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
-            if (htmlLinkClickedEventArgs.Link.Contains("|")) {
-                var splitted = htmlLinkClickedEventArgs.Link.Split('|');
-                if (splitted.Length == 2)
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]));
-                else
-                    Npp.Goto(splitted[0], Int32.Parse(splitted[1]), Int32.Parse(splitted[2]));
-                htmlLinkClickedEventArgs.Handled = true;
-            } else {
-                htmlLinkClickedEventArgs.Handled = OpenAnyLink(htmlLinkClickedEventArgs.Link);
-            }
-        }
+        #endregion
 
-        public static void SerializeToXml<T>(T obj, string fileName) {
-            var fileStream = new FileStream(fileName, FileMode.Create);
-            var ser = new XmlSerializer(typeof(T));
-            ser.Serialize(fileStream, obj);
-            fileStream.Close();
-        }
-
-        public static T DeserializeFromXml<T>(string fileName) {
-            var deserializer = new XmlSerializer(typeof(T));
-            TextReader reader = new StreamReader(fileName);
-            var obj = deserializer.Deserialize(reader);
-            reader.Close();
-            return (T)obj;
-        }
     }
 }

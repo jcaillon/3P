@@ -27,13 +27,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.buttonSort = new YamuiFramework.Controls.YamuiImageButton();
-            this.buttonRefresh = new YamuiFramework.Controls.YamuiImageButton();
-            this.buttonCleanText = new YamuiFramework.Controls.YamuiImageButton();
-            this.buttonExpandRetract = new YamuiFramework.Controls.YamuiImageButton();
+            this.buttonSort = new YamuiFramework.Controls.YamuiButtonImage();
+            this.buttonRefresh = new YamuiFramework.Controls.YamuiButtonImage();
+            this.buttonCleanText = new YamuiFramework.Controls.YamuiButtonImage();
+            this.buttonExpandRetract = new YamuiFramework.Controls.YamuiButtonImage();
             this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBoxAlt();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiImageButton();
+            this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiButtonImage();
             this.SuspendLayout();
             // 
             // buttonSort
@@ -142,13 +142,13 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
-        private YamuiImageButton buttonSort;
-        private YamuiImageButton buttonRefresh;
-        private YamuiImageButton buttonCleanText;
-        private YamuiImageButton buttonExpandRetract;
+        private YamuiButtonImage buttonSort;
+        private YamuiButtonImage buttonRefresh;
+        private YamuiButtonImage buttonCleanText;
+        private YamuiButtonImage buttonExpandRetract;
         private YamuiTextBoxAlt textBoxFilter;
         private HtmlToolTip toolTipHtml;
-        private YamuiImageButton buttonIncludeExternal;
+        private YamuiButtonImage buttonIncludeExternal;
 
     }
 }

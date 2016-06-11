@@ -46,7 +46,7 @@ namespace YamuiFramework.Controls {
         private bool _showingHidden;
         private Point _currentPoint = new Point(0, 0);
         private YamuiPage _currentPage;
-        private YamuiCharButton _goBackButton;
+        private YamuiButtonChar _goBackButton;
         private YamuiTabButtons _mainButtons;
         private YamuiTabButtons _secondaryButtons;
 
@@ -78,7 +78,7 @@ namespace YamuiFramework.Controls {
 
         public void Init() {
             // draw the go back button
-            _goBackButton = new YamuiCharButton() {
+            _goBackButton = new YamuiButtonChar() {
                 UseWingdings = true,
                 ButtonChar = "ç",
                 FakeDisabled = true,
@@ -120,13 +120,38 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
+        #region public methods
+
+        /// <summary>
+        /// Show the given page
+        /// </summary>
+        /// <param name="pageName"></param>
+        public void ShowPage(string pageName) {
+            PushHistory();
+            CurrentPage = FindPage(pageName);
+        }
+
+        /// <summary>
+        /// Execute the OnClose of the current page
+        /// </summary>
+        public void ExecuteOnClose() {
+            _currentPage.OnHide();
+        }
+
+        #endregion
+
         #region Mechanic
 
         private Point CurrentPage {
             get { return _currentPoint; }
             set {
-                // remove the current page
-                Controls.Remove(_currentPage);
+                // execute the OnClose for the current page
+                if (_currentPage != null) {
+                    _currentPage.OnHide();
+
+                    // remove the current page
+                    Controls.Remove(_currentPage);
+                }
 
                 // update private
                 _currentPoint = value;
@@ -218,13 +243,8 @@ namespace YamuiFramework.Controls {
             get { return _showingHidden ? 0 : _content.Where(menu => !menu.Hidden).ToList().FindIndex(menu => menu.RefName.Equals(_content[_currentPoint.X].RefName)); }
         }
 
-        public void ShowPage(string pageName) {
-            PushHistory();
-            CurrentPage = FindPage(pageName);
-        }
-
-        public void PushHistory() {
-            // remember previous page (if different from the previous one)
+        private void PushHistory() {
+            // remember current page (if different from the previous one)
             if (_formHistory.Count == 0 || !_currentPoint.Equals(_formHistory.Peek())) {
                 _formHistory.Push(_currentPoint);
                 _goBackButton.FakeDisabled = false;
@@ -255,7 +275,7 @@ namespace YamuiFramework.Controls {
         private static YamuiTabAnimation _animSmokeScreen;
         private YamuiForm _owner;
 
-        public bool TabAnimatorInit() {
+        private bool TabAnimatorInit() {
             if (!YamuiThemeManager.TabAnimationAllowed) return false;
 
             // the principle is easy, we create a foreground form on top of our form with the same back ground,
@@ -276,7 +296,7 @@ namespace YamuiFramework.Controls {
             return true;
         }
 
-        public void TabAnimatorStart() {
+        private void TabAnimatorStart() {
             if (!YamuiThemeManager.TabAnimationAllowed) return;
             var t = new Transition(new TransitionType_Acceleration(500));
             t.add(_animSmokeScreen, "Opacity", 0d);

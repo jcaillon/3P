@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (FTPSClient.cs) is part of 3P.
+// This file (FtpsClient.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -895,7 +894,7 @@ namespace _3PA.Lib.Ftp {
                 currRemoteDirectoryName = GetCurrentDirectory();
 
             string currLocalDirectoryName = localDirectoryName;
-            if (currLocalDirectoryName == null || currLocalDirectoryName.Length == 0)
+            if (string.IsNullOrEmpty(currLocalDirectoryName))
                 currLocalDirectoryName = Directory.GetCurrentDirectory();
 
             string[] dirItems = Directory.GetFiles(currLocalDirectoryName);
@@ -912,7 +911,7 @@ namespace _3PA.Lib.Ftp {
                 dirItems = Directory.GetDirectories(currLocalDirectoryName);
                 foreach (string itemName in dirItems) {
                     string remoteNextDirName = CombineRemotePath(currRemoteDirectoryName, Path.GetFileName(itemName));
-                    PutFiles(itemName, remoteNextDirName, filePattern, patternStyle, recursive, transferCallback);
+                    PutFiles(itemName, remoteNextDirName, filePattern, patternStyle, true, transferCallback);
                 }
             }
 
@@ -968,6 +967,7 @@ namespace _3PA.Lib.Ftp {
         /// </summary>
         /// <param name="localFileName"></param>
         /// <param name="remoteFileName"></param>
+        /// <param name="transferCallback"></param>
         public ulong AppendFile(string localFileName, string remoteFileName, FileTransferCallback transferCallback) {
             using (Stream s = AppendFile(remoteFileName))
                 return SendFile(localFileName, remoteFileName, s, transferCallback);
@@ -1002,7 +1002,6 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// Deletes the given remote file.
         /// </summary>
-        /// <param name="remoteDirName"></param>
         public void DeleteFile(string remoteFileName) {
             DeleCmd(remoteFileName);
         }
@@ -1010,7 +1009,6 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// Renames the given remote file.
         /// </summary>
-        /// <param name="remoteDirName"></param>
         public void RenameFile(string remoteFileNameFrom, string remoteFileNameTo) {
             RnfrCmd(remoteFileNameFrom);
             RntoCmd(remoteFileNameTo);
@@ -1083,7 +1081,6 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// returns the given directory list data as returned from the server, without parsing its contents.
         /// </summary>
-        /// <param name="dirName"></param>
         /// <returns></returns>
         public string GetDirectoryListUnparsed(string remoteDirName) {
             SetupDataConnection();
@@ -1153,7 +1150,7 @@ namespace _3PA.Lib.Ftp {
         }
 
         /// <summary>
-        /// Set the language used by the server during the current connection. Please check the features returned by <see cref="GetFeatues"/> for a list of 
+        /// Set the language used by the server during the current connection. Please check the features returned by GetFeatues for a list of 
         /// available languages supported by the server.
         /// </summary>
         /// <param name="ietfLanguageTag">RFC 1766 language tag.</param>
@@ -1247,7 +1244,7 @@ namespace _3PA.Lib.Ftp {
                         if (ex.ErrorCode == 550)
                             item.IsDirectory = false;
                         else
-                            throw ex;
+                            throw;
                     }
 
             if (currDir != null)
@@ -1287,7 +1284,7 @@ namespace _3PA.Lib.Ftp {
                         if (ex.ErrorCode == 534 || ex.ErrorCode == 536)
                             throw new FtpSslException("The server policy denies SSL/TLS", ex);
                         else
-                            throw ex;
+                            throw;
 
                     _sslSupportCurrentMode ^= EsslSupportMode.DataChannelRequired;
 
@@ -1306,7 +1303,7 @@ namespace _3PA.Lib.Ftp {
                         if (ex.ErrorCode == 530 || ex.ErrorCode == 534)
                             throw new FtpSslException("SSL/TLS connection not supported on server", ex);
                         else
-                            throw ex;
+                            throw;
 
                     _sslSupportCurrentMode = EsslSupportMode.ClearText;
                 }
@@ -1346,7 +1343,7 @@ namespace _3PA.Lib.Ftp {
 
             using (FileStream fs = File.OpenRead(localFileName)) {
                 byte[] buf = new byte[1024];
-                int n = 0;
+                int n;
                 do {
                     CallTransferCallback(transferCallback, ETransferActions.FileUploadingStatus, localFileName, remoteFileName, totalBytes, fileTransferSize);
 
@@ -1383,7 +1380,7 @@ namespace _3PA.Lib.Ftp {
                     MakeDir(remoteDirectoryName);
                     CallTransferCallback(transferCallback, ETransferActions.RemoteDirectoryCreated, null, remoteDirectoryName, 0, null);
                 } else
-                    throw ex;
+                    throw;
             }
         }
 
@@ -1397,7 +1394,7 @@ namespace _3PA.Lib.Ftp {
         }
 
         private Stream GetDataStream() {
-            Stream s = null;
+            Stream s;
 
             if (_dataConnectionMode == EDataConnectionMode.Active)
                 SetupActiveDataConnectionStep2();
@@ -1419,7 +1416,7 @@ namespace _3PA.Lib.Ftp {
                 StringBuilder data = new StringBuilder();
 
                 byte[] buf = new byte[1024];
-                int n = 0;
+                int n;
                 do {
                     n = s.Read(buf, 0, buf.Length);
                     data.Append(Encoding.UTF8.GetString(buf, 0, n));

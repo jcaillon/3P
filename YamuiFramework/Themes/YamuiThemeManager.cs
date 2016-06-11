@@ -28,6 +28,32 @@ namespace YamuiFramework.Themes {
 
     public static class YamuiThemeManager {
 
+        #region public fields/events
+
+        /// <summary>
+        /// Set the icon to be used by every yamui form
+        /// </summary>
+        public static Icon GlobalIcon { get; set; }
+
+        /// <summary>
+        /// Set to false to deactivate tab animation
+        /// </summary>
+        public static bool TabAnimationAllowed { get; set; }
+
+        /// <summary>
+        /// Subscribe to this event to feed YamuiFramework with a css sheet of your making
+        /// </summary>
+        public static event GetCssSheet OnGetCssSheet;
+        public static event Action OnCssSheetChanged;
+        public delegate string GetCssSheet();
+
+        /// <summary>
+        /// Subscribe to this event to feed the YamuiFramework with an image to load in a img tag
+        /// The needed image is in HtmlImageLoadEventArgs.src and you need to feed back the Image
+        /// on HtmlImageLoadEventArgs.Callback(MyImage);
+        /// </summary>
+        public static event EventHandler<HtmlImageLoadEventArgs> OnHtmlImageNeeded;
+
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
@@ -46,12 +72,18 @@ namespace YamuiFramework.Themes {
                 return _currentTheme;
             }
         }
-        private static YamuiTheme _currentTheme;
 
-        /// <summary>
-        /// Set to false to deactivate tab animation
-        /// </summary>
-        public static bool TabAnimationAllowed { get; set; }
+        #endregion
+
+        #region private fields
+
+        private static CssData _baseCssData;
+        private static YamuiTheme _currentTheme;
+        private static List<YamuiTheme> _listOfThemes = new List<YamuiTheme>();
+
+        #endregion
+
+        #region public methods
 
         /// <summary>
         /// Returns the list of all available themes
@@ -63,15 +95,32 @@ namespace YamuiFramework.Themes {
             }
             return _listOfThemes;
         }
-        private static List<YamuiTheme> _listOfThemes = new List<YamuiTheme>();
+
+        #endregion
+
+        #region internal
 
         /// <summary>
-        /// Subscribe to this event to feed YamuiFramework with a css sheet of your making
+        /// Feeds the images to the html renderer
         /// </summary>
-        public static event GetCssSheet OnGetCssSheet;
-        public static event Action OnCssSheetChanged;
+        internal static void OnHtmlImageLoad(HtmlImageLoadEventArgs e) {
+            // load image from user
+            if (OnHtmlImageNeeded != null) {
+                OnHtmlImageNeeded(null, e);
+                if (e.Handled)
+                    return;
+            }
+            // load image from yamui library
+            Image tryImg = (Image) Resources.Resources.ResourceManager.GetObject(e.Src);
+            if (tryImg == null) return;
+            e.Handled = true;
+            e.Callback(tryImg);
+        }
 
-        public static CssData BaseCssData {
+        /// <summary>
+        /// Feeds the CSS to the html renderer
+        /// </summary>
+        internal static CssData BaseCssData {
             get {
                 if (_baseCssData == null) {
                     var baseCss = Resources.Resources.BaseStyleSheet;
@@ -98,29 +147,8 @@ namespace YamuiFramework.Themes {
             }
         }
 
-        private static CssData _baseCssData;
-        public delegate string GetCssSheet();
+        #endregion
 
-        /// <summary>
-        /// Subscribe to this event to feed the YamuiFramework with an image to load in a img tag
-        /// The needed image is in HtmlImageLoadEventArgs.src and you need to feed back the Image
-        /// on HtmlImageLoadEventArgs.Callback(MyImage);
-        /// </summary>
-        public static event EventHandler<HtmlImageLoadEventArgs> OnHtmlImageNeeded;
-
-        public static void OnHtmlImageLoad(HtmlImageLoadEventArgs e) {
-            // load image from user
-            if (OnHtmlImageNeeded != null) {
-                OnHtmlImageNeeded(null, e);
-                if (e.Handled)
-                    return;
-            }
-            // load image from yamui library
-            Image tryImg = (Image)Resources.Resources.ResourceManager.GetObject(e.Src);
-            if (tryImg == null) return;
-            e.Handled = true;
-            e.Callback(tryImg);
-        }
 
     }
 }

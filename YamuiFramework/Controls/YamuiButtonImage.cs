@@ -17,22 +17,32 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System.Collections;
+
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.Design;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
 
-    [Designer("YamuiFramework.Controls.YamuiImageDesigner")]
-    public class YamuiImage : PictureBox {
+    [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
+    [ToolboxBitmap(typeof(Button))]
+    [DefaultEvent("ButtonPressed")]
+    public class YamuiButtonImage : YamuiButton {
        
         #region Fields
-
         [Category("Yamui")]
         public Image BackGrndImage { get; set; }
+
+        private bool _fakeDisabled;
+
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public bool FakeDisabled {
+            get { return _fakeDisabled; }
+            set { _fakeDisabled = value; Invalidate(); }
+        }
 
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -44,21 +54,32 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
+                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, false, IsFocused, IsHovered, IsPressed, true);
+                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, true);
+                var img = BackGrndImage;
+
+                if (DesignMode)
+                    backColor = Color.Fuchsia;
+
                 // draw background
-                using (SolidBrush b = new SolidBrush(DesignMode ? Color.Fuchsia : YamuiThemeManager.Current.FormBack)) {
+                using (SolidBrush b = new SolidBrush(backColor)) {
                     e.Graphics.FillRectangle(b, ClientRectangle);
                 }
 
                 // draw main image, in greyscale if not activated
-                var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
-                e.Graphics.DrawImage(BackGrndImage, recImg);
+                if (_fakeDisabled || !Enabled)
+                    img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
+                var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width) / 2, (ClientRectangle.Height - img.Height) / 2), new Size(img.Width, img.Height));
+                e.Graphics.DrawImage(img, recImg);
 
                 // border
                 if (DrawBorder) {
                     recImg = ClientRectangle;
                     recImg.Inflate(-2, -2);
-                    using (Pen b = new Pen(YamuiThemeManager.Current.ButtonNormalBorder, 2f)) {
-                        e.Graphics.DrawRectangle(b, recImg);
+                    if (borderColor != Color.Transparent) {
+                        using (Pen b = new Pen(borderColor, 2f)) {
+                            e.Graphics.DrawRectangle(b, recImg);
+                        }
                     }
                 }
             } catch {
@@ -66,26 +87,5 @@ namespace YamuiFramework.Controls {
             }
         }
         #endregion
-    }
-    internal class YamuiImageDesigner : ControlDesigner {
-
-        protected override void PreFilterProperties(IDictionary properties) {
-            properties.Remove("ImeMode");
-            properties.Remove("Padding");
-            properties.Remove("FlatAppearance");
-            properties.Remove("FlatStyle");
-            properties.Remove("AutoEllipsis");
-            properties.Remove("UseCompatibleTextRendering");
-            properties.Remove("Image");
-            properties.Remove("ImageAlign");
-            properties.Remove("ImageIndex");
-            properties.Remove("ImageKey");
-            properties.Remove("ImageList");
-            properties.Remove("TextImageRelation");
-            properties.Remove("UseVisualStyleBackColor");
-            properties.Remove("Font");
-            properties.Remove("RightToLeft");
-            base.PreFilterProperties(properties);
-        }
     }
 }

@@ -34,8 +34,8 @@ namespace YamuiDemoApp.Pages.control {
             this.htmlPanel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlPanel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel15 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLink1 = new YamuiFramework.Controls.YamuiLink();
-            this.yamuiLink2 = new YamuiFramework.Controls.YamuiLink();
+            this.yamuiLink1 = new YamuiFramework.Controls.YamuiButtonLink();
+            this.yamuiLink2 = new YamuiFramework.Controls.YamuiButtonLink();
             this.yamuiLabel12 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel17 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiTextBox2 = new YamuiFramework.Controls.YamuiTextBox();
@@ -310,8 +310,8 @@ namespace YamuiDemoApp.Pages.control {
         private HtmlPanel htmlPanel1;
         private HtmlLabel htmlLabel1;
         private YamuiLabel yamuiLabel15;
-        private YamuiLink yamuiLink1;
-        private YamuiLink yamuiLink2;
+        private YamuiButtonLink yamuiLink1;
+        private YamuiButtonLink yamuiLink2;
         private YamuiLabel yamuiLabel12;
         private YamuiLabel yamuiLabel18;
         private YamuiTextBox yamuiTextBox1;

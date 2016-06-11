@@ -28,14 +28,14 @@ namespace YamuiDemoApp.Pages.control {
         /// </summary>
         private void InitializeComponent() {
             this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
-            this.yamuiCharButton5 = new YamuiFramework.Controls.YamuiCharButton();
-            this.yamuiCharButton4 = new YamuiFramework.Controls.YamuiCharButton();
-            this.yamuiCharButton3 = new YamuiFramework.Controls.YamuiCharButton();
-            this.yamuiCharButton2 = new YamuiFramework.Controls.YamuiCharButton();
-            this.yamuiCharButton1 = new YamuiFramework.Controls.YamuiCharButton();
-            this.yamuiToggle3 = new YamuiFramework.Controls.YamuiToggle();
-            this.yamuiToggle2 = new YamuiFramework.Controls.YamuiToggle();
-            this.yamuiToggle1 = new YamuiFramework.Controls.YamuiToggle();
+            this.yamuiCharButton5 = new YamuiFramework.Controls.YamuiButtonChar();
+            this.yamuiCharButton4 = new YamuiFramework.Controls.YamuiButtonChar();
+            this.yamuiCharButton3 = new YamuiFramework.Controls.YamuiButtonChar();
+            this.yamuiCharButton2 = new YamuiFramework.Controls.YamuiButtonChar();
+            this.yamuiCharButton1 = new YamuiFramework.Controls.YamuiButtonChar();
+            this.yamuiToggle3 = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.yamuiToggle2 = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.yamuiToggle1 = new YamuiFramework.Controls.YamuiButtonToggle();
             this.yamuiButton5 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton4 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiLabel8 = new YamuiFramework.Controls.YamuiLabel();
@@ -159,7 +159,6 @@ namespace YamuiDemoApp.Pages.control {
             // 
             this.yamuiToggle2.AutoSize = true;
             this.yamuiToggle2.Checked = true;
-            this.yamuiToggle2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.yamuiToggle2.Location = new System.Drawing.Point(0, 255);
             this.yamuiToggle2.Name = "yamuiToggle2";
             this.yamuiToggle2.Size = new System.Drawing.Size(125, 15);
@@ -360,14 +359,14 @@ namespace YamuiDemoApp.Pages.control {
         #endregion
 
         private YamuiScrollPage yamuiScrollPage1;
-        private YamuiCharButton yamuiCharButton5;
-        private YamuiCharButton yamuiCharButton4;
-        private YamuiCharButton yamuiCharButton3;
-        private YamuiCharButton yamuiCharButton2;
-        private YamuiCharButton yamuiCharButton1;
-        private YamuiToggle yamuiToggle3;
-        private YamuiToggle yamuiToggle2;
-        private YamuiToggle yamuiToggle1;
+        private YamuiButtonChar yamuiCharButton5;
+        private YamuiButtonChar yamuiCharButton4;
+        private YamuiButtonChar yamuiCharButton3;
+        private YamuiButtonChar yamuiCharButton2;
+        private YamuiButtonChar yamuiCharButton1;
+        private YamuiButtonToggle yamuiToggle3;
+        private YamuiButtonToggle yamuiToggle2;
+        private YamuiButtonToggle yamuiToggle1;
         private YamuiButton yamuiButton5;
         private YamuiButton yamuiButton4;
         private YamuiLabel yamuiLabel8;

@@ -42,6 +42,11 @@ namespace YamuiFramework.Controls {
         /// </summary>
         public virtual void OnShow() { }
 
+        /// <summary>
+        /// Method called by YamuiTab when the page changes from this one and when the form closes
+        /// </summary>
+        public virtual void OnHide() { }
+
         #endregion
 
         #region Paint

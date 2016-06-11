@@ -130,6 +130,10 @@ namespace YamuiFramework.Forms {
 
             _mainFormToolTip.ShowAlways = true;
 
+            // icon
+            if (YamuiThemeManager.GlobalIcon != null)
+                Icon = YamuiThemeManager.GlobalIcon;
+
             Shown += OnShown;
         }
 
@@ -182,6 +186,12 @@ namespace YamuiFramework.Forms {
         public void ShowPage(string pageName) {
             if (_contentTab != null)
                 _contentTab.ShowPage(pageName);
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            if (_contentTab != null)
+                _contentTab.ExecuteOnClose();
+            base.OnClosing(e);
         }
 
         /// <summary>

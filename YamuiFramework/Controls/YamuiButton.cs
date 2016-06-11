@@ -51,16 +51,11 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool AcceptsRightClick { get; set; }
 
-        private event EventHandler<EventArgs> OnButtonPressed;
-
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
         /// </summary>
         [Category("Yamui")]
-        public event EventHandler<EventArgs> ButtonPressed {
-            add { OnButtonPressed += value; }
-            remove { OnButtonPressed -= value; }
-        }
+        public event EventHandler<EventArgs> ButtonPressed;
 
         /// <summary>
         /// This public prop is only defined so we can set it from the transitions (animation component)
@@ -97,6 +92,28 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
+        #region methods
+
+        /// <summary>
+        /// Call this method to activate the OnPressedButton event manually
+        /// </summary>
+        public void HandlePressedButton() {
+            OnButtonPressed(new EventArgs());
+        }
+
+        private void OnButtonPressed(EventArgs eventArgs) {
+            if (ButtonPressed != null) {
+                Enabled = false;
+                try {
+                    ButtonPressed(this, eventArgs);
+                } finally {
+                    Enabled = true;
+                }
+            }
+        }
+
+        #endregion
+
         #region Overridden Methods
 
         protected override void OnEnabledChanged(EventArgs e) {
@@ -127,6 +144,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnPaint(PaintEventArgs e) {
+
             // background
             var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
             if (backColor != Color.Transparent)
@@ -153,14 +171,6 @@ namespace YamuiFramework.Controls {
             }
 
             TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
-        }
-
-        /// <summary>
-        /// Call this method to activate the OnPressedButton event manually
-        /// </summary>
-        public void HandlePressedButton() {
-            if (OnButtonPressed == null) return;
-            OnButtonPressed(this, new EventArgs());
         }
 
         #endregion
@@ -217,8 +227,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
-            if (IsPressed && OnButtonPressed != null) {
-                OnButtonPressed(this, e);
+            if (IsPressed) {
+                OnButtonPressed(e);
                 e.Handled = true;
             }
             IsPressed = false;
@@ -245,8 +255,8 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            if (IsPressed && OnButtonPressed != null) {
-                OnButtonPressed(this, e);
+            if (IsPressed) {
+                OnButtonPressed(e);
             }
             IsPressed = false;
             Invalidate();

@@ -73,6 +73,18 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= 0x80;
+                return Params;
+            }
+        }
+
+        #endregion
+
         #region Life and death
 
         public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null) {
@@ -100,7 +112,6 @@ namespace YamuiFramework.Forms {
             maxWidth += maxWidth == 0 ? 0 : 15;
             maxWidth += content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
             maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
-
 
             int yPos = BorderWidth;
 

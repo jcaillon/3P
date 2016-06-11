@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.Parser;

@@ -29,7 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         private void InitializeComponent() {
             this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
             this.html = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiImageButton();
+            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -94,6 +94,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         private YamuiScrollPage yamuiScrollPage1;
         private HtmlLabel html;
-        private YamuiImageButton yamuiImageButton1;
+        private YamuiButtonImage yamuiImageButton1;
     }
 }

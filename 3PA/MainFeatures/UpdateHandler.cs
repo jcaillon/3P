@@ -20,16 +20,15 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 using _3PA.Html;
 using _3PA.Lib;
-using _3PA.Properties;
+using _3PA.Lib._3pUpdater;
 
 namespace _3PA.MainFeatures {
 
@@ -43,37 +42,30 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Holds the info about the latest release found on the distant update server
         /// </summary>
-        public static ReleaseInfo LatestReleaseInfo { get; set; }
+        private static ReleaseInfo _latestReleaseInfo;
+        private static bool _warnedUserAboutUpdateAvail;
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private static ReccurentAction _checkEveryHourAction;
 
-        private static bool _alwaysGetFeedBack;
-        private static bool _checkStarted;
-        private static bool _warnedUserAboutUpdateAvail = false;
+        #endregion
+
+        #region constants to read the JSON
+
+        /// <summary>
+        /// name of the fields in the GITHUB json
+        /// </summary>
+        private const string ReleaseVersionName = "tag_name";
+
+        private const string BoolIsBetaName = "prerelease";
+        private const string ReleaseName = "name";
+        private const string ReleaseUrlName = "html_url";
+        private const string BoolIsDraftName = "draft";
+        private const string ReleaseDateName = "updated_at";
+        private const string ReleaseDownloadUrlName = "browser_download_url";
 
         #endregion
 
         #region public
-
-        /// <summary>
-        /// Method to call when the user leaves notepad++,
-        /// check if there is an update to make
-        /// </summary>
-        public static void OnNotepadExit() {
-            if (File.Exists(Config.FileUpdaterExe)) {
-                try {
-                    var process = new Process {
-                        StartInfo = {
-                            FileName = Config.FileUpdaterExe,
-                            Arguments = Config.FileDownloadedPlugin.ProgressQuoter() + " " + AssemblyInfo.Location.ProgressQuoter(),
-                            WindowStyle = ProcessWindowStyle.Hidden
-                        }
-                    };
-                    process.Start();
-                } catch (Exception e) {
-                    if (!(e is Win32Exception))
-                        ErrorHandler.Log("OnNotepadExit\r\n" + e);
-                }
-            }
-        }
 
         /// <summary>
         /// Method to call when the user starts notepad++,
@@ -107,14 +99,15 @@ namespace _3PA.MainFeatures {
                 // The dll is still in the update dir, something went wrong
                 if (File.Exists(Config.FileDownloadedPlugin)) {
                     UserCommunication.Notify(@"<h2>I require your attention!</h2><br>
+                        <div>
                         The update didn't go as expected, i couldn't replace the old plugin file by the new one!<br>
                         It is very likely because i didn't get the rights to write a file in your /plugins/ folder, don't panic!<br>
                         You will have to manually copy the new file and delete the old file :<br><br>
-                        <b>MOVE (delete the source and replace the target)</b> this file : <a href='" + Path.GetDirectoryName(Config.FileDownloadedPlugin) + "'>" + Config.FileDownloadedPlugin + @"</a></b><br>" + @"
-                        <i>This message will be shown at startup as long as the above-mentionned file exists)</i><br>
-                        <b>In this folder</b> (replacing the old file) : <a href='" + Path.GetDirectoryName(AssemblyInfo.Location) + "'>" + Path.GetDirectoryName(AssemblyInfo.Location) + @"</a><br>
+                        <b>MOVE (delete the source and replace the target)</b> this file : <div>" + Path.GetDirectoryName(Config.FileDownloadedPlugin).ToHtmlLink(Config.FileDownloadedPlugin) + @"</div><br>
+                        <b>In this folder</b> (replacing the old file) : <div>" + Path.GetDirectoryName(AssemblyInfo.Location).ToHtmlLink() + @"</div><br><br>
                         Please do it as soon as possible, as i will stop checking for more updates until this problem is fixed.<br>
-                        Thank you for your patience!<br>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
+                        <i>(n.b. : this message will be shown at startup as long as the above-mentionned file exists!)</i><br>
+                        Thank you for your patience!</div>", MessageImg.MsgUpdate, "Update", "Problem during the update!");
                     return;
                 }
 
@@ -137,15 +130,12 @@ namespace _3PA.MainFeatures {
                     Style.InstallUdl();
             }
 
-            // start doing stuff every hour (checking for updates, pinging...)
-            EveryHour();
-        }
-
-        /// <summary>
-        /// Gets an object with the latest release info
-        /// </summary>
-        public static void GetLatestReleaseInfo() {
-            GetLatestReleaseInfo(false);
+            // check for updates every now and then (2h)
+            _checkEveryHourAction = new ReccurentAction(() => {
+                // Check for new updates
+                if (!Config.Instance.GlobalDontCheckUpdates)
+                    GetLatestReleaseInfo(false);
+            }, 1000 * 60 * 120);
         }
 
         /// <summary>
@@ -154,7 +144,9 @@ namespace _3PA.MainFeatures {
         public static void CheckForUpdates() {
             if (!Utils.IsSpamming("updates", 1000)) {
                 UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
-                Task.Factory.StartNew(() => { GetLatestReleaseInfo(true); });
+                Task.Factory.StartNew(() => {
+                    GetLatestReleaseInfo(true);
+                });
             }
         }
 
@@ -162,22 +154,17 @@ namespace _3PA.MainFeatures {
         /// Gets an object with the latest release info
         /// </summary>
         public static void GetLatestReleaseInfo(bool alwaysGetFeedBack) {
-            _alwaysGetFeedBack = alwaysGetFeedBack;
 
-            if (_checkStarted) {
-                return;
-            }
-
-            if (LatestReleaseInfo != null) {
+            if (_latestReleaseInfo != null) {
                 // we already checked and there is a new version
-                if (!_warnedUserAboutUpdateAvail || alwaysGetFeedBack) {
+                if (!_warnedUserAboutUpdateAvail || alwaysGetFeedBack)
                     NotifyUpdateAvailable();
-                    _warnedUserAboutUpdateAvail = true;
-                }
                 return;
             }
 
-            _checkStarted = true;
+            if (!_lock.TryEnterWriteLock(100))
+                return;
+
             try {
                 using (WebClient wc = new WebClient()) {
                     wc.Proxy = Config.Instance.GetWebClientProxy();
@@ -191,7 +178,7 @@ namespace _3PA.MainFeatures {
                         Config.Instance.LastCheckUpdateOk = true;
                     } catch (WebException e) {
                         if (alwaysGetFeedBack || Config.Instance.LastCheckUpdateOk) {
-                            UserCommunication.Notify("For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br><a href='" + Config.ReleasesApi + "'>" + Config.ReleasesApi + "</a><br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed");
+                            UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed", null);
                             Config.Instance.LastCheckUpdateOk = false;
                         }
                         ErrorHandler.Log(e.ToString(), true);
@@ -202,86 +189,89 @@ namespace _3PA.MainFeatures {
                     parser.Tokenize();
                     var releasesList = parser.GetList();
 
-                    // Releases list empty?
-                    if (releasesList == null) {
-                        _checkStarted = false;
-                        return;
-                    }
+                    // Releases list not empty?
+                    if (releasesList != null) {
+                        
+                        var localVersion = AssemblyInfo.Version;
+                        var outputBody = new StringBuilder();
+                        var highestVersion = localVersion;
+                        var highestVersionInt = -1;
+                        var iCount = -1;
 
-                    var localVersion = AssemblyInfo.Version;
+                        // for each release in the list...
+                        foreach (var release in releasesList) {
+                            iCount++;
 
-                    var outputBody = new StringBuilder();
-                    var highestVersion = localVersion;
-                    var highestVersionInt = -1;
-                    var iCount = 0;
-                    foreach (var release in releasesList) {
-                        var releaseVersionTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals("tag_name"));
-                        var prereleaseTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals("prerelease"));
-                        var releaseNameTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals("name"));
+                            var releaseVersionTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseVersionName));
+                            var prereleaseTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(BoolIsBetaName));
+                            var releaseNameTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseName));
+                            var isDraftTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(BoolIsDraftName));
 
-                        if (releaseVersionTuple != null && prereleaseTuple != null) {
+                            // don't care about draft release
+                            if (isDraftTuple != null && isDraftTuple.Item2.EqualsCi("true"))
+                                continue;
+                            
+                            if (releaseVersionTuple != null && prereleaseTuple != null) {
 
-                            var releaseVersion = releaseVersionTuple.Item2;
+                                var releaseVersion = releaseVersionTuple.Item2;
 
-                            // is it the highest version ? for prereleases or full releases depending on the user config
-                            if (releaseVersion.IsHigherVersionThan(highestVersion) && (Config.Instance.UserGetsPreReleases || prereleaseTuple.Item2.EqualsCi("false"))) {
-                                highestVersion = releaseVersion;
-                                highestVersionInt = iCount;
+                                // is it the highest version ? for prereleases or full releases depending on the user config
+                                if (releaseVersion.IsHigherVersionThan(highestVersion) && (Config.Instance.UserGetsPreReleases || prereleaseTuple.Item2.EqualsCi("false"))) {
+                                    highestVersion = releaseVersion;
+                                    highestVersionInt = iCount;
+                                }
+
+                                // For each version higher than the local one, append to the release body
+                                // Will be used to display the version log to the user
+                                if (releaseVersion.IsHigherVersionThan(localVersion)) {
+                                    // h1
+                                    outputBody.AppendLine("\n\n## " + releaseVersion + ((releaseNameTuple != null) ? " : " + releaseNameTuple.Item2 : "") + " ##\n\n");
+                                    // body
+                                    var locBody = release.FirstOrDefault(tuple => tuple.Item1.Equals("body"));
+                                    if (locBody != null)
+                                        outputBody.AppendLine(locBody.Item2);
+                                }
+                            }
+                        }
+
+                        // There is a distant version higher than the local one
+                        if (highestVersionInt > -1) {
+
+                            // Update dir
+                            Utils.DeleteDirectory(Config.FolderUpdate, true);
+                            Utils.CreateDirectory(Config.FolderUpdate);
+
+                            // latest release info
+                            _latestReleaseInfo = new ReleaseInfo() {
+                                Name = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseName)).Item2,
+                                Version = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseVersionName)).Item2,
+                                IsBeta = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(BoolIsBetaName)).Item2.EqualsCi("true"),
+                                ReleaseDate = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseDateName)).Item2.Substring(0, 10),
+                                ReleaseUrl = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseUrlName)).Item2,
+                                Body = outputBody.ToString().Replace("\\r\\n", "\n").Replace("\\n", "\n")
+                            };
+
+                            // Hookup DownloadFileCompleted Event, download the release .zip
+                            var downloadUriTuple = releasesList[highestVersionInt].FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseDownloadUrlName));
+                            if (downloadUriTuple != null) {
+                                _latestReleaseInfo.DownloadUrl = downloadUriTuple.Item2;
+                                wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
+                                wc.DownloadFileAsync(new Uri(_latestReleaseInfo.DownloadUrl), Config.FileLatestReleaseZip);
                             }
 
-                            // For each version higher than the local one, append to the release body
-                            // Will be used to display the version log to the user
-                            if (releaseVersion.IsHigherVersionThan(localVersion)) {
-                                outputBody.AppendLine("\n\n## " + releaseVersion + ((releaseNameTuple != null) ? " : " + releaseNameTuple.Item2 : "") + " ##\n\n");
-                                var locBody = release.FirstOrDefault(tuple => tuple.Item1.Equals("body"));
-                                if (locBody != null)
-                                    outputBody.AppendLine(locBody.Item2);
-                            }
+                        } else if (alwaysGetFeedBack) {
+                            UserCommunication.Notify("Congratulations! You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version);
                         }
-                        iCount++;
-                    }
-
-                    // There is a distant version higher than the local one
-                    if (highestVersionInt > -1) {
-                        // Update dir
-                        Utils.DeleteDirectory(Config.FolderUpdate, true);
-                        Utils.CreateDirectory(Config.FolderUpdate);
-
-                        // latest release info
-                        try {
-                            LatestReleaseInfo = new ReleaseInfo(
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("tag_name")).Item2,
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("name")).Item2,
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("prerelease")).Item2.EqualsCi("true"),
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("html_url")).Item2,
-                                outputBody.ToString().Replace("\\r\\n", "\n").Replace("\\n", "\n"),
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("draft")).Item2.EqualsCi("true"),
-                                releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals("updated_at")).Item2.Substring(0, 10)
-                                );
-                        } catch (Exception x) {
-                            ErrorHandler.Log(x.Message);
-                        }
-
-                        // Hookup DownloadFileCompleted Event, download the release .zip
-                        var downloadUriTuple = releasesList[highestVersionInt].FirstOrDefault(tuple => tuple.Item1.Equals("browser_download_url"));
-                        if (downloadUriTuple != null) {
-                            wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
-                            wc.DownloadFileAsync(new Uri(downloadUriTuple.Item2), Config.FileLatestReleaseZip);
-                        }
-
-                    } else if (_alwaysGetFeedBack) {
-                        UserCommunication.Notify("Congratulations! You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version);
                     }
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "GetLatestReleaseInfo");
+            } finally {
+                _lock.ExitWriteLock();
             }
-
-            _checkStarted = false;
         }
 
         #endregion
-
 
         #region private
 
@@ -292,98 +282,52 @@ namespace _3PA.MainFeatures {
         /// <param name="asyncCompletedEventArgs"></param>
         private static void WcOnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
-
                 // Extract the .zip file
                 if (!Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
 
                     // check the presence of the plugin file
                     if (File.Exists(Config.FileDownloadedPlugin)) {
 
-                        // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                        if (!File.Exists(Config.FileUpdaterExe))
-                            File.WriteAllBytes(Config.FileUpdaterExe, Utils.IsDirectoryWritable(Path.GetDirectoryName(AssemblyInfo.Location)) ? Resources._3pUpdater_user : Resources._3pUpdater);
-
-                        // configure the update
-                        File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", Config.FileDownloadedPlugin, AssemblyInfo.Location), Encoding.Default);
+                        // set up the update so the .dll file downloaded replaces the current .dll
+                        _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
 
                         // write the version log
-                        File.WriteAllText(Config.FileVersionLog, LatestReleaseInfo.Body, Encoding.Default);
-
+                        File.WriteAllText(Config.FileVersionLog, _latestReleaseInfo.Body, Encoding.Default);
+                        
                         NotifyUpdateAvailable();
-
+                    
                     } else {
                         Utils.DeleteDirectory(Config.FolderUpdate, true);
                     }
 
                 } else {
-                    ErrorHandler.Log("Failed to unzip : " + Config.FileLatestReleaseZip);
                     UserCommunication.Notify("I failed to unzip the following file : <br>" + Config.FileLatestReleaseZip + "<br>It contains the update for 3P, you will have to do a manual update.", MessageImg.MsgError, "Unzip", "Failed");
                 }
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "WcOnDownloadFileCompleted");
+                ErrorHandler.ShowErrors(e, "On Download File Completed");
             }
         }
 
         private static void NotifyUpdateAvailable() {
-            UserCommunication.Notify(@"Dear user, <br>
-                <br>
-                A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
-                <br>
-                Your version: <b>" + AssemblyInfo.Version + @"</b><br>
-                Distant version: <b>" + LatestReleaseInfo.Version + @"</b><br>
-                Release name: <b>" + LatestReleaseInfo.Name + @"</b><br>
-                Available since: <b>" + LatestReleaseInfo.ReleaseDate + @"</b><br>
-                Release URL: <b><a href='" + LatestReleaseInfo.ReleaseUrl + "'>" + LatestReleaseInfo.ReleaseUrl + @"</a></b><br>" +
-                                     ((Config.Instance.UserGetsPreReleases && LatestReleaseInfo.IsPreRelease) ? "This distant release is not flagged as a stable version<br>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available");
-        }
+            if (_latestReleaseInfo != null) {
+                UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
+                    <br>
+                    A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
+                    <br>
+                    Your version: <b>" + AssemblyInfo.Version + @"</b><br>
+                    Distant version: <b>" + _latestReleaseInfo.Version + @"</b><br>
+                    Release name: <b>" + _latestReleaseInfo.Name + @"</b><br>
+                    Available since: <b>" + _latestReleaseInfo.ReleaseDate + @"</b><br>
+                    Release URL: <b>" + _latestReleaseInfo.ReleaseUrl.ToHtmlLink()+ @"</b><br>" +
+                    ((Config.Instance.UserGetsPreReleases && _latestReleaseInfo.IsBeta) ? "This distant release is not flagged as a stable version<br>" : "") +
+                    ((_3PUpdater.Instance.IsAdminRightsNeeded) ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
-        #endregion
+                _warnedUserAboutUpdateAvail = true;
 
-
-        #region On hour
-
-        private static Timer _hourTimer;
-
-        /// <summary>
-        /// This method is called once every hour (and at the start)
-        /// </summary>
-        public static void EveryHour() {
-
-            // execute again in 1 hour
-            if (_hourTimer == null) {
-                _hourTimer = new Timer(1000 * 60 * 60) {
-                    AutoReset = true
-                };
-                _hourTimer.Elapsed += (sender, args) => EveryHour();
-                _hourTimer.Start();
-            }
-
-            // now do stuff async
-            Task.Factory.StartNew(() => {
-
-                // ping
-                User.Ping();
-
-                // Check for new updates
-                if (!Config.Instance.GlobalDontCheckUpdates)
-                    GetLatestReleaseInfo();
-            });
-
-        }
-
-        /// <summary>
-        /// delete the hour timer
-        /// </summary>
-        public static void DeleteHourTimer() {
-            try {
-                if (_hourTimer != null) {
-                    _hourTimer.Stop();
-                    _hourTimer.Close();
-                    _hourTimer.Dispose();
-                }
-            } catch (Exception) {
-                // clean up proc
+                // stop checking for more updates :)
+                _checkEveryHourAction.Stop();
+                _checkEveryHourAction = null;
             }
         }
 
@@ -397,21 +341,11 @@ namespace _3PA.MainFeatures {
         public class ReleaseInfo {
             public string Version { get; set; }
             public string Name { get; set; }
-            public bool IsPreRelease { get; set; }
-            public bool IsDraft { private set; get; }
+            public bool IsBeta { get; set; }
             public string ReleaseUrl { get; set; }
             public string Body { get; set; }
             public string ReleaseDate { get; set; }
-
-            public ReleaseInfo(string version, string name, bool isPreRelease, string releaseUrl, string body, bool isDraft, string releaseDate) {
-                Version = version;
-                Name = name;
-                IsPreRelease = isPreRelease;
-                ReleaseUrl = releaseUrl;
-                Body = body;
-                IsDraft = isDraft;
-                ReleaseDate = releaseDate;
-            }
+            public string DownloadUrl { get; set; }
         }
 
         #endregion

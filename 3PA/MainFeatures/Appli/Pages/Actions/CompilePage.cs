@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (ExportPage.cs) is part of 3P.
+// This file (CompilePage.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -71,6 +70,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btHistoric.BackGrndImage = ImageResources.Historic;
             btHistoric.ButtonPressed += BtHistoricOnButtonPressed;
             tooltip.SetToolTip(btHistoric, "Click to <b>browse</b> the previous folders");
+            if (string.IsNullOrEmpty(Config.Instance.CompileDirectoriesHistoric))
+                btHistoric.Visible = false;
 
             btUndo.BackGrndImage = ImageResources.UndoUserAction;
             btUndo.ButtonPressed += BtUndoOnButtonPressed;
@@ -480,6 +481,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (list.Count > 2)
                     list.RemoveAt(list.Count - 1);
                 Config.Instance.CompileDirectoriesHistoric = string.Join(",", list);
+                btHistoric.Visible = true;
             }
         }
 

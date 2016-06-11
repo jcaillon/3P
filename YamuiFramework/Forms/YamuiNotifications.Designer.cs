@@ -63,7 +63,7 @@ namespace YamuiFramework.Forms {
             this.Name = "YamuiNotifications";
             this.Padding = new System.Windows.Forms.Padding(5);
             this.Resizable = false;
-            this.ShowIcon = false;
+            this.ShowIcon = true;
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;

@@ -28,6 +28,7 @@ using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.Tests;
 
 namespace _3PA.MainFeatures {
 
@@ -154,7 +155,7 @@ namespace _3PA.MainFeatures {
                 },
                 new MenuItem("Show auto-completion at caret", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space", ImageResources.Autocompletion),
 
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
 
                 new MenuItem("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1", ImageResources.ProgressHelp) {
                     Generic = true
@@ -169,7 +170,7 @@ namespace _3PA.MainFeatures {
                     Generic = true
                 },
 
-                new MenuItem(true), // --------------------------
+                new MenuItem(true) { Generic = true }, // --------------------------
 
                 new MenuItem("Start searching files", FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q", ImageResources.Search) {
                     Generic = true
@@ -200,16 +201,17 @@ namespace _3PA.MainFeatures {
                new MenuItem("Insert title block", ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M", ImageResources.TitleBlock),
                new MenuItem("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M", ImageResources.ModificationTag),
 
-               new MenuItem(true), // --------------------------
+               new MenuItem(true) { Generic = true }, // --------------------------
 
-               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions)
+               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions) { Generic = true }
             };
 
             if (Config.IsDevelopper) {
                 MainMenuList.Add(
                     new MenuItem("Tests", ImageResources.Tests, new List<MenuItem> {
-                        new MenuItem("Test", Plug.Test, "Test", "Ctrl+D", ImageResources.TestTube),
-                        new MenuItem("DEBUG", Plug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube)
+                        new MenuItem("GetCurrentScrollPageAddOrder", PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12", ImageResources.TestTube) { Generic = true },
+                        new MenuItem("Test", PlugDebug.Test, "Test", "Ctrl+D", ImageResources.TestTube) { Generic = true },
+                        new MenuItem("DEBUG", PlugDebug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube) { Generic = true },
                     }));
             }
         }

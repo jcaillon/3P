@@ -41,7 +41,14 @@ namespace _3PA {
 
     internal static partial class Plug {
 
-        #region Members
+        #region Static events
+
+        // NOTE : be aware that if you subscribe to one of those events, a reference to the subscribing object is held by the publisher (this class). That means that you have to be very careful about explicitly unsubscribing from static events as they will keep the subscriber alive forever, i.e., you may end up with the managed equivalent of a memory leak.
+
+        /// <summary>
+        /// Published when Npp is shutting down, do your clean up actions
+        /// </summary>
+        public static event Action OnNppShutDown;
 
         /// <summary>
         /// Subscribe to this event, published when the current document in changed (on document open or tab switched)
@@ -52,6 +59,11 @@ namespace _3PA {
         /// Published when the Npp windows is being moved
         /// </summary>
         public static event Action OnNppWindowsMove;
+
+        #endregion
+
+
+        #region Members
 
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
@@ -83,7 +95,8 @@ namespace _3PA {
                         return;
 
                     case (uint) NppNotif.NPPN_SHUTDOWN:
-                        OnNppShutdown();
+                        if (OnNppShutDown != null)
+                            OnNppShutDown();
                         return;
                 }
 

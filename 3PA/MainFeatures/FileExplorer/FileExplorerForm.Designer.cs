@@ -29,25 +29,25 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         private void InitializeComponent() {
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.btGetHelp = new YamuiFramework.Controls.YamuiImageButton();
+            this.btGetHelp = new YamuiFramework.Controls.YamuiButtonImage();
             this.lbNbErrors = new YamuiFramework.Controls.YamuiLabel();
             this.lbErrorText = new YamuiFramework.Controls.YamuiLabel();
-            this.btClearAllErrors = new YamuiFramework.Controls.YamuiImageButton();
-            this.btNextError = new YamuiFramework.Controls.YamuiImageButton();
+            this.btClearAllErrors = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btNextError = new YamuiFramework.Controls.YamuiButtonImage();
             this.lbStatus = new YamuiFramework.Controls.YamuiLabel();
-            this.btPrevError = new YamuiFramework.Controls.YamuiImageButton();
+            this.btPrevError = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.FileName = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
             this.fastOLV = new BrightIdeasSoftware.FastObjectListView();
             this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();
-            this.btRefresh = new YamuiFramework.Controls.YamuiImageButton();
+            this.btRefresh = new YamuiFramework.Controls.YamuiButtonImage();
             this.textFilter = new YamuiFramework.Controls.YamuiTextBoxAlt();
-            this.btErase = new YamuiFramework.Controls.YamuiImageButton();
-            this.btDirectory = new YamuiFramework.Controls.YamuiImageButton();
+            this.btErase = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btDirectory = new YamuiFramework.Controls.YamuiButtonImage();
             this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
-            this.btGotoDir = new YamuiFramework.Controls.YamuiImageButton();
+            this.btGotoDir = new YamuiFramework.Controls.YamuiButtonImage();
             ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).BeginInit();
             this.SuspendLayout();
             // 
@@ -326,25 +326,25 @@ namespace _3PA.MainFeatures.FileExplorer {
         #endregion
 
         private HtmlToolTip toolTipHtml;
-        private YamuiImageButton btGetHelp;
+        private YamuiButtonImage btGetHelp;
         private YamuiLabel lbNbErrors;
         private YamuiLabel lbErrorText;
-        private YamuiImageButton btClearAllErrors;
-        private YamuiImageButton btNextError;
+        private YamuiButtonImage btClearAllErrors;
+        private YamuiButtonImage btNextError;
         private YamuiLabel lbStatus;
-        private YamuiImageButton btPrevError;
+        private YamuiButtonImage btPrevError;
         private YamuiLabel yamuiLabel1;
         private YamuiLabel yamuiLabel3;
         private OLVColumn FileName;
         private FastObjectListView fastOLV;
         private YamuiLabel yamuiLabel4;
         private YamuiLabel nbitems;
-        private YamuiImageButton btRefresh;
+        private YamuiButtonImage btRefresh;
         private YamuiTextBoxAlt textFilter;
-        private YamuiImageButton btErase;
-        private YamuiImageButton btDirectory;
+        private YamuiButtonImage btErase;
+        private YamuiButtonImage btDirectory;
         private YamuiLabel lbDirectory;
-        private YamuiImageButton btGotoDir;
+        private YamuiButtonImage btGotoDir;
 
 
     }

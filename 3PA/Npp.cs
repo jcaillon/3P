@@ -19,8 +19,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -394,6 +396,18 @@ namespace _3PA {
             int nppVersion = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
             var lowWord = (nppVersion & 0x0000FFFF).ToString();
             return "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
+        }
+
+        /// <summary>
+        /// Get the number of instances of Notepad++ currently running
+        /// </summary>
+        /// <returns></returns>
+        public static int NumberOfNppStarted() {
+            try {
+                return Process.GetProcesses().Count(clsProcess => clsProcess.ProcessName.Contains("notepad++"));
+            } catch {
+                return 1;
+            }
         }
 
         /// <summary>

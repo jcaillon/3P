@@ -17,13 +17,11 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
-using System.Net;
 using System.Threading.Tasks;
-using System.Web.Script.Serialization;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -37,12 +35,18 @@ namespace _3PA.MainFeatures {
 
     internal static class UserCommunication {
 
+        #region private fields
+
         private static EmptyForm _anchorForm;
 
         /// <summary>
         /// Allows to keep track of opened notifications (when its ID is set)
         /// </summary>
-        private static Dictionary<string, YamuiNotifications> _registeredNotif = new Dictionary<string, YamuiNotifications>(StringComparer.CurrentCultureIgnoreCase); 
+        private static Dictionary<string, YamuiNotifications> _registeredNotif = new Dictionary<string, YamuiNotifications>(StringComparer.CurrentCultureIgnoreCase);
+
+        #endregion
+
+        #region Management
 
         /// <summary>
         /// init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
@@ -56,6 +60,13 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
+        /// Get true if the notifications are ready to be used
+        /// </summary>
+        public static bool Ready {
+            get { return _anchorForm != null && _anchorForm.IsHandleCreated; }
+        }
+
+        /// <summary>
         /// Close all the notifications
         /// </summary>
         public static void ForceClose() {
@@ -63,6 +74,10 @@ namespace _3PA.MainFeatures {
                 _anchorForm.Close();
             YamuiNotifications.CloseEverything();
         }
+
+        #endregion
+
+        #region Notify and NotifyUnique
 
         /// <summary>
         /// Closes the notification represented by the given id
@@ -96,35 +111,34 @@ namespace _3PA.MainFeatures {
             Task.Factory.StartNew(() => {
 
                 try {
-                    if (_anchorForm != null) {
-                        // get npp's screen
-                        if (_anchorForm.IsHandleCreated) {
-                            _anchorForm.BeginInvoke((Action) delegate {
-                                var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
+                    if (Ready) {
+                        _anchorForm.BeginInvoke((Action) delegate {
+                            var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
 
-                                if (id != null) {
-                                    // close existing notification with the same id
-                                    CloseUniqueNotif(id);
-                                    // Remember this notification
-                                    _registeredNotif.Add(id, toastNotification);
-                                }
+                            if (id != null) {
+                                // close existing notification with the same id
+                                CloseUniqueNotif(id);
+                                // Remember this notification
+                                _registeredNotif.Add(id, toastNotification);
+                            }
 
-                                if (clickHandler != null)
-                                    toastNotification.LinkClicked += (sender, args) => clickHandler(args);
-                                else
-                                    toastNotification.LinkClicked += Utils.OpenPathClickHandler;
+                            if (clickHandler != null)
+                                toastNotification.LinkClicked += (sender, args) => clickHandler(args);
+                            else
+                                toastNotification.LinkClicked += Utils.OpenPathClickHandler;
 
-                                toastNotification.Show();
-                            });
-                            return;
-                        }
+                            toastNotification.Show();
+                        });
+                        return;
                     }
+
+                    ErrorHandler.Log(html);
                 } catch (Exception e) {
                     ErrorHandler.Log(e.Message);
-                }
 
-                // if we are here, display the error message the old way
-                MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // if we are here, display the error message the old way
+                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             });
         }
 
@@ -140,6 +154,10 @@ namespace _3PA.MainFeatures {
             Notify(html, MessageImg.MsgDebug, "Debug message", "Should not appear in prod?", duration, width);
         }
 
+        #endregion
+
+        #region Message
+
         /// <summary>
         /// Displays a messagebox like window
         /// REMARK : DON'T WAIT FOR AN ANSWER IF YOU CALL IT FROM A THREAD!!!!!!!
@@ -153,11 +171,11 @@ namespace _3PA.MainFeatures {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
                 if (waitResponse) {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
                 } else {
                     if (_anchorForm.IsHandleCreated) {
                         _anchorForm.BeginInvoke((Action) delegate {
-                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
+                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
                         });
                     }
                 }
@@ -165,51 +183,6 @@ namespace _3PA.MainFeatures {
             return clickedButton;
         }
 
-        /// <summary>
-        /// Sends an comment to a given GITHUB issue url
-        /// </summary>
-        /// <param name="message"></param>
-        /// <param name="url"></param>
-        public static bool SendIssue(string message, string url) {
-            try {
-                // handle spam (10s min between 2 posts)
-                if (Utils.IsSpamming("SendIssue", 10000))
-                    return false;
-
-                HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
-                if (req == null)
-                    return false;
-                req.Proxy = Config.Instance.GetWebClientProxy();
-                req.Method = "POST";
-                req.ContentType = "application/json";
-                req.UserAgent = Config.GetUserAgent;
-                req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
-                StreamWriter writer = new StreamWriter(req.GetRequestStream());
-                JavaScriptSerializer serializer = new JavaScriptSerializer();
-                writer.Write("{\"body\": " + serializer.Serialize(
-                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion() + " ####\r\n" +
-                    message
-                    ) + "}");
-                writer.Close();
-                string result = null;
-                using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
-                    if (resp != null && resp.GetResponseStream() != null) {
-                        var respStream = resp.GetResponseStream();
-                        if (respStream != null) {
-                            StreamReader reader = new StreamReader(respStream);
-                            result = reader.ReadToEnd();
-                            reader.Close();
-                        }
-                    }
-                }
-                if (result != null) {
-                    return true;
-                }
-            } catch (Exception ex) {
-                ErrorHandler.Log(ex.ToString());
-            }
-            return false;
-        }
+        #endregion
     }
 }

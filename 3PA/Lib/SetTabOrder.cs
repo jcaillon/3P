@@ -1,22 +1,49 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (SetTabOrder.cs) is part of 3P.
+// 
+// 3P is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// 3P is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with 3P. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections;
 using System.Text;
 using System.Windows.Forms;
+using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
-    internal static class SetTabOrder {
+    /// <summary>
+    /// Use like this :
+    /// (new SetTabOrder()).CopyAddingOrderToClipBoard(Utils.GetControlsOfType<YamuiScrollPage>(Appli.Form).FirstOrDefault());
+    /// </summary>
+    internal class SetTabOrder {
 
-        private static int _curTabIndex;
+        private int _curTabIndex;
 
-        private static StringBuilder _result;
+        private StringBuilder _result;
 
-        public static void CopyAddingOrderToClipBoard(Control control) {
+        private YamuiScrollPage _page;
+
+        public void CopyAddingOrderToClipBoard(YamuiScrollPage scrollPage) {
+            _page = scrollPage;
             _curTabIndex = 0;
             _result = new StringBuilder();
-            GetTabOrder(control);
+            GetTabOrder(scrollPage.ContentPanel);
             if (_result.Length > 0) {
                 Clipboard.SetText(_result.ToString());
                 UserCommunication.Notify("Tab order copied to clipboard");
@@ -25,7 +52,7 @@ namespace _3PA.Lib {
             }
         }
 
-        public static void GetTabOrder(Control control) {
+        public void GetTabOrder(Control control) {
             // Tab order isn't important enough to ever cause a crash, so replace any exceptions
             // with assertions.
             try {
@@ -40,7 +67,7 @@ namespace _3PA.Lib {
                     if (c.Controls.Count > 0) {
                         //GetTabOrder(c);
                     } else {
-                        _result.AppendLine("this." + control.Name + ".ContentPanel.Controls.Add(this." + c.Name + ");");
+                        _result.AppendLine("this." + _page.Name + ".ContentPanel.Controls.Add(this." + c.Name + ");");
                     }
                 }
             } catch (Exception e) {
