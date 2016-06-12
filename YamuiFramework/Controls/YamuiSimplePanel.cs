@@ -26,7 +26,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
 
     [ToolboxBitmap(typeof(Panel))]
-    public class YamuiPanel : Panel {
+    public class YamuiSimplePanel : Panel {
 
         #region Fields
 
@@ -42,7 +42,7 @@ namespace YamuiFramework.Controls {
 
         #region Constructor
 
-        public YamuiPanel() {
+        public YamuiSimplePanel() {
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |

@@ -27,9 +27,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
+            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPanel();
             this.html = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiImageButton1 = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiScrollPage1.ContentPanel.SuspendLayout();
             this.yamuiScrollPage1.SuspendLayout();
             this.SuspendLayout();
@@ -39,11 +38,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiImageButton1);
             this.yamuiScrollPage1.ContentPanel.Controls.Add(this.html);
             this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
-            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
+            this.yamuiScrollPage1.ContentPanel.OwnerPanel = this.yamuiScrollPage1;
             this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(750, 600);
             this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
             this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -68,15 +66,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.html.TabStop = false;
             this.html.Text = "home HTML";
             // 
-            // yamuiImageButton1
-            // 
-            this.yamuiImageButton1.BackGrndImage = null;
-            this.yamuiImageButton1.Location = new System.Drawing.Point(734, 587);
-            this.yamuiImageButton1.Name = "yamuiImageButton1";
-            this.yamuiImageButton1.Size = new System.Drawing.Size(10, 10);
-            this.yamuiImageButton1.TabIndex = 4;
-            this.yamuiImageButton1.Text = "yamuiImageButton1";
-            // 
             // HomePage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -92,8 +81,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         #endregion
 
-        private YamuiScrollPage yamuiScrollPage1;
+        private YamuiScrollPanel yamuiScrollPage1;
         private HtmlLabel html;
-        private YamuiButtonImage yamuiImageButton1;
     }
 }

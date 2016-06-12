@@ -65,7 +65,7 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool IsPreRelease {
             get {
-                return _assembly.GetName().Version.ToString().Split('.').Last().Equals("1");
+                return _assembly.GetName().Version.ToString().EndsWith(".1");
             }
         }
 
@@ -95,6 +95,13 @@ namespace _3PA.Lib {
         /// </summary>
         public static string Location {
             get { return _assembly.Location; }
+        }
+
+        /// <summary>
+        /// Returns the name of the executing assembly
+        /// </summary>
+        public static string AssemblyName {
+            get { return Path.GetFileName(_assembly.Location); }
         }
 
         public static string GetAttributeValue<TAttr>(Func<TAttr,

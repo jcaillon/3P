@@ -31,6 +31,7 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
 using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
@@ -95,6 +96,20 @@ namespace _3PA.MainFeatures.FileExplorer {
 
 
             StartPosition = FormStartPosition.Manual;
+
+            #region Current env
+
+            // register to env change event
+            ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+
+            btEnvList.BackGrndImage = ImageResources.Env;
+            btEnvList.ButtonPressed += BtEnvListOnButtonPressed;
+
+            btEnvModify.BackGrndImage = ImageResources.ZoomIn;
+            btEnvModify.ButtonPressed += BtEnvModifyOnButtonPressed;
+
+            #endregion
+
 
             #region Current file
 
@@ -850,6 +865,22 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilesInfo.ClearAnnotationsAndMarkers();
             FilesInfo.UpdateErrorsInScintilla();
             Npp.GrabFocus();
+        }
+
+        #endregion
+
+        #region Current env
+
+        private void ProEnvironmentOnOnEnvironmentChange() {
+            lblEnv.Text = ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : "");
+        }
+
+        private void BtEnvModifyOnButtonPressed(object sender, EventArgs eventArgs) {
+            Appli.Appli.GoToPage(PageNames.SetEnvironment);
+        }
+
+        private void BtEnvListOnButtonPressed(object sender, EventArgs eventArgs) {
+            AppliMenu.ShowEnvMenuAtCursor();
         }
 
         #endregion

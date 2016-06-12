@@ -378,7 +378,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #region events
 
         /// <summary>
-        /// Subscribe to this event, published when the current environment changes
+        /// Subscribe to this event, published when the current environment changes (and when the list / env is modified)
         /// </summary>
         public static event Action OnEnvironmentChange;
 

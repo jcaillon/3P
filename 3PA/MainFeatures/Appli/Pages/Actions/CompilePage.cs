@@ -118,6 +118,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -454,7 +457,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         </div>";
 
                     // Activate scrollbars if needed
-                    dockedPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
+                    scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
 
                 });
             }

@@ -288,8 +288,8 @@ namespace YamuiFramework.Controls {
             }
 
             // show the background image or not
-            var firstScrollPage = ControlHelper.GetFirst(_currentPage, typeof(YamuiScrollPage));
-            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPage)firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
+            var firstScrollPage = ControlHelper.GetFirst(_currentPage, typeof(YamuiScrollPanel));
+            _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPanel)firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
 
             _animSmokeScreen.GoHide = false;
 

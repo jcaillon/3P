@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.23107.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.30501.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "3P", "3PA\3P.csproj", "{9A5EC9F0-4DB3-44D6-AA1F-27E031666936}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamuiFramework", "YamuiFramework\YamuiFramework.csproj", "{0A4BE330-B2BB-43A5-B392-15DCE4736E55}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YamuiDemoApp", "YamuiDemoApp\YamuiDemoApp.csproj", "{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ObjectListView2012", "ObjectListView\ObjectListView2012.csproj", "{18FEDA0C-D147-4286-B39A-01204808106A}"
 EndProject
@@ -44,17 +42,6 @@ Global
 		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Signed|Any CPU.ActiveCfg = Release|Any CPU
 		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Signed|Any CPU.Build.0 = Release|Any CPU
 		{0A4BE330-B2BB-43A5-B392-15DCE4736E55}.Signed|x86.ActiveCfg = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Debug|x86.Build.0 = Debug|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|x86.ActiveCfg = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Release|x86.Build.0 = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Signed|Any CPU.ActiveCfg = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Signed|Any CPU.Build.0 = Release|Any CPU
-		{99BEEB9F-A101-457B-BCC7-41AFEC9C78EE}.Signed|x86.ActiveCfg = Release|Any CPU
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{18FEDA0C-D147-4286-B39A-01204808106A}.Debug|x86.ActiveCfg = Debug|Any CPU

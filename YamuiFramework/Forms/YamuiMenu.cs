@@ -87,7 +87,7 @@ namespace YamuiFramework.Forms {
 
         #region Life and death
 
-        public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null) {
+        public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null, int minSize = 150) {
             if (content == null || content.Count == 0)
                 return;
 
@@ -112,6 +112,7 @@ namespace YamuiFramework.Forms {
             maxWidth += maxWidth == 0 ? 0 : 15;
             maxWidth += content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
             maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
+            maxWidth = Math.Max(minSize, maxWidth);
 
             int yPos = BorderWidth;
 
@@ -418,15 +419,42 @@ namespace YamuiFramework.Forms {
     #region YamuiMenuItem
 
     public class YamuiMenuItem {
+        /// <summary>
+        /// Image to associate with the menu
+        /// </summary>
         public Image ItemImage { get; set; }
+
+        /// <summary>
+        /// displayed main text
+        /// </summary>
         public string ItemName { get; set; }
+
+        /// <summary>
+        /// Action to execute on clic
+        /// </summary>
         public Action OnClic { get; set; }
+
+        /// <summary>
+        /// true if the item is a separator
+        /// </summary>
         public bool IsSeparator { get; set; }
+
+        /// <summary>
+        /// List of child items for the current item
+        /// </summary>
         public List<YamuiMenuItem> Children { get; set; }
+
+        /// <summary>
+        /// Small text displayed on the right side of the item
+        /// </summary>
         public string SubText { get; set; }
 
         private Action _do;
 
+        /// <summary>
+        /// The OnClic action is executed through this when the using clic an item,
+        /// You probably want to set OnClic instead!
+        /// </summary>
         public Action Do { 
             get { 
                 return _do ?? (() => {

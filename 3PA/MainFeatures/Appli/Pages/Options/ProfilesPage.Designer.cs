@@ -26,12 +26,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.yamuiScrollPage1 = new YamuiFramework.Controls.YamuiScrollPage();
+            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiScrollPage1.ContentPanel.SuspendLayout();
-            this.yamuiScrollPage1.SuspendLayout();
+            this.scrollPanel.ContentPanel.SuspendLayout();
+            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // yamuiScrollPage1
@@ -39,19 +39,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // yamuiScrollPage1.ContentPanel
             // 
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel3);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.yamuiScrollPage1.ContentPanel.Controls.Add(this.yamuiLabel1);
-            this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
-            this.yamuiScrollPage1.ContentPanel.OwnerPage = this.yamuiScrollPage1;
-            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
-            this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiScrollPage1.Name = "yamuiScrollPage1";
-            this.yamuiScrollPage1.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.TabIndex = 0;
+            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
+            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
+            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.ContentPanel.Name = "ContentPanel";
+            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.TabIndex = 0;
+            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.Name = "scrollPanel";
+            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.TabIndex = 0;
             // 
             // yamuiLabel3
             // 
@@ -90,19 +90,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.yamuiScrollPage1);
+            this.Controls.Add(this.scrollPanel);
             this.Name = "ProfilesPage";
             this.Size = new System.Drawing.Size(720, 550);
-            this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
-            this.yamuiScrollPage1.ContentPanel.PerformLayout();
-            this.yamuiScrollPage1.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.PerformLayout();
+            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private YamuiScrollPage yamuiScrollPage1;
+        private YamuiScrollPanel scrollPanel;
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel1;

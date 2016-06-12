@@ -31,14 +31,14 @@ using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.Tests;
 
 namespace _3PA.MainFeatures {
-
+     
     /// <summary>
     /// This class handle the Main context menu (and its children)
     /// It also has knownledge of the shortcuts for each item in the menu
     /// </summary>
-    internal class AppliMenu {
+    internal class AppliMenu : IDisposable {
 
-        #region Static
+        #region Core
 
         private static AppliMenu _instance;
 
@@ -48,58 +48,23 @@ namespace _3PA.MainFeatures {
         public static AppliMenu Instance {
             get { return _instance ?? (_instance = new AppliMenu()); }
             set {
-                if (value == null)
+                if (value == null) {
+                    if (_instance != null)
+                        _instance.Dispose();
                     _instance = null;
+                }
             }
         }
 
         /// <summary>
-        /// We keep a list with ALL the menu items, to use them in the shortcut settings page
+        /// Command index in the notepad++ plugin menu
         /// </summary>
-        public static List<MenuItem> CompleteMenuList { get; set; }
-
         public static int DockableCommandIndex { get; set; }
-
-        /// <summary>
-        /// Show the appli main menu at the cursor location
-        /// </summary>
-        public static void ShowMainMenuAtCursor() {
-            if (!Plug.PluginIsFullyLoaded) {
-                return;
-            }
-            ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance.MainMenuList : Instance.MainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem)item).ToList(), "Main menu");
-        }
-
-        /// <summary>
-        /// Show the generate code menu at the cursor location
-        /// </summary>
-        public static void ShowGenerateCodeMenuAtCursor() {
-            if (Abl.IsCurrentProgressFile()) {
-                ShowMenuAtCursor(Instance.GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(), "Generate code", "GenerateCode");
-            }
-        }
-
-        /// <summary>
-        /// Show a given menu
-        /// </summary>
-        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16") {
-            try {
-                // Close any already opened menu
-                ForceClose();
-
-                // open requested menu
-                menuList.Insert(0, new YamuiMenuItem { IsSeparator = true });
-                var menu = new YamuiMenu(Cursor.Position, menuList, "<div class='contextMenuTitle'><img src='" + menuLogo +"' width='16' Height='16' style='padding-right: 5px; padding-top: 1px;'>" + menuTitle + "</span>");
-                menu.Show();
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
-            }
-        }
 
         /// <summary>
         /// Closes the visible menu (if any)
         /// </summary>
-        public static void ForceClose() {
+        public static void ForceCloseMenu() {
             if (YamuiMenu.ListOfOpenededMenuHandle != null && YamuiMenu.ListOfOpenededMenuHandle.Count > 0) {
                 var curCtrl = (Control.FromHandle(YamuiMenu.ListOfOpenededMenuHandle[0]));
                 var curMenu = curCtrl as YamuiMenu;
@@ -110,28 +75,80 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
-        /// Returns a list containing all the keys used in the menu's items
+        /// Show a given menu
         /// </summary>
-        public static List<Keys> GetMenuKeysList(List<MenuItem> menu) {
-            var output = new List<Keys>();
-            foreach (var item in menu) {
-                if (item.Shortcut.IsSet) {
-                    output.Add(item.Shortcut.Key);
-                }
-                if (item.ChildrenList != null) {
-                    output.AddRange(GetMenuKeysList(item.ChildrenList));
-                }
+        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16", int minSize = 150) {
+            try {
+                // Close any already opened menu
+                ForceCloseMenu();
+
+                // open requested menu
+                var copyMenuList = menuList.ToList();
+                copyMenuList.Insert(0, new YamuiMenuItem { IsSeparator = true });
+
+                var menu = new YamuiMenu(Cursor.Position, copyMenuList, "<div class='contextMenuTitle'><img src='" + menuLogo + "' width='16' Height='16' style='padding-right: 5px; padding-top: 1px;'>" + menuTitle + "</span>", minSize);
+                menu.Show();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
             }
-            return output;
+        }
+
+        #endregion
+
+        #region Show menus
+
+        /// <summary>
+        /// Show the appli main menu at the cursor location
+        /// </summary>
+        public static void ShowMainMenuAtCursor() {
+            if (!Plug.PluginIsFullyLoaded) {
+                return;
+            }
+            ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance._mainMenuList : Instance._mainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
+        }
+
+
+        /// <summary>
+        /// Show the generate code menu at the cursor location
+        /// </summary>
+        public static void ShowGenerateCodeMenuAtCursor() {
+            if (Abl.IsCurrentProgressFile()) {
+                ShowMenuAtCursor(Instance._generateCodeMenuList.Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
+            }
+        }
+
+        /// <summary>
+        /// Show the environment menu at the cursor location
+        /// </summary>
+        public static void ShowEnvMenuAtCursor() {
+            ShowMenuAtCursor(Instance._envMenuList, "Switch environment", "Env", 185);
         }
 
         #endregion
 
         #region fields
 
-        public List<MenuItem> MainMenuList { get; set; }
+        /// <summary>
+        /// Returns a list containing all the keys used in the menu's items
+        /// </summary>
+        public List<Keys> GetMenuKeysList {
+            get {
+                return (from item in ShortcutableItemList where item.Shortcut.IsSet select item.Shortcut.Key).ToList();
+            }
+        }
 
-        public List<MenuItem> GenerateCodeMenuList { get; set; }
+        /// <summary>
+        /// List with ALL the menu items that have a ItemId (= have or can have a shortcut)
+        /// </summary>
+        public List<MenuItem> ShortcutableItemList { get; set; }
+
+        private List<MenuItem> _mainMenuList;
+
+        private List<MenuItem> _generateCodeMenuList;
+
+        private List<YamuiMenuItem> _envMenuList;
+
+        private MenuItem _envMenu;
 
         #endregion
 
@@ -139,84 +156,168 @@ namespace _3PA.MainFeatures {
 
         private AppliMenu() {
 
-            CompleteMenuList = new List<MenuItem>();
-
-            GenerateCodeMenuList = new List<MenuItem> {
-                //new MenuItem("Insert new function", null, "Insert_new_func", "", ImageResources.Function),
-                //new MenuItem("Insert new internal procedure", null, "Insert_new_proc", "", ImageResources.Procedure)
+            ShortcutableItemList = new List<MenuItem> {
+                // add the main menu here, so it can appear in the list of shortcut to set
+                new MenuItem(null, "Open main menu", ImageResources.logo20x20, ShowMainMenuAtCursor, "Show_main_menu", "F6") {
+                    Generic = true
+                }
             };
 
-            var goToDefItem = new MenuItem("Go to definition", ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B", ImageResources.GoToDefinition);
+            #region Environments
+
+            // subscribe to env change event so the Env menu is always up to date
+            ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+            _envMenu = new MenuItem(this, "Switch environment", ImageResources.Env, ShowEnvMenuAtCursor, "Switch_env", "Ctrl+E") {
+                Generic = true
+            };
+            ProEnvironmentOnOnEnvironmentChange();
+
+            #endregion
+
+            #region Generate code
+
+            _generateCodeMenuList = new List<MenuItem> {
+                new MenuItem(this, "Insert new function", ImageResources.Function, null, null, ""),
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, null, null, "")
+            };
+
+            #endregion
+
+            #region All
+
+            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
 
-            MainMenuList = new List<MenuItem> {
-                new MenuItem("Show main window", Appli.Appli.ToggleView, "Open_main_window", "Alt+Space", ImageResources.MainWindow) {
+            _mainMenuList = new List<MenuItem> {
+                new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") {
                     Generic = true
                 },
-                new MenuItem("Show auto-completion at caret", AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space", ImageResources.Autocompletion),
+                new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space"),
+                _envMenu,
 
-                new MenuItem(true) { Generic = true }, // --------------------------
+                new MenuItem(true) {Generic = true}, // --------------------------
 
-                new MenuItem("Open 4GL help", ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1", ImageResources.ProgressHelp) {
+                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1") {
                     Generic = true
                 },
-                new MenuItem("Check syntax", () => ProCodeUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1", ImageResources.CheckCode),
-                new MenuItem("Compile", () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1", ImageResources.CompileCode),
-                new MenuItem("Run program", () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1", ImageResources.RunCode),
+                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProCodeUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
 
-                new MenuItem("Prolint code",  () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12", ImageResources.ProlintCode),
-                new MenuItem("Open in the AppBuilder", ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O", ImageResources.SendToAppbuilder),
-                new MenuItem("Open progress dictionary", ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D", ImageResources.Dictionary) {
+                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D") {
                     Generic = true
                 },
 
-                new MenuItem(true) { Generic = true }, // --------------------------
+                new MenuItem(true) {Generic = true}, // --------------------------
 
-                new MenuItem("Start searching files", FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q", ImageResources.Search) {
+                new MenuItem(this, "Start searching files", ImageResources.Search, FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q") {
                     Generic = true
                 },
                 goToDefItem,
-                new MenuItem("Go to previous jump point", Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B", ImageResources.GoBackward) {
+                new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
                     Generic = true
                 },
 
                 new MenuItem(true), // --------------------------
 
-                //new MenuItem("New 4GL file", ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N", ImageResources.GenerateCode) {
+                //new MenuItem(this, "New 4GL file", ImageResources.GenerateCode, ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N") {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
 
-                new MenuItem("Toggle comment line", ProCodeUtils.ToggleComment, "Toggle_Comment", "Ctrl+Q", ImageResources.ToggleComment),
+                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, ProCodeUtils.ToggleComment, "Toggle_Comment", "Ctrl+Q"),
+
+                //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
+                //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
                 
-                //new MenuItem("Insert mark", null, "Insert_mark", "Ctrl+T", ImageResources.InsertMark),
-                //new MenuItem("Format document", CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I", ImageResources.FormatCode),
-                
-                //new MenuItem("Generate code", ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert", ImageResources.GenerateCode) {
+                //new MenuItem(this, "Generate code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
 
                 new MenuItem(true), // --------------------------
 
-                new MenuItem("Edit current file info", () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M", ImageResources.FileInfo),
-               new MenuItem("Insert title block", ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M", ImageResources.TitleBlock),
-               new MenuItem("Surround with modification tags", ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M", ImageResources.ModificationTag),
+                new MenuItem(this, "Edit current file info", ImageResources.FileInfo, () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
+                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
 
-               new MenuItem(true) { Generic = true }, // --------------------------
+                new MenuItem(true) {Generic = true}, // --------------------------
 
-               new MenuItem("Options", () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null, ImageResources.ShowOptions) { Generic = true }
+                new MenuItem(this, "Options", ImageResources.ShowOptions, () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
             };
 
+            #endregion
+
+
+            #region special dev
+
             if (Config.IsDevelopper) {
-                MainMenuList.Add(
-                    new MenuItem("Tests", ImageResources.Tests, new List<MenuItem> {
-                        new MenuItem("GetCurrentScrollPageAddOrder", PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12", ImageResources.TestTube) { Generic = true },
-                        new MenuItem("Test", PlugDebug.Test, "Test", "Ctrl+D", ImageResources.TestTube) { Generic = true },
-                        new MenuItem("DEBUG", PlugDebug.StartDebug, "DEBUG", "Ctrl+F12", ImageResources.TestTube) { Generic = true },
+                _mainMenuList.Add(
+                    new MenuItem(this, "Tests", ImageResources.Tests, null, null, null, new List<MenuItem> {
+                        new MenuItem(this, "GetCurrentScrollPageAddOrder", ImageResources.TestTube, PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12") {Generic = true},
+                        new MenuItem(this, "Test", ImageResources.TestTube, PlugDebug.Test, "Test", "Ctrl+D") {Generic = true},
+                        new MenuItem(this, "DEBUG", ImageResources.TestTube, PlugDebug.StartDebug, "DEBUG", "Ctrl+F12") {Generic = true},
                     }));
             }
+
+            #endregion
+
+        }
+
+        public void Dispose() {
+            ProEnvironment.OnEnvironmentChange -= ProEnvironmentOnOnEnvironmentChange;
+            UserCommunication.Notify("dipose");
         }
 
         #endregion
+
+        #region private
+
+        /// <summary>
+        /// Called when an environement is modified/add or simply switched
+        /// </summary>
+        private void ProEnvironmentOnOnEnvironmentChange() {
+            _envMenuList = new List<YamuiMenuItem>();
+
+            string previousSuffix = null;
+            foreach (var env in ProEnvironment.GetList) {
+                var name = env.Name;
+                var suffix = env.Suffix;
+                var existingItem = _envMenuList.FirstOrDefault(item => item.ItemName.Equals(env.Name));
+                if (existingItem != null) {
+                    var newSub = new YamuiMenuItem() {
+                        ItemName = env.Suffix,
+                        ItemImage = ImageResources.EnvSuffix,
+                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null)
+                    };
+                    if (existingItem.Children != null)
+                        existingItem.Children.Add(newSub);
+                    else {
+                        // also add the first sub item..
+                        var previousSuffix1 = previousSuffix;
+                        existingItem.Children = new List<YamuiMenuItem> { new YamuiMenuItem {
+                            ItemName = previousSuffix,
+                            ItemImage = ImageResources.EnvSuffix,
+                            OnClic = () => ProEnvironment.SetCurrent(name, previousSuffix1, null)
+                        }, newSub};
+                    }
+                    existingItem.SubText = existingItem.Children.Count.ToString();
+                } else {
+                    // new item
+                    _envMenuList.Add(new YamuiMenuItem() {
+                        ItemName = env.Name,
+                        ItemImage = ImageResources.EnvName,
+                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null)
+                    });
+                    previousSuffix = env.Suffix;
+                }
+            }
+
+            _envMenu.Children = _envMenuList;
+        }
+
+        #endregion
+
     }
 
     #region MenuItem
@@ -224,53 +325,78 @@ namespace _3PA.MainFeatures {
     internal class MenuItem : YamuiMenuItem {
 
         /// <summary>
-        /// Key of the item in the shortcut dictionnary stored in the config
+        /// Key of the item in the shortcut dictionnary stored in the config,
+        /// must not be null if you want to be able to set a shortcut for the item
         /// </summary>
         public string ItemId { get; set; }
-        public string ItemSpec { get; set; }
-        public ShortcutKey Shortcut { get; set; }
-        public bool Generic { get; set; }
+        /// <summary>
+        /// Same as ItemId, it must be set if you want to be able to use/set shortcuts on children
+        /// </summary>
         public List<MenuItem> ChildrenList { get; set; }
+        /// <summary>
+        /// Item shorcut (string format)
+        /// </summary>
+        public string ItemSpec { get; set; }
+        /// <summary>
+        /// Item shortcut
+        /// </summary>
+        public ShortcutKey Shortcut { get; set; }
+        /// <summary>
+        /// true if the item must appear no matter which doc we are on, otherwise the menu appears for 3P documents
+        /// </summary>
+        public bool Generic { get; set; }
 
-        public MenuItem(string name, Action action, string itemId, string defaultKey, Image img) {
+        public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action action, string itemId, string defaultKey, List<MenuItem> children) {
             ItemName = name;
             ItemImage = img;
-            ItemId = itemId;
-            OnClic = action;
-            ItemSpec = defaultKey;
-            
-            if (Config.Instance.ShortCuts.ContainsKey(ItemId)) {
-                ItemSpec = Config.Instance.ShortCuts[ItemId];
-                Config.Instance.ShortCuts.Remove(ItemId);
+
+            // children?
+            if (children != null) {
+                ChildrenList = children;
+                Children = children.Select(item => (YamuiMenuItem)item).ToList();
             }
 
-            if (!string.IsNullOrEmpty(ItemSpec)) {
-                Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
-                Shortcut = new ShortcutKey(ItemSpec);
-                SubText = ItemSpec;
-            }
+            // shortcut?
+            if (!string.IsNullOrEmpty(itemId)) {
 
-            // We set the Do() action, which is the "go through" action when the OnClic action is activated
-            Do = () => {
-                if (OnClic != null) {
-                    try {
-                        OnClic();
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error in : " + ItemName);
-                    }
+                ItemId = itemId;
+                ItemSpec = defaultKey;
+
+                if (Config.Instance.ShortCuts.ContainsKey(ItemId)) {
+                    ItemSpec = Config.Instance.ShortCuts[ItemId];
+                    Config.Instance.ShortCuts.Remove(ItemId);
                 }
-            };
 
-            // we set up a list of items to use in the shortcut page
-            AppliMenu.CompleteMenuList.Add(this);
+                if (!string.IsNullOrEmpty(ItemSpec)) {
+                    Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
+                    Shortcut = new ShortcutKey(ItemSpec);
+                    SubText = ItemSpec;
+                }
+
+                // we set up a list of items to use in the shortcut page
+                if (menuToRegisterTo != null)
+                    menuToRegisterTo.ShortcutableItemList.Add(this);
+            }
+
+            // action?
+            if (action != null) {
+                OnClic = action;
+                // We set the Do() action, which is the "go through" action when the OnClic action is activated
+                Do = () => {
+                    if (OnClic != null) {
+                        try {
+                            OnClic();
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error in : " + ItemName);
+                        }
+                    }
+                };
+            }
         }
 
-        public MenuItem(string name, Image img, List<MenuItem> children) {
-            ItemName = name;
-            ItemImage = img;
-            ChildrenList = children;
-            Children = children.Select(item => (YamuiMenuItem) item).ToList();
-        }
+
+        public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action action, string itemId, string defaultKey) :
+            this(menuToRegisterTo, name, img, action, itemId, defaultKey, null) { }
 
         public MenuItem(bool isSeparator) {
             IsSeparator = isSeparator;

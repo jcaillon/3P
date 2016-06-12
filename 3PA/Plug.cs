@@ -132,6 +132,30 @@ namespace _3PA {
             // from a back groundthread, use : BeginInvoke()
             UserCommunication.Init();
 
+            // if the UDL is not installed
+            if (!Style.InstallUdl(true)) {
+                Style.InstallUdl();
+            } else {
+                // first use message?
+                if (Config.Instance.UserFirstUse) {
+                    UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                        Appli.ToggleView();
+                        UserCommunication.CloseUniqueNotif("welcome");
+                        args.Handled = true;
+                    });
+                    Config.Instance.UserFirstUse = false;
+                }
+            }
+
+            // check Npp version, 3P requires version 6.8 or higher
+            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
+                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+            }
+
+            // Check if an update has been done and start checking for new updates
+            UpdateHandler.CheckForUpdateDone();
+            UpdateHandler.StartCheckingForUpdate();
+
             // code explorer
             if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                 CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
@@ -145,9 +169,6 @@ namespace _3PA {
             } else if (Config.Instance.FileExplorerVisible) {
                 FileExplorer.Toggle();
             }
-            
-            // Try to update 3P
-            UpdateHandler.OnNotepadStart();
 
             // Try to update the configuration from the distant shared folder
             ShareExportConf.OnNotepadStart();
@@ -213,7 +234,7 @@ namespace _3PA {
                 FileExplorer.ForceClose();
                 CodeExplorer.ForceClose();
                 UserCommunication.ForceClose();
-                AppliMenu.ForceClose();
+                AppliMenu.ForceCloseMenu();
 
                 PluginIsFullyLoaded = false;
 
@@ -253,7 +274,7 @@ namespace _3PA {
             // we also add the key that are used as shortcut for 3P functions
             AppliMenu.Instance = null;
             if (AppliMenu.Instance != null) {
-                KeyboardMonitor.Instance.Add(AppliMenu.GetMenuKeysList(AppliMenu.Instance.MainMenuList).ToArray());
+                KeyboardMonitor.Instance.Add(AppliMenu.Instance.GetMenuKeysList.ToArray());
             }
             if (!KeyboardMonitor.Instance.IsInstalled) {
                 KeyboardMonitor.Instance.KeyDown += OnKeyDown;

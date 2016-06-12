@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
+using _3PA.Lib;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
@@ -62,6 +63,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             fl_correctionNb.TextChanged += YamuiTextBoxOnTextChanged;
             fl_correctionDate.TextChanged += YamuiTextBoxOnTextChanged;
             fl_correctionDesc.TextChanged += YamuiTextBoxOnTextChanged;
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion

@@ -553,6 +553,8 @@ namespace _3PA.MainFeatures {
 
         public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
 
+        public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
+
         /// <summary>
         /// Url for the ping webservice
         /// </summary>
@@ -567,7 +569,7 @@ namespace _3PA.MainFeatures {
         public static string FolderTechnical { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Technical")); } }
         public static string FolderDatabase { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DatabaseInfo")); } }
         public static string FolderLibrary { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Libraries")); } }
-        public static string FolderUpdate { get { return Path.Combine(Npp.GetConfigDir(), "Update"); } }
+        public static string FolderUpdate { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Update")); } }
         public static string FolderTemplates { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Templates")); } }
         public static string FolderThemes { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Themes")); } }
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
@@ -591,7 +593,7 @@ namespace _3PA.MainFeatures {
         public static string FileCompilPath { get { return Path.Combine(Npp.GetConfigDir(), "_CompilationPath.conf"); } }
         public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
-        public static string FileUdl { get { return Path.Combine(Npp.GetConfigDir(), @"../../../userDefineLang.xml"); } }
+        public static string FileUdl { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
 

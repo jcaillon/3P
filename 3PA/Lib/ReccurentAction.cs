@@ -27,7 +27,7 @@ namespace _3PA.Lib {
     /// <summary>
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
-    class ReccurentAction {
+    class ReccurentAction : IDisposable {
 
         #region private fields
 
@@ -80,14 +80,13 @@ namespace _3PA.Lib {
                 if (_timer != null) {
                     _timer.Stop();
                     _timer.Close();
-                    _timer.Dispose();
                 }
             } catch (Exception) {
                 // clean up proc
             }
         }
 
-        ~ReccurentAction() {
+        public void Dispose() {
             Stop();
         }
 

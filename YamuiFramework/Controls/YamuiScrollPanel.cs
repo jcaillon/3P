@@ -29,7 +29,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
 
     [Designer(typeof(ScrollPageDesigner))]
-    public class YamuiScrollPage : UserControl {
+    public class YamuiScrollPanel : UserControl {
 
         #region fields
 
@@ -65,7 +65,7 @@ namespace YamuiFramework.Controls {
 
         #region constructor
 
-        public YamuiScrollPage() {
+        public YamuiScrollPanel() {
             SetStyle(ControlStyles.UserPaint |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.ResizeRedraw |
@@ -75,7 +75,7 @@ namespace YamuiFramework.Controls {
                 Location = new Point(0, 0),
                 Width = Width,
                 Height = Height,
-                OwnerPage = this
+                OwnerPanel = this
             };
             if (NoBackgroundImage)
                 _contentPanel.DontUseTransparentBackGround = true;
@@ -253,14 +253,14 @@ namespace YamuiFramework.Controls {
 
         #region internal content panel
 
-        public class YamuiInternalPanel : YamuiPanel {
+        public class YamuiInternalPanel : YamuiSimplePanel {
 
-            public YamuiScrollPage OwnerPage { get; set; }
+            public YamuiScrollPanel OwnerPanel { get; set; }
 
             public new DockStyle Dock {
                 get { return base.Dock; }
                 set {
-                    OwnerPage.Dock = value;
+                    OwnerPanel.Dock = value;
                     base.Dock = DockStyle.None;
                 }
             }
@@ -273,7 +273,7 @@ namespace YamuiFramework.Controls {
     internal class ScrollPageDesigner : ParentControlDesigner {
         public override void Initialize(IComponent component) {
             base.Initialize(component);
-            EnableDesignMode(((YamuiScrollPage)Control).ContentPanel, "ContentPanel");
+            EnableDesignMode(((YamuiScrollPanel)Control).ContentPanel, "ContentPanel");
         }
     }
 }

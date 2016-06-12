@@ -96,7 +96,7 @@ namespace _3PA.MainFeatures.Appli {
 
             // title
             string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='" + HtmlHandler.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span>";
+            labelTitle.Text = @"<img src='" + HtmlHandler.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + @"</b></span>";
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -178,10 +178,12 @@ namespace _3PA.MainFeatures.Appli {
         }
 
         protected override void OnClosing(CancelEventArgs e) {
-            if (((bool) Tag)) return;
-            e.Cancel = true;
-            base.OnClosing(e);
-            Cloack();
+            if (!((bool) Tag)) {
+                e.Cancel = true;
+                Cloack();
+            } else {
+                base.OnClosing(e);
+            }
         }
         #endregion
 

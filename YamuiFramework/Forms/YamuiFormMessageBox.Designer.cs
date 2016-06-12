@@ -28,7 +28,7 @@ namespace YamuiFramework.Forms {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            this.contentPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.contentPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.contentLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.contentPanel.ContentPanel.SuspendLayout();
             this.contentPanel.SuspendLayout();
@@ -42,7 +42,7 @@ namespace YamuiFramework.Forms {
             this.contentPanel.ContentPanel.Controls.Add(this.contentLabel);
             this.contentPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.contentPanel.ContentPanel.Name = "ContentPanel";
-            this.contentPanel.ContentPanel.OwnerPage = this.contentPanel;
+            this.contentPanel.ContentPanel.OwnerPanel = this.contentPanel;
             this.contentPanel.ContentPanel.Size = new System.Drawing.Size(245, 113);
             this.contentPanel.ContentPanel.TabIndex = 0;
             this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -84,7 +84,7 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
-        private YamuiScrollPage contentPanel;
+        private YamuiScrollPanel contentPanel;
         private HtmlLabel contentLabel;
 
 

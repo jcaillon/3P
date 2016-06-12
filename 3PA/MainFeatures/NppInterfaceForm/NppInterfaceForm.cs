@@ -95,9 +95,11 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             Plug.OnNppWindowsMove += PlugOnOnNppWindowsMove;
         }
 
-        ~NppInterfaceForm() {
-            Closing -= OnClosing;
+        protected override void Dispose(bool disposing) {
+            Plug.OnNppWindowsMove -= PlugOnOnNppWindowsMove;
+            base.Dispose(disposing);
         }
+
         #endregion
 
         #region public

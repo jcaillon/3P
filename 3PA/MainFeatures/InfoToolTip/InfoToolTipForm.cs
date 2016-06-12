@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static Rectangle _rect;
         private static bool _reversed;
 
-        private YamuiScrollPage _panel;
+        private YamuiScrollPanel _panel;
         private HtmlLabel _labelContent;
 
         #endregion
@@ -51,7 +51,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             Padding = new Padding(5);
 
             // add scroll page
-            _panel = new YamuiScrollPage {
+            _panel = new YamuiScrollPanel {
                 Dock = DockStyle.Fill,
                 NoBackgroundImage = true
             };

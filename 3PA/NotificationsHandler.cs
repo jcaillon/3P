@@ -302,7 +302,7 @@ namespace _3PA {
                 }
 
                 // check if the user triggered a 3P function defined in the AppliMenu
-                menuItem = TriggeredMenuItem(AppliMenu.Instance.MainMenuList, isSpamming, key, keyModifiers, ref handled);
+                menuItem = TriggeredMenuItem(AppliMenu.Instance.ShortcutableItemList, isSpamming, key, keyModifiers, ref handled);
                 if (handled) {
                     return;
                 }
@@ -371,6 +371,7 @@ namespace _3PA {
         /// Check if the key/keymodifiers correspond to a item in the menu, if yes, returns this item and execute .Do()
         /// </summary>
         private static MenuItem TriggeredMenuItem(List<MenuItem> list, bool isSpamming, Keys key, KeyModifiers keyModifiers, ref bool handled) {
+
             // check if the user triggered a 3P function defined in the AppliMenu
             foreach (var item in list) {
                 // shortcut corresponds to the item?
@@ -384,13 +385,6 @@ namespace _3PA {
                     }
                     handled = true;
                     return item;
-                }
-                // check its children if any
-                if (item.ChildrenList != null) {
-                    var childItem = TriggeredMenuItem(item.ChildrenList, isSpamming, key, keyModifiers, ref handled);
-                    if (childItem != null) {
-                        return childItem;
-                    }
                 }
             }
             return null;

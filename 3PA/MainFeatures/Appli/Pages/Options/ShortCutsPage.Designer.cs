@@ -28,12 +28,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.static_name = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.static_keys = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.static_title = new YamuiFramework.Controls.YamuiLabel();
-            this.dockedPanel.ContentPanel.SuspendLayout();
-            this.dockedPanel.SuspendLayout();
+            this.scrollPanel.ContentPanel.SuspendLayout();
+            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tooltip
@@ -55,19 +55,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.static_name);
-            this.dockedPanel.ContentPanel.Controls.Add(this.static_keys);
-            this.dockedPanel.ContentPanel.Controls.Add(this.static_title);
-            this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.dockedPanel.ContentPanel.Name = "ContentPanel";
-            this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
-            this.dockedPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.ContentPanel.TabIndex = 0;
-            this.dockedPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dockedPanel.Location = new System.Drawing.Point(0, 0);
-            this.dockedPanel.Name = "dockedPanel";
-            this.dockedPanel.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.TabIndex = 0;
+            this.scrollPanel.ContentPanel.Controls.Add(this.static_name);
+            this.scrollPanel.ContentPanel.Controls.Add(this.static_keys);
+            this.scrollPanel.ContentPanel.Controls.Add(this.static_title);
+            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.ContentPanel.Name = "ContentPanel";
+            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.TabIndex = 0;
+            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.Name = "scrollPanel";
+            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.TabIndex = 0;
             // 
             // static_name
             // 
@@ -107,12 +107,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.dockedPanel);
+            this.Controls.Add(this.scrollPanel);
             this.Name = "ShortCutsPage";
             this.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.ContentPanel.ResumeLayout(false);
-            this.dockedPanel.ContentPanel.PerformLayout();
-            this.dockedPanel.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.PerformLayout();
+            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -120,7 +120,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         private HtmlToolTip tooltip;
-        private YamuiScrollPage dockedPanel;
+        private YamuiScrollPanel scrollPanel;
         private YamuiLabel static_title;
         private HtmlLabel static_keys;
         private HtmlLabel static_name;

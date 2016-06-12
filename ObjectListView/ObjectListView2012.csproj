@@ -32,7 +32,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\3PA\Lib\ObjectListView\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE;DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -43,7 +43,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\3PA\Lib\ObjectListView\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -91,7 +91,9 @@
     </Compile>
     <Compile Include="Rendering\Adornments.cs" />
     <Compile Include="Implementation\Attributes.cs" />
-    <Compile Include="CellEditing\CellEditors.cs" />
+    <Compile Include="CellEditing\CellEditors.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="CellEditing\EditorRegistry.cs" />
     <Compile Include="DataListView.cs">
       <SubType>Component</SubType>
@@ -193,6 +195,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if exist "$(SolutionDir)3PA\Lib\ObjectListView\" copy /Y "$(TargetPath)" "$(SolutionDir)3PA\Lib\ObjectListView\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

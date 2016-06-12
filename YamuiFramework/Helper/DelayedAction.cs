@@ -26,7 +26,7 @@ namespace YamuiFramework.Helper {
     /// <summary>
     /// Simple class to delay an action
     /// </summary>
-    public class DelayedAction {
+    public class DelayedAction : IDisposable {
 
         private Timer _timer;
 
@@ -60,16 +60,14 @@ namespace YamuiFramework.Helper {
                 if (_timer != null) {
                     _timer.Stop();
                     _timer.Close();
-                    _timer.Dispose();
                 }
             } catch (Exception) {
                 // clean up proc
             }
         }
 
-        ~DelayedAction() {
+        public void Dispose() {
             CleanUp();
         }
-
     }
 }

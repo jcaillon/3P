@@ -18,17 +18,21 @@
 // ========================================================================
 #endregion
 using YamuiFramework.Controls;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages {
-    internal partial class template : YamuiPage {
+    internal partial class Template : YamuiPage {
 
         #region fields
 
         #endregion
 
         #region constructor
-        public template() {
+        public Template() {
             InitializeComponent();
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
         #endregion
 

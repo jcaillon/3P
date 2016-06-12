@@ -519,6 +519,20 @@ namespace _3PA.Lib {
             return output;
         }
 
+        /// <summary>
+        /// Returns the version of a given dll
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public static string GetDllVersion(string path) {
+            try {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(path);
+                return myFileVersionInfo.FileVersion;
+            } catch(Exception) {
+                return string.Empty;
+            }
+        }
+
         public static void SerializeToXml<T>(T obj, string fileName) {
             var fileStream = new FileStream(fileName, FileMode.Create);
             var ser = new XmlSerializer(typeof (T));

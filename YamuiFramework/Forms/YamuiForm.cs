@@ -137,10 +137,6 @@ namespace YamuiFramework.Forms {
             Shown += OnShown;
         }
 
-        ~YamuiForm() {
-            Shown -= OnShown;
-        }
-
         #endregion
 
         #region Paint Methods
@@ -365,9 +361,10 @@ namespace YamuiFramework.Forms {
                     , true);
             }
 
-            ~YamuiNotifLabel() {
-                _durationTimer.Dispose();
-                _durationTimer = null;
+            protected override void Dispose(bool disposing) {
+                if (_durationTimer != null)
+                    _durationTimer.Dispose();
+                base.Dispose(disposing);
             }
 
             #endregion

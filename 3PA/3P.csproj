@@ -34,11 +34,11 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>TRACE</DefineConstants>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <DebugType>full</DebugType>
     <ErrorReport>prompt</ErrorReport>
     <Optimize>false</Optimize>
-    <OutputPath>..\..\..\LiberKey\Apps\Notepad++\App\Notepad++\plugins\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <PlatformTarget>x86</PlatformTarget>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <UseVSHostingProcess>false</UseVSHostingProcess>
@@ -280,11 +280,11 @@
     <Compile Include="MainFeatures\Appli\AppliForm.Designer.cs">
       <DependentUpon>AppliForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\template.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Template.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\template.Designer.cs">
-      <DependentUpon>template.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Template.Designer.cs">
+      <DependentUpon>Template.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Options\SettingAppearance.cs">
       <SubType>UserControl</SubType>
@@ -375,8 +375,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\template.resx">
-      <DependentUpon>template.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Template.resx">
+      <DependentUpon>Template.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\SettingAppearance.resx">
       <DependentUpon>SettingAppearance.cs</DependentUpon>
@@ -549,6 +549,7 @@
     <Content Include="Images\FileExplorer\TType.png" />
     <Content Include="Images\FileExplorer\UnknowType.png" />
     <Content Include="Images\FileExplorer\WType.png" />
+    <Content Include="Images\FileExplorer\ZoomIn.png" />
     <Content Include="Images\Html\getting-started-0.png" />
     <Content Include="Images\Html\getting-started-1.png" />
     <Content Include="Images\Html\getting-started-2.png" />
@@ -556,8 +557,8 @@
     <Content Include="Images\Html\Update26x26.png" />
     <Content Include="Images\logo\icon\3p_icon.ico" />
     <Content Include="Images\logo\logo16x16.png" />
-    <Content Include="Images\logo\logo16x16_r.png" />
     <Content Include="Images\logo\logo200x200.png" />
+    <Content Include="Images\logo\logo20x20.png" />
     <Content Include="Images\logo\logo30x30.png" />
     <Content Include="Html\Pages\getting_started.txt" />
     <None Include="Images\Menu\FileInfo.png" />
@@ -581,6 +582,9 @@
     <None Include="Images\Menu\CheckCode.png" />
     <None Include="Images\Menu\CompileCode.png" />
     <Content Include="Images\Menu\Dictionary.png" />
+    <Content Include="Images\Menu\Env.png" />
+    <Content Include="Images\Menu\EnvName.png" />
+    <Content Include="Images\Menu\EnvSuffix.png" />
     <Content Include="Images\Menu\ShowOptions.png" />
     <Content Include="Images\NotifAndMessages\MsgDebug.png" />
     <Content Include="Images\NotifAndMessages\MsgError.png" />
@@ -630,8 +634,7 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

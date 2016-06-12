@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using _3PA.MainFeatures;
@@ -75,6 +76,16 @@ namespace _3PA.Lib {
                 ErrorHandler.ShowErrors(e, "Error in LibLoader");
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns the version of the YamuiFramework library
+        /// </summary>
+        public static string YamuiFrameworkVersion {
+            get {
+                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(_pathToYamui);
+                return myFileVersionInfo.FileVersion;
+            }
         }
 
     }

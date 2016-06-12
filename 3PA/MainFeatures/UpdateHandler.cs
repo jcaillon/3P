@@ -71,27 +71,7 @@ namespace _3PA.MainFeatures {
         /// Method to call when the user starts notepad++,
         /// check if an update has been done since the last time notepad was closed
         /// </summary>
-        public static void OnNotepadStart() {
-
-            // if the UDL is not installed
-            if (!Style.InstallUdl(true)) {
-                Style.InstallUdl();
-            } else {
-                // first use message?
-                if (Config.Instance.UserFirstUse) {
-                    UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
-                        Appli.Appli.ToggleView();
-                        UserCommunication.CloseUniqueNotif("welcome");
-                        args.Handled = true;
-                    });
-                    Config.Instance.UserFirstUse = false;
-                }
-            }
-
-            // check Npp version, 3P requires version 6.8 or higher
-            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
-                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
-            }
+        public static void CheckForUpdateDone() {
 
             // an update has been done
             if (File.Exists(Config.FileVersionLog)) {
@@ -129,23 +109,28 @@ namespace _3PA.MainFeatures {
                 if (!Config.Instance.GlobalDontUpdateUdlOnUpdate)
                     Style.InstallUdl();
             }
+        }
 
+        /// <summary>
+        /// Call this method to start checking for updates every 2 hours, also check once immediatly
+        /// </summary>
+        public static void StartCheckingForUpdate() {
             // check for updates every now and then (2h)
             _checkEveryHourAction = new ReccurentAction(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
-                    GetLatestReleaseInfo(false);
+                    CheckForUpdate(false);
             }, 1000 * 60 * 120);
         }
 
         /// <summary>
         /// To call when the user click on an update button
         /// </summary>
-        public static void CheckForUpdates() {
+        public static void CheckForUpdate() {
             if (!Utils.IsSpamming("updates", 1000)) {
                 UserCommunication.Notify("Now checking for updates, you will be notified when it's done", MessageImg.MsgInfo, "Update", "Update check", 5);
                 Task.Factory.StartNew(() => {
-                    GetLatestReleaseInfo(true);
+                    CheckForUpdate(true);
                 });
             }
         }
@@ -153,7 +138,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Gets an object with the latest release info
         /// </summary>
-        public static void GetLatestReleaseInfo(bool alwaysGetFeedBack) {
+        public static void CheckForUpdate(bool alwaysGetFeedBack) {
 
             if (_latestReleaseInfo != null) {
                 // we already checked and there is a new version
@@ -164,8 +149,8 @@ namespace _3PA.MainFeatures {
 
             if (!_lock.TryEnterWriteLock(100))
                 return;
-
             try {
+                // try to update from GitHub
                 using (WebClient wc = new WebClient()) {
                     wc.Proxy = Config.Instance.GetWebClientProxy();
                     wc.Headers.Add("user-agent", Config.GetUserAgent);
@@ -189,9 +174,43 @@ namespace _3PA.MainFeatures {
                     parser.Tokenize();
                     var releasesList = parser.GetList();
 
-                    // Releases list not empty?
-                    if (releasesList != null) {
-                        
+                    // Releases list empty?
+                    if (releasesList == null) {
+
+                        // check if there is an update available in the Shared config folder
+                        if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
+                            var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
+
+                            // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
+                            if (File.Exists(potentialUpdate) &&
+                                Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
+                                (Config.Instance.UserGetsPreReleases || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
+
+                                // copy to local update folder and warn the user 
+                                if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
+
+                                    _latestReleaseInfo = new ReleaseInfo() {
+                                        Name = "Updated from shared directory",
+                                        Version = Utils.GetDllVersion(Config.FileDownloadedPlugin),
+                                        IsBeta = Utils.GetDllVersion(Config.FileDownloadedPlugin).EndsWith(".1"),
+                                        ReleaseDate = "???",
+                                        ReleaseUrl = Config.UrlCheckReleases
+                                    };
+
+                                    // write the version log
+                                    File.WriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
+
+                                    // set up the update so the .dll file downloaded replaces the current .dll
+                                    _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
+
+                                    NotifyUpdateAvailable();
+                                }
+                            }
+                        }
+
+                    } else {
+
+                        // check for a online update
                         var localVersion = AssemblyInfo.Version;
                         var outputBody = new StringBuilder();
                         var highestVersion = localVersion;
@@ -237,9 +256,8 @@ namespace _3PA.MainFeatures {
                         // There is a distant version higher than the local one
                         if (highestVersionInt > -1) {
 
-                            // Update dir
+                            // delete existing dir
                             Utils.DeleteDirectory(Config.FolderUpdate, true);
-                            Utils.CreateDirectory(Config.FolderUpdate);
 
                             // latest release info
                             _latestReleaseInfo = new ReleaseInfo() {
@@ -255,7 +273,7 @@ namespace _3PA.MainFeatures {
                             var downloadUriTuple = releasesList[highestVersionInt].FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseDownloadUrlName));
                             if (downloadUriTuple != null) {
                                 _latestReleaseInfo.DownloadUrl = downloadUriTuple.Item2;
-                                wc.DownloadFileCompleted += WcOnDownloadFileCompleted;
+                                wc.DownloadFileCompleted += OnDownloadFileCompleted;
                                 wc.DownloadFileAsync(new Uri(_latestReleaseInfo.DownloadUrl), Config.FileLatestReleaseZip);
                             }
 
@@ -280,7 +298,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="asyncCompletedEventArgs"></param>
-        private static void WcOnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
+        private static void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
                 // Extract the .zip file
                 if (!Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
@@ -311,23 +329,23 @@ namespace _3PA.MainFeatures {
 
         private static void NotifyUpdateAvailable() {
             if (_latestReleaseInfo != null) {
+
                 UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
                     <br>
-                    A new version of 3P is available on github and will be automatically installed the next time you restart Notepad++<br>
+                    A new version of 3P has been downloaded and will be automatically installed the next time you restart Notepad++<br>
                     <br>
                     Your version: <b>" + AssemblyInfo.Version + @"</b><br>
                     Distant version: <b>" + _latestReleaseInfo.Version + @"</b><br>
                     Release name: <b>" + _latestReleaseInfo.Name + @"</b><br>
-                    Available since: <b>" + _latestReleaseInfo.ReleaseDate + @"</b><br>
-                    Release URL: <b>" + _latestReleaseInfo.ReleaseUrl.ToHtmlLink()+ @"</b><br>" +
-                    ((Config.Instance.UserGetsPreReleases && _latestReleaseInfo.IsBeta) ? "This distant release is not flagged as a stable version<br>" : "") +
-                    ((_3PUpdater.Instance.IsAdminRightsNeeded) ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
+                    Available since: <b>" + _latestReleaseInfo.ReleaseDate + @"</b><br>" +
+                    "Release URL: <b>" + _latestReleaseInfo.ReleaseUrl.ToHtmlLink()+ @"</b><br>" +
+                    (_latestReleaseInfo.IsBeta ? "This distant release is not flagged as a stable version<br>" : "") +
+                    (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
                 _warnedUserAboutUpdateAvail = true;
 
                 // stop checking for more updates :)
-                _checkEveryHourAction.Stop();
-                _checkEveryHourAction = null;
+                _checkEveryHourAction.Dispose();
             }
         }
 
@@ -338,7 +356,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Contains info about the latest release
         /// </summary>
-        public class ReleaseInfo {
+        private class ReleaseInfo {
             public string Version { get; set; }
             public string Name { get; set; }
             public bool IsBeta { get; set; }

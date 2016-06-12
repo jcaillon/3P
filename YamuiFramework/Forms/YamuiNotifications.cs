@@ -44,7 +44,7 @@ namespace YamuiFramework.Forms {
         private bool _allowFocus;
         private IntPtr _currentForegroundWindow;
         private int _duration;
-        private YamuiPanel _progressPanel;
+        private YamuiSimplePanel _progressSimplePanel;
         private Transition _closingTransition;
         private Screen _screen;
 
@@ -117,7 +117,7 @@ namespace YamuiFramework.Forms {
 
             // do we need to animate a panel on the bottom to visualise time left
             if (duration > 0) {
-                _progressPanel = new YamuiPanel {
+                _progressSimplePanel = new YamuiSimplePanel {
                     BackColor = YamuiThemeManager.Current.AccentColor,
                     AutoScroll = false,
                     Location = new Point(1, Height - 11),
@@ -126,7 +126,7 @@ namespace YamuiFramework.Forms {
                     TabStop = false,
                     UseCustomBackColor = true
                 };
-                Controls.Add(_progressPanel);
+                Controls.Add(_progressSimplePanel);
                 _duration = duration*1000;
             } else
                 _duration = 0;
@@ -191,8 +191,8 @@ namespace YamuiFramework.Forms {
                 if (_closingTransition != null) {
                     _closingTransition.removeProperty(_closingTransition.TransitionedProperties.FirstOrDefault());
                     _closingTransition = null;
-                    _progressPanel.Width = 0;
-                    _progressPanel.Invalidate();
+                    _progressSimplePanel.Width = 0;
+                    _progressSimplePanel.Invalidate();
                 }
             }
         }
@@ -218,7 +218,7 @@ namespace YamuiFramework.Forms {
             _allowFocus = true;
             if (_duration > 0) {
                 _closingTransition = new Transition(new TransitionType_Linear(_duration));
-                _closingTransition.add(_progressPanel, "Width", 0);
+                _closingTransition.add(_progressSimplePanel, "Width", 0);
                 _closingTransition.TransitionCompletedEvent += (o, args) => { Close(); };
                 _closingTransition.run();
             }

@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using YamuiFramework.Controls;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class ProfilesPage : YamuiPage {
@@ -29,6 +30,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #region constructor
         public ProfilesPage() {
             InitializeComponent();
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
         #endregion
 

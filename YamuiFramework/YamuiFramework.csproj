@@ -16,7 +16,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\3PA\Lib\YamuiFolder\</OutputPath>
+    <OutputPath>bin\Debug\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -28,7 +28,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
-    <OutputPath>..\3PA\Lib\YamuiFolder\</OutputPath>
+    <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -71,7 +71,7 @@
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiScrollPage.cs">
+    <Compile Include="Controls\YamuiScrollPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiButtonImage.cs">
@@ -98,7 +98,7 @@
     <Compile Include="Controls\YamuiButtonLink.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiPanel.cs">
+    <Compile Include="Controls\YamuiSimplePanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\YamuiProgressBar.cs">
@@ -314,6 +314,9 @@
     <None Include="Fonts\REDCIRCL.ttf" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>if exist "$(SolutionDir)3PA\Lib\YamuiFolder\" copy /Y "$(TargetPath)" "$(SolutionDir)3PA\Lib\YamuiFolder\$(TargetFileName)"</PostBuildEvent>
+  </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

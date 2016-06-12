@@ -48,6 +48,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         public ExportPage() {
             InitializeComponent();
 
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
+
             // browse
             btBrowse.BackGrndImage = ImageResources.SelectFile;
             btBrowse.ButtonPressed += BtBrowseOnButtonPressed;
@@ -89,7 +92,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = confLine.Label
                 };
                 tooltip.SetToolTip(label, "File or folder handled :<br>" + confLine.HandledItem);
-                dockedPanel.ContentPanel.Controls.Add(label);
+                scrollPanel.ContentPanel.Controls.Add(label);
 
                 // switch, auto update?
                 var toggleControl = new YamuiCheckBox {
@@ -100,7 +103,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = confLine
                 };
                 toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
-                dockedPanel.ContentPanel.Controls.Add(toggleControl);
+                scrollPanel.ContentPanel.Controls.Add(toggleControl);
                 tooltip.SetToolTip(toggleControl, "Check this option to automatically fetch the most recent version of the file<br>This update occurs on notepad++ startup and each time you refresh the local/distant file status");
 
                 // do we have an update available?
@@ -114,7 +117,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Visible = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "The distant version is more recent than the local one<br>Press this button to <b>fetch</b> the distant version");
 
                 // local date
@@ -127,7 +130,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @"???",
                     Name = "datel_" + iNbLine
                 };
-                dockedPanel.ContentPanel.Controls.Add(date);
+                scrollPanel.ContentPanel.Controls.Add(date);
 
                 // local open
                 strButton = new YamuiButtonImage {
@@ -141,7 +144,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
                 strButton.MouseDown += OpenFileOnMouseDown;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
 
                 // local import
@@ -155,7 +158,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Name = "bti_" + iNbLine
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>import</b> this file<br>It reads its content and use it in this session of 3P");
 
                 // local export
@@ -169,7 +172,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>export</b> this file to a local version,<br>you will use the exported file instead of the embedded file in 3P");
 
                 // local delete
@@ -183,7 +186,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>delete</b> the local version of your file,<br>you will use the embedded (default) file of 3P instead");
 
                 // distant date
@@ -196,7 +199,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Text = @"???",
                     Name = "dated_" + iNbLine
                 };
-                dockedPanel.ContentPanel.Controls.Add(date);
+                scrollPanel.ContentPanel.Controls.Add(date);
 
                 // distant open
                 strButton = new YamuiButtonImage {
@@ -210,7 +213,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 strButton.ButtonPressed += OpenFileOnButtonPressed;
                 strButton.MouseDown += OpenFileOnMouseDown;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
 
                 // distant fetch
@@ -224,7 +227,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>fetch</b> this file from the shared directory,<br>replacing the local one");
 
                 // distant push
@@ -238,7 +241,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Enabled = false
                 };
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
-                dockedPanel.ContentPanel.Controls.Add(strButton);
+                scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>push</b> the local file to the shared directory,<br>replacing any existing file");
 
 
@@ -249,13 +252,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // Activate scrollbars
             yPos += 15;
             if (yPos > Height) {
-                dockedPanel.ContentPanel.Controls.Add(new YamuiLabel {
+                scrollPanel.ContentPanel.Controls.Add(new YamuiLabel {
                     AutoSize = true,
                     Location = new Point(0, yPos),
                     Text = @" "
                 });
                 yPos += 10;
-                dockedPanel.ContentPanel.Height = yPos;
+                scrollPanel.ContentPanel.Height = yPos;
             }
             Height = yPos;
         }
@@ -324,7 +327,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void BtDownloadAllOnButtonPressed(object sender, EventArgs eventArgs) {
             var iNbLine = 0;
             foreach (var confLine in ShareExportConf.List) {
-                if (((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Visible) {
+                if (((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Visible) {
                     if (confLine.OnFetch != null)
                         confLine.OnFetch(confLine);
                 }
@@ -425,42 +428,42 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                             foreach (var confLine in ShareExportConf.List) {
 
                                 // open
-                                ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
+                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bto_" + iNbLine]).Enabled = confLine.LocalExists;
 
                                 // import
-                                ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
+                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bti_" + iNbLine]).Enabled = confLine.OnImport != null && confLine.LocalExists;
 
                                 if (confLine.IsDir) {
                                     // hide export/delete
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Hide();
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bte_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btd_" + iNbLine]).Hide();
                                 } else {
                                     // export
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["bte_" + iNbLine]).Enabled = confLine.OnExport != null && !confLine.LocalExists;
 
                                     // delete
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btd_" + iNbLine]).Enabled = confLine.OnDelete != null && confLine.LocalExists;
                                 }
 
                                 // distant open
-                                ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
+                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btz_" + iNbLine]).Enabled = confLine.DistantExists;
 
                                 // fetch
-                                ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btf_" + iNbLine]).Enabled = confLine.OnFetch != null && confLine.DistantExists && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
 
                                 // push
-                                ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
+                                ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btp_" + iNbLine]).Enabled = confLine.OnPush != null && confLine.LocalExists && sharedDirOk && (confLine.DistantTime.CompareTo(confLine.LocalTime) != 0 || confLine.LocalNbFiles != confLine.DistantNbFiles);
 
-                                ((HtmlLabel) dockedPanel.ContentPanel.Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
+                                ((HtmlLabel) scrollPanel.ContentPanel.Controls["datel_" + iNbLine]).Text = confLine.LocalExists ? confLine.LocalTime.ToString("yyyy-MM-dd HH:mm:ss") : (confLine.IsDir ? "" : @"Not exported");
 
-                                ((HtmlLabel) dockedPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
+                                ((HtmlLabel) scrollPanel.ContentPanel.Controls["dated_" + iNbLine]).Text = confLine.DistantExists ? confLine.DistantTime.ToString("yyyy-MM-dd HH:mm:ss") : @"Not found";
 
                                 // maj button
                                 if (confLine.NeedUpdate) {
                                     nbMaj++;
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Show();
                                 } else
-                                    ((YamuiButtonImage) dockedPanel.ContentPanel.Controls["btm_" + iNbLine]).Hide();
+                                    ((YamuiButtonImage) scrollPanel.ContentPanel.Controls["btm_" + iNbLine]).Hide();
 
                                 iNbLine++;
                             }

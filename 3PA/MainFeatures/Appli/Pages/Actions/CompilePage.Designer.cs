@@ -29,7 +29,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// </summary>
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.dockedPanel = new YamuiFramework.Controls.YamuiScrollPage();
+            this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.bt_export = new YamuiFramework.Controls.YamuiButton();
             this.btReset = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -53,8 +53,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_directory = new YamuiFramework.Controls.YamuiTextBox();
             this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.dockedPanel.ContentPanel.SuspendLayout();
-            this.dockedPanel.SuspendLayout();
+            this.scrollPanel.ContentPanel.SuspendLayout();
+            this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // tooltip
@@ -76,39 +76,39 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // dockedPanel.ContentPanel
             // 
-            this.dockedPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btBrowse);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btUndo);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_directory);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btOpen);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btHistoric);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel3);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel2);
-            this.dockedPanel.ContentPanel.Controls.Add(this.toggleRecurs);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel1);
-            this.dockedPanel.ContentPanel.Controls.Add(this.toggleMono);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel4);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel5);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_include);
-            this.dockedPanel.ContentPanel.Controls.Add(this.htmlLabel6);
-            this.dockedPanel.ContentPanel.Controls.Add(this.fl_exclude);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btCancel);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btStart);
-            this.dockedPanel.ContentPanel.Controls.Add(this.progressBar);
-            this.dockedPanel.ContentPanel.Controls.Add(this.btReset);
-            this.dockedPanel.ContentPanel.Controls.Add(this.bt_export);
-            this.dockedPanel.ContentPanel.Controls.Add(this.lbl_report);
-            this.dockedPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
-            this.dockedPanel.ContentPanel.Name = "ContentPanel";
-            this.dockedPanel.ContentPanel.OwnerPage = this.dockedPanel;
-            this.dockedPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.ContentPanel.TabIndex = 0;
-            this.dockedPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dockedPanel.Location = new System.Drawing.Point(0, 0);
-            this.dockedPanel.Name = "dockedPanel";
-            this.dockedPanel.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.TabIndex = 0;
+            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btBrowse);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btUndo);
+            this.scrollPanel.ContentPanel.Controls.Add(this.fl_directory);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btOpen);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btHistoric);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel3);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel2);
+            this.scrollPanel.ContentPanel.Controls.Add(this.toggleRecurs);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
+            this.scrollPanel.ContentPanel.Controls.Add(this.toggleMono);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel4);
+            this.scrollPanel.ContentPanel.Controls.Add(this.fl_nbProcess);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
+            this.scrollPanel.ContentPanel.Controls.Add(this.fl_include);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel6);
+            this.scrollPanel.ContentPanel.Controls.Add(this.fl_exclude);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btStart);
+            this.scrollPanel.ContentPanel.Controls.Add(this.progressBar);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btReset);
+            this.scrollPanel.ContentPanel.Controls.Add(this.bt_export);
+            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_report);
+            this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.ContentPanel.Name = "ContentPanel";
+            this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.TabIndex = 0;
+            this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.scrollPanel.Location = new System.Drawing.Point(0, 0);
+            this.scrollPanel.Name = "scrollPanel";
+            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.TabIndex = 0;
             // 
             // bt_export
             // 
@@ -391,12 +391,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.Controls.Add(this.dockedPanel);
+            this.Controls.Add(this.scrollPanel);
             this.Name = "CompilePage";
             this.Size = new System.Drawing.Size(720, 550);
-            this.dockedPanel.ContentPanel.ResumeLayout(false);
-            this.dockedPanel.ContentPanel.PerformLayout();
-            this.dockedPanel.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.ResumeLayout(false);
+            this.scrollPanel.ContentPanel.PerformLayout();
+            this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -404,7 +404,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
 
         private HtmlToolTip tooltip;
-        private YamuiScrollPage dockedPanel;
+        private YamuiScrollPanel scrollPanel;
         private YamuiLabel yamuiLabel2;
         private YamuiButtonImage btHistoric;
         private YamuiButtonImage btOpen;

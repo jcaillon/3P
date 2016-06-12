@@ -21,11 +21,18 @@ using System;
 using System.Drawing;
 using System.Linq;
 using YamuiFramework.Controls;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
 
+        #region private fields
+
         private static YamuiColorRadioButton _checkButton;
+
+        #endregion
+
+        #region constructor
 
         public SettingAppearance() {
             InitializeComponent();
@@ -35,13 +42,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             int y = 0;
             foreach (var accentColor in ThemeManager.GetAccentColors) {
                 var newColorPicker = new YamuiColorRadioButton();
-                PanelAccentColor.Controls.Add(newColorPicker);
+                _simplePanelAccentColor.Controls.Add(newColorPicker);
                 newColorPicker.CheckedChanged += NewColorPickerOnCheckedChanged;
                 newColorPicker.BackColor = accentColor;
                 newColorPicker.Location = new Point(x, y);
                 newColorPicker.Size = new Size(50, 50);
                 //newColorPicker.Bounds = new Rectangle(x, y, 50, 50);
-                if (y + 2*newColorPicker.Height > PanelAccentColor.Height) {
+                if (y + 2*newColorPicker.Height > _simplePanelAccentColor.Height) {
                     x += newColorPicker.Width;
                     y = 0;
                 } else
@@ -68,7 +75,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             toolTip.SetToolTip(tg_override, "Toggle this option on if don't want 3P to override certain colors of Notepad++<br>like the selection / caret line color for instance<br>In that case, you will continue using the style settings of Notepad++ and 3P<br>will only control the colors of the language itself.<br><br><i>You need to restart Notepad++ to see any changes</i>");
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpCustomThemes + @"'>How to customize the look of 3P?</a>";
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
+
+        #endregion
+
 
         public override void OnShow() {
             // themes combo box

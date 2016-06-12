@@ -60,10 +60,6 @@ namespace YamuiFramework.Controls {
             ButtonPressed += OnButtonPressed;
         }
 
-        ~YamuiButtonToggle() {
-            ButtonPressed -= OnButtonPressed;
-        }
-
         #endregion
 
         #region Paint Methods

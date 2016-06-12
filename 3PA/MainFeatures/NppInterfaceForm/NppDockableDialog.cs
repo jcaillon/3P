@@ -83,21 +83,18 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
             Plug.OnNppWindowsMove += RefreshPosAndLoc;
         }
 
-        ~NppDockableDialog() {
-            _masterForm.VisibleChanged -= Cover_OnVisibleChanged;
-            _masterForm.Closed -= MasterFormOnClosed;
+        protected override void Dispose(bool disposing) {
+            try {
+                Plug.OnNppWindowsMove -= RefreshPosAndLoc;
 
-            _masterForm.ClientSizeChanged -= RefreshPosAndLoc;
-            _masterForm.LocationChanged -= RefreshPosAndLoc;
-            _masterForm.LostFocus -= RefreshPosLocContent;
-            _masterForm.GotFocus -= RefreshPosLocContent;
-
-            Plug.OnNppWindowsMove -= RefreshPosAndLoc;
-
-            if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
-                int value = 0;
-                WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
+                    int value = 0;
+                    WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                }
+            } catch (Exception e) {
+                // ignored
             }
+            base.Dispose(disposing);
         }
 
         #endregion

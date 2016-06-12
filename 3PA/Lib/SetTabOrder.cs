@@ -17,61 +17,30 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-using System;
 using System.Collections;
-using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Helper;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
     /// <summary>
-    /// Use like this :
-    /// (new SetTabOrder()).CopyAddingOrderToClipBoard(Utils.GetControlsOfType<YamuiScrollPage>(Appli.Form).FirstOrDefault());
+    /// This little class allows to remove and immedialty add all the direct children of a given scrollPanel.ContentPanel
+    /// Allowing to set the correct tab order for them
+    /// In Npp, the classic TabOrder is ignored for some reasons, what matters is the order in which the
+    /// control were added to their parent, hence this class...
     /// </summary>
-    internal class SetTabOrder {
+    internal static class SetTabOrder {
 
-        private int _curTabIndex;
-
-        private StringBuilder _result;
-
-        private YamuiScrollPage _page;
-
-        public void CopyAddingOrderToClipBoard(YamuiScrollPage scrollPage) {
-            _page = scrollPage;
-            _curTabIndex = 0;
-            _result = new StringBuilder();
-            GetTabOrder(scrollPage.ContentPanel);
-            if (_result.Length > 0) {
-                Clipboard.SetText(_result.ToString());
-                UserCommunication.Notify("Tab order copied to clipboard");
-            } else {
-                UserCommunication.Notify("Nothing!");
-            }
-        }
-
-        public void GetTabOrder(Control control) {
-            // Tab order isn't important enough to ever cause a crash, so replace any exceptions
-            // with assertions.
-            try {
-                _curTabIndex = 0;
-
-                ArrayList controlArraySorted = new ArrayList();
-                controlArraySorted.AddRange(control.Controls);
-                controlArraySorted.Sort(new TabSchemeComparer(TabOrderManager.TabScheme.AcrossFirst));
-
-                foreach (Control c in controlArraySorted) {
-                    c.TabIndex = _curTabIndex++;
-                    if (c.Controls.Count > 0) {
-                        //GetTabOrder(c);
-                    } else {
-                        _result.AppendLine("this." + _page.Name + ".ContentPanel.Controls.Add(this." + c.Name + ");");
-                    }
+        public static void RemoveAndAddForTabOrder(YamuiScrollPanel scrollPanel) {
+            ArrayList controlArraySorted = new ArrayList();
+            controlArraySorted.AddRange(scrollPanel.ContentPanel.Controls);
+            controlArraySorted.Sort(new TabSchemeComparer(TabOrderManager.TabScheme.AcrossFirst));
+            foreach (Control c in controlArraySorted) {
+                if (c.Controls.Count == 0) {
+                    scrollPanel.ContentPanel.Controls.Remove(c);
+                    scrollPanel.ContentPanel.Controls.Add(c);
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "TabOrder");
             }
         }
     }

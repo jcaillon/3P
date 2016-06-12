@@ -34,6 +34,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             InitializeComponent();
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
                 .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
+                .Replace("%YamuiFrameworkVersion%", LibLoader.YamuiFrameworkVersion)
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
             html.LinkClicked += HtmlOnLinkClicked;
@@ -43,7 +44,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
 
         private void HtmlOnLinkClicked(object sender, HtmlLinkClickedEventArgs htmlLinkClickedEventArgs) {
             if (htmlLinkClickedEventArgs.Link.Equals("update")) {
-                UpdateHandler.CheckForUpdates();
+                UpdateHandler.CheckForUpdate();
                 htmlLinkClickedEventArgs.Handled = true;
             }
         }

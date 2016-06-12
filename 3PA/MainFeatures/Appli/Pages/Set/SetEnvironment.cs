@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             InitializeComponent();
 
             // sets buttons behavior
-            foreach (var control in mainPanel.ContentPanel.Controls) {
+            foreach (var control in scrollPanel.ContentPanel.Controls) {
                 if (control is YamuiButtonImage) {
                     var x = (YamuiButtonImage)control;
                     if (x.Name.StartsWith("btleft")) {
@@ -148,6 +148,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             ToggleMode(ViewMode.Select);
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpSetEnv + @"'>How to set up a new environment?</a>";
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -255,57 +258,53 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // Fill combo boxes
             if (mode == ViewMode.Select) {
                 var envList = ProEnvironment.GetList;
-                try {
-                    // Fill combo box appli
-                    var appliList = envList.Select(environnement => environnement.Name).Distinct().ToList();
-                    if (appliList.Count > 0) {
-                        cbName.DataSource = appliList;
-                        var selectedIdx = appliList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Name));
-                        cbName.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                // Fill combo box appli
+                var appliList = envList.Select(environnement => environnement.Name).Distinct().ToList();
+                if (appliList.Count > 0) {
+                    cbName.DataSource = appliList;
+                    var selectedIdx = appliList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Name));
+                    cbName.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
 
-                        // Combo box env letter
-                        var envLetterList = envList.Where(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name)).Select(environnement => environnement.Suffix).ToList();
+                    // Combo box env letter
+                    var envLetterList = envList.Where(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name)).Select(environnement => environnement.Suffix).ToList();
 
-                        // empty database cb
-                        cbDatabase.DataSource = new List<string>();
+                    // empty database cb
+                    cbDatabase.DataSource = new List<string>();
 
-                        if (envLetterList.Count > 0) {
+                    if (envLetterList.Count > 0) {
 
-                            // hide the combo if there is only one item
-                            if (envLetterList.Count == 1) {
-                                cbSuffix.Hide();
-                            } else {
-                                cbSuffix.Show();
-                                cbSuffix.DataSource = envLetterList;
-                                selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Suffix));
-                                cbSuffix.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
-                            }
-
-                            // Combo box database
-                            var dic = envList.FirstOrDefault(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name) && environnement.Suffix.EqualsCi(ProEnvironment.Current.Suffix));
-                            if (dic != null) {
-                                var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
-                                if (databaseList.Count > 0) {
-                                    cbDatabase.DataSource = databaseList;
-                                    selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvDatabase));
-                                    cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
-                                }
-                            }
-                        } else {
+                        // hide the combo if there is only one item
+                        if (envLetterList.Count == 1) {
                             cbSuffix.Hide();
+                        } else {
+                            cbSuffix.Show();
+                            cbSuffix.DataSource = envLetterList;
+                            selectedIdx = envLetterList.FindIndex(str => str.EqualsCi(ProEnvironment.Current.Suffix));
+                            cbSuffix.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                        }
+
+                        // Combo box database
+                        var dic = envList.FirstOrDefault(environnement => environnement.Name.EqualsCi(ProEnvironment.Current.Name) && environnement.Suffix.EqualsCi(ProEnvironment.Current.Suffix));
+                        if (dic != null) {
+                            var databaseList = dic.DbConnectionInfo.Keys.ToList().OrderBy(s => s).ToList();
+                            if (databaseList.Count > 0) {
+                                cbDatabase.DataSource = databaseList;
+                                selectedIdx = databaseList.FindIndex(str => str.EqualsCi(Config.Instance.EnvDatabase));
+                                cbDatabase.SelectedIndex = selectedIdx >= 0 ? selectedIdx : 0;
+                            }
                         }
                     } else {
-                        // the user needs to add a new one
-                        btEnv2.UseCustomBackColor = true;
-                        btEnv2.BackColor = ThemeManager.Current.AccentColor;
+                        cbSuffix.Hide();
                     }
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error when filling comboboxes");
+                } else {
+                    // the user needs to add a new one
+                    btEnv2.UseCustomBackColor = true;
+                    btEnv2.BackColor = ThemeManager.Current.AccentColor;
                 }
             }
 
             // hide/show btleft
-            foreach (var control in mainPanel.ContentPanel.Controls) {
+            foreach (var control in scrollPanel.ContentPanel.Controls) {
                 if (control is YamuiButtonImage) {
                     var x = (YamuiButtonImage)control;
                     if (x.Name.StartsWith("btleft")) {
@@ -384,7 +383,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             // reset fields when adding a new env
             if (mode == ViewMode.AddNew) {
-                foreach (var control in mainPanel.ContentPanel.Controls) {
+                foreach (var control in scrollPanel.ContentPanel.Controls) {
                     if (control is YamuiTextBox)
                         ((YamuiTextBox)control).Text = string.Empty;
                 }
@@ -632,7 +631,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// false to disable all textboxes of the form, true to enable
         /// </summary>
         private void EnableAllTextBoxes(bool newStatus) {
-            foreach (var control in mainPanel.ContentPanel.Controls) {
+            foreach (var control in scrollPanel.ContentPanel.Controls) {
                 if (control is YamuiTextBox)
                     ((YamuiTextBox)control).Enabled = newStatus;
             }

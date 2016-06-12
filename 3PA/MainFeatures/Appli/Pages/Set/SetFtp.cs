@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using YamuiFramework.Controls;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFtp : YamuiPage {
@@ -37,7 +38,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(fl_remoteDir, "The directory on the FTP server on which you want to upload the compiled code");
             toolTip.SetToolTip(cb_info, "3P will automatically set the right option for you");
             toolTip.SetToolTip(fl_port, "TCP/IP connection port, default is 21 for standard FTP or explicit FTPS and 990 for implicit FTPS<br>Leave empty to use the default values");
-            
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion

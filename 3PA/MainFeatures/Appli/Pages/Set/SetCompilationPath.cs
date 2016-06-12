@@ -42,6 +42,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             bt_import.ButtonPressed += BtImportOnButtonPressed;
             bt_modify.ButtonPressed += BtModifyOnButtonPressed;
+
+            // dynamically reorder the controls for a correct tab order on notepad++
+            SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
 
         #endregion
@@ -55,19 +58,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #endregion
 
-
         #region private methods
 
         private void UpdateList() {
             // build the html
             html_list.Text = CompilationPath.BuildHtmlTable();
 
-            dockedPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
-            dockedPanel.OnResizedContentPanel();
+            scrollPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
+            scrollPanel.OnResizedContentPanel();
         }
 
         #endregion
-
 
         #region private event
 
