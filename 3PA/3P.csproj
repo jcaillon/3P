@@ -119,6 +119,11 @@
     <Compile Include="Html\MarkdownDeep\TableSpec.cs" />
     <Compile Include="Html\MarkdownDeep\Token.cs" />
     <Compile Include="Html\MarkdownDeep\Utils.cs" />
+    <Compile Include="Images\ImageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ImageResources.resx</DependentUpon>
+    </Compile>
     <Compile Include="Lib\3pUpdater\3PUpdater.cs" />
     <Compile Include="Lib\FolderSelectDialog.cs" />
     <Compile Include="Lib\Ftp\Common.cs" />
@@ -199,11 +204,6 @@
     <Compile Include="Tests\PlugDebug.cs" />
     <Compile Include="ThemeManager.cs" />
     <Content Include="Html\Pages\disclaimer.html" />
-    <Compile Include="Images\ImageResources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ImageResources.resx</DependentUpon>
-    </Compile>
     <Compile Include="Interop\CoreWindowsHook.cs" />
     <Compile Include="Lib\DocumentLines.cs" />
     <Compile Include="Interop\NotepadHelper.cs" />
@@ -430,23 +430,25 @@
     </Content>
     <Content Include="Html\Pages\home.html" />
     <Content Include="Html\StyleSheet.css" />
+    <Content Include="Images\Appli\Add.png" />
+    <Content Include="Images\Appli\Cancel.png" />
     <Content Include="Images\Appli\Configuration.png" />
+    <Content Include="Images\Appli\Copy.png" />
+    <Content Include="Images\Appli\Del.png" />
     <Content Include="Images\Appli\Delete.png" />
     <Content Include="Images\Appli\DownloadAll.png" />
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
-    <Content Include="Images\Appli\EditDb.png" />
+    <Content Include="Images\Appli\Edit.png" />
     <Content Include="Images\Appli\Export.png" />
     <Content Include="Images\Appli\Fetch.png" />
     <Content Include="Images\Appli\Help.png" />
     <Content Include="Images\Appli\Historic.png" />
     <Content Include="Images\Appli\Import.png" />
-    <Content Include="Images\Appli\MinusDb.png" />
     <Content Include="Images\Appli\NotSaved.png" />
     <Content Include="Images\Appli\Ok.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\OutDated.png" />
-    <Content Include="Images\Appli\PlusDb.png" />
     <Content Include="Images\Appli\Push.png" />
     <Content Include="Images\Appli\Report.png" />
     <Content Include="Images\Appli\Save.png" />

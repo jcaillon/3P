@@ -25,6 +25,7 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
@@ -50,6 +51,16 @@ namespace YamuiFramework.Controls {
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool AcceptsRightClick { get; set; }
+
+        [Category("Yamui")]
+        public Image BackGrndImage { get; set; }
+
+        /// <summary>
+        /// Set the image size to visualize in the designer mode
+        /// </summary>
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public Size SetImgSize { get; set; }
 
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
@@ -102,15 +113,9 @@ namespace YamuiFramework.Controls {
         }
 
         private void OnButtonPressed(EventArgs eventArgs) {
-            if (ButtonPressed != null) {
-                //Enabled = false;
-                //Invalidate();
-                try {
-                    ButtonPressed(this, eventArgs);
-                } finally {
-                    //Enabled = true;
-                }
-            }
+            // we could do something here, like preventing the user to click the button when the OnClick is being ran
+            if (ButtonPressed != null) 
+                ButtonPressed(this, eventArgs);
         }
 
         #endregion
@@ -157,6 +162,7 @@ namespace YamuiFramework.Controls {
             var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
             var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
 
+            // border?
             if (borderColor != Color.Transparent)
                 using (var p = new Pen(borderColor)) {
                     var borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
@@ -171,7 +177,36 @@ namespace YamuiFramework.Controls {
                 }
             }
 
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            // text + image
+            if (BackGrndImage != null || !SetImgSize.IsEmpty) {
+
+                // ReSharper disable once PossibleNullReferenceException
+                Size imgSize = !SetImgSize.IsEmpty ? SetImgSize : BackGrndImage.Size;
+                float gap = ((float) ClientRectangle.Height - imgSize.Height) / 2;
+                var rectImg = new RectangleF(gap, gap, imgSize.Width, imgSize.Height);
+
+                if (DesignMode || BackGrndImage == null) {
+                    // in design mode
+                    using (SolidBrush b = new SolidBrush(Color.Fuchsia))
+                        e.Graphics.FillRectangle(b, rectImg);
+                } else {
+                    // draw main image, in greyscale if not activated
+                    var img = BackGrndImage;
+                    if (img != null) {
+                        if (!Enabled)
+                            img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(imgSize.Width, imgSize.Height)));
+                        e.Graphics.DrawImage(img, rectImg);
+                    }
+                }
+
+                // text
+                int xPos = (int) (gap*2 + 0.5) + imgSize.Width;
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos, ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
+
+            } else {
+                // text only
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            }
         }
 
         #endregion

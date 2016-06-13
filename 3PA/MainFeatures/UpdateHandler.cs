@@ -301,7 +301,7 @@ namespace _3PA.MainFeatures {
         private static void OnDownloadFileCompleted(object sender, AsyncCompletedEventArgs asyncCompletedEventArgs) {
             try {
                 // Extract the .zip file
-                if (!Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
+                if (Utils.ExtractAll(Config.FileLatestReleaseZip, Config.FolderUpdate)) {
 
                     // check the presence of the plugin file
                     if (File.Exists(Config.FileDownloadedPlugin)) {

@@ -21,7 +21,6 @@ using System.Drawing;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Data;
 using _3PA.Images;
-using _3PA.Properties;
 
 namespace _3PA.Html {
 

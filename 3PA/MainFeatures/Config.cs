@@ -544,7 +544,8 @@ namespace _3PA.MainFeatures {
         /// Url to request to get info on the latest releases
         /// </summary>
         public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
-
+        //public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/battle-code/releases"; } }
+        
         /// <summary>
         /// Url to post logs
         /// </summary>

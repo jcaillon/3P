@@ -32,17 +32,6 @@ namespace YamuiFramework.Controls {
     public class YamuiButtonImage : YamuiButton {
        
         #region Fields
-        [Category("Yamui")]
-        public Image BackGrndImage { get; set; }
-
-        private bool _fakeDisabled;
-
-        [DefaultValue(false)]
-        [Category("Yamui")]
-        public bool FakeDisabled {
-            get { return _fakeDisabled; }
-            set { _fakeDisabled = value; Invalidate(); }
-        }
 
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -67,7 +56,7 @@ namespace YamuiFramework.Controls {
                 }
 
                 // draw main image, in greyscale if not activated
-                if (_fakeDisabled || !Enabled)
+                if (!Enabled)
                     img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
                 var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width) / 2, (ClientRectangle.Height - img.Height) / 2), new Size(img.Width, img.Height));
                 e.Graphics.DrawImage(img, recImg);

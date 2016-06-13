@@ -36,12 +36,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region fields
 
-        private const string ModifyStr = "Modify";
-        private const string AddNewStr = "Add new";
-
-        private const string SaveStr = "Save";
-        private const string CancelStr = "Cancel";
-
         private ViewMode _currentMode = ViewMode.Select;
 
         #endregion
@@ -88,7 +82,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbEdit, "Click to <b>edit</b> this database definition (name and .pf path)");
             toolTip.SetToolTip(btDbAdd, "Click to <b>add</b> a new database definition (name and .pf path)<br>for the current environment");
             toolTip.SetToolTip(btDbDelete, "Click to <b>delete</b> this database definition");
+            toolTip.SetToolTip(btDbCopy, "Click to <b>copy (duplicate)</b> this database definition");
             toolTip.SetToolTip(btDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
+            toolTip.SetToolTip(btDbSave, "Click to <b>save</b> your modifications");
+            toolTip.SetToolTip(btDbCancel, "Click to <b>cancel</b> your modifications");
 
             textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1</div>";
             toolTip.SetToolTip(flExtraPf, textTool);
@@ -117,33 +114,51 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             toolTip.SetToolTip(tgCompilLocl, "<b>TOGGLE ON</b> to move .r and .lst files to the source folder after the compilation<br>Or <b>TOGGLE OFF</b> to move .r and .lst files to the above distant folder after the compilation");
 
-            toolTip.SetToolTip(btEnv4del, "Click here to <b>delete</b> the current environment");
-
-            toolTip.SetToolTip(btSaveDb, "Click to <b>save</b> your modifications");
-            toolTip.SetToolTip(btCancelDb, "Click to <b>cancel</b> your modifications");
-
-            toolTip.SetToolTip(btEnv3dupli, "Click to <b>duplicate</b> the current environment");
+            toolTip.SetToolTip(btEdit, "Click to <b>modify</b> the information for the current environment");
+            toolTip.SetToolTip(btAdd, "Click to <b>add a new</b> environment<br>");
+            toolTip.SetToolTip(btDelete, "Click here to <b>delete</b> the current environment");
+            toolTip.SetToolTip(btCopy, "Click to <b>copy (duplicate)</b> the current environment");
+            toolTip.SetToolTip(btSave, "Click to <b>save</b> your modifications");
+            toolTip.SetToolTip(btCancel, "Click to <b>cancel</b> your modifications");
+               
 
             // buttons
-            btDbAdd.BackGrndImage = ImageResources.PlusDb;
-            btDbDelete.BackGrndImage = ImageResources.MinusDb;
-            btDbEdit.BackGrndImage = ImageResources.EditDb;
             btDeleteDownload.BackGrndImage = ImageResources.Delete;
             btConfFtp.BackGrndImage = ImageResources.Configuration;
+            
+            btAdd.BackGrndImage = ImageResources.Add;
+            btCancel.BackGrndImage = ImageResources.Cancel;
+            btSave.BackGrndImage = ImageResources.Save;
+            btEdit.BackGrndImage = ImageResources.Edit;
+            btCopy.BackGrndImage = ImageResources.Copy;
+            btDelete.BackGrndImage = ImageResources.Del;
 
-            btEnv1.ButtonPressed += Btcontrol2OnButtonPressed;
-            btEnv2.ButtonPressed += Btcontrol1ButtonPressed;
-            btEnv3dupli.ButtonPressed += BtduplicateOnButtonPressed;
+            btDbAdd.BackGrndImage = ImageResources.Add;
+            btDbCancel.BackGrndImage = ImageResources.Cancel;
+            btDbSave.BackGrndImage = ImageResources.Save;
+            btDbEdit.BackGrndImage = ImageResources.Edit;
+            btDbCopy.BackGrndImage = ImageResources.Copy;
+            btDbDelete.BackGrndImage = ImageResources.Del;
+            
+
+            btEdit.ButtonPressed += BtModifyOnButtonPressed;
+            btAdd.ButtonPressed += BtAddOnButtonPressed;
+            btCopy.ButtonPressed += BtduplicateOnButtonPressed;
+            btDelete.ButtonPressed += BtDeleteOnButtonPressed;
+            btSave.ButtonPressed += BtSaveOnButtonPressed;
+            btCancel.ButtonPressed += BtCancelOnButtonPressed;
+
+            btDbSave.ButtonPressed += BtDbSaveOnButtonPressed;
+            btDbCancel.ButtonPressed += BtDbCancelOnButtonPressed;
             btDbAdd.ButtonPressed += BtDbAddOnButtonPressed;
             btDbEdit.ButtonPressed += BtDbEditOnButtonPressed;
             btDbDelete.ButtonPressed += BtDbDeleteOnButtonPressed;
-            tgCompilLocl.ButtonPressed += TgCompilLoclOnCheckedChanged;
+            btDbCopy.ButtonPressed += BtDbCopyOnButtonPressed;
+            
             btDeleteDownload.ButtonPressed += BtDeleteDownloadOnButtonPressed;
-            btEnv4del.ButtonPressed += BtDeleteOnButtonPressed;
             btDownload.ButtonPressed += btDownload_Click;
 
-            btSaveDb.ButtonPressed += BtSaveDbOnButtonPressed;
-            btCancelDb.ButtonPressed += BtCancelDbOnButtonPressed;
+            tgCompilLocl.ButtonPressed += TgCompilLoclOnCheckedChanged;
 
             ToggleMode(ViewMode.Select);
 
@@ -298,8 +313,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     }
                 } else {
                     // the user needs to add a new one
-                    btEnv2.UseCustomBackColor = true;
-                    btEnv2.BackColor = ThemeManager.Current.AccentColor;
+                    btAdd.UseCustomBackColor = true;
+                    btAdd.BackColor = ThemeManager.Current.AccentColor;
                 }
             }
 
@@ -317,12 +332,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             var isAddOrEdit = (mode == ViewMode.AddNew || mode == ViewMode.Edit);
             var isDbAddOrEdit = (mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit);
 
+            // combo
+            cbName.Visible = !isAddOrEdit && !isDbAddOrEdit;
+            cbSuffix.Visible = !isAddOrEdit && !isDbAddOrEdit;
+            cbDatabase.Visible = !isAddOrEdit && !isDbAddOrEdit;
+
             // handle pf
             lbl_listdb.Visible = !isAddOrEdit;
             btleft1.Visible = !isAddOrEdit && isDbAddOrEdit;
             textbox1.Visible = !isAddOrEdit;
             btright1.Visible = !isAddOrEdit;
-            cbDatabase.Visible = !isAddOrEdit && !isDbAddOrEdit;
             flDatabase.Visible = !isAddOrEdit && isDbAddOrEdit;
 
             textbox1.Enabled = isDbAddOrEdit;
@@ -332,38 +351,26 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbAdd.Visible = (mode == ViewMode.Select);
             btDbEdit.Visible = (mode == ViewMode.Select);
             btDbDelete.Visible = (mode == ViewMode.Select);
+            btDbCopy.Visible = (mode == ViewMode.Select);
             btDownload.Visible = (mode == ViewMode.Select);
             btDeleteDownload.Visible = (mode == ViewMode.Select);
 
-            btSaveDb.Visible = isDbAddOrEdit;
-            btCancelDb.Visible = isDbAddOrEdit;
+            btDbSave.Visible = isDbAddOrEdit;
+            btDbCancel.Visible = isDbAddOrEdit;
 
             // buttons modify/new/duplicate/delete
-            btEnv1.Visible = !isDbAddOrEdit;
-            btEnv2.Visible = !isDbAddOrEdit;
-            btEnv4del.Visible = (mode == ViewMode.Select);
-            btEnv3dupli.Visible = (mode == ViewMode.Select);
-
-            // bottom buttons
-            if (mode == ViewMode.Select) {
-                btEnv1.Text = ModifyStr;
-                toolTip.SetToolTip(btEnv1, "Click to <b>modify</b> the information for the current environment");
-                btEnv2.Text = AddNewStr;
-                toolTip.SetToolTip(btEnv2, "Click to <b>add a new</b> environment<br>");
-            } else {
-                btEnv1.Text = SaveStr;
-                toolTip.SetToolTip(btEnv1, "Click to <b>save</b> your modifications");
-                btEnv2.Text = CancelStr;
-                toolTip.SetToolTip(btEnv2, "Click to <b>cancel</b> your modifications");
-            }
+            btEdit.Visible =  (mode == ViewMode.Select);
+            btAdd.Visible = (mode == ViewMode.Select);
+            btDelete.Visible = (mode == ViewMode.Select);
+            btCopy.Visible = (mode == ViewMode.Select);
+            btSave.Visible = isAddOrEdit;
+            btCancel.Visible = isAddOrEdit;
 
             // fill details
             flName.Text = ProEnvironment.Current.Name;
             flSuffix.Text = ProEnvironment.Current.Suffix;
             flLabel.Text = ProEnvironment.Current.Label;
-
             txLabel.Text = ProEnvironment.Current.Label;
-
             flExtraPf.Lines = ProEnvironment.Current.ExtraPf.Replace("\r\n", "\n").Split('\n');
             flExtraProPath.Lines = ProEnvironment.Current.ExtraProPath.Replace("\r\n", "\n").Split('\n');
             flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
@@ -376,6 +383,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
             textbox5.Text = ProEnvironment.Current.ProwinPath;
             textbox6.Text = ProEnvironment.Current.LogFilePath;
+
             tgCompilLocl.Checked = ProEnvironment.Current.CompileLocally;
 
             // update the download database button
@@ -390,15 +398,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 cbDatabase.DataSource = new List<string>();
             }
 
-            btEnv4del.Enabled = ProEnvironment.GetList.Count > 1;
+            btDelete.Enabled = ProEnvironment.GetList.Count > 1;
+            btDbDelete.Enabled = ProEnvironment.Current.DbConnectionInfo.Count >= 1;
 
             // blink when changing mode
             if (mode != _currentMode && mode != ViewMode.Select) {
-                BlinkButton(btEnv2, ThemeManager.Current.AccentColor);
-                BlinkButton(btEnv1, ThemeManager.Current.AccentColor);
-
-                BlinkButton(btSaveDb, ThemeManager.Current.AccentColor);
-                BlinkButton(btCancelDb, ThemeManager.Current.AccentColor);
+                BlinkButton(btSave, ThemeManager.Current.AccentColor);
+                BlinkButton(btCancel, ThemeManager.Current.AccentColor);
+                BlinkButton(btDbSave, ThemeManager.Current.AccentColor);
+                BlinkButton(btDbCancel, ThemeManager.Current.AccentColor);
             }
 
             cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
@@ -414,12 +422,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (DataBase.TryToLoadDatabaseInfo()) {
                 btDownload.BackGrndImage = ImageResources.DownloadDbOk;
                 btDeleteDownload.Enabled = true;
-                btDeleteDownload.FakeDisabled = false;
                 toolTip.SetToolTip(btDownload, "<i>The database information for this environment are available and in use in the auto-completion list</i><br><br>Click this button to <b>force a refresh of the database information</b> for this environment");
             } else {
                 btDownload.BackGrndImage = ImageResources.DownloadDbNok;
                 btDeleteDownload.Enabled = false;
-                btDeleteDownload.FakeDisabled = true;
                 toolTip.SetToolTip(btDownload, "<i>No information available for this database!</i><br><br>Click this button to <b>fetch the database information</b> for this environment,<br>they will be used in the auto-completion list to suggest database names,<br>table names and field names.<br><br>By default, the auto-completion list uses the last environment <br>selected where database info were available.");
             }
             btDownload.Invalidate();
@@ -429,47 +435,30 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region Events
 
+        #region misc
+
         private void btDownload_Click(object sender, EventArgs e) {
             // refresh the info after the extraction
             DataBase.FetchCurrentDbInfo(UpdateDownloadButton);
         }
+
         private void BtDeleteDownloadOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             DataBase.DeleteCurrentDbInfo();
             UpdateDownloadButton();
         }
 
-        /// <summary>
-        /// On change of compile locally
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="eventArgs"></param>
         private void TgCompilLoclOnCheckedChanged(object sender, EventArgs eventArgs) {
             ProEnvironment.Current.CompileLocally = tgCompilLocl.Checked;
             ProEnvironment.SaveList();
         }
 
+        #endregion
 
-        /// <summary>
-        ///  Click on "CANCEL" or "ADD NEW"
-        /// </summary>
-        private void Btcontrol1ButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            btEnv2.UseCustomBackColor = false;
-            if (_currentMode == ViewMode.Select) {
-                // Add new
-                ToggleMode(ViewMode.AddNew);
-            } else {
-                // cancel
-                ToggleMode(ViewMode.Select);
-            }
-        }
+        #region Env management
 
-        private void BtCancelDbOnButtonPressed(object sender, EventArgs eventArgs) {
-            ToggleMode(ViewMode.Select);
-        }
-
-        private void BtSaveDbOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (Save())
-                ToggleMode(ViewMode.Select);
+        private void BtAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            btAdd.UseCustomBackColor = false;
+            ToggleMode(ViewMode.AddNew);
         }
 
         private void BtduplicateOnButtonPressed(object sender, EventArgs eventArgs) {
@@ -478,18 +467,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             _currentMode = ViewMode.AddNew;
         }
 
-        /// <summary>
-        /// Click on "SAVE" or "MODIFY"
-        /// </summary>
-        private void Btcontrol2OnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (_currentMode == ViewMode.Select) {
-                // modify
-                ToggleMode(ViewMode.Edit);
-            } else {
-                // save
-                if(Save())
-                    ToggleMode(ViewMode.Select);
-            }
+        private void BtModifyOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
+            ToggleMode(ViewMode.Edit);
+        }
+
+        private void BtCancelOnButtonPressed(object sender, EventArgs eventArgs) {
+            ToggleMode(ViewMode.Select);
+        }
+
+        private void BtSaveOnButtonPressed(object sender, EventArgs eventArgs) {
+            if (Save())
+                ToggleMode(ViewMode.Select);
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -501,8 +489,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             }
         }
 
+        #endregion
+
+        #region db management
+
+        private void BtDbCancelOnButtonPressed(object sender, EventArgs eventArgs) {
+            ToggleMode(ViewMode.Select);
+        }
+
+        private void BtDbSaveOnButtonPressed(object sender, EventArgs eventArgs) {
+            if (Save())
+                ToggleMode(ViewMode.Select);
+        }
+
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
+            var answ = UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "No, Cancel"}, true);
             if (answ == 0) {
                 _currentMode = ViewMode.DbDelete;
                 if (Save())
@@ -517,6 +518,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void BtDbAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             ToggleMode(ViewMode.DbAddNew);
         }
+
+        private void BtDbCopyOnButtonPressed(object sender, EventArgs eventArgs) {
+            // duplicate
+            ToggleMode(ViewMode.DbEdit);
+            _currentMode = ViewMode.DbAddNew;
+        }
+
+        #endregion
 
 
         /// <summary>

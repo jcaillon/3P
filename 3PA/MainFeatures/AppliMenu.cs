@@ -166,11 +166,11 @@ namespace _3PA.MainFeatures {
             #region Environments
 
             // subscribe to env change event so the Env menu is always up to date
-            ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange += OnEnvironmentChange;
             _envMenu = new MenuItem(this, "Switch environment", ImageResources.Env, ShowEnvMenuAtCursor, "Switch_env", "Ctrl+E") {
                 Generic = true
             };
-            ProEnvironmentOnOnEnvironmentChange();
+            OnEnvironmentChange();
 
             #endregion
 
@@ -254,10 +254,12 @@ namespace _3PA.MainFeatures {
             if (Config.IsDevelopper) {
                 _mainMenuList.Add(
                     new MenuItem(this, "Tests", ImageResources.Tests, null, null, null, new List<MenuItem> {
-                        new MenuItem(this, "GetCurrentScrollPageAddOrder", ImageResources.TestTube, PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12") {Generic = true},
-                        new MenuItem(this, "Test", ImageResources.TestTube, PlugDebug.Test, "Test", "Ctrl+D") {Generic = true},
-                        new MenuItem(this, "DEBUG", ImageResources.TestTube, PlugDebug.StartDebug, "DEBUG", "Ctrl+F12") {Generic = true},
-                    }));
+                            new MenuItem(this, "GetCurrentScrollPageAddOrder", ImageResources.TestTube, PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12") {Generic = true},
+                            new MenuItem(this, "Test", ImageResources.TestTube, PlugDebug.Test, "Test", "Ctrl+D") {Generic = true},
+                            new MenuItem(this, "DEBUG", ImageResources.TestTube, PlugDebug.StartDebug, "DEBUG", "Ctrl+F12") {Generic = true},
+                        }) {
+                        Generic = true
+                    });
             }
 
             #endregion
@@ -265,18 +267,18 @@ namespace _3PA.MainFeatures {
         }
 
         public void Dispose() {
-            ProEnvironment.OnEnvironmentChange -= ProEnvironmentOnOnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange -= OnEnvironmentChange;
             UserCommunication.Notify("dipose");
         }
 
         #endregion
 
-        #region private
+        #region ProEnvironmentOnOnEnvironmentChange
 
         /// <summary>
         /// Called when an environement is modified/add or simply switched
         /// </summary>
-        private void ProEnvironmentOnOnEnvironmentChange() {
+        private void OnEnvironmentChange() {
             _envMenuList = new List<YamuiMenuItem>();
 
             foreach (var env in ProEnvironment.GetList) {

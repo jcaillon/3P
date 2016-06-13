@@ -83,6 +83,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Add {
+            get {
+                object obj = ResourceManager.GetObject("Add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Autocompletion {
             get {
                 object obj = ResourceManager.GetObject("Autocompletion", resourceCulture);
@@ -136,6 +146,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Buffer {
             get {
                 object obj = ResourceManager.GetObject("Buffer", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Cancel {
+            get {
+                object obj = ResourceManager.GetObject("Cancel", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -233,6 +253,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Copy {
+            get {
+                object obj = ResourceManager.GetObject("Copy", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap CreateWindowBlock {
             get {
                 object obj = ResourceManager.GetObject("CreateWindowBlock", resourceCulture);
@@ -256,6 +286,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap DefinitionBlock {
             get {
                 object obj = ResourceManager.GetObject("DefinitionBlock", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Del {
+            get {
+                object obj = ResourceManager.GetObject("Del", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -353,9 +393,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap EditDb {
+        internal static System.Drawing.Bitmap Edit {
             get {
-                object obj = ResourceManager.GetObject("EditDb", resourceCulture);
+                object obj = ResourceManager.GetObject("Edit", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -973,16 +1013,6 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap MinusDb {
-            get {
-                object obj = ResourceManager.GetObject("MinusDb", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap MissingDbName {
             get {
                 object obj = ResourceManager.GetObject("MissingDbName", resourceCulture);
@@ -1216,16 +1246,6 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Persistent {
             get {
                 object obj = ResourceManager.GetObject("Persistent", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        internal static System.Drawing.Bitmap PlusDb {
-            get {
-                object obj = ResourceManager.GetObject("PlusDb", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
