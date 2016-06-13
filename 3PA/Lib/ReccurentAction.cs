@@ -103,7 +103,7 @@ namespace _3PA.Lib {
                 try {
                     // increase number of already repeated action
                     _repeatCounter++;
-                    if (_repeatCounter >= _nbRepeat)
+                    if (_nbRepeat > 0 && _repeatCounter >= _nbRepeat)
                         Stop();
 
                     // new task, do the action

@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
@@ -37,6 +36,8 @@ namespace _3PA.MainFeatures {
         #region fields
 
         private static List<ConfLine> _list;
+
+        private static bool _silentUpdate;
 
         #endregion
 
@@ -133,11 +134,16 @@ namespace _3PA.MainFeatures {
             }
         }
 
+
         /// <summary>
-        /// Lors du startup de notepad++, on met à jour la conf avec le shared folder
+        /// Call this method to start checking for updates every xx min, also check once immediatly
         /// </summary>
-        public static void OnNotepadStart() {
-            Task.Factory.StartNew(() => { UpdateList(Config.Instance.SharedConfFolder); });
+        public static void StartCheckingForUpdates() {
+            // check for updates every now and then (15min)
+            // ReSharper disable once ObjectCreationAsStatement
+            new ReccurentAction(() => {
+                UpdateList(Config.Instance.SharedConfFolder);
+            }, 1000 * 60 * 15);
         }
 
         /// <summary>
@@ -214,11 +220,13 @@ namespace _3PA.MainFeatures {
 
                     // the line needs to be autoupdated
                     if (confLine.AutoUpdate && confLine.NeedUpdate && confLine.OnFetch != null) {
+                        _silentUpdate = true;
                         confLine.OnFetch(confLine);
                         confLine.LocalExists = true;
                         confLine.LocalTime = confLine.DistantTime;
                         confLine.LocalNbFiles = confLine.DistantNbFiles;
                         confLine.NeedUpdate = false;
+                        _silentUpdate = false;
 
                         if (updateMessage.Length == 0)
                             updateMessage.Append("The following configuration files have been updated from the shared folder:<br><br>");
@@ -256,7 +264,7 @@ namespace _3PA.MainFeatures {
 
         private static void DoFetch(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.DistantPath)) {
-                if (!_dontWarnFetch) {
+                if (!_dontWarnFetch && !_silentUpdate) {
                     var answ = UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> {"Yes, don't ask again", "Cancel", "Yes"}, true);
                     if (answ == 0)
                         _dontWarnFetch = true;

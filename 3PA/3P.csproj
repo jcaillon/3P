@@ -125,7 +125,6 @@
     <Compile Include="Lib\Ftp\DirectoryListParser.cs" />
     <Compile Include="Lib\Ftp\Exceptions.cs" />
     <Compile Include="Lib\Ftp\FileTransfert.cs" />
-    <Compile Include="Lib\Ftp\ftp.cs" />
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />

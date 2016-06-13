@@ -104,9 +104,13 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             btEnvList.BackGrndImage = ImageResources.Env;
             btEnvList.ButtonPressed += BtEnvListOnButtonPressed;
+            toolTipHtml.SetToolTip(btEnvList, "Click to <b>open a menu</b> that allows you to quickly select another environment");
 
             btEnvModify.BackGrndImage = ImageResources.ZoomIn;
             btEnvModify.ButtonPressed += BtEnvModifyOnButtonPressed;
+            toolTipHtml.SetToolTip(btEnvModify, "Click to go to see the details of the current environment");
+
+            toolTipHtml.SetToolTip(lblEnv, "Name of the currently selected environment");
 
             #endregion
 

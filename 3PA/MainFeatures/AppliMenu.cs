@@ -279,7 +279,6 @@ namespace _3PA.MainFeatures {
         private void ProEnvironmentOnOnEnvironmentChange() {
             _envMenuList = new List<YamuiMenuItem>();
 
-            string previousSuffix = null;
             foreach (var env in ProEnvironment.GetList) {
                 var name = env.Name;
                 var suffix = env.Suffix;
@@ -294,12 +293,14 @@ namespace _3PA.MainFeatures {
                         existingItem.Children.Add(newSub);
                     else {
                         // also add the first sub item..
-                        var previousSuffix1 = previousSuffix;
-                        existingItem.Children = new List<YamuiMenuItem> { new YamuiMenuItem {
-                            ItemName = previousSuffix,
-                            ItemImage = ImageResources.EnvSuffix,
-                            OnClic = () => ProEnvironment.SetCurrent(name, previousSuffix1, null)
-                        }, newSub};
+                        var firstItemSuffix = (string) existingItem.Data;
+                        existingItem.Children = new List<YamuiMenuItem> {
+                            new YamuiMenuItem {
+                                ItemName = firstItemSuffix ?? "",
+                                ItemImage = ImageResources.EnvSuffix,
+                                OnClic = () => ProEnvironment.SetCurrent(name, firstItemSuffix, null)
+                            },
+                            newSub };
                     }
                     existingItem.SubText = existingItem.Children.Count.ToString();
                 } else {
@@ -307,9 +308,9 @@ namespace _3PA.MainFeatures {
                     _envMenuList.Add(new YamuiMenuItem() {
                         ItemName = env.Name,
                         ItemImage = ImageResources.EnvName,
-                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null)
+                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null),
+                        Data = env.Suffix
                     });
-                    previousSuffix = env.Suffix;
                 }
             }
 

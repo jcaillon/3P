@@ -103,11 +103,12 @@ namespace YamuiFramework.Controls {
 
         private void OnButtonPressed(EventArgs eventArgs) {
             if (ButtonPressed != null) {
-                Enabled = false;
+                //Enabled = false;
+                //Invalidate();
                 try {
                     ButtonPressed(this, eventArgs);
                 } finally {
-                    Enabled = true;
+                    //Enabled = true;
                 }
             }
         }

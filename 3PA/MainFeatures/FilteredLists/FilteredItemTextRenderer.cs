@@ -79,7 +79,7 @@ namespace _3PA.MainFeatures.FilteredLists {
             Font f = Font;
 
             var rowObj = RowObject as FilteredItem;
-            if (rowObj != null) {
+            if (rowObj != null && rowObj.FilterMatchedRanges != null) {
                 foreach (CharacterRange range in rowObj.FilterMatchedRanges) {
                     // Measure the text that comes before our substring
                     Size precedingTextSize = Size.Empty;

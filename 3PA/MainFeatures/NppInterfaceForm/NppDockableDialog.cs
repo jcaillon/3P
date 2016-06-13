@@ -91,7 +91,7 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
                     int value = 0;
                     WinApi.DwmSetWindowAttribute(Owner.Handle, WinApi.DwmwaTransitionsForcedisabled, ref value, 4);
                 }
-            } catch (Exception e) {
+            } catch (Exception) {
                 // ignored
             }
             base.Dispose(disposing);

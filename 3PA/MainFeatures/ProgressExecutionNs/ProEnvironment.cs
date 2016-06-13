@@ -398,6 +398,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void Import() {
             _listOfEnv.Clear();
+            _currentEnv = null;
         }
 
         /// <summary>

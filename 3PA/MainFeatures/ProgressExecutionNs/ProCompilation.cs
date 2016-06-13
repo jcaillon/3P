@@ -202,7 +202,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 if (!compilationProcess.ProExecutionObject.Do(ExecutionType.Compile))
                     return false;
             }
-
             return true;
         }
 
@@ -398,6 +397,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         internal class CompilationProcess {
             public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
             public ProExecution ProExecutionObject;
+            public bool Started;
         }
 
         #endregion

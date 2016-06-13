@@ -85,11 +85,11 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string GlobalHelpFilePath = "";
 
-            [Display(Name = "Use Prowin in batch mode",
-                Description = "In order to avoid the prowin32 splash screen when compiling, you can start a Prowin process in<br>batch mode (-b option).<br>However, if you disabled the splash screen (by renaming the file<br>/dlc/bin/splashscreen.bmp for instance),<br>you can avoid having the prowin32 process creating a window in the taskbar<br>This is what 3P does if it has the rights to access your dlc folder, turn this option on and see if it works for you",
+            [Display(Name = "Never use Prowin in batch mode",
+                Description = "For performance considerations and in order to avoid the Progress splash screen,<br>3P starts the Prowin process for compilation in batch mode (-b option)<br>If you absolutely want to avoid having the Prowin process creating a window in the taskbar,<br>you can toggle on this option and the -b option will never be used<br><br><i>The batch mode is slighty faster than its counterpart!</i>",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public bool UseProwinInBatchMode = true;
+            public bool NeverUseProwinInBatchMode = false;
 
             [Display(Name = "Use default values in file info",
                 Description = "Set to true and the <b>default</b> option will be selected when you open a new file info,<br>set to false and the option <b>last values</b> will be selected",
@@ -433,7 +433,10 @@ namespace _3PA.MainFeatures {
             // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
 
-            // allows to delete the lib after an update to make sure we get the last lib
+            /// <summary>
+            /// allows to delete the lib after an update to make sure we get the last lib
+            /// dont use this for anything else!!!
+            /// </summary>
             public string PreviousStart3PVersion = "";
 
             // THEMES

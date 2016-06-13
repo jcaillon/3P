@@ -24,6 +24,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading;
 using _3PA.Data;
 using _3PA.Html;
 using _3PA.Lib;
@@ -131,6 +132,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
+        private static int _proExecutionCounter;
+
+        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
         #region constructors and destructor
 
         /// <summary>
@@ -155,6 +160,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public ProExecution() {
             // create a copy of the current environment
             ProEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
+
+            if (_lock.TryEnterWriteLock(-1)) {
+                _proExecutionCounter++;
+                _lock.ExitWriteLock();
+            } else {
+                throw new Exception("Couln't increase the execution counter...");
+            }
         }
 
         #endregion
@@ -193,9 +205,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             // create unique temporary folder
-            TempDir = Path.Combine(Config.FolderTemp, DateTime.Now.ToString("yyMMdd_HHmmssfff"));
-            while (Directory.Exists(TempDir))
-                TempDir += "_";
+            TempDir = Path.Combine(Config.FolderTemp, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
             if (!Utils.CreateDirectory(TempDir))
                 return false;
             
@@ -347,13 +357,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             File.WriteAllText(runnerPath, programContent.ToString(), Encoding.Default);
 
+            // preferably, we use the batch mode becauce it's faster than the client mode
+            var batchMode = (executionType == ExecutionType.CheckSyntax || executionType == ExecutionType.Compile || executionType == ExecutionType.Database);
 
-            var batchMode = Config.Instance.UseProwinInBatchMode && !(executionType == ExecutionType.Run || executionType == ExecutionType.Prolint || executionType == ExecutionType.Appbuilder || executionType == ExecutionType.Dictionary);
+            // no batch mode option?
+            batchMode = batchMode && !Config.Instance.NeverUseProwinInBatchMode;
+
+            // multiple compilation, we don't want to show all those Prowin in the task bar...
+            batchMode = batchMode && (ListToCompile.Count <= 1);
 
             // Parameters
             StringBuilder Params = new StringBuilder();
             
-            //Params.Append(" -T " + Path.GetTempPath().Trim('\\').ProgressQuoter());
+            if (executionType == ExecutionType.Prolint)
+                Params.Append(" -T " + TempDir.Trim('\\').ProgressQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
                 Params.Append(" -ini " + baseIniPath.ProgressQuoter());
             if (batchMode)
@@ -362,7 +379,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (!string.IsNullOrWhiteSpace(ProEnv.CmdLineParameters))
                 Params.Append(" " + ProEnv.CmdLineParameters.Trim());
             ExeParameters = Params.ToString();
-
 
             // we supress the splashscreen
             if (!batchMode)
@@ -383,7 +399,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 EnableRaisingEvents = true
             };
             Process.Exited += ProcessOnExited;
-
             try {
                 Process.Start();
             } catch (Exception e) {

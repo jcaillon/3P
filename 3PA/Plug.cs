@@ -171,7 +171,7 @@ namespace _3PA {
             }
 
             // Try to update the configuration from the distant shared folder
-            ShareExportConf.OnNotepadStart();
+            ShareExportConf.StartCheckingForUpdates();
 
             // everything else can be async
             //Task.Factory.StartNew(() => {

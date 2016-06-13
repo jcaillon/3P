@@ -449,6 +449,11 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public string SubText { get; set; }
 
+        /// <summary>
+        /// You can use this field to store any piece of info on this menu item
+        /// </summary>
+        public object Data { get; set; }
+
         private Action _do;
 
         /// <summary>

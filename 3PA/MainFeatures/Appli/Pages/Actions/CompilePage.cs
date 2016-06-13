@@ -128,6 +128,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #region Build the report
 
         private void BuildReport() {
+
             StringBuilder currentReport = new StringBuilder();
 
             currentReport.Append(@"<h2>Results :</h2>");
@@ -458,7 +459,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     // Activate scrollbars if needed
                     scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
-
+                    Height = lbl_report.Location.Y + lbl_report.Height + 20;
                 });
             }
         }

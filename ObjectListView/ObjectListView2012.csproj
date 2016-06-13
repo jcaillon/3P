@@ -91,9 +91,7 @@
     </Compile>
     <Compile Include="Rendering\Adornments.cs" />
     <Compile Include="Implementation\Attributes.cs" />
-    <Compile Include="CellEditing\CellEditors.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="CellEditing\CellEditors.cs" />
     <Compile Include="CellEditing\EditorRegistry.cs" />
     <Compile Include="DataListView.cs">
       <SubType>Component</SubType>
