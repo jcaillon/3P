@@ -66,14 +66,6 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                // draw background
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormBack)) {
-                    e.Graphics.FillRectangle(b, ClientRectangle);
-                }
-
-                if (ToggleSize == 0)
-                    ToggleSize = string.IsNullOrEmpty(Text) ? Width : 30;
-
                 Color textColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, IsFocused, IsHovered, IsPressed, Enabled);
                 Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, IsFocused, IsHovered, Checked, Enabled);
                 Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
@@ -81,8 +73,26 @@ namespace YamuiFramework.Controls {
                 if (unfilledColor == YamuiThemeManager.Current.FormBack) unfilledColor = borderColor;
                 Color fillColor = Checked ? YamuiThemeManager.Current.AccentColor : unfilledColor;
 
+                if (ToggleSize == 0)
+                    ToggleSize = string.IsNullOrEmpty(Text) ? Width : 30;
+
                 Rectangle textRect = new Rectangle(ToggleSize + 3, 0, Width - 42, Height);
                 Rectangle backRect = new Rectangle(0, 0, ToggleSize, Height);
+
+                // background
+                var backColor = YamuiThemeManager.Current.FormBack;
+                if (!string.IsNullOrEmpty(Text)) {
+                    PaintTransparentBackground(e.Graphics, DisplayRectangle);
+                    if (backColor != Color.Transparent)
+                        using (SolidBrush b = new SolidBrush(backColor)) {
+                            e.Graphics.FillRectangle(b, backRect);
+                        }
+                } else {
+                    if (backColor != Color.Transparent)
+                        e.Graphics.Clear(backColor);
+                    else
+                        PaintTransparentBackground(e.Graphics, DisplayRectangle);
+                }
 
                 // draw the back
                 e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
@@ -107,6 +117,8 @@ namespace YamuiFramework.Controls {
                 }
                 e.Graphics.SmoothingMode = SmoothingMode.Default;
 
+
+                // text?
                 if (!string.IsNullOrEmpty(Text))
                     TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, textColor, FontManager.GetTextFormatFlags(TextAlign));
             } catch {

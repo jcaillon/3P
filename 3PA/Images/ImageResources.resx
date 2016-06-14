@@ -454,9 +454,6 @@
   <data name="Delete" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\delete.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="Update26x26" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>html\update26x26.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="TempTableUsed" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\type\temptableused.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -580,9 +577,6 @@
   <data name="Dictionary" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>menu\dictionary.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="bg_hellokitty" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>backgrounds\bg_hellokitty.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="bg_darkmaul" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>backgrounds\bg_darkmaul.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -630,5 +624,11 @@
   </data>
   <data name="Cancel" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>appli\cancel.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="bg_hellokitty" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>backgrounds\bg_hellokitty.jpg;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ViewFile" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\viewfile.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

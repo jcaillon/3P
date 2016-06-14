@@ -68,6 +68,9 @@
     <Compile Include="Animations\Transitions\TransitionType_ThrowAndCatch.cs" />
     <Compile Include="Animations\Transitions\TransitionType_UserDefined.cs" />
     <Compile Include="Animations\Transitions\Utility.cs" />
+    <Compile Include="Controls\YamuiArea.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>

@@ -43,10 +43,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // yamuiScrollPage1
+            // scrollPanel
             // 
             // 
-            // yamuiScrollPage1.ContentPanel
+            // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
             this.scrollPanel.ContentPanel.Controls.Add(this.tg_override);
@@ -82,10 +82,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // tg_override
             // 
+            this.tg_override.BackGrndImage = null;
             this.tg_override.Checked = false;
             this.tg_override.Location = new System.Drawing.Point(25, 307);
             this.tg_override.Name = "tg_override";
-            this.tg_override.Size = new System.Drawing.Size(692, 16);
+            this.tg_override.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tg_override.Size = new System.Drawing.Size(590, 16);
             this.tg_override.TabIndex = 64;
             this.tg_override.Text = "Let 3P override notepad++ themes";
             this.tg_override.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -93,10 +95,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // tg_colorOn
             // 
+            this.tg_colorOn.BackGrndImage = null;
             this.tg_colorOn.Checked = false;
             this.tg_colorOn.Location = new System.Drawing.Point(25, 251);
             this.tg_colorOn.Name = "tg_colorOn";
-            this.tg_colorOn.Size = new System.Drawing.Size(692, 16);
+            this.tg_colorOn.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tg_colorOn.Size = new System.Drawing.Size(590, 16);
             this.tg_colorOn.TabIndex = 63;
             this.tg_colorOn.Text = "I\'m using my own User Defined Language";
             this.tg_colorOn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -155,7 +159,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.cbApplication.Size = new System.Drawing.Size(180, 21);
             this.cbApplication.TabIndex = 19;
             // 
-            // PanelAccentColor
+            // _simplePanelAccentColor
             // 
             this._simplePanelAccentColor.Location = new System.Drawing.Point(25, 104);
             this._simplePanelAccentColor.Margin = new System.Windows.Forms.Padding(0);

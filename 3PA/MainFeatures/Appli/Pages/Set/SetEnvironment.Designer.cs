@@ -29,6 +29,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.btDbView = new YamuiFramework.Controls.YamuiButton();
+            this.btDbDeleteDownload = new YamuiFramework.Controls.YamuiButton();
+            this.btDbDownload = new YamuiFramework.Controls.YamuiButton();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
@@ -43,8 +46,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft1 = new YamuiFramework.Controls.YamuiButtonImage();
             this.textbox1 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright1 = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btDeleteDownload = new YamuiFramework.Controls.YamuiButtonImage();
-            this.btDownload = new YamuiFramework.Controls.YamuiButtonImage();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlLabel8 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.flExtraPf = new YamuiFramework.Controls.YamuiTextBox();
@@ -62,8 +63,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright4 = new YamuiFramework.Controls.YamuiButtonImage();
             this.btConfFtp = new YamuiFramework.Controls.YamuiButtonImage();
-            this.tgCompilLocl = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.yamuiToggle1 = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.tgCompilLoc = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.tgWithLst = new YamuiFramework.Controls.YamuiButtonToggle();
             this.tgftp = new YamuiFramework.Controls.YamuiButtonToggle();
             this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
@@ -79,18 +80,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright6 = new YamuiFramework.Controls.YamuiButtonImage();
             this.btDelete = new YamuiFramework.Controls.YamuiButton();
-            this.btCancel = new YamuiFramework.Controls.YamuiButton();
-            this.btSave = new YamuiFramework.Controls.YamuiButton();
             this.flName = new YamuiFramework.Controls.YamuiTextBox();
-            this.btDbCancel = new YamuiFramework.Controls.YamuiButton();
-            this.btDbSave = new YamuiFramework.Controls.YamuiButton();
             this.btEdit = new YamuiFramework.Controls.YamuiButton();
             this.btAdd = new YamuiFramework.Controls.YamuiButton();
             this.btCopy = new YamuiFramework.Controls.YamuiButton();
             this.btDbEdit = new YamuiFramework.Controls.YamuiButton();
             this.btDbAdd = new YamuiFramework.Controls.YamuiButton();
-            this.btDbCopy = new YamuiFramework.Controls.YamuiButton();
             this.btDbDelete = new YamuiFramework.Controls.YamuiButton();
+            this.btSave = new YamuiFramework.Controls.YamuiButton();
+            this.btCancel = new YamuiFramework.Controls.YamuiButton();
+            this.btDbCancel = new YamuiFramework.Controls.YamuiButton();
+            this.btDbSave = new YamuiFramework.Controls.YamuiButton();
+            this.areaEnv = new YamuiFramework.Controls.YamuiArea();
+            this.areaPf = new YamuiFramework.Controls.YamuiArea();
+            this.areaDb = new YamuiFramework.Controls.YamuiArea();
+            this.areaSelection = new YamuiFramework.Controls.YamuiArea();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -112,10 +116,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.btDbView);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btDbDeleteDownload);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btDbDownload);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
             this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbSuffix);
-            this.scrollPanel.ContentPanel.Controls.Add(this.cbName);
             this.scrollPanel.ContentPanel.Controls.Add(this.flSuffix);
             this.scrollPanel.ContentPanel.Controls.Add(this.flLabel);
             this.scrollPanel.ContentPanel.Controls.Add(this.txLabel);
@@ -126,8 +131,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.btleft1);
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox1);
             this.scrollPanel.ContentPanel.Controls.Add(this.btright1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDeleteDownload);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDownload);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel8);
             this.scrollPanel.ContentPanel.Controls.Add(this.flExtraPf);
@@ -145,8 +148,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox4);
             this.scrollPanel.ContentPanel.Controls.Add(this.btright4);
             this.scrollPanel.ContentPanel.Controls.Add(this.btConfFtp);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompilLocl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiToggle1);
+            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompilLoc);
+            this.scrollPanel.ContentPanel.Controls.Add(this.tgWithLst);
             this.scrollPanel.ContentPanel.Controls.Add(this.tgftp);
             this.scrollPanel.ContentPanel.Controls.Add(this.lblLocally);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel5);
@@ -163,17 +166,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.btright6);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDelete);
             this.scrollPanel.ContentPanel.Controls.Add(this.flName);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbCancel);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbSave);
             this.scrollPanel.ContentPanel.Controls.Add(this.btEdit);
             this.scrollPanel.ContentPanel.Controls.Add(this.btAdd);
             this.scrollPanel.ContentPanel.Controls.Add(this.btCopy);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDbEdit);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDbAdd);
-            this.scrollPanel.ContentPanel.Controls.Add(this.btDbCopy);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDbDelete);
             this.scrollPanel.ContentPanel.Controls.Add(this.btSave);
             this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btDbCancel);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btDbSave);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaEnv);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaPf);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaDb);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaSelection);
+            this.scrollPanel.ContentPanel.Controls.Add(this.cbSuffix);
+            this.scrollPanel.ContentPanel.Controls.Add(this.cbName);
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
@@ -184,6 +192,42 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Name = "scrollPanel";
             this.scrollPanel.Size = new System.Drawing.Size(720, 550);
             this.scrollPanel.TabIndex = 0;
+            // 
+            // btDbView
+            // 
+            this.btDbView.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btDbView.BackGrndImage = null;
+            this.btDbView.Location = new System.Drawing.Point(632, 145);
+            this.btDbView.Name = "btDbView";
+            this.btDbView.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btDbView.Size = new System.Drawing.Size(59, 24);
+            this.btDbView.TabIndex = 164;
+            this.btDbView.Text = "View";
+            this.btDbView.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btDbDeleteDownload
+            // 
+            this.btDbDeleteDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btDbDeleteDownload.BackGrndImage = null;
+            this.btDbDeleteDownload.Location = new System.Drawing.Point(557, 145);
+            this.btDbDeleteDownload.Name = "btDbDeleteDownload";
+            this.btDbDeleteDownload.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btDbDeleteDownload.Size = new System.Drawing.Size(69, 24);
+            this.btDbDeleteDownload.TabIndex = 163;
+            this.btDbDeleteDownload.Text = "Delete";
+            this.btDbDeleteDownload.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btDbDownload
+            // 
+            this.btDbDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btDbDownload.BackGrndImage = null;
+            this.btDbDownload.Location = new System.Drawing.Point(499, 145);
+            this.btDbDownload.Name = "btDbDownload";
+            this.btDbDownload.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btDbDownload.Size = new System.Drawing.Size(52, 24);
+            this.btDbDownload.TabIndex = 162;
+            this.btDbDownload.Text = "Get";
+            this.btDbDownload.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // yamuiLabel1
             // 
@@ -233,7 +277,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flSuffix.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flSuffix.Location = new System.Drawing.Point(173, 27);
             this.flSuffix.Name = "flSuffix";
-            this.flSuffix.Size = new System.Drawing.Size(105, 21);
+            this.flSuffix.Size = new System.Drawing.Size(133, 21);
             this.flSuffix.TabIndex = 135;
             this.flSuffix.WaterMark = "Suffix";
             // 
@@ -357,45 +401,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright1.TabStop = false;
             this.btright1.Text = "yamuiImageButton9";
             // 
-            // btDeleteDownload
-            // 
-            this.btDeleteDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btDeleteDownload.BackColor = System.Drawing.Color.Transparent;
-            this.btDeleteDownload.BackGrndImage = null;
-            this.btDeleteDownload.Location = new System.Drawing.Point(651, 148);
-            this.btDeleteDownload.Margin = new System.Windows.Forms.Padding(0);
-            this.btDeleteDownload.Name = "btDeleteDownload";
-            this.btDeleteDownload.SetImgSize = new System.Drawing.Size(0, 0);
-            this.btDeleteDownload.Size = new System.Drawing.Size(20, 20);
-            this.btDeleteDownload.TabIndex = 120;
-            this.btDeleteDownload.TabStop = false;
-            this.btDeleteDownload.Text = "yamuiImageButtonDB";
-            // 
-            // btDownload
-            // 
-            this.btDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btDownload.BackColor = System.Drawing.Color.Transparent;
-            this.btDownload.BackGrndImage = null;
-            this.btDownload.Location = new System.Drawing.Point(671, 148);
-            this.btDownload.Margin = new System.Windows.Forms.Padding(0);
-            this.btDownload.Name = "btDownload";
-            this.btDownload.SetImgSize = new System.Drawing.Size(0, 0);
-            this.btDownload.Size = new System.Drawing.Size(20, 20);
-            this.btDownload.TabIndex = 109;
-            this.btDownload.TabStop = false;
-            this.btDownload.Text = "yamuiImageButtonDB";
-            // 
             // yamuiLabel3
             // 
             this.yamuiLabel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel3.AutoSize = true;
             this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel3.Location = new System.Drawing.Point(540, 152);
+            this.yamuiLabel3.Location = new System.Drawing.Point(430, 151);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel3.Name = "yamuiLabel3";
-            this.yamuiLabel3.Size = new System.Drawing.Size(108, 12);
+            this.yamuiLabel3.Size = new System.Drawing.Size(64, 12);
             this.yamuiLabel3.TabIndex = 152;
-            this.yamuiLabel3.Text = "Get database structure :";
+            this.yamuiLabel3.Text = "DB structure :";
             this.yamuiLabel3.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // htmlLabel8
@@ -405,7 +421,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel8.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel8.BaseStylesheet = null;
             this.htmlLabel8.IsSelectionEnabled = false;
-            this.htmlLabel8.Location = new System.Drawing.Point(30, 172);
+            this.htmlLabel8.Location = new System.Drawing.Point(30, 173);
             this.htmlLabel8.Name = "htmlLabel8";
             this.htmlLabel8.Size = new System.Drawing.Size(154, 60);
             this.htmlLabel8.TabIndex = 142;
@@ -639,27 +655,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btConfFtp.Tag = "dir";
             this.btConfFtp.Text = "yamuiImageButton5";
             // 
-            // tgCompilLocl
+            // tgCompilLoc
             // 
-            this.tgCompilLocl.BackGrndImage = null;
-            this.tgCompilLocl.Checked = false;
-            this.tgCompilLocl.Location = new System.Drawing.Point(293, 373);
-            this.tgCompilLocl.Name = "tgCompilLocl";
-            this.tgCompilLocl.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompilLocl.Size = new System.Drawing.Size(30, 16);
-            this.tgCompilLocl.TabIndex = 137;
-            this.tgCompilLocl.ToggleSize = 30;
+            this.tgCompilLoc.BackGrndImage = null;
+            this.tgCompilLoc.Checked = false;
+            this.tgCompilLoc.Location = new System.Drawing.Point(293, 373);
+            this.tgCompilLoc.Name = "tgCompilLoc";
+            this.tgCompilLoc.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tgCompilLoc.Size = new System.Drawing.Size(30, 16);
+            this.tgCompilLoc.TabIndex = 137;
+            this.tgCompilLoc.ToggleSize = 30;
             // 
-            // yamuiToggle1
+            // tgWithLst
             // 
-            this.yamuiToggle1.BackGrndImage = null;
-            this.yamuiToggle1.Checked = false;
-            this.yamuiToggle1.Location = new System.Drawing.Point(456, 373);
-            this.yamuiToggle1.Name = "yamuiToggle1";
-            this.yamuiToggle1.SetImgSize = new System.Drawing.Size(0, 0);
-            this.yamuiToggle1.Size = new System.Drawing.Size(30, 16);
-            this.yamuiToggle1.TabIndex = 155;
-            this.yamuiToggle1.ToggleSize = 30;
+            this.tgWithLst.BackGrndImage = null;
+            this.tgWithLst.Checked = false;
+            this.tgWithLst.Location = new System.Drawing.Point(456, 373);
+            this.tgWithLst.Name = "tgWithLst";
+            this.tgWithLst.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tgWithLst.Size = new System.Drawing.Size(30, 16);
+            this.tgWithLst.TabIndex = 155;
+            this.tgWithLst.ToggleSize = 30;
             // 
             // tgftp
             // 
@@ -842,6 +858,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // btright6
             // 
+            this.btright6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
             this.btright6.Location = new System.Drawing.Point(694, 454);
@@ -857,37 +874,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btDelete.BackGrndImage = null;
-            this.btDelete.Location = new System.Drawing.Point(396, 480);
+            this.btDelete.Location = new System.Drawing.Point(394, 480);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDelete.Size = new System.Drawing.Size(70, 24);
             this.btDelete.TabIndex = 121;
             this.btDelete.Text = "Delete";
             this.btDelete.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btCancel
-            // 
-            this.btCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btCancel.BackGrndImage = null;
-            this.btCancel.Location = new System.Drawing.Point(261, 480);
-            this.btCancel.Name = "btCancel";
-            this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btCancel.Size = new System.Drawing.Size(71, 24);
-            this.btCancel.TabIndex = 159;
-            this.btCancel.Text = "Cancel";
-            this.btCancel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btSave
-            // 
-            this.btSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btSave.BackGrndImage = null;
-            this.btSave.Location = new System.Drawing.Point(193, 480);
-            this.btSave.Name = "btSave";
-            this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btSave.Size = new System.Drawing.Size(62, 24);
-            this.btSave.TabIndex = 160;
-            this.btSave.Text = "Save";
-            this.btSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // flName
             // 
@@ -902,28 +895,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flName.Size = new System.Drawing.Size(137, 21);
             this.flName.TabIndex = 136;
             this.flName.WaterMark = "Application name";
-            // 
-            // btDbCancel
-            // 
-            this.btDbCancel.BackGrndImage = null;
-            this.btDbCancel.Location = new System.Drawing.Point(261, 145);
-            this.btDbCancel.Name = "btDbCancel";
-            this.btDbCancel.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btDbCancel.Size = new System.Drawing.Size(71, 24);
-            this.btDbCancel.TabIndex = 143;
-            this.btDbCancel.Text = "Cancel";
-            this.btDbCancel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // btDbSave
-            // 
-            this.btDbSave.BackGrndImage = null;
-            this.btDbSave.Location = new System.Drawing.Point(193, 145);
-            this.btDbSave.Name = "btDbSave";
-            this.btDbSave.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btDbSave.Size = new System.Drawing.Size(62, 24);
-            this.btDbSave.TabIndex = 144;
-            this.btDbSave.Text = "Save";
-            this.btDbSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // btEdit
             // 
@@ -949,7 +920,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btAdd.Text = "Add";
             this.btAdd.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // btDupli
+            // btCopy
             // 
             this.btCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btCopy.BackGrndImage = null;
@@ -983,28 +954,114 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDbAdd.Text = "Add";
             this.btDbAdd.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
-            // btDbDupli
-            // 
-            this.btDbCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.btDbCopy.BackGrndImage = null;
-            this.btDbCopy.Location = new System.Drawing.Point(321, 145);
-            this.btDbCopy.Name = "btDbCopy";
-            this.btDbCopy.SetImgSize = new System.Drawing.Size(20, 20);
-            this.btDbCopy.Size = new System.Drawing.Size(67, 24);
-            this.btDbCopy.TabIndex = 161;
-            this.btDbCopy.Text = "Copy";
-            this.btDbCopy.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
             // btDbDelete
             // 
             this.btDbDelete.BackGrndImage = null;
-            this.btDbDelete.Location = new System.Drawing.Point(394, 145);
+            this.btDbDelete.Location = new System.Drawing.Point(321, 145);
             this.btDbDelete.Name = "btDbDelete";
             this.btDbDelete.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDbDelete.Size = new System.Drawing.Size(70, 24);
             this.btDbDelete.TabIndex = 156;
             this.btDbDelete.Text = "Delete";
             this.btDbDelete.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btSave
+            // 
+            this.btSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btSave.BackGrndImage = null;
+            this.btSave.Location = new System.Drawing.Point(193, 480);
+            this.btSave.Name = "btSave";
+            this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btSave.Size = new System.Drawing.Size(62, 24);
+            this.btSave.TabIndex = 160;
+            this.btSave.Text = "Save";
+            this.btSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btCancel
+            // 
+            this.btCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btCancel.BackGrndImage = null;
+            this.btCancel.Location = new System.Drawing.Point(261, 480);
+            this.btCancel.Name = "btCancel";
+            this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btCancel.Size = new System.Drawing.Size(71, 24);
+            this.btCancel.TabIndex = 159;
+            this.btCancel.Text = "Cancel";
+            this.btCancel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btDbCancel
+            // 
+            this.btDbCancel.BackGrndImage = null;
+            this.btDbCancel.Location = new System.Drawing.Point(261, 145);
+            this.btDbCancel.Name = "btDbCancel";
+            this.btDbCancel.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btDbCancel.Size = new System.Drawing.Size(71, 24);
+            this.btDbCancel.TabIndex = 143;
+            this.btDbCancel.Text = "Cancel";
+            this.btDbCancel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // btDbSave
+            // 
+            this.btDbSave.BackGrndImage = null;
+            this.btDbSave.Location = new System.Drawing.Point(193, 145);
+            this.btDbSave.Name = "btDbSave";
+            this.btDbSave.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btDbSave.Size = new System.Drawing.Size(62, 24);
+            this.btDbSave.TabIndex = 144;
+            this.btDbSave.Text = "Save";
+            this.btDbSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            // 
+            // areaEnv
+            // 
+            this.areaEnv.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.areaEnv.BackColor = System.Drawing.Color.Yellow;
+            this.areaEnv.Enabled = false;
+            this.areaEnv.Location = new System.Drawing.Point(3, 171);
+            this.areaEnv.Name = "areaEnv";
+            this.areaEnv.Size = new System.Drawing.Size(717, 298);
+            this.areaEnv.TabIndex = 165;
+            this.areaEnv.Visible = false;
+            // 
+            // areaPf
+            // 
+            this.areaPf.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.areaPf.BackColor = System.Drawing.Color.Aqua;
+            this.areaPf.Enabled = false;
+            this.areaPf.Location = new System.Drawing.Point(2, 95);
+            this.areaPf.Name = "areaPf";
+            this.areaPf.Size = new System.Drawing.Size(718, 43);
+            this.areaPf.TabIndex = 166;
+            this.areaPf.Visible = false;
+            // 
+            // areaDb
+            // 
+            this.areaDb.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.areaDb.BackColor = System.Drawing.Color.Lime;
+            this.areaDb.Enabled = false;
+            this.areaDb.Location = new System.Drawing.Point(421, 144);
+            this.areaDb.Name = "areaDb";
+            this.areaDb.Size = new System.Drawing.Size(277, 24);
+            this.areaDb.TabIndex = 167;
+            this.areaDb.Visible = false;
+            // 
+            // areaSelection
+            // 
+            this.areaSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.areaSelection.BackColor = System.Drawing.Color.Red;
+            this.areaSelection.Enabled = false;
+            this.areaSelection.Location = new System.Drawing.Point(3, 20);
+            this.areaSelection.Name = "areaSelection";
+            this.areaSelection.Size = new System.Drawing.Size(717, 38);
+            this.areaSelection.TabIndex = 168;
+            this.areaSelection.Visible = false;
             // 
             // SetEnvironment
             // 
@@ -1035,15 +1092,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiTextBox textbox1;
         private YamuiTextBox flExtraPf;
         private YamuiTextBox textbox2;
-        private YamuiButtonToggle tgCompilLocl;
+        private YamuiButtonToggle tgCompilLoc;
         private YamuiTextBox flExtraProPath;
         private YamuiTextBox textbox3;
         private YamuiTextBox textbox4;
         private YamuiTextBox textbox5;
         private YamuiTextBox flCmdLine;
         private YamuiTextBox textbox6;
-        private YamuiButtonImage btDeleteDownload;
-        private YamuiButtonImage btDownload;
         private HtmlLabel txLabel;
         private YamuiButtonImage btright6;
         private YamuiButtonImage btleft6;
@@ -1077,7 +1132,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButtonImage btConfFtp;
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel5;
-        private YamuiButtonToggle yamuiToggle1;
+        private YamuiButtonToggle tgWithLst;
         private YamuiButton btDbDelete;
         private YamuiButton btDbAdd;
         private YamuiButton btDbEdit;
@@ -1085,6 +1140,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButton btCancel;
         private YamuiButton btEdit;
         private YamuiButton btAdd;
-        private YamuiButton btDbCopy;
+        private YamuiButton btDbView;
+        private YamuiButton btDbDeleteDownload;
+        private YamuiButton btDbDownload;
+        private YamuiArea areaEnv;
+        private YamuiArea areaPf;
+        private YamuiArea areaDb;
+        private YamuiArea areaSelection;
     }
 }

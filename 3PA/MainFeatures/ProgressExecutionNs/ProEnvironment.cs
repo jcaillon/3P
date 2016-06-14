@@ -121,6 +121,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public bool RemoveCurrentPfPath() {
                 if (!string.IsNullOrEmpty(Config.Instance.EnvDatabase) && DbConnectionInfo.ContainsKey(Config.Instance.EnvDatabase)) {
                     DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
+                    SetCurrent(null, null,null);
                     return true;
                 }
                 return false;
@@ -129,6 +130,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public bool AddPfPath(string name, string path) {
                 if (!string.IsNullOrEmpty(name) && !DbConnectionInfo.ContainsKey(name)) {
                     DbConnectionInfo.Add(name, path);
+                    SetCurrent(null, null, name);
+                    return true;
+                }
+                return false;
+            }
+
+            public bool ModifyPfPath(string name, string path) {
+                if (!string.IsNullOrEmpty(name) && (!DbConnectionInfo.ContainsKey(name) || name.Equals(Config.Instance.EnvDatabase))) {
+                    DbConnectionInfo.Remove(Config.Instance.EnvDatabase);
+                    DbConnectionInfo.Add(name, path);
+                    SetCurrent(null, null, name);
                     return true;
                 }
                 return false;

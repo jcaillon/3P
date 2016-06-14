@@ -58,6 +58,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region public methods
 
         /// <summary>
+        /// returns the path of the current dump file
+        /// </summary>
+        /// <returns></returns>
+        public static string GetCurrentDumpPath {
+            get { return Path.Combine(Config.FolderDatabase, GetOutputName()); }
+        }
+
+        /// <summary>
         /// Tries to load the database information of the current ProgressEnv, 
         /// returns false the info is not available
         /// </summary>
@@ -159,116 +167,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // Update autocompletion
             AutoComplete.RefreshStaticItems();
             AutoComplete.ParseCurrentDocument();
-        }
-
-        #endregion
-
-        #region private methods
-
-        /// <summary>
-        /// Returns the output file name for the current appli/env
-        /// </summary>
-        /// <returns></returns>
-        private static string GetOutputName() {
-            return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump";
-        }
-
-        /// <summary>
-        /// This method parses the output of the .p procedure that exports the database info
-        /// and fills _dataBases
-        /// It then updates the parser with the new info
-        /// </summary>
-        private static void Read(string filePath) {
-            if (!File.Exists(filePath)) return;
-            _dataBases.Clear();
-            _sequences.Clear();
-            try {
-                ParsedDataBase currentDb = null;
-                ParsedTable currentTable = null;
-                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
-                    var splitted = items.Split('\t');
-                    switch (items[0]) {
-                        case 'H':
-                            // base
-                            //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
-                            if (splitted.Count() != 6) continue;
-                            currentDb = new ParsedDataBase(
-                                splitted[3].ToUpper(),
-                                splitted[4],
-                                splitted[5],
-                                new List<ParsedTable>());
-                            _dataBases.Add(currentDb);
-                            break;
-                        case 'S':
-                            if (splitted.Count() != 3 || currentDb == null) continue;
-                            _sequences.Add(new CompletionData {
-                                DisplayText = splitted[1].ToUpper(),
-                                Type = CompletionType.Sequence,
-                                SubString = currentDb.LogicalName
-                            });
-                            break;
-                        case 'T':
-                            // table
-                            //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
-                            if (splitted.Count() != 6 || currentDb == null) continue;
-                            currentTable = new ParsedTable(
-                                splitted[1].ToUpper(),
-                                0, 0,
-                                splitted[2],
-                                splitted[3],
-                                splitted[4],
-                                splitted[5],
-                                "", false,
-                                new List<ParsedField>(),
-                                new List<ParsedIndex>(),
-                                new List<ParsedTrigger>()
-                                , "", "");
-                            currentDb.Tables.Add(currentTable);
-                            break;
-                        case 'X':
-                            // trigger
-                            //#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>
-                            if (splitted.Count() != 5 || currentTable == null) continue;
-                            currentTable.Triggers.Add(new ParsedTrigger(
-                                splitted[2],
-                                splitted[3]));
-                            break;
-                        case 'I':
-                            // index
-                            //#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>
-                            if (splitted.Count() != 7 || currentTable == null) continue;
-                            var flag = splitted[3].Equals("1") ? ParsedIndexFlag.Primary : ParsedIndexFlag.None;
-                            if (splitted[4].Equals("1")) flag = flag | ParsedIndexFlag.Unique;
-                            currentTable.Indexes.Add(new ParsedIndex(
-                                splitted[2],
-                                flag,
-                                splitted[6].Split('%').ToList()));
-                            break;
-                        case 'F':
-                            // field
-                            //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
-                            if (splitted.Count() != 12 || currentTable == null) continue;
-                            var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
-                            if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
-                            if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
-                            if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
-                            var curField = new ParsedField(
-                                splitted[2].ToUpper(),
-                                splitted[3],
-                                splitted[4],
-                                int.Parse(splitted[5]),
-                                flag2,
-                                splitted[10],
-                                splitted[11],
-                                ParsedAsLike.None);
-                            curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
-                            currentTable.Fields.Add(curField);
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
-            }
         }
 
         #endregion
@@ -379,6 +277,116 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParsedItem = table
             }));
             return output;
+        }
+
+        #endregion
+
+        #region private methods
+
+        /// <summary>
+        /// Returns the output file name for the current appli/env
+        /// </summary>
+        /// <returns></returns>
+        private static string GetOutputName() {
+            return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump";
+        }
+
+        /// <summary>
+        /// This method parses the output of the .p procedure that exports the database info
+        /// and fills _dataBases
+        /// It then updates the parser with the new info
+        /// </summary>
+        private static void Read(string filePath) {
+            if (!File.Exists(filePath)) return;
+            _dataBases.Clear();
+            _sequences.Clear();
+            try {
+                ParsedDataBase currentDb = null;
+                ParsedTable currentTable = null;
+                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
+                    var splitted = items.Split('\t');
+                    switch (items[0]) {
+                        case 'H':
+                            // base
+                            //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
+                            if (splitted.Count() != 6) continue;
+                            currentDb = new ParsedDataBase(
+                                splitted[3].ToUpper(),
+                                splitted[4],
+                                splitted[5],
+                                new List<ParsedTable>());
+                            _dataBases.Add(currentDb);
+                            break;
+                        case 'S':
+                            if (splitted.Count() != 3 || currentDb == null) continue;
+                            _sequences.Add(new CompletionData {
+                                DisplayText = splitted[1].ToUpper(),
+                                Type = CompletionType.Sequence,
+                                SubString = currentDb.LogicalName
+                            });
+                            break;
+                        case 'T':
+                            // table
+                            //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
+                            if (splitted.Count() != 6 || currentDb == null) continue;
+                            currentTable = new ParsedTable(
+                                splitted[1].ToUpper(),
+                                0, 0,
+                                splitted[2],
+                                splitted[3],
+                                splitted[4],
+                                splitted[5],
+                                "", false,
+                                new List<ParsedField>(),
+                                new List<ParsedIndex>(),
+                                new List<ParsedTrigger>()
+                                , "", "");
+                            currentDb.Tables.Add(currentTable);
+                            break;
+                        case 'X':
+                            // trigger
+                            //#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>
+                            if (splitted.Count() != 5 || currentTable == null) continue;
+                            currentTable.Triggers.Add(new ParsedTrigger(
+                                splitted[2],
+                                splitted[3]));
+                            break;
+                        case 'I':
+                            // index
+                            //#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>
+                            if (splitted.Count() != 7 || currentTable == null) continue;
+                            var flag = splitted[3].Equals("1") ? ParsedIndexFlag.Primary : ParsedIndexFlag.None;
+                            if (splitted[4].Equals("1")) flag = flag | ParsedIndexFlag.Unique;
+                            currentTable.Indexes.Add(new ParsedIndex(
+                                splitted[2],
+                                flag,
+                                splitted[6].Split('%').ToList()));
+                            break;
+                        case 'F':
+                            // field
+                            //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
+                            if (splitted.Count() != 12 || currentTable == null) continue;
+                            var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
+                            if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
+                            if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
+                            if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
+                            var curField = new ParsedField(
+                                splitted[2].ToUpper(),
+                                splitted[3],
+                                splitted[4],
+                                int.Parse(splitted[5]),
+                                flag2,
+                                splitted[10],
+                                splitted[11],
+                                ParsedAsLike.None);
+                            curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
+                            currentTable.Fields.Add(curField);
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
+            }
         }
 
         #endregion

@@ -670,8 +670,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
     public class SelectorButton<T> : YamuiButton {
 
         #region Fields
-        public Image BackGrndImage { get; set; }
-
         public bool Activated { get; set; }
 
         public T Type { get; set; }

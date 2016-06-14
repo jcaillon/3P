@@ -36,27 +36,49 @@ namespace YamuiFramework.Controls {
 
         #region Fields
 
+        /// <summary>
+        /// Set to true if you wish to use the BackColor property
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomBackColor { get; set; }
 
+        /// <summary>
+        /// Set to true if you wish to use the ForeColor property
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool UseCustomForeColor { get; set; }
 
+        /// <summary>
+        /// Highlight this button by giving it a thicker border
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool Highlight { get; set; }
 
+        /// <summary>
+        /// Allows the ButtonPressed event to also be activated by a right click on the button
+        /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
         public bool AcceptsRightClick { get; set; }
 
+        /// <summary>
+        /// Set the image to use for this button
+        /// </summary>
         [Category("Yamui")]
-        public Image BackGrndImage { get; set; }
+        public Image BackGrndImage {
+            get { return _backGrndImage; }
+            set {
+                _backGrndImage = value; 
+                Invalidate();
+            }
+        }
+        private Image _backGrndImage;
 
         /// <summary>
-        /// Set the image size to visualize in the designer mode
+        /// Set the image size to visualize the image position in the designer mode
         /// </summary>
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -201,7 +223,7 @@ namespace YamuiFramework.Controls {
 
                 // text
                 int xPos = (int) (gap*2 + 0.5) + imgSize.Width;
-                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos, ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
+                TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), new Rectangle(xPos, 0, ClientRectangle.Width - xPos - (int)(gap + 0.5), ClientRectangle.Height), foreColor, FontManager.GetTextFormatFlags(TextAlign));
 
             } else {
                 // text only

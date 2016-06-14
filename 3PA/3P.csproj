@@ -455,6 +455,7 @@
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\Appli\Time.png" />
     <Content Include="Images\Appli\UndoUserAction.png" />
+    <Content Include="Images\Appli\ViewFile.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
@@ -487,7 +488,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
-    <Content Include="Images\Backgrounds\bg_hellokitty.png" />
+    <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
@@ -555,7 +556,6 @@
     <Content Include="Images\Html\getting-started-1.png" />
     <Content Include="Images\Html\getting-started-2.png" />
     <Content Include="Images\Html\getting-started-3.png" />
-    <Content Include="Images\Html\Update26x26.png" />
     <Content Include="Images\logo\icon\3p_icon.ico" />
     <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo200x200.png" />
