@@ -69,7 +69,7 @@ namespace YamuiFramework.Controls {
             PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
             // border?
-            using (var p = new Pen(BackColor, 2)) {
+            using (var p = new Pen(BackColor, 1)) {
                 var borderRect = new Rectangle(0, 0, Width - 1, Height - 1);
                 e.Graphics.DrawRectangle(p, borderRect);
             }
@@ -85,7 +85,7 @@ namespace YamuiFramework.Controls {
             var rect = new Rectangle(Location, Size);
             foreach (Control control in Parent.Controls) {
                 // the control is within the border of this Area? (based on the top/left corner)
-                if (rect.Contains(control.Location) && !control.Equals(this)) {
+                if (rect.Contains(control.Location) && !(control is YamuiArea)) {
                     try {
                         // set the property requested
                         PropertyInfo propertyInfo = control.GetType().GetProperty(propertyName);

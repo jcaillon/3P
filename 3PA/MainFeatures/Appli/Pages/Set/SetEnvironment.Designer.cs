@@ -34,8 +34,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDbDownload = new YamuiFramework.Controls.YamuiButton();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
-            this.cbName = new YamuiFramework.Controls.YamuiComboBox();
             this.flSuffix = new YamuiFramework.Controls.YamuiTextBox();
             this.flLabel = new YamuiFramework.Controls.YamuiTextBox();
             this.txLabel = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -63,12 +61,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4 = new YamuiFramework.Controls.YamuiTextBox();
             this.btright4 = new YamuiFramework.Controls.YamuiButtonImage();
             this.btConfFtp = new YamuiFramework.Controls.YamuiButtonImage();
-            this.tgCompilLoc = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.tgWithLst = new YamuiFramework.Controls.YamuiButtonToggle();
-            this.tgftp = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.tgCompLocally = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.tgCompWithLst = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.tgCompToFtp = new YamuiFramework.Controls.YamuiButtonToggle();
             this.lblLocally = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel5 = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
+            this.lblFtp = new YamuiFramework.Controls.YamuiLabel();
             this.htmlLabel5 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btleft5 = new YamuiFramework.Controls.YamuiButtonImage();
             this.textbox5 = new YamuiFramework.Controls.YamuiTextBox();
@@ -91,10 +89,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.btDbCancel = new YamuiFramework.Controls.YamuiButton();
             this.btDbSave = new YamuiFramework.Controls.YamuiButton();
+            this.areaDb = new YamuiFramework.Controls.YamuiArea();
+            this.cbSuffix = new YamuiFramework.Controls.YamuiComboBox();
+            this.cbName = new YamuiFramework.Controls.YamuiComboBox();
+            this.areaLeftButtons = new YamuiFramework.Controls.YamuiArea();
             this.areaEnv = new YamuiFramework.Controls.YamuiArea();
             this.areaPf = new YamuiFramework.Controls.YamuiArea();
-            this.areaDb = new YamuiFramework.Controls.YamuiArea();
-            this.areaSelection = new YamuiFramework.Controls.YamuiArea();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -148,12 +148,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox4);
             this.scrollPanel.ContentPanel.Controls.Add(this.btright4);
             this.scrollPanel.ContentPanel.Controls.Add(this.btConfFtp);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompilLoc);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgWithLst);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tgftp);
+            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompLocally);
+            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompWithLst);
+            this.scrollPanel.ContentPanel.Controls.Add(this.tgCompToFtp);
             this.scrollPanel.ContentPanel.Controls.Add(this.lblLocally);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel5);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
+            this.scrollPanel.ContentPanel.Controls.Add(this.lblFtp);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel5);
             this.scrollPanel.ContentPanel.Controls.Add(this.btleft5);
             this.scrollPanel.ContentPanel.Controls.Add(this.textbox5);
@@ -176,12 +176,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDbCancel);
             this.scrollPanel.ContentPanel.Controls.Add(this.btDbSave);
-            this.scrollPanel.ContentPanel.Controls.Add(this.areaEnv);
-            this.scrollPanel.ContentPanel.Controls.Add(this.areaPf);
             this.scrollPanel.ContentPanel.Controls.Add(this.areaDb);
-            this.scrollPanel.ContentPanel.Controls.Add(this.areaSelection);
             this.scrollPanel.ContentPanel.Controls.Add(this.cbSuffix);
             this.scrollPanel.ContentPanel.Controls.Add(this.cbName);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaLeftButtons);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaEnv);
+            this.scrollPanel.ContentPanel.Controls.Add(this.areaPf);
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
@@ -250,22 +250,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.linkurl.TabIndex = 145;
             this.linkurl.TabStop = false;
             this.linkurl.Text = "How to set up a new environment?";
-            // 
-            // cbSuffix
-            // 
-            this.cbSuffix.ItemHeight = 15;
-            this.cbSuffix.Location = new System.Drawing.Point(173, 27);
-            this.cbSuffix.Name = "cbSuffix";
-            this.cbSuffix.Size = new System.Drawing.Size(133, 21);
-            this.cbSuffix.TabIndex = 140;
-            // 
-            // cbName
-            // 
-            this.cbName.ItemHeight = 15;
-            this.cbName.Location = new System.Drawing.Point(30, 27);
-            this.cbName.Name = "cbName";
-            this.cbName.Size = new System.Drawing.Size(137, 21);
-            this.cbName.TabIndex = 141;
             // 
             // flSuffix
             // 
@@ -655,38 +639,38 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btConfFtp.Tag = "dir";
             this.btConfFtp.Text = "yamuiImageButton5";
             // 
-            // tgCompilLoc
+            // tgCompLocally
             // 
-            this.tgCompilLoc.BackGrndImage = null;
-            this.tgCompilLoc.Checked = false;
-            this.tgCompilLoc.Location = new System.Drawing.Point(293, 373);
-            this.tgCompilLoc.Name = "tgCompilLoc";
-            this.tgCompilLoc.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompilLoc.Size = new System.Drawing.Size(30, 16);
-            this.tgCompilLoc.TabIndex = 137;
-            this.tgCompilLoc.ToggleSize = 30;
+            this.tgCompLocally.BackGrndImage = null;
+            this.tgCompLocally.Checked = false;
+            this.tgCompLocally.Location = new System.Drawing.Point(293, 373);
+            this.tgCompLocally.Name = "tgCompLocally";
+            this.tgCompLocally.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tgCompLocally.Size = new System.Drawing.Size(30, 16);
+            this.tgCompLocally.TabIndex = 137;
+            this.tgCompLocally.ToggleSize = 30;
             // 
-            // tgWithLst
+            // tgCompWithLst
             // 
-            this.tgWithLst.BackGrndImage = null;
-            this.tgWithLst.Checked = false;
-            this.tgWithLst.Location = new System.Drawing.Point(456, 373);
-            this.tgWithLst.Name = "tgWithLst";
-            this.tgWithLst.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgWithLst.Size = new System.Drawing.Size(30, 16);
-            this.tgWithLst.TabIndex = 155;
-            this.tgWithLst.ToggleSize = 30;
+            this.tgCompWithLst.BackGrndImage = null;
+            this.tgCompWithLst.Checked = false;
+            this.tgCompWithLst.Location = new System.Drawing.Point(456, 373);
+            this.tgCompWithLst.Name = "tgCompWithLst";
+            this.tgCompWithLst.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tgCompWithLst.Size = new System.Drawing.Size(30, 16);
+            this.tgCompWithLst.TabIndex = 155;
+            this.tgCompWithLst.ToggleSize = 30;
             // 
-            // tgftp
+            // tgCompToFtp
             // 
-            this.tgftp.BackGrndImage = null;
-            this.tgftp.Checked = false;
-            this.tgftp.Location = new System.Drawing.Point(591, 373);
-            this.tgftp.Name = "tgftp";
-            this.tgftp.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgftp.Size = new System.Drawing.Size(30, 16);
-            this.tgftp.TabIndex = 149;
-            this.tgftp.ToggleSize = 30;
+            this.tgCompToFtp.BackGrndImage = null;
+            this.tgCompToFtp.Checked = false;
+            this.tgCompToFtp.Location = new System.Drawing.Point(591, 373);
+            this.tgCompToFtp.Name = "tgCompToFtp";
+            this.tgCompToFtp.SetImgSize = new System.Drawing.Size(0, 0);
+            this.tgCompToFtp.Size = new System.Drawing.Size(30, 16);
+            this.tgCompToFtp.TabIndex = 149;
+            this.tgCompToFtp.ToggleSize = 30;
             // 
             // lblLocally
             // 
@@ -712,17 +696,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel5.Text = "Compile with listing (.lst)?";
             this.yamuiLabel5.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // yamuiLabel2
+            // lblFtp
             // 
-            this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel2.Location = new System.Drawing.Point(499, 374);
-            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(3);
-            this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(86, 12);
-            this.yamuiLabel2.TabIndex = 150;
-            this.yamuiLabel2.Text = "Push to ftp server?";
-            this.yamuiLabel2.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.lblFtp.AutoSize = true;
+            this.lblFtp.Function = YamuiFramework.Fonts.FontFunction.Small;
+            this.lblFtp.Location = new System.Drawing.Point(499, 374);
+            this.lblFtp.Margin = new System.Windows.Forms.Padding(3);
+            this.lblFtp.Name = "lblFtp";
+            this.lblFtp.Size = new System.Drawing.Size(86, 12);
+            this.lblFtp.TabIndex = 150;
+            this.lblFtp.Text = "Push to ftp server?";
+            this.lblFtp.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // htmlLabel5
             // 
@@ -1011,10 +995,46 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btDbSave.Text = "Save";
             this.btDbSave.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
+            // areaDb
+            // 
+            this.areaDb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.areaDb.BackColor = System.Drawing.Color.Lime;
+            this.areaDb.Enabled = false;
+            this.areaDb.Location = new System.Drawing.Point(421, 144);
+            this.areaDb.Name = "areaDb";
+            this.areaDb.Size = new System.Drawing.Size(277, 24);
+            this.areaDb.TabIndex = 167;
+            this.areaDb.Visible = false;
+            // 
+            // cbSuffix
+            // 
+            this.cbSuffix.ItemHeight = 15;
+            this.cbSuffix.Location = new System.Drawing.Point(173, 27);
+            this.cbSuffix.Name = "cbSuffix";
+            this.cbSuffix.Size = new System.Drawing.Size(133, 21);
+            this.cbSuffix.TabIndex = 140;
+            // 
+            // cbName
+            // 
+            this.cbName.ItemHeight = 15;
+            this.cbName.Location = new System.Drawing.Point(30, 27);
+            this.cbName.Name = "cbName";
+            this.cbName.Size = new System.Drawing.Size(137, 21);
+            this.cbName.TabIndex = 141;
+            // 
+            // areaLeftButtons
+            // 
+            this.areaLeftButtons.BackColor = System.Drawing.Color.Red;
+            this.areaLeftButtons.Enabled = false;
+            this.areaLeftButtons.Location = new System.Drawing.Point(166, 119);
+            this.areaLeftButtons.Name = "areaLeftButtons";
+            this.areaLeftButtons.Size = new System.Drawing.Size(16, 347);
+            this.areaLeftButtons.TabIndex = 168;
+            this.areaLeftButtons.Visible = false;
+            // 
             // areaEnv
             // 
-            this.areaEnv.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.areaEnv.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.areaEnv.BackColor = System.Drawing.Color.Yellow;
             this.areaEnv.Enabled = false;
@@ -1026,8 +1046,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // areaPf
             // 
-            this.areaPf.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
+            this.areaPf.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.areaPf.BackColor = System.Drawing.Color.Aqua;
             this.areaPf.Enabled = false;
@@ -1036,32 +1055,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaPf.Size = new System.Drawing.Size(718, 43);
             this.areaPf.TabIndex = 166;
             this.areaPf.Visible = false;
-            // 
-            // areaDb
-            // 
-            this.areaDb.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.areaDb.BackColor = System.Drawing.Color.Lime;
-            this.areaDb.Enabled = false;
-            this.areaDb.Location = new System.Drawing.Point(421, 144);
-            this.areaDb.Name = "areaDb";
-            this.areaDb.Size = new System.Drawing.Size(277, 24);
-            this.areaDb.TabIndex = 167;
-            this.areaDb.Visible = false;
-            // 
-            // areaSelection
-            // 
-            this.areaSelection.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.areaSelection.BackColor = System.Drawing.Color.Red;
-            this.areaSelection.Enabled = false;
-            this.areaSelection.Location = new System.Drawing.Point(3, 20);
-            this.areaSelection.Name = "areaSelection";
-            this.areaSelection.Size = new System.Drawing.Size(717, 38);
-            this.areaSelection.TabIndex = 168;
-            this.areaSelection.Visible = false;
             // 
             // SetEnvironment
             // 
@@ -1092,7 +1085,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiTextBox textbox1;
         private YamuiTextBox flExtraPf;
         private YamuiTextBox textbox2;
-        private YamuiButtonToggle tgCompilLoc;
+        private YamuiButtonToggle tgCompLocally;
         private YamuiTextBox flExtraProPath;
         private YamuiTextBox textbox3;
         private YamuiTextBox textbox4;
@@ -1127,12 +1120,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiButton btDbCancel;
         private HtmlLabel linkurl;
         private YamuiButton btCopy;
-        private YamuiLabel yamuiLabel2;
-        private YamuiButtonToggle tgftp;
+        private YamuiLabel lblFtp;
+        private YamuiButtonToggle tgCompToFtp;
         private YamuiButtonImage btConfFtp;
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel5;
-        private YamuiButtonToggle tgWithLst;
+        private YamuiButtonToggle tgCompWithLst;
         private YamuiButton btDbDelete;
         private YamuiButton btDbAdd;
         private YamuiButton btDbEdit;
@@ -1146,6 +1139,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private YamuiArea areaEnv;
         private YamuiArea areaPf;
         private YamuiArea areaDb;
-        private YamuiArea areaSelection;
+        private YamuiArea areaLeftButtons;
     }
 }

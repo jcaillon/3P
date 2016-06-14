@@ -58,7 +58,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string BaseCompilationPath = "";
             public bool CompileLocally;
             public bool CompileWithListing = true;
-            public bool PushToFtpOnCompile;
+            public bool CompilePushToFtp;
 
             public string ProwinPath = "";
             public string CmdLineParameters = "";

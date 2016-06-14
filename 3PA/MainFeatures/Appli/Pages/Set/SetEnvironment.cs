@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region fields
 
-        private ViewMode _currentMode = ViewMode.Select;
+        private ViewMode _currentMode;
 
         private bool _unsafeDelete;
 
@@ -110,9 +110,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(htmlLabel5, textTool);
 
             toolTip.SetToolTip(htmlLabel6, "Appended to the prowin.exe command line<br>you can define custom options here");
-            toolTip.SetToolTip(flCmdLine, @"This field can be used if you have special needs when you compile or run a progress program<br>For instance, you activate the logs when you run a program by setting those parameters :<div class='ToolTipcodeSnippet'>-clientlog ""client.log"" - logginglevel ""3"" - logentrytypes ""4GLMessages,4GLTrace,FileID""</div>");
+            toolTip.SetToolTip(flCmdLine, @"This field can be used if you have special needs when you compile or run a progress program<br>For instance, you can activate the logs when you run a program by setting those parameters :<br><div class='ToolTipcodeSnippet'>-clientlog ""client.log"" - logginglevel ""3"" - logentrytypes ""4GLMessages,4GLTrace,FileID""</div>");
             toolTip.SetToolTip(textbox6, "Path to your server.log file, for a quick access");
-            toolTip.SetToolTip(tgCompilLoc, "<b>TOGGLE ON</b> to move .r and .lst files to the source folder after the compilation<br>Or <b>TOGGLE OFF</b> to move .r and .lst files to the above distant folder after the compilation");
+
+            toolTip.SetToolTip(tgCompLocally, "Toggle to <b>move .r and .lst files to the source folder</b> after the compilation<br>Or toggle off to move .r and .lst files to the above distant folder after the compilation");
+            toolTip.SetToolTip(tgCompWithLst, "Toggle on to <b>compile your code with the listing option</b>, generating a .lst file<br>see the DEBUG-LIST option of the Progress compiler for more info");
+            toolTip.SetToolTip(tgCompToFtp, "Toggle on to automatically send your compiled files to a distant FTP server<br><br><i>The option on the FTP connection will be available once this option is toggle on</i>");
 
             toolTip.SetToolTip(btEdit, "Click to <b>modify</b> the information for the current environment");
             toolTip.SetToolTip(btAdd, "Click to <b>add a new</b> environment<br>");
@@ -157,15 +160,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             btDbDownload.ButtonPressed += BtDownloadOnButtonPressed;
             btDbView.ButtonPressed += BtDbViewOnButtonPressed;
 
-            tgCompilLoc.ButtonPressed += TgCompilLocOnCheckedChanged;
-            tgWithLst.ButtonPressed += TgWithLstOnButtonPressed;
-            tgftp.ButtonPressed += TgftpOnButtonPressed;
+            tgCompLocally.ButtonPressed += TgCompLocallyOnCheckedChanged;
+            tgCompWithLst.ButtonPressed += TgCompWithLstOnButtonPressed;
+            tgCompToFtp.ButtonPressed += TgCompToFtpOnButtonPressed;
             btConfFtp.ButtonPressed += BtConfFtpOnButtonPressed;
 
+            _currentMode = ViewMode.Edit;
             ToggleMode(ViewMode.Select);
-            EnableAllTextBoxes(false);
-
-            //btConfFtp.Visible = false;
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpSetEnv + @"'>How to set up a new environment?</a>";
 
@@ -192,16 +193,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     ProEnvironment.DeleteCurrent();
                     break;
 
-                case ViewMode.DbAddNew:
+                case ViewMode.DbAdd:
                 case ViewMode.DbEdit:
-                    if (!(_currentMode == ViewMode.DbAddNew ? ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text) : ProEnvironment.Current.ModifyPfPath(flDatabase.Text, textbox1.Text))) {
+                    if (!(_currentMode == ViewMode.DbAdd ? ProEnvironment.Current.AddPfPath(flDatabase.Text, textbox1.Text) : ProEnvironment.Current.ModifyPfPath(flDatabase.Text, textbox1.Text))) {
                         BlinkTextBox(flDatabase, ThemeManager.Current.GenericErrorColor);
                         return false;
                     }
                     break;
 
-                case ViewMode.AddNew:
+                case ViewMode.Add:
                 case ViewMode.Edit:
+                case ViewMode.Copy:
                     // mandatory fields
                     foreach (var box in new List<YamuiTextBox> { flName }.Where(box => string.IsNullOrWhiteSpace(box.Text))) {
                         BlinkTextBox(box, ThemeManager.Current.GenericErrorColor);
@@ -220,10 +222,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         ProwinPath = textbox5.Text,
                         LogFilePath = textbox6.Text,
                         CmdLineParameters = flCmdLine.Text,
-                        DbConnectionInfo = _currentMode == ViewMode.AddNew ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo
+                        DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo,
+                        CompileLocally = tgCompLocally.Checked,
+                        CompileWithListing = tgCompWithLst.Checked,
+                        CompilePushToFtp = tgCompToFtp.Checked
                     };
 
-                    if (_currentMode == ViewMode.AddNew && (ProEnvironment.GetList.Exists(env => env.Name.EqualsCi(newEnv.Name) && env.Suffix.EqualsCi(newEnv.Suffix)))) {
+                    if (_currentMode != ViewMode.Edit && (ProEnvironment.GetList.Exists(env => env.Name.EqualsCi(newEnv.Name) && env.Suffix.EqualsCi(newEnv.Suffix)))) {
                         // name + suffix must be unique!
                         BlinkTextBox(flName, ThemeManager.Current.GenericErrorColor);
                         BlinkTextBox(flSuffix, ThemeManager.Current.GenericErrorColor);
@@ -241,10 +246,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private enum ViewMode {
             Select,
             Edit,
-            AddNew,
+            Add,
+            Copy,
             Delete,
             DbEdit,
-            DbAddNew,
+            DbAdd,
             DbDelete
         }
 
@@ -255,20 +261,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             cbDatabase.SelectedIndexChanged -= cbDatabase_SelectedIndexChanged;
 
             // mode
-            var isAddOrEdit = (mode == ViewMode.AddNew || mode == ViewMode.Edit);
-            var isDbAddOrEdit = (mode == ViewMode.DbAddNew || mode == ViewMode.DbEdit);
+            var isAddOrEdit = (mode == ViewMode.Add || mode == ViewMode.Copy || mode == ViewMode.Edit);
+            var isDbAddOrEdit = (mode == ViewMode.DbAdd || mode == ViewMode.DbEdit);
             var isSelect = (mode == ViewMode.Select);
 
-            // selection visible or not
-            flName.Visible = isAddOrEdit;
-            flSuffix.Visible = isAddOrEdit;
-            flLabel.Visible = isAddOrEdit;
-
-            cbName.Visible = !isAddOrEdit;
-            cbSuffix.Visible = !isAddOrEdit;
-            
-            cbName.Enabled = !isAddOrEdit && !isDbAddOrEdit;
-            cbSuffix.Enabled = !isAddOrEdit && !isDbAddOrEdit;           
+            // selection
+            flName.Visible = flSuffix.Visible = flLabel.Visible = isAddOrEdit;
+            cbName.Visible = cbSuffix.Visible = !isAddOrEdit;
+            cbName.Enabled = cbSuffix.Enabled = !isAddOrEdit && !isDbAddOrEdit;
+            txLabel.Text = ProEnvironment.Current.Label;
 
             // Fill combo boxes
             if (isSelect) {
@@ -318,94 +319,80 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 }
             }
 
-            // hide/show btleft
-            foreach (var control in scrollPanel.ContentPanel.Controls) {
-                if (control is YamuiButtonImage) {
-                    var x = (YamuiButtonImage)control;
-                    if (x.Name.StartsWith("btleft")) {
-                        x.Visible = !(isSelect || isDbAddOrEdit);
-                    }
-                }
-            }
+            // handle pf dictionnary
+            flDatabase.Visible = isDbAddOrEdit;
+            cbDatabase.Visible = !flDatabase.Visible;
 
             // entering or leaving DB add/edit mode
-            if (isDbAddOrEdit || _currentMode == ViewMode.DbAddNew || _currentMode == ViewMode.DbEdit) {
+            if (isDbAddOrEdit || _currentMode == ViewMode.DbAdd || _currentMode == ViewMode.DbEdit) {
+                flDatabase.Enabled = textbox1.Enabled = isDbAddOrEdit;
                 areaEnv.SetPropertyOnArea("Visible", !isDbAddOrEdit);
                 areaDb.SetPropertyOnArea("Visible", !isDbAddOrEdit);
+                areaLeftButtons.SetPropertyOnArea("Enabled", isDbAddOrEdit);
             }
 
             // entering or leaving add/edit mode
-            if (isAddOrEdit || _currentMode == ViewMode.AddNew || _currentMode == ViewMode.Edit) {
+            else if (isAddOrEdit || _currentMode == ViewMode.Add || _currentMode == ViewMode.Copy || _currentMode == ViewMode.Edit) {
                 EnableAllTextBoxes(isAddOrEdit);
                 areaPf.SetPropertyOnArea("Visible", !isAddOrEdit);
                 areaDb.SetPropertyOnArea("Visible", !isAddOrEdit);
+                areaLeftButtons.SetPropertyOnArea("Enabled", isAddOrEdit);
             }
 
             // update the download database button
             UpdateDownloadButton();
-           
-            // handle pf
-            flDatabase.Visible = !isAddOrEdit && isDbAddOrEdit;
-            cbDatabase.Visible = !isAddOrEdit && !isDbAddOrEdit;
-
-            textbox1.Enabled = isDbAddOrEdit;
-            flDatabase.Enabled = isDbAddOrEdit;
-            
+          
             // buttons to handle pf files
-            btDbAdd.Visible = isSelect;
-            btDbEdit.Visible = isSelect;
-            btDbDelete.Visible = isSelect;
-            btDbSave.Visible = isDbAddOrEdit;
-            btDbCancel.Visible = isDbAddOrEdit;
+            btDbAdd.Visible = btDbEdit.Visible = btDbDelete.Visible = isSelect;
+            btDbSave.Visible = btDbCancel.Visible = isDbAddOrEdit;
             btDbDelete.Enabled = ProEnvironment.Current.DbConnectionInfo.Count >= 1;
 
             // buttons modify/new/duplicate/delete
-            btEdit.Visible =  isSelect;
-            btAdd.Visible = isSelect;
-            btDelete.Visible = isSelect;
-            btCopy.Visible = isSelect;
-            btSave.Visible = isAddOrEdit;
-            btCancel.Visible = isAddOrEdit;
+            btEdit.Visible = btAdd.Visible = btDelete.Visible = btCopy.Visible = isSelect;
+            btSave.Visible = btCancel.Visible = isAddOrEdit;
             btDelete.Enabled = ProEnvironment.GetList.Count > 1;
 
-            // fill details
-            flName.Text = ProEnvironment.Current.Name;
-            flSuffix.Text = ProEnvironment.Current.Suffix;
-            flLabel.Text = ProEnvironment.Current.Label;
-            txLabel.Text = ProEnvironment.Current.Label;
-            flExtraPf.Lines = ProEnvironment.Current.ExtraPf.Replace("\r\n", "\n").Split('\n');
-            flExtraProPath.Lines = ProEnvironment.Current.ExtraProPath.Replace("\r\n", "\n").Split('\n');
-            flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
+            // Compilation toggle
+            tgCompWithLst.Enabled = tgCompLocally.Enabled = tgCompToFtp.Enabled = btConfFtp.Enabled = isSelect;
 
-            flDatabase.Text = Config.Instance.EnvDatabase;
-            textbox1.Text = ProEnvironment.Current.GetPfPath();
-
-            textbox2.Text = ProEnvironment.Current.IniPath;
-            textbox3.Text = ProEnvironment.Current.BaseLocalPath;
-            textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
-            textbox5.Text = ProEnvironment.Current.ProwinPath;
-            textbox6.Text = ProEnvironment.Current.LogFilePath;
-
-            // reset fields when adding a new env
-            if (mode == ViewMode.AddNew) {
+            if (mode == ViewMode.Add) {
+                // reset fields when adding a new env
                 foreach (var control in scrollPanel.ContentPanel.Controls) {
                     if (control is YamuiTextBox)
                         ((YamuiTextBox)control).Text = string.Empty;
                 }
                 cbDatabase.DataSource = new List<string>();
-            } else if (mode == ViewMode.DbAddNew) {
+                var defaultEnv = new ProEnvironment.ProEnvironmentObject();
+                tgCompLocally.Checked = defaultEnv.CompileLocally;
+                tgCompWithLst.Checked = defaultEnv.CompileWithListing;
+                tgCompToFtp.Checked = defaultEnv.CompilePushToFtp;
+
+            } else if (mode == ViewMode.DbAdd) {
+                // reset fields when adding a new pf
                 flDatabase.Text = string.Empty;
                 textbox1.Text = string.Empty;
+
+            } else {
+                // fill details
+                flName.Text = ProEnvironment.Current.Name;
+                flSuffix.Text = ProEnvironment.Current.Suffix;
+                flLabel.Text = ProEnvironment.Current.Label;
+                flExtraPf.Lines = ProEnvironment.Current.ExtraPf.Replace("\r\n", "\n").Split('\n');
+                flExtraProPath.Lines = ProEnvironment.Current.ExtraProPath.Replace("\r\n", "\n").Split('\n');
+                flCmdLine.Text = ProEnvironment.Current.CmdLineParameters;
+                flDatabase.Text = Config.Instance.EnvDatabase;
+                textbox1.Text = ProEnvironment.Current.GetPfPath();
+                textbox2.Text = ProEnvironment.Current.IniPath;
+                textbox3.Text = ProEnvironment.Current.BaseLocalPath;
+                textbox4.Text = ProEnvironment.Current.BaseCompilationPath;
+                textbox5.Text = ProEnvironment.Current.ProwinPath;
+                textbox6.Text = ProEnvironment.Current.LogFilePath;
+
+                tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
+                tgCompWithLst.Checked = ProEnvironment.Current.CompileWithListing;
+                tgCompToFtp.Checked = ProEnvironment.Current.CompilePushToFtp;
+                btConfFtp.Visible = tgCompToFtp.Checked;
             }
-
-            // Toggle boxes
-            tgCompilLoc.Checked = ProEnvironment.Current.CompileLocally;
-            btConfFtp.Visible = tgftp.Checked;
-
-            tgWithLst.Enabled = isSelect;
-            tgCompilLoc.Enabled = isSelect;
-            tgftp.Enabled = isSelect;
-            btConfFtp.Enabled = isSelect;
 
             // blink when changing mode
             if (mode != _currentMode && mode != ViewMode.Select) {
@@ -418,7 +405,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                     BlinkButton(btDbCancel, ThemeManager.Current.AccentColor);
                     ActiveControl = btDbSave;
                 }
-            }
+            } else if (mode != _currentMode && mode == ViewMode.Select)
+                ActiveControl = _currentMode == ViewMode.Edit ? btEdit : btDbEdit;
+
+            // 1.5.5
+            tgCompToFtp.Visible = false;
+            btConfFtp.Visible = false;
+            lblFtp.Visible = false;
 
             cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
             cbSuffix.SelectedIndexChanged += cbSuffix_SelectedIndexChanged;
@@ -449,12 +442,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region misc
 
-        private void BtDbViewOnButtonPressed(object sender, EventArgs eventArgs) {
-            Npp.OpenFile(DataBase.GetCurrentDumpPath);
-        }
-
         private void BtDownloadOnButtonPressed(object sender, EventArgs e) {
-            // refresh the info after the extraction
             DataBase.FetchCurrentDbInfo(UpdateDownloadButton);
         }
 
@@ -463,21 +451,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             UpdateDownloadButton();
         }
 
-        private void TgCompilLocOnCheckedChanged(object sender, EventArgs eventArgs) {
-            ProEnvironment.Current.CompileLocally = tgCompilLoc.Checked;
+        private void BtDbViewOnButtonPressed(object sender, EventArgs eventArgs) {
+            Npp.OpenFile(DataBase.GetCurrentDumpPath);
+        }
+
+        private void TgCompLocallyOnCheckedChanged(object sender, EventArgs eventArgs) {
+            ProEnvironment.Current.CompileLocally = tgCompLocally.Checked;
+            ProEnvironment.SaveList();
+        }
+
+        private void TgCompWithLstOnButtonPressed(object sender, EventArgs eventArgs) {
+            ProEnvironment.Current.CompileWithListing = tgCompWithLst.Checked;
+            ProEnvironment.SaveList();
+        }
+        private void TgCompToFtpOnButtonPressed(object sender, EventArgs eventArgs) {
+            btConfFtp.Visible = tgCompToFtp.Checked;
+            ProEnvironment.Current.CompilePushToFtp = tgCompToFtp.Checked;
             ProEnvironment.SaveList();
         }
 
         private void BtConfFtpOnButtonPressed(object sender, EventArgs eventArgs) {
-            
-        }
+            UserCommunication.Notify("to be done");
 
-        private void TgftpOnButtonPressed(object sender, EventArgs eventArgs) {
-            btConfFtp.Visible = tgftp.Checked;
-        }
-
-        private void TgWithLstOnButtonPressed(object sender, EventArgs eventArgs) {
-            
         }
 
         #endregion
@@ -486,13 +481,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void BtAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             btAdd.UseCustomBackColor = false;
-            ToggleMode(ViewMode.AddNew);
+            ToggleMode(ViewMode.Add);
         }
 
         private void BtduplicateOnButtonPressed(object sender, EventArgs eventArgs) {
-            // duplicate
-            ToggleMode(ViewMode.Edit);
-            _currentMode = ViewMode.AddNew;
+            ToggleMode(ViewMode.Copy);
         }
 
         private void BtModifyOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -548,7 +541,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDbAddOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            ToggleMode(ViewMode.DbAddNew);
+            ToggleMode(ViewMode.DbAdd);
         }
 
         #endregion
@@ -588,7 +581,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (Config.Instance.EnvDatabase.Equals(cbDatabase.SelectedItem.ToString()))
                 return;
             ProEnvironment.SetCurrent(null, null, cbDatabase.SelectedItem.ToString());
-            ToggleMode(ViewMode.Select);
+            textbox1.Text = ProEnvironment.Current.GetPfPath();
         }
 
         #endregion

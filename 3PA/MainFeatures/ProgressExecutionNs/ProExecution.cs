@@ -586,7 +586,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                                     From = file,
                                     To = outputRPath
                                 });
-                                if (Config.Instance.CompileWithLst && Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath))) {
+                                if (ProEnvironment.Current.CompileWithListing && Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath))) {
                                     outputList.Add(new FileToMove {
                                         Origin = treatedFile.InputPath,
                                         From = treatedFile.TempOutputLst,
@@ -605,7 +605,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         From = treatedFile.TempOutputR,
                         To = treatedFile.OutputR
                     });
-                    if (Config.Instance.CompileWithLst) {
+                    if (ProEnvironment.Current.CompileWithListing) {
                         outputList.Add(new FileToMove {
                             Origin = treatedFile.InputPath,
                             From = treatedFile.TempOutputLst,
