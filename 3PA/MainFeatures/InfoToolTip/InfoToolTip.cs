@@ -230,7 +230,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
-            //if (data == null) return;
+            if (data == null) return;
 
             // Measure the max size of the title (ensure that the title isn't cropped
             var size = TextRenderer.MeasureText(data.DisplayText, FontManager.GetFont(FontStyle.Bold, 13));

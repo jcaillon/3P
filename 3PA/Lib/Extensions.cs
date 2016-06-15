@@ -24,6 +24,8 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
@@ -36,11 +38,12 @@ namespace _3PA.Lib {
     /// </summary>
     public static class Extensions {
 
+        #region misc
+
         public static List<T> ToNonNullList<T>(this IEnumerable<T> obj) {
             return obj == null ? new List<T>() : obj.ToList();
         }
 
-        #region misc
         public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate) {
             if (predicate == null) throw new ArgumentNullException("predicate");
 
@@ -129,6 +132,28 @@ namespace _3PA.Lib {
             FieldInfo fieldInfo = type.GetField(value.ToString());
             var atts = (EnumAttr[]) fieldInfo.GetCustomAttributes(typeof (EnumAttr), false);
             return atts.Length > 0 ? atts[0] : null;
+        }
+
+        /// <summary>
+        /// Decorate enum values with [Description("Description for Foo")] and get their description with x.Foo.GetDescription()
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns></returns>
+        public static string GetDescription(this Enum value) {
+            Type type = value.GetType();
+            string name = Enum.GetName(type, value);
+            if (name != null) {
+                FieldInfo field = type.GetField(name);
+                if (field != null) {
+                    DescriptionAttribute attr =
+                           Attribute.GetCustomAttribute(field,
+                             typeof(DescriptionAttribute)) as DescriptionAttribute;
+                    if (attr != null) {
+                        return attr.Description;
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>

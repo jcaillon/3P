@@ -110,8 +110,7 @@ namespace _3PA.MainFeatures.Parser {
         public static void RefreshParser() {
             // we launch the parser, that will fill the DynamicItems
             try {
-                // if this document is in the Saved parsed visitors, we remove it because it might change so
-                // we want to re parse it later
+                // if this document is in the Saved parsed visitors, we remove it because it might change so we want to re parse it later
                 LastParsedFilePath = Plug.CurrentFilePath;
                 if (SavedParserVisitors.ContainsKey(LastParsedFilePath))
                     SavedParserVisitors.Remove(LastParsedFilePath);
@@ -130,7 +129,10 @@ namespace _3PA.MainFeatures.Parser {
                 }
 
                 // save the info for uses in an another file, where this file is run in persistent or included
-                SavedParserVisitors.Add(LastParsedFilePath, _parserVisitor);
+                if (!SavedParserVisitors.ContainsKey(LastParsedFilePath))
+                    SavedParserVisitors.Add(LastParsedFilePath, _parserVisitor);
+                else
+                    SavedParserVisitors[LastParsedFilePath] = _parserVisitor;
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in RefreshParser");

@@ -39,6 +39,8 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
+            Config.ConfigObject x = null;
+            var y = (Config.ConfigObject) x;
             UserCommunication.Notify("hi");
         }
 

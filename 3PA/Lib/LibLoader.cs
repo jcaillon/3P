@@ -66,7 +66,6 @@ namespace _3PA.Lib {
                         File.WriteAllBytes(_pathToYamui, Resources.YamuiFramework);
                     return Assembly.LoadFrom(_pathToYamui);
                 }
-
                 if (args.Name.StartsWith("ObjectListView,")) {
                     if (!File.Exists(_pathToOlv))
                         File.WriteAllBytes(_pathToOlv, Resources.ObjectListView);

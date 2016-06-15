@@ -513,7 +513,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             Dictionary<string, List<FileError>> errorsList;
             if (ExecutionType == ExecutionType.Prolint) {
                 var treatedFile = ListToCompile.First();
-                changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
+                if (!changePaths.ContainsKey(treatedFile.TempInputPath))
+                    changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
                 errorsList = FilesInfo.ReadErrorsFromFile(ProlintOutputPath, true, changePaths);
             } else
                 errorsList = FilesInfo.ReadErrorsFromFile(LogPath, false, changePaths);

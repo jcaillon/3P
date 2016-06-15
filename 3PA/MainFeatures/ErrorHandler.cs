@@ -136,6 +136,15 @@ namespace _3PA.MainFeatures {
             return true;
         }
 
+        /// <summary>
+        /// Log a piece of information
+        /// returns false if the error already occured during the session, true otherwise
+        /// </summary>
+        public static bool LogError(Exception e) {
+
+            return true;
+        }
+
         public static string GetHtmlLogLink {
             get {
                 return Config.Instance.UserGetsPreReleases ? "<br>More details can be found in log file below :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") : "";

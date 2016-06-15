@@ -115,40 +115,48 @@ namespace _3PA.MainFeatures.FileExplorer {
             var dirInfo = new DirectoryInfo(dirPath);
 
             // for each file in the dir
-            foreach (var fileInfo in dirInfo.GetFiles()) {
-                FileType fileType;
-                if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileType))
-                    fileType = FileType.Unknow;
-                output.Add(new FileListItem {
-                    DisplayText = fileInfo.Name,
-                    BasePath = fileInfo.DirectoryName,
-                    FullPath = fileInfo.FullName,
-                    Flags = FileFlag.ReadOnly,
-                    Size = fileInfo.Length,
-                    CreateDateTime = fileInfo.CreationTime,
-                    ModifieDateTime = fileInfo.LastWriteTime,
-                    Type = fileType
-                });
+            try {
+                foreach (var fileInfo in dirInfo.GetFiles()) {
+                    FileType fileType;
+                    if (!Enum.TryParse(fileInfo.Extension.Replace(".", ""), true, out fileType))
+                        fileType = FileType.Unknow;
+                    output.Add(new FileListItem {
+                        DisplayText = fileInfo.Name,
+                        BasePath = fileInfo.DirectoryName,
+                        FullPath = fileInfo.FullName,
+                        Flags = FileFlag.ReadOnly,
+                        Size = fileInfo.Length,
+                        CreateDateTime = fileInfo.CreationTime,
+                        ModifieDateTime = fileInfo.LastWriteTime,
+                        Type = fileType
+                    });
+                }
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
 
             // for each folder in dir
             if (includeFolders) {
                 Regex regex = new Regex(@"\\\.");
-                foreach (var directoryInfo in dirInfo.GetDirectories()) {
-                    if (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directoryInfo.FullName)) {
-                        // recursive
-                        if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
+                try {
+                    foreach (var directoryInfo in dirInfo.GetDirectories()) {
+                        if (!Config.Instance.FileExplorerIgnoreUnixHiddenFolders || !regex.IsMatch(directoryInfo.FullName)) {
+                            // recursive
+                            if (recursive && DateTime.Now.Subtract(_startTime).TotalMilliseconds <= Config.Instance.FileExplorerListFilesTimeOutInMs) {
                                 output.AddRange(ListFileOjectsInDirectory(directoryInfo.FullName, true, true, false));
+                            }
+                            output.Add(new FileListItem {
+                                DisplayText = directoryInfo.Name,
+                                BasePath = Path.GetDirectoryName(directoryInfo.FullName),
+                                FullPath = directoryInfo.FullName,
+                                CreateDateTime = directoryInfo.CreationTime,
+                                ModifieDateTime = directoryInfo.LastWriteTime,
+                                Type = FileType.Folder
+                            });
                         }
-                        output.Add(new FileListItem {
-                            DisplayText = directoryInfo.Name,
-                            BasePath = Path.GetDirectoryName(directoryInfo.FullName),
-                            FullPath = directoryInfo.FullName,
-                            CreateDateTime = directoryInfo.CreationTime,
-                            ModifieDateTime = directoryInfo.LastWriteTime,
-                            Type = FileType.Folder
-                        });
                     }
+                } catch (Exception e) {
+                    ErrorHandler.LogError(e);
                 }
             }
 

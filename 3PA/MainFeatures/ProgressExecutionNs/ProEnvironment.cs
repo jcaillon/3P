@@ -31,9 +31,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #region ProEnvironmentObject
 
+        [Serializable]
         internal class ProEnvironmentObject {
 
             #region Exported fields
+            /// <summary>
+            /// IF YOU HAD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
+            /// </summary>
 
             // primary key
             public string Name = "";
@@ -56,13 +60,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string BaseLocalPath = "";
 
             public string BaseCompilationPath = "";
-            public bool CompileLocally;
-            public bool CompileWithListing = true;
-            public bool CompilePushToFtp;
 
             public string ProwinPath = "";
             public string CmdLineParameters = "";
             public string LogFilePath = "";
+
+            public bool CompileLocally;
+            public bool CompileWithListing = true;
+            public bool CompilePushToFtp;
 
             // FTP options
             public string FtpHostName = "";
@@ -72,6 +77,21 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string FtpRemoteDir = "";
             public string FtpSslSupportMode = "";
             public string FtpTimeOut = "";
+
+            #endregion
+
+            #region private fields
+
+            /// <summary>
+            /// Finding files in directories is actually a task that can take a long time,
+            /// if we get a match, we save it here so the next time we look for the file,
+            /// we already know its full path
+            /// </summary>
+            private Dictionary<string, string> _savedFoundFiles = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+
+            private List<string> _currentProPathDirList;
+
+            private List<CompilationPath> _compilationPathList;
 
             #endregion
 
@@ -92,15 +112,30 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 Name = toCopy.Name;
                 Suffix = toCopy.Suffix;
                 Label = toCopy.Label;
+                DbConnectionInfo = toCopy.DbConnectionInfo;
                 ExtraPf = toCopy.ExtraPf;
                 IniPath = toCopy.IniPath;
                 ExtraProPath = toCopy.ExtraProPath;
-                CmdLineParameters = toCopy.CmdLineParameters;
+                
                 BaseLocalPath = toCopy.BaseLocalPath;
                 BaseCompilationPath = toCopy.BaseCompilationPath;
-                CompileLocally = toCopy.CompileLocally;
+                
                 ProwinPath = toCopy.ProwinPath;
+                CmdLineParameters = toCopy.CmdLineParameters;
                 LogFilePath = toCopy.LogFilePath;
+
+                CompileLocally = toCopy.CompileLocally;
+                CompileWithListing = toCopy.CompileWithListing;
+                CompilePushToFtp = toCopy.CompilePushToFtp;
+
+                FtpHostName = toCopy.FtpHostName;
+                FtpHostPort = toCopy.FtpHostPort;
+                FtpUserName = toCopy.FtpUserName;
+                FtpUserPassword = toCopy.FtpUserPassword;
+                FtpRemoteDir = toCopy.FtpRemoteDir;
+                FtpSslSupportMode = toCopy.FtpSslSupportMode;
+                FtpTimeOut = toCopy.FtpTimeOut;
+
                 _currentProPathDirList = toCopy._currentProPathDirList;
                 _compilationPathList = toCopy._compilationPathList;
             }
@@ -149,8 +184,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #endregion
 
             #region Get ProPath
-
-            private List<string> _currentProPathDirList;
 
             /// <summary>
             /// Call this method to compute the propath again the next time we call GetProPathFileList
@@ -201,13 +234,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #endregion
 
             #region Find file
-
-            /// <summary>
-            /// Finding files in directories is actually a task that can take a long time,
-            /// if we get a match, we save it here so the next time we look for the file,
-            /// we already know its full path
-            /// </summary>
-            private Dictionary<string, string> _savedFoundFiles = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
             /// <summary>
             /// tries to find the specified file in the current propath
@@ -329,8 +355,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #endregion
 
             #region CompilationPath
-
-            private List<CompilationPath> _compilationPathList;
 
             private List<CompilationPath> GetCompilationPathList {
                 get {

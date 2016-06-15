@@ -686,15 +686,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <param name="o"></param>
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
-            var compData = (FileListItem)o;
-            if (compData == null)
-                return false;
-            bool output = false;
-            // check for the filter match, the activated category,
-            if (compData.FilterFullyMatch && _displayedTypes.ContainsKey(compData.Type))
-                output = _displayedTypes[compData.Type].Activated;
-
-            return output;
+            var compData = (FileListItem) o;
+            // check for the filter match, the activated category
+            return (compData != null && 
+                compData.FilterFullyMatch && 
+                _displayedTypes != null && 
+                _displayedTypes.ContainsKey(compData.Type) && 
+                _displayedTypes[compData.Type].Activated);
         }
 
         #endregion
@@ -707,10 +705,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <returns></returns>
         public FileListItem GetCurrentFile() {
             try {
-                return (FileListItem)fastOLV.SelectedItem.RowObject;
+                if (fastOLV.SelectedItem != null)
+                    return (FileListItem) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
-                if (!(x is NullReferenceException))
-                    ErrorHandler.Log(x.Message);
+                ErrorHandler.Log(x.Message);
             }
             return null;
         }

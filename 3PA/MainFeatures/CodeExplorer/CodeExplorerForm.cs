@@ -654,17 +654,18 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <returns></returns>
         private bool FilterPredicate(object o) {
             var item = (CodeExplorerItem)o;
-            
-            // Match filter
-            bool output = item.FilterFullyMatch;
+            bool output = false;
+            if (item != null) {
+                // Match filter
+                output = item.FilterFullyMatch;
 
-            // when filtering, only display items not branches
-            if (_displayUnSorted || _isFiltering)
-                output = output && !item.CanExpand;
-            else
-                // branches it belongs to must be expanded
-                output = output && (item.Ancestors == null || !item.Ancestors.Exists(tree => tree.CanExpand && !tree.IsExpanded));
-
+                // when filtering, only display items not branches
+                if (_displayUnSorted || _isFiltering)
+                    output = output && !item.CanExpand;
+                else
+                    // branches it belongs to must be expanded
+                    output = output && (item.Ancestors == null || !item.Ancestors.Exists(tree => tree.CanExpand && !tree.IsExpanded));
+            }
             return output;
         }
 
@@ -678,7 +679,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <returns></returns>
         public CodeExplorerItem GetCurrentItem() {
             try {
-                return (CodeExplorerItem)_fastOlv.SelectedItem.RowObject;
+                if (_fastOlv.SelectedItem != null)
+                    return (CodeExplorerItem)_fastOlv.SelectedItem.RowObject;
             } catch (Exception x) {
                 ErrorHandler.Log(x.Message);
             }
