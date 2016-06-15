@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (Tests.cs) is part of 3P.
+// This file (PlugDebug.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -39,15 +39,11 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-            Config.ConfigObject x = null;
-            var y = (Config.ConfigObject) x;
-            UserCommunication.Notify("hi");
+
         }
 
         public static void StartDebug() {
-            //Appli.ForceClose();
-            var y = 0;
-            var x = 1/y;
+
         }
 
         public static void Test() {

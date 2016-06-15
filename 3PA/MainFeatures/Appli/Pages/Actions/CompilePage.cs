@@ -116,6 +116,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btReset, "Click to reset the options to their default values");
             btReset.ButtonPressed += BtResetOnButtonPressed;
 
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
+
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
 

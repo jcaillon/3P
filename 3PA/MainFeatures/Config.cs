@@ -548,11 +548,12 @@ namespace _3PA.MainFeatures {
 
         public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
 
+        // HELP URL
         public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
-
         public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
-
         public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
+        public static string UrlHelpMassCompiler { get { return @"http://jcaillon.github.io/3P/#/mass_compiler"; } }
+        
 
         /// <summary>
         /// Url for the ping webservice

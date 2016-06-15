@@ -53,6 +53,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.btReset = new YamuiFramework.Controls.YamuiButton();
             this.bt_export = new YamuiFramework.Controls.YamuiButton();
             this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -76,6 +77,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
             this.scrollPanel.ContentPanel.Controls.Add(this.btBrowse);
             this.scrollPanel.ContentPanel.Controls.Add(this.btUndo);
@@ -402,6 +404,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.lbl_report.TabStop = false;
             this.lbl_report.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
             // 
+            // linkurl
+            // 
+            this.linkurl.BackColor = System.Drawing.Color.Transparent;
+            this.linkurl.BaseStylesheet = null;
+            this.linkurl.Location = new System.Drawing.Point(257, 2);
+            this.linkurl.Name = "linkurl";
+            this.linkurl.Size = new System.Drawing.Size(161, 15);
+            this.linkurl.TabIndex = 146;
+            this.linkurl.TabStop = false;
+            this.linkurl.Text = "Learn more about this feature?";
+            // 
             // CompilePage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -444,5 +457,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private YamuiTextBox fl_include;
         private YamuiButton btReset;
         private YamuiButton bt_export;
+        private HtmlLabel linkurl;
     }
 }
