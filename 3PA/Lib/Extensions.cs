@@ -94,19 +94,33 @@ namespace _3PA.Lib {
 
         #region Colors
 
-        public static Color ChangeColorBrightness(Color color, double correctionFactor) {
-            double red = (255 - color.R)*correctionFactor + color.R;
-            double green = (255 - color.G)*correctionFactor + color.G;
-            double blue = (255 - color.B)*correctionFactor + color.B;
-            return Color.FromArgb(color.A, (int) red, (int) green, (int) blue);
+        /// <summary>
+        /// Lighten or darken an hexadecimal color, ratio + to lighten, - to darken
+        /// </summary>
+        public static string HtmlColorLuminance(this string htmlColor, double ratio) {
+            htmlColor = htmlColor.Replace("#", "");
+            // validate hex string
+	        if (htmlColor.Length == 3) {
+		        htmlColor = string.Concat(htmlColor[0], htmlColor[0], htmlColor[1], htmlColor[1], htmlColor[2], htmlColor[2]);
+	        } else if (htmlColor.Length != 6)
+                throw new Exception("You need to provide a hex format color!");
+	
+	        // convert to decimal and change luminosity
+	        var rgb = "#";
+	        for (var i = 0; i < 3; i++) {
+                var c = int.Parse(htmlColor.Substring(i * 2, 2), NumberStyles.HexNumber);
+                var res = ((int)Math.Round(Math.Min(Math.Max(0, c + (c * ratio)), 255))).ToString("X"); ;
+		        rgb += ("00" + res).Substring(res.Length);
+	        }
+
+            return rgb;
         }
 
-        public static Color LightenBy(this Color color, int percent) {
-            return ChangeColorBrightness(color, percent / 100.0);
-        }
-
-        public static Color DarkenBy(this Color color, int percent) {
-            return ChangeColorBrightness(color, -1 * percent / 100.0);
+        /// <summary>
+        /// returns true if the color can be considered as dark
+        /// </summary>
+        public static bool IsColorDark(this Color color) {
+            return color.GetBrightness() < 0.5;
         }
 
         #endregion
