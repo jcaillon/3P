@@ -18,12 +18,17 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using _3PA.Images;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
@@ -39,7 +44,8 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-
+            UserCommunication.Notify("Gooo");
+            ExtracFromLess();
         }
 
         public static void StartDebug() {
@@ -155,6 +161,110 @@ namespace _3PA.Tests {
         }
 
         #endregion
+
+
+        #region extract color schme from less files
+
+        private static Dictionary<string, string> colorsDictionary = new Dictionary<string, string>();
+
+        public static void ExtracFromLess() {
+
+            var inputLess = @"D:\Profiles\jcaillon\Downloads\variables.less";
+
+            var matchArray = new Dictionary<string, string> {
+                {"ThemeAccentColor", "@brand-primary"},
+                {"FormBack", "@body-bg"},
+                {"FormFore", "@text-color"},
+                {"FormBorder", "@gray-light"},
+                {"ScrollBarNormalBack", "@navbar-default-bg"},
+                {"ScrollThumbNormalBack", "@navbar-default-link-hover-bg"},
+                {"ScrollBarHoverBack", "@navbar-default-bg"},
+                {"ScrollThumbHoverBack", "@navbar-default-link-active-bg"},
+                {"ScrollBarDisabledBack", "@navbar-default-bg"},
+                {"ScrollThumbDisabledBack", "@navbar-default-bg"},
+                {"LabelNormalFore", "@text-color"},
+                {"LabelPressedFore", "@link-color"},
+                {"LabelDisabledFore", "@text-muted"},
+                {"TabNormalBack", "@body-bg"},
+                {"TabNormalFore", "@text-color"},
+                {"TabHoverFore", "@label-link-hover-color"},
+                {"TabPressedFore", "@brand-primary"},
+                {"ButtonNormalBack", "@btn-default-bg"},
+                {"ButtonNormalFore", "@btn-default-color"},
+                {"ButtonNormalBorder", "@btn-default-border"},
+                {"ButtonHoverBack", "@dropdown-link-hover-bg"},
+                {"ButtonHoverFore", "@dropdown-link-hover-color"},
+                {"ButtonHoverBorder", "@btn-default-border"},
+                {"ButtonPressedFore", "@brand-primary"},
+                {"ButtonDisabledBack", "@btn-default-color"},
+                {"ButtonDisabledFore", "@text-muted"},
+                {"ButtonDisabledBorder", "@btn-default-border"},
+                {"FormAltBack", "@gray-light"},
+                {"SubTextFore", "@brand-primary"},
+                {"MenuHoverBack", "@dropdown-link-hover-bg"},
+                {"MenuHoverFore", "@dropdown-link-hover-color"},
+                {"MenuFocusBack", "@navbar-default-link-active-bg"},
+                {"MenuFocusFore", "@dropdown-link-hover-color"},
+                {"AutoCompletionHighlightBack", "@brand-primary"},
+                {"AutoCompletionHighlightBorder", "@brand-primary"},
+            };
+
+            var result = new StringBuilder();
+
+            var regex1 = new Regex(@"(^@[\w-]*)\:\s*(.*?)\;(.*?(\#\w{3,6}))?$");
+            foreach (var line in File.ReadAllLines(inputLess).Select(s => s.Trim())) {
+                if (regex1.IsMatch(line)) {
+                    string colorName;
+                    var colorValue = GetLineValue(regex1, line, out colorName);
+                    if (colorValue != null) {
+                        if (!colorsDictionary.ContainsKey(colorName))
+                            colorsDictionary.Add(colorName, colorValue);
+                    }
+                }
+            }
+
+            foreach (var kpv in matchArray) {
+                // the var corresponds to one of our var?
+                if (colorsDictionary.ContainsKey(kpv.Value)) {
+                    result.AppendLine(kpv.Key + "\t" + colorsDictionary[kpv.Value]);
+                }
+            }
+
+            Clipboard.SetText(result.ToString());
+
+        }
+
+        public static string GetLineValue(Regex regex, string line, out string varName) {
+            foreach (Match match in regex.Matches(line)) {
+                varName = match.Groups[1].Value;
+                var val = match.Groups[2].Value;
+                if (val.StartsWith("@") && colorsDictionary.ContainsKey(val))
+                    return colorsDictionary[val];
+                if (val.EqualsCi("transparent") && colorsDictionary.ContainsKey("@body-bg"))
+                    return colorsDictionary["@body-bg"];
+                if (val.StartsWith("darken") || val.StartsWith("lighten")) {
+                    var darken = val.StartsWith("darken");
+                    val = val.Substring(val.IndexOf("(", StringComparison.CurrentCultureIgnoreCase) + 1);
+                    val = val.Substring(0, val.Length - 2);
+                    var split = val.Split(',');
+                    if (colorsDictionary.ContainsKey(split[0])) {
+                        val = colorsDictionary[split[0]];
+                        if (darken)
+                            val = ColorTranslator.ToHtml(ColorTranslator.FromHtml(val).DarkenBy((int)float.Parse((split[1].Trim().Replace("%", "")))));
+                        else
+                            val = ColorTranslator.ToHtml(ColorTranslator.FromHtml(val).LightenBy((int)float.Parse((split[1].Trim().Replace("%", "")))));
+                    }
+                    UserCommunication.Notify(val);
+                }
+                return val.StartsWith("#") ? val : match.Groups[4].Value;
+            }
+            varName = null;
+            return null;
+        }
+
+        #endregion
+
+
     }
 
     #region Parser

@@ -20,12 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
@@ -92,6 +91,26 @@ namespace _3PA.Lib {
         }
 
         #endregion
+
+        #region Colors
+
+        public static Color ChangeColorBrightness(Color color, double correctionFactor) {
+            double red = (255 - color.R)*correctionFactor + color.R;
+            double green = (255 - color.G)*correctionFactor + color.G;
+            double blue = (255 - color.B)*correctionFactor + color.B;
+            return Color.FromArgb(color.A, (int) red, (int) green, (int) blue);
+        }
+
+        public static Color LightenBy(this Color color, int percent) {
+            return ChangeColorBrightness(color, percent / 100.0);
+        }
+
+        public static Color DarkenBy(this Color color, int percent) {
+            return ChangeColorBrightness(color, -1 * percent / 100.0);
+        }
+
+        #endregion
+
 
         #region ui thread safe invoke
 
