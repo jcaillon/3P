@@ -170,6 +170,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpSetEnv + @"'>How to set up a new environment?</a>";
 
+            // register to change env event
+            ProEnvironment.OnEnvironmentChange += () => ToggleMode(ViewMode.Select);
+
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }

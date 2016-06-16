@@ -268,7 +268,6 @@ namespace _3PA.MainFeatures {
 
         public void Dispose() {
             ProEnvironment.OnEnvironmentChange -= OnEnvironmentChange;
-            UserCommunication.Notify("dipose");
         }
 
         #endregion
