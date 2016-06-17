@@ -95,25 +95,33 @@ namespace _3PA.Lib {
         #region Colors
 
         /// <summary>
-        /// Lighten or darken an hexadecimal color, ratio + to lighten, - to darken
+        /// Convert a string representation (html=hexa) of a color into a color
+        /// Allows to have the syntax : lighten(#000000, 35%) and darken(#FFFFFF, 35%)
         /// </summary>
-        public static string HtmlColorLuminance(this string htmlColor, double ratio) {
-            htmlColor = htmlColor.Replace("#", "");
-            // validate hex string
-	        if (htmlColor.Length == 3) {
-		        htmlColor = string.Concat(htmlColor[0], htmlColor[0], htmlColor[1], htmlColor[1], htmlColor[2], htmlColor[2]);
-	        } else if (htmlColor.Length != 6)
-                throw new Exception("You need to provide a hex format color!");
-	
-	        // convert to decimal and change luminosity
-	        var rgb = "#";
-	        for (var i = 0; i < 3; i++) {
-                var c = int.Parse(htmlColor.Substring(i * 2, 2), NumberStyles.HexNumber);
-                var res = ((int)Math.Round(Math.Min(Math.Max(0, c + (c * ratio)), 255))).ToString("X"); ;
-		        rgb += ("00" + res).Substring(res.Length);
-	        }
+        /// <param name="htmlColor"></param>
+        /// <returns></returns>
+        public static Color GetColorFromHtml(this string htmlColor) {
+            if (htmlColor[0] != '#') {
+                var values = htmlColor.Substring(htmlColor.IndexOf('(') + 1);
+                values = values.Substring(0, values.IndexOf(')'));
+                var splitValues = values.Split(',');
+                float ratio;
+                if (!float.TryParse(splitValues[1].Trim().Replace("%", ""), out ratio))
+                    ratio = 0;
+                return ColorTranslator.FromHtml(splitValues[0].Trim()).ModifyColorLuminosity((htmlColor[0] == 'l' ? 1 : -1) * ratio / 100);
+            }
+            return ColorTranslator.FromHtml(htmlColor);
+        }
 
-            return rgb;
+        /// <summary>
+        /// Lighten or darken a color, ratio + to lighten, - to darken
+        /// </summary>
+        public static Color ModifyColorLuminosity(this Color color, float ratio) {
+            var isBlack = color.R == 0 && color.G == 0 && color.B == 0;
+            var red = (int)Math.Min(Math.Max(0, color.R + ((isBlack ? 255 : color.R) * ratio)), 255);
+            var green = (int)Math.Min(Math.Max(0, color.G + ((isBlack ? 255 : color.G) * ratio)), 255);
+            var blue = (int)Math.Min(Math.Max(0, color.B + ((isBlack ? 255 : color.B) * ratio)), 255);
+            return Color.FromArgb(red, green, blue);
         }
 
         /// <summary>

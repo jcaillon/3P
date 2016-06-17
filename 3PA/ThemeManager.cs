@@ -88,8 +88,8 @@ namespace _3PA {
                 YamuiTheme.OnImageNeeded = YamuiThemeOnOnImageNeeded;
             }
 
-            if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
-                Config.Instance.SyntaxHighlightThemeId = 0;
+            if (Config.Instance.ThemeId < 0 || Config.Instance.ThemeId >= _listOfThemes.Count)
+                Config.Instance.ThemeId = 0;
 
             return _listOfThemes;
         }
@@ -199,7 +199,6 @@ namespace _3PA {
             public Color GenericLinkColor = Color.FromArgb(95, 158, 142);
             public Color GenericErrorColor = Color.OrangeRed;
 
-
             /// <summary>
             /// Set a value to this instance, by its property name
             /// </summary>
@@ -211,9 +210,8 @@ namespace _3PA {
                 if (property == null) {
                     return false;
                 }
-
                 if (property.FieldType == typeof (Color)) {
-                    property.SetValue(this, ColorTranslator.FromHtml((string) value));
+                    property.SetValue(this, ((string) value).GetColorFromHtml());
                 } else {
                     property.SetValue(this, value);
                 }

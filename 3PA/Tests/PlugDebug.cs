@@ -27,8 +27,6 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using _3PA.Images;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
@@ -49,6 +47,10 @@ namespace _3PA.Tests {
         }
 
         public static void StartDebug() {
+            UserCommunication.Notify(ColorTranslator.ToHtml("lighten(#CCCCCC, 5%);".GetColorFromHtml()));
+            UserCommunication.Notify(ColorTranslator.ToHtml("#000000".GetColorFromHtml()));
+            UserCommunication.Notify(ColorTranslator.ToHtml("d(#CCCCCC, 5%);".GetColorFromHtml()));
+            UserCommunication.Notify(ColorTranslator.ToHtml("lighten(#000000, 30.8%);".GetColorFromHtml()));
         }
 
         public static void Test() {
@@ -164,8 +166,8 @@ namespace _3PA.Tests {
         #region extract color scheme from less files
 
         private static void ExtracFromMultipleLess() {
-            var output = @"C:\Work\3P-side\bootwatch\out.txt";
-            foreach (var file in Directory.GetFiles(@"C:\Work\3P-side\bootwatch", "*.less")) {
+            var output = @"D:\Profiles\jcaillon\Downloads\bootwatch\out.txt";
+            foreach (var file in Directory.GetFiles(@"D:\Profiles\jcaillon\Downloads\bootwatch", "*.less")) {
                 ExtracFromLess(file, output);
             }
         }
@@ -180,19 +182,19 @@ namespace _3PA.Tests {
                 {"FormBack", "@body-bg"},
                 {"FormFore", "@text-color"},
                 {"FormBorder", "@jumbotron-bg"},
-                {"FormAltBack", "@jumbotron-bg"},
+                {"FormAltBack", "@breadcrumb-bg"},
                 {"SubTextFore", "@brand-primary"},
 
-                {"ScrollBarNormalBack", "@jumbotron-bg"},
-                {"ScrollThumbNormalBack", "@pagination-bg"},
-                {"ScrollBarHoverBack", "@jumbotron-bg"},
-                {"ScrollThumbHoverBack", "@buttonhover-bg"},
-                {"ScrollBarDisabledBack", "@jumbotron-bg"},
+                {"ScrollBarNormalBack", "@breadcrumb-bg"},
+                {"ScrollThumbNormalBack", "@breadcrumb-color"},
+                {"ScrollBarHoverBack", "@breadcrumb-bg"},
+                {"ScrollThumbHoverBack", "@breadcrumb-active-color"},
+                {"ScrollBarDisabledBack", "@breadcrumb-bg"},
                 {"ScrollThumbDisabledBack", "@buttondisabled-bg"},
 
                 {"ButtonNormalBack", "@pagination-bg"},
                 {"ButtonNormalFore", "@pagination-color"},
-                {"ButtonNormalBorder", "@pagination-border"},
+                {"ButtonNormalBorder", "@input-border"},
 
                 {"ButtonHoverBack", "@buttonhover-bg"},
                 {"ButtonHoverFore", "@buttonhover-color"},
@@ -200,7 +202,7 @@ namespace _3PA.Tests {
                 
                 {"ButtonDisabledBack", "@buttondisabled-bg"},
                 {"ButtonDisabledFore", "@text-muted"},
-                {"ButtonDisabledBorder", "@buttonhover-border"},
+                {"ButtonDisabledBorder", "@input-border"},
 
                 {"ButtonPressedFore", "@buttondpressed-bg"},
 
@@ -210,8 +212,8 @@ namespace _3PA.Tests {
 
                 {"TabNormalBack", "@body-bg"},
                 {"TabNormalFore", "@text-color"},
-                {"TabHoverFore", "@label-link-hover-color"},
-                {"TabPressedFore", "@brand-primary"},
+                {"TabHoverFore", "@link-color"},
+                {"TabPressedFore", "@link-hover-color"},
 
                 {"MenuHoverBack", "@buttonhover-bg"},
                 {"MenuHoverFore", "@buttonhover-color"},
@@ -260,11 +262,12 @@ namespace _3PA.Tests {
             }
 
             var isBgDark = ColorTranslator.FromHtml(colorsDictTemp["@body-bg"]).IsColorDark();
-            colorsDictTemp.Add("@brand-primary-darker", @"darken(@brand-warning, " + (isBgDark ? "-" : "") + "35%)");
-            colorsDictTemp.Add("@buttonhover-bg", @"darken(@pagination-bg, " + (isBgDark ? "" : "-") + "20%)");
+            colorsDictTemp.Add("@brand-primary-darker", @"darken(@brand-warning, " + (isBgDark ? "" : "-") + "35%)");
+            colorsDictTemp.Add("@buttonhover-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "20%)");
             colorsDictTemp.Add("@buttonhover-color", @"darken(@pagination-color, " + (isBgDark ? "" : "-") + "15%)");
-            colorsDictTemp.Add("@buttondisabled-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "35%)");
-            colorsDictTemp.Add("@buttondpressed-bg", @"darken(@pagination-bg, " + (isBgDark ? "" : "-") + "35%)");
+            colorsDictTemp.Add("@buttonhover-border", @"darken(@input-border, " + (isBgDark ? "-" : "") + "15%)");
+            colorsDictTemp.Add("@buttondisabled-bg", @"darken(@pagination-bg, " + (isBgDark ? "" : "-") + "35%)");
+            colorsDictTemp.Add("@buttondpressed-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "35%)");
 
             colorsDictionary.Clear();
             foreach (var color in colorsDictTemp) {
@@ -300,10 +303,8 @@ namespace _3PA.Tests {
                     link = link.Substring(0, link.Length - 2);
                     var split = link.Split(',');
                     link = FindColor(refDic, split[0]);
-                    //UserCommunication.Notify(split[0] + ": " + link + ", " + (split[1].Trim().Replace("%", "").Replace(",", ".")));
                     var percent = float.Parse((split[1].Trim().Replace("%", "").Replace(",", "."))) / 100;
-                    link = link.HtmlColorLuminance((darken ? -1 : 1) * percent);
-
+                    link = ColorTranslator.ToHtml(ColorTranslator.FromHtml(link).ModifyColorLuminosity((darken ? -1 : 1) * percent));
                 }
             } catch (Exception) {
             }

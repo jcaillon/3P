@@ -66,7 +66,7 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color textColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, IsFocused, IsHovered, IsPressed, Enabled);
+                Color textColor = YamuiThemeManager.Current.FormFore;
                 Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, IsFocused, IsHovered, Checked, Enabled);
                 Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
                 Color unfilledColor = YamuiThemeManager.Current.ButtonNormalBack;
