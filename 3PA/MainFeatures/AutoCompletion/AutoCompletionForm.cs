@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.FilteredLists;
@@ -116,8 +117,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
             fastOLV.BackColor = ThemeManager.Current.FormBack;
             fastOLV.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
             fastOLV.ForeColor = ThemeManager.Current.FormFore;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
+            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusedBack;
+            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusedFore;
             fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
             fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
 
@@ -265,7 +266,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         TabStop = false,
                         Location = new Point(xPos, Height - 28),
                         Type = type,
-                        AcceptsRightClick = true
+                        AcceptsRightClick = true,
+                        HideFocusedIndicator = true
                     };
                     but.ButtonPressed += HandleTypeClick;
                     htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
@@ -306,7 +308,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (allowedType == null) allowedType = new List<CompletionType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -319,7 +320,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (allowedType == null) allowedType = new List<CompletionType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -330,7 +330,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (_displayedTypes == null) return;
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = true;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -436,7 +435,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 // left click is only a toggle
                 _displayedTypes[clickedType].Activated = !_displayedTypes[clickedType].Activated;
 
-            _displayedTypes[clickedType].Invalidate();
             ApplyFilter();
             // give focus back
             GiveFocusBack();
@@ -667,36 +665,23 @@ namespace _3PA.MainFeatures.AutoCompletion {
     #endregion
 
     #region SelectorButtons
-    public class SelectorButton<T> : YamuiButton {
+
+    public class SelectorButton<T> : YamuiButtonImage {
+        private bool _activated;
 
         #region Fields
-        public bool Activated { get; set; }
+
+        public bool Activated {
+            get { return _activated; }
+            set {
+                _activated = value;
+                UseGreyScale = !_activated;
+            }
+        }
 
         public T Type { get; set; }
         #endregion
 
-        #region Paint Methods
-        protected override void OnPaint(PaintEventArgs e) {
-            try {
-                Color backColor = ThemeManager.Current.ButtonBg(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                var img = BackGrndImage;
-
-                // draw background
-                using (SolidBrush b = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(b, ClientRectangle);
-                }
-
-                // draw main image, in greyscale if not activated
-                if (!Activated)
-                    img = Utils.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
-                var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width)/2, (ClientRectangle.Height - img.Height)/2), new Size(img.Width, img.Height));
-                e.Graphics.DrawImage(img, recImg);
-            } catch {
-                // ignored
-            }
-        }
-
-        #endregion
     }
 
     #endregion

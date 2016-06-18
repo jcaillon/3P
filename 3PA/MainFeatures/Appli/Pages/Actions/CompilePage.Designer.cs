@@ -30,6 +30,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
             this.btUndo = new YamuiFramework.Controls.YamuiButtonImage();
@@ -53,7 +54,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.btReset = new YamuiFramework.Controls.YamuiButton();
             this.bt_export = new YamuiFramework.Controls.YamuiButton();
             this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -112,6 +112,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.scrollPanel.Size = new System.Drawing.Size(720, 550);
             this.scrollPanel.TabIndex = 0;
             // 
+            // linkurl
+            // 
+            this.linkurl.BackColor = System.Drawing.Color.Transparent;
+            this.linkurl.BaseStylesheet = null;
+            this.linkurl.Location = new System.Drawing.Point(257, 2);
+            this.linkurl.Name = "linkurl";
+            this.linkurl.Size = new System.Drawing.Size(161, 15);
+            this.linkurl.TabIndex = 146;
+            this.linkurl.TabStop = false;
+            this.linkurl.Text = "Learn more about this feature?";
+            // 
             // yamuiLabel2
             // 
             this.yamuiLabel2.AutoSize = true;
@@ -126,6 +137,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btBrowse
             // 
             this.btBrowse.BackGrndImage = null;
+            this.btBrowse.HideFocusedIndicator = false;
             this.btBrowse.Location = new System.Drawing.Point(225, 29);
             this.btBrowse.Margin = new System.Windows.Forms.Padding(0);
             this.btBrowse.Name = "btBrowse";
@@ -137,6 +149,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btUndo
             // 
             this.btUndo.BackGrndImage = null;
+            this.btUndo.HideFocusedIndicator = false;
             this.btUndo.Location = new System.Drawing.Point(245, 29);
             this.btUndo.Margin = new System.Windows.Forms.Padding(0);
             this.btUndo.Name = "btUndo";
@@ -165,6 +178,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btOpen.BackGrndImage = null;
+            this.btOpen.HideFocusedIndicator = false;
             this.btOpen.Location = new System.Drawing.Point(671, 29);
             this.btOpen.Margin = new System.Windows.Forms.Padding(0);
             this.btOpen.Name = "btOpen";
@@ -177,6 +191,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btHistoric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btHistoric.BackGrndImage = null;
+            this.btHistoric.HideFocusedIndicator = false;
             this.btHistoric.Location = new System.Drawing.Point(691, 29);
             this.btHistoric.Margin = new System.Windows.Forms.Padding(0);
             this.btHistoric.Name = "btHistoric";
@@ -216,13 +231,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleRecurs
             // 
             this.toggleRecurs.BackGrndImage = null;
-            this.toggleRecurs.Checked = false;
             this.toggleRecurs.Location = new System.Drawing.Point(268, 55);
             this.toggleRecurs.Name = "toggleRecurs";
             this.toggleRecurs.SetImgSize = new System.Drawing.Size(0, 0);
             this.toggleRecurs.Size = new System.Drawing.Size(40, 16);
             this.toggleRecurs.TabIndex = 121;
-            this.toggleRecurs.ToggleSize = 30;
             // 
             // htmlLabel1
             // 
@@ -241,13 +254,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // toggleMono
             // 
             this.toggleMono.BackGrndImage = null;
-            this.toggleMono.Checked = false;
             this.toggleMono.Location = new System.Drawing.Point(268, 81);
             this.toggleMono.Name = "toggleMono";
             this.toggleMono.SetImgSize = new System.Drawing.Size(0, 0);
             this.toggleMono.Size = new System.Drawing.Size(40, 16);
             this.toggleMono.TabIndex = 124;
-            this.toggleMono.ToggleSize = 30;
             // 
             // htmlLabel4
             // 
@@ -403,17 +414,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.lbl_report.TabIndex = 117;
             this.lbl_report.TabStop = false;
             this.lbl_report.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
-            // 
-            // linkurl
-            // 
-            this.linkurl.BackColor = System.Drawing.Color.Transparent;
-            this.linkurl.BaseStylesheet = null;
-            this.linkurl.Location = new System.Drawing.Point(257, 2);
-            this.linkurl.Name = "linkurl";
-            this.linkurl.Size = new System.Drawing.Size(161, 15);
-            this.linkurl.TabIndex = 146;
-            this.linkurl.TabStop = false;
-            this.linkurl.Text = "Learn more about this feature?";
             // 
             // CompilePage
             // 

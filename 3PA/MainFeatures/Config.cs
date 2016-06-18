@@ -604,7 +604,7 @@ namespace _3PA.MainFeatures {
         public static string FileZipDll { get { return Path.Combine(FolderUpdate, "7z.dll"); } }
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
-        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "latestRelease.zip"); } }
+        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
 
         #endregion
 

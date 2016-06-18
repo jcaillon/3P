@@ -42,8 +42,7 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-            UserCommunication.Notify("Gooo");
-            ExtracFromMultipleLess();
+            UserCommunication.Notify("zefhfiuhezrg@fzeueriughergher.zefieuhezhf".Between("@", "."));
         }
 
         public static void StartDebug() {
@@ -164,7 +163,7 @@ namespace _3PA.Tests {
         #endregion
 
         #region extract color scheme from less files
-
+        /*
         private static void ExtracFromMultipleLess() {
             var output = @"D:\Profiles\jcaillon\Downloads\bootwatch\out.txt";
             foreach (var file in Directory.GetFiles(@"D:\Profiles\jcaillon\Downloads\bootwatch", "*.less")) {
@@ -310,7 +309,7 @@ namespace _3PA.Tests {
             }
             return link;
         }
-
+        */
         #endregion
 
     }

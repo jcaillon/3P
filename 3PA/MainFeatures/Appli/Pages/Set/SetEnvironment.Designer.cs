@@ -345,6 +345,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft1.BackColor = System.Drawing.Color.Transparent;
             this.btleft1.BackGrndImage = null;
+            this.btleft1.HideFocusedIndicator = false;
             this.btleft1.Location = new System.Drawing.Point(170, 122);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
@@ -376,6 +377,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
+            this.btright1.HideFocusedIndicator = false;
             this.btright1.Location = new System.Drawing.Point(694, 122);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
@@ -450,6 +452,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft2.BackColor = System.Drawing.Color.Transparent;
             this.btleft2.BackGrndImage = null;
+            this.btleft2.HideFocusedIndicator = false;
             this.btleft2.Location = new System.Drawing.Point(170, 238);
             this.btleft2.Margin = new System.Windows.Forms.Padding(0);
             this.btleft2.Name = "btleft2";
@@ -464,6 +467,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
+            this.btright2.HideFocusedIndicator = false;
             this.btright2.Location = new System.Drawing.Point(694, 238);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
@@ -525,6 +529,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft3.BackColor = System.Drawing.Color.Transparent;
             this.btleft3.BackGrndImage = null;
+            this.btleft3.HideFocusedIndicator = false;
             this.btleft3.Location = new System.Drawing.Point(170, 321);
             this.btleft3.Margin = new System.Windows.Forms.Padding(0);
             this.btleft3.Name = "btleft3";
@@ -556,6 +561,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
+            this.btright3.HideFocusedIndicator = false;
             this.btright3.Location = new System.Drawing.Point(694, 321);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
@@ -584,6 +590,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft4.BackColor = System.Drawing.Color.Transparent;
             this.btleft4.BackGrndImage = null;
+            this.btleft4.HideFocusedIndicator = false;
             this.btleft4.Location = new System.Drawing.Point(170, 347);
             this.btleft4.Margin = new System.Windows.Forms.Padding(0);
             this.btleft4.Name = "btleft4";
@@ -615,6 +622,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
+            this.btright4.HideFocusedIndicator = false;
             this.btright4.Location = new System.Drawing.Point(694, 347);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
@@ -629,7 +637,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btConfFtp.BackColor = System.Drawing.Color.Transparent;
             this.btConfFtp.BackGrndImage = null;
-            this.btConfFtp.Location = new System.Drawing.Point(628, 370);
+            this.btConfFtp.HideFocusedIndicator = false;
+            this.btConfFtp.Location = new System.Drawing.Point(632, 370);
             this.btConfFtp.Margin = new System.Windows.Forms.Padding(0);
             this.btConfFtp.Name = "btConfFtp";
             this.btConfFtp.SetImgSize = new System.Drawing.Size(0, 0);
@@ -642,33 +651,29 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // tgCompLocally
             // 
             this.tgCompLocally.BackGrndImage = null;
-            this.tgCompLocally.Checked = false;
-            this.tgCompLocally.Location = new System.Drawing.Point(293, 373);
+            this.tgCompLocally.Location = new System.Drawing.Point(291, 373);
             this.tgCompLocally.Name = "tgCompLocally";
             this.tgCompLocally.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompLocally.Size = new System.Drawing.Size(30, 16);
+            this.tgCompLocally.Size = new System.Drawing.Size(35, 16);
             this.tgCompLocally.TabIndex = 137;
-            this.tgCompLocally.ToggleSize = 30;
             // 
             // tgCompWithLst
             // 
             this.tgCompWithLst.BackGrndImage = null;
-            this.tgCompWithLst.Checked = false;
-            this.tgCompWithLst.Location = new System.Drawing.Point(456, 373);
+            this.tgCompWithLst.Location = new System.Drawing.Point(454, 373);
             this.tgCompWithLst.Name = "tgCompWithLst";
             this.tgCompWithLst.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompWithLst.Size = new System.Drawing.Size(30, 16);
+            this.tgCompWithLst.Size = new System.Drawing.Size(35, 16);
             this.tgCompWithLst.TabIndex = 155;
             this.tgCompWithLst.ToggleSize = 30;
             // 
             // tgCompToFtp
             // 
             this.tgCompToFtp.BackGrndImage = null;
-            this.tgCompToFtp.Checked = false;
-            this.tgCompToFtp.Location = new System.Drawing.Point(591, 373);
+            this.tgCompToFtp.Location = new System.Drawing.Point(589, 373);
             this.tgCompToFtp.Name = "tgCompToFtp";
             this.tgCompToFtp.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tgCompToFtp.Size = new System.Drawing.Size(30, 16);
+            this.tgCompToFtp.Size = new System.Drawing.Size(35, 16);
             this.tgCompToFtp.TabIndex = 149;
             this.tgCompToFtp.ToggleSize = 30;
             // 
@@ -726,6 +731,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft5.BackColor = System.Drawing.Color.Transparent;
             this.btleft5.BackGrndImage = null;
+            this.btleft5.HideFocusedIndicator = false;
             this.btleft5.Location = new System.Drawing.Point(170, 402);
             this.btleft5.Margin = new System.Windows.Forms.Padding(0);
             this.btleft5.Name = "btleft5";
@@ -757,6 +763,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
+            this.btright5.HideFocusedIndicator = false;
             this.btright5.Location = new System.Drawing.Point(694, 402);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
@@ -814,6 +821,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btleft6.BackColor = System.Drawing.Color.Transparent;
             this.btleft6.BackGrndImage = null;
+            this.btleft6.HideFocusedIndicator = false;
             this.btleft6.Location = new System.Drawing.Point(170, 454);
             this.btleft6.Margin = new System.Windows.Forms.Padding(0);
             this.btleft6.Name = "btleft6";
@@ -845,6 +853,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
+            this.btright6.HideFocusedIndicator = false;
             this.btright6.Location = new System.Drawing.Point(694, 454);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";

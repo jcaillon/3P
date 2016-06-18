@@ -28,6 +28,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(DateTimePicker))]
     public class YamuiDateTimePicker : DateTimePicker {
+
         #region Fields
         [DefaultValue(false)]
         [Category("Yamui")]

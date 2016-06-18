@@ -45,15 +45,14 @@ namespace _3PA {
         /// </summary>
         public static Theme Current {
             get {
-                if (_currentTheme == null) {
+                if (_currentTheme == null)
                     Current = GetThemesList().ElementAt(Config.Instance.ThemeId);
-                }
                 return _currentTheme;
             }
             set {
                 _currentTheme = value;
+                _currentTheme.ComputeColorValues();
                 YamuiThemeManager.Current = _currentTheme;
-                //ThemeManager.Current.GetThemeImage() =;
             }
         }
 
@@ -62,30 +61,47 @@ namespace _3PA {
         /// <summary>
         /// Returns the list of all available themes
         /// </summary>
-        /// <returns></returns>
         public static List<Theme> GetThemesList() {
 
             if (_listOfThemes.Count == 0) {
+
                 Theme curTheme = null;
+                
+                // the dico below will contain key -> values of the theme
+                var valuesDictionnary = new Dictionary<string, string>();
+
                 ConfLoader.ForEachLine(Config.FileApplicationThemes, DataResources.ApplicationThemes, Encoding.Default, s => {
+
                     // beggining of a new theme, read its name
                     if (s.Length > 2 && s[0] == '>') {
+                        // Set the current them with the values we keep in the dico
+                        if (curTheme != null)
+                            curTheme.SetStringValues(valuesDictionnary);
+
                         _listOfThemes.Add(new Theme());
                         curTheme = _listOfThemes.Last();
                         curTheme.ThemeName = s.Substring(2).Trim();
-                    }
-                    if (curTheme == null)
+                    } else if (curTheme == null)
                         return;
 
-                    // fill the theme
+                    // fill the theme's dico
                     var items = s.Split('\t');
                     if (items.Count() == 2) {
-                        curTheme.SetValueOf(items[0].Trim(), items[1].Trim());
+                        var name = items[0].Trim();
+                        if (!valuesDictionnary.ContainsKey(name))
+                            valuesDictionnary.Add(name, items[1].Trim());
+                        else
+                            valuesDictionnary[name] = items[1].Trim();
                     }
                 });
 
+                // Set the current them with the values we keep in the dico
+                if (curTheme != null)
+                    curTheme.SetStringValues(valuesDictionnary);
+
                 // get background image event
-                YamuiTheme.OnImageNeeded = YamuiThemeOnOnImageNeeded;
+                if (YamuiTheme.OnImageNeeded == null)
+                    YamuiTheme.OnImageNeeded = YamuiThemeOnOnImageNeeded;
             }
 
             if (Config.Instance.ThemeId < 0 || Config.Instance.ThemeId >= _listOfThemes.Count)
@@ -116,14 +132,19 @@ namespace _3PA {
             // force the dockable to redraw
             CodeExplorer.ApplyColorSettings();
             FileExplorer.ApplyColorSettings();
-
             Application.DoEvents();
             Appli.Refresh();
         }
 
+        /// <summary>
+        /// Called when the list of themes is imported
+        /// </summary>
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
+            Current = Current;
+            Current.AccentColor = Current.ThemeAccentColor;
+            Config.Instance.AccentColor = Current.ThemeAccentColor;
             PlsRefresh();
         }
 
@@ -199,24 +220,58 @@ namespace _3PA {
             public Color GenericLinkColor = Color.FromArgb(95, 158, 142);
             public Color GenericErrorColor = Color.OrangeRed;
 
+            private Dictionary<string, string> _savedStringValues;
+
             /// <summary>
-            /// Set a value to this instance, by its property name
+            /// Saves the info extracted from the .conf file for this instance, allows to recompute the Color values later
             /// </summary>
-            /// <param name="propertyName"></param>
-            /// <param name="value"></param>
-            /// <returns></returns>
-            public bool SetValueOf(string propertyName, object value) {
-                var property = typeof (Theme).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-                if (property == null) {
-                    return false;
-                }
-                if (property.FieldType == typeof (Color)) {
-                    property.SetValue(this, ((string) value).GetColorFromHtml());
-                } else {
-                    property.SetValue(this, value);
-                }
-                return true;
+            /// <param name="values"></param>
+            public void SetStringValues(Dictionary<string, string> values) {
+                _savedStringValues = new Dictionary<string, string> {{"AccentColor", ""}};
+                foreach (var kpv in values) 
+                    _savedStringValues.Add(kpv.Key, kpv.Value);
             }
+
+            /// <summary>
+            /// Set the values of this instance, using a dictionnary of key -> values
+            /// </summary>
+            public void ComputeColorValues() {
+                // update AccentColor
+                _savedStringValues["AccentColor"] = ColorTranslator.ToHtml(Config.Instance.AccentColor);
+
+                // for each field of this object, try to assign its value with the _savedStringValues dico
+                foreach (var fieldInfo in typeof(Theme).GetFields()) {
+                    if (_savedStringValues.ContainsKey(fieldInfo.Name)) {
+                        try {
+                            var value = _savedStringValues[fieldInfo.Name];
+                            if (fieldInfo.FieldType == typeof(Color)) {
+                                fieldInfo.SetValue(this, FindHtmlColor(value).GetColorFromHtml());
+                            } else {
+                                fieldInfo.SetValue(this, value);
+                            }
+                        } catch (Exception) {
+                            ErrorHandler.Log("Couldn't convert the color : " + _savedStringValues[fieldInfo.Name].ProgressQuoter() + " for the field " + fieldInfo.Name.ProgressQuoter() + " and theme " + ThemeName.ProgressQuoter(), true);
+                        }
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Allows to replace the links (@PropertyName) by their values 
+            /// </summary>
+            private string FindHtmlColor(string value) {
+                if (value.ContainsFast("@")) {
+                    // try to replace a variable name by it's html color value
+                    value = value.RegexReplace(@"@([a-zA-Z]*)", match => {
+                        if (_savedStringValues.ContainsKey(match.Groups[1].Value))
+                            return _savedStringValues[match.Groups[1].Value];
+                        throw new Exception("Couldn't find the color " + match.Groups[1].Value + "!");
+                    });
+                    return FindHtmlColor(value);
+                }
+                return value;
+            }
+
         }
 
         #endregion

@@ -205,7 +205,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonExpandRetract.BackGrndImage = ImageResources.collapse;
             buttonRefresh.BackGrndImage = ImageResources.refresh;
             buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
-            buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
+            buttonIncludeExternal.BackGrndImage = ImageResources.External;
+            buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             // Register buttons to events
             buttonCleanText.ButtonPressed += buttonCleanText_Click;
@@ -292,8 +293,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // currently selected block
             if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
-                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusBack)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusFore), 1),
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedFore), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };
@@ -343,8 +344,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             _fastOlv.BackColor = ThemeManager.Current.FormBack;
             _fastOlv.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
             _fastOlv.ForeColor = ThemeManager.Current.FormFore;
-            _fastOlv.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
-            _fastOlv.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
+            _fastOlv.HighlightBackgroundColor = ThemeManager.Current.MenuFocusedBack;
+            _fastOlv.HighlightForegroundColor = ThemeManager.Current.MenuFocusedFore;
             _fastOlv.UnfocusedHighlightBackgroundColor = _fastOlv.HighlightBackgroundColor;
             _fastOlv.UnfocusedHighlightForegroundColor = _fastOlv.HighlightForegroundColor;
 
@@ -771,7 +772,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private void ButtonIncludeExternalOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             // change option and image
             Config.Instance.CodeExplorerDisplayExternalItems = !Config.Instance.CodeExplorerDisplayExternalItems;
-            buttonIncludeExternal.BackGrndImage = Config.Instance.CodeExplorerDisplayExternalItems ? ImageResources.External : Utils.MakeGrayscale3(ImageResources.External);
+            buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             // parse document
             Plug.OnDocumentSwitched();

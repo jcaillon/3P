@@ -125,7 +125,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             if (!string.IsNullOrEmpty(Config.Instance.CompileIncludeList)) {
                                 var hasMatch = false;
                                 foreach (var pattern in Config.Instance.CompileIncludeList.Split(',')) {
-                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasMatch = true;
                                 }
                                 toAdd = hasMatch;
@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             if (!string.IsNullOrEmpty(Config.Instance.CompileExcludeList)) {
                                 var hasNoMatch = true;
                                 foreach (var pattern in Config.Instance.CompileExcludeList.Split(',')) {
-                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasNoMatch = false;
                                 }
                                 toAdd = toAdd && hasNoMatch;

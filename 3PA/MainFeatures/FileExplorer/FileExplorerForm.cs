@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -121,13 +122,18 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilesInfo.OnUpdatedOperation += FilesInfoOnUpdatedOperation;
             FilesInfo.OnUpdatedErrors += FilesInfoOnUpdatedErrors;
 
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
-            UpdateErrorButtons(false);
-
-            btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
             btPrevError.ButtonPressed += BtPrevErrorOnButtonPressed;
             btNextError.ButtonPressed += BtNextErrorOnButtonPressed;
             btClearAllErrors.ButtonPressed += BtClearAllErrorsOnButtonPressed;
+            btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
+
+            btPrevError.BackGrndImage = ImageResources.Previous;
+            btNextError.BackGrndImage = ImageResources.Next;
+            btClearAllErrors.BackGrndImage = ImageResources.ClearAll;
+            btGetHelp.BackGrndImage = ImageResources.GetHelp;
+            btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
+
+            UpdateErrorButtons(false);
 
             toolTipHtml.SetToolTip(btGetHelp, "Toggle on/off the <b>detailed help</b> for compilation errors and warnings");
             toolTipHtml.SetToolTip(btPrevError, "<b>Move the caret</b> to the previous error");
@@ -259,8 +265,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             // currently document
             if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
-                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusBack)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusFore), 1),
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedFore), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };
@@ -312,8 +318,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             fastOLV.BackColor = ThemeManager.Current.FormBack;
             fastOLV.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
             fastOLV.ForeColor = ThemeManager.Current.FormFore;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
+            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusedBack;
+            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusedFore;
             fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
             fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
 
@@ -430,7 +436,17 @@ namespace _3PA.MainFeatures.FileExplorer {
                         int yPox = Height - 28;
                         _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
                         foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                            var but = new SelectorButton<FileType> {BackGrndImage = GetImageFromStr(type + "Type"), Activated = true, Size = new Size(24, 24), TabStop = false, Location = new Point(xPos, yPox), Type = type, AcceptsRightClick = true, Anchor = AnchorStyles.Left | AnchorStyles.Bottom};
+                            var but = new SelectorButton<FileType> {
+                                BackGrndImage = GetImageFromStr(type + "Type"), 
+                                Activated = true, 
+                                Size = new Size(24, 24), 
+                                TabStop = false, 
+                                Location = new Point(xPos, yPox), 
+                                Type = type, 
+                                AcceptsRightClick = true, 
+                                Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                                HideFocusedIndicator = true
+                            };
                             but.ButtonPressed += HandleTypeClick;
                             toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
                             _displayedTypes.Add(type, but);
@@ -461,7 +477,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -474,7 +489,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -521,7 +535,6 @@ namespace _3PA.MainFeatures.FileExplorer {
                 // left click is only a toggle
                 _displayedTypes[clickedType].Activated = !_displayedTypes[clickedType].Activated;
 
-            _displayedTypes[clickedType].Invalidate();
             ApplyFilter();
         }
 
@@ -840,12 +853,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             btPrevError.Enabled = activate;
             btNextError.Enabled = activate;
             btClearAllErrors.Enabled = activate;
-            btPrevError.BackGrndImage = activate ? ImageResources.Previous : Utils.MakeGrayscale3(ImageResources.Previous);
-            btNextError.BackGrndImage = activate ? ImageResources.Next : Utils.MakeGrayscale3(ImageResources.Next);
-            btClearAllErrors.BackGrndImage = activate ? ImageResources.ClearAll : Utils.MakeGrayscale3(ImageResources.ClearAll);
-            btPrevError.Invalidate();
-            btNextError.Invalidate();
-            btClearAllErrors.Invalidate();
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -863,7 +870,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtGetHelpOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
             FilesInfo.ClearAnnotationsAndMarkers();
             FilesInfo.UpdateErrorsInScintilla();
             Npp.GrabFocus();

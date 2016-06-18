@@ -102,9 +102,7 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static Color GetColorFromHtml(this string htmlColor) {
             if (htmlColor[0] != '#') {
-                var values = htmlColor.Substring(htmlColor.IndexOf('(') + 1);
-                values = values.Substring(0, values.IndexOf(')'));
-                var splitValues = values.Split(',');
+                var splitValues = htmlColor.Between("(", ")").Split(',');
                 float ratio;
                 if (!float.TryParse(splitValues[1].Trim().Replace("%", ""), out ratio))
                     ratio = 0;
@@ -132,7 +130,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region ui thread safe invoke
 
@@ -198,7 +195,7 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Usage :  Extensions.EnumUtil.GetValues<MyEnum>()
+        /// Usage :  Extensions.EnumUtil.GetValues MyEnum>()
         /// </summary>
         public static class EnumUtil {
             public static IEnumerable<T> GetValues<T>() {
@@ -209,6 +206,53 @@ namespace _3PA.Lib {
         #endregion
 
         #region string extensions
+
+        /// <summary>
+        /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
+        /// good website : https://regex101.com/
+        /// </summary>
+        public static bool RegexMatch(this string source, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
+            var reg = new Regex(regex);
+            return reg.Match(source).Success;
+        }
+
+        /// <summary>
+        /// Allows to replace a string with a regular expression, uses the IgnoreCase option by default,
+        /// replacementStr can contains $1, $2...
+        /// </summary>
+        public static string RegexReplace(this string source, string regexString, string replacementStr, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Replace(source, replacementStr);
+        }
+
+        /// <summary>
+        /// Allows to replace a string with a regular expression, uses the IgnoreCase option by default
+        /// </summary>
+        public static string RegexReplace(this string source, string regexString, MatchEvaluator matchEvaluator, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Replace(source, matchEvaluator);
+        }
+
+        /// <summary>
+        /// Allows to find a string with a regular expression, uses the IgnoreCase option by default, returns a match collection,
+        /// to be used foreach (Match match in collection) { with match.Groups[1].Value being the first capture [2] etc...
+        /// </summary>
+        public static MatchCollection RegexFind(this string source, string regexString, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Matches(source);
+        }   
+
+        /// <summary>
+        /// Get string value between [first] a and [last] b (not included), returns null if it failes
+        /// </summary>
+        public static string Between(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
+            int posA = value.IndexOf(a, comparer);
+            int posB = value.LastIndexOf(b, comparer);
+            if (posA == -1 || posB == -1)
+                return null;
+            int adjustedPosA = posA + a.Length;
+            return adjustedPosA >= posB ? null : value.Substring(adjustedPosA, posB - adjustedPosA);
+        }
 
         /// <summary>
         /// Allows to tranform a matching string using * and ? (wildcards) into a valid regex expression
@@ -222,18 +266,6 @@ namespace _3PA.Lib {
             var startStar = pattern[0].Equals('*');
             var endStar = pattern[pattern.Length - 1].Equals('*');
             return (!startStar ? (endStar ? "^" : "") : "") + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + (!endStar ? (startStar ? "$" : "") : "");
-        }
-
-        /// <summary>
-        /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
-        /// </summary>
-        /// <param name="toCheck"></param>
-        /// <param name="regex"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public static bool MatchRegex(this string toCheck, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
-            var reg = new Regex(regex);
-            return reg.Match(toCheck).Success;
         }
 
         /// <summary>
@@ -414,7 +446,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region region string misc
 

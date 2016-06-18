@@ -22,9 +22,10 @@ using System.Drawing.Imaging;
 
 namespace YamuiFramework.Helper {
 
-    internal static class Utilities {
+    public static class Utilities {
 
-        public static Bitmap MakeGrayscale3(Bitmap original) {
+        public static Image MakeGrayscale3(Image original) {
+
             //create a blank bitmap the same size as original
             var newBitmap = new Bitmap(original.Width, original.Height);
 

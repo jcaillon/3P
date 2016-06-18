@@ -32,6 +32,7 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(CheckBox))]
 
     public class YamuiCheckBox : CheckBox {
+
         #region Fields
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -61,6 +62,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region Paint Methods
+
         protected void PaintTransparentBackground(Graphics graphics, Rectangle clipRect) {
             graphics.Clear(Color.Transparent);
             if ((Parent != null)) {
@@ -79,31 +81,16 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        protected override void OnPaintBackground(PaintEventArgs e) { }
-
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
-            try {
-                PaintTransparentBackground(e.Graphics, DisplayRectangle);
-            } catch {
-                Invalidate();
-            }
-        }
-
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                CustomOnPaintBackground(e);
-                OnPaintForeground(e);
-            } catch {
-                Invalidate();
-            }
-        }
 
-        protected virtual void OnPaintForeground(PaintEventArgs e) {
-            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled);
-            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled);
-            Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
+            Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
+            Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, _isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);
 
             var backRect = new Rectangle(0, Height / 2 - 6, 12, 12);
+            Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
+
+            PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
             // Paint the back + border of the checkbox
             using (SolidBrush b = new SolidBrush(backColor)) {
@@ -118,15 +105,12 @@ namespace YamuiFramework.Controls {
             // paint the form inside
             if (Checked) {
                 if (CheckState != CheckState.Indeterminate) {
-                    //using (Pen p = new Pen(ThemeManager.AccentColor, 2)) {
-                    //    e.Graphics.DrawLines(p, new[] { new Point(2, Height / 2 - 1), new Point(6, Height / 2 + 3), new Point(10, Height / 2 - 4) });
-                    //}
-                    var fuRect = ClientRectangle;
-                    fuRect.Width = 15;
-                    fuRect.Offset(0, -3);
-                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, YamuiThemeManager.Current.AccentColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    var checkRect = ClientRectangle;
+                    checkRect.Width = 15;
+                    checkRect.Offset(0, -3);
+                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
-                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
+                    using (SolidBrush b = new SolidBrush(foreColor)) {
                         Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);
                         e.Graphics.FillRectangle(b, boxRect);
                     }
@@ -134,8 +118,7 @@ namespace YamuiFramework.Controls {
 
             }
 
-            Rectangle textRect = new Rectangle(16, 0, Width - 16, Height);
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, FontManager.GetTextFormatFlags(TextAlign));
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, YamuiThemeManager.Current.FormFore, FontManager.GetTextFormatFlags(TextAlign));
         }
 
         #endregion

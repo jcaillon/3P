@@ -85,6 +85,19 @@ namespace YamuiFramework.Controls {
         public Size SetImgSize { get; set; }
 
         /// <summary>
+        /// Set to true to use grey scale only for the image (happens by default if the button is disabled)
+        /// </summary>
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public bool UseGreyScale {
+            get { return _useGreyScale; }
+            set {
+                _useGreyScale = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
         /// </summary>
         [Category("Yamui")]
@@ -106,6 +119,15 @@ namespace YamuiFramework.Controls {
         public bool IsHovered;
         public bool IsPressed;
         public bool IsFocused;
+        private bool _useGreyScale;
+        private Image _greyScaleBackGrndImage;
+
+        /// <summary>
+        /// Returns a grey scale version of the image
+        /// </summary>
+        public Image GreyScaleBackGrndImage {
+            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = Utilities.MakeGrayscale3(BackGrndImage)); }
+        }
 
         #endregion
 
@@ -173,16 +195,15 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
 
-            // background
             var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, IsPressed, Enabled);
+            var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
+            var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
+
+            // background
             if (backColor != Color.Transparent)
                 e.Graphics.Clear(backColor);
             else
                 PaintTransparentBackground(e.Graphics, DisplayRectangle);
-
-            // foreground
-            var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
-            var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, IsPressed, Enabled);
 
             // border?
             if (borderColor != Color.Transparent)
@@ -213,12 +234,8 @@ namespace YamuiFramework.Controls {
                         e.Graphics.FillRectangle(b, rectImg);
                 } else {
                     // draw main image, in greyscale if not activated
-                    var img = BackGrndImage;
-                    if (img != null) {
-                        if (!Enabled)
-                            img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(imgSize.Width, imgSize.Height)));
-                        e.Graphics.DrawImage(img, rectImg);
-                    }
+                    if (BackGrndImage != null)
+                        e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, rectImg);
                 }
 
                 // text

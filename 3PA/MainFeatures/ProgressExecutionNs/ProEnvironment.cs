@@ -340,12 +340,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 bool singleUserMode = false;
 
                 if (!string.IsNullOrEmpty(ExtraPf)) {
-                    if (ExtraPf.MatchRegex(@"\s-1", RegexOptions.Singleline))
+                    if (ExtraPf.RegexMatch(@"\s-1", RegexOptions.Singleline))
                         singleUserMode = true;
                 }
 
                 if (!string.IsNullOrEmpty(GetPfPath()) && File.Exists(GetPfPath())) {
-                    if (File.ReadAllText(GetPfPath(), Encoding.Default).MatchRegex(@"\s-1", RegexOptions.Singleline))
+                    if (File.ReadAllText(GetPfPath(), Encoding.Default).RegexMatch(@"\s-1", RegexOptions.Singleline))
                         singleUserMode = true;
                 }
 
@@ -391,7 +391,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // try to find the first item that match the input pattern
                 if (GetCompilationPathList.Count > 0) {
-                    var canFind = GetCompilationPathList.FirstOrDefault(item => sourcePath.MatchRegex(item.InputPathPattern.WildCardToRegex()));
+                    var canFind = GetCompilationPathList.FirstOrDefault(item => sourcePath.RegexMatch(item.InputPathPattern.WildCardToRegex()));
                     if (canFind != null) {
                         if (Path.IsPathRooted(canFind.OutputPathAppend)) {
                             baseComp = canFind.OutputPathAppend;

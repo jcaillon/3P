@@ -250,7 +250,6 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-
         #region generic methods
 
         private static void DoDelete(ConfLine conf) {

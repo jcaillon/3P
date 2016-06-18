@@ -82,7 +82,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
-
         public override void OnShow() {
             // themes combo box
             cbApplication.SelectedIndexChanged -= CbApplicationOnSelectedIndexChanged;
@@ -125,7 +124,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             try {
                 ThemeManager.Current = ThemeManager.GetThemesList()[cbApplication.SelectedIndex];
                 ThemeManager.Current.AccentColor = ThemeManager.Current.ThemeAccentColor;
-                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
+                Config.Instance.AccentColor = ThemeManager.Current.ThemeAccentColor;
                 _checkButton.Checked = false;
             } catch (Exception x) {
                 if (!(x is NullReferenceException))

@@ -36,6 +36,8 @@ namespace YamuiFramework.Controls {
 
         private bool _checked;
 
+        [DefaultValue(false)]
+        [Category("Yamui")]
         public bool Checked {
             get { return _checked; }
             set {
@@ -44,6 +46,8 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        [DefaultValue(35)]
+        [Category("Yamui")]
         public int ToggleSize { get; set; }
 
         #endregion
@@ -66,47 +70,48 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color textColor = YamuiThemeManager.Current.FormFore;
-                Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, IsFocused, IsHovered, Checked, Enabled);
-                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
-                Color unfilledColor = YamuiThemeManager.Current.ButtonNormalBack;
-                if (unfilledColor == YamuiThemeManager.Current.FormBack) unfilledColor = borderColor;
-                Color fillColor = Checked ? YamuiThemeManager.Current.AccentColor : unfilledColor;
+                var backColor = YamuiThemeManager.Current.ButtonBg(BackColor, UseCustomBackColor, IsFocused, IsHovered, false, Enabled, Checked);
+                var borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, false, Enabled, Checked);
+                var foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, UseCustomForeColor, IsFocused, IsHovered, false, Enabled, Checked);
 
                 if (ToggleSize == 0)
-                    ToggleSize = string.IsNullOrEmpty(Text) ? Width : 30;
+                    ToggleSize = 30;
 
                 Rectangle textRect = new Rectangle(ToggleSize + 3, 0, Width - 42, Height);
-                Rectangle backRect = new Rectangle(0, 0, ToggleSize, Height);
+                Rectangle backRect = new Rectangle(0, 0, string.IsNullOrEmpty(Text) ? Width : ToggleSize, Height);
 
                 // background
-                var backColor = YamuiThemeManager.Current.FormBack;
                 if (!string.IsNullOrEmpty(Text)) {
                     PaintTransparentBackground(e.Graphics, DisplayRectangle);
                     if (backColor != Color.Transparent)
-                        using (SolidBrush b = new SolidBrush(backColor)) {
+                        using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormBack)) {
                             e.Graphics.FillRectangle(b, backRect);
                         }
                 } else {
                     if (backColor != Color.Transparent)
-                        e.Graphics.Clear(backColor);
+                        e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
                     else
                         PaintTransparentBackground(e.Graphics, DisplayRectangle);
                 }
-
+                
                 // draw the back
                 e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-                using (SolidBrush b = new SolidBrush(fillColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(Height / 2, 0, backRect.Width - Height, Height));
-                    e.Graphics.FillEllipse(b, new Rectangle(0, 0, Height, Height));
-                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height, 0, Height, Height));
+                using (SolidBrush b = new SolidBrush(borderColor)) {
+                    e.Graphics.FillRectangle(b, new Rectangle(Height / 2, 0, backRect.Width - Height - 1, Height - 1));
+                    e.Graphics.FillEllipse(b, new Rectangle(0, 0, Height - 1, Height - 1));
+                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height, 0, Height - 1, Height - 1));
+                }
+                using (SolidBrush b = new SolidBrush(backColor)) {
+                    e.Graphics.FillRectangle(b, new Rectangle(Height / 2 + 1, 1, backRect.Width - Height - 3, Height - 3));
+                    e.Graphics.FillEllipse(b, new Rectangle(1, 1, Height - 3, Height - 3));
+                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height, 1, Height - 3, Height - 3));
                 }
                 // draw foreground ellipse
                 using (SolidBrush b = new SolidBrush(foreColor)) {
                     if (!Checked)
-                        e.Graphics.FillEllipse(b, new Rectangle(2, 2, Height - 4, Height - 4));
+                        e.Graphics.FillEllipse(b, new Rectangle(2, 2, Height - 5, Height - 5));
                     else
-                        e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height + 2, 2, Height - 4, Height - 4));
+                        e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height + 2, 2, Height - 5, Height - 5));
                 }
                 // draw checked.. or not
                 if (Checked) {
@@ -116,11 +121,36 @@ namespace YamuiFramework.Controls {
                     TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
                 e.Graphics.SmoothingMode = SmoothingMode.Default;
+                
+                
+                // foreground
+                /*
+                e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
+                // draw foreground ellipse
+                using (SolidBrush b = new SolidBrush(foreColor)) {
+                    if (!Checked)
+                        e.Graphics.FillEllipse(b, new Rectangle(2, 2, Height - 5, Height - 5));
+                    else
+                        e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height + 2, 2, Height - 5, Height - 5));
+                }
+                e.Graphics.SmoothingMode = SmoothingMode.Default;
 
+                if (Checked) {
+                    // draw check
+                    var checkRect = new Rectangle(backRect.Width - 18 - 2*Height/3, -3, 15, Height);
+                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                }
 
+                // border?
+                if (borderColor != Color.Transparent)
+                    using (var p = new Pen(borderColor)) {
+                        var borderRect = new Rectangle(0, 0, backRect.Width - 1, backRect.Height - 1);
+                        e.Graphics.DrawRectangle(p, borderRect);
+                    }
+                */
                 // text?
                 if (!string.IsNullOrEmpty(Text))
-                    TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, textColor, FontManager.GetTextFormatFlags(TextAlign));
+                    TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, YamuiThemeManager.Current.FormFore, FontManager.GetTextFormatFlags(TextAlign));
             } catch {
                 // ignored
             }

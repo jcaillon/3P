@@ -95,7 +95,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = item.ItemId,
                     Text = item.ItemSpec ?? "",
                     Name = "bt" + item.ItemId,
-                    TabStop = false
+                    TabStop = true
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;
