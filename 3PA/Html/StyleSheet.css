@@ -4,7 +4,7 @@ html {
     padding: 0;
     margin: 0;
     Font: 12px "Segoe UI";
-    color: %FGCOLOR%;
+    color: @FormFore;
 }
 
 body {
@@ -15,19 +15,19 @@ body {
 hr {
     border: 0;
     height: 1px;
-    background: %FORMBORDER% no-repeat scroll center;
+    background: @FormBorder no-repeat scroll center;
     width: 70%;
 }
 
 a:link {
-    color: %LINKCOLOR%;
+    color: @GenericLinkColor;
     text-decoration: underline;
     /*margin: 0px;
     padding: 0px;*/
 }
 
 code {
-    background-color: %ALTERNATEBGCOLOR%;
+    background-color: @FormAltBack;
     padding-left: 5px;
     padding-right: 5px;
 }
@@ -35,52 +35,50 @@ code {
 
 /* this decorates the htmllabels */
 .yamui-text { 
-    color: %FGCOLOR%;
+    color: @FormFore;
     margin: 0;
     padding: 0;
 }
 
 /*This is the class of the HtmlToolTip*/
 .yamui-tooltip {
-    border: solid 2px %FORMBORDER%;
-    background-color: %BGCOLOR%;
-    color: %FGCOLOR%;
+    border: solid 2px @FormBorder;
+    background-color: @FormBack;
+    color: @FormFore;
     padding: 4px;
 }
 
-
-
 .contextMenuTitle {
     border-width: 0;
-    color: %FGCOLOR%;
+    color: @FormFore;
     padding: 5px;
     font-weight: bold;
     font-size: 13px;
     text-align: center;
-    /*background-color: %BGCOLOR%;*/
+    /*background-color: @FormBack;*/
     padding-right: 20px;
 }
 
 .AccentColor {
-    color: %ACCENTCOLOR%;
+    color: @AccentColor;
 }
 
 .SubTextColor {
-    color: %SUBSTRINGCOLOR%;
+    color: @SubTextFore;
 }
 
 .AlternatBackColor {
-    background-color: %ALTERNATEBGCOLOR%;
-    color: %FGCOLOR%;
+    background-color: @FormAltBack;
+    color: @FormFore;
 }
 
 .NormalBackColor {
-    background-color: %BGCOLOR%;
-    color: %FGCOLOR%;
+    background-color: @FormBack;
+    color: @FormFore;
 }
 
 .NormalForeColor {
-    color: %FGCOLOR%;
+    color: @FormFore;
 }
 
 
@@ -91,15 +89,15 @@ code {
 /* TOOL TIPS */
 
 .InfoToolTip {
-    background-color: %BGCOLOR%;
-    color: %FGCOLOR%;
+    background-color: @FormBack;
+    color: @FormFore;
     Font: 12px "Segoe UI";
     border: none;
 }
 .ToolTipName {
     font-weight: bold;
     font-size: 13px;
-    background-color: %ALTERNATEBGCOLOR%;
+    background-color: @FormAltBack;
     margin-bottom: 5px;
 }
 .ToolTipDisplayText {
@@ -108,14 +106,14 @@ code {
     margin-bottom: 5px;
 }
 .ToolTipBottomGoTo {
-    background-color: %ALTERNATEBGCOLOR%;
+    background-color: @FormAltBack;
     margin-top: 10px;
     padding: 4px;
 
     font-size: 11px;
 }
 .ToolGotoDefinition:link {
-    color: %LINKCOLOR%;
+    color: @GenericLinkColor;
     text-decoration: underline;
 }
 .ToolTipDownArrow {
@@ -123,7 +121,7 @@ code {
     font-style: normal;
 }
 .ToolTipSubString {
-    color: %SUBSTRINGCOLOR%;
+    color: @SubTextFore;
     font-weight: bold;
 }
 .ToolTipRowWithImg {
@@ -143,7 +141,7 @@ code {
     padding-right: 3px;
 }
 .ToolTipcodeSnippet {
-    background-color: %ALTERNATEBGCOLOR%;
+    background-color: @FormAltBack;
     margin: 10px 2px;
     padding: 5px 5px;
     word-wrap: normal;
@@ -157,13 +155,13 @@ code {
 .NotificationTitle {
     font-size: 24px;
     font-weight: bold;
-    color: %FGCOLOR%;
+    color: @FormFore;
 }
 
 .NotificationSubTitle {
     font-size: 18px;
     font-weight: bold;
-    color: %SUBSTRINGCOLOR%;
+    color: @SubTextFore;
 }
 
 

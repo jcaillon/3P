@@ -17,26 +17,45 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
+using System;
+using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
+using YamuiFramework.Helper;
 
 namespace YamuiFramework.Themes {
 
-    public class YamuiTheme {
+    /// <summary>
+    /// Holds a theme configuration for the YamuiFramework
+    /// </summary>
+    public class YamuiTheme : GenericThemeHolder {
 
-        public delegate Image ImageGetter(string imageToLoad);
-        public static ImageGetter OnImageNeeded;
+        #region Accent color
+
+        private Color _accentColor;
 
         /// <summary>
-        /// This field is dynamic and can be modified by the calling program
+        /// Accent color of the theme, can be set to Color.Empty in order to make it equal to the ThemeAccentColor
         /// </summary>
-        public Color AccentColor = Color.Fuchsia;
+        public Color AccentColor {
+            get { return _accentColor; }
+            set {
+                if (value == Color.Empty) {
+                    var foundPairColor = SavedStringValues.FirstOrDefault(pair => pair.Key.Equals("ThemeAccentColor"));
+                    if (!foundPairColor.Equals(new KeyValuePair<string, string>()))
+                        _accentColor = ColorTranslator.FromHtml(foundPairColor.Value);
+                    else
+                        _accentColor = Color.Fuchsia;
+                } else
+                    _accentColor = value;
+                SetStringValues("AccentColor", ColorTranslator.ToHtml(_accentColor));
+            }
+        }
+
+        #endregion
 
         #region Stored in the config file
-
-        /// <summary>
-        /// Theme's name
-        /// </summary>
-        public string ThemeName;
 
         public string PageBackGroundImage = "";
 
@@ -93,6 +112,7 @@ namespace YamuiFramework.Themes {
         public Color ButtonImagePressedBack = Color.FromArgb(190, 190, 190);
         public Color ButtonImageFocusedIndicator = Color.FromArgb(190, 190, 190);
 
+        public Color MenuNormalAltBack = Color.FromArgb(200, 200, 200);
         public Color MenuNormalBack = Color.FromArgb(230, 230, 230);
         public Color MenuNormalFore = Color.FromArgb(30, 30, 30);
         public Color MenuHoverBack = Color.FromArgb(206, 226, 252);
@@ -103,20 +123,6 @@ namespace YamuiFramework.Themes {
         #endregion
 
         #region Get colors
-
-        /// <summary>
-        /// Gets the background image for the current theme
-        /// </summary>
-        public Image GetThemeImage() {
-            var yamuiImage = (!string.IsNullOrEmpty(PageBackGroundImage) ? (Image) Resources.Resources.ResourceManager.GetObject(PageBackGroundImage) : null);
-
-            // can't find the image locally (in Yamui), use the event to try and find one from the user program
-            if (yamuiImage == null && OnImageNeeded != null) {
-                yamuiImage = OnImageNeeded(PageBackGroundImage);
-            }
-
-            return yamuiImage;
-        }
 
         /// <summary>
         /// This class is used for sliders as well as scrollbars
@@ -287,5 +293,19 @@ namespace YamuiFramework.Themes {
 
         #endregion
 
+        #region base class overload
+
+        /// <summary>
+        /// Set the values of this instance, using a dictionnary of key -> values
+        /// </summary>
+        public new void SetColorValues(Type type) {
+            // add the accent color if it doesn't exist! it means that we didn't set it, so it must be equal to ThemeAccentColor
+            if (!SavedStringValues.ContainsKey("AccentColor"))
+                SetStringValues("AccentColor", "@ThemeAccentColor");
+            base.SetColorValues(type);
+        }
+
+        #endregion
+        
     }
 }

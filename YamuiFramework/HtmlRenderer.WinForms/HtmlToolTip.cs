@@ -249,7 +249,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             //Create fragment container
             var cssClass = string.IsNullOrEmpty(_tooltipCssClass) ? null : string.Format(" class=\"{0}\"", "yamui-tooltip");
             var toolipHtml = string.Format("<div{0}>{1}</div>", cssClass, GetToolTip(e.AssociatedControl));
-            HtmlContainer.SetHtml(toolipHtml, YamuiThemeManager.BaseCssData);
+            HtmlContainer.SetHtml(toolipHtml, YamuiThemeManager.CurrentThemeCss);
             HtmlContainer.MaxSize = MaximumSize;
 
             //Measure size of the container
@@ -348,10 +348,11 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// Propagate the image load event from root container.
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e) {
-            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);
+            if (!e.Handled)
+                YamuiThemeManager.GetHtmlImages(e);
         }
 
 #if !MONO

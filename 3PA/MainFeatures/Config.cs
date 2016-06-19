@@ -110,8 +110,8 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = true)]
             public bool GlobalUseAlternateBackColorOnGrid = false;
 
-            [Display(Name = "Application focused opacity",
-                Description = "Set the opacity that the main application window will have when activated",
+            [Display(Name = "Application unfocused opacity",
+                Description = "Set the opacity that the main application window will have when it doenst' have the focus",
                 GroupName = "General",
                 AutoGenerateField = false)]
             [Range(0.1, 1)]
@@ -438,7 +438,7 @@ namespace _3PA.MainFeatures {
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
-            public bool GlobalDontUseSyntaxHighlightTheme = false;
+            public bool GlobalUseSyntaxHighlightTheme = true;
             public bool GlobalOverrideNppTheme = true;
 
             // SHORTCUTS (id, spec)

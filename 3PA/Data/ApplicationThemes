@@ -27,10 +27,11 @@
 # for instance :
 # PageBackGroundImage	my_pic.png
 #
-# you can use aliases of already defined to color to avoid repetition, ex :
+# you can use aliases to avoid repetition, ex :
 # color1	#000
 # color2	@color1
-# you can also an alias on the current AccentColor with : @AccentColor
+# you can also use an alias on the current AccentColor with : @AccentColor
+# However, the ThemeAccentColor must be an html color, no alias allowed!
 #
 # You can also use the two functions below :
 # color1	darken(#FFF, 20%)
@@ -88,6 +89,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#E6E6E6
 ButtonDisabledFore	#646464
 ButtonDisabledBorder	#BEBEBE
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#CEE2FC
@@ -96,6 +98,8 @@ MenuFocusedBack	#9AC2F9
 MenuFocusedFore	#000000
 AutoCompletionHighlightBack	#1BA1E2
 AutoCompletionHighlightBorder	#FFAB00
+GenericLinkColor	#0A81F0
+GenericErrorColor	#CC0000
 
 
 > Monokawai
@@ -127,7 +131,8 @@ LabelNormalFore	#B4B4B5
 LabelFocusedFore	@LabelHoverFore
 LabelHoverFore	@AccentColor
 LabelPressedFore	#5D5D5D
-LabelDisabledFore	#505050TabNormalFore	#505050
+LabelDisabledFore	#505050
+TabNormalFore	#505050
 TabHoverFore	#8C8C8C
 TabActiveFore	#C1C1C2
 ButtonNormalBack	#333333
@@ -145,6 +150,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#333333
 ButtonDisabledFore	#545454
 ButtonDisabledBorder	#333333
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#181718
@@ -205,6 +211,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#E6E6E6
 ButtonDisabledFore	#646464
 ButtonDisabledBorder	#BEBEBE
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#CEE2FC
@@ -265,6 +272,7 @@ LabelDisabledFore	#888
 TabNormalFore	#888
 TabHoverFore	#DDD
 TabActiveFore	#CC0000
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#222
@@ -325,6 +333,7 @@ LabelDisabledFore	#7A8288
 TabNormalFore	#737A80
 TabHoverFore	#fff
 TabActiveFore	#fff
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#454B51
@@ -385,6 +394,7 @@ LabelDisabledFore	#888
 TabNormalFore	#888
 TabHoverFore	#DDD
 TabActiveFore	#2A9FD6
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#222
@@ -445,6 +455,7 @@ LabelDisabledFore	#777777
 TabNormalFore	@FormFore
 TabHoverFore	darken(@AccentColor, 15%)
 TabActiveFore	lighten(@AccentColor, 15%)
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#B4B4B4
@@ -505,6 +516,7 @@ LabelDisabledFore	#999999
 TabNormalFore	#555555
 TabHoverFore	#111
 TabActiveFore	#111
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#EEEEEE
@@ -564,6 +576,7 @@ LabelDisabledFore	#B2B2B2
 TabNormalFore	#333333
 TabHoverFore	#4582EC
 TabActiveFore	#3768BC
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#CCCCCC
@@ -623,6 +636,7 @@ LabelDisabledFore	#98978B
 TabNormalFore	#3E3F3A
 TabHoverFore	#93C54B
 TabActiveFore	#84B143
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#EADEC9
@@ -684,6 +698,7 @@ LabelDisabledFore	#999999
 TabNormalFore	#777
 TabHoverFore	#000
 TabActiveFore	#795548
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#CCCCCC
@@ -743,6 +758,7 @@ LabelDisabledFore	#4E5D6C
 TabNormalFore	#EBEBEB
 TabHoverFore	#E9C800
 TabActiveFore	#FFCA28
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#5D6F81
@@ -756,7 +772,7 @@ GenericErrorColor	#d9534f
 
 
 > Shartpshooter (Img by MaximoVLorenzo)
-PageBackGroundImage	MaximoVLorenzo.jpg
+PageBackGroundImage	bg_MaximoVLorenzo.jpg
 ThemeAccentColor	#D13250
 FormBack	#363636
 FormFore	#C8C8C8
@@ -803,6 +819,7 @@ LabelDisabledFore	#7A8288
 TabNormalFore	darken(#C8C8C8, 30%)
 TabHoverFore	#FFF102
 TabActiveFore	#FFF102
+MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
 MenuHoverBack	#454B51

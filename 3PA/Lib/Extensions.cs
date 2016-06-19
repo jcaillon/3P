@@ -95,34 +95,6 @@ namespace _3PA.Lib {
         #region Colors
 
         /// <summary>
-        /// Convert a string representation (html=hexa) of a color into a color
-        /// Allows to have the syntax : lighten(#000000, 35%) and darken(#FFFFFF, 35%)
-        /// </summary>
-        /// <param name="htmlColor"></param>
-        /// <returns></returns>
-        public static Color GetColorFromHtml(this string htmlColor) {
-            if (htmlColor[0] != '#') {
-                var splitValues = htmlColor.Between("(", ")").Split(',');
-                float ratio;
-                if (!float.TryParse(splitValues[1].Trim().Replace("%", ""), out ratio))
-                    ratio = 0;
-                return ColorTranslator.FromHtml(splitValues[0].Trim()).ModifyColorLuminosity((htmlColor[0] == 'l' ? 1 : -1) * ratio / 100);
-            }
-            return ColorTranslator.FromHtml(htmlColor);
-        }
-
-        /// <summary>
-        /// Lighten or darken a color, ratio + to lighten, - to darken
-        /// </summary>
-        public static Color ModifyColorLuminosity(this Color color, float ratio) {
-            var isBlack = color.R == 0 && color.G == 0 && color.B == 0;
-            var red = (int)Math.Min(Math.Max(0, color.R + ((isBlack ? 255 : color.R) * ratio)), 255);
-            var green = (int)Math.Min(Math.Max(0, color.G + ((isBlack ? 255 : color.G) * ratio)), 255);
-            var blue = (int)Math.Min(Math.Max(0, color.B + ((isBlack ? 255 : color.B) * ratio)), 255);
-            return Color.FromArgb(red, green, blue);
-        }
-
-        /// <summary>
         /// returns true if the color can be considered as dark
         /// </summary>
         public static bool IsColorDark(this Color color) {

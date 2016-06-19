@@ -24,9 +24,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Data;
-using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -74,7 +73,7 @@ namespace _3PA.MainFeatures {
 
             if (_listOfThemes.Count == 0) {
                 StyleTheme curTheme = null;
-                ConfLoader.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxThemes, Encoding.Default, s => {
+                Utils.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxThemes, Encoding.Default, s => {
                     // beggining of a new theme, read its name
                     if (s.Length > 2 && s[0] == '>') {
                         _listOfThemes.Add(new StyleTheme());
@@ -87,8 +86,8 @@ namespace _3PA.MainFeatures {
                     var items = s.Split('\t');
                     if (items.Count() == 4) {
                         curTheme.SetValueOf(items[0].Trim(), new StyleThemeItem {
-                            ForeColor = ColorTranslator.FromHtml(items[1].Trim()),
-                            BackColor = ColorTranslator.FromHtml(items[2].Trim()),
+                            ForeColor = ColorTranslator.FromHtml(items[1].Trim().ApplyColorFunctions()),
+                            BackColor = ColorTranslator.FromHtml(items[2].Trim().ApplyColorFunctions()),
                             FontType = int.Parse(items[3].Trim())
                         });
                     }
@@ -182,13 +181,11 @@ namespace _3PA.MainFeatures {
 
                 Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
 
-                // selection and caret line, we can't restore the previous colors because we don't have the selection color! (it's a npp setting)
-                if (CurrentTheme.Selection.BackColor != Color.Transparent) {
-                    Npp.SetSelectionColor(true, _caretLineColor, Color.Transparent);
-                }
-                if (CurrentTheme.CaretLine.BackColor != Color.Transparent) {
-                    Npp.CaretLineBackColor = ControlPaint.Light(_caretLineColor, 1.2f);
-                }
+                // selection and caret line
+                if (CurrentTheme.Selection.BackColor != Color.Transparent)
+                    Npp.SetSelectionColor(true, Color.LightGray, Color.Transparent);
+                if (CurrentTheme.CaretLine.BackColor != Color.Transparent)
+                    Npp.CaretLineBackColor = _caretLineColor;
             }
         }
 

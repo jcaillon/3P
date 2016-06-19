@@ -96,16 +96,13 @@ namespace YamuiFramework.Controls {
                 
                 // draw the back
                 e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-                using (SolidBrush b = new SolidBrush(borderColor)) {
+
+                using (SolidBrush b = new SolidBrush(backColor)) {
                     e.Graphics.FillRectangle(b, new Rectangle(Height / 2, 0, backRect.Width - Height - 1, Height - 1));
                     e.Graphics.FillEllipse(b, new Rectangle(0, 0, Height - 1, Height - 1));
-                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height, 0, Height - 1, Height - 1));
+                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height - 1, 0, Height - 1, Height - 1));
                 }
-                using (SolidBrush b = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(Height / 2 + 1, 1, backRect.Width - Height - 3, Height - 3));
-                    e.Graphics.FillEllipse(b, new Rectangle(1, 1, Height - 3, Height - 3));
-                    e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height, 1, Height - 3, Height - 3));
-                }
+
                 // draw foreground ellipse
                 using (SolidBrush b = new SolidBrush(foreColor)) {
                     if (!Checked)
@@ -113,6 +110,7 @@ namespace YamuiFramework.Controls {
                     else
                         e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height + 2, 2, Height - 5, Height - 5));
                 }
+
                 // draw checked.. or not
                 if (Checked) {
                     var fuRect = ClientRectangle;
@@ -120,34 +118,21 @@ namespace YamuiFramework.Controls {
                     fuRect.Offset(5, -3);
                     TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
-                e.Graphics.SmoothingMode = SmoothingMode.Default;
-                
-                
-                // foreground
-                /*
-                e.Graphics.SmoothingMode = SmoothingMode.HighQuality;
-                // draw foreground ellipse
-                using (SolidBrush b = new SolidBrush(foreColor)) {
-                    if (!Checked)
-                        e.Graphics.FillEllipse(b, new Rectangle(2, 2, Height - 5, Height - 5));
-                    else
-                        e.Graphics.FillEllipse(b, new Rectangle(backRect.Width - Height + 2, 2, Height - 5, Height - 5));
-                }
-                e.Graphics.SmoothingMode = SmoothingMode.Default;
 
-                if (Checked) {
-                    // draw check
-                    var checkRect = new Rectangle(backRect.Width - 18 - 2*Height/3, -3, 15, Height);
-                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                }
-
-                // border?
+                // draw border
                 if (borderColor != Color.Transparent)
-                    using (var p = new Pen(borderColor)) {
-                        var borderRect = new Rectangle(0, 0, backRect.Width - 1, backRect.Height - 1);
-                        e.Graphics.DrawRectangle(p, borderRect);
+                    using (Pen b = new Pen(borderColor, 1)) {
+                        var path = new GraphicsPath();
+                        path.AddLine(Height / 2, 0, backRect.Width - Height - 1, 0);
+                        path.AddArc(backRect.Width - Height - 1, 0, Height - 1, Height - 1, -90, 180);
+                    
+                        path.AddLine(backRect.Width - Height - 1, Height - 1, Height / 2, Height - 1);
+                        path.AddArc(0, 0, Height - 1, Height - 1, 90, 180);
+                        e.Graphics.DrawPath(b, path);
                     }
-                */
+
+                e.Graphics.SmoothingMode = SmoothingMode.Default;
+
                 // text?
                 if (!string.IsNullOrEmpty(Text))
                     TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, YamuiThemeManager.Current.FormFore, FontManager.GetTextFormatFlags(TextAlign));

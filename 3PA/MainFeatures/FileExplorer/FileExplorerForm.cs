@@ -312,38 +312,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            // Style the control
-            fastOLV.OwnerDraw = true;
-            fastOLV.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            fastOLV.BackColor = ThemeManager.Current.FormBack;
-            fastOLV.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
-            fastOLV.ForeColor = ThemeManager.Current.FormFore;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusedBack;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusedFore;
-            fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
-            fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
-
-            // Decorate and configure hot item
-            fastOLV.UseHotItem = true;
-            fastOLV.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.MenuHoverBack,
-                ForeColor = ThemeManager.Current.MenuHoverFore
-            };
-
-            // overlay of empty list :
-            fastOLV.EmptyListMsg = StrEmptyList;
-            TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
-            if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.FormFore;
-                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
-                textOverlay.BorderColor = ThemeManager.Current.FormFore;
-                textOverlay.BorderWidth = 4.0f;
-                textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
-                textOverlay.Rotation = -5;
-            }
-
-            fastOLV.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-
+            OlvStyler.StyleIt(fastOLV, StrEmptyList);
             fastOLV.DefaultRenderer = new FilteredItemTextRenderer();
         }
 

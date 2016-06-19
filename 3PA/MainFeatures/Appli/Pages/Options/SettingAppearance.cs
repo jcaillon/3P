@@ -62,10 +62,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // toggle
             tg_colorOn.ButtonPressed += TgOnCheckedChanged;
-            tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
+            tg_colorOn.Checked = !Config.Instance.GlobalUseSyntaxHighlightTheme;
 
             tg_override.ButtonPressed += TgOnCheckedChanged;
-            tg_override.Checked = Config.Instance.GlobalOverrideNppTheme;
+            tg_override.Checked = !Config.Instance.GlobalOverrideNppTheme;
             UpdateToggle();
 
             // tooltips
@@ -85,7 +85,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         public override void OnShow() {
             // themes combo box
             cbApplication.SelectedIndexChanged -= CbApplicationOnSelectedIndexChanged;
-            cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
+            cbApplication.DataSource = ThemeManager.GetThemesList.Select(theme => theme.ThemeName).ToList();
             cbApplication.SelectedIndex = Config.Instance.ThemeId;
             cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
 
@@ -97,18 +97,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         private void TgOnCheckedChanged(object sender, EventArgs eventArgs) {
-            Config.Instance.GlobalDontUseSyntaxHighlightTheme = tg_colorOn.Checked;
-            Config.Instance.GlobalOverrideNppTheme = tg_override.Checked;
+            Config.Instance.GlobalUseSyntaxHighlightTheme = !tg_colorOn.Checked;
+            Config.Instance.GlobalOverrideNppTheme = !tg_override.Checked;
             UpdateToggle();
         }
 
         private void UpdateToggle() {
             if (tg_colorOn.Checked) {
-                tg_colorOn.Text = @"Use a custom User Defined Language";
-                cbSyntax.Hide();
-            } else {
                 tg_colorOn.Text = @"Use the themes provided by 3P, select one below : ";
                 cbSyntax.Show();
+            } else {
+                tg_colorOn.Text = @"Use a custom User Defined Language";
+                cbSyntax.Hide();
             }
             if (tg_override.Checked) {
                 tg_override.Text = @"Let 3P override notepad++ themes (for instance, replace selection color)";
@@ -121,34 +121,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// Changing theme
         /// </summary>
         private void CbApplicationOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            try {
-                ThemeManager.Current = ThemeManager.GetThemesList()[cbApplication.SelectedIndex];
-                ThemeManager.Current.AccentColor = ThemeManager.Current.ThemeAccentColor;
-                Config.Instance.AccentColor = ThemeManager.Current.ThemeAccentColor;
+            var theme = ThemeManager.GetThemesList[cbApplication.SelectedIndex];
+            theme.AccentColor = Color.Empty;
+            Config.Instance.ThemeId = cbApplication.SelectedIndex;
+            if (_checkButton != null)
                 _checkButton.Checked = false;
-            } catch (Exception x) {
-                if (!(x is NullReferenceException))
-                    ErrorHandler.Log(x.Message);
-            } finally {
-                Config.Instance.ThemeId = cbApplication.SelectedIndex;
-                ThemeManager.PlsRefresh();
-            }
-            
-        }
-
-        /// <summary>
-        /// Changing syntax theme
-        /// </summary>
-        private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            try {
-                Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
-            } finally {
-                Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-                if (Plug.IsCurrentFileProgress)
-                    Style.SetSyntaxStyles();
-            }
+            ThemeManager.RefreshApplicationWithTheme(theme);
         }
 
         /// <summary>
@@ -158,10 +136,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {
                 ThemeManager.Current.AccentColor = rb.BackColor;
-                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
+                ThemeManager.RefreshApplicationWithTheme(ThemeManager.Current);
                 _checkButton = rb;
-                ThemeManager.PlsRefresh();
             }
         }
+
+        /// <summary>
+        /// Changing syntax theme
+        /// </summary>
+        private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
+            Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
+            Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
+            if (Plug.IsCurrentFileProgress)
+                Style.SetSyntaxStyles();
+        }
+
     }
 }

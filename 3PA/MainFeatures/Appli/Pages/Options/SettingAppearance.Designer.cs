@@ -135,7 +135,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.cbSyntax.ItemHeight = 15;
             this.cbSyntax.Location = new System.Drawing.Point(25, 273);
             this.cbSyntax.Name = "cbSyntax";
-            this.cbSyntax.Size = new System.Drawing.Size(180, 21);
+            this.cbSyntax.Size = new System.Drawing.Size(277, 21);
             this.cbSyntax.TabIndex = 21;
             // 
             // yamuiLabel1
@@ -154,7 +154,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.cbApplication.ItemHeight = 15;
             this.cbApplication.Location = new System.Drawing.Point(25, 50);
             this.cbApplication.Name = "cbApplication";
-            this.cbApplication.Size = new System.Drawing.Size(180, 21);
+            this.cbApplication.Size = new System.Drawing.Size(277, 21);
             this.cbApplication.TabIndex = 19;
             // 
             // _simplePanelAccentColor

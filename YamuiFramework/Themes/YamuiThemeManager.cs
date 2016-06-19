@@ -20,6 +20,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Text;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
@@ -43,33 +45,32 @@ namespace YamuiFramework.Themes {
         /// <summary>
         /// Subscribe to this event to feed YamuiFramework with a css sheet of your making
         /// </summary>
-        public static event GetCssSheet OnGetCssSheet;
-        public static event Action OnCssSheetChanged;
-        public delegate string GetCssSheet();
+        public static event Func<string> OnCssNeeded;
 
         /// <summary>
         /// Subscribe to this event to feed the YamuiFramework with an image to load in a img tag
         /// The needed image is in HtmlImageLoadEventArgs.src and you need to feed back the Image
         /// on HtmlImageLoadEventArgs.Callback(MyImage);
         /// </summary>
-        public static event EventHandler<HtmlImageLoadEventArgs> OnHtmlImageNeeded;
+        public static event Func<string, Image> OnImageNeeded;
 
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
         public static YamuiTheme Current {
+            get {
+                if (_currentTheme == null)
+                    Current = GetThemesList[0];
+                return _currentTheme;
+            }
             set {
                 _currentTheme = value;
-                BaseCssData = null;
-            }
-            get {
-                if (_currentTheme != null) {
-                    return _currentTheme;
-                }
-                // instanciation of current theme
-                _currentTheme = GetThemesList()[0];
-                BaseCssData = null;
-                return _currentTheme;
+                // compute the colors of the theme based on the their values found in the conf file
+                _currentTheme.SetColorValues(typeof(YamuiTheme));
+                // recompute the css sheet
+                CurrentThemeCss = null;
+                // get the theme background image if any
+                CurrentThemeImage = FindImage(Current.PageBackGroundImage);
             }
         }
 
@@ -79,7 +80,7 @@ namespace YamuiFramework.Themes {
 
         private static CssData _baseCssData;
         private static YamuiTheme _currentTheme;
-        private static List<YamuiTheme> _listOfThemes = new List<YamuiTheme>();
+        private static List<YamuiTheme> _listOfThemes;
 
         #endregion
 
@@ -89,11 +90,12 @@ namespace YamuiFramework.Themes {
         /// Returns the list of all available themes
         /// </summary>
         /// <returns></returns>
-        public static List<YamuiTheme> GetThemesList() {
-            if (_listOfThemes.Count == 0) {
-                Class2Xml<YamuiTheme>.LoadFromRaw(_listOfThemes, Resources.Resources.themesXml, true);
+        public static List<YamuiTheme> GetThemesList {
+            get {
+                if (_listOfThemes == null)
+                    _listOfThemes = GenericThemeHolder.ReadThemeFile<YamuiTheme>(null, Resources.Resources.ApplicationThemes, Encoding.Default);
+                return _listOfThemes;
             }
-            return _listOfThemes;
         }
 
         #endregion
@@ -103,52 +105,77 @@ namespace YamuiFramework.Themes {
         /// <summary>
         /// Feeds the images to the html renderer
         /// </summary>
-        internal static void OnHtmlImageLoad(HtmlImageLoadEventArgs e) {
-            // load image from user
-            if (OnHtmlImageNeeded != null) {
-                OnHtmlImageNeeded(null, e);
-                if (e.Handled)
-                    return;
+        internal static void GetHtmlImages(HtmlImageLoadEventArgs e) {
+            Image img = FindImage(e.Src);
+            if (img != null) {
+                e.Callback(img);
+                e.Handled = true;
             }
-            // load image from yamui library
-            Image tryImg = (Image) Resources.Resources.ResourceManager.GetObject(e.Src);
-            if (tryImg == null) return;
-            e.Handled = true;
-            e.Callback(tryImg);
         }
+
+        /// <summary>
+        /// Gets the background image for the current theme
+        /// </summary>
+        internal static Image CurrentThemeImage { private set; get; }
+
+        /// <summary>
+        /// Event fired when the css sheet changed, allows the html label/panel to update themselves
+        /// </summary>
+        internal static event Action OnCssChanged;
 
         /// <summary>
         /// Feeds the CSS to the html renderer
         /// </summary>
-        internal static CssData BaseCssData {
+        internal static CssData CurrentThemeCss {
             get {
                 if (_baseCssData == null) {
+                    // Get base css from the ressources
                     var baseCss = Resources.Resources.BaseStyleSheet;
-                    baseCss = baseCss.Replace("%FGcolor%", ColorTranslator.ToHtml(Current.LabelNormalFore));
-                    baseCss = baseCss.Replace("%BGcolor%", ColorTranslator.ToHtml(Current.FormBack));
-                    baseCss = baseCss.Replace("%FORMBORDER%", ColorTranslator.ToHtml(Current.FormBorder));
+                    baseCss = Current.ReplaceAliasesByColor(baseCss);
 
                     // load extra css from the user program
-                    if (OnGetCssSheet != null) {
-                        baseCss = string.Join("\n", baseCss, OnGetCssSheet());
-                    }
+                    if (OnCssNeeded != null)
+                        baseCss = string.Join("\r\n", baseCss, OnCssNeeded());
+
                     _baseCssData = HtmlRender.ParseStyleSheet(baseCss);
                 }
                 return _baseCssData;
             }
             set {
                 // The css has changed
-                if (_baseCssData != null && OnCssSheetChanged != null) {
+                if (_baseCssData != null && OnCssChanged != null) {
                     _baseCssData = value;
-                    OnCssSheetChanged();
-                } else {
+                    OnCssChanged();
+                } else
                     _baseCssData = value;
-                }
             }
         }
 
         #endregion
 
+        #region private
+
+        /// <summary>
+        /// Find the given image though the user's function or in the framework 
+        /// </summary>
+        /// <param name="imageName"></param>
+        /// <returns></returns>
+        private static Image FindImage(string imageName) {
+            Image img = null;
+            if (!string.IsNullOrEmpty(imageName)) {
+                // user custom function
+                if (OnImageNeeded != null)
+                    img = OnImageNeeded(imageName);
+
+                // find in this framework
+                if (img == null)
+                    img = (Image) Resources.Resources.ResourceManager.GetObject(imageName);
+            }
+            return img;
+        }
+
+        #endregion
 
     }
+
 }

@@ -93,7 +93,7 @@ namespace YamuiFramework.Controls {
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
             if (!NoBackgroundImage && !DesignMode) {
-                var img = YamuiThemeManager.Current.GetThemeImage();
+                var img = YamuiThemeManager.CurrentThemeImage;
                 if (img != null) {
                     Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
                     e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);

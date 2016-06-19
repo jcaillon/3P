@@ -24,7 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -521,7 +521,7 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
-            if (IsCurrentFileProgress && !Config.Instance.GlobalDontUseSyntaxHighlightTheme) {
+            if (IsCurrentFileProgress && Config.Instance.GlobalUseSyntaxHighlightTheme) {
                 // Syntax Style
                 Style.SetSyntaxStyles();
             } else {

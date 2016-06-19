@@ -189,6 +189,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\FilteredLists\FilteredItemTree.cs" />
+    <Compile Include="MainFeatures\FilteredLists\OlvStyler.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTipForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -207,7 +208,6 @@
     <Compile Include="Interop\CoreWindowsHook.cs" />
     <Compile Include="Lib\DocumentLines.cs" />
     <Compile Include="Interop\NotepadHelper.cs" />
-    <Compile Include="Lib\ConfLoader.cs" />
     <Compile Include="Lib\GapBuffer.cs" />
     <Compile Include="Lib\HtmlHelpInterop.cs" />
     <Compile Include="Lib\JsonParser.cs" />
@@ -490,6 +490,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
     <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
+    <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />

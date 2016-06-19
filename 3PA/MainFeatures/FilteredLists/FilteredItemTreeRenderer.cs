@@ -114,16 +114,13 @@ namespace _3PA.MainFeatures.FilteredLists {
                     var x = expandGlyphRectangle.X + (expandGlyphRectangle.Width / 2) - w / 2;
                     var y = expandGlyphRectangle.Y + (expandGlyphRectangle.Height / 2) - h / 2;
 
+                    using (var p = new SolidBrush(rowObj.IsExpanded ? ThemeManager.Current.AccentColor : ThemeManager.Current.ButtonHoverBack)) {
+                        graphic.FillRectangle(p, new Rectangle(x, y, w, h));
+                    }
+
                     using (var p = new Pen(ThemeManager.Current.ButtonHoverBorder)) {
                         graphic.DrawRectangle(p, new Rectangle(x, y, w, h));
                     }
-                    using (var p = new SolidBrush(ThemeManager.Current.ButtonHoverBack)) {
-                        graphic.FillRectangle(p, new Rectangle(x + 1, y + 1, w - 1, h - 1));
-                    }
-                    if (rowObj.IsExpanded)
-                        using (var b = new SolidBrush(ThemeManager.Current.AccentColor)) {
-                            graphic.FillRectangle(b, new Rectangle(x + 2, y + 2, w - 4, h - 4));
-                        }
                 }
 
                 var indent = rowObj.Level * PixelsPerLevel;

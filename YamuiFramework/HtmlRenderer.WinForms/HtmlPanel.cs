@@ -136,10 +136,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             _htmlContainer.ImageLoad += OnImageLoad;
 
             // subscribe to an event called when the BaseCss sheet changes
-            YamuiThemeManager.OnCssSheetChanged += YamuiThemeManagerOnOnCssSheetChanged;
+            YamuiThemeManager.OnCssChanged += YamuiThemeManagerOnOnCssChanged;
         }
 
-        private void YamuiThemeManagerOnOnCssSheetChanged() {
+        private void YamuiThemeManagerOnOnCssChanged() {
             if (_text != null)
                 Text = _text;
         }
@@ -157,7 +157,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 base.Text = value;
                 if (!IsDisposed) {
                     VerticalScroll.Value = VerticalScroll.Minimum;
-                    _htmlContainer.SetHtml((_text.StartsWith(@"<html") ? _text : @"<html><body>" + _text + @"</body><html>"), YamuiThemeManager.BaseCssData);
+                    _htmlContainer.SetHtml((_text.StartsWith(@"<html") ? _text : @"<html><body>" + _text + @"</body><html>"), YamuiThemeManager.CurrentThemeCss);
                     PerformLayout();
                     Invalidate();
                     InvokeMouseMove();
@@ -667,10 +667,11 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// Propagate the image load event from root container.
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e) {
-            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);
+            if (!e.Handled)
+                YamuiThemeManager.GetHtmlImages(e);
         }
 
         /// <summary>

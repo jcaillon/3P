@@ -2,7 +2,7 @@
     padding: 0;
     margin: 0;
     Font: 12px "Segoe UI";
-    color: %FGcolor%;
+    color: @FormFore;
 }
 
 body {
@@ -10,19 +10,19 @@ body {
     margin: 0;
 }
 
-/* this decorates the htmllabels */
+/* this decorates the html labels */
 .yamui-text { 
     Font: 12px "Segoe UI";
-    color: %FGcolor%;
+    color: @FormFore;
     margin: 0;
     padding: 0;
 }
 
-/*This is the class of the HtmlToolTip*/
+/* This is the class of the Html ToolTip */
 .yamui-tooltip {
-    border: solid 1px %FORMBORDER%;
-    background-color: %BGcolor%;
-    color: %FGcolor%;
+    border: solid 1px @FormBorder;
+    background-color: @FormBack;
+    color: @FormFore;
     padding: 5px;
     Font: 12px "Segoe UI";
 }

@@ -165,6 +165,7 @@
       <DependentUpon>YamuiFormMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
+    <Compile Include="Helper\GenericThemeHolder.cs" />
     <Compile Include="Helper\TabOrderManager.cs" />
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />
@@ -265,7 +266,6 @@
     <Compile Include="HtmlRenderer.WinForms\Utilities\ClipboardHelper.cs" />
     <Compile Include="HtmlRenderer.WinForms\Utilities\Utils.cs" />
     <Compile Include="HtmlRenderer.WinForms\Utilities\Win32Utils.cs" />
-    <Compile Include="Helper\ControlHelper.cs" />
     <Compile Include="Helper\DwmApi.cs" />
     <Compile Include="Helper\WinApi.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -274,7 +274,6 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Themes\Class2xml.cs" />
     <Compile Include="Themes\YamuiTheme.cs" />
     <Compile Include="Themes\YamuiThemeManager.cs" />
   </ItemGroup>
@@ -311,10 +310,10 @@
     <Content Include="Resources\MsgBoxAndHtmlImg\Services.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\Warning.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\WarningShield.png" />
-    <Content Include="Resources\themesXml.xml" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageError.png" />
     <None Include="Fonts\REDCIRCL.ttf" />
+    <None Include="Resources\ApplicationThemes" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

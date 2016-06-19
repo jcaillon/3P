@@ -21,7 +21,6 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Themes;
-using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -121,11 +120,7 @@ namespace _3PA {
         internal static void InitPlugin() {
 
             // themes and html
-            ThemeManager.Current.AccentColor = Config.Instance.AccentColor;
-            YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            YamuiThemeManager.OnGetCssSheet += HtmlHandler.YamuiThemeManagerOnOnGetCssSheet;
-            YamuiThemeManager.OnHtmlImageNeeded += HtmlHandler.YamuiThemeManagerOnOnHtmlImageNeeded;
-            YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
+            ThemeManager.OnStartUp();
 
             // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
             // from a back groundthread, use : BeginInvoke()

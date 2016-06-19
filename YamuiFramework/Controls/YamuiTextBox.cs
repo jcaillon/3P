@@ -137,25 +137,26 @@ namespace YamuiFramework.Controls {
             if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {
                 // Apply a padding INSIDE the textbox (so we can draw the border!)
                 if (!_appliedPadding) {
-                    WinApi.RECT rc = new WinApi.RECT(4, 2, ClientSize.Width - 8, ClientSize.Height - 3);
-                    WinApi.SendMessageRefRect(Handle, WinApi.EM_SETRECT, 0, ref rc);
-
+                    ApplyInternalPadding();
                     _appliedPadding = true;
                 } else {
                     using (Graphics graphics = CreateGraphics()) {
                         CustomPaint(graphics);
                     }
                 }
-
             }
         }
 
         public void ApplyInternalPadding() {
-            WinApi.RECT rc = new WinApi.RECT(4, 1, ClientSize.Width - 8, ClientSize.Height - 2);
+            WinApi.RECT rc = new WinApi.RECT(2, 2, ClientSize.Width - 4, ClientSize.Height - 3);
             WinApi.SendMessageRefRect(Handle, WinApi.EM_SETRECT, 0, ref rc);
         }
 
         private void CustomPaint(Graphics g) {
+
+            BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
+            ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
 
             if (!_isFocused && string.IsNullOrEmpty(Text) && !string.IsNullOrEmpty(WaterMark) && Enabled) {
                 TextFormatFlags flags = TextFormatFlags.NoPadding | TextFormatFlags.EndEllipsis;
@@ -164,13 +165,11 @@ namespace YamuiFramework.Controls {
                     case HorizontalAlignment.Left:
                         clientRectangle.Offset(4, 2);
                         break;
-
                     case HorizontalAlignment.Right:
                         flags |= TextFormatFlags.Right;
                         clientRectangle.Offset(0, 2);
                         clientRectangle.Inflate(-4, 0);
                         break;
-
                     case HorizontalAlignment.Center:
                         flags |= TextFormatFlags.HorizontalCenter;
                         clientRectangle.Offset(0, 2);
@@ -179,20 +178,14 @@ namespace YamuiFramework.Controls {
                 TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonDisabledFore, flags);
             }
 
-            // Modify colors
-            BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
-            ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
-
             // draw border
-            Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, false, Enabled);
-            using (Pen p = new Pen(borderColor)) {
+            using (Pen p = new Pen(borderColor))
                 g.DrawRectangle(p, new Rectangle(0, 0, Width - 1, Height - 1));
-            }
         }
 
         #endregion
 
-        #region Managing isHovered, isPressed, isFocused
+        #region Managing isHovered, isFocused
 
         #region Focus Methods
 

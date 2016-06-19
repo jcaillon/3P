@@ -407,7 +407,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // the first field should be the file that was compiled, it might not be there for PROLINT.log 
                 // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
                 if (fields.Count() == 7) {
-                    fields.Insert(0, permutePaths.First().Value);
+                    fields.Insert(0, permutePaths.Count > 0 ? permutePaths.First().Value : "");
                 }
 
                 // new file

@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private static Dictionary<string, bool> _expandedBranches = new Dictionary<string, bool>();  
 
         private OLVColumn _displayText;
-        private FastObjectListView _fastOlv;
+        private FastObjectListView fastOLV;
         
         #endregion
 
@@ -146,37 +146,37 @@ namespace _3PA.MainFeatures.CodeExplorer {
             };
 
             // fast ovl
-            _fastOlv = new FastObjectListView();
-            _fastOlv.AllColumns.Add(_displayText);
-            _fastOlv.AutoArrange = false;
-            _fastOlv.BorderStyle = BorderStyle.None;
-            _fastOlv.Columns.AddRange(new ColumnHeader[] {_displayText});
-            _fastOlv.FullRowSelect = true;
-            _fastOlv.HeaderMaximumHeight = 0;
-            _fastOlv.HeaderStyle = ColumnHeaderStyle.None;
-            _fastOlv.HideSelection = false;
-            _fastOlv.LabelWrap = false;
-            _fastOlv.MultiSelect = false;
-            _fastOlv.OwnerDraw = true;
-            _fastOlv.RowHeight = 20;
-            _fastOlv.SelectAllOnControlA = false;
-            _fastOlv.ShowGroups = false;
-            _fastOlv.ShowHeaderInAllViews = false;
-            _fastOlv.ShowSortIndicators = false;
-            _fastOlv.SortGroupItemsByPrimaryColumn = false;
-            _fastOlv.UseCellFormatEvents = true;
-            _fastOlv.UseCompatibleStateImageBehavior = false;
-            _fastOlv.UseFiltering = true;
-            _fastOlv.UseHotItem = true;
-            _fastOlv.UseTabAsInput = true;
-            _fastOlv.View = View.Details;
-            _fastOlv.VirtualMode = true;
-            _fastOlv.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
-            _fastOlv.Location = new Point(0, 30);
-            _fastOlv.Size = new Size(320, 300);
+            fastOLV = new FastObjectListView();
+            fastOLV.AllColumns.Add(_displayText);
+            fastOLV.AutoArrange = false;
+            fastOLV.BorderStyle = BorderStyle.None;
+            fastOLV.Columns.AddRange(new ColumnHeader[] {_displayText});
+            fastOLV.FullRowSelect = true;
+            fastOLV.HeaderMaximumHeight = 0;
+            fastOLV.HeaderStyle = ColumnHeaderStyle.None;
+            fastOLV.HideSelection = false;
+            fastOLV.LabelWrap = false;
+            fastOLV.MultiSelect = false;
+            fastOLV.OwnerDraw = true;
+            fastOLV.RowHeight = 20;
+            fastOLV.SelectAllOnControlA = false;
+            fastOLV.ShowGroups = false;
+            fastOLV.ShowHeaderInAllViews = false;
+            fastOLV.ShowSortIndicators = false;
+            fastOLV.SortGroupItemsByPrimaryColumn = false;
+            fastOLV.UseCellFormatEvents = true;
+            fastOLV.UseCompatibleStateImageBehavior = false;
+            fastOLV.UseFiltering = true;
+            fastOLV.UseHotItem = true;
+            fastOLV.UseTabAsInput = true;
+            fastOLV.View = View.Details;
+            fastOLV.VirtualMode = true;
+            fastOLV.Anchor = AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Top;
+            fastOLV.Location = new Point(0, 30);
+            fastOLV.Size = new Size(320, 300);
 
             // add to content panel
-            Controls.Add(_fastOlv);
+            Controls.Add(fastOLV);
 
             // Image getter
             _displayText.ImageGetter += ImageGetter;
@@ -185,16 +185,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
             StyleOvlTree();
 
             // Register to events
-            _fastOlv.KeyDown += FastOlvOnKeyDown;
-            _fastOlv.Click += FastOlvOnClick;
+            fastOLV.KeyDown += FastOlvOnKeyDown;
+            fastOLV.Click += FastOlvOnClick;
 
             // decorate rows
-            _fastOlv.UseCellFormatEvents = true;
-            _fastOlv.FormatCell += FastOlvOnFormatCell;
+            fastOLV.UseCellFormatEvents = true;
+            fastOLV.FormatCell += FastOlvOnFormatCell;
 
             // problems with the width of the column, set here
-            _displayText.Width = _fastOlv.Width - 17;
-            _fastOlv.ClientSizeChanged += (sender, args) => _displayText.Width = _fastOlv.Width - 17;
+            _displayText.Width = fastOLV.Width - 17;
+            fastOLV.ClientSizeChanged += (sender, args) => _displayText.Width = fastOLV.Width - 17;
 
             #endregion
 
@@ -338,39 +338,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            // Style the control
-            _fastOlv.OwnerDraw = true;
-            _fastOlv.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            _fastOlv.BackColor = ThemeManager.Current.FormBack;
-            _fastOlv.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
-            _fastOlv.ForeColor = ThemeManager.Current.FormFore;
-            _fastOlv.HighlightBackgroundColor = ThemeManager.Current.MenuFocusedBack;
-            _fastOlv.HighlightForegroundColor = ThemeManager.Current.MenuFocusedFore;
-            _fastOlv.UnfocusedHighlightBackgroundColor = _fastOlv.HighlightBackgroundColor;
-            _fastOlv.UnfocusedHighlightForegroundColor = _fastOlv.HighlightForegroundColor;
-
-            // Decorate and configure hot item
-            _fastOlv.UseHotItem = true;
-            _fastOlv.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.MenuHoverBack,
-                ForeColor = ThemeManager.Current.MenuHoverFore
-            };
-
-            // overlay of empty list :
-            _fastOlv.EmptyListMsg = StrEmptyList;
-            TextOverlay textOverlay = _fastOlv.EmptyListMsgOverlay as TextOverlay;
-            if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.FormFore;
-                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
-                textOverlay.BorderColor = ThemeManager.Current.FormFore;
-                textOverlay.BorderWidth = 4.0f;
-                textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
-                textOverlay.Rotation = -5;
-            }
-
-            _fastOlv.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-
-            _fastOlv.DefaultRenderer = new FilteredItemTreeRenderer();
+            OlvStyler.StyleIt(fastOLV, StrEmptyList);
+            fastOLV.DefaultRenderer = new FilteredItemTreeRenderer();
         }
 
         #endregion
@@ -541,7 +510,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             } else {
                 // Item clicked : go to line
                 Npp.Goto(curItem.DocumentOwner, curItem.GoToLine, curItem.GoToColumn);
-                _fastOlv.Invalidate();
+                fastOLV.Invalidate();
             }
         }
 
@@ -566,19 +535,19 @@ namespace _3PA.MainFeatures.CodeExplorer {
             bool handled = true;
             // down and up change the selection
             if (key == Keys.Up) {
-                if (_fastOlv.SelectedIndex > 0)
-                    _fastOlv.SelectedIndex--;
+                if (fastOLV.SelectedIndex > 0)
+                    fastOLV.SelectedIndex--;
                 else
-                    _fastOlv.SelectedIndex = (TotalItems - 1);
-                if (_fastOlv.SelectedIndex >= 0)
-                    _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
+                    fastOLV.SelectedIndex = (TotalItems - 1);
+                if (fastOLV.SelectedIndex >= 0)
+                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
             } else if (key == Keys.Down) {
-                if (_fastOlv.SelectedIndex < (TotalItems - 1))
-                    _fastOlv.SelectedIndex++;
+                if (fastOLV.SelectedIndex < (TotalItems - 1))
+                    fastOLV.SelectedIndex++;
                 else
-                    _fastOlv.SelectedIndex = 0;
-                if (_fastOlv.SelectedIndex >= 0)
-                    _fastOlv.EnsureVisible(_fastOlv.SelectedIndex);
+                    fastOLV.SelectedIndex = 0;
+                if (fastOLV.SelectedIndex >= 0)
+                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
 
                 // escape close
             } else if (key == Keys.Escape) {
@@ -617,7 +586,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 return;
 
             // save position in the list
-            var curPos = new Point(_fastOlv.SelectedIndex, _fastOlv.TopItemIndex);
+            var curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
 
             // apply filter to each item in the list then set the list
             try {
@@ -627,24 +596,24 @@ namespace _3PA.MainFeatures.CodeExplorer {
                     ErrorHandler.Log(e.ToString());
             }
             if (!_isFiltering) {
-                _fastOlv.SetObjects(_initialObjectsList);
+                fastOLV.SetObjects(_initialObjectsList);
             } else {
-                _fastOlv.SetObjects(_initialObjectsList.OrderBy(data => data.FilterDispertionLevel).ToList());
+                fastOLV.SetObjects(_initialObjectsList.OrderBy(data => data.FilterDispertionLevel).ToList());
             }
 
             // display as tree or flat list?
-            ((FilteredItemTreeRenderer)_fastOlv.DefaultRenderer).DoNotDrawTree = _displayUnSorted || _isFiltering;
+            ((FilteredItemTreeRenderer)fastOLV.DefaultRenderer).DoNotDrawTree = _displayUnSorted || _isFiltering;
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
-            _fastOlv.ModelFilter = new ModelFilter(FilterPredicate);
+            fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
 
             // update total items
-            TotalItems = ((ArrayList)_fastOlv.FilteredObjects).Count;
+            TotalItems = ((ArrayList)fastOLV.FilteredObjects).Count;
 
             // reposition the cursor in the list
             if (TotalItems > 0) {
-                _fastOlv.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
-                _fastOlv.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+                fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
+                fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
             }
         }
 
@@ -680,8 +649,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <returns></returns>
         public CodeExplorerItem GetCurrentItem() {
             try {
-                if (_fastOlv.SelectedItem != null)
-                    return (CodeExplorerItem)_fastOlv.SelectedItem.RowObject;
+                if (fastOLV.SelectedItem != null)
+                    return (CodeExplorerItem)fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
                 ErrorHandler.Log(x.Message);
             }
@@ -689,7 +658,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         internal void Redraw() {
-            _fastOlv.Invalidate();
+            fastOLV.Invalidate();
         }
 
         /// <summary>
@@ -732,8 +701,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (Refreshing) {
                 return;
             }
-            _fastOlv.Refresh();
-            _fastOlv.BuildList();
+            fastOLV.Refresh();
+            fastOLV.BuildList();
             Refresh();
             RefreshParserAndCodeExplorer();
 

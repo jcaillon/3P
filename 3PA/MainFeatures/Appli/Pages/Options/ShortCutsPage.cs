@@ -24,7 +24,7 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;

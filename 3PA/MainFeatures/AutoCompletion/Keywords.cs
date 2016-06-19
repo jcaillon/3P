@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void Import() {
             // reads keywords
             _keywordList.Clear();
-            ConfLoader.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 5) {
                     // find the KeywordType from items[1]
@@ -78,7 +78,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             });
 
             // reads keywords rank
-            ConfLoader.ForEachLine(Config.FileKeywordsRank, new byte[0], Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2 && _keywordList.ContainsKey(items[0])) {
                     int val;
@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // reads abbreviations
             _abbreviations.Clear();
-            ConfLoader.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2) {
                     _abbreviations.Add(new KeywordsAbbreviations {
@@ -102,7 +102,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // reads keywords help
             _help.Clear();
-            ConfLoader.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, Encoding.Default, s => {
                 var items = s.Split('\t');
                 if (items.Count() > 2) {
                     var listSynthax = new List<string>();

@@ -489,9 +489,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var point = Npp.GetCaretScreenLocation();
             var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight;
-            _form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
             _form.SetPosition(point, lineHeight + 2);
-
             _form.UnCloack();
         }
 

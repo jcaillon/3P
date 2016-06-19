@@ -42,14 +42,9 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-            UserCommunication.Notify("zefhfiuhezrg@fzeueriughergher.zefieuhezhf".Between("@", "."));
         }
 
         public static void StartDebug() {
-            UserCommunication.Notify(ColorTranslator.ToHtml("lighten(#CCCCCC, 5%);".GetColorFromHtml()));
-            UserCommunication.Notify(ColorTranslator.ToHtml("#000000".GetColorFromHtml()));
-            UserCommunication.Notify(ColorTranslator.ToHtml("d(#CCCCCC, 5%);".GetColorFromHtml()));
-            UserCommunication.Notify(ColorTranslator.ToHtml("lighten(#000000, 30.8%);".GetColorFromHtml()));
         }
 
         public static void Test() {
