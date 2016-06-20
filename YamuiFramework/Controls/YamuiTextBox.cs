@@ -103,9 +103,8 @@ namespace YamuiFramework.Controls {
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Multiline = true;
-            Size = new Size(100, 20);
             MinimumSize = new Size(20, 20);
-            WordWrap = false;
+            WordWrap = true;
         }
 
         #endregion
@@ -175,7 +174,7 @@ namespace YamuiFramework.Controls {
                         clientRectangle.Offset(0, 2);
                         break;
                 }
-                TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonDisabledFore, flags);
+                TextRenderer.DrawText(g, WaterMark, FontManager.GetFont(FontFunction.WaterMark), clientRectangle, YamuiThemeManager.Current.ButtonWatermarkFore, flags);
             }
 
             // draw border

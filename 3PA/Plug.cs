@@ -20,7 +20,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Themes;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -119,7 +119,6 @@ namespace _3PA {
 
         internal static void InitPlugin() {
 
-            // themes and html
             ThemeManager.OnStartUp();
 
             // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
@@ -191,8 +190,12 @@ namespace _3PA {
             // this is done async anyway
             FileExplorer.RebuildItemList();
 
+            // Start pinging
             // ReSharper disable once ObjectCreationAsStatement
             new ReccurentAction(User.Ping, 1000 * 60 * 120);
+
+            // Make sure to give the focus to scintilla on startup
+            WinApi.SetForegroundWindow(Npp.HandleNpp);
         }
 
         #endregion

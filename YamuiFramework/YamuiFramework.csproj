@@ -125,9 +125,6 @@
     <Compile Include="Controls\YamuiTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiTextBoxAlt.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <Compile Include="Controls\YamuiButtonToggle.cs">
       <SubType>Component</SubType>
     </Compile>

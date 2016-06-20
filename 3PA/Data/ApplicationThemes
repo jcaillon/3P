@@ -89,6 +89,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#E6E6E6
 ButtonDisabledFore	#646464
 ButtonDisabledBorder	#BEBEBE
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -150,6 +151,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#333333
 ButtonDisabledFore	#545454
 ButtonDisabledBorder	#333333
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -211,6 +213,7 @@ ButtonPressedBorder	@AccentColor
 ButtonDisabledBack	#E6E6E6
 ButtonDisabledFore	#646464
 ButtonDisabledBorder	#BEBEBE
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -272,6 +275,7 @@ LabelDisabledFore	#888
 TabNormalFore	#888
 TabHoverFore	#DDD
 TabActiveFore	#CC0000
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -333,6 +337,7 @@ LabelDisabledFore	#7A8288
 TabNormalFore	#737A80
 TabHoverFore	#fff
 TabActiveFore	#fff
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -394,6 +399,7 @@ LabelDisabledFore	#888
 TabNormalFore	#888
 TabHoverFore	#DDD
 TabActiveFore	#2A9FD6
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -455,6 +461,7 @@ LabelDisabledFore	#777777
 TabNormalFore	@FormFore
 TabHoverFore	darken(@AccentColor, 15%)
 TabActiveFore	lighten(@AccentColor, 15%)
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -516,6 +523,7 @@ LabelDisabledFore	#999999
 TabNormalFore	#555555
 TabHoverFore	#111
 TabActiveFore	#111
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -576,6 +584,7 @@ LabelDisabledFore	#B2B2B2
 TabNormalFore	#333333
 TabHoverFore	#4582EC
 TabActiveFore	#3768BC
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -636,6 +645,7 @@ LabelDisabledFore	#98978B
 TabNormalFore	#3E3F3A
 TabHoverFore	#93C54B
 TabActiveFore	#84B143
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -698,6 +708,7 @@ LabelDisabledFore	#999999
 TabNormalFore	#777
 TabHoverFore	#000
 TabActiveFore	#795548
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -758,6 +769,7 @@ LabelDisabledFore	#4E5D6C
 TabNormalFore	#EBEBEB
 TabHoverFore	#E9C800
 TabActiveFore	#FFCA28
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore
@@ -819,6 +831,7 @@ LabelDisabledFore	#7A8288
 TabNormalFore	darken(#C8C8C8, 30%)
 TabHoverFore	#FFF102
 TabActiveFore	#FFF102
+ButtonWatermarkFore	@ButtonDisabledFore
 MenuNormalAltBack	@FormAltBack
 MenuNormalBack	@FormBack
 MenuNormalFore	@FormFore

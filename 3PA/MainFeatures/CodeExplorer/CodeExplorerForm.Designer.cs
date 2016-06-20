@@ -31,7 +31,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             this.buttonRefresh = new YamuiFramework.Controls.YamuiButtonImage();
             this.buttonCleanText = new YamuiFramework.Controls.YamuiButtonImage();
             this.buttonExpandRetract = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBoxAlt();
+            this.textBoxFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.toolTipHtml = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.buttonIncludeExternal = new YamuiFramework.Controls.YamuiButtonImage();
             this.SuspendLayout();
@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private YamuiButtonImage buttonRefresh;
         private YamuiButtonImage buttonCleanText;
         private YamuiButtonImage buttonExpandRetract;
-        private YamuiTextBoxAlt textBoxFilter;
+        private YamuiTextBox textBoxFilter;
         private HtmlToolTip toolTipHtml;
         private YamuiButtonImage buttonIncludeExternal;
 

@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 

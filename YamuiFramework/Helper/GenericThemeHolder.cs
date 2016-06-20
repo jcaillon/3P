@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -98,18 +99,16 @@ namespace YamuiFramework.Helper {
                 return;
 
             // for each field of this object, try to assign its value with the _savedStringValues dico
-            foreach (var fieldInfo in thisType.GetFields()) {
-                if (SavedStringValues.ContainsKey(fieldInfo.Name) && fieldInfo.DeclaringType == thisType) {
-                    try {
-                        var value = SavedStringValues[fieldInfo.Name];
-                        if (fieldInfo.FieldType == typeof (Color)) {
-                            fieldInfo.SetValue(this, ColorTranslator.FromHtml(GetHtmlColor(value)));
-                        } else {
-                            fieldInfo.SetValue(this, value);
-                        }
-                    } catch (Exception e) {
-                        throw new Exception("Couldn't convert the color : <" + SavedStringValues[fieldInfo.Name] + "> for the field <" + fieldInfo.Name + "> for the theme <" + ThemeName + "> : " + e);
+            foreach (var fieldInfo in thisType.GetFields().Where(fieldInfo => SavedStringValues.ContainsKey(fieldInfo.Name) && fieldInfo.DeclaringType == thisType)) {
+                try {
+                    var value = SavedStringValues[fieldInfo.Name];
+                    if (fieldInfo.FieldType == typeof (Color)) {
+                        fieldInfo.SetValue(this, ColorTranslator.FromHtml(GetHtmlColor(value)));
+                    } else if (fieldInfo.FieldType == typeof(string)) {
+                        fieldInfo.SetValue(this, value);
                     }
+                } catch (Exception e) {
+                    throw new Exception("Couldn't convert the color : <" + SavedStringValues[fieldInfo.Name] + "> for the field <" + fieldInfo.Name + "> for the theme <" + ThemeName + "> : " + e);
                 }
             }
         }

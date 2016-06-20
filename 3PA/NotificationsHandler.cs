@@ -521,7 +521,7 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
-            if (IsCurrentFileProgress && Config.Instance.GlobalUseSyntaxHighlightTheme) {
+            if (IsCurrentFileProgress && Config.Instance.UseSyntaxHighlightTheme) {
                 // Syntax Style
                 Style.SetSyntaxStyles();
             } else {

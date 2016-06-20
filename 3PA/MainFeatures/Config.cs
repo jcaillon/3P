@@ -438,8 +438,8 @@ namespace _3PA.MainFeatures {
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
-            public bool GlobalUseSyntaxHighlightTheme = true;
-            public bool GlobalOverrideNppTheme = true;
+            public bool UseSyntaxHighlightTheme = true;
+            public bool OverrideNppTheme = true;
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();

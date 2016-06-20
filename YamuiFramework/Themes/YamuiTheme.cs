@@ -31,30 +31,6 @@ namespace YamuiFramework.Themes {
     /// </summary>
     public class YamuiTheme : GenericThemeHolder {
 
-        #region Accent color
-
-        private Color _accentColor;
-
-        /// <summary>
-        /// Accent color of the theme, can be set to Color.Empty in order to make it equal to the ThemeAccentColor
-        /// </summary>
-        public Color AccentColor {
-            get { return _accentColor; }
-            set {
-                if (value == Color.Empty) {
-                    var foundPairColor = SavedStringValues.FirstOrDefault(pair => pair.Key.Equals("ThemeAccentColor"));
-                    if (!foundPairColor.Equals(new KeyValuePair<string, string>()))
-                        _accentColor = ColorTranslator.FromHtml(foundPairColor.Value);
-                    else
-                        _accentColor = Color.Fuchsia;
-                } else
-                    _accentColor = value;
-                SetStringValues("AccentColor", ColorTranslator.ToHtml(_accentColor));
-            }
-        }
-
-        #endregion
-
         #region Stored in the config file
 
         public string PageBackGroundImage = "";
@@ -106,6 +82,7 @@ namespace YamuiFramework.Themes {
         public Color ButtonCheckedBack = Color.FromArgb(210, 210, 210);
         public Color ButtonCheckedFore = Color.FromArgb(30, 30, 30);
         public Color ButtonCheckedBorder = Color.FromArgb(190, 190, 190);
+        public Color ButtonWatermarkFore = Color.FromArgb(100, 100, 100);
 
         public Color ButtonImageNormalBack = Color.FromArgb(190, 190, 190);
         public Color ButtonImageHoverBack = Color.FromArgb(190, 190, 190);
@@ -119,6 +96,30 @@ namespace YamuiFramework.Themes {
         public Color MenuHoverFore = Color.FromArgb(0, 0, 0);
         public Color MenuFocusedBack = Color.FromArgb(154, 194, 249);
         public Color MenuFocusedFore = Color.FromArgb(0, 0, 0);
+
+        #endregion
+
+        #region Accent color
+
+        private Color _accentColor;
+
+        /// <summary>
+        /// Accent color of the theme, can be set to Color.Empty in order to make it equal to the ThemeAccentColor
+        /// </summary>
+        public Color AccentColor {
+            get { return _accentColor; }
+            set {
+                if (value == Color.Empty) {
+                    var foundPairColor = SavedStringValues.FirstOrDefault(pair => pair.Key.Equals("ThemeAccentColor"));
+                    if (!foundPairColor.Equals(new KeyValuePair<string, string>()))
+                        _accentColor = ColorTranslator.FromHtml(foundPairColor.Value);
+                    else
+                        _accentColor = Color.Fuchsia;
+                } else
+                    _accentColor = value;
+                SetStringValues("AccentColor", ColorTranslator.ToHtml(_accentColor));
+            }
+        }
 
         #endregion
 

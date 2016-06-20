@@ -40,15 +40,14 @@ namespace _3PA {
         #region Allows to initiate stuff 
 
         public static void OnStartUp() {
+            YamuiThemeManager.OnCssNeeded += OnCssNeeded;
+            YamuiThemeManager.OnImageNeeded += OnImageNeeded;
             Current.AccentColor = Config.Instance.AccentColor;
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
-            YamuiThemeManager.OnCssNeeded += OnCssNeeded;
-            YamuiThemeManager.OnImageNeeded += OnImageNeeded;
         }
 
         #endregion
-
 
         #region Themes list
 
@@ -60,9 +59,8 @@ namespace _3PA {
         /// </summary>
         public static Theme Current {
             get {
-                if (_currentTheme == null) {
+                if (_currentTheme == null)
                     Current = GetThemesList.ElementAt(Config.Instance.ThemeId);
-                }
                 return _currentTheme;
             }
             set {
@@ -87,6 +85,17 @@ namespace _3PA {
             }
         }
 
+        /// <summary>
+        /// Called when the list of themes is imported
+        /// </summary>
+        public static void ImportList() {
+            _listOfThemes.Clear();
+            _currentTheme = null;
+            Current.AccentColor = Color.Empty;
+            RefreshApplicationWithTheme(Current);
+            Config.Instance.AccentColor = Current.AccentColor;
+        }
+
         #endregion
 
         #region public
@@ -105,17 +114,6 @@ namespace _3PA {
             FileExplorer.ApplyColorSettings();
             Application.DoEvents();
             Appli.Refresh();
-        }
-
-        /// <summary>
-        /// Called when the list of themes is imported
-        /// </summary>
-        public static void ImportList() {
-            _listOfThemes.Clear();
-            _currentTheme = null;
-            Current.AccentColor = Color.Empty;
-            RefreshApplicationWithTheme(Current);
-            Config.Instance.AccentColor = Current.AccentColor;
         }
 
         /// <summary>

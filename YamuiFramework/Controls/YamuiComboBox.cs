@@ -158,7 +158,7 @@ namespace YamuiFramework.Controls {
             }
 
             Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter);
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetStandardFont(), textRect, foreColor, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
 
             DrawTextPrompt(e.Graphics);
         }
@@ -189,7 +189,7 @@ namespace YamuiFramework.Controls {
         private void DrawTextPrompt(Graphics g) {
             if (!_isFocused && SelectedIndex == -1) {
                 Rectangle textRect = new Rectangle(2, 2, Width - 20, Height - 4);
-                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), textRect, SystemColors.GrayText, Color.Transparent, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
+                TextRenderer.DrawText(g, _waterMark, FontManager.GetFont(FontFunction.WaterMark), textRect, YamuiThemeManager.Current.ButtonWatermarkFore, TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPadding);
             }
         }
 

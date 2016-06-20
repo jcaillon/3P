@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Text;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core;
@@ -54,6 +55,18 @@ namespace YamuiFramework.Themes {
         /// </summary>
         public static event Func<string, Image> OnImageNeeded;
 
+        #endregion
+
+        #region private fields
+
+        private static CssData _baseCssData;
+        private static YamuiTheme _currentTheme;
+        private static List<YamuiTheme> _listOfThemes;
+
+        #endregion
+
+        #region public
+
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
@@ -67,24 +80,14 @@ namespace YamuiFramework.Themes {
                 _currentTheme = value;
                 // compute the colors of the theme based on the their values found in the conf file
                 _currentTheme.SetColorValues(typeof(YamuiTheme));
-                // recompute the css sheet
+
+                // recompute the css sheet when it's needed
                 CurrentThemeCss = null;
+
                 // get the theme background image if any
-                CurrentThemeImage = FindImage(Current.PageBackGroundImage);
+                CurrentThemeImage = FindImage(_currentTheme.PageBackGroundImage);
             }
         }
-
-        #endregion
-
-        #region private fields
-
-        private static CssData _baseCssData;
-        private static YamuiTheme _currentTheme;
-        private static List<YamuiTheme> _listOfThemes;
-
-        #endregion
-
-        #region public methods
 
         /// <summary>
         /// Returns the list of all available themes
@@ -102,6 +105,8 @@ namespace YamuiFramework.Themes {
 
         #region internal
 
+        internal static Image CurrentThemeImage { private set; get; }
+
         /// <summary>
         /// Feeds the images to the html renderer
         /// </summary>
@@ -112,11 +117,6 @@ namespace YamuiFramework.Themes {
                 e.Handled = true;
             }
         }
-
-        /// <summary>
-        /// Gets the background image for the current theme
-        /// </summary>
-        internal static Image CurrentThemeImage { private set; get; }
 
         /// <summary>
         /// Event fired when the css sheet changed, allows the html label/panel to update themselves
