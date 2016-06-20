@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
@@ -65,9 +66,22 @@ namespace _3PA {
             }
             set {
                 _currentTheme = value;
-                YamuiThemeManager.Current = _currentTheme;
-                // we set the color for the YamuiTheme, but we also need to do it for the Theme...
-                _currentTheme.SetColorValues(typeof(Theme));
+                try { 
+
+                    YamuiThemeManager.Current = _currentTheme;
+                    // we set the color for the YamuiTheme, but we also need to do it for the Theme...
+                    _currentTheme.SetColorValues(typeof(Theme));
+
+                } catch (Exception e) {
+                    // either display the error immediatly or when the plugin is fully loaded...
+                    if (Plug.PluginIsFullyLoaded)
+                        ErrorHandler.ShowErrors(e, "Loading a theme");
+                    else {
+                        Plug.OnPlugReady += () => {
+                            ErrorHandler.ShowErrors(e, "Loading a theme");
+                        };
+                    }
+                }
             }
         }
 

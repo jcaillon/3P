@@ -62,7 +62,7 @@ namespace _3PA.Lib {
                                      "\"computerId\": " + serializer.Serialize(GetWindowsUniqueId()) + "," +
                                      "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
                                      "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
-                                     "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion()) + "," +
+                                     "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion) + "," +
                                      "\"lang\": " + serializer.Serialize(CultureInfo.InstalledUICulture.EnglishName) + "," +
                                      "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString()) +
                                      "}");
@@ -153,7 +153,7 @@ namespace _3PA.Lib {
                 JavaScriptSerializer serializer = new JavaScriptSerializer();
                 writer.Write("{\"body\": " + serializer.Serialize(
                     "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion() + " ####\r\n" +
+                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
                     message
                     ) + "}");
                 writer.Close();

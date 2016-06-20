@@ -428,12 +428,6 @@ namespace _3PA.MainFeatures {
             // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
 
-            /// <summary>
-            /// allows to delete the lib after an update to make sure we get the last lib
-            /// dont use this for anything else!!!
-            /// </summary>
-            public string PreviousStart3PVersion = "";
-
             // THEMES
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");

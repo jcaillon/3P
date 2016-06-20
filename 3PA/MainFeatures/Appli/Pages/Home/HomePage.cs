@@ -34,7 +34,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             InitializeComponent();
             html.Text = HtmlResources.home.Replace("%version%", AssemblyInfo.Version)
                 .Replace("%disclaimer%", AssemblyInfo.IsPreRelease ? HtmlResources.disclaimer : "")
-                .Replace("%YamuiFrameworkVersion%", LibLoader.YamuiFrameworkVersion)
+                .Replace("%YamuiFrameworkVersion%", LibLoader.GetAssemblyVersion(@"YamuiFramework"))
                 .Replace("%getting-started.md%", HtmlResources.getting_started.MdToHtml());
 
             html.LinkClicked += HtmlOnLinkClicked;

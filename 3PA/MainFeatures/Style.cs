@@ -53,7 +53,11 @@ namespace _3PA.MainFeatures {
             }
             set {
                 _currentTheme = value;
-                _currentTheme.SetColorValues(typeof(StyleTheme));
+                try { 
+                    _currentTheme.SetColorValues(typeof(StyleTheme));
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Loading a theme");
+                }
             }
         }
 
@@ -416,11 +420,14 @@ namespace _3PA.MainFeatures {
                 try {
                     var value = SavedStringValues[fieldInfo.Name];
                     var items = value.Split('\t');
+                    int fontType;
+                    if (!int.TryParse(items[2].Trim(), out fontType))
+                        fontType = 0;
                     if (items.Length == 3) {
                         fieldInfo.SetValue(this, new StyleThemeItem {
-                            ForeColor = ColorTranslator.FromHtml(items[0].Trim().ApplyColorFunctions()),
-                            BackColor = ColorTranslator.FromHtml(items[1].Trim().ApplyColorFunctions()),
-                            FontType = int.Parse(items[2].Trim())
+                            ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim())),
+                            BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim())),
+                            FontType = fontType
                         });
                     }
                 } catch (Exception e) {

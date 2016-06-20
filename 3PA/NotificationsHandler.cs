@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -60,8 +59,17 @@ namespace _3PA {
         /// </summary>
         public static event Action OnNppWindowsMove;
 
-        #endregion
+        /// <summary>
+        /// Event published when notepad++ is ready and the plugin can do its init, you must return true if the init went ok, false otherwise
+        /// </summary>
+        public static event Func<bool> OnNppReady;
 
+        /// <summary>
+        /// Envent published when the plugin is ready
+        /// </summary>
+        public static event Action OnPlugReady;
+
+        #endregion
 
         #region Members
 
@@ -69,6 +77,11 @@ namespace _3PA {
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
+
+        /// <summary>
+        /// Set to true after the plugin has been fully loaded
+        /// </summary>
+        public static bool PluginIsFullyLoaded { get; private set; }
 
         #endregion
 
@@ -91,7 +104,10 @@ namespace _3PA {
 
                     case (uint) NppNotif.NPPN_READY:
                         // notify plugins that all the procedures of launchment of notepad++ are done
-                        OnNppReady();
+                        // call OnNppReady then OnPlugReady if it all went ok
+                        PluginIsFullyLoaded = OnNppReady == null || OnNppReady();
+                        if (PluginIsFullyLoaded && OnPlugReady != null)
+                            OnPlugReady();
                         return;
 
                     case (uint) NppNotif.NPPN_SHUTDOWN:

@@ -53,28 +53,52 @@ namespace _3PA.Interop {
 
         #region Exported methods (to be used by npp)
 
+        /// <summary>
+        /// A plugin is designed to either work with an ANSI or Unicode build of Notepad++. ANSI plugins must not define this function. Unicode plugins must define it, and it must return true
+        /// </summary>
+        /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static bool isUnicode() {
             return true;
         }
 
+        /// <summary>
+        /// This routine is called when the plugin is loaded, providing it with information on the current instance of Notepad++ – namely, an array of three handles for: the main Notepad++ window, the primary Scintilla control, the secondary Scintilla control
+        /// </summary>
+        /// <param name="notepadPlusData"></param>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void setInfo(NppData notepadPlusData) {
             NppData = notepadPlusData;
             Plug.OnCommandMenuInit();
         }
 
+        /// <summary>
+        /// Retrieves a pointer to an array of structures that describe the exposed functions. The expected length of the array is the value pointed by the argument. There must be at least one such routine. Provide one that displays some sort of About dialog box if there is otherwise no need for a menu entry - a typical case for external lexers
+        /// </summary>
+        /// <param name="nbF"></param>
+        /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static IntPtr getFuncsArray(ref int nbF) {
             nbF = FuncItems.Items.Count;
             return FuncItems.NativePointer;
         }
 
+        /// <summary>
+        /// This is a message processor handling any message Notepad++ has to pass on
+        /// </summary>
+        /// <param name="Message"></param>
+        /// <param name="wParam"></param>
+        /// <param name="lParam"></param>
+        /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static uint messageProc(uint Message, IntPtr wParam, IntPtr lParam) {
             return 1;
         }
 
+        /// <summary>
+        /// Returns name of the plugin, to appear in the Plugin menu
+        /// </summary>
+        /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static IntPtr getName() {
             if (_ptrPluginName == IntPtr.Zero)
@@ -83,7 +107,7 @@ namespace _3PA.Interop {
         }
 
         /// <summary>
-        /// handles the notifications send by npp and scintilla to the plugin
+        /// This procedure will be called by Notepad++ for a variety of reasons. The complete list of codes is to be found on the Messages And Notifications. It should handle these tasks using information passed in the notification header
         /// </summary>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void beNotified(IntPtr notifyCode) {
