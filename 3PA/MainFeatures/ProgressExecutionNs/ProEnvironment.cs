@@ -356,6 +356,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             #region CompilationPath
 
+            /// <summary>
+            /// List of compilation path read from the file and filtered for this env
+            /// </summary>
             private List<CompilationPath> GetCompilationPathList {
                 get {
                     if (_compilationPathList == null) {

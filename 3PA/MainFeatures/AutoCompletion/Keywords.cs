@@ -40,7 +40,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         private static Dictionary<string, CompletionData> _keywordList = new Dictionary<string, CompletionData>(); 
         private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
-        private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.OrdinalIgnoreCase);
+        private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
         

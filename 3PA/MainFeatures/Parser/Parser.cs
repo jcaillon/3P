@@ -303,7 +303,7 @@ namespace _3PA.MainFeatures.Parser {
                                     // we known the word
                                     if (AutoComplete.KnownStaticItems[lowerTok] == CompletionType.Table) {
                                         // it's a table from the database
-                                        AddParsedItem(new ParsedFoundTableUse(token.Value.AutoCaseToUserLiking(), token.Line, token.Column, false));
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token.Line, token.Column, false));
                                     }
                                 } else if (_knownWords.ContainsKey(lowerTok)) {
                                     if (_knownWords[lowerTok] == CompletionType.Table) {

@@ -65,7 +65,7 @@ namespace YamuiFramework.Helper {
         public static string ApplyColorFunctions(this string htmlColor) {
             if (htmlColor.Contains("(")) {
                 var functionName = htmlColor.Substring(0, htmlColor.IndexOf("(", StringComparison.CurrentCultureIgnoreCase));
-                var splitValues = htmlColor.GetValueBetween("(", ")").Split(',');
+                var splitValues = htmlColor.GetBetweenMostNested("(", ")").Split(',');
                 float ratio;
                 if (!float.TryParse(splitValues[1].Trim().Replace("%", ""), out ratio))
                     ratio = 0;
@@ -99,15 +99,12 @@ namespace YamuiFramework.Helper {
         }
 
         /// <summary>
-        /// Get string value between [first] a and [last] b (not included), returns null if it fails
+        /// Get string value between [first] a and [last] b (not included)
         /// </summary>
-        public static string GetValueBetween(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
-            int posA = value.IndexOf(a, comparer);
-            int posB = value.LastIndexOf(b, comparer);
-            if (posA == -1 || posB == -1)
-                return null;
-            int adjustedPosA = posA + a.Length;
-            return adjustedPosA >= posB ? null : value.Substring(adjustedPosA, posB - adjustedPosA);
+        public static string GetBetweenMostNested(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
+            int posA = value.LastIndexOf(a, comparer);
+            int posB = value.IndexOf(b, comparer);
+            return posB == -1 ? value.Substring(posA + 1) : value.Substring(posA + 1, posB - posA - 1);
         }
 
         #endregion

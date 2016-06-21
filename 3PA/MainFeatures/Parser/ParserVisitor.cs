@@ -416,7 +416,7 @@ namespace _3PA.MainFeatures.Parser {
                 // find the table or temp table that the buffer is FOR
                 var foundTable = ParserHandler.FindAnyTableByName(pars.BufferFor);
                 if (foundTable != null) {
-                    subString = foundTable.Name.AutoCaseToUserLiking();
+                    subString = foundTable.Name;
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
 
                     // To code explorer, list buffers and associated tables

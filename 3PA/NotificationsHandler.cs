@@ -490,11 +490,9 @@ namespace _3PA {
                     }
 
                     // replace the last keyword by the correct case
-                    if (Config.Instance.CodeChangeCaseMode != 0) {
-                        var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
-                        if (casedKeyword != null)
-                            replacementWord = casedKeyword;
-                    }
+                    var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
+                    if (casedKeyword != null)
+                        replacementWord = casedKeyword;
 
                     if (replacementWord != null)
                         Npp.ReplaceKeywordWrapped(replacementWord, -offset);
@@ -514,7 +512,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region On document switch
 
@@ -579,7 +576,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region On misc
 

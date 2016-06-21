@@ -57,13 +57,17 @@ namespace YamuiFramework.Helper {
             // the dico below will contain key -> values of the theme
             var listOfThemes = new List<T>();
             GenericThemeHolder curTheme = null;
+            Dictionary<string, string> previousStringValues = new Dictionary<string, string>();
 
             Utilities.ForEachLine(filePath, dataResources, Encoding.Default,
                 line => {
                     // beggining of a new theme, read its name
                     if (line.Length > 2 && line[0] == '>') {
+                        if (curTheme != null)
+                            previousStringValues = curTheme.SavedStringValues;
                         curTheme = Activator.CreateInstance<T>();
                         curTheme.ThemeName = line.Substring(2).Trim();
+                        curTheme.SavedStringValues = new Dictionary<string, string>(previousStringValues);
                         listOfThemes.Add((T) curTheme);
                     } else if (curTheme == null)
                         return;

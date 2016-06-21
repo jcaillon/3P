@@ -59,11 +59,11 @@ namespace _3PA.Tests {
 
                 var ftp = new FtpsClient();
                 bool connected = false;
-                foreach (var mode in Extensions.EnumUtil.GetValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
                     try {
                         ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
                         connected = true;
-                        UserCommunication.Notify(((EsslSupportModeAttr)mode.GetAttributes()).Value);
+                        UserCommunication.Notify(mode.GetDescription());
                     } catch (Exception) {
                         //ignored
                     }

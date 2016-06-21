@@ -284,18 +284,18 @@ namespace _3PA.MainFeatures {
             public bool DisableAutoCaseCompletly = false;
 
             [Display(Name = "Keywords auto-case mode",
-                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
+                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
-            [Range(0, 3)]
-            public int CodeChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+            [Range(0, 4)]
+            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
 
             [Display(Name = "Database info auto-case mode",
-                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
+                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
-            [Range(0, 3)]
-            public int DatabaseChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+            [Range(0, 4)]
+            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
 
             [Display(Name = "Auto replace abbreviations",
                 Description = "Automatically replaces abbreviations by their full lenght counterparts",

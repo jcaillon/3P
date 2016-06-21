@@ -93,7 +93,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // Update autocompletion
             AutoComplete.RefreshStaticItems();
-            AutoComplete.ParseCurrentDocument();
+            AutoComplete.Close();
+            AutoComplete.ParseCurrentDocument(true);
         }
 
         /// <summary>
@@ -183,7 +184,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
                             if (splitted.Count() != 6) continue;
                             currentDb = new ParsedDataBase(
-                                splitted[3].ToUpper(),
+                                splitted[3],
                                 splitted[4],
                                 splitted[5],
                                 new List<ParsedTable>());
@@ -192,7 +193,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'S':
                             if (splitted.Count() != 3 || currentDb == null) continue;
                             _sequences.Add(new CompletionData {
-                                DisplayText = splitted[1].ToUpper(),
+                                DisplayText = splitted[1],
                                 Type = CompletionType.Sequence,
                                 SubString = currentDb.LogicalName
                             });
@@ -202,7 +203,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
                             if (splitted.Count() != 6 || currentDb == null) continue;
                             currentTable = new ParsedTable(
-                                splitted[1].ToUpper(),
+                                splitted[1],
                                 0, 0,
                                 splitted[2],
                                 splitted[3],
@@ -243,7 +244,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
                             if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
                             var curField = new ParsedField(
-                                splitted[2].ToUpper(),
+                                splitted[2],
                                 splitted[3],
                                 splitted[4],
                                 int.Parse(splitted[5]),
@@ -340,7 +341,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
             output.AddRange(dataBase.Tables.Select(table => new CompletionData {
                 DisplayText = table.Name,
-                SubString = dataBase.LogicalName.AutoCaseToUserLiking(),
+                SubString = dataBase.LogicalName,
                 Type = CompletionType.Table,
                 FromParser = false,
                 Ranking = ParserHandler.FindRankingOfDatabaseItem(table.Name),

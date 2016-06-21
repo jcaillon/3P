@@ -425,14 +425,37 @@ namespace _3PA.MainFeatures {
                         fontType = 0;
                     if (items.Length == 3) {
                         fieldInfo.SetValue(this, new StyleThemeItem {
-                            ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim())),
-                            BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim())),
+                            ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim(), 0)),
+                            BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim(), 1)),
                             FontType = fontType
                         });
                     }
                 } catch (Exception e) {
-                    throw new Exception("Couldn't convert the color : <" + SavedStringValues[fieldInfo.Name] + "> for the field <" + fieldInfo.Name + "> for the theme <" + ThemeName + "> : " + e);
+                    throw new Exception("Reading styles, couldn't understand the line : <" + SavedStringValues[fieldInfo.Name] + "> for the field <" + fieldInfo.Name + "> and for the theme <" + ThemeName + "> : " + e);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Find the html color behing any property
+        /// </summary>
+        private string GetHtmlColor(string propertyName, int propNumber) {
+            return ReplaceAliases(propertyName, propNumber).ApplyColorFunctions();
+        }
+
+        private string ReplaceAliases(string value, int propNumber) {
+            while (true) {
+                if (value.Contains("@")) {
+                    // try to replace a variable name by it's html color value
+                    var regex = new Regex(@"@([a-zA-Z]*)", RegexOptions.IgnoreCase);
+                    value = regex.Replace(value, match => {
+                        if (SavedStringValues.ContainsKey(match.Groups[1].Value))
+                            return SavedStringValues[match.Groups[1].Value].Split('\t')[propNumber];
+                        throw new Exception("Couldn't find the color " + match.Groups[1].Value + "!");
+                    });
+                    continue;
+                }
+                return value;
             }
         }
 

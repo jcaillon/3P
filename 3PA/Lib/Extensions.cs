@@ -28,7 +28,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -61,6 +60,15 @@ namespace _3PA.Lib {
                 retVal++;
             }
             return -1;
+        }
+
+        /// <summary>
+        /// Get string value between [first] a and [last] b (not included)
+        /// </summary>
+        public static string GetValueBetween(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
+            int posA = value.IndexOf(a, comparer);
+            int posB = value.LastIndexOf(b, comparer);
+            return posB == -1 ? value.Substring(posA + 1) : value.Substring(posA + 1, posB - posA - 1);
         }
 
         /// <summary>
@@ -132,7 +140,11 @@ namespace _3PA.Lib {
         /// <summary>
         /// Allows to describe a field of an enum like this :
         /// [DescriptionAttribute(Value = "DATA-SOURCE")]
-        /// and use the value "Value"
+        /// and use the value "Value" with :
+        /// ((DisplayAttr)currentOperation.GetAttributes()).Name 
+        /// where you used the decoration :
+        /// [DisplayAttr(Name = "Editing")]
+        /// on your enum value
         /// </summary>
         [AttributeUsage(AttributeTargets.Field)]
         public class EnumAttr : Attribute {}
@@ -167,12 +179,25 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Usage :  Extensions.EnumUtil.GetValues MyEnum>()
+        /// Returns a collection of all the values of a given Enum
         /// </summary>
-        public static class EnumUtil {
-            public static IEnumerable<T> GetValues<T>() {
-                return Enum.GetValues(typeof(T)).Cast<T>();
-            }
+        public static IEnumerable<T> GetEnumValues<T>(this Enum value) {
+            return Enum.GetValues(typeof(T)).Cast<T>();
+        }
+
+        /// <summary>
+        /// Returns an array of all the names of a given Enum
+        /// </summary>
+        public static string[] GetEnumNames<T>(this Enum value) {
+            return Enum.GetNames(typeof(T));
+        }
+
+        /// <summary>
+        /// MyEnum tester = MyEnum.FlagA | MyEnum.FlagB;
+        /// if(tester.IsSet(MyEnum.FlagA))
+        /// </summary>
+        public static bool IsFlagSet(this Enum input, Enum matchTo) {
+            return (Convert.ToUInt32(input) & Convert.ToUInt32(matchTo)) != 0;
         }
 
         #endregion
@@ -345,18 +370,18 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// autocase the keyword in input according to the user config
+        /// autocase the keyword according to the mode given
         /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static string AutoCaseToUserLiking(this string keyword) {
-            switch (Config.Instance.CodeChangeCaseMode) {
+        public static string ConvertCase(this string keyword, int mode, string naturalCase = null) {
+            switch (mode) {
                 case 1:
                     return keyword.ToUpper();
                 case 2:
                     return keyword.ToLower();
                 case 3:
                     return keyword.ToTitleCase();
+                case 4:
+                    return naturalCase ?? keyword;
                 default:
                     return keyword;
             }
