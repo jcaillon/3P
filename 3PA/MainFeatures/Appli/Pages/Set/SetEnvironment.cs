@@ -25,7 +25,6 @@ using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
@@ -426,7 +425,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateDownloadButton() {
             // download database information
-            if (DataBase.TryToLoadDatabaseInfo()) {
+            if (DataBase.IsDbInfoAvailable) {
                 btDbDownload.BackGrndImage = ImageResources.DownloadDbOk;
                 btDbDeleteDownload.Enabled = true;
                 btDbView.Enabled = true;

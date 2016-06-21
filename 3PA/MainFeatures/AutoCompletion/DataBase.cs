@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -41,11 +40,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static List<CompletionData> _sequences = new List<CompletionData>();
 
-        /// <summary>
-        /// File path to the output file of the dumpdatabase program
-        /// </summary>
-        private static string _outputFileName;
-
         private static bool _isExtracting;
 
         /// <summary>
@@ -58,11 +52,28 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region public methods
 
         /// <summary>
+        /// Read last used database info file
+        /// </summary>
+        public static void Init() {
+            ProEnvironment.OnEnvironmentChange += UpdateDatabaseInfo;
+            // either do it now or make sure to subscribe to OnEnvironmentChange before the first call to Proenv.current
+            //UpdateDatabaseInfo();
+        }
+
+        /// <summary>
         /// returns the path of the current dump file
         /// </summary>
         /// <returns></returns>
         public static string GetCurrentDumpPath {
-            get { return Path.Combine(Config.FolderDatabase, GetOutputName()); }
+            get { return Path.Combine(Config.FolderDatabase, GetOutputName); }
+        }
+
+        /// <summary>
+        /// returns true if the database info is available
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsDbInfoAvailable {
+            get { return File.Exists(GetCurrentDumpPath); }
         }
 
         /// <summary>
@@ -70,32 +81,28 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns false the info is not available
         /// </summary>
         /// <returns></returns>
-        public static bool TryToLoadDatabaseInfo() {
-            var fileName = GetOutputName();
-
-            // read
-            if (File.Exists(Path.Combine(Config.FolderDatabase, fileName))) {
-                if (Plug.PluginIsFullyLoaded) {
-                    Config.Instance.EnvLastDbInfoUsed = fileName;
-                    Init();
-                }
-                return true;
+        public static void UpdateDatabaseInfo() {
+            if (IsDbInfoAvailable) {
+                // read file, extract info
+                Read(GetCurrentDumpPath);
+            } else {
+                // reset
+                _dataBases.Clear();
+                _sequences.Clear();
             }
-            return false;
+
+            // Update autocompletion
+            AutoComplete.RefreshStaticItems();
+            AutoComplete.ParseCurrentDocument();
         }
 
         /// <summary>
         /// Deletes the file corresponding to the current database (if it exists)
         /// </summary>
         public static void DeleteCurrentDbInfo() {
-            var filePath = Path.Combine(Config.FolderDatabase, GetOutputName());
-            if (File.Exists(filePath)) {
-                try {
-                    File.Delete(filePath);
-                } catch (Exception) {
-                    UserCommunication.Notify("Couldn't delete the following files:<br><a href='" + filePath + "'>" + filePath + "</a>", MessageImg.MsgError, "Delete failed", "Current database info");
-                }
-            }
+            if (!Utils.DeleteFile(GetCurrentDumpPath))
+                UserCommunication.Notify("Couldn't delete the current database info stored in the file :<br>" + GetCurrentDumpPath.ToHtmlLink(), MessageImg.MsgError, "Delete failed", "Current database info");
+            UpdateDatabaseInfo();
         }
 
         /// <summary>
@@ -110,15 +117,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 }
 
                 // save the filename of the output database info file for this environment
-                _outputFileName = GetOutputName();
-
                 UserCommunication.Notify("Now fetching info on all the connected databases for the current environment<br>You will be warned when the process is over", MessageImg.MsgInfo, "Database info", "Extracting database structure", 5);
 
                 var exec = new ProExecution {
                     OnExecutionEnd = execution => _isExtracting = false,
                     OnExecutionOk = ExtractionDoneOk,
                     NeedDatabaseConnection = true,
-                    ExtractDbOutputPath = _outputFileName
+                    ExtractDbOutputPath = GetOutputName
                 };
                 _onExtractionDone = onExtractionDone;
                 _isExtracting = exec.Do(ExecutionType.Database);
@@ -131,42 +136,129 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Method called after the execution of the program extracting the db info
         /// </summary>
         private static void ExtractionDoneOk(ProExecution lastExec) {
-            try {
-                // copy the dump to the folder database
-                if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, _outputFileName))) {
-
-                    // read
-                    Config.Instance.EnvLastDbInfoUsed = _outputFileName;
-                    Init();
-
-                    UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
-
-                    if (_onExtractionDone != null) {
-                        _onExtractionDone();
-                        _onExtractionDone = null;
-                    }
-
-                    AutoComplete.ParseCurrentDocument(true);
+            // copy the dump to the folder database
+            if (Utils.CopyFile(lastExec.ExtractDbOutputPath, Path.Combine(Config.FolderDatabase, Path.GetFileName(lastExec.ExtractDbOutputPath) ?? ""))) {
+                // update info
+                UpdateDatabaseInfo();
+                UserCommunication.Notify("Database structure extracted with success! The auto-completion has been updated with the latest info, enjoy!", MessageImg.MsgOk, "Database info", "Extracting database structure", 10);
+                if (_onExtractionDone != null) {
+                    _onExtractionDone();
+                    _onExtractionDone = null;
                 }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "FetchCurrentDbInfo");
             }
-            
+        }
+
+        #endregion
+
+        #region private methods
+
+        /// <summary>
+        /// Returns the output file name for the current appli/env
+        /// </summary>
+        /// <returns></returns>
+        private static string GetOutputName {
+            get {
+                return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump";
+            }
+
         }
 
         /// <summary>
-        /// Read last used database info file
+        /// This method parses the output of the .p procedure that exports the database info
+        /// and fills _dataBases
+        /// It then updates the parser with the new info
         /// </summary>
-        public static void Init() {
-            if (string.IsNullOrEmpty(Config.Instance.EnvLastDbInfoUsed))
-                return;
-
-            // read file, extract info
-            Read(Path.Combine(Config.FolderDatabase, Config.Instance.EnvLastDbInfoUsed));
-
-            // Update autocompletion
-            AutoComplete.RefreshStaticItems();
-            AutoComplete.ParseCurrentDocument();
+        private static void Read(string filePath) {
+            if (!File.Exists(filePath)) return;
+            _dataBases.Clear();
+            _sequences.Clear();
+            try {
+                ParsedDataBase currentDb = null;
+                ParsedTable currentTable = null;
+                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
+                    var splitted = items.Split('\t');
+                    switch (items[0]) {
+                        case 'H':
+                            // base
+                            //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
+                            if (splitted.Count() != 6) continue;
+                            currentDb = new ParsedDataBase(
+                                splitted[3].ToUpper(),
+                                splitted[4],
+                                splitted[5],
+                                new List<ParsedTable>());
+                            _dataBases.Add(currentDb);
+                            break;
+                        case 'S':
+                            if (splitted.Count() != 3 || currentDb == null) continue;
+                            _sequences.Add(new CompletionData {
+                                DisplayText = splitted[1].ToUpper(),
+                                Type = CompletionType.Sequence,
+                                SubString = currentDb.LogicalName
+                            });
+                            break;
+                        case 'T':
+                            // table
+                            //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
+                            if (splitted.Count() != 6 || currentDb == null) continue;
+                            currentTable = new ParsedTable(
+                                splitted[1].ToUpper(),
+                                0, 0,
+                                splitted[2],
+                                splitted[3],
+                                splitted[4],
+                                splitted[5],
+                                "", false,
+                                new List<ParsedField>(),
+                                new List<ParsedIndex>(),
+                                new List<ParsedTrigger>()
+                                , "", "");
+                            currentDb.Tables.Add(currentTable);
+                            break;
+                        case 'X':
+                            // trigger
+                            //#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>
+                            if (splitted.Count() != 5 || currentTable == null) continue;
+                            currentTable.Triggers.Add(new ParsedTrigger(
+                                splitted[2],
+                                splitted[3]));
+                            break;
+                        case 'I':
+                            // index
+                            //#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>
+                            if (splitted.Count() != 7 || currentTable == null) continue;
+                            var flag = splitted[3].Equals("1") ? ParsedIndexFlag.Primary : ParsedIndexFlag.None;
+                            if (splitted[4].Equals("1")) flag = flag | ParsedIndexFlag.Unique;
+                            currentTable.Indexes.Add(new ParsedIndex(
+                                splitted[2],
+                                flag,
+                                splitted[6].Split('%').ToList()));
+                            break;
+                        case 'F':
+                            // field
+                            //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
+                            if (splitted.Count() != 12 || currentTable == null) continue;
+                            var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
+                            if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
+                            if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
+                            if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
+                            var curField = new ParsedField(
+                                splitted[2].ToUpper(),
+                                splitted[3],
+                                splitted[4],
+                                int.Parse(splitted[5]),
+                                flag2,
+                                splitted[10],
+                                splitted[11],
+                                ParsedAsLike.None);
+                            curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
+                            currentTable.Fields.Add(curField);
+                            break;
+                    }
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
+            }
         }
 
         #endregion
@@ -277,116 +369,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 ParsedItem = table
             }));
             return output;
-        }
-
-        #endregion
-
-        #region private methods
-
-        /// <summary>
-        /// Returns the output file name for the current appli/env
-        /// </summary>
-        /// <returns></returns>
-        private static string GetOutputName() {
-            return (Config.Instance.EnvName + "_" + Config.Instance.EnvSuffix + "_" + Config.Instance.EnvDatabase).ToValidFileName().ToLower() + ".dump";
-        }
-
-        /// <summary>
-        /// This method parses the output of the .p procedure that exports the database info
-        /// and fills _dataBases
-        /// It then updates the parser with the new info
-        /// </summary>
-        private static void Read(string filePath) {
-            if (!File.Exists(filePath)) return;
-            _dataBases.Clear();
-            _sequences.Clear();
-            try {
-                ParsedDataBase currentDb = null;
-                ParsedTable currentTable = null;
-                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
-                    var splitted = items.Split('\t');
-                    switch (items[0]) {
-                        case 'H':
-                            // base
-                            //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
-                            if (splitted.Count() != 6) continue;
-                            currentDb = new ParsedDataBase(
-                                splitted[3].ToUpper(),
-                                splitted[4],
-                                splitted[5],
-                                new List<ParsedTable>());
-                            _dataBases.Add(currentDb);
-                            break;
-                        case 'S':
-                            if (splitted.Count() != 3 || currentDb == null) continue;
-                            _sequences.Add(new CompletionData {
-                                DisplayText = splitted[1].ToUpper(),
-                                Type = CompletionType.Sequence,
-                                SubString = currentDb.LogicalName
-                            });
-                            break;
-                        case 'T':
-                            // table
-                            //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
-                            if (splitted.Count() != 6 || currentDb == null) continue;
-                            currentTable = new ParsedTable(
-                                splitted[1].ToUpper(),
-                                0, 0,
-                                splitted[2],
-                                splitted[3],
-                                splitted[4],
-                                splitted[5],
-                                "", false,
-                                new List<ParsedField>(),
-                                new List<ParsedIndex>(),
-                                new List<ParsedTrigger>()
-                                , "", "");
-                            currentDb.Tables.Add(currentTable);
-                            break;
-                        case 'X':
-                            // trigger
-                            //#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>
-                            if (splitted.Count() != 5 || currentTable == null) continue;
-                            currentTable.Triggers.Add(new ParsedTrigger(
-                                splitted[2],
-                                splitted[3]));
-                            break;
-                        case 'I':
-                            // index
-                            //#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>
-                            if (splitted.Count() != 7 || currentTable == null) continue;
-                            var flag = splitted[3].Equals("1") ? ParsedIndexFlag.Primary : ParsedIndexFlag.None;
-                            if (splitted[4].Equals("1")) flag = flag | ParsedIndexFlag.Unique;
-                            currentTable.Indexes.Add(new ParsedIndex(
-                                splitted[2],
-                                flag,
-                                splitted[6].Split('%').ToList()));
-                            break;
-                        case 'F':
-                            // field
-                            //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
-                            if (splitted.Count() != 12 || currentTable == null) continue;
-                            var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
-                            if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
-                            if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
-                            if (splitted[9].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Primary;
-                            var curField = new ParsedField(
-                                splitted[2].ToUpper(),
-                                splitted[3],
-                                splitted[4],
-                                int.Parse(splitted[5]),
-                                flag2,
-                                splitted[10],
-                                splitted[11],
-                                ParsedAsLike.None);
-                            curField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(curField.TempType, false);
-                            currentTable.Fields.Add(curField);
-                            break;
-                    }
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
-            }
         }
 
         #endregion

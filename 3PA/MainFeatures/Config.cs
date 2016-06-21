@@ -277,13 +277,25 @@ namespace _3PA.MainFeatures {
             /// CODE EDITION
             /// </summary>
 
+            [Display(Name = "Disable all auto-case mode",
+                Description = "Toggle on if you wish to completly disable the auto-case ability of 3P<br><br>By default, 3P will at least correct the case for variables (using their definition)<br>it also can convert the case of keywords / database info (tables, fields...) : see the options below",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            public bool DisableAutoCaseCompletly = false;
 
-            [Display(Name = "Auto-case mode",
+            [Display(Name = "Keywords auto-case mode",
                 Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
             [Range(0, 3)]
             public int CodeChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+
+            [Display(Name = "Database info auto-case mode",
+                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            [Range(0, 3)]
+            public int DatabaseChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
 
             [Display(Name = "Auto replace abbreviations",
                 Description = "Automatically replaces abbreviations by their full lenght counterparts",
