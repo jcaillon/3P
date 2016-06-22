@@ -26,7 +26,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -58,40 +57,42 @@ namespace _3PA {
         /// when the current Encoding is UTF-8, in all other case, we can read/write the strings
         /// as they are (</remarks>
         /// <returns></returns>
-        public static Encoding GetCurrentEncoding() {
-            var curBufferId = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
-            int nppEncoding = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
-            return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
-            /*
-            // Logically, we should identify the correct encoding as follow, but in reality
-            // we only need to convert To/From UTF8/ANSI
-            Encoding encoding = Encoding.Default;
-            switch(nppEncoding) {
-                case 1:
-                case 4:
-                    // UTF-8
-                    encoding = Encoding.UTF8;
-                    break;
-                case 2:
-                case 6:
-                    // UTF-16 Big Endian
-                    encoding = Encoding.BigEndianUnicode;
-                    break;
-                case 3:
-                case 7:
-                    // UTF-16 Little Endian
-                    encoding = Encoding.Unicode;
-                    break;
-                case 5:
-                    // not sure about that (uni7Bit?)
-                    encoding = Encoding.UTF7;
-                    break;
-                default:
-                    // ANSI (chars in the range 0-255 range)
-                    encoding = Encoding.GetEncoding(1252);
-                    break;
+        public static Encoding GetCurrentEncoding {
+            get {
+                var curBufferId = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTBUFFERID, 0, 0);
+                int nppEncoding = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETBUFFERENCODING, curBufferId, 0);
+                return nppEncoding < 1 ? Encoding.Default : Encoding.UTF8;
+                /*
+                // Logically, we should identify the correct encoding as follow, but in reality
+                // we only need to convert To/From UTF8/ANSI
+                Encoding encoding = Encoding.Default;
+                switch(nppEncoding) {
+                    case 1:
+                    case 4:
+                        // UTF-8
+                        encoding = Encoding.UTF8;
+                        break;
+                    case 2:
+                    case 6:
+                        // UTF-16 Big Endian
+                        encoding = Encoding.BigEndianUnicode;
+                        break;
+                    case 3:
+                    case 7:
+                        // UTF-16 Little Endian
+                        encoding = Encoding.Unicode;
+                        break;
+                    case 5:
+                        // not sure about that (uni7Bit?)
+                        encoding = Encoding.UTF7;
+                        break;
+                    default:
+                        // ANSI (chars in the range 0-255 range)
+                        encoding = Encoding.GetEncoding(1252);
+                        break;
+                }
+                */
             }
-            */
         }
 
         /// <summary>
@@ -104,8 +105,10 @@ namespace _3PA {
             get { return UnmanagedExports.NppData._nppHandle; }
         }
 
-        public static bool IsNppWindowFocused() {
-            return (WinApi.GetForegroundWindow() == HandleNpp);
+        public static bool IsNppWindowFocused {
+            get {
+                return (WinApi.GetForegroundWindow() == HandleNpp);
+            }
         }
 
         /// <summary>
@@ -384,21 +387,27 @@ namespace _3PA {
         /// returns npp.exe path
         /// </summary>
         /// <returns></returns>
-        public static string GetNppExePath() {
-            return Path.Combine(GetNppDirectory(), "notepad++.exe");
+        public static string GetNppExePath {
+            get {
+                return Path.Combine(GetNppDirectory(), "notepad++.exe");
+            }
+            
         }
 
         /// <summary>
         /// Returns the current version of notepad++ (format vX.X.X)
         /// </summary>
         /// <returns></returns>
-        public static string GetNppVersion() {
-            if (string.IsNullOrEmpty(_nppVersion)) {
+        public static string GetNppVersion {
+            get {
+                if (string.IsNullOrEmpty(_nppVersion)) {
                 int nppVersion = WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNPPVERSION, 0, 0).ToInt32();
                 var lowWord = (nppVersion & 0x0000FFFF).ToString();
                 _nppVersion = "v" + (nppVersion >> 16 & 0x0000FFFF) + "." + lowWord.Substring(0, 1) + "." + (string.IsNullOrEmpty(lowWord.Substring(1)) ? "0" : lowWord.Substring(1));
+                }
+                return _nppVersion;
             }
-            return _nppVersion;
+
         }
 
         private static string _nppVersion;
@@ -407,11 +416,13 @@ namespace _3PA {
         /// Get the number of instances of Notepad++ currently running
         /// </summary>
         /// <returns></returns>
-        public static int NumberOfNppStarted() {
-            try {
-                return Process.GetProcesses().Count(clsProcess => clsProcess.ProcessName.Contains("notepad++"));
-            } catch {
-                return 1;
+        public static int NumberOfNppStarted {
+            get {
+                try {
+                    return Process.GetProcesses().Count(clsProcess => clsProcess.ProcessName.Contains("notepad++"));
+                } catch {
+                    return 1;
+                }
             }
         }
 

@@ -65,11 +65,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public int TotalItems { get; set; }
 
-        /// <summary>
-        /// The value ranging from 0 to 3 and indicating which folder we are exploring
-        /// </summary>
-        public int DirectoryToExplorer { get; private set; }
-
         // List of displayed type of file
         private static Dictionary<FileType, SelectorButton<FileType>> _displayedTypes;
 
@@ -79,7 +74,34 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private int _currentType;
 
-        private static bool _isListing;
+        /// <summary>
+        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
+        /// </summary>
+        private bool Refreshing {
+            get { return _refreshing; }
+            set {
+                _refreshing = value;
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        if (_refreshing) {
+                            btRefresh.BackGrndImage = ImageResources.refreshing;
+                            btRefresh.Invalidate();
+                            btDirectory.Enabled = false;
+                            toolTipHtml.SetToolTip(btRefresh, "The list is being refreshed, please wait");
+                        } else {
+                            btRefresh.BackGrndImage = ImageResources.refresh;
+                            btRefresh.Invalidate();
+                            toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
+                            btDirectory.Enabled = true;
+                        }
+                    });
+                }
+            }
+        }
+        private bool _refreshing;
+
+        private bool _refreshRequiredWhileRefreshing;
+
         #endregion
 
         #region constructor
@@ -114,20 +136,24 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             #endregion
 
-
             #region Current file
 
             // register to Updated Operation events
             FilesInfo.OnUpdatedOperation += FilesInfoOnUpdatedOperation;
             FilesInfo.OnUpdatedErrors += FilesInfoOnUpdatedErrors;
 
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
-            UpdateErrorButtons(false);
-
-            btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
             btPrevError.ButtonPressed += BtPrevErrorOnButtonPressed;
             btNextError.ButtonPressed += BtNextErrorOnButtonPressed;
             btClearAllErrors.ButtonPressed += BtClearAllErrorsOnButtonPressed;
+            btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
+
+            btPrevError.BackGrndImage = ImageResources.Previous;
+            btNextError.BackGrndImage = ImageResources.Next;
+            btClearAllErrors.BackGrndImage = ImageResources.ClearAll;
+            btGetHelp.BackGrndImage = ImageResources.GetHelp;
+            btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
+
+            UpdateErrorButtons(false);
 
             toolTipHtml.SetToolTip(btGetHelp, "Toggle on/off the <b>detailed help</b> for compilation errors and warnings");
             toolTipHtml.SetToolTip(btPrevError, "<b>Move the caret</b> to the previous error");
@@ -173,21 +199,19 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // button tooltips
             toolTipHtml.SetToolTip(btErase, "<b>Erase</b> the content of the text filter");
-            toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
             toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list below");
             toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
             toolTipHtml.SetToolTip(lbDirectory, "Current directory being explored");
 
-            // default to "everywhere"
-            DirectoryToExplorer = 3;
-
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
-            btDirectory.BackGrndImage = ImageResources.ExplorerDir3;
-            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
-            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
-            btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
+            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
+            btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
+
+            RefreshGotoDirButton();
+
+            Refreshing = false;
 
             #endregion
 
@@ -259,8 +283,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             // currently document
             if (obj.FullPath.Equals(Plug.CurrentFilePath)) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
-                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusBack)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusFore), 1),
+                    FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedFore), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };
@@ -306,38 +330,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            // Style the control
-            fastOLV.OwnerDraw = true;
-            fastOLV.Font = FontManager.GetFont(FontFunction.AutoCompletion);
-            fastOLV.BackColor = ThemeManager.Current.FormBack;
-            fastOLV.AlternateRowBackColor = ThemeManager.Current.FormAltBack;
-            fastOLV.ForeColor = ThemeManager.Current.FormFore;
-            fastOLV.HighlightBackgroundColor = ThemeManager.Current.MenuFocusBack;
-            fastOLV.HighlightForegroundColor = ThemeManager.Current.MenuFocusFore;
-            fastOLV.UnfocusedHighlightBackgroundColor = fastOLV.HighlightBackgroundColor;
-            fastOLV.UnfocusedHighlightForegroundColor = fastOLV.HighlightForegroundColor;
-
-            // Decorate and configure hot item
-            fastOLV.UseHotItem = true;
-            fastOLV.HotItemStyle = new HotItemStyle {
-                BackColor = ThemeManager.Current.MenuHoverBack,
-                ForeColor = ThemeManager.Current.MenuHoverFore
-            };
-
-            // overlay of empty list :
-            fastOLV.EmptyListMsg = StrEmptyList;
-            TextOverlay textOverlay = fastOLV.EmptyListMsgOverlay as TextOverlay;
-            if (textOverlay != null) {
-                textOverlay.TextColor = ThemeManager.Current.FormFore;
-                textOverlay.BackColor = ThemeManager.Current.FormAltBack;
-                textOverlay.BorderColor = ThemeManager.Current.FormFore;
-                textOverlay.BorderWidth = 4.0f;
-                textOverlay.Font = FontManager.GetFont(FontStyle.Bold, 30f);
-                textOverlay.Rotation = -5;
-            }
-
-            fastOLV.UseAlternatingBackColors = Config.Instance.GlobalUseAlternateBackColorOnGrid;
-
+            OlvStyler.StyleIt(fastOLV, StrEmptyList);
             fastOLV.DefaultRenderer = new FilteredItemTextRenderer();
         }
 
@@ -349,14 +342,21 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Call this method to completly refresh the object view list (recompute the items of the list)
         /// </summary>
         public void RefreshFileList() {
-            if (_isListing) return;
-            _isListing = true;
+            if (Refreshing) {
+                _refreshRequiredWhileRefreshing = true;
+                return;
+            }
+            _refreshRequiredWhileRefreshing = false;
+            Refreshing = true;
             Task.Factory.StartNew(() => {
                 try {
                     RefreshFileListAction();
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while listing files");
-                    _isListing = false;
+                } finally {
+                    Refreshing = false;
+                    if (_refreshRequiredWhileRefreshing)
+                        RefreshFileList();
                 }
             });
         }
@@ -364,7 +364,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public void RefreshFileListAction() {
             // get the list of FileObjects
             _initialObjectsList = new List<FileListItem>();
-            switch (DirectoryToExplorer) {
+            switch (Config.Instance.FileExplorerViewMode) {
                 case 0:
                     _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProEnvironment.Current.BaseLocalPath);
                     break;
@@ -430,7 +430,17 @@ namespace _3PA.MainFeatures.FileExplorer {
                         int yPox = Height - 28;
                         _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
                         foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                            var but = new SelectorButton<FileType> {BackGrndImage = GetImageFromStr(type + "Type"), Activated = true, Size = new Size(24, 24), TabStop = false, Location = new Point(xPos, yPox), Type = type, AcceptsRightClick = true, Anchor = AnchorStyles.Left | AnchorStyles.Bottom};
+                            var but = new SelectorButton<FileType> {
+                                BackGrndImage = GetImageFromStr(type + "Type"), 
+                                Activated = true, 
+                                Size = new Size(24, 24), 
+                                TabStop = false, 
+                                Location = new Point(xPos, yPox), 
+                                Type = type, 
+                                AcceptsRightClick = true, 
+                                Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                                HideFocusedIndicator = true
+                            };
                             but.ButtonPressed += HandleTypeClick;
                             toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
                             _displayedTypes.Add(type, but);
@@ -444,11 +454,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                         fastOLV.SetObjects(_initialObjectsList);
                     } catch (Exception e) {
                         ErrorHandler.ShowErrors(e, "Error while showing the list of files");
-                    } finally {
-                        _isListing = false;
                     }
                 });
             }
+
             ApplyFilter();
         }
 
@@ -461,7 +470,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -474,7 +482,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
-                selectorButton.Value.Invalidate();
             }
         }
 
@@ -521,7 +528,6 @@ namespace _3PA.MainFeatures.FileExplorer {
                 // left click is only a toggle
                 _displayedTypes[clickedType].Activated = !_displayedTypes[clickedType].Activated;
 
-            _displayedTypes[clickedType].Invalidate();
             ApplyFilter();
         }
 
@@ -738,27 +744,32 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region File list buttons events
 
+        private void RefreshGotoDirButton() {
+            // refresh a button depending on the mode...
+            if (IsHandleCreated) {
+                BeginInvoke((Action) delegate {
+                    btGotoDir.Visible = Config.Instance.FileExplorerViewMode <= 1;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerViewMode);
+                    btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
+                    btDirectory.Invalidate();
+                    lbDirectory.Text = _explorerDirStr[Config.Instance.FileExplorerViewMode];
+                });
+            }
+        }
+
         private void BtGotoDirOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (DirectoryToExplorer == 0)
+            if (Config.Instance.FileExplorerViewMode == 0)
                 Utils.OpenFolder(ProEnvironment.Current.BaseLocalPath);
-            else if (DirectoryToExplorer == 1)
+            else if (Config.Instance.FileExplorerViewMode == 1)
                 Utils.OpenFolder(ProEnvironment.Current.BaseCompilationPath);
         }
 
         private void BtDirectoryOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (_isListing) return;
-            DirectoryToExplorer++;
-            if (DirectoryToExplorer > 3) DirectoryToExplorer = 0;
-            Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + DirectoryToExplorer);
-            btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
-            btDirectory.Invalidate();
-            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
-            if (DirectoryToExplorer > 1)
-                btGotoDir.Hide();
-            else
-                btGotoDir.Show();
-            RefreshFileList();
+            Config.Instance.FileExplorerViewMode++;
+            if (Config.Instance.FileExplorerViewMode > 3) Config.Instance.FileExplorerViewMode = 0;
+            RefreshGotoDirButton();
 
+            RefreshFileList();
             GiveFocustoTextBox();
         }
 
@@ -776,7 +787,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtRefreshOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             RefreshFileList();
-
             GiveFocustoTextBox();
         }
 
@@ -840,12 +850,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             btPrevError.Enabled = activate;
             btNextError.Enabled = activate;
             btClearAllErrors.Enabled = activate;
-            btPrevError.BackGrndImage = activate ? ImageResources.Previous : Utils.MakeGrayscale3(ImageResources.Previous);
-            btNextError.BackGrndImage = activate ? ImageResources.Next : Utils.MakeGrayscale3(ImageResources.Next);
-            btClearAllErrors.BackGrndImage = activate ? ImageResources.ClearAll : Utils.MakeGrayscale3(ImageResources.ClearAll);
-            btPrevError.Invalidate();
-            btNextError.Invalidate();
-            btClearAllErrors.Invalidate();
         }
 
         private void BtClearAllErrorsOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
@@ -863,7 +867,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtGetHelpOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             Config.Instance.GlobalShowDetailedHelpForErrors = !Config.Instance.GlobalShowDetailedHelpForErrors;
-            btGetHelp.BackGrndImage = (Config.Instance.GlobalShowDetailedHelpForErrors) ? ImageResources.GetHelp : Utils.MakeGrayscale3(ImageResources.GetHelp);
+            btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
             FilesInfo.ClearAnnotationsAndMarkers();
             FilesInfo.UpdateErrorsInScintilla();
             Npp.GrabFocus();

@@ -24,7 +24,7 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -95,7 +95,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Tag = item.ItemId,
                     Text = item.ItemSpec ?? "",
                     Name = "bt" + item.ItemId,
-                    TabStop = false
+                    TabStop = true
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;

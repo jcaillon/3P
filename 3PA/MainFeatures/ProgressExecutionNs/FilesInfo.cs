@@ -407,11 +407,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // the first field should be the file that was compiled, it might not be there for PROLINT.log 
                 // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
                 if (fields.Count() == 7) {
-                    fields.Insert(0, permutePaths.First().Value);
+                    fields.Insert(0, permutePaths.Count > 0 ? permutePaths.First().Value : "");
                 }
 
                 // new file
-                var filePath = (permutePaths.ContainsKey(fields[1]) ? permutePaths[fields[1]] : fields[1]);
+                // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
+                var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
+                var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
                 if (!output.ContainsKey(filePath)) {
                     output.Add(filePath, new List<FileError>());
                     lastLineNbCouple = new[] { -10, -10 };
@@ -451,7 +453,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     Line = lastLineNbCouple[0],
                     Column = column,
                     ErrorNumber = lastLineNbCouple[1],
-                    Message = fields[6].Replace("<br>", "\n").Replace(fields[1], baseFileName).Replace(filePath, baseFileName).Trim(),
+                    Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
                     Help = fields[7].Replace("<br>", "\n").Trim(),
                     FromProlint = fromProlint,
                     CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])

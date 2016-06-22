@@ -62,17 +62,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // toggle
             tg_colorOn.ButtonPressed += TgOnCheckedChanged;
-            tg_colorOn.Checked = Config.Instance.GlobalDontUseSyntaxHighlightTheme;
+            tg_colorOn.Checked = Config.Instance.UseSyntaxHighlightTheme;
 
             tg_override.ButtonPressed += TgOnCheckedChanged;
-            tg_override.Checked = Config.Instance.GlobalOverrideNppTheme;
+            tg_override.Checked = Config.Instance.OverrideNppTheme;
             UpdateToggle();
 
             // tooltips
             toolTip.SetToolTip(cbApplication, "Choose the theme you wish to use for the software");
             toolTip.SetToolTip(cbSyntax, "Choose the theme you wish to use for the syntax highlighting");
-            toolTip.SetToolTip(tg_colorOn, "Toggle this option on if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this on, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this, select the UDL to use from the Language menu before you can see any changes</i>");
-            toolTip.SetToolTip(tg_override, "Toggle this option on if don't want 3P to override certain colors of Notepad++<br>like the selection / caret line color for instance<br>In that case, you will continue using the style settings of Notepad++ and 3P<br>will only control the colors of the language itself.<br><br><i>You need to restart Notepad++ to see any changes</i>");
+            toolTip.SetToolTip(tg_colorOn, "Toggle this option OFF if you are using your own User Defined Language<br><br>By default, 3P created a new UDL called 'OpenEdgeABL' and applies the selected theme below<br>each time the user switches the current document<br>By toggling this OFF, you will prevent this behavior and you can define your own UDL<br><br><i>If you toggle this OFF, select the UDL to use from the Language menu before you can see any changes</i>");
+            toolTip.SetToolTip(tg_override, "Toggle this option OFF if don't want 3P to override certain colors of Notepad++<br>like the selection / caret line / whitespaces and indent guide colors<br>In that case, you will continue using the style settings of Notepad++ and 3P<br>will only control the colors of the language itself.<br><br><i>You need to restart Notepad++ to see any changes</i>");
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpCustomThemes + @"'>How to customize the look of 3P?</a>";
 
@@ -82,34 +82,35 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
-
         public override void OnShow() {
             // themes combo box
             cbApplication.SelectedIndexChanged -= CbApplicationOnSelectedIndexChanged;
-            cbApplication.DataSource = ThemeManager.GetThemesList().Select(theme => theme.ThemeName).ToList();
+            cbApplication.DataSource = ThemeManager.GetThemesList.Select(theme => theme.ThemeName).ToList();
             cbApplication.SelectedIndex = Config.Instance.ThemeId;
             cbApplication.SelectedIndexChanged += CbApplicationOnSelectedIndexChanged;
 
             // syntax combo
             cbSyntax.SelectedIndexChanged -= CbSyntaxSelectedIndexChanged;
-            cbSyntax.DataSource = Style.GetThemesList().Select(theme => theme.Name).ToList();
+            cbSyntax.DataSource = Style.GetThemesList.Select(theme => theme.ThemeName).ToList();
             cbSyntax.SelectedIndex = Config.Instance.SyntaxHighlightThemeId;
             cbSyntax.SelectedIndexChanged += CbSyntaxSelectedIndexChanged;
         }
 
         private void TgOnCheckedChanged(object sender, EventArgs eventArgs) {
-            Config.Instance.GlobalDontUseSyntaxHighlightTheme = tg_colorOn.Checked;
-            Config.Instance.GlobalOverrideNppTheme = tg_override.Checked;
+            Config.Instance.UseSyntaxHighlightTheme = tg_colorOn.Checked;
+            Config.Instance.OverrideNppTheme = tg_override.Checked;
             UpdateToggle();
         }
 
         private void UpdateToggle() {
             if (tg_colorOn.Checked) {
-                tg_colorOn.Text = @"Use a custom User Defined Language";
-                cbSyntax.Hide();
-            } else {
                 tg_colorOn.Text = @"Use the themes provided by 3P, select one below : ";
                 cbSyntax.Show();
+                tg_override.Show();
+            } else {
+                tg_colorOn.Text = @"Use a custom User Defined Language";
+                cbSyntax.Hide();
+                tg_override.Hide();
             }
             if (tg_override.Checked) {
                 tg_override.Text = @"Let 3P override notepad++ themes (for instance, replace selection color)";
@@ -122,34 +123,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// Changing theme
         /// </summary>
         private void CbApplicationOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            try {
-                ThemeManager.Current = ThemeManager.GetThemesList()[cbApplication.SelectedIndex];
-                ThemeManager.Current.AccentColor = ThemeManager.Current.ThemeAccentColor;
-                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
+            var theme = ThemeManager.GetThemesList[cbApplication.SelectedIndex];
+            theme.AccentColor = Color.Empty;
+            Config.Instance.ThemeId = cbApplication.SelectedIndex;
+            if (_checkButton != null)
                 _checkButton.Checked = false;
-            } catch (Exception x) {
-                if (!(x is NullReferenceException))
-                    ErrorHandler.Log(x.Message);
-            } finally {
-                Config.Instance.ThemeId = cbApplication.SelectedIndex;
-                ThemeManager.PlsRefresh();
-            }
-            
-        }
-
-        /// <summary>
-        /// Changing syntax theme
-        /// </summary>
-        private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            try {
-                Style.CurrentTheme = Style.GetThemesList()[cbSyntax.SelectedIndex];
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
-            } finally {
-                Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
-                if (Plug.IsCurrentFileProgress)
-                    Style.SetSyntaxStyles();
-            }
+            ThemeManager.RefreshApplicationWithTheme(theme);
         }
 
         /// <summary>
@@ -159,10 +138,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             YamuiColorRadioButton rb = sender as YamuiColorRadioButton;
             if (rb != null && rb.Checked) {
                 ThemeManager.Current.AccentColor = rb.BackColor;
-                Config.Instance.AccentColor = ThemeManager.Current.AccentColor;
+                ThemeManager.RefreshApplicationWithTheme(ThemeManager.Current);
                 _checkButton = rb;
-                ThemeManager.PlsRefresh();
             }
         }
+
+        /// <summary>
+        /// Changing syntax theme
+        /// </summary>
+        private void CbSyntaxSelectedIndexChanged(object sender, EventArgs eventArgs) {
+            Style.Current = Style.GetThemesList[cbSyntax.SelectedIndex];
+            Config.Instance.SyntaxHighlightThemeId = cbSyntax.SelectedIndex;
+            if (Plug.IsCurrentFileProgress)
+                Style.SetSyntaxStyles();
+        }
+
     }
 }

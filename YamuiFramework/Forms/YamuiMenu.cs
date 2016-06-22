@@ -202,6 +202,7 @@ namespace YamuiFramework.Forms {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
+
             var backColor = YamuiThemeManager.Current.FormBack;
             var borderColor = YamuiThemeManager.Current.FormBorder;
 
@@ -214,7 +215,7 @@ namespace YamuiFramework.Forms {
 
             // draw separators
             foreach (var yPosOfSeparator in _yPosOfSeparators) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonHoverBack)) {
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormAltBack)) {
                     var width = (int) (Width*0.35);
                     e.Graphics.FillRectangle(b, new Rectangle(width, yPosOfSeparator + SeparatorLineHeight / 2 - 1, Width - width * 2, 2));
                 }
@@ -372,13 +373,13 @@ namespace YamuiFramework.Forms {
 
             protected override void OnPaint(PaintEventArgs e) {
 
-                // background
                 var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered);
+                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered);
+
+                // background
                 e.Graphics.Clear(backColor);
 
                 // foreground
-                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered);
-
                 // left line
                 if (IsFocused) {
                     using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
@@ -388,9 +389,8 @@ namespace YamuiFramework.Forms {
 
                 // Image icon
                 Image img = IconImage;
-                if (img != null && !NoIconImage) {
+                if (img != null && !NoIconImage)
                     e.Graphics.DrawImage(img, new Rectangle(8, 1, 20, 20));
-                }
 
                 // sub text 
                 if (!string.IsNullOrEmpty(SubText)) {

@@ -40,9 +40,11 @@ namespace _3PA.MainFeatures.FilteredLists {
         }
 
         #region Configuration properties
+
         private Brush _fillBrush;
         private Pen _framePen;
         private bool _useRoundedRectangle = true;
+
         #endregion
 
         #region Text Rendering

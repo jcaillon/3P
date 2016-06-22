@@ -110,8 +110,8 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = true)]
             public bool GlobalUseAlternateBackColorOnGrid = false;
 
-            [Display(Name = "Application focused opacity",
-                Description = "Set the opacity that the main application window will have when activated",
+            [Display(Name = "Application unfocused opacity",
+                Description = "Set the opacity that the main application window will have when it doenst' have the focus",
                 GroupName = "General",
                 AutoGenerateField = false)]
             [Range(0.1, 1)]
@@ -277,13 +277,25 @@ namespace _3PA.MainFeatures {
             /// CODE EDITION
             /// </summary>
 
-
-            [Display(Name = "Auto-case mode",
-                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3)<br>Set to 0 to deactivate",
+            [Display(Name = "Disable all auto-case mode",
+                Description = "Toggle on if you wish to completly disable the auto-case ability of 3P<br><br>By default, 3P will at least correct the case for variables (using their definition)<br>it also can convert the case of keywords / database info (tables, fields...) : see the options below",
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
-            [Range(0, 3)]
-            public int CodeChangeCaseMode = 1; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel
+            public bool DisableAutoCaseCompletly = false;
+
+            [Display(Name = "Keywords auto-case mode",
+                Description = "When you finished entering a keyword, it can be automatically be :<br>UPPERCASED (1), lowercased (2), CamelCased (3) or set as it appears in the documentation (4)<br>Set to 0 to deactivate",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            [Range(0, 4)]
+            public int KeywordChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
+
+            [Display(Name = "Database info auto-case mode",
+                Description = "When you finished entering any information extracted from the database<br>(db name, tables, fields, sequences), it can be automatically be :<br>UPPERCASED (1), lowercased (2) or CamelCased (3), or set as it appears in the database (4)<br>Set to 0 to deactivate",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            [Range(0, 4)]
+            public int DatabaseChangeCaseMode = 4; // 0 = inactive, 1 = upper, 2 = lower, 3 = camel, 4 = default
 
             [Display(Name = "Auto replace abbreviations",
                 Description = "Automatically replaces abbreviations by their full lenght counterparts",
@@ -394,6 +406,9 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
+            // Current folder mode for the file explorer : local/compilation/propath/everywhere
+            public int FileExplorerViewMode = 3;
+
             // Shared configuration last folder selected
             public string SharedConfFolder = "";
             // a list of Label corresponding to confLine(s) that are auto-updated
@@ -428,18 +443,12 @@ namespace _3PA.MainFeatures {
             // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
 
-            /// <summary>
-            /// allows to delete the lib after an update to make sure we get the last lib
-            /// dont use this for anything else!!!
-            /// </summary>
-            public string PreviousStart3PVersion = "";
-
             // THEMES
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
-            public bool GlobalDontUseSyntaxHighlightTheme = false;
-            public bool GlobalOverrideNppTheme = true;
+            public bool UseSyntaxHighlightTheme = true;
+            public bool OverrideNppTheme = true;
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
@@ -575,8 +584,8 @@ namespace _3PA.MainFeatures {
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
 
         // themes
-        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_SyntaxThemes.conf"); } }
-        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ApplicationThemes.conf"); } }
+        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); } }
+        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ThemesForApplication.conf"); } }
 
         // errors
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }
@@ -604,7 +613,7 @@ namespace _3PA.MainFeatures {
         public static string FileZipDll { get { return Path.Combine(FolderUpdate, "7z.dll"); } }
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
-        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "latestRelease.zip"); } }
+        public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
 
         #endregion
 

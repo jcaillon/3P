@@ -20,8 +20,6 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Themes;
-using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -47,10 +45,6 @@ namespace _3PA {
 
         #region Fields
 
-        /// <summary>
-        /// Set to true after the plugin has been fully loaded
-        /// </summary>
-        public static bool PluginIsFullyLoaded { get; private set; }
 
         // We don't want to recompute those values all the time so we store them when the buffer (document) changes
 
@@ -71,7 +65,7 @@ namespace _3PA {
 
         #endregion
 
-        #region Init
+        #region Start
 
         /// <summary>
         /// Called on notepad++ setinfo
@@ -87,6 +81,15 @@ namespace _3PA {
 
             // subscribe to notorious events
             OnNppShutDown += PlugShutDown;
+            OnNppReady += PlugStartup;
+
+            // This allows to correctly feed the dll with its dependencies
+            AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
+
+            // catch unhandled errors to log them
+            AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
+            Application.ThreadException += ErrorHandler.ThreadErrorHandler;
+            TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
         }
 
         /// <summary>
@@ -101,108 +104,101 @@ namespace _3PA {
         /// <summary>
         /// Called on npp ready
         /// </summary>
-        internal static void OnNppReady() {
+        internal static bool PlugStartup() {
             try {
-                // This allows to correctly feed the dll with its dependencies
-                LibLoader.Init();
+                // need to 
+                ThemeManager.OnStartUp();
 
-                // catch unhandled errors to log them
-                AppDomain.CurrentDomain.UnhandledException += ErrorHandler.UnhandledErrorHandler;
-                Application.ThreadException += ErrorHandler.ThreadErrorHandler;
-                TaskScheduler.UnobservedTaskException += ErrorHandler.UnobservedErrorHandler;
-                
-                // initialize plugin (why another method for this? because otherwise the LibLoader can't do his job...)
-                InitPlugin();
+                // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
+                // from a back groundthread with BeginInvoke()
+                // once this method is done, we are able to publish notifications
+                UserCommunication.Init();
+
+                // if the UDL is not installed
+                if (!Style.InstallUdl(true)) {
+                    Style.InstallUdl();
+                } else {
+                    // first use message?
+                    if (Config.Instance.UserFirstUse) {
+                        UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
+                            Appli.ToggleView();
+                            UserCommunication.CloseUniqueNotif("welcome");
+                            args.Handled = true;
+                        });
+                        Config.Instance.UserFirstUse = false;
+                    }
+                }
+
+                // check Npp version, 3P requires version 6.8 or higher
+                if (!string.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("6.7")) {
+                    UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
+                }
+
+                // Check if an update has been done and start checking for new updates
+                UpdateHandler.CheckForUpdateDone();
+                UpdateHandler.StartCheckingForUpdate();
+
+                // Try to update the configuration from the distant shared folder
+                ShareExportConf.StartCheckingForUpdates();
+
+                Keywords.Import();
+                Snippets.Init();
+                FileTag.Import();
+
+                // initialize the list of objects of the autocompletion form
+                AutoComplete.RefreshStaticItems(true);
+
+                // init database info
+                DataBase.Init();
+
+                SetHooks();
+
+                // Start pinging
+                // ReSharper disable once ObjectCreationAsStatement
+                new ReccurentAction(User.Ping, 1000*60*120);
+
+                // code explorer
+                if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
+                    CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
+                } else if (Config.Instance.CodeExplorerVisible) {
+                    CodeExplorer.Toggle();
+                }
+
+                // File explorer
+                if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
+                    FileExplorer.Toggle(Abl.IsCurrentProgressFile());
+                } else if (Config.Instance.FileExplorerVisible) {
+                    FileExplorer.Toggle();
+                }
+
+                // set the following operations
+                OnPlugReady += AfterPlugStartUp;
+
+                return true;
+
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "OnNppReady");
+                ErrorHandler.ShowErrors(e, "Plugin startup");
             }
+            return false;
         }
 
-        internal static void InitPlugin() {
+        internal static void AfterPlugStartUp() {
 
-            // themes and html
-            ThemeManager.Current.AccentColor = Config.Instance.AccentColor;
-            YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
-            YamuiThemeManager.OnGetCssSheet += HtmlHandler.YamuiThemeManagerOnOnGetCssSheet;
-            YamuiThemeManager.OnHtmlImageNeeded += HtmlHandler.YamuiThemeManagerOnOnHtmlImageNeeded;
-            YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
+            // subscribe to static events
 
-            // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
-            // from a back groundthread, use : BeginInvoke()
-            UserCommunication.Init();
-
-            // if the UDL is not installed
-            if (!Style.InstallUdl(true)) {
-                Style.InstallUdl();
-            } else {
-                // first use message?
-                if (Config.Instance.UserFirstUse) {
-                    UserCommunication.NotifyUnique("welcome", "<div>Dear user,<br><br>Thank you for installing 3P, you are awesome!<br><br>If this is your first look at 3P I invite you to read the <b>Getting started</b> section of the home page by clicking <a href='go'>on this link right here</a>.<br><br></div><div align='right'>Enjoy!</div>", MessageImg.MsgInfo, "Information", "Hello and welcome aboard!", args => {
-                        Appli.ToggleView();
-                        UserCommunication.CloseUniqueNotif("welcome");
-                        args.Handled = true;
-                    });
-                    Config.Instance.UserFirstUse = false;
-                }
-            }
-
-            // check Npp version, 3P requires version 6.8 or higher
-            if (!string.IsNullOrEmpty(Npp.GetNppVersion()) && !Npp.GetNppVersion().IsHigherVersionThan("6.7")) {
-                UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion() + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
-            }
-
-            // Check if an update has been done and start checking for new updates
-            UpdateHandler.CheckForUpdateDone();
-            UpdateHandler.StartCheckingForUpdate();
-
-            // code explorer
-            if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
-            } else if (Config.Instance.CodeExplorerVisible) {
-                CodeExplorer.Toggle();
-            }
-
-            // File explorer
-            if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                FileExplorer.Toggle(Abl.IsCurrentProgressFile());
-            } else if (Config.Instance.FileExplorerVisible) {
-                FileExplorer.Toggle();
-            }
-
-            // Try to update the configuration from the distant shared folder
-            ShareExportConf.StartCheckingForUpdates();
-
-            // everything else can be async
-            //Task.Factory.StartNew(() => {
-
-            Keywords.Import();
-            Snippets.Init();
-            FileTag.Import();
-
-            // initialize the list of objects of the autocompletion form
-            AutoComplete.RefreshStaticItems(true);
-
-            // init database info
-            DataBase.Init();
-
-            PluginIsFullyLoaded = true;
+            // rebuild the file explorer each time the environment changes
+            ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
 
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched(true);
 
-            SetHooks();
-            //});
-
-            // this is done async anyway
-            FileExplorer.RebuildItemList();
-
-            // ReSharper disable once ObjectCreationAsStatement
-            new ReccurentAction(User.Ping, 1000 * 60 * 120);
+            // Make sure to give the focus to scintilla on startup
+            WinApi.SetForegroundWindow(Npp.HandleNpp);
         }
 
         #endregion
 
-        #region Clean up
+        #region Die
 
         /// <summary>
         /// Called on Npp shutdown

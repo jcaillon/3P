@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiImageButton.cs) is part of YamuiFramework.
+// This file (YamuiButtonImage.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,11 +17,10 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
-using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
@@ -37,37 +36,45 @@ namespace YamuiFramework.Controls {
         [Category("Yamui")]
         public bool DrawBorder { get; set; }
 
+        [DefaultValue(false)]
+        [Category("Yamui")]
+        public bool HideFocusedIndicator { get; set; }
+
         #endregion
 
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
             try {
-                Color backColor = YamuiThemeManager.Current.ButtonBg(BackColor, false, IsFocused, IsHovered, IsPressed, true);
-                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, true);
-                var img = BackGrndImage;
-
-                if (DesignMode)
-                    backColor = Color.Fuchsia;
+                Color backColor = DesignMode ? Color.Fuchsia : YamuiThemeManager.Current.ButtonImageBg(IsHovered, IsPressed);
+                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
 
                 // draw background
                 using (SolidBrush b = new SolidBrush(backColor)) {
                     e.Graphics.FillRectangle(b, ClientRectangle);
                 }
 
+                // draw an indicator to know the image is focused
+                if (!HideFocusedIndicator && IsFocused)
+                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
+                        GraphicsPath path = new GraphicsPath();
+                        path.AddLines(new[] { new Point(0, 0), new Point(ClientRectangle.Width / 2, 0), new Point(0, ClientRectangle.Height / 2), new Point(0, 0), });
+                        e.Graphics.FillPath(b, path);
+                    }
+
                 // draw main image, in greyscale if not activated
-                if (!Enabled)
-                    img = Utilities.MakeGrayscale3(new Bitmap(img, new Size(BackGrndImage.Width, BackGrndImage.Height)));
-                var recImg = new Rectangle(new Point((ClientRectangle.Width - img.Width) / 2, (ClientRectangle.Height - img.Height) / 2), new Size(img.Width, img.Height));
-                e.Graphics.DrawImage(img, recImg);
+                if (BackGrndImage != null) {
+                    var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
+                    e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
+                }
 
                 // border
                 if (DrawBorder) {
-                    recImg = ClientRectangle;
-                    recImg.Inflate(-2, -2);
+                    var recBorder = ClientRectangle;
+                    recBorder.Inflate(-1, -1);
                     if (borderColor != Color.Transparent) {
-                        using (Pen b = new Pen(borderColor, 2f)) {
-                            e.Graphics.DrawRectangle(b, recImg);
+                        using (Pen b = new Pen(borderColor, 1f)) {
+                            e.Graphics.DrawRectangle(b, recBorder);
                         }
                     }
                 }

@@ -18,11 +18,14 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
@@ -39,11 +42,9 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-
         }
 
         public static void StartDebug() {
-
         }
 
         public static void Test() {
@@ -58,11 +59,11 @@ namespace _3PA.Tests {
 
                 var ftp = new FtpsClient();
                 bool connected = false;
-                foreach (var mode in Extensions.EnumUtil.GetValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
                     try {
                         ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
                         connected = true;
-                        UserCommunication.Notify(((EsslSupportModeAttr)mode.GetAttributes()).Value);
+                        UserCommunication.Notify(mode.GetDescription());
                     } catch (Exception) {
                         //ignored
                     }
@@ -155,6 +156,157 @@ namespace _3PA.Tests {
         }
 
         #endregion
+
+        #region extract color scheme from less files
+        /*
+        private static void ExtracFromMultipleLess() {
+            var output = @"D:\Profiles\jcaillon\Downloads\bootwatch\out.txt";
+            foreach (var file in Directory.GetFiles(@"D:\Profiles\jcaillon\Downloads\bootwatch", "*.less")) {
+                ExtracFromLess(file, output);
+            }
+        }
+
+        private static void ExtracFromLess(string lessFile, string outputFile) {
+
+            var colorsDictionary = new Dictionary<string, string>();
+
+            var matchArray = new Dictionary<string, string> {
+                {"ThemeAccentColor", "@brand-primary"},
+
+                {"FormBack", "@body-bg"},
+                {"FormFore", "@text-color"},
+                {"FormBorder", "@jumbotron-bg"},
+                {"FormAltBack", "@breadcrumb-bg"},
+                {"SubTextFore", "@brand-primary"},
+
+                {"ScrollBarNormalBack", "@breadcrumb-bg"},
+                {"ScrollThumbNormalBack", "@breadcrumb-color"},
+                {"ScrollBarHoverBack", "@breadcrumb-bg"},
+                {"ScrollThumbHoverBack", "@breadcrumb-active-color"},
+                {"ScrollBarDisabledBack", "@breadcrumb-bg"},
+                {"ScrollThumbDisabledBack", "@buttondisabled-bg"},
+
+                {"ButtonNormalBack", "@pagination-bg"},
+                {"ButtonNormalFore", "@pagination-color"},
+                {"ButtonNormalBorder", "@input-border"},
+
+                {"ButtonHoverBack", "@buttonhover-bg"},
+                {"ButtonHoverFore", "@buttonhover-color"},
+                {"ButtonHoverBorder", "@buttonhover-border"},
+                
+                {"ButtonDisabledBack", "@buttondisabled-bg"},
+                {"ButtonDisabledFore", "@text-muted"},
+                {"ButtonDisabledBorder", "@input-border"},
+
+                {"ButtonPressedFore", "@buttondpressed-bg"},
+
+                {"LabelNormalFore", "@text-color"},
+                {"LabelPressedFore", "@brand-primary"},
+                {"LabelDisabledFore", "@text-muted"},
+
+                {"TabNormalBack", "@body-bg"},
+                {"TabNormalFore", "@text-color"},
+                {"TabHoverFore", "@link-color"},
+                {"TabPressedFore", "@link-hover-color"},
+
+                {"MenuHoverBack", "@buttonhover-bg"},
+                {"MenuHoverFore", "@buttonhover-color"},
+                {"MenuFocusBack", "@buttondpressed-bg"},
+                {"MenuFocusFore", "@buttonhover-color"},
+
+                {"AutoCompletionHighlightBack", "@brand-warning"},
+                {"AutoCompletionHighlightBorder", "@brand-warning-darker"},
+
+                {"GenericLinkColor", "@link-color"},
+                {"GenericErrorColor", "@brand-danger"},
+            };
+
+            var result = new StringBuilder();
+
+            // extract colors from less file
+            var regex = new Regex(@"(^@[\w-]*)\:\s*(.*?)\;.*?$");
+            foreach (var line in File.ReadAllLines(lessFile).Select(s => s.Trim())) {
+                if (regex.IsMatch(line)) {
+                    string colorName = null;
+                    string colorValue = null;
+                    foreach (Match match in regex.Matches(line)) {
+                        colorName = match.Groups[1].Value;
+                        colorValue = match.Groups[2].Value;
+                    }
+                    if (colorValue != null) {
+                        if (!colorsDictionary.ContainsKey(colorName))
+                            colorsDictionary.Add(colorName, colorValue);
+                    }
+                }
+            }
+
+            // convert stuff like lighten/darken of reference to other colors
+            var colorsDictTemp = new Dictionary<string, string>();
+            foreach (var color in colorsDictionary) {
+                var colorValue = color.Value;
+                // ref
+                if (colorValue.StartsWith("@") && colorsDictionary.ContainsKey(colorValue))
+                    colorValue = colorsDictionary[colorValue];
+
+                // transparent
+                else if (colorValue.EqualsCi("transparent") && colorsDictionary.ContainsKey("@body-bg"))
+                    colorValue = colorsDictionary["@body-bg"];
+                if (!colorsDictTemp.ContainsKey(color.Key))
+                    colorsDictTemp.Add(color.Key, FindColor(colorsDictTemp, colorValue));
+            }
+
+            var isBgDark = ColorTranslator.FromHtml(colorsDictTemp["@body-bg"]).IsColorDark();
+            colorsDictTemp.Add("@brand-primary-darker", @"darken(@brand-warning, " + (isBgDark ? "" : "-") + "35%)");
+            colorsDictTemp.Add("@buttonhover-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "20%)");
+            colorsDictTemp.Add("@buttonhover-color", @"darken(@pagination-color, " + (isBgDark ? "" : "-") + "15%)");
+            colorsDictTemp.Add("@buttonhover-border", @"darken(@input-border, " + (isBgDark ? "-" : "") + "15%)");
+            colorsDictTemp.Add("@buttondisabled-bg", @"darken(@pagination-bg, " + (isBgDark ? "" : "-") + "35%)");
+            colorsDictTemp.Add("@buttondpressed-bg", @"darken(@pagination-bg, " + (isBgDark ? "-" : "") + "35%)");
+
+            colorsDictionary.Clear();
+            foreach (var color in colorsDictTemp) {
+                if (!colorsDictionary.ContainsKey(color.Key))
+                    colorsDictionary.Add(color.Key, FindColor(colorsDictTemp, color.Value));
+            }
+
+            // and now write the result...
+            foreach (var kpv in matchArray) {
+                // the var corresponds to one of our var?
+                if (colorsDictionary.ContainsKey(kpv.Value)) {
+                    result.AppendLine(kpv.Key + "\t" + colorsDictionary[kpv.Value]);
+                }
+            }
+
+            File.AppendAllText(outputFile, "\r\n\r\n\r\n> " + Path.GetFileNameWithoutExtension(lessFile) + "\r\n" + result);
+
+        }
+
+        private static string FindColor(Dictionary<string, string> refDic, string link) {
+            if (link.StartsWith("@")) {
+                if (refDic.ContainsKey(link))
+                    return ConvertLightenDarken(refDic, FindColor(refDic, refDic[link]));
+            }
+            return ConvertLightenDarken(refDic, link);
+        }
+
+        private static string ConvertLightenDarken(Dictionary<string, string> refDic, string link) {
+            try {
+                if (link.StartsWith("darken") || link.StartsWith("lighten")) {
+                    var darken = link.StartsWith("darken");
+                    link = link.Substring(link.IndexOf("(", StringComparison.CurrentCultureIgnoreCase) + 1);
+                    link = link.Substring(0, link.Length - 2);
+                    var split = link.Split(',');
+                    link = FindColor(refDic, split[0]);
+                    var percent = float.Parse((split[1].Trim().Replace("%", "").Replace(",", "."))) / 100;
+                    link = ColorTranslator.ToHtml(ColorTranslator.FromHtml(link).ModifyColorLuminosity((darken ? -1 : 1) * percent));
+                }
+            } catch (Exception) {
+            }
+            return link;
+        }
+        */
+        #endregion
+
     }
 
     #region Parser

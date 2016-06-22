@@ -24,9 +24,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Data;
-using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -34,35 +33,31 @@ using _3PA.MainFeatures.ProgressExecutionNs;
 namespace _3PA.MainFeatures {
 
     /// <summary>
-    /// This class handles the STYLENEEDED notification of scintilla
+    /// This class handles the Styles of scintilla
     /// </summary>
     internal static class Style {
 
-        #region fields
-
-        /// <summary>
-        /// List of themes
-        /// </summary>
-        private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();
-
-        private static StyleTheme _currentTheme;
-
-        #endregion
-
         #region Current theme
+
+        private static List<StyleTheme> _listOfThemes = new List<StyleTheme>();
+        private static StyleTheme _currentTheme;
 
         /// <summary>
         /// handles the current theme
         /// </summary>
-        public static StyleTheme CurrentTheme {
-            set { _currentTheme = value; }
+        public static StyleTheme Current {
             get {
-                if (_currentTheme != null)
-                    return _currentTheme;
-
-                // instanciation of current theme
-                _currentTheme = GetThemesList().ElementAt(Config.Instance.SyntaxHighlightThemeId);
+                if (_currentTheme == null)
+                    Current = GetThemesList.ElementAt(Config.Instance.SyntaxHighlightThemeId);
                 return _currentTheme;
+            }
+            set {
+                _currentTheme = value;
+                try { 
+                    _currentTheme.SetColorValues(typeof(StyleTheme));
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Loading a theme");
+                }
             }
         }
 
@@ -70,37 +65,20 @@ namespace _3PA.MainFeatures {
         /// Returns the list of all available themes
         /// </summary>
         /// <returns></returns>
-        public static List<StyleTheme> GetThemesList() {
-
-            if (_listOfThemes.Count == 0) {
-                StyleTheme curTheme = null;
-                ConfLoader.ForEachLine(Config.FileSyntaxThemes, DataResources.SyntaxThemes, Encoding.Default, s => {
-                    // beggining of a new theme, read its name
-                    if (s.Length > 2 && s[0] == '>') {
-                        _listOfThemes.Add(new StyleTheme());
-                        curTheme = _listOfThemes.Last();
-                        curTheme.Name = s.Substring(2).Trim();
-                    }
-                    if (curTheme == null)
-                        return;
-                    // fill the theme
-                    var items = s.Split('\t');
-                    if (items.Count() == 4) {
-                        curTheme.SetValueOf(items[0].Trim(), new StyleThemeItem {
-                            ForeColor = ColorTranslator.FromHtml(items[1].Trim()),
-                            BackColor = ColorTranslator.FromHtml(items[2].Trim()),
-                            FontType = int.Parse(items[3].Trim())
-                        });
-                    }
-                });
+        public static List<StyleTheme> GetThemesList {
+            get {
+                // get the list of themes from the user's file or from the ressource by default
+                if (_listOfThemes.Count == 0)
+                    _listOfThemes = GenericThemeHolder.ReadThemeFile<StyleTheme>(Config.FileSyntaxThemes, DataResources.SyntaxThemes, Encoding.Default);
+                if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
+                    Config.Instance.SyntaxHighlightThemeId = 0;
+                return _listOfThemes;
             }
-
-            if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
-                Config.Instance.SyntaxHighlightThemeId = 0;
-
-            return _listOfThemes;
         }
 
+        /// <summary>
+        /// Called when the list of themes is imported
+        /// </summary>
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
@@ -178,17 +156,14 @@ namespace _3PA.MainFeatures {
             if (!_needReset)
                 return;
 
-            if (Config.Instance.GlobalOverrideNppTheme) {
-
+            if (Config.Instance.OverrideNppTheme) {
                 Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
 
-                // selection and caret line, we can't restore the previous colors because we don't have the selection color! (it's a npp setting)
-                if (CurrentTheme.Selection.BackColor != Color.Transparent) {
-                    Npp.SetSelectionColor(true, _caretLineColor, Color.Transparent);
-                }
-                if (CurrentTheme.CaretLine.BackColor != Color.Transparent) {
-                    Npp.CaretLineBackColor = ControlPaint.Light(_caretLineColor, 1.2f);
-                }
+                // selection and caret line
+                if (Current.Selection.BackColor != Color.Transparent)
+                    Npp.SetSelectionColor(true, Color.LightGray, Color.Transparent);
+                if (Current.CaretLine.BackColor != Color.Transparent)
+                    Npp.CaretLineBackColor = _caretLineColor;
             }
         }
 
@@ -198,7 +173,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void SetSyntaxStyles() {
 
-            var curTheme = CurrentTheme;
+            var curTheme = Current;
 
             // Default
             SetFontStyle((byte)SciMsg.STYLE_DEFAULT, curTheme.Default);
@@ -228,7 +203,7 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
             SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
 
-            if (Config.Instance.GlobalOverrideNppTheme) {
+            if (Config.Instance.OverrideNppTheme) {
 
                 // save current values, to reset them when we switch on a non progress file
                 if (!_needReset) {
@@ -244,12 +219,10 @@ namespace _3PA.MainFeatures {
                 }
 
                 // Selection and caret line
-                if (curTheme.Selection.BackColor != Color.Transparent) {
+                if (curTheme.Selection.BackColor != Color.Transparent)
                     Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
-                }
-                if (curTheme.CaretLine.BackColor != Color.Transparent) {
+                if (curTheme.CaretLine.BackColor != Color.Transparent)
                     Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
-                }
             }
 
         }
@@ -269,7 +242,7 @@ namespace _3PA.MainFeatures {
 
         public static void SetGeneralStyles() {
 
-            var curTheme = CurrentTheme;
+            var curTheme = Current;
             
             // Setting styles for errors 
             SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
@@ -406,9 +379,8 @@ namespace _3PA.MainFeatures {
 
     #region StyleTheme class
 
-    public class StyleTheme {
+    public class StyleTheme : GenericThemeHolder {
 
-        public string Name = "Default";
         public StyleThemeItem Default = new StyleThemeItem();
         public StyleThemeItem Comment = new StyleThemeItem();
         public StyleThemeItem NestedComment = new StyleThemeItem();
@@ -437,19 +409,56 @@ namespace _3PA.MainFeatures {
         public StyleThemeItem Error4 = new StyleThemeItem();
 
         /// <summary>
-        /// Set a value to this instance, by its property name
+        /// Set the values of this instance, using a dictionnary of key -> values, override for this class
         /// </summary>
-        /// <param name="propertyName"></param>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public bool SetValueOf(string propertyName, object value) {
-            var property = typeof(StyleTheme).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-            if (property == null) {
-                return false;
+        public new void SetColorValues(Type thisType) {
+            if (SavedStringValues == null)
+                return;
+
+            // for each field of this object, try to assign its value with the _savedStringValues dico
+            foreach (var fieldInfo in thisType.GetFields().Where(fieldInfo => SavedStringValues.ContainsKey(fieldInfo.Name) && fieldInfo.DeclaringType == thisType && fieldInfo.FieldType == typeof(StyleThemeItem))) {
+                try {
+                    var value = SavedStringValues[fieldInfo.Name];
+                    var items = value.Split('\t');
+                    int fontType;
+                    if (!int.TryParse(items[2].Trim(), out fontType))
+                        fontType = 0;
+                    if (items.Length == 3) {
+                        fieldInfo.SetValue(this, new StyleThemeItem {
+                            ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim(), 0)),
+                            BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim(), 1)),
+                            FontType = fontType
+                        });
+                    }
+                } catch (Exception e) {
+                    throw new Exception("Reading styles, couldn't understand the line : <" + SavedStringValues[fieldInfo.Name] + "> for the field <" + fieldInfo.Name + "> and for the theme <" + ThemeName + "> : " + e);
+                }
             }
-            property.SetValue(this, value);
-            return true;
         }
+
+        /// <summary>
+        /// Find the html color behing any property
+        /// </summary>
+        private string GetHtmlColor(string propertyName, int propNumber) {
+            return ReplaceAliases(propertyName, propNumber).ApplyColorFunctions();
+        }
+
+        private string ReplaceAliases(string value, int propNumber) {
+            while (true) {
+                if (value.Contains("@")) {
+                    // try to replace a variable name by it's html color value
+                    var regex = new Regex(@"@([a-zA-Z]*)", RegexOptions.IgnoreCase);
+                    value = regex.Replace(value, match => {
+                        if (SavedStringValues.ContainsKey(match.Groups[1].Value))
+                            return SavedStringValues[match.Groups[1].Value].Split('\t')[propNumber];
+                        throw new Exception("Couldn't find the color " + match.Groups[1].Value + "!");
+                    });
+                    continue;
+                }
+                return value;
+            }
+        }
+
     }
 
     public class StyleThemeItem {

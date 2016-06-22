@@ -27,30 +27,6 @@ using _3PA.Properties;
 namespace _3PA.Lib {
     internal static class LibLoader {
 
-        private static string _pathToYamui;
-        private static string _pathToOlv;
-
-        /// <summary>
-        /// Should be called when the dll loads so it can call its dependencies freely
-        /// </summary>
-        public static void Init() {
-            AppDomain.CurrentDomain.AssemblyResolve += CurrentDomain_AssemblyResolve;
-
-            _pathToYamui = Path.Combine(Config.FolderLibrary, @"YamuiFramework.dll");
-            _pathToOlv = Path.Combine(Config.FolderLibrary, @"ObjectListView.dll");
-
-            // we reset the lib if we are the single instance of Npp and (we just updated 3P or we are in dev)
-            if ((!Config.Instance.PreviousStart3PVersion.Equals(AssemblyInfo.Version) || Config.IsDevelopper) &&
-                Npp.NumberOfNppStarted() <= 1) {
-
-                // delete existing libs so we are sure to use up to date libs
-                Utils.DeleteFile(_pathToYamui);
-                Utils.DeleteFile(_pathToOlv);
-
-                Config.Instance.PreviousStart3PVersion = AssemblyInfo.Version;
-            }
-        }
-
         /// <summary>
         /// Called when the resolution of an assembly fails, gives us the opportunity to feed the required asssembly
         /// to the program
@@ -58,17 +34,23 @@ namespace _3PA.Lib {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args) {
+        public static Assembly AssemblyResolver(object sender, ResolveEventArgs args) {
             try {
-                if (args.Name.StartsWith("YamuiFramework,")) {
-                    if (!File.Exists(_pathToYamui))
-                        File.WriteAllBytes(_pathToYamui, Resources.YamuiFramework);
-                    return Assembly.LoadFrom(_pathToYamui);
-                }
-                if (args.Name.StartsWith("ObjectListView,")) {
-                    if (!File.Exists(_pathToOlv))
-                        File.WriteAllBytes(_pathToOlv, Resources.ObjectListView);
-                    return Assembly.LoadFrom(_pathToOlv);
+                var requestedAssembly = new AssemblyName(args.Name);
+
+                // new library request!
+                if (!requestedAssembly.Name.Contains(".")) {
+
+                    var pathToLib = Path.Combine(Config.FolderLibrary, requestedAssembly.Name + ".dll");
+
+                    // replace the library if outdated or if it doesn't exist
+                    if (string.IsNullOrEmpty(pathToLib) || !File.Exists(pathToLib) || requestedAssembly.Version.ToString().IsHigherVersionThan(GetAssemblyVersionFromPath(pathToLib))) {
+                        var lib = (byte[])Resources.ResourceManager.GetObject(requestedAssembly.Name);
+                        if (lib != null && Npp.NumberOfNppStarted <= 1)
+                            File.WriteAllBytes(pathToLib, lib);
+                    }
+
+                    return Assembly.LoadFrom(pathToLib);
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in LibLoader");
@@ -77,13 +59,17 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Returns the version of the YamuiFramework library
+        /// Get the version of the given library, if it fails it returns an empty string
         /// </summary>
-        public static string YamuiFrameworkVersion {
-            get {
-                FileVersionInfo myFileVersionInfo = FileVersionInfo.GetVersionInfo(_pathToYamui);
-                return myFileVersionInfo.FileVersion;
-            }
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static string GetAssemblyVersion(string name) {
+            var path = Path.Combine(Config.FolderLibrary, name + ".dll");
+            return (!string.IsNullOrEmpty(path) && File.Exists(path)) ? GetAssemblyVersionFromPath(path) : string.Empty;
+        }
+
+        private static string GetAssemblyVersionFromPath(string path) {
+            return FileVersionInfo.GetVersionInfo(path).FileVersion;
         }
 
     }

@@ -26,7 +26,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using _3PA.Data;
-using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 
@@ -132,9 +131,19 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
+        #region static
+
+        /// <summary>
+        /// Keep a counter of the number of executions in the current session
+        /// </summary>
         private static int _proExecutionCounter;
 
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+
+        private static bool _dontWarnAboutRCode;
+
+        #endregion
+
 
         #region constructors and destructor
 
@@ -261,6 +270,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // feed files list
                 filesListcontent.AppendLine(fileToCompile.TempInputPath.ProgressQuoter() + " " + fileToCompile.TempOutputDir.ProgressQuoter() + " " + fileToCompile.TempOutputLst.ProgressQuoter());
+
+                // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
+                if (executionType == ExecutionType.Run && !_dontWarnAboutRCode) {
+                    if (File.Exists(Path.Combine(Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.TempOutputDir, baseFileName + ".r"))) {
+                        UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Execution warning", "An Rcode hides the program", args => { _dontWarnAboutRCode = true; UserCommunication.CloseUniqueNotif("rcodehide"); }, 5);
+                    }
+                }
 
                 count++;
             }

@@ -43,7 +43,6 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region Life and death
 
         /// <summary>
@@ -99,21 +98,21 @@ namespace _3PA.Lib {
         /// This method every time the timer ticks
         /// </summary>
         private void OnTick(object sender, ElapsedEventArgs elapsedEventArgs) {
-            if (_lock.TryEnterWriteLock(100)) {
-                try {
-                    // increase number of already repeated action
-                    _repeatCounter++;
-                    if (_nbRepeat > 0 && _repeatCounter >= _nbRepeat)
-                        Stop();
+            Task.Factory.StartNew(() => {
+                if (_lock.TryEnterWriteLock(100)) {
+                    try {
+                        // increase number of already repeated action
+                        _repeatCounter++;
+                        if (_nbRepeat > 0 && _repeatCounter >= _nbRepeat)
+                            Stop();
 
-                    // new task, do the action
-                    Task.Factory.StartNew(() => {
+                        // new task, do the action
                         _actionToDo();
-                    });
-                } finally {
-                    _lock.ExitWriteLock();
+                    } finally {
+                        _lock.ExitWriteLock();
+                    }
                 }
-            }
+            });
         }
 
         #endregion

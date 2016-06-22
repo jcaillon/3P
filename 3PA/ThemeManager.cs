@@ -24,10 +24,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 using _3PA.Data;
 using _3PA.Images;
-using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
@@ -36,99 +36,136 @@ using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA {
 
-    public static class ThemeManager {
+    internal static class ThemeManager {
+
+        #region Allows to initiate stuff 
+
+        public static void OnStartUp() {
+            YamuiThemeManager.OnCssNeeded += OnCssNeeded;
+            YamuiThemeManager.OnImageNeeded += OnImageNeeded;
+            YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
+            YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
+            Current.AccentColor = Config.Instance.AccentColor;
+        }
+
+        #endregion
 
         #region Themes list
+
+        private static Theme _currentTheme;
+        private static List<Theme> _listOfThemes = new List<Theme>();
 
         /// <summary>
         /// Return the current Theme object 
         /// </summary>
         public static Theme Current {
             get {
-                if (_currentTheme == null) {
-                    Current = GetThemesList().ElementAt(Config.Instance.ThemeId);
-                }
+                if (_currentTheme == null)
+                    Current = GetThemesList.ElementAt(Config.Instance.ThemeId);
                 return _currentTheme;
             }
             set {
                 _currentTheme = value;
-                YamuiThemeManager.Current = _currentTheme;
-                //ThemeManager.Current.GetThemeImage() =;
+                try { 
+
+                    YamuiThemeManager.Current = _currentTheme;
+                    // we set the color for the YamuiTheme, but we also need to do it for the Theme...
+                    _currentTheme.SetColorValues(typeof(Theme));
+
+                } catch (Exception e) {
+                    // either display the error immediatly or when the plugin is fully loaded...
+                    if (Plug.PluginIsFullyLoaded)
+                        ErrorHandler.ShowErrors(e, "Loading a theme");
+                    else {
+                        Plug.OnPlugReady += () => {
+                            ErrorHandler.ShowErrors(e, "Loading a theme");
+                        };
+                    }
+                }
             }
         }
-
-        private static Theme _currentTheme;
 
         /// <summary>
         /// Returns the list of all available themes
         /// </summary>
-        /// <returns></returns>
-        public static List<Theme> GetThemesList() {
-
-            if (_listOfThemes.Count == 0) {
-                Theme curTheme = null;
-                ConfLoader.ForEachLine(Config.FileApplicationThemes, DataResources.ApplicationThemes, Encoding.Default, s => {
-                    // beggining of a new theme, read its name
-                    if (s.Length > 2 && s[0] == '>') {
-                        _listOfThemes.Add(new Theme());
-                        curTheme = _listOfThemes.Last();
-                        curTheme.ThemeName = s.Substring(2).Trim();
-                    }
-                    if (curTheme == null)
-                        return;
-
-                    // fill the theme
-                    var items = s.Split('\t');
-                    if (items.Count() == 2) {
-                        curTheme.SetValueOf(items[0].Trim(), items[1].Trim());
-                    }
-                });
-
-                // get background image event
-                YamuiTheme.OnImageNeeded = YamuiThemeOnOnImageNeeded;
+        public static List<Theme> GetThemesList {
+            get {
+                // get the list of themes from the user's file or from the ressource by default
+                if (_listOfThemes.Count == 0)
+                    _listOfThemes = GenericThemeHolder.ReadThemeFile<Theme>(Config.FileApplicationThemes, DataResources.ApplicationThemes, Encoding.Default);
+                if (Config.Instance.ThemeId < 0 || Config.Instance.ThemeId >= _listOfThemes.Count)
+                    Config.Instance.ThemeId = 0;
+                return _listOfThemes;
             }
-
-            if (Config.Instance.SyntaxHighlightThemeId < 0 || Config.Instance.SyntaxHighlightThemeId >= _listOfThemes.Count)
-                Config.Instance.SyntaxHighlightThemeId = 0;
-
-            return _listOfThemes;
         }
 
-        private static List<Theme> _listOfThemes = new List<Theme>();
+        /// <summary>
+        /// Called when the list of themes is imported
+        /// </summary>
+        public static void ImportList() {
+            _listOfThemes.Clear();
+            _currentTheme = null;
+            Current.AccentColor = Color.Empty;
+            RefreshApplicationWithTheme(Current);
+            Config.Instance.AccentColor = Current.AccentColor;
+        }
 
         #endregion
 
         #region public
 
         /// <summary>
-        /// force verything to redraw to apply a new theme
+        /// force everything to redraw to apply a new theme
         /// </summary>
-        public static void PlsRefresh() {
-
-            // Allows to refresh stuff corrrectly (mainly, it sets the baseCssData to null so it can be recomputed)
-            Current = Current;
-
+        public static void RefreshApplicationWithTheme(Theme theme) {
+            Current = theme;
+            Config.Instance.AccentColor = theme.AccentColor;
             Style.SetGeneralStyles();
 
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
-
-            // force the dockable to redraw
             CodeExplorer.ApplyColorSettings();
             FileExplorer.ApplyColorSettings();
-
             Application.DoEvents();
             Appli.Refresh();
         }
 
-        public static void ImportList() {
-            _listOfThemes.Clear();
-            _currentTheme = null;
-            PlsRefresh();
+        /// <summary>
+        /// Returns a formmatted html message with a title, subtitle and icon
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="image"></param>
+        /// <param name="title"></param>
+        /// <param name="subtitle"></param>
+        /// <param name="forMessageBox"></param>
+        /// <returns></returns>
+        public static string FormatMessage(string content, MessageImg image, string title, string subtitle, bool forMessageBox = false) {
+            return @"
+            <div style='margin-bottom: 1px;'>
+                <table style='margin-bottom: " + (forMessageBox ? "15px" : "5px") + @"; width: 100%'>
+                    <tr>
+                        <td rowspan='2' style='" + (forMessageBox ? "width: 95px; padding-left: 15px" : "width: 80px") + @"'><img src='" + image + @"' width='64' height='64' /></td>
+                        <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
+                    </tr>
+                    <tr>
+                        <td class='NotificationSubTitle'>" + subtitle + @"</td>
+                    </tr>
+                </table>
+                <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px;'>
+                    " + content + @"
+                </div>
+            </div>";
+        }
+
+        /// <summary>
+        /// Returns the image of the logo (30x30)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetLogo {
+            get { return "logo30x30"; }
         }
 
         #endregion
-
 
         #region private
 
@@ -137,19 +174,21 @@ namespace _3PA {
         /// Tries to find the image in the ressources of the assembly, otherwise look for a file
         /// in the Config/3P/Themes folder
         /// </summary>
-        private static Image YamuiThemeOnOnImageNeeded(string imageToLoad) {
-            try {
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(imageToLoad);
-                if (tryImg != null)
-                    return tryImg;
+        private static Image OnImageNeeded(string imageToLoad) {
+            Image tryImg = (Image) ImageResources.ResourceManager.GetObject(imageToLoad);
+            if (tryImg == null) {
                 var path = Path.Combine(Config.FolderThemes, imageToLoad);
-                if (File.Exists(path)) {
-                    return Image.FromFile(path);
-                }
-            } catch (Exception e) {
-                ErrorHandler.Log(e.ToString());
+                if (File.Exists(path))
+                    tryImg = Image.FromFile(path);
             }
-            return null;
+            return tryImg;
+        }
+
+        /// <summary>
+        /// Called when the yamuiframework needs a css sheet
+        /// </summary>
+        private static string OnCssNeeded() {
+            return Current.ReplaceAliasesByColor(DataResources.StyleSheet);
         }
 
         #endregion
@@ -199,29 +238,31 @@ namespace _3PA {
             public Color GenericLinkColor = Color.FromArgb(95, 158, 142);
             public Color GenericErrorColor = Color.OrangeRed;
 
-
-            /// <summary>
-            /// Set a value to this instance, by its property name
-            /// </summary>
-            /// <param name="propertyName"></param>
-            /// <param name="value"></param>
-            /// <returns></returns>
-            public bool SetValueOf(string propertyName, object value) {
-                var property = typeof (Theme).GetFields().FirstOrDefault(info => info.Name.Equals(propertyName));
-                if (property == null) {
-                    return false;
-                }
-
-                if (property.FieldType == typeof (Color)) {
-                    property.SetValue(this, ColorTranslator.FromHtml((string) value));
-                } else {
-                    property.SetValue(this, value);
-                }
-                return true;
-            }
         }
 
         #endregion
 
     }
+
+    #region Message image
+
+    /// <summary>
+    /// each value must correspond to an image in the ressources
+    /// </summary>
+    internal enum MessageImg {
+        MsgDebug,
+        MsgError,
+        MsgHighImportance,
+        MsgInfo,
+        MsgOk,
+        MsgPoison,
+        MsgQuestion,
+        MsgRip,
+        MsgToolTip,
+        MsgUpdate,
+        MsgWarning
+    }
+
+    #endregion
+
 }

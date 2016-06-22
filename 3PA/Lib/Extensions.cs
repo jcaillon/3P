@@ -20,16 +20,14 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
-using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
 
@@ -65,6 +63,15 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
+        /// Get string value between [first] a and [last] b (not included)
+        /// </summary>
+        public static string GetValueBetween(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
+            int posA = value.IndexOf(a, comparer);
+            int posB = value.LastIndexOf(b, comparer);
+            return posB == -1 ? value.Substring(posA + 1) : value.Substring(posA + 1, posB - posA - 1);
+        }
+
+        /// <summary>
         /// Use : var name = player.GetAttributeFrom DisplayAttribute>("PlayerDescription").Name;
         /// </summary>
         /// <typeparam name="T"></typeparam>
@@ -89,6 +96,17 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool IsBitSet(this uint b, int pos) {
             return (b & (1 << pos)) != 0;
+        }
+
+        #endregion
+
+        #region Colors
+
+        /// <summary>
+        /// returns true if the color can be considered as dark
+        /// </summary>
+        public static bool IsColorDark(this Color color) {
+            return color.GetBrightness() < 0.5;
         }
 
         #endregion
@@ -122,7 +140,11 @@ namespace _3PA.Lib {
         /// <summary>
         /// Allows to describe a field of an enum like this :
         /// [DescriptionAttribute(Value = "DATA-SOURCE")]
-        /// and use the value "Value"
+        /// and use the value "Value" with :
+        /// ((DisplayAttr)currentOperation.GetAttributes()).Name 
+        /// where you used the decoration :
+        /// [DisplayAttr(Name = "Editing")]
+        /// on your enum value
         /// </summary>
         [AttributeUsage(AttributeTargets.Field)]
         public class EnumAttr : Attribute {}
@@ -157,17 +179,77 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Usage :  Extensions.EnumUtil.GetValues<MyEnum>()
+        /// Returns a collection of all the values of a given Enum
         /// </summary>
-        public static class EnumUtil {
-            public static IEnumerable<T> GetValues<T>() {
-                return Enum.GetValues(typeof(T)).Cast<T>();
-            }
+        public static IEnumerable<T> GetEnumValues<T>(this Enum value) {
+            return Enum.GetValues(typeof(T)).Cast<T>();
+        }
+
+        /// <summary>
+        /// Returns an array of all the names of a given Enum
+        /// </summary>
+        public static string[] GetEnumNames<T>(this Enum value) {
+            return Enum.GetNames(typeof(T));
+        }
+
+        /// <summary>
+        /// MyEnum tester = MyEnum.FlagA | MyEnum.FlagB;
+        /// if(tester.IsSet(MyEnum.FlagA))
+        /// </summary>
+        public static bool IsFlagSet(this Enum input, Enum matchTo) {
+            return (Convert.ToUInt32(input) & Convert.ToUInt32(matchTo)) != 0;
         }
 
         #endregion
 
         #region string extensions
+
+        /// <summary>
+        /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
+        /// good website : https://regex101.com/
+        /// </summary>
+        public static bool RegexMatch(this string source, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
+            var reg = new Regex(regex);
+            return reg.Match(source).Success;
+        }
+
+        /// <summary>
+        /// Allows to replace a string with a regular expression, uses the IgnoreCase option by default,
+        /// replacementStr can contains $1, $2...
+        /// </summary>
+        public static string RegexReplace(this string source, string regexString, string replacementStr, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Replace(source, replacementStr);
+        }
+
+        /// <summary>
+        /// Allows to replace a string with a regular expression, uses the IgnoreCase option by default
+        /// </summary>
+        public static string RegexReplace(this string source, string regexString, MatchEvaluator matchEvaluator, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Replace(source, matchEvaluator);
+        }
+
+        /// <summary>
+        /// Allows to find a string with a regular expression, uses the IgnoreCase option by default, returns a match collection,
+        /// to be used foreach (Match match in collection) { with match.Groups[1].Value being the first capture [2] etc...
+        /// </summary>
+        public static MatchCollection RegexFind(this string source, string regexString, RegexOptions options = RegexOptions.IgnoreCase) {
+            var regex = new Regex(regexString, options);
+            return regex.Matches(source);
+        }   
+
+        /// <summary>
+        /// Get string value between [first] a and [last] b (not included), returns null if it failes
+        /// </summary>
+        public static string Between(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
+            int posA = value.IndexOf(a, comparer);
+            int posB = value.LastIndexOf(b, comparer);
+            if (posA == -1 || posB == -1)
+                return null;
+            int adjustedPosA = posA + a.Length;
+            return adjustedPosA >= posB ? null : value.Substring(adjustedPosA, posB - adjustedPosA);
+        }
 
         /// <summary>
         /// Allows to tranform a matching string using * and ? (wildcards) into a valid regex expression
@@ -181,18 +263,6 @@ namespace _3PA.Lib {
             var startStar = pattern[0].Equals('*');
             var endStar = pattern[pattern.Length - 1].Equals('*');
             return (!startStar ? (endStar ? "^" : "") : "") + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + (!endStar ? (startStar ? "$" : "") : "");
-        }
-
-        /// <summary>
-        /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
-        /// </summary>
-        /// <param name="toCheck"></param>
-        /// <param name="regex"></param>
-        /// <param name="options"></param>
-        /// <returns></returns>
-        public static bool MatchRegex(this string toCheck, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
-            var reg = new Regex(regex);
-            return reg.Match(toCheck).Success;
         }
 
         /// <summary>
@@ -300,18 +370,18 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// autocase the keyword in input according to the user config
+        /// autocase the keyword according to the mode given
         /// </summary>
-        /// <param name="keyword"></param>
-        /// <returns></returns>
-        public static string AutoCaseToUserLiking(this string keyword) {
-            switch (Config.Instance.CodeChangeCaseMode) {
+        public static string ConvertCase(this string keyword, int mode, string naturalCase = null) {
+            switch (mode) {
                 case 1:
                     return keyword.ToUpper();
                 case 2:
                     return keyword.ToLower();
                 case 3:
                     return keyword.ToTitleCase();
+                case 4:
+                    return naturalCase ?? keyword;
                 default:
                     return keyword;
             }
@@ -373,7 +443,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-
 
         #region region string misc
 

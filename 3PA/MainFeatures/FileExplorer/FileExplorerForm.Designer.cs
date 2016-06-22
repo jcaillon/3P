@@ -43,7 +43,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.yamuiLabel4 = new YamuiFramework.Controls.YamuiLabel();
             this.nbitems = new YamuiFramework.Controls.YamuiLabel();
             this.btRefresh = new YamuiFramework.Controls.YamuiButtonImage();
-            this.textFilter = new YamuiFramework.Controls.YamuiTextBoxAlt();
+            this.textFilter = new YamuiFramework.Controls.YamuiTextBox();
             this.btErase = new YamuiFramework.Controls.YamuiButtonImage();
             this.btDirectory = new YamuiFramework.Controls.YamuiButtonImage();
             this.lbDirectory = new YamuiFramework.Controls.YamuiLabel();
@@ -392,7 +392,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiLabel yamuiLabel4;
         private YamuiLabel nbitems;
         private YamuiButtonImage btRefresh;
-        private YamuiTextBoxAlt textFilter;
+        private YamuiTextBox textFilter;
         private YamuiButtonImage btErase;
         private YamuiButtonImage btDirectory;
         private YamuiLabel lbDirectory;

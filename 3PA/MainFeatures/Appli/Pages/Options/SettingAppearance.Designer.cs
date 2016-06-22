@@ -83,7 +83,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // tg_override
             // 
             this.tg_override.BackGrndImage = null;
-            this.tg_override.Checked = false;
             this.tg_override.Location = new System.Drawing.Point(25, 307);
             this.tg_override.Name = "tg_override";
             this.tg_override.SetImgSize = new System.Drawing.Size(0, 0);
@@ -91,12 +90,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tg_override.TabIndex = 64;
             this.tg_override.Text = "Let 3P override notepad++ themes";
             this.tg_override.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.tg_override.ToggleSize = 30;
+            this.tg_override.ToggleSize = 40;
             // 
             // tg_colorOn
             // 
             this.tg_colorOn.BackGrndImage = null;
-            this.tg_colorOn.Checked = false;
             this.tg_colorOn.Location = new System.Drawing.Point(25, 251);
             this.tg_colorOn.Name = "tg_colorOn";
             this.tg_colorOn.SetImgSize = new System.Drawing.Size(0, 0);
@@ -104,7 +102,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tg_colorOn.TabIndex = 63;
             this.tg_colorOn.Text = "I\'m using my own User Defined Language";
             this.tg_colorOn.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.tg_colorOn.ToggleSize = 30;
+            this.tg_colorOn.ToggleSize = 40;
             // 
             // htmlLabel1
             // 
@@ -137,7 +135,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.cbSyntax.ItemHeight = 15;
             this.cbSyntax.Location = new System.Drawing.Point(25, 273);
             this.cbSyntax.Name = "cbSyntax";
-            this.cbSyntax.Size = new System.Drawing.Size(180, 21);
+            this.cbSyntax.Size = new System.Drawing.Size(277, 21);
             this.cbSyntax.TabIndex = 21;
             // 
             // yamuiLabel1
@@ -156,7 +154,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.cbApplication.ItemHeight = 15;
             this.cbApplication.Location = new System.Drawing.Point(25, 50);
             this.cbApplication.Name = "cbApplication";
-            this.cbApplication.Size = new System.Drawing.Size(180, 21);
+            this.cbApplication.Size = new System.Drawing.Size(277, 21);
             this.cbApplication.TabIndex = 19;
             // 
             // _simplePanelAccentColor

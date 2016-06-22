@@ -288,7 +288,7 @@ namespace YamuiFramework.Controls {
             }
 
             // show the background image or not
-            var firstScrollPage = ControlHelper.GetFirst(_currentPage, typeof(YamuiScrollPanel));
+            var firstScrollPage = Utilities.GetFirst(_currentPage, typeof(YamuiScrollPanel));
             _animSmokeScreen.DontShowBackGroundImage = (firstScrollPage == null || ((YamuiScrollPanel)firstScrollPage).ContentPanel.Height > (Height - YOffsetPage));
 
             _animSmokeScreen.GoHide = false;
@@ -347,7 +347,7 @@ namespace YamuiFramework.Controls {
                 e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
                 // background image?
                 if (!DontShowBackGroundImage) {
-                    var img = YamuiThemeManager.Current.GetThemeImage();
+                    var img = YamuiThemeManager.CurrentThemeImage;
                     if (img != null) {
                         Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
                         e.Graphics.DrawImage(img, rect, 0, 0, img.Width, img.Height, GraphicsUnit.Pixel);

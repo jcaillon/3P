@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiDateTime.cs) is part of YamuiFramework.
+// This file (YamuiDateTimePicker.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -28,6 +28,7 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(DateTimePicker))]
     public class YamuiDateTimePicker : DateTimePicker {
+
         #region Fields
         [DefaultValue(false)]
         [Category("Yamui")]
@@ -126,7 +127,7 @@ namespace YamuiFramework.Controls {
                         e.Graphics.FillRectangle(b, boxRect);
                     }
                 } else {
-                    foreColor = YamuiThemeManager.Current.ButtonDisabledFore;
+                    foreColor = YamuiThemeManager.Current.ButtonWatermarkFore;
                 }
             }
 

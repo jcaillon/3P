@@ -24,7 +24,8 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using _3PA.Html;
+using _3PA.Data;
+using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
 
@@ -125,7 +126,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             if (!string.IsNullOrEmpty(Config.Instance.CompileIncludeList)) {
                                 var hasMatch = false;
                                 foreach (var pattern in Config.Instance.CompileIncludeList.Split(',')) {
-                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasMatch = true;
                                 }
                                 toAdd = hasMatch;
@@ -135,7 +136,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             if (!string.IsNullOrEmpty(Config.Instance.CompileExcludeList)) {
                                 var hasNoMatch = true;
                                 foreach (var pattern in Config.Instance.CompileExcludeList.Split(',')) {
-                                    if (filePath.MatchRegex(pattern.WildCardToRegex()))
+                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasNoMatch = false;
                                 }
                                 toAdd = toAdd && hasNoMatch;
@@ -289,6 +290,104 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <returns></returns>
         public bool CompilationFailedOnMaxUser() {
             return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && File.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog, Encoding.Default).Contains("(748)"));
+        }
+
+        #endregion
+
+        #region Single : Compilation, Check syntax, Run, Prolint
+
+        /// <summary>
+        /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
+        /// </summary>
+        public static void OnSingleExecutionEnd(ProExecution lastExec) {
+            try {
+                var treatedFile = lastExec.ListToCompile.First();
+                CurrentOperation currentOperation;
+                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                    currentOperation = CurrentOperation.Run;
+
+                // Clear flag or we can't do any other actions on this file
+                FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                if (isCurrentFile)
+                    FilesInfo.UpdateFileStatus();
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
+            }
+        }
+
+        /// <summary>
+        /// Called after the execution of run/compile/check/prolint
+        /// </summary>
+        public static void OnSingleExecutionOk(ProExecution lastExec) {
+            try {
+                var treatedFile = lastExec.ListToCompile.First();
+                CurrentOperation currentOperation;
+                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                    currentOperation = CurrentOperation.Run;
+
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                var otherFilesInError = false;
+                int nbWarnings = 0;
+                int nbErrors = 0;
+
+                // Read log info
+                var errorList = lastExec.LoadErrorLog();
+
+                if (!errorList.Any()) {
+                    // the compiler messages are empty
+                    var fileInfo = new FileInfo(lastExec.LogPath);
+                    if (fileInfo.Length > 0) {
+                        // the .log is not empty, maybe something went wrong in the runner, display errors
+                        UserCommunication.Notify(
+                            "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
+                            Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
+                            "Critical error", "Action failed");
+                        return;
+                    }
+                } else {
+                    // count number of warnings/errors, loop through files > loop through errors in each file
+                    foreach (var keyValue in errorList) {
+                        foreach (var fileError in keyValue.Value) {
+                            if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
+                            else nbErrors++;
+                        }
+                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
+                    }
+                }
+
+                // Prepare the notification content
+                var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
+                var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
+                var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
+                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
+                    (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
+                        ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
+                            "Syntax correct");
+
+                // build the error list
+                var errorsList = new List<FileError>();
+                foreach (var keyValue in errorList) {
+                    errorsList.AddRange(keyValue.Value);
+                }
+
+                // when compiling, move .r/.lst to compilation dir
+                var fileToMoveList = new List<FileToMove>();
+                if (lastExec.ExecutionType == ExecutionType.Compile) {
+                    fileToMoveList = lastExec.CreateListOfFilesToMove();
+                    foreach (var fileToMove in fileToMoveList) {
+                        fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
+                    }
+                }
+
+                // Notify the user, or not
+                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
+            }
         }
 
         #endregion

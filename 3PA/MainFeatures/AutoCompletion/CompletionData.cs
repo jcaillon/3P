@@ -69,7 +69,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public KeywordType KeywordType { get; set; }
 
-
         /// <summary>
         /// Use this method to do an action for each flag of the item...
         /// </summary>

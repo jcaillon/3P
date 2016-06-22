@@ -24,7 +24,6 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Html;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 
@@ -112,7 +111,7 @@ namespace _3PA.MainFeatures {
                 try {
                     if (Ready) {
                         _anchorForm.BeginInvoke((Action) delegate {
-                            var toastNotification = new YamuiNotifications(HtmlHandler.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
+                            var toastNotification = new YamuiNotifications(ThemeManager.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
 
                             if (id != null) {
                                 // close existing notification with the same id
@@ -170,11 +169,11 @@ namespace _3PA.MainFeatures {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
                 if (waitResponse) {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
+                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
                 } else {
                     if (_anchorForm.IsHandleCreated) {
                         _anchorForm.BeginInvoke((Action) delegate {
-                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, HtmlHandler.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
+                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
                         });
                     }
                 }

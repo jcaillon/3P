@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
-using _3PA.Html;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -60,8 +59,17 @@ namespace _3PA {
         /// </summary>
         public static event Action OnNppWindowsMove;
 
-        #endregion
+        /// <summary>
+        /// Event published when notepad++ is ready and the plugin can do its init, you must return true if the init went ok, false otherwise
+        /// </summary>
+        public static event Func<bool> OnNppReady;
 
+        /// <summary>
+        /// Envent published when the plugin is ready
+        /// </summary>
+        public static event Action OnPlugReady;
+
+        #endregion
 
         #region Members
 
@@ -69,6 +77,11 @@ namespace _3PA {
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
+
+        /// <summary>
+        /// Set to true after the plugin has been fully loaded
+        /// </summary>
+        public static bool PluginIsFullyLoaded { get; private set; }
 
         #endregion
 
@@ -91,7 +104,10 @@ namespace _3PA {
 
                     case (uint) NppNotif.NPPN_READY:
                         // notify plugins that all the procedures of launchment of notepad++ are done
-                        OnNppReady();
+                        // call OnNppReady then OnPlugReady if it all went ok
+                        PluginIsFullyLoaded = OnNppReady == null || OnNppReady();
+                        if (PluginIsFullyLoaded && OnPlugReady != null)
+                            OnPlugReady();
                         return;
 
                     case (uint) NppNotif.NPPN_SHUTDOWN:
@@ -474,11 +490,9 @@ namespace _3PA {
                     }
 
                     // replace the last keyword by the correct case
-                    if (Config.Instance.CodeChangeCaseMode != 0) {
-                        var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
-                        if (casedKeyword != null)
-                            replacementWord = casedKeyword;
-                    }
+                    var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
+                    if (casedKeyword != null)
+                        replacementWord = casedKeyword;
 
                     if (replacementWord != null)
                         Npp.ReplaceKeywordWrapped(replacementWord, -offset);
@@ -498,7 +512,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region On document switch
 
@@ -521,7 +534,7 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
-            if (IsCurrentFileProgress && !Config.Instance.GlobalDontUseSyntaxHighlightTheme) {
+            if (IsCurrentFileProgress && Config.Instance.UseSyntaxHighlightTheme) {
                 // Syntax Style
                 Style.SetSyntaxStyles();
             } else {
@@ -537,6 +550,12 @@ namespace _3PA {
             // Need to compute the propath again, because we take into account relative path
             ProEnvironment.Current.ReComputeProPath();
 
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyPluginSpecificOptions(false);
+
+            // refresh file explorer currently opened file
+            FileExplorer.RedrawFileExplorerList();
+
             if (!initiating) {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Toggle(IsCurrentFileProgress);
@@ -544,17 +563,10 @@ namespace _3PA {
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
                     FileExplorer.Toggle(IsCurrentFileProgress);
                 }
-            }
 
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
-
-            // refresh file explorer currently opened file
-            FileExplorer.RedrawFileExplorerList();
-
-            // Parse the document
-            if (PluginIsFullyLoaded)
+                // Parse the document
                 AutoComplete.ParseCurrentDocument(true);
+            }
 
             // publish an event
             if (OnDocumentChangedEnd != null) {
@@ -563,7 +575,6 @@ namespace _3PA {
         }
 
         #endregion
-
 
         #region On misc
 

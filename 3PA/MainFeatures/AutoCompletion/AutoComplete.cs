@@ -127,24 +127,33 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static string CorrectKeywordCase(string keyword, int lastWordPos) {
             string output = null;
-            var found = FindInSavedItems(keyword, Npp.Line.CurrentLine);
-            if (found != null) {
-                RememberUseOf(found);
-                output = !found.FromParser ? keyword.AutoCaseToUserLiking() : found.DisplayText;
-            } else {
-                // search in tables fields
-                var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(lastWordPos));
-                if (tableFound != null) {
-                    var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
-                    if (fieldFound != null) {
-                        RememberUseOf(new CompletionData {
-                            FromParser = false,
-                            DisplayText = fieldFound.Name,
-                            Type = CompletionType.Field,
-                            Ranking = 0
-                        });
-                        ParserHandler.RememberUseOfDatabaseItem(fieldFound.Name);
-                        output = tableFound.IsTempTable ? fieldFound.Name : keyword.AutoCaseToUserLiking();
+            if (!Config.Instance.DisableAutoCaseCompletly) {
+                var found = FindInSavedItems(keyword, Npp.Line.CurrentLine);
+                if (found != null) {
+                    RememberUseOf(found);
+                    int caseMode;
+                    if (found.FromParser)
+                        caseMode = 4; // use displayText case
+                    else if (found.Type == CompletionType.Database || found.Type == CompletionType.Field || found.Type == CompletionType.FieldPk || found.Type == CompletionType.Sequence || found.Type == CompletionType.Table)
+                        caseMode = Config.Instance.DatabaseChangeCaseMode;
+                    else
+                        caseMode = Config.Instance.KeywordChangeCaseMode;
+                    output = keyword.ConvertCase(caseMode, found.DisplayText);
+                } else {
+                    // search in tables fields
+                    var tableFound = ParserHandler.FindAnyTableOrBufferByName(Npp.GetFirstWordRightAfterPoint(lastWordPos));
+                    if (tableFound != null) {
+                        var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
+                        if (fieldFound != null) {
+                            RememberUseOf(new CompletionData {
+                                FromParser = false,
+                                DisplayText = fieldFound.Name,
+                                Type = CompletionType.Field,
+                                Ranking = 0
+                            });
+                            ParserHandler.RememberUseOfDatabaseItem(fieldFound.Name);
+                            output = keyword.ConvertCase(tableFound.IsTempTable ? 4 : Config.Instance.DatabaseChangeCaseMode, fieldFound.Name);
+                        }
                     }
                 }
             }
@@ -189,6 +198,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static CompletionData GetCurrentSuggestion() {
             return _form.GetCurrentSuggestion();
         }
+
         #endregion
 
         #region core mechanism
@@ -489,9 +499,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             var point = Npp.GetCaretScreenLocation();
             var lineHeight = Npp.TextHeight(Npp.Line.CurrentLine);
             point.Y += lineHeight;
-            _form.UseAlternateBackColor = Config.Instance.GlobalUseAlternateBackColorOnGrid;
             _form.SetPosition(point, lineHeight + 2);
-
             _form.UnCloack();
         }
 

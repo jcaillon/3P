@@ -25,11 +25,12 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using System.Xml.Serialization;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -46,6 +47,8 @@ namespace _3PA.Lib {
         }
 
         #endregion
+   
+    
      */
 
     #region Enumeration attributes
@@ -371,44 +374,6 @@ namespace _3PA.Lib {
         #region Image manipulation
 
         /// <summary>
-        /// Returns the given image... but in grayscale
-        /// </summary>
-        /// <param name="original"></param>
-        /// <returns></returns>
-        public static Bitmap MakeGrayscale3(Bitmap original) {
-            //create a blank bitmap the same size as original
-            var newBitmap = new Bitmap(original.Width, original.Height);
-
-            //get a graphics object from the new image
-            var g = Graphics.FromImage(newBitmap);
-
-            //create the grayscale ColorMatrix
-            var colorMatrix = new ColorMatrix(
-                new[] {
-                    new[] {.3f, .3f, .3f, 0, 0},
-                    new[] {.59f, .59f, .59f, 0, 0},
-                    new[] {.11f, .11f, .11f, 0, 0},
-                    new float[] {0, 0, 0, 1, 0},
-                    new float[] {0, 0, 0, 0, 1}
-                });
-
-            //create some image attributes
-            var attributes = new ImageAttributes();
-
-            //set the color matrix attribute
-            attributes.SetColorMatrix(colorMatrix);
-
-            //draw the original image on the new image
-            //using the grayscale color matrix
-            g.DrawImage(original, new Rectangle(0, 0, original.Width, original.Height),
-                0, 0, original.Width, original.Height, GraphicsUnit.Pixel, attributes);
-
-            //dispose the Graphics object
-            g.Dispose();
-            return newBitmap;
-        }
-
-        /// <summary>
         /// Returns a 16x16 pixels icon to use in the dockable panel
         /// </summary>
         /// <returns></returns>
@@ -468,9 +433,6 @@ namespace _3PA.Lib {
         /// register a feature's last execution datetime and prevent the user from using it too often 
         /// by setting a minimum amount of time to wait between two calls
         /// </summary>
-        /// <param name="featureName"></param>
-        /// <param name="minIntervalInMilliseconds"></param>
-        /// <returns></returns>
         public static bool IsSpamming(string featureName, int minIntervalInMilliseconds, bool resetOnSpam = false) {
             // first use, no problem
             if (!_registeredEvents.ContainsKey(featureName)) {
@@ -533,21 +495,6 @@ namespace _3PA.Lib {
             }
         }
 
-        public static void SerializeToXml<T>(T obj, string fileName) {
-            var fileStream = new FileStream(fileName, FileMode.Create);
-            var ser = new XmlSerializer(typeof (T));
-            ser.Serialize(fileStream, obj);
-            fileStream.Close();
-        }
-
-        public static T DeserializeFromXml<T>(string fileName) {
-            var deserializer = new XmlSerializer(typeof (T));
-            TextReader reader = new StreamReader(fileName);
-            var obj = deserializer.Deserialize(reader);
-            reader.Close();
-            return (T) obj;
-        }
-
         #endregion
 
         #region ZipStorer wrapper
@@ -583,6 +530,25 @@ namespace _3PA.Lib {
             }
 
             return result;
+        }
+
+        #endregion
+
+        #region configuration file reader
+
+        /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
+        /// Apply the action toApplyOnEachLine to each line
+        /// Uses encoding as the Encoding to read the file or convert the byte array to a string
+        /// Uses the char # as a comment in the file
+        public static void ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
+            try {
+                Exception ex = new Exception("Undetermined");
+                if (!Utilities.ForEachLine(filePath, dataResources, encoding, toApplyOnEachLine, exception => ex = exception)) {
+                    ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
+            }
         }
 
         #endregion

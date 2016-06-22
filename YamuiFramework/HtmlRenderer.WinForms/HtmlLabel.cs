@@ -152,10 +152,10 @@ namespace YamuiFramework.HtmlRenderer.WinForms
             TabStop = false;
 
             // subscribe to an event called when the BaseCss sheet changes
-            YamuiThemeManager.OnCssSheetChanged += YamuiThemeManagerOnOnCssSheetChanged;
+            YamuiThemeManager.OnCssChanged += YamuiThemeManagerOnOnCssChanged;
         }
 
-        private void YamuiThemeManagerOnOnCssSheetChanged() {
+        private void YamuiThemeManagerOnOnCssChanged() {
             if (_text != null)
                 Text = _text;
         }
@@ -171,9 +171,9 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 base.Text = value;
                 if (!IsDisposed) {
                     if (_text.StartsWith(@"<div class='yamui-text'>"))
-                        _htmlContainer.SetHtml(_text, YamuiThemeManager.BaseCssData);
+                        _htmlContainer.SetHtml(_text, YamuiThemeManager.CurrentThemeCss);
                     else
-                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", YamuiThemeManager.BaseCssData);
+                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", YamuiThemeManager.CurrentThemeCss);
                     PerformLayout();
                     Invalidate();
                 }
@@ -647,10 +647,11 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// </summary>
         protected virtual void OnImageLoad(HtmlImageLoadEventArgs e)
         {
-            YamuiThemeManager.OnHtmlImageLoad(e);
             var handler = ImageLoad;
             if (handler != null)
                 handler(this, e);
+            if (!e.Handled)
+                YamuiThemeManager.GetHtmlImages(e);
         }
 
         /// <summary>

@@ -25,7 +25,7 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli.Pages.Actions;
@@ -96,7 +96,7 @@ namespace _3PA.MainFeatures.Appli {
 
             // title
             string strongBold = "<span class='AccentColor'>";
-            labelTitle.Text = @"<img src='" + HtmlHandler.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDevelopper ? " (debug)" : "") + @"</b></span>";
+            labelTitle.Text = @"<img src='" + ThemeManager.GetLogo + @"' style='padding-right: 10px'><span class='AppliTitle'>" + strongBold + @"P</span>rogress " + strongBold + @"P</span>rogrammers " + strongBold + @"P</span>al</span> <span style='padding-left: 6px; font-size: 12px;' class='SubTextColor'><b>" + AssemblyInfo.Version + (AssemblyInfo.IsPreRelease ? " (beta)" : "") + (Config.IsDevelopper ? " (debug)" : "") + @"</b></span>";
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);

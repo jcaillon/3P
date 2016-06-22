@@ -60,7 +60,9 @@ namespace YamuiFramework.Controls {
 
         private bool _isHovered;
         private bool _isPressed;
+#pragma warning disable 414
         private bool _isFocused;
+#pragma warning restore 414
 
         private List<string> _listOfButtons;
 
@@ -93,13 +95,17 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaint(PaintEventArgs e) {
             // background
-            e.Graphics.Clear(YamuiThemeManager.Current.TabNormalBack);
+            e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
 
             // foreground
             var startingIndex = WriteFromRight ? _listOfButtons.Count - 1 : 0;
             var index = startingIndex;
             for (int i = 0; i < _listOfButtons.Count; i++) {
                 var button = _listOfButtons[WriteFromRight ? _listOfButtons.Count - 1 - i : i];
+
+                Color foreColor = UseLinksColors ?
+                    YamuiThemeManager.Current.LabelsFg(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
+                    YamuiThemeManager.Current.TabsFg((index == _hotIndex && _isHovered), index == _selectedIndex);
 
                 // get the rectangle in which will fit this item
                 Rectangle thisTabRekt;
@@ -120,9 +126,6 @@ namespace YamuiFramework.Controls {
                 Rectangle textRect = thisTabRekt;
                 if (WriteFromRight)
                     textRect.Offset(SpaceBetweenText, 0);
-                Color foreColor = UseLinksColors?
-                    YamuiThemeManager.Current.LabelsFg(ForeColor, false, false, (index == _hotIndex && _isHovered), _isPressed, Enabled) :
-                    YamuiThemeManager.Current.TabsFg(_isFocused, (index == _hotIndex && _isHovered), index == _selectedIndex);
                 TextRenderer.DrawText(e.Graphics, button, Font, textRect, foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
 
                 // draw a | separator?

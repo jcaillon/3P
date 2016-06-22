@@ -21,8 +21,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using _3PA.Data;
-using _3PA.Html;
+using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
@@ -136,7 +137,7 @@ namespace _3PA.MainFeatures {
 
 
         /// <summary>
-        /// Call this method to start checking for updates every xx min, also check once immediatly
+        /// ASYNC - Call this method to start checking for updates every xx min, also check once immediatly
         /// </summary>
         public static void StartCheckingForUpdates() {
             // check for updates every now and then (15min)
@@ -249,7 +250,6 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
 
         #region generic methods
 

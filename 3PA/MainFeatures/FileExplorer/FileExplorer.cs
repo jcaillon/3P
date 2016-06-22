@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using _3PA.Html;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -76,7 +75,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Refresh the files list
         /// </summary>
-        public static void RebuildItemList() {
+        public static void RebuildFileList() {
             if (!IsVisible) return;
             Form.RefreshFileList();
             Form.FilterByText = "";
@@ -191,6 +190,9 @@ namespace _3PA.MainFeatures.FileExplorer {
                 // initialize if not done
                 if (FakeForm == null) {
                     Init();
+                    // if just shown, refresh the list
+                    if (Plug.PluginIsFullyLoaded)
+                        RebuildFileList();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }

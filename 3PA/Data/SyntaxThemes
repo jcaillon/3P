@@ -24,35 +24,40 @@
 #
 # You must specify the colors in html format (#000000)
 #
+# You can use the two functions below :
+# color1	darken(#FFF, 20%)
+# color2	lighten(@color1, 10%)
+#
 # If you create cool themes, don't hesitate to submit them to me :)
 #
 > Default
 Default	#000000	#FFFFFF	0
-Comment	#008000	#FFFFFF	0
-NestedComment	#408080	#FFFFFF	0
-SingleLineComment	#408080	#FFFFFF	0
-PreProcessed	#804000	#FFFFFF	4
+Comment	#008000	@Default	0
+NestedComment	#408080	@Default	0
+SingleLineComment	#408080	@Default	0
+PreProcessed	#804000	@Default	4
 JumpStatement	#000080	#FCD54B	2
-Statement	#000080	#FFFFFF	2
-VarType	#0075EA	#FFFFFF	2
-OtherKeywords	#005EBB	#FFFFFF	2
-Operators	#408080	#FFFFFF	2
-Abbreviations	#EC4D00	#FFFFFF	2
-Includes	#0000A0	#FFFFAA	4
-DoubleQuote	#FF42FF	#FFFFFF	0
-SimpleQuote	#CE00CE	#FFFFFF	0
-NormedVariables	#2D2DFF	#FFFFFF	0
+Statement	#000080	@Default	2
+VarType	#0075EA	@Default	2
+OtherKeywords	#005EBB	@Default	2
+Operators	#408080	@Default	2
+Abbreviations	#EC4D00	@Default	2
+Includes	#0000A0	@Default	4
+DoubleQuote	#FF42FF	@Default	0
+SimpleQuote	#CE00CE	@Default	0
+NormedVariables	#2D2DFF	@Default	0
 SpecialWord	#000000	#9EE41B	2
-Numbers	#FF0000	#FFFFFF	0
+Numbers	#FF0000	@Default	0
 CaretLine	#000000	#E8E8FF	0
 Selection	#000000	#E3E3E3	0
-WhiteSpace	#E2AE3E	#FFFFFF	0
+WhiteSpace	#E2AE3E	@Default	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+
 
 > Tomorrow
 Default	#4D4D4C	#FFFFFF	0
@@ -112,28 +117,34 @@ Error4	#58267E	#CC99FF	0
 
 > Sublime?
 Default	#F8F8F2	#26292C	0
-Comment	#75715E	#26292C	0
-NestedComment	#75715E	#26292C	0
-SingleLineComment	#75715E	#26292C	0
-PreProcessed	#FFE4C4	#26292C	4
-Includes	#FFE4C4	#26292C	4
-JumpStatement	#A6E22E	#26292C	2
-Statement	#F92672	#26292C	2
-OtherKeywords	#66D9EF	#26292C	2
-VarType	#AE81FF	#26292C	2
-Abbreviations	#FD6347	#26292C	2
-Operators	#F8F8F2	#26292C	2
-Numbers	#AE81FF	#26292C	0
-NormedVariables	#FD971F	#26292C	0
+Comment	#75715E	@Default	0
+NestedComment	#75715E	@Default	0
+SingleLineComment	#75715E	@Default	0
+PreProcessed	#FFE4C4	@Default	4
+Includes	#FFE4C4	@Default	4
+JumpStatement	#A6E22E	@Default	2
+Statement	#F92672	@Default	2
+OtherKeywords	#66D9EF	@Default	2
+VarType	#AE81FF	@Default	2
+Abbreviations	#FD6347	@Default	2
+Operators	#F8F8F2	@Default	2
+Numbers	#AE81FF	@Default	0
+NormedVariables	#FD971F	@Default	0
 SpecialWord	#000000	#9EE41B	2
-DoubleQuote	#E6DB74	#26292C	0
-SimpleQuote	#FFEF62	#26292C	0
+DoubleQuote	#E6DB74	@Default	0
+SimpleQuote	#FFEF62	@Default	0
 CaretLine	#000000	#373835	0
 Selection	#000000	#49483E	0
-WhiteSpace	#4F565C	#26292C	0
+WhiteSpace	#4F565C	@Default	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+
+> Sublime with black background
+Default	#F8F8F2	black	0
+
+> Sublime with grey background
+Default	#F8F8F2	#272B30	0
