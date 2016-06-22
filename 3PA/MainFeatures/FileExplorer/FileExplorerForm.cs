@@ -74,7 +74,34 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private int _currentType;
 
-        private static bool _isListing;
+        /// <summary>
+        /// Use this to change the image of the refresh button to let the user know the tree is being refreshed
+        /// </summary>
+        private bool Refreshing {
+            get { return _refreshing; }
+            set {
+                _refreshing = value;
+                if (IsHandleCreated) {
+                    BeginInvoke((Action)delegate {
+                        if (_refreshing) {
+                            btRefresh.BackGrndImage = ImageResources.refreshing;
+                            btRefresh.Invalidate();
+                            btDirectory.Enabled = false;
+                            toolTipHtml.SetToolTip(btRefresh, "The list is being refreshed, please wait");
+                        } else {
+                            btRefresh.BackGrndImage = ImageResources.refresh;
+                            btRefresh.Invalidate();
+                            toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
+                            btDirectory.Enabled = true;
+                        }
+                    });
+                }
+            }
+        }
+        private bool _refreshing;
+
+        private bool _refreshRequiredWhileRefreshing;
+
         #endregion
 
         #region constructor
@@ -108,7 +135,6 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(lblEnv, "Name of the currently selected environment");
 
             #endregion
-
 
             #region Current file
 
@@ -173,7 +199,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // button tooltips
             toolTipHtml.SetToolTip(btErase, "<b>Erase</b> the content of the text filter");
-            toolTipHtml.SetToolTip(btRefresh, "Click this button to <b>refresh</b> the list of files for the current directory<br>No automatic refreshing is done so you have to use this button when you add/delete a file in said directory");
             toolTipHtml.SetToolTip(textFilter, "Start writing a file name to <b>filter</b> the list below");
             toolTipHtml.SetToolTip(btGotoDir, "<b>Open</b> the current path in the windows explorer");
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
@@ -185,6 +210,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
 
             RefreshGotoDirButton();
+
+            Refreshing = false;
 
             #endregion
 
@@ -315,14 +342,21 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Call this method to completly refresh the object view list (recompute the items of the list)
         /// </summary>
         public void RefreshFileList() {
-            if (_isListing) return;
-            _isListing = true;
+            if (Refreshing) {
+                _refreshRequiredWhileRefreshing = true;
+                return;
+            }
+            _refreshRequiredWhileRefreshing = false;
+            Refreshing = true;
             Task.Factory.StartNew(() => {
                 try {
                     RefreshFileListAction();
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while listing files");
-                    _isListing = false;
+                } finally {
+                    Refreshing = false;
+                    if (_refreshRequiredWhileRefreshing)
+                        RefreshFileList();
                 }
             });
         }
@@ -420,11 +454,10 @@ namespace _3PA.MainFeatures.FileExplorer {
                         fastOLV.SetObjects(_initialObjectsList);
                     } catch (Exception e) {
                         ErrorHandler.ShowErrors(e, "Error while showing the list of files");
-                    } finally {
-                        _isListing = false;
                     }
                 });
             }
+
             ApplyFilter();
         }
 
@@ -732,8 +765,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtDirectoryOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (_isListing) return;
-
             Config.Instance.FileExplorerViewMode++;
             if (Config.Instance.FileExplorerViewMode > 3) Config.Instance.FileExplorerViewMode = 0;
             RefreshGotoDirButton();

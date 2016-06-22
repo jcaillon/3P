@@ -43,9 +43,9 @@ namespace _3PA {
         public static void OnStartUp() {
             YamuiThemeManager.OnCssNeeded += OnCssNeeded;
             YamuiThemeManager.OnImageNeeded += OnImageNeeded;
-            Current.AccentColor = Config.Instance.AccentColor;
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
+            Current.AccentColor = Config.Instance.AccentColor;
         }
 
         #endregion

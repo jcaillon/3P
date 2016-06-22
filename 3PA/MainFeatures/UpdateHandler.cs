@@ -112,14 +112,14 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
-        /// Call this method to start checking for updates every 2 hours, also check once immediatly
+        /// ASYNC - Call this method to start checking for updates every 2 hours, also check once immediatly
         /// </summary>
         public static void StartCheckingForUpdate() {
             // check for updates every now and then (2h)
             _checkEveryHourAction = new ReccurentAction(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
-                    CheckForUpdate(false);
+                        CheckForUpdate(false);
             }, 1000 * 60 * 120);
         }
 

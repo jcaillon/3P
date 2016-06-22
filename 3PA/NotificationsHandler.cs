@@ -550,6 +550,12 @@ namespace _3PA {
             // Need to compute the propath again, because we take into account relative path
             ProEnvironment.Current.ReComputeProPath();
 
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyPluginSpecificOptions(false);
+
+            // refresh file explorer currently opened file
+            FileExplorer.RedrawFileExplorerList();
+
             if (!initiating) {
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Toggle(IsCurrentFileProgress);
@@ -557,17 +563,10 @@ namespace _3PA {
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
                     FileExplorer.Toggle(IsCurrentFileProgress);
                 }
-            }
 
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
-
-            // refresh file explorer currently opened file
-            FileExplorer.RedrawFileExplorerList();
-
-            // Parse the document
-            if (PluginIsFullyLoaded)
+                // Parse the document
                 AutoComplete.ParseCurrentDocument(true);
+            }
 
             // publish an event
             if (OnDocumentChangedEnd != null) {

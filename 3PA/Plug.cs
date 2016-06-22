@@ -106,10 +106,12 @@ namespace _3PA {
         /// </summary>
         internal static bool PlugStartup() {
             try {
+                // need to 
                 ThemeManager.OnStartUp();
 
                 // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
-                // from a back groundthread, use : BeginInvoke()
+                // from a back groundthread with BeginInvoke()
+                // once this method is done, we are able to publish notifications
                 UserCommunication.Init();
 
                 // if the UDL is not installed
@@ -136,6 +138,25 @@ namespace _3PA {
                 UpdateHandler.CheckForUpdateDone();
                 UpdateHandler.StartCheckingForUpdate();
 
+                // Try to update the configuration from the distant shared folder
+                ShareExportConf.StartCheckingForUpdates();
+
+                Keywords.Import();
+                Snippets.Init();
+                FileTag.Import();
+
+                // initialize the list of objects of the autocompletion form
+                AutoComplete.RefreshStaticItems(true);
+
+                // init database info
+                DataBase.Init();
+
+                SetHooks();
+
+                // Start pinging
+                // ReSharper disable once ObjectCreationAsStatement
+                new ReccurentAction(User.Ping, 1000*60*120);
+
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
                     CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
@@ -150,32 +171,6 @@ namespace _3PA {
                     FileExplorer.Toggle();
                 }
 
-                // Try to update the configuration from the distant shared folder
-                ShareExportConf.StartCheckingForUpdates();
-
-                // everything else can be async
-                //Task.Factory.StartNew(() => {
-
-                Keywords.Import();
-                Snippets.Init();
-                FileTag.Import();
-
-                // initialize the list of objects of the autocompletion form
-                AutoComplete.RefreshStaticItems(true);
-
-                // init database info
-                DataBase.Init();
-
-                SetHooks();
-                //});
-
-                // Start pinging
-                // ReSharper disable once ObjectCreationAsStatement
-                new ReccurentAction(User.Ping, 1000*60*120);
-
-                // Make sure to give the focus to scintilla on startup
-                WinApi.SetForegroundWindow(Npp.HandleNpp);
-
                 // set the following operations
                 OnPlugReady += AfterPlugStartUp;
 
@@ -189,8 +184,16 @@ namespace _3PA {
 
         internal static void AfterPlugStartUp() {
 
+            // subscribe to static events
+
+            // rebuild the file explorer each time the environment changes
+            ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
+
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched(true);
+
+            // Make sure to give the focus to scintilla on startup
+            WinApi.SetForegroundWindow(Npp.HandleNpp);
         }
 
         #endregion

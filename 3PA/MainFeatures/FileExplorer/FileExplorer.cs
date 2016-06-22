@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Refresh the files list
         /// </summary>
-        public static void RebuildItemList() {
+        public static void RebuildFileList() {
             if (!IsVisible) return;
             Form.RefreshFileList();
             Form.FilterByText = "";
@@ -191,7 +191,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 if (FakeForm == null) {
                     Init();
                     // if just shown, refresh the list
-                    RebuildItemList();
+                    if (Plug.PluginIsFullyLoaded)
+                        RebuildFileList();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
