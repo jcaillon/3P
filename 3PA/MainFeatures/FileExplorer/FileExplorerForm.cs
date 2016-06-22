@@ -29,7 +29,6 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
-using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -65,11 +64,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         ///  gets or sets the total items currently displayed in the form
         /// </summary>
         public int TotalItems { get; set; }
-
-        /// <summary>
-        /// The value ranging from 0 to 3 and indicating which folder we are exploring
-        /// </summary>
-        public int DirectoryToExplorer { get; private set; }
 
         // List of displayed type of file
         private static Dictionary<FileType, SelectorButton<FileType>> _displayedTypes;
@@ -185,15 +179,12 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btDirectory, "Click to <b>change</b> the directory to explore");
             toolTipHtml.SetToolTip(lbDirectory, "Current directory being explored");
 
-            // default to "everywhere"
-            DirectoryToExplorer = 3;
-
             btGotoDir.BackGrndImage = ImageResources.OpenInExplorer;
-            btDirectory.BackGrndImage = ImageResources.ExplorerDir3;
-            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
-            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
-            btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
             btGotoDir.ButtonPressed += BtGotoDirOnButtonPressed;
+            _explorerDirStr = new[] { "Local path ", "Compilation path", "Propath", "Everywhere" };
+            btDirectory.ButtonPressed += BtDirectoryOnButtonPressed;
+
+            RefreshGotoDirButton();
 
             #endregion
 
@@ -339,7 +330,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         public void RefreshFileListAction() {
             // get the list of FileObjects
             _initialObjectsList = new List<FileListItem>();
-            switch (DirectoryToExplorer) {
+            switch (Config.Instance.FileExplorerViewMode) {
                 case 0:
                     _initialObjectsList = FileExplorer.ListFileOjectsInDirectory(ProEnvironment.Current.BaseLocalPath);
                     break;
@@ -720,27 +711,34 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region File list buttons events
 
+        private void RefreshGotoDirButton() {
+            // refresh a button depending on the mode...
+            if (IsHandleCreated) {
+                BeginInvoke((Action) delegate {
+                    btGotoDir.Visible = Config.Instance.FileExplorerViewMode <= 1;
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + Config.Instance.FileExplorerViewMode);
+                    btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
+                    btDirectory.Invalidate();
+                    lbDirectory.Text = _explorerDirStr[Config.Instance.FileExplorerViewMode];
+                });
+            }
+        }
+
         private void BtGotoDirOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            if (DirectoryToExplorer == 0)
+            if (Config.Instance.FileExplorerViewMode == 0)
                 Utils.OpenFolder(ProEnvironment.Current.BaseLocalPath);
-            else if (DirectoryToExplorer == 1)
+            else if (Config.Instance.FileExplorerViewMode == 1)
                 Utils.OpenFolder(ProEnvironment.Current.BaseCompilationPath);
         }
 
         private void BtDirectoryOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             if (_isListing) return;
-            DirectoryToExplorer++;
-            if (DirectoryToExplorer > 3) DirectoryToExplorer = 0;
-            Image tryImg = (Image)ImageResources.ResourceManager.GetObject("ExplorerDir" + DirectoryToExplorer);
-            btDirectory.BackGrndImage = tryImg ?? ImageResources.Error;
-            btDirectory.Invalidate();
-            lbDirectory.Text = _explorerDirStr[DirectoryToExplorer];
-            if (DirectoryToExplorer > 1)
-                btGotoDir.Hide();
-            else
-                btGotoDir.Show();
-            RefreshFileList();
 
+            Config.Instance.FileExplorerViewMode++;
+            if (Config.Instance.FileExplorerViewMode > 3) Config.Instance.FileExplorerViewMode = 0;
+            RefreshGotoDirButton();
+
+            RefreshFileList();
             GiveFocustoTextBox();
         }
 
@@ -758,7 +756,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private void BtRefreshOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             RefreshFileList();
-
             GiveFocustoTextBox();
         }
 

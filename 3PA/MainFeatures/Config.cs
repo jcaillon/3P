@@ -406,6 +406,9 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
+            // Current folder mode for the file explorer : local/compilation/propath/everywhere
+            public int FileExplorerViewMode = 3;
+
             // Shared configuration last folder selected
             public string SharedConfFolder = "";
             // a list of Label corresponding to confLine(s) that are auto-updated
@@ -581,8 +584,8 @@ namespace _3PA.MainFeatures {
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
 
         // themes
-        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_SyntaxThemes.conf"); } }
-        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ApplicationThemes.conf"); } }
+        public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); } }
+        public static string FileApplicationThemes { get { return Path.Combine(FolderThemes, "_ThemesForApplication.conf"); } }
 
         // errors
         public static string FileErrorLog { get { return Path.Combine(FolderLog, "error.log"); } }

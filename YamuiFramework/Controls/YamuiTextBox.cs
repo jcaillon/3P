@@ -103,8 +103,8 @@ namespace YamuiFramework.Controls {
             BackColor = YamuiThemeManager.Current.ButtonBg(CustomBackColor, UseCustomBackColor, _isFocused, _isHovered, false, Enabled);
             ForeColor = YamuiThemeManager.Current.ButtonFg(CustomForeColor, UseCustomForeColor, _isFocused, _isHovered, false, Enabled);
             Multiline = true;
+            WordWrap = false;
             MinimumSize = new Size(20, 20);
-            WordWrap = true;
         }
 
         #endregion

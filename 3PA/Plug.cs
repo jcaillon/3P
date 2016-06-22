@@ -65,7 +65,7 @@ namespace _3PA {
 
         #endregion
 
-        #region Init
+        #region Start
 
         /// <summary>
         /// Called on notepad++ setinfo
@@ -166,14 +166,8 @@ namespace _3PA {
                 // init database info
                 DataBase.Init();
 
-                // Simulates a OnDocumentSwitched when we start this dll
-                OnDocumentSwitched(true);
-
                 SetHooks();
                 //});
-
-                // this is done async anyway
-                FileExplorer.RebuildItemList();
 
                 // Start pinging
                 // ReSharper disable once ObjectCreationAsStatement
@@ -182,17 +176,26 @@ namespace _3PA {
                 // Make sure to give the focus to scintilla on startup
                 WinApi.SetForegroundWindow(Npp.HandleNpp);
 
+                // set the following operations
+                OnPlugReady += AfterPlugStartUp;
+
                 return true;
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "OnNppReady");
+                ErrorHandler.ShowErrors(e, "Plugin startup");
             }
             return false;
         }
 
+        internal static void AfterPlugStartUp() {
+
+            // Simulates a OnDocumentSwitched when we start this dll
+            OnDocumentSwitched(true);
+        }
+
         #endregion
 
-        #region Clean up
+        #region Die
 
         /// <summary>
         /// Called on Npp shutdown

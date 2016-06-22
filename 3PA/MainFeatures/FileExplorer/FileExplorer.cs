@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -191,6 +190,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 // initialize if not done
                 if (FakeForm == null) {
                     Init();
+                    // if just shown, refresh the list
+                    RebuildItemList();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);
                 }
