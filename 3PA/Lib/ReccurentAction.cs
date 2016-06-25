@@ -46,6 +46,7 @@ namespace _3PA.Lib {
         #region Life and death
 
         /// <summary>
+        /// Executed ASYNCHRONOUSLY, 
         /// Allows to do a given action (in a new task) every XXX ms for XXX times
         /// by default it does the action when creating this instance, set doActionOnCreate = false to not do it immediatly
         /// </summary>

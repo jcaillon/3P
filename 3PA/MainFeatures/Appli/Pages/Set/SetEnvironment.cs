@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(textbox4, textTool);
             toolTip.SetToolTip(htmlLabel4, textTool);
 
-            textTool = "The path to the prowin.exe (or prowin32.exe), it is usually located in :<div class='ToolTipcodeSnippet'>%INSTALL_DIR%\\client\\vXXXX\\dlc\\bin\\</div>";
+            textTool = "The path to the prowin.exe (or prowin32.exe for 32 bits version), it is usually located in :<div class='ToolTipcodeSnippet'>%INSTALL_DIR%\\client\\vXXXX\\dlc\\bin\\</div>";
             toolTip.SetToolTip(textbox5, textTool);
             toolTip.SetToolTip(htmlLabel5, textTool);
 
@@ -505,7 +505,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current environment?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"}, true);
-            if (answ < 2) {
+            if (answ == 0 || answ == 1) {
                 if (answ == 1)
                     _unsafeDelete = true;
                 _currentMode = ViewMode.Delete;
@@ -529,7 +529,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
             var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
-            if (answ < 2) {
+            if (answ == 0 || answ == 1) {
                 if (answ == 1)
                     _unsafeDelete = true;
                 _currentMode = ViewMode.DbDelete;

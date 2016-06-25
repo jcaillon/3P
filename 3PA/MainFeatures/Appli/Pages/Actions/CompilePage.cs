@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
 
             // subscribe to env update
-            ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange += UpdateMassCompilerBaseDirectory;
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
@@ -360,7 +360,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 
-        private void ProEnvironmentOnOnEnvironmentChange() {
+        private void UpdateMassCompilerBaseDirectory() {
             fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 

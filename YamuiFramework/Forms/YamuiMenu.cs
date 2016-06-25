@@ -156,6 +156,8 @@ namespace YamuiFramework.Forms {
                     Controls.Add(button);
                     _content.Add(item);
                     yPos += LineHeight;
+                    if (item.IsSelectedByDefault)
+                        _selectedIndex = index;
                     index++;
                 }
             }
@@ -195,6 +197,9 @@ namespace YamuiFramework.Forms {
             // keydown
             KeyPreview = true;
             PreviewKeyDown += OnPreviewKeyDown;
+
+            // set focused item
+            ActiveControl = Controls[_selectedIndex];
         }
 
         #endregion
@@ -414,6 +419,7 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
+
     }
 
     #region YamuiMenuItem
@@ -438,6 +444,12 @@ namespace YamuiFramework.Forms {
         /// true if the item is a separator
         /// </summary>
         public bool IsSeparator { get; set; }
+
+        /// <summary>
+        /// True if the item should be selected by default in the menu 
+        /// (the last item to true is selected, otherwise it's the first in the list)
+        /// </summary>
+        public bool IsSelectedByDefault { get; set; }
 
         /// <summary>
         /// List of child items for the current item

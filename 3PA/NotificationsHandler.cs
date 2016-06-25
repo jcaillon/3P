@@ -563,10 +563,10 @@ namespace _3PA {
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
                     FileExplorer.Toggle(IsCurrentFileProgress);
                 }
-
-                // Parse the document
-                AutoComplete.ParseCurrentDocument(true);
             }
+
+            // Parse the document
+            AutoComplete.ParseCurrentDocument(true);
 
             // publish an event
             if (OnDocumentChangedEnd != null) {

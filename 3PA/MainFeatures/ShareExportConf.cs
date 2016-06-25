@@ -264,20 +264,17 @@ namespace _3PA.MainFeatures {
 
         private static void DoFetch(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.DistantPath)) {
-                if (!_dontWarnFetch && !_silentUpdate) {
-                    var answ = UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> {"Yes, don't ask again", "Cancel", "Yes"}, true);
-                    if (answ == 0)
-                        _dontWarnFetch = true;
+                var answ = (_dontWarnFetch || _silentUpdate) ? 0 : UserCommunication.Message("This will <b>replace your local</b> configuration with the distant one.<br><br>Do you wish to continue?", MessageImg.MsgInfo, "Fetch", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
+                if (answ == 0 || answ == 1) {
                     if (answ == 1)
-                        return;
-                }
-
-                if (conf.IsDir)
-                    Utils.CopyDirectory(conf.DistantPath, conf.LocalPath);
-                else {
-                    Utils.CopyFile(conf.DistantPath, conf.LocalPath);
-                    if (conf.OnImport != null)
-                        conf.OnImport(conf);
+                        _dontWarnFetch = true;
+                    if (conf.IsDir)
+                        Utils.CopyDirectory(conf.DistantPath, conf.LocalPath);
+                    else {
+                        Utils.CopyFile(conf.DistantPath, conf.LocalPath);
+                        if (conf.OnImport != null)
+                            conf.OnImport(conf);
+                    }
                 }
             }
         }
@@ -286,18 +283,15 @@ namespace _3PA.MainFeatures {
 
         private static void DoPush(ConfLine conf) {
             if (!string.IsNullOrEmpty(conf.LocalPath)) {
-                if (!_dontWarnPush) {
-                    var answ = UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Push", "Confirmation", new List<string> { "Yes, don't ask again", "Cancel", "Yes" }, true);
-                    if (answ == 0)
-                        _dontWarnPush = true;
+                var answ = _dontWarnPush ? 0 : UserCommunication.Message("This will <b>replace the distant configuration <i>(for everyone!)</i></b> with your local configuration.<br><br>Do you wish to continue?", MessageImg.MsgWarning, "Push", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
+                if (answ == 0 || answ == 1) {
                     if (answ == 1)
-                        return;
+                        _dontWarnPush = true;
+                    if (conf.IsDir)
+                        Utils.CopyDirectory(conf.LocalPath, conf.DistantPath);
+                    else
+                        Utils.CopyFile(conf.LocalPath, conf.DistantPath);
                 }
-
-                if (conf.IsDir)
-                    Utils.CopyDirectory(conf.LocalPath, conf.DistantPath);
-                else
-                    Utils.CopyFile(conf.LocalPath, conf.DistantPath);
             }
         }
 

@@ -327,11 +327,11 @@ namespace _3PA.MainFeatures.Parser {
             var fieldName = splitted[nbPoints == 2 ? 2 : 1];
 
             // Search through database
-            if (DataBase.Get().Count > 0) {
-                ParsedDataBase foundDb = DataBase.Get().First();
+            if (DataBase.List.Count > 0) {
+                ParsedDataBase foundDb = DataBase.List.First();
                 if (nbPoints == 2)
                     // find database
-                    foundDb = DataBase.FindDatabaseByName(splitted[0]) ?? DataBase.Get().First();
+                    foundDb = DataBase.FindDatabaseByName(splitted[0]) ?? DataBase.List.First();
                 if (foundDb == null) return ParsedPrimitiveType.Unknow;
 
                 // find table

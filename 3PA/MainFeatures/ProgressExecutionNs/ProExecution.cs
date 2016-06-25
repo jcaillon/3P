@@ -144,7 +144,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-
         #region constructors and destructor
 
         /// <summary>
@@ -195,9 +194,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // check prowin32.exe
             if (!File.Exists(ProEnv.ProwinPath)) {
-                UserCommunication.NotifyUnique("NoProwin32", "The file path to prowin32.exe is incorrect : <br><br>" + ProEnv.ProwinPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
+                UserCommunication.NotifyUnique("ProExecutionChecks", "The file path to Prowin.exe is incorrect : <div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + "</div>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
                     Appli.Appli.GoToPage(PageNames.SetEnvironment);
-                    UserCommunication.CloseUniqueNotif("NoProwin32");
+                    UserCommunication.CloseUniqueNotif("ProExecutionChecks");
                     args.Handled = true;
                 }, 10);
                 return false;
@@ -205,9 +204,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // check compilation dir
             if (!ProEnv.CompileLocally && (!Path.IsPathRooted(ProEnv.BaseCompilationPath))) {
-                UserCommunication.NotifyUnique("Compilationdirectory", "The path for the compilation base directory is incorrect : <br><br>" + ProEnv.BaseCompilationPath + "<br><br>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
+                UserCommunication.NotifyUnique("ProExecutionChecks", "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (string.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
                     Appli.Appli.GoToPage(PageNames.SetEnvironment);
-                    UserCommunication.CloseUniqueNotif("Compilationdirectory");
+                    UserCommunication.CloseUniqueNotif("ProExecutionChecks");
                     args.Handled = true;
                 }, 10);
                 return false;

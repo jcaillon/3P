@@ -28,6 +28,16 @@ using _3PA.MainFeatures.ProgressExecutionNs;
 namespace _3PA.MainFeatures.AutoCompletion {
     internal static class DataBase {
 
+        #region events
+
+        /// <summary>
+        /// Event published when the current database information is updated
+        /// </summary>
+        public static event Action OnDatabaseInfoUpdated;
+
+        #endregion
+
+
         #region fields
 
         /// <summary>
@@ -50,15 +60,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #endregion
 
         #region public methods
-
-        /// <summary>
-        /// Read last used database info file
-        /// </summary>
-        public static void Init() {
-            ProEnvironment.OnEnvironmentChange += UpdateDatabaseInfo;
-            // either do it now or make sure to subscribe to OnEnvironmentChange before the first call to Proenv.current
-            //UpdateDatabaseInfo();
-        }
 
         /// <summary>
         /// returns the path of the current dump file
@@ -91,10 +92,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _sequences.Clear();
             }
 
-            // Update autocompletion
-            AutoComplete.RefreshStaticItems();
-            AutoComplete.Close();
-            AutoComplete.ParseCurrentDocument(true);
+            if (OnDatabaseInfoUpdated != null)
+                OnDatabaseInfoUpdated();
         }
 
         /// <summary>
@@ -270,8 +269,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Exposes the databases info
         /// </summary>
         /// <returns></returns>
-        public static List<ParsedDataBase> Get() {
-            return _dataBases;
+        public static List<ParsedDataBase> List {
+            get { return _dataBases; }
         }
 
         /// <summary>

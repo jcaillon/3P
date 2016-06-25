@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using _3PA.Data;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;

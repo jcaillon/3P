@@ -183,13 +183,11 @@ namespace YamuiFramework.Forms {
             // we either display a modal or a normal messagebox
             Transition.run(msgbox, "Opacity", 0d, 1d, new TransitionType_Linear(400));
             if (waitResponse) {
-                if (yamuiForm != null) {
+                if (yamuiForm != null) 
                     yamuiForm.HasModalOpened = true;
-                }
                 msgbox.ShowDialog(new WindowWrapper(ownerHandle));
-                if (yamuiForm != null) {
+                if (yamuiForm != null) 
                     yamuiForm.HasModalOpened = false;
-                }
                 // get focus back to owner
                 WinApi.SetForegroundWindow(ownerHandle);
             } else {

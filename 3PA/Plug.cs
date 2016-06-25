@@ -106,7 +106,7 @@ namespace _3PA {
         /// </summary>
         internal static bool PlugStartup() {
             try {
-                // need to 
+                // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
 
                 // init an empty form, this gives us a Form to hook onto if we want to do stuff on the UI thread
@@ -136,20 +136,10 @@ namespace _3PA {
 
                 // Check if an update has been done and start checking for new updates
                 UpdateHandler.CheckForUpdateDone();
-                UpdateHandler.StartCheckingForUpdate();
+                UpdateHandler.StartCheckingForUpdate(); // async
 
                 // Try to update the configuration from the distant shared folder
                 ShareExportConf.StartCheckingForUpdates();
-
-                Keywords.Import();
-                Snippets.Init();
-                FileTag.Import();
-
-                // initialize the list of objects of the autocompletion form
-                AutoComplete.RefreshStaticItems(true);
-
-                // init database info
-                DataBase.Init();
 
                 SetHooks();
 
@@ -185,9 +175,15 @@ namespace _3PA {
         internal static void AfterPlugStartUp() {
 
             // subscribe to static events
-
-            // rebuild the file explorer each time the environment changes
             ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
+            ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+
+            Keywords.Import();
+            Snippets.Init();
+            FileTag.Import();
+
+            // initialize the list of objects of the autocompletion form
+            AutoComplete.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
             OnDocumentSwitched(true);
@@ -230,8 +226,6 @@ namespace _3PA {
                 CodeExplorer.ForceClose();
                 UserCommunication.ForceClose();
                 AppliMenu.ForceCloseMenu();
-
-                PluginIsFullyLoaded = false;
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "CleanUp");

@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // build the interface
             var yPos = static_name.Location.Y + 35;
-            foreach (var item in AppliMenu.Instance.ShortcutableItemList) {
+            foreach (var item in AppliMenu.Instance.ShortcutableItemList.OrderBy(item => item.ItemName)) {
 
                 // icon
                 var imgButton = new YamuiPictureBox {
@@ -123,7 +123,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
-
         #region events
 
         private void UndoButtonOnButtonPressed(object sender, EventArgs eventArgs) {
@@ -145,7 +144,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 return;
 
             _waitingInput = true;
-            KeyboardMonitor.Instance.KeyDownByPass += OnKeyDownByPass;
+            KeyboardMonitor.Instance.KeyDownByPass += OnNewShortcutPressed;
 
             var button = ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]);
 
@@ -158,7 +157,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #region private methods
 
-        private void OnKeyDownByPass(Keys key, KeyModifiers modifiers, ref bool handled) {
+        private void OnNewShortcutPressed(Keys key, KeyModifiers modifiers, ref bool handled) {
             bool stopListening = true;
             var button = (YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
 
@@ -190,7 +189,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // stop listening to button pressed
             if (stopListening) {
                 _waitingInput = false;
-                KeyboardMonitor.Instance.KeyDownByPass -= OnKeyDownByPass;
+                KeyboardMonitor.Instance.KeyDownByPass -= OnNewShortcutPressed;
                 BlinkButton(button, ThemeManager.Current.ThemeAccentColor);
             }
         }

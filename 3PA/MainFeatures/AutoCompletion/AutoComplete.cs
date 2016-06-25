@@ -99,6 +99,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         private static string _lastRememberedKeyword = "";
 
+        private static bool _initialized;
+
         #endregion
 
         #region public misc.
@@ -293,7 +295,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// this method should be called at the plugin's start and when we change the current database
         /// It refreshed the "static" items of the autocompletion : keywords, snippets, databases, tables, sequences
         /// </summary>
-        public static void RefreshStaticItems(bool initializing = false) {
+        public static void RefreshStaticItems() {
+
+            // subscribe to events that indicate the static items should be updated
+            if (!_initialized) {
+                DataBase.OnDatabaseInfoUpdated += RefreshStaticItems;
+            }
 
             _staticItems.Clear();
             _staticItems = Keywords.GetList().ToList();
@@ -304,13 +311,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 FromParser = false,
                 Flag = 0
             }).ToList());
-
-            // add database info?
-            if (!initializing) {
-                _staticItems.AddRange(DataBase.GetDbList());
-                _staticItems.AddRange(DataBase.GetSequencesList());
-                _staticItems.AddRange(DataBase.GetTablesList());
-            }
+            _staticItems.AddRange(DataBase.GetDbList());
+            _staticItems.AddRange(DataBase.GetSequencesList());
+            _staticItems.AddRange(DataBase.GetTablesList());
 
             // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
             _staticItems.Sort(new CompletionDataSortingClass());
@@ -322,12 +325,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 KnownStaticItems[keyword.DisplayText] = keyword.Type;
             }
 
-            // Update the form?
-            if (!initializing) {
-                CurrentTypeOfList = TypeOfList.Reset;
-                if (IsVisible)
-                    UpdateAutocompletion();
-            }
+            // Update the form
+            CurrentTypeOfList = TypeOfList.Reset;
+            if (IsVisible)
+                UpdateAutocompletion();
+
+            // update parser?
+            if (_initialized)
+                ParseCurrentDocument();
+
+            _initialized = true;
         }
 
         /// <summary>

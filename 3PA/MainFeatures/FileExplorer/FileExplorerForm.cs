@@ -122,7 +122,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             #region Current env
 
             // register to env change event
-            ProEnvironment.OnEnvironmentChange += ProEnvironmentOnOnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange += UpdateCurrentEnvName;
 
             btEnvList.BackGrndImage = ImageResources.Env;
             btEnvList.ButtonPressed += BtEnvListOnButtonPressed;
@@ -877,7 +877,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region Current env
 
-        private void ProEnvironmentOnOnEnvironmentChange() {
+        private void UpdateCurrentEnvName() {
             lblEnv.Text = ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : "");
         }
 

@@ -166,11 +166,11 @@ namespace _3PA.MainFeatures {
             #region Environments
 
             // subscribe to env change event so the Env menu is always up to date
-            ProEnvironment.OnEnvironmentChange += OnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange += RebuildSwitchEnvMenu;
             _envMenu = new MenuItem(this, "Switch environment", ImageResources.Env, ShowEnvMenuAtCursor, "Switch_env", "Ctrl+E") {
                 Generic = true
             };
-            OnEnvironmentChange();
+            RebuildSwitchEnvMenu();
 
             #endregion
 
@@ -266,50 +266,55 @@ namespace _3PA.MainFeatures {
         }
 
         public void Dispose() {
-            ProEnvironment.OnEnvironmentChange -= OnEnvironmentChange;
+            ProEnvironment.OnEnvironmentChange -= RebuildSwitchEnvMenu;
         }
 
         #endregion
 
-        #region ProEnvironmentOnOnEnvironmentChange
+        #region RebuildSwitchEnvMenu
 
         /// <summary>
-        /// Called when an environement is modified/add or simply switched
+        /// Called when an environement is modified/add or simply switched,
+        /// rebuilds the environment menu
         /// </summary>
-        private void OnEnvironmentChange() {
+        private void RebuildSwitchEnvMenu() {
             _envMenuList = new List<YamuiMenuItem>();
 
             foreach (var env in ProEnvironment.GetList) {
                 var name = env.Name;
                 var suffix = env.Suffix;
                 var existingItem = _envMenuList.FirstOrDefault(item => item.ItemName.Equals(env.Name));
+                // add a new suffix item
                 if (existingItem != null) {
                     var newSub = new YamuiMenuItem() {
                         ItemName = env.Suffix,
                         ItemImage = ImageResources.EnvSuffix,
-                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null)
+                        OnClic = () => ProEnvironment.SetCurrent(name, suffix, null),
+                        IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && suffix.Equals(Config.Instance.EnvSuffix)
                     };
                     if (existingItem.Children != null)
                         existingItem.Children.Add(newSub);
                     else {
                         // also add the first sub item..
-                        var firstItemSuffix = (string) existingItem.Data;
+                        var firstItemSuffix = ((string)existingItem.Data) ?? "";
                         existingItem.Children = new List<YamuiMenuItem> {
                             new YamuiMenuItem {
-                                ItemName = firstItemSuffix ?? "",
+                                ItemName = firstItemSuffix,
                                 ItemImage = ImageResources.EnvSuffix,
-                                OnClic = () => ProEnvironment.SetCurrent(name, firstItemSuffix, null)
+                                OnClic = () => ProEnvironment.SetCurrent(name, firstItemSuffix, null),
+                                IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && firstItemSuffix.Equals(Config.Instance.EnvSuffix)
                             },
                             newSub };
                     }
                     existingItem.SubText = existingItem.Children.Count.ToString();
                 } else {
-                    // new item
+                    // add a new env item
                     _envMenuList.Add(new YamuiMenuItem() {
                         ItemName = env.Name,
                         ItemImage = ImageResources.EnvName,
                         OnClic = () => ProEnvironment.SetCurrent(name, suffix, null),
-                        Data = env.Suffix
+                        Data = env.Suffix,
+                        IsSelectedByDefault = name.Equals(Config.Instance.EnvName)
                     });
                 }
             }

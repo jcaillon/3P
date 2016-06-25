@@ -25,7 +25,6 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
-using YamuiFramework.Themes;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli.Pages.Actions;
@@ -57,7 +56,7 @@ namespace _3PA.MainFeatures.Appli {
                     new YamuiSecMenu("WELCOME", PageNames.Welcome.ToString(), new HomePage())
                 }),
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
-                    new YamuiSecMenu("ENVIRONMENT", PageNames.SetEnvironment.ToString(), new SetEnvironment()),
+                    //new YamuiSecMenu("ENVIRONMENT", PageNames.SetEnvironment.ToString(), new SetEnvironment()),
                     new YamuiSecMenu("COMPILATION PATH", null, new SetCompilationPath()),
                     new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())

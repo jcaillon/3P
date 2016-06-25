@@ -78,7 +78,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         public static void RebuildFileList() {
             if (!IsVisible) return;
             Form.RefreshFileList();
-            Form.FilterByText = "";
         }
 
         /// <summary>
