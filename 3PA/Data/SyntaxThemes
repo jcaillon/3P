@@ -200,3 +200,32 @@ Error1	#9C6500	#FFEB8B	0
 Error2	#833C0C	#EBB885	0
 Error3	#C76F00	#FFC0A0	0
 Error4	#9C0006	#FFC7CE	0
+
+
+> Developper studio
+Default	#000000	#FFF	0
+Comment	#3F7F5F	@Default	0
+NestedComment	@Comment	@Default	0
+SingleLineComment	@Comment	@Default	0
+PreProcessed	#B3A68E	@Default	0
+JumpStatement	#7F0055	@Default	0
+Statement	#7F0055	@Default	0
+VarType	#CD3A3A	@Default	0
+OtherKeywords	#7F0055	@Default	0
+Operators	#000000	@Default	0
+Abbreviations	#EC4D00	@Default	0
+Includes	#FF0080	@Default	0
+DoubleQuote	#2A00FF	@Default	0
+SimpleQuote	#2A00FF	@Default	0
+NormedVariables	#FF8000	@Default	0
+SpecialWord	#000000	#9EE41B	0
+Numbers	#2A00FF	@Default	0
+CaretLine	#000000	#E8E8FF	0
+Selection	#000000	lightgrey	0
+WhiteSpace	#CCC	@Default	0
+NoError	#007B74	#C6EFCE	0
+Error0	#3F3F3F	#F2F2F2	0
+Error1	#9C6500	#FFEB9C	0
+Error2	#833C0C	#FFCC99	0
+Error3	#9C0006	#FFC7CE	0
+Error4	#58267E	#CC99FF	0

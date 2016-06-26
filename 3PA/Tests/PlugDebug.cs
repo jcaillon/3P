@@ -27,6 +27,7 @@ using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
@@ -42,6 +43,7 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
+
         }
 
         public static void StartDebug() {
