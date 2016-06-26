@@ -1853,6 +1853,12 @@ namespace _3PA {
         public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+
+            // we also set the indent line color here
+            new Style(Style.IndentGuide) {
+                BackColor = bg,
+                ForeColor = fg
+            };
         }
 
         /// <summary>

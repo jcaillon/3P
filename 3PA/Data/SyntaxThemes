@@ -49,7 +49,7 @@ NormedVariables	#2D2DFF	@Default	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#FF0000	@Default	0
 CaretLine	#000000	#E8E8FF	0
-Selection	#000000	#E3E3E3	0
+Selection	#000000	lightgrey	0
 WhiteSpace	#E2AE3E	@Default	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
@@ -80,34 +80,34 @@ Numbers	#C82829	#FFFFFF	0
 CaretLine	#000000	#E8E8FF	0
 Selection	#000000	#E3E3E3	0
 WhiteSpace	#E2AE3E	#FFFFFF	0
-NoError	#007B74	#C6EFCE	0
-Error0	#3F3F3F	#F2F2F2	0
-Error1	#9C6500	#FFEB9C	0
-Error2	#833C0C	#FFCC99	0
-Error3	#9C0006	#FFC7CE	0
-Error4	#58267E	#CC99FF	0
+NoError	#FFF	#3FB618	0
+Error0	#FFF	#999999	0
+Error1	#333	#FFEE97	0
+Error2	#FFF	#FFB521	0
+Error3	#FFF	#F57A00	0
+Error4	#FFF	#EB6864	0
 
 > Michael Knight
-Default	#C5C8C6	#1D1F21	0
-Comment	#969896	#1D1F21	0
-NestedComment	#969896	#1D1F21	0
-SingleLineComment	#969896	#1D1F21	0
-PreProcessed	#DE935F	#1D1F21	4
+Default	#C5C8C6	#000	0
+Comment	#969896	@Default	0
+NestedComment	#969896	@Default	0
+SingleLineComment	#969896	@Default	0
+PreProcessed	#DE935F	@Default	4
 JumpStatement	#B294BB	#3E4356	2
-Statement	#81A2BE	#1D1F21	2
-VarType	#81A2A3	#1D1F21	2
-OtherKeywords	#81A2BE	#1D1F21	2
-Operators	#8ABEB7	#1D1F21	2
-Abbreviations	#F5871F	#1D1F21	2
+Statement	#81A2BE	@Default	2
+VarType	#81A2A3	@Default	2
+OtherKeywords	#81A2BE	@Default	2
+Operators	#8ABEB7	@Default	2
+Abbreviations	#F5871F	@Default	2
 Includes	#FFEDF9	#525352	4
-DoubleQuote	#B5BD68	#1D1F21	0
-SimpleQuote	#73EC0F	#1D1F21	0
-NormedVariables	#CC6666	#1D1F21	0
+DoubleQuote	#B5BD68	@Default	0
+SimpleQuote	#73EC0F	@Default	0
+NormedVariables	#CC6666	@Default	0
 SpecialWord	#000000	#9EE41B	2
-Numbers	#84AFE4	#1D1F21	0
+Numbers	#84AFE4	@Default	0
 CaretLine	#000000	#623A1E	0
 Selection	#000000	#1E417D	0
-WhiteSpace	#4C5156	#1D1F21	0
+WhiteSpace	#353535	@Default	0
 NoError	#007B74	#C6EFCE	0
 Error0	#3F3F3F	#F2F2F2	0
 Error1	#9C6500	#FFEB9C	0
@@ -116,7 +116,7 @@ Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
 
 > Sublime?
-Default	#F8F8F2	#26292C	0
+Default	#F8F8F2	#272B30	0
 Comment	#75715E	@Default	0
 NestedComment	#75715E	@Default	0
 SingleLineComment	#75715E	@Default	0
@@ -143,8 +143,60 @@ Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
 
-> Sublime with black background
-Default	#F8F8F2	black	0
 
-> Sublime with grey background
-Default	#F8F8F2	#272B30	0
+> Grey (uk) or Gray (us)?
+Default	#C5C8C6	#363636	0
+Comment	#A9ACAA	@Default	0
+NestedComment	#A9ACAA	@Default	0
+SingleLineComment	#A9ACAA	@Default	0
+PreProcessed	lighten(#363636, 40%)	@Default	4
+Includes	#E3C766	@Default	4
+JumpStatement	#FFF	#B83B5E	2
+Statement	#B193BE	@Default	2
+OtherKeywords	#7DA1C1	@Default	2
+VarType	#D78943	@Default	2
+Abbreviations	#C5C8C6	@Default	2
+Operators	#C5C8C6	@Default	2
+Numbers	#D78943	@Default	0
+NormedVariables	#C96764	@Default	0
+SpecialWord	#000000	#9EE41B	2
+DoubleQuote	#AFB857	@Default	0
+SimpleQuote	#AFAC40	@Default	0
+CaretLine	#000000	lighten(@Default, 15%)	0
+Selection	#000000	#1E1E1E	0
+WhiteSpace	#595959	@Default	0
+NoError	#FFF	#3FB618	0
+Error0	#DDDDDD	#222222	0
+Error1	#032AB4	#FCD54B	0
+Error2	#FFEDE4	#FF7518	0
+Error3	#FFDAC7	#FF5300	0
+Error4	#FFD0D0	#D30039	0
+
+
+> Default alt
+Default	#333	#F0F0F0	0
+Comment	#15714C	@Default	4
+NestedComment	@Comment	@Default	4
+SingleLineComment	@Comment	@Default	4
+PreProcessed	#686868	@Default	4
+JumpStatement	#000080	#FCCB1B	2
+Statement	#000080	@Default	2
+VarType	#0075EA	@Default	2
+OtherKeywords	#005EBB	@Default	2
+Operators	#482D57	@Default	2
+Abbreviations	#EC4D00	@Default	2
+Includes	#C76408	@Default	0
+DoubleQuote	#CE00CE	@Default	0
+SimpleQuote	#B42386	@Default	0
+NormedVariables	#2D2DFF	@Default	0
+SpecialWord	#000000	#9EE41B	2
+Numbers	#BE1313	@Default	2
+CaretLine	#000000	#E8E8FF	0
+Selection	#000000	lightgrey	0
+WhiteSpace	#CCC	@Default	0
+NoError	#007B74	#B2EFBE	0
+Error0	#3F3F3F	#E1E1E1	0
+Error1	#9C6500	#FFEB8B	0
+Error2	#833C0C	#EBB885	0
+Error3	#C76F00	#FFC0A0	0
+Error4	#9C0006	#FFC7CE	0

@@ -48,7 +48,7 @@ FormBack	#E6E6E6
 FormFore	#1E1E1E
 FormBorder	#647687
 FormAltBack	#FAFAFA
-SubTextFore	#471212
+SubTextFore	#093850
 ScrollNormalBack	#CCCCCC
 ScrollNormalFore	#666666
 ScrollFocusedBack	@ScrollHoverBack
@@ -99,7 +99,7 @@ MenuFocusedBack	#9AC2F9
 MenuFocusedFore	#000000
 AutoCompletionHighlightBack	#FEE465
 AutoCompletionHighlightBorder	#FFAB00
-GenericLinkColor	#0A81F0
+GenericLinkColor	darken(@AccentColor, 20%)
 GenericErrorColor	#CC0000
 
 
@@ -110,7 +110,7 @@ FormBack	#252526
 FormFore	#D2D2D2
 FormBorder	#647687
 FormAltBack	#333333
-SubTextFore	#649AD1
+SubTextFore	lighten(@AccentColor, 50%)
 ScrollNormalBack	#333333
 ScrollNormalFore	#999999
 ScrollFocusedBack	@ScrollHoverBack
@@ -161,7 +161,7 @@ MenuFocusedBack	#0A3259
 MenuFocusedFore	#F5CDA6
 AutoCompletionHighlightBack	#5F0005
 AutoCompletionHighlightBorder	#9D0008
-GenericLinkColor	#F0A30A
+GenericLinkColor	@AccentColor
 GenericErrorColor	#CC0000
 
 
@@ -351,7 +351,7 @@ GenericLinkColor	#fff
 GenericErrorColor	#ee5f5b
 
 
-> Nice and simple
+> Flash blindness
 PageBackGroundImage	
 ThemeAccentColor	#3D81BC
 FormBack	#fff
@@ -410,4 +410,128 @@ MenuFocusedFore	#000
 AutoCompletionHighlightBack	lighten(@AccentColor, 90%)
 AutoCompletionHighlightBorder	darken(@AccentColor, 20%)
 GenericLinkColor	@AccentColor
+GenericErrorColor	#d9534f
+
+
+> Rampage
+PageBackGroundImage	bg_MaximoVLorenzo
+ThemeAccentColor	#CD3450
+FormBack	#363636
+FormFore	#C8C8C8
+FormBorder	#25282D
+FormAltBack	darken(@FormBack, 20%)
+SubTextFore	#D0FD0C
+ScrollNormalBack	@FormAltBack
+ScrollNormalFore	@FormFore
+ScrollFocusedBack	@ScrollHoverBack
+ScrollFocusedFore	@ScrollHoverFore
+ScrollHoverBack	@ScrollNormalBack
+ScrollHoverFore	@SubTextFore
+ScrollPressedBack	@ScrollNormalBack
+ScrollPressedFore	@AccentColor
+ScrollDisabledBack	@ScrollNormalBack
+ScrollDisabledFore	@ButtonDisabledBack
+ButtonNormalBack	#474747
+ButtonNormalFore	#fff
+ButtonNormalBorder	#000
+ButtonFocusedBack	@ButtonNormalBack
+ButtonFocusedFore	@ButtonNormalFore
+ButtonFocusedBorder	@AccentColor
+ButtonHoverBack	#CFFA0D
+ButtonHoverFore	#000000
+ButtonHoverBorder	#000
+ButtonDisabledBack	darken(@FormBack, 30%)
+ButtonDisabledFore	darken(@FormFore, 30%)
+ButtonDisabledBorder	@ButtonNormalBorder
+ButtonPressedBack	@AccentColor
+ButtonPressedFore	#CACACA
+ButtonPressedBorder	@AccentColor
+ButtonCheckedBack	@ButtonPressedBack
+ButtonCheckedFore	@ButtonPressedFore
+ButtonCheckedBorder	@ButtonPressedBorder
+ButtonImageNormalBack	@FormBack
+ButtonImageHoverBack	@ButtonHoverBack
+ButtonImagePressedBack	@AccentColor
+ButtonImageFocusedIndicator	@AccentColor
+LabelNormalFore	@FormFore
+LabelFocusedFore	@SubTextFore
+LabelHoverFore	@SubTextFore
+LabelPressedFore	@AccentColor
+LabelDisabledFore	darken(@FormFore, 30%)
+TabNormalFore	darken(@FormFore, 30%)
+TabHoverFore	#FFF102
+TabActiveFore	#FFF102
+ButtonWatermarkFore	@ButtonDisabledFore
+MenuNormalAltBack	@FormAltBack
+MenuNormalBack	@FormBack
+MenuNormalFore	@FormFore
+MenuHoverBack	lighten(@MenuNormalBack, 25%)
+MenuHoverFore	darken(@MenuNormalFore, 25%)
+MenuFocusedBack	#932C41
+MenuFocusedFore	#D8D8D8
+AutoCompletionHighlightBack	#CD2342
+AutoCompletionHighlightBorder	#CD7081
+GenericLinkColor	@SubTextFore
+GenericErrorColor	#ee5f5b
+
+
+> Sacré houbert!
+PageBackGroundImage	bg_oss
+ThemeAccentColor	#393E46
+FormBack	#EEEEEE
+FormFore	#333333
+FormBorder	#EEEEEE
+FormAltBack	#FFF
+SubTextFore	#222831
+ScrollNormalBack	@FormAltBack
+ScrollNormalFore	@FormFore
+ScrollFocusedBack	@ScrollHoverBack
+ScrollFocusedFore	@ScrollHoverFore
+ScrollHoverBack	@FormAltBack
+ScrollHoverFore	@SubTextFore
+ScrollPressedBack	@ScrollNormalBack
+ScrollPressedFore	@AccentColor
+ScrollDisabledBack	@FormAltBack
+ScrollDisabledFore	@ButtonDisabledBack
+ButtonNormalBack	#fff
+ButtonNormalFore	#333333
+ButtonNormalBorder	#ddd
+ButtonFocusedBack	@ButtonNormalBack
+ButtonFocusedFore	@ButtonNormalFore
+ButtonFocusedBorder	@AccentColor
+ButtonHoverBack	#CCCCCC
+ButtonHoverFore	#3A3A3A
+ButtonHoverBorder	#BBBBBB
+ButtonPressedBorder	@AccentColor
+ButtonDisabledBack	#FFFFFF
+ButtonDisabledFore	#B2B2B2
+ButtonDisabledBorder	#ddd
+ButtonPressedBack	@AccentColor
+ButtonPressedFore	#A5A5A5
+ButtonCheckedBack	@ButtonPressedBack
+ButtonCheckedFore	@ButtonPressedFore
+ButtonCheckedBorder	@ButtonPressedBorder
+ButtonImageNormalBack	@FormBack
+ButtonImageHoverBack	@ButtonHoverBack
+ButtonImagePressedBack	@AccentColor
+ButtonImageFocusedIndicator	@AccentColor
+LabelNormalFore	#333333
+LabelFocusedFore	@LabelHoverFore
+LabelHoverFore	@AccentColor
+LabelPressedFore	#00ADB5
+LabelDisabledFore	#B2B2B2
+TabNormalFore	@FormFore
+TabHoverFore	@AccentColor
+TabActiveFore	#00ADB5
+ButtonWatermarkFore	@ButtonDisabledFore
+MenuNormalAltBack	@FormAltBack
+MenuNormalBack	@FormBack
+MenuNormalFore	@FormFore
+MenuHoverBack	#DDD
+MenuHoverFore	#3A3A3A
+MenuFocusedBack	@FormAltBack
+MenuFocusedFore	#3A3A3A
+AutoCompletionHighlightBack	#CCC
+AutoCompletionHighlightBorder	#888
+GenericLinkColor	#00ADB5
 GenericErrorColor	#d9534f

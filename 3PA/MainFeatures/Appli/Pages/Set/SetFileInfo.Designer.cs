@@ -29,6 +29,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetFileInfo));
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.bt_delete = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -56,8 +58,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_default = new YamuiFramework.Controls.YamuiButton();
             this.bt_clear = new YamuiFramework.Controls.YamuiButton();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).BeginInit();
@@ -106,6 +106,32 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Name = "scrollPanel";
             this.scrollPanel.Size = new System.Drawing.Size(720, 550);
             this.scrollPanel.TabIndex = 0;
+            // 
+            // lbl_about
+            // 
+            this.lbl_about.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbl_about.AutoSize = false;
+            this.lbl_about.AutoSizeHeightOnly = true;
+            this.lbl_about.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_about.BaseStylesheet = null;
+            this.lbl_about.Location = new System.Drawing.Point(30, 29);
+            this.lbl_about.Name = "lbl_about";
+            this.lbl_about.Size = new System.Drawing.Size(682, 30);
+            this.lbl_about.TabIndex = 74;
+            this.lbl_about.TabStop = false;
+            this.lbl_about.Text = resources.GetString("lbl_about.Text");
+            // 
+            // yamuiLabel2
+            // 
+            this.yamuiLabel2.AutoSize = true;
+            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
+            this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
+            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
+            this.yamuiLabel2.Name = "yamuiLabel2";
+            this.yamuiLabel2.Size = new System.Drawing.Size(154, 19);
+            this.yamuiLabel2.TabIndex = 73;
+            this.yamuiLabel2.Text = "ABOUT THIS FEATURE";
             // 
             // bt_delete
             // 
@@ -440,30 +466,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
             this.toolTip.TooltipCssClass = "htmltooltip";
-            // 
-            // lbl_about
-            // 
-            this.lbl_about.AutoSize = false;
-            this.lbl_about.AutoSizeHeightOnly = true;
-            this.lbl_about.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_about.BaseStylesheet = null;
-            this.lbl_about.Location = new System.Drawing.Point(30, 29);
-            this.lbl_about.Name = "lbl_about";
-            this.lbl_about.Size = new System.Drawing.Size(653, 30);
-            this.lbl_about.TabIndex = 74;
-            this.lbl_about.TabStop = false;
-            this.lbl_about.Text = resources.GetString("lbl_about.Text");
-            // 
-            // yamuiLabel2
-            // 
-            this.yamuiLabel2.AutoSize = true;
-            this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
-            this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
-            this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(154, 19);
-            this.yamuiLabel2.TabIndex = 73;
-            this.yamuiLabel2.Text = "ABOUT THIS FEATURE";
             // 
             // SetFileInfo
             // 

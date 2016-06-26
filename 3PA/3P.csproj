@@ -490,6 +490,7 @@
     <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
+    <Content Include="Images\Backgrounds\bg_oss.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />

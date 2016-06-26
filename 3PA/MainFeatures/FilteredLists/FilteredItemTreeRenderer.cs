@@ -114,11 +114,11 @@ namespace _3PA.MainFeatures.FilteredLists {
                     var x = expandGlyphRectangle.X + (expandGlyphRectangle.Width / 2) - w / 2;
                     var y = expandGlyphRectangle.Y + (expandGlyphRectangle.Height / 2) - h / 2;
 
-                    using (var p = new SolidBrush(rowObj.IsExpanded ? ThemeManager.Current.AccentColor : ThemeManager.Current.ButtonHoverBack)) {
+                    using (var p = new SolidBrush(rowObj.IsExpanded ? ThemeManager.Current.AccentColor : ThemeManager.Current.ButtonDisabledBack)) {
                         graphic.FillRectangle(p, new Rectangle(x, y, w, h));
                     }
 
-                    using (var p = new Pen(ThemeManager.Current.ButtonHoverBorder)) {
+                    using (var p = new Pen(rowObj.IsExpanded ? ThemeManager.Current.ButtonNormalBorder : ThemeManager.Current.ButtonDisabledBorder)) {
                         graphic.DrawRectangle(p, new Rectangle(x, y, w, h));
                     }
                 }

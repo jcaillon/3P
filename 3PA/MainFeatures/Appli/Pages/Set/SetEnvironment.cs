@@ -85,6 +85,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(btDbSave, "Click to <b>save</b> your modifications");
             toolTip.SetToolTip(btDbCancel, "Click to <b>cancel</b> your modifications");
             toolTip.SetToolTip(btDbDeleteDownload, "Click here to <b>delete</b> the extracted database structure info");
+            toolTip.SetToolTip(btDbView, "Click here to <b>view</b> the content of the file holding the database structure info for 3P");
 
             textTool = "You can set a database connection that will occur for the current<br>environment, no matter which database definition is selected.<br><br>This field is used like this in 3P :<div class='ToolTipcodeSnippet'>CONNECT VALUE(my_info).</div><i>This is a different connect statement that for the .pf above</i><br><br>Below is an example of content to connect 2 databases :<div class='ToolTipcodeSnippet'>-db base1 -ld mylogicalName1 -H 127.0.0.1 -S 1024<br>-db C:\\wrk\\sport2000.db -1</div>";
             toolTip.SetToolTip(flExtraPf, textTool);

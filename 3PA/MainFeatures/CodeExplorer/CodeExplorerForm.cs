@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
                     FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
-                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedFore), 1),
+                    BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedBack.IsColorDark() ? ControlPaint.Light(ThemeManager.Current.MenuFocusedBack, 0.10f) : ControlPaint.Dark(ThemeManager.Current.MenuFocusedBack, 0.10f)), 1),
                     BoundsPadding = new Size(-2, 0),
                     CornerRounding = 6.0f
                 };

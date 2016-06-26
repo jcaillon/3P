@@ -211,12 +211,12 @@ namespace YamuiFramework.Themes {
                 backColor = ButtonDisabledBack;
             else if (isPressed)
                 backColor = ButtonPressedBack;
-            else if (isChecked)
-                backColor = ButtonCheckedBack;
             else if (isFocused)
                 backColor = ButtonFocusedBack;
             else if (isHovered)
                 backColor = ButtonHoverBack;
+            else if (isChecked)
+                backColor = ButtonCheckedBack;
             else
                 backColor = ButtonNormalBack;
             return backColor;
@@ -230,12 +230,12 @@ namespace YamuiFramework.Themes {
                 foreColor = ButtonDisabledFore;
             else if (isPressed)
                 foreColor = ButtonPressedFore;
-            else if (isChecked)
-                foreColor = ButtonCheckedFore;
             else if (isFocused)
                 foreColor = ButtonFocusedFore;
             else if (isHovered)
                 foreColor = ButtonHoverFore;
+            else if (isChecked)
+                foreColor = ButtonCheckedFore;
             else
                 foreColor = ButtonNormalFore;
             return foreColor;
@@ -247,12 +247,12 @@ namespace YamuiFramework.Themes {
                 borderColor = ButtonDisabledBorder;
             else if (isPressed)
                 borderColor = ButtonPressedBorder;
-            else if (isChecked)
-                borderColor = ButtonCheckedBorder;
             else if (isFocused)
                 borderColor = ButtonFocusedBorder;
             else if (isHovered)
                 borderColor = ButtonHoverBorder;
+            else if (isChecked)
+                borderColor = ButtonCheckedBorder;
             else
                 borderColor = ButtonNormalBorder;
             return borderColor;
