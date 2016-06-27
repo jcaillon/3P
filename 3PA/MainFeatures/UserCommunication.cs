@@ -169,11 +169,11 @@ namespace _3PA.MainFeatures {
                     clickHandler = Utils.OpenPathClickHandler;
                 }
                 if (waitResponse) {
-                    clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
+                    clickedButton = YamuiMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
                 } else {
                     if (_anchorForm.IsHandleCreated) {
                         _anchorForm.BeginInvoke((Action) delegate {
-                            clickedButton = YamuiFormMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
+                            clickedButton = YamuiMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
                         });
                     }
                 }

@@ -4,7 +4,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
-    partial class YamuiFormMessageBox {
+    partial class YamuiMessageBox {
         /// <summary>
         /// Required designer variable.
         /// </summary>
