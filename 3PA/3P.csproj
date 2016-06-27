@@ -494,7 +494,7 @@
     <Content Include="Images\Backgrounds\bg_oss.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
-    <Content Include="Images\DockableExplorer\CodeExplorer16x16.png" />
+    <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
     <Content Include="Images\DockableExplorer\Flag\LoadPersistent.png" />
@@ -538,7 +538,7 @@
     <Content Include="Images\FileExplorer\ExplorerDir1.png" />
     <Content Include="Images\FileExplorer\ExplorerDir2.png" />
     <Content Include="Images\FileExplorer\ExplorerDir3.png" />
-    <Content Include="Images\FileExplorer\FileExplorer16x16.png" />
+    <Content Include="Images\ToolBar\FileExplorer16x16.png" />
     <Content Include="Images\FileExplorer\FileExplorerLogo.png" />
     <Content Include="Images\FileExplorer\FolderType.png" />
     <Content Include="Images\FileExplorer\GetHelp.png" />
@@ -559,7 +559,6 @@
     <Content Include="Images\Html\getting-started-2.png" />
     <Content Include="Images\Html\getting-started-3.png" />
     <Content Include="Images\logo\icon\3p_icon.ico" />
-    <Content Include="Images\logo\logo16x16.png" />
     <Content Include="Images\logo\logo200x200.png" />
     <Content Include="Images\logo\logo20x20.png" />
     <Content Include="Images\logo\logo30x30.png" />
@@ -600,6 +599,8 @@
     <Content Include="Images\NotifAndMessages\MsgToolTip.png" />
     <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
     <Content Include="Images\NotifAndMessages\MsgWarning.png" />
+    <Content Include="Images\ToolBar\logo16x16.png" />
+    <Content Include="Images\ToolBar\ShowAllChar16x16.png" />
     <Content Include="Images\tooltips\Output.png" />
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />

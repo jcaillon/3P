@@ -43,7 +43,7 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void GetCurrentScrollPageAddOrder() {
-
+            RunParserTests();
         }
 
         public static void StartDebug() {
@@ -104,15 +104,17 @@ namespace _3PA.Tests {
 
         public static void RunParserTests() {
 
+            var inLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "in.p");
+            var outLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "out.p");
+
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            /*
+
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            var inputFile = @"C:\Temp\in.p";
-            Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
+            Parser tok = new Parser(File.ReadAllText(inLocation), inLocation, null, true);
 
             OutputVis vis = new OutputVis();
             tok.Accept(vis);
@@ -122,8 +124,8 @@ namespace _3PA.Tests {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Temp\out.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-            */
+            File.WriteAllText(outLocation, vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            return;
 
             // OUTPUT INFO ON EACH LINE
             /*
@@ -147,7 +149,7 @@ namespace _3PA.Tests {
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Temp\in.p"));
+            Lexer tok2 = new Lexer(File.ReadAllText(inLocation));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -155,7 +157,7 @@ namespace _3PA.Tests {
             //--------------
             watch2.Stop();
 
-            File.WriteAllText(@"C:\Temp\out.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(outLocation, vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
 
         }
 
@@ -317,15 +319,15 @@ namespace _3PA.Tests {
 
     internal class OutputVis : IParserVisitor {
         public void Visit(ParsedBlock pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.Branch);
         }
 
         public void Visit(ParsedLabel pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedFunctionCall pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
         }
 
         public void Visit(ParsedFoundTableUse pars) {
@@ -335,42 +337,42 @@ namespace _3PA.Tests {
         public StringBuilder Output = new StringBuilder();
 
         public void Visit(ParsedOnEvent pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
         }
 
         public void Visit(ParsedFunction pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
 
         public void Visit(ParsedProcedure pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedPreProc pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
         }
 
         public void Visit(ParsedDefine pars) {
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
         }
 
         public void Visit(ParsedTable pars) {
-            //Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
-            //foreach (var field in pars.Fields) {
-            //    Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
-            //}
-            //Output.AppendLine("");
+            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            foreach (var field in pars.Fields) {
+                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+            }
+            Output.AppendLine("");
         }
 
         public void Visit(ParsedRun pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
         }
     }
 
