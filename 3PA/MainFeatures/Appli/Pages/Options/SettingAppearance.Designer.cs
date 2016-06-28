@@ -29,7 +29,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private void InitializeComponent() {
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.tg_override = new YamuiFramework.Controls.YamuiButtonToggle();
             this.tg_colorOn = new YamuiFramework.Controls.YamuiButtonToggle();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -49,7 +48,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
-            this.scrollPanel.ContentPanel.Controls.Add(this.tg_override);
             this.scrollPanel.ContentPanel.Controls.Add(this.tg_colorOn);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel1);
             this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
@@ -79,18 +77,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.linkurl.TabIndex = 65;
             this.linkurl.TabStop = false;
             this.linkurl.Text = "How to customize the look of 3P?";
-            // 
-            // tg_override
-            // 
-            this.tg_override.BackGrndImage = null;
-            this.tg_override.Location = new System.Drawing.Point(25, 307);
-            this.tg_override.Name = "tg_override";
-            this.tg_override.SetImgSize = new System.Drawing.Size(0, 0);
-            this.tg_override.Size = new System.Drawing.Size(590, 16);
-            this.tg_override.TabIndex = 64;
-            this.tg_override.Text = "Let 3P override notepad++ themes";
-            this.tg_override.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.tg_override.ToggleSize = 40;
             // 
             // tg_colorOn
             // 
@@ -213,7 +199,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private HtmlLabel htmlLabel7;
         private HtmlLabel htmlLabel1;
         private YamuiButtonToggle tg_colorOn;
-        private YamuiButtonToggle tg_override;
         private HtmlLabel linkurl;
     }
 }

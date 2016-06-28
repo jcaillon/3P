@@ -18,8 +18,12 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
@@ -53,6 +57,11 @@ namespace _3PA {
         /// true if the current file is a progress file, false otherwise
         /// </summary>
         public static bool IsCurrentFileProgress { get; private set; }
+
+        /// <summary>
+        /// true if the previous file was a progress file, false otherwise
+        /// </summary>
+        public static bool IsPreviousFileProgress { get; private set; }
 
         /// <summary>
         /// Stores the current file path when switching document
@@ -138,7 +147,7 @@ namespace _3PA {
                 }
 
                 // check Npp version, 3P requires version 6.8 or higher
-                if (!string.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("6.7")) {
+                if (!String.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("6.7")) {
                     UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
                 }
 
@@ -183,13 +192,7 @@ namespace _3PA {
 
             OnKeyDown += KeyDownHandler;
             OnMouseMessage += MouseMessageHandler;
-            //OnNeedToSaveDefaultOptions += () => UserCommunication.Notify("save");
 
-            // publish this event every second
-            new ReccurentAction(() => {
-                if (OnNeedToSaveDefaultOptions != null)
-                    OnNeedToSaveDefaultOptions();
-            }, 1000);
 
             Keywords.Import();
             Snippets.Init();
@@ -199,6 +202,7 @@ namespace _3PA {
             AutoComplete.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
+            IsCurrentFileProgress = Abl.IsCurrentProgressFile(); // to correctly init isPreviousProgress
             OnDocumentSwitched(true);
 
             // Make sure to give the focus to scintilla on startup
@@ -220,9 +224,6 @@ namespace _3PA {
 
                 // export modified conf
                 FileTag.Export();
-
-                // set options back to client's default
-                ApplyPluginSpecificOptions(true);
 
                 // save config (should be done but just in case)
                 CodeExplorer.UpdateMenuItemChecked();
@@ -248,48 +249,109 @@ namespace _3PA {
 
         #endregion
 
-        #region Apply Npp options
+        #region Apply Scintilla options for plugin needs
 
         private static bool _indentWithTabs;
-        private static int _indentWidth = -1;
+        private static int _tabWidth = -1;
         private static Annotation _annotationMode;
         private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
+
+        private static bool _hasBeenInit;
+        private static bool _autoStopSet;
+        private static bool _warnedAboutFailStylers;
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
-        /// <param name="forceToDefault"></param>
-        public static void ApplyPluginSpecificOptions(bool forceToDefault) {
+        internal static void ApplyOptionsForScintilla() {
+            if (IsCurrentFileProgress)
+                ApplyPluginOptionsForScintilla();
+            else
+                ApplyDefaultOptionsForScintilla();
+        }
 
-            if (_indentWidth == -1) {
-                _indentWidth = Npp.IndentWidth;
+        internal static void ApplyPluginOptionsForScintilla() {
+            if (!_hasBeenInit || !IsPreviousFileProgress) {
+                // read default options
+                _tabWidth = Npp.TabWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
                 _whitespaceMode = Npp.ViewWhitespace;
-
+            }
+            
+            if (!_hasBeenInit) {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
                 Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
+                _hasBeenInit = true;
             }
 
-            if (!IsCurrentFileProgress || forceToDefault) {
-                Npp.AutoCStops("");
-                Npp.AnnotationVisible = _annotationMode;
-                Npp.UseTabs = _indentWithTabs;
-                Npp.TabWidth = _indentWidth;
-                Npp.ViewWhitespace = _whitespaceMode;
-            } else {
+            Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
+            Npp.UseTabs = false;
+            Npp.AnnotationVisible = Annotation.Indented;
+            if (Config.Instance.CodeShowSpaces)
+                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+
+            // apply style
+            var currentStyle = Style.Current;
+            Npp.SetWhiteSpaceColor(true, currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
+            Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
+
+            // we want the default auto-completion to not show
+            if (!_autoStopSet) {
                 // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
                 // TODO: find a better technique to hide the autocompletion!!! this slows npp down
                 Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-                Npp.AnnotationVisible = Annotation.Indented;
-                Npp.UseTabs = false;
-                Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
-                if (Config.Instance.CodeShowSpaces) {
-                    Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+                _autoStopSet = true;
+            }
+        }
+
+        internal static void ApplyDefaultOptionsForScintilla() {
+            // nothing has been done yet, no need to reset anything! same if we already were on a non progress file
+            if (!_hasBeenInit || !IsPreviousFileProgress)
+                return;
+
+            // apply default options
+            Npp.TabWidth = _tabWidth;
+            Npp.UseTabs = _indentWithTabs;
+            Npp.AnnotationVisible = _annotationMode;
+            if (Npp.ViewWhitespace != WhitespaceMode.Invisible)
+                Npp.ViewWhitespace = _whitespaceMode;
+
+            // apply default style...
+            try {
+                // read npp's stylers.xml file
+                var widgetStyle = XDocument.Load(Config.FileNppStylersXml).Descendants("WidgetStyle");
+                var xElements = widgetStyle as XElement[] ?? widgetStyle.ToArray();
+                var wsFore = GetColorInStylers(xElements, "White space symbol", "fgColor");
+                Npp.SetWhiteSpaceColor(true, Color.Transparent, wsFore);
+                Npp.SetIndentGuideColor(GetColorInStylers(xElements, "Indent guideline style", "bgColor"), GetColorInStylers(xElements, "Indent guideline style", "fgColor"));
+                Npp.SetSelectionColor(true, GetColorInStylers(xElements, "Selected text colour", "bgColor"), Color.Transparent);
+                Npp.CaretLineBackColor = GetColorInStylers(xElements, "Current line background colour", "bgColor");
+            } catch (Exception e) {
+                ErrorHandler.Log(e.ToString());
+                if (!_warnedAboutFailStylers) {
+                    _warnedAboutFailStylers = true;
+                    UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + Config.FileNppStylersXml.ToHtmlLink() + "</div>", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");
                 }
+            }
+            
+            // we wanted the default auto-completion to not show, but no more
+            if (_autoStopSet) {
+                Npp.AutoCStops("");
+                _autoStopSet = false;
+            }
+        }
+
+        private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {
+            try {
+                return ColorTranslator.FromHtml("#" + (string)widgetStyle.First(x => x.Attribute("name").Value.Equals(attributeName)).Attribute(attributeToGet));
+            } catch (Exception) {
+                return Color.Transparent;
             }
         }
 

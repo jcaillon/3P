@@ -25,6 +25,7 @@ using _3PA.MainFeatures;
 using _3PA.Properties;
 
 namespace _3PA.Lib {
+
     internal static class LibLoader {
 
         /// <summary>

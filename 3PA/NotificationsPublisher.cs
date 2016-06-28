@@ -72,9 +72,14 @@ namespace _3PA {
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
 
         /// <summary>
-        /// Set to true after the plugin has been fully loaded
+        /// Set to true after the plugin has been init
         /// </summary>
         public static bool PluginIsReady { get; private set; }
+
+        /// <summary>
+        /// Set to true after the plugin has been fully loaded
+        /// </summary>
+        public static bool PluginIsFullyLoaded { get; private set; }
 
         #endregion
 
@@ -129,6 +134,8 @@ namespace _3PA {
 
                             // set hooks on mouse/keyboard
                             SetHooks();
+
+                            PluginIsFullyLoaded = true;
                         }
                         return;
 
@@ -312,6 +319,5 @@ namespace _3PA {
         }
 
         #endregion
-
     }
 }

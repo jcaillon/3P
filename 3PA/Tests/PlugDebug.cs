@@ -25,6 +25,7 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
 using YamuiFramework.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -57,6 +58,17 @@ namespace _3PA.Tests {
 
 
         public static void GetCurrentScrollPageAddOrder() {
+            UserCommunication.Notify(Npp.IsMacroRecording.ToString());
+            Npp.RunCommand(NppMenuCmd.MacroStartRecording);
+            UserCommunication.Notify(Npp.IsMacroRecording.ToString());
+            var stylersXml = XDocument.Load(Config.FileNppStylersXml);
+            UserCommunication.Notify(stylersXml.Descendants("WidgetStyle").Count().ToString());
+            var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
+            UserCommunication.Notify(firstname);
+        }
+
+        public static void StartDebug() {
+            
             object s = "";
             if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
                 // Do something with the 's' variable
@@ -65,10 +77,6 @@ namespace _3PA.Tests {
 
             object a = new B();
             YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
-        }
-
-        public static void StartDebug() {
-            ReccurentAction.CleanAll();
             //Debug.Assert(false);
             //UserCommunication.Notify("debug");
         }

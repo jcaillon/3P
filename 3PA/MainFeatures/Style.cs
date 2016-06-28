@@ -107,7 +107,7 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var fileContent = File.Exists(Config.FileUdl) ? File.ReadAllText(Config.FileUdl, Encoding.Default) : @"<NotepadPlus />";
+            var fileContent = File.Exists(Config.FileNppUdlXml) ? File.ReadAllText(Config.FileNppUdlXml, Encoding.Default) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -127,10 +127,10 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
             try {
-                File.WriteAllText(Config.FileUdl, fileContent, Encoding.Default);
+                File.WriteAllText(Config.FileNppUdlXml, fileContent, Encoding.Default);
             } catch (Exception e) {
                 if (e is UnauthorizedAccessException)
-                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileUdl + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
+                    UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
                 else
                     ErrorHandler.ShowErrors(e, "Error while accessing userDefineLang.xml");
                 return false;
@@ -141,31 +141,6 @@ namespace _3PA.MainFeatures {
         #endregion
 
         #region set styles
-
-        private static bool _needReset;
-        private static Color _indentGuideColor;
-        private static Color _caretLineColor;
-
-        /// <summary>
-        /// Call this method to reset the styles to their default value when moving to a non progress file
-        /// We don't need to reset the actual syntax colors, but stuff like selection color, caret line color and so on...
-        /// we have to reset them. They actually are Npp settings!
-        /// </summary>
-        public static void ResetSyntaxStyles() {
-
-            if (!_needReset)
-                return;
-
-            if (Config.Instance.OverrideNppTheme) {
-                Npp.GetStyle((byte) SciMsg.STYLE_INDENTGUIDE).BackColor = _indentGuideColor;
-
-                // selection and caret line
-                if (Current.Selection.BackColor != Color.Transparent)
-                    Npp.SetSelectionColor(true, Color.LightGray, Color.Transparent);
-                if (Current.CaretLine.BackColor != Color.Transparent)
-                    Npp.CaretLineBackColor = _caretLineColor;
-            }
-        }
 
         /// <summary>
         /// Call this method to set the back/fore color and font type of each type used in 3P according to the 
@@ -202,29 +177,6 @@ namespace _3PA.MainFeatures {
             SetFontStyle((byte)UdlStyles.Delimiter5, curTheme.SimpleQuote);
             SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
             SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
-
-            if (Config.Instance.OverrideNppTheme) {
-
-                // save current values, to reset them when we switch on a non progress file
-                if (!_needReset) {
-                    _indentGuideColor = Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor;
-                    _caretLineColor = Npp.CaretLineBackColor;
-                    _needReset = true;
-                }
-
-                // whitespaces and indent guides
-                if (curTheme.WhiteSpace.ForeColor != Color.Transparent) {
-                    Npp.SetWhiteSpaceColor(true, Color.Transparent, curTheme.WhiteSpace.ForeColor);
-                    Npp.GetStyle((byte)SciMsg.STYLE_INDENTGUIDE).BackColor = curTheme.WhiteSpace.ForeColor;
-                }
-
-                // Selection and caret line
-                if (curTheme.Selection.BackColor != Color.Transparent)
-                    Npp.SetSelectionColor(true, curTheme.Selection.BackColor, Color.Transparent);
-                if (curTheme.CaretLine.BackColor != Color.Transparent)
-                    Npp.CaretLineBackColor = curTheme.CaretLine.BackColor;
-            }
-
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {

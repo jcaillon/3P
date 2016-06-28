@@ -448,7 +448,6 @@ namespace _3PA.MainFeatures {
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
             public int SyntaxHighlightThemeId = 1;
             public bool UseSyntaxHighlightTheme = true;
-            public bool OverrideNppTheme = true;
 
             // SHORTCUTS (id, spec)
             public Dictionary<string, string> ShortCuts = new Dictionary<string, string>();
@@ -602,9 +601,13 @@ namespace _3PA.MainFeatures {
         public static string FileCompilPath { get { return Path.Combine(Npp.GetConfigDir(), "_CompilationPath.conf"); } }
         public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
-        public static string FileUdl { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
+
+        // Npp files
+        public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
+        public static string FileNppConfigXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\config.xml")); } }
+        public static string FileNppStylersXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\stylers.xml")); } }
 
         // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }

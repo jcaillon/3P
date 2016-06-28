@@ -611,6 +611,10 @@ namespace _3PA {
             set { Sci.Send(SciMsg.SCI_SETWRAPVISUALFLAGSLOCATION, new IntPtr((int) value)); }
         }
 
+        public static IntPtr StartRecordMacro() {
+            return Sci.Send(SciMsg.SCI_STARTRECORD);
+        }
+
         #endregion
 
         #region folding and view
@@ -1855,7 +1859,15 @@ namespace _3PA {
         public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+        }
 
+        /// <summary>
+        /// sets the fore/background color of the IndentGuide, overriding the lexer's
+        /// </summary>
+        /// <param name="use"></param>
+        /// <param name="bg"></param>
+        /// <param name="fg"></param>
+        public static void SetIndentGuideColor(Color bg, Color fg) {
             // we also set the indent line color here
             new Style(Style.IndentGuide) {
                 BackColor = bg,

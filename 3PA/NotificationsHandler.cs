@@ -52,14 +52,7 @@ namespace _3PA {
         /// </summary>
         public static event Action OnNppWindowsMove;
 
-        /// <summary>
-        /// Published on click UP (when the mouse was not clicked in scintilla) or every xx seconds,
-        /// handle this event to 
-        /// </summary>
-        public static event Action OnNeedToSaveDefaultOptions;
-
         #endregion
-
 
         #region On mouse message
 
@@ -108,8 +101,6 @@ namespace _3PA {
                     if (MouseMonitor.Instance.Remove(WinApi.WindowsMessageMouse.WM_MOUSEMOVE)) {
                         if (OnNppWindowsMove != null)
                             OnNppWindowsMove();
-                        if (OnNeedToSaveDefaultOptions != null)
-                            OnNeedToSaveDefaultOptions();
                     }
                     break;
                 case WinApi.WindowsMessageMouse.WM_MOUSEMOVE:
@@ -309,7 +300,7 @@ namespace _3PA {
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
-                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext) {
+                if (!String.IsNullOrWhiteSpace(keyword) && isNormalContext) {
                     string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list
@@ -360,6 +351,7 @@ namespace _3PA {
         public static void OnDocumentSwitched(bool initiating = false) {
 
             // update current file info
+            IsPreviousFileProgress = IsCurrentFileProgress;
             IsCurrentFileProgress = Abl.IsCurrentProgressFile();
             CurrentFilePath = Npp.GetCurrentFilePath();
             CurrentFileObject = FilesInfo.GetFileInfo(CurrentFilePath);
@@ -376,8 +368,6 @@ namespace _3PA {
             if (IsCurrentFileProgress && Config.Instance.UseSyntaxHighlightTheme) {
                 // Syntax Style
                 Style.SetSyntaxStyles();
-            } else {
-                Style.ResetSyntaxStyles();
             }
 
             // set general styles (useful for the file explorer > current status)
@@ -390,7 +380,7 @@ namespace _3PA {
             ProEnvironment.Current.ReComputeProPath();
 
             // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyPluginSpecificOptions(false);
+            ApplyOptionsForScintilla();
 
             // refresh file explorer currently opened file
             FileExplorer.RedrawFileExplorerList();
@@ -472,7 +462,7 @@ namespace _3PA {
                         warningMessage.Append("<br><i>To prevent this, reduce the number of chararacters in the above blocks, deleting dead code and trimming spaces is a good place to start!</i>");
                         var curPath = CurrentFilePath;
                         UserCommunication.NotifyUnique("AppBuilderLimit", warningMessage.ToString(), MessageImg.MsgHighImportance, "File saved", "Appbuilder limitations", args => {
-                            Npp.Goto(curPath, int.Parse(args.Link));
+                            Npp.Goto(curPath, Int32.Parse(args.Link));
                             UserCommunication.CloseUniqueNotif("AppBuilderLimit");
                         }, 20);
                         CurrentFileObject.WarnedTooLong = true;

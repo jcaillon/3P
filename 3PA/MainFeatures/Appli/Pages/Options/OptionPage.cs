@@ -222,8 +222,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         }
 
         public override void OnShow() {
-            if (_btSave != null)
-                ActiveControl = _btSave;
+            foreach (Control control in scrollPanel.ContentPanel.Controls) {
+                control.Dispose();
+            }
+            GeneratePage();
+
             base.OnShow();
         }
 
@@ -336,8 +339,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
-
-
         /// <summary>
         /// For certain config properties, we need to refresh stuff to see a difference
         /// </summary>
@@ -347,7 +348,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             FileExplorer.FileExplorer.ApplyColorSettings();
             AutoComplete.ForceClose();
             InfoToolTip.InfoToolTip.ForceClose();
-            Plug.ApplyPluginSpecificOptions(false);
+            Plug.ApplyOptionsForScintilla();
 
             Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
         }

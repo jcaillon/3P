@@ -338,7 +338,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="text"></param>
         public static void NewDocument(string text) {
-            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, NppMenuCmd.FileNew);
+            RunCommand(NppMenuCmd.FileNew);
             GrabFocus();
         }
 
@@ -499,6 +499,25 @@ namespace _3PA {
                 Marshal.FreeHGlobal(text0);
             }
             return retval;
+        }
+
+        /// <summary>
+        /// Returns a bool informing if a macro is being recorded or not
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsMacroRecording {
+            get {
+                return (int) WinApi.SendMessage(HandleNpp, NppMsg.WM_GETCURRENTMACROSTATUS, 0, 0) == 1;
+            }
+        }
+            
+
+        /// <summary>
+        /// Allows to execute one of Npp's command
+        /// </summary>
+        /// <param name="cmd"></param>
+        public static void RunCommand(NppMenuCmd cmd) {
+            WinApi.SendMessage(HandleNpp, NppMsg.NPPM_MENUCOMMAND, 0, cmd);
         }
     }
 }
