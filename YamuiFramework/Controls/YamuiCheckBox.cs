@@ -107,7 +107,7 @@ namespace YamuiFramework.Controls {
                 if (CheckState != CheckState.Indeterminate) {
                     var checkRect = ClientRectangle;
                     checkRect.Width = 15;
-                    checkRect.Offset(0, -3);
+                    checkRect.Offset(0, Height / 2 - 11);
                     TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
                     using (SolidBrush b = new SolidBrush(foreColor)) {

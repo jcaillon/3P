@@ -29,7 +29,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
-    public sealed partial class YamuiFormMessageBox : YamuiForm {
+    public sealed partial class YamuiMessageBox : YamuiForm {
 
         #region Fields
 
@@ -66,7 +66,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Constructor, you should the method ShwDlg instead
         /// </summary>
-        private YamuiFormMessageBox(string htmlContent, List<string> buttonsList, int maxHeight, int maxWidth, int minWidth = 300) {
+        private YamuiMessageBox(string htmlContent, List<string> buttonsList, int maxHeight, int maxWidth, int minWidth = 300) {
             InitializeComponent();
 
             // register to the panel onclicked event and propagate it as a public field of this class
@@ -162,7 +162,7 @@ namespace YamuiFramework.Forms {
         public static int ShwDlg(Screen screen, IntPtr ownerHandle, string title, string text, List<string> buttonsList, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
 
             // new message box
-            var msgbox = new YamuiFormMessageBox(text, buttonsList, screen.WorkingArea.Height*8/10, screen.WorkingArea.Width*8/10) {
+            var msgbox = new YamuiMessageBox(text, buttonsList, screen.WorkingArea.Height*8/10, screen.WorkingArea.Width*8/10) {
                 ShowInTaskbar = !waitResponse, 
                 TopMost = true,
                 Text = title

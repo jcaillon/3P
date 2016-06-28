@@ -18,20 +18,20 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.Win32;
+using System.Windows.Forms;
+using YamuiFramework.Forms;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
 
@@ -42,8 +42,29 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
+        public class B {
+            public enum AGender { Female, Male };
+
+            [YamuiInputDialogItemAttribute(Hidden = true)]
+            public bool unshownSetting = true;
+
+            [YamuiInputDialogItemAttribute("Full name", Order = 0)]
+            public string Name { get; set; }
+            public int Age = 25;
+            public bool Married { get; set; }
+            public AGender Gender { get; set; }
+        }
+
+
         public static void GetCurrentScrollPageAddOrder() {
-            RunParserTests();
+            object s = "";
+            if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
+                // Do something with the 's' variable
+                UserCommunication.Notify((string)s);
+            }
+
+            object a = new B();
+            YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
         }
 
         public static void StartDebug() {
@@ -384,7 +405,7 @@ namespace _3PA.Tests {
             Output.AppendLine("C" + (tok.IsSingleLine ? "S" : "M") + " " + tok.Value);
         }
 
-        public void Visit(TokenEol tok) {}
+        public void Visit(TokenEol tok) { }
 
         public void Visit(TokenEos tok) {
             Output.AppendLine("EOS " + tok.Value);
@@ -410,15 +431,15 @@ namespace _3PA.Tests {
             Output.AppendLine("S  " + tok.Value);
         }
 
-        public void Visit(TokenWhiteSpace tok) {}
+        public void Visit(TokenWhiteSpace tok) { }
 
         public void Visit(TokenWord tok) {
             Output.AppendLine("W  " + tok.Value);
         }
 
-        public void Visit(TokenEof tok) {}
+        public void Visit(TokenEof tok) { }
 
-        public void Visit(TokenUnknown tok) {}
+        public void Visit(TokenUnknown tok) { }
 
         public void Visit(TokenPreProcStatement tok) {
             //Output.AppendLine(tok.Value);
@@ -482,58 +503,59 @@ namespace _3PA.Tests {
                         if (File.Exists(@"D:\temp\lgrfeng\" + m.Groups[1].Value))
                             output.AppendLine(keyword + " " + items[1] + "\t" + ExtractFromHtml(m.Groups[1].Value));
                     }
-                    *//*
-                }
-            }
+                    */
+    /*
+}
+}
 
-            File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
-            File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
-        }
+File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
+File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
+}
 
 
-        private static string ExtractFromHtml(string htmlName) {
-            string paragraph = "";
-            var synthax = new StringBuilder();
-            int status = 0;
-            bool first = true;
-            foreach (var lines in File.ReadAllLines(@"D:\temp\lgrfeng\" + htmlName, Encoding.Default)) {
-                var line = lines.Trim();
-                if (status == 0) {
-                    if (line.StartsWith("<div class=\"paragraph\">")) {
-                        paragraph = ClearTags(line);
-                        status++;
-                    }
-                } else if (status == 1) {
-                    if (line.StartsWith("<div class=\"paramete"))
-                        status = -1;
+private static string ExtractFromHtml(string htmlName) {
+string paragraph = "";
+var synthax = new StringBuilder();
+int status = 0;
+bool first = true;
+foreach (var lines in File.ReadAllLines(@"D:\temp\lgrfeng\" + htmlName, Encoding.Default)) {
+var line = lines.Trim();
+if (status == 0) {
+  if (line.StartsWith("<div class=\"paragraph\">")) {
+      paragraph = ClearTags(line);
+      status++;
+  }
+} else if (status == 1) {
+  if (line.StartsWith("<div class=\"paramete"))
+      status = -1;
 
-                    if (line.StartsWith("<table class=\"table_")) {
-                        status++;
-                        first = true;
-                    }
-                } else if (status == 2) {
-                    if (line.StartsWith("</table>")) {
-                        status = 1;
-                        synthax.Append("\t");
-                    }
+  if (line.StartsWith("<table class=\"table_")) {
+      status++;
+      first = true;
+  }
+} else if (status == 2) {
+  if (line.StartsWith("</table>")) {
+      status = 1;
+      synthax.Append("\t");
+  }
 
-                    if (line.StartsWith("<pre class=\"cell_003acode\">")) {
-                        if (!first) synthax.Append("<br>");
-                        if (first) first = false;
-                        synthax.Append(ClearTags(line));
+  if (line.StartsWith("<pre class=\"cell_003acode\">")) {
+      if (!first) synthax.Append("<br>");
+      if (first) first = false;
+      synthax.Append(ClearTags(line));
 
-                    }
-                }
-            }
-            return paragraph + "\t" + synthax;
-        }
+  }
+}
+}
+return paragraph + "\t" + synthax;
+}
 
-        private static string ClearTags(string input) {
-            return Regex.Replace(input.Replace(@"<br />", "~n"), "<.*?>", string.Empty).Replace("~n", "<br>").Replace("\t", " ");
-        }
+private static string ClearTags(string input) {
+return Regex.Replace(input.Replace(@"<br />", "~n"), "<.*?>", string.Empty).Replace("~n", "<br>").Replace("\t", " ");
+}
 
-    }
-    */
+}
+*/
     #endregion
 
 }
