@@ -20,6 +20,7 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -35,7 +36,7 @@ namespace _3PA {
 
     /// <summary>
     /// The entry points for this plugin are the following :<br></br>
-    /// - OnCommandMenuInit (through UnmanagedExports)<br></br>
+    /// - Main (through UnmanagedExports)<br></br>
     /// - OnNppNotification (through UnmanagedExports)<br></br>
     /// - OnWndProcMessage<br></br>
     /// - OnMouseMessage<br></br>
@@ -68,20 +69,14 @@ namespace _3PA {
         #region Start
 
         /// <summary>
-        /// Called on notepad++ setinfo
+        /// Called by notepad++ when the plugin is loaded
         /// </summary>
-        internal static void OnCommandMenuInit() {
-            var cmdIndex = 0;
-            AppliMenu.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
-            CodeExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
-
+        internal static void Main() {
             // subscribe to notorious events
+            OnSetFuncItems += SetPlugFuncItems;
             OnNppShutDown += PlugShutDown;
-            OnNppReady += PlugStartup;
+            OnNppReady += PlugInit;
+            OnPlugReady += PlugStartUp;
 
             // This allows to correctly feed the dll with its dependencies
             AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
@@ -93,7 +88,20 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// display images in the npp toolbar
+        /// Called when the plugin menu of the plugin needs to be filled
+        /// </summary>
+        internal static void SetPlugFuncItems() {
+            var cmdIndex = 0;
+            AppliMenu.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
+            CodeExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
+        }
+
+        /// <summary>
+        /// Called when the plugin can set new shorcuts to the toolbar in notepad++
         /// </summary>
         internal static void InitToolbarImages() {
             Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.DockableCommandIndex);
@@ -104,7 +112,7 @@ namespace _3PA {
         /// <summary>
         /// Called on npp ready
         /// </summary>
-        internal static bool PlugStartup() {
+        internal static bool PlugInit() {
             try {
                 // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
@@ -141,8 +149,6 @@ namespace _3PA {
                 // Try to update the configuration from the distant shared folder
                 ShareExportConf.StartCheckingForUpdates();
 
-                SetHooks();
-
                 // Start pinging
                 // ReSharper disable once ObjectCreationAsStatement
                 new ReccurentAction(User.Ping, 1000*60*120);
@@ -161,9 +167,6 @@ namespace _3PA {
                     FileExplorer.Toggle();
                 }
 
-                // set the following operations
-                OnPlugReady += AfterPlugStartUp;
-
                 return true;
 
             } catch (Exception e) {
@@ -172,11 +175,21 @@ namespace _3PA {
             return false;
         }
 
-        internal static void AfterPlugStartUp() {
+        internal static void PlugStartUp() {
 
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+
+            OnKeyDown += KeyDownHandler;
+            OnMouseMessage += MouseMessageHandler;
+            //OnNeedToSaveDefaultOptions += () => UserCommunication.Notify("save");
+
+            // publish this event every second
+            new ReccurentAction(() => {
+                if (OnNeedToSaveDefaultOptions != null)
+                    OnNeedToSaveDefaultOptions();
+            }, 1000);
 
             Keywords.Import();
             Snippets.Init();
@@ -201,11 +214,12 @@ namespace _3PA {
         /// </summary>
         internal static void PlugShutDown() {
             try {
+                // clean up timers
+                ReccurentAction.CleanAll();
+                DelayedAction.CleanAll();
+
                 // export modified conf
                 FileTag.Export();
-
-                // uninstall hooks
-                UninstallHooks();
 
                 // set options back to client's default
                 ApplyPluginSpecificOptions(true);
@@ -228,66 +242,8 @@ namespace _3PA {
                 AppliMenu.ForceCloseMenu();
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "CleanUp");
+                ErrorHandler.ShowErrors(e, "Stop");
             }
-        }
-
-        #endregion
-
-        #region Hooks and WndProc override
-
-        /// <summary>
-        /// Bascially, this method allows us to hook onto:
-        /// - Keyboard (on key down only) messages  -> OnKeyDown
-        /// - Mouse messages                        -> OnMouseMessage
-        /// It either install the hooks (if they are not installed yet) or just refresh the keyboard keys / mouse messages
-        /// to watch, so it can be called several times safely
-        /// </summary>
-        public static void SetHooks() {
-            
-            // Install a WM_KEYDOWN hook
-            KeyboardMonitor.Instance.Clear();
-            KeyboardMonitor.Instance.Add(
-                Keys.Up, 
-                Keys.Down, 
-                Keys.Left, 
-                Keys.Right, 
-                Keys.Tab, 
-                Keys.Return, 
-                Keys.Escape, 
-                Keys.Back, 
-                Keys.PageDown, 
-                Keys.PageUp, 
-                Keys.Next, 
-                Keys.Prior);
-            // we also add the key that are used as shortcut for 3P functions
-            AppliMenu.Instance = null;
-            if (AppliMenu.Instance != null) {
-                KeyboardMonitor.Instance.Add(AppliMenu.Instance.GetMenuKeysList.ToArray());
-            }
-            if (!KeyboardMonitor.Instance.IsInstalled) {
-                KeyboardMonitor.Instance.KeyDown += OnKeyDown;
-                KeyboardMonitor.Instance.Install();
-            }
-
-            // Install a mouse hook
-            MouseMonitor.Instance.Clear();
-            MouseMonitor.Instance.Add(
-                WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN,
-                WinApi.WindowsMessageMouse.WM_NCLBUTTONUP,
-                WinApi.WindowsMessageMouse.WM_LBUTTONUP,
-                WinApi.WindowsMessageMouse.WM_MBUTTONDOWN, 
-                WinApi.WindowsMessageMouse.WM_RBUTTONUP);
-
-            if (!MouseMonitor.Instance.IsInstalled) {
-                MouseMonitor.Instance.GetMouseMessage += OnMouseMessage;
-                MouseMonitor.Instance.Install();
-            }
-        }
-
-        private static void UninstallHooks() {
-            KeyboardMonitor.Instance.Uninstall();
-            MouseMonitor.Instance.Uninstall();
         }
 
         #endregion

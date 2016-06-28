@@ -110,7 +110,6 @@ namespace _3PA.Interop {
 
     #endregion
 
-
     #region Enum HookType
 
     // Hook Types
@@ -195,6 +194,12 @@ namespace _3PA.Interop {
 
         // Uninstall the hook
         public void Uninstall() {
+            // delete all subscribers
+            /*
+            foreach (Delegate d in HookInvoked.GetInvocationList()) {
+                HookInvoked -= (HookEventHandler)d;
+            }
+            */
             WinApi.UnhookWindowsHookEx(InternalHook);
             InternalHook = IntPtr.Zero;
         }

@@ -24,7 +24,6 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -153,13 +152,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             button.BackColor = ThemeManager.Current.AccentColor;
         }
 
-        #endregion
-
-        #region private methods
-
-        private void OnNewShortcutPressed(Keys key, KeyModifiers modifiers, ref bool handled) {
+        private bool OnNewShortcutPressed(Keys key, KeyModifiers modifiers) {
             bool stopListening = true;
-            var button = (YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
+            var button = (YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
 
             // the user presses escape to cancel the current shortcut modification
             if (key == Keys.Escape) {
@@ -170,7 +165,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
                     UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
-                    return;
+                    return true;
                 }
 
                 // change the shortcut in the settings
@@ -192,7 +187,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 KeyboardMonitor.Instance.KeyDownByPass -= OnNewShortcutPressed;
                 BlinkButton(button, ThemeManager.Current.ThemeAccentColor);
             }
+
+            return true;
         }
+
+        #endregion
+
+        #region private methods
 
         /// <summary>
         /// Makes the given button blink

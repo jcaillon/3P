@@ -18,6 +18,8 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Timers;
 
@@ -28,34 +30,32 @@ namespace YamuiFramework.Helper {
     /// </summary>
     public class DelayedAction : IDisposable {
 
+        #region private fields
+
         private Timer _timer;
 
         private Action _toDo;
+
+        private static List<DelayedAction> _savedDelayedActions = new List<DelayedAction>(); 
+
+        #endregion
+
+        #region Life and death
 
         /// <summary>
         /// Use this class to do an action after a given delay
         /// </summary>
         public DelayedAction(int msDelay, Action toDo) {
             _toDo = toDo;
-            _timer = new Timer {
-                AutoReset = false,
-                Interval = msDelay
-            };
+            _timer = new Timer {AutoReset = false, Interval = msDelay};
             _timer.Elapsed += TimerOnElapsed;
             _timer.Start();
-        }
-
-        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
-            Task.Factory.StartNew(() => {
-                _toDo();
-            });
-            CleanUp();
         }
 
         /// <summary>
         /// Stop the recurrent action
         /// </summary>
-        public void CleanUp() {
+        public void Stop() {
             try {
                 if (_timer != null) {
                     _timer.Stop();
@@ -63,11 +63,38 @@ namespace YamuiFramework.Helper {
                 }
             } catch (Exception) {
                 // clean up proc
+            } finally {
+                _savedDelayedActions.Remove(this);
             }
         }
 
         public void Dispose() {
-            CleanUp();
+            Stop();
         }
+
+        #endregion
+
+        #region public
+
+        /// <summary>
+        /// Clean all delayed actions started
+        /// </summary>
+        public static void CleanAll() {
+            foreach (var action in _savedDelayedActions.ToList()) {
+                action.Stop();
+            }
+        }
+
+        #endregion
+
+        #region private
+
+        private void TimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
+            Task.Factory.StartNew(() => { _toDo(); });
+            Stop();
+        }
+
+        #endregion
+
     }
 }

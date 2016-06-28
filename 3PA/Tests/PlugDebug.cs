@@ -68,8 +68,9 @@ namespace _3PA.Tests {
         }
 
         public static void StartDebug() {
-            Debug.Assert(false);
-            UserCommunication.Notify("debug");
+            ReccurentAction.CleanAll();
+            //Debug.Assert(false);
+            //UserCommunication.Notify("debug");
         }
 
         public static void Test() {

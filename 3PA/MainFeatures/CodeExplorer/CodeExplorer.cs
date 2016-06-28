@@ -97,7 +97,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 if (FakeForm == null) {
                     Init();
                     // first time we show it, refresh the list
-                    if (Plug.PluginIsFullyLoaded)
+                    if (Plug.PluginIsReady)
                         Form.RefreshParserAndCodeExplorer();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);

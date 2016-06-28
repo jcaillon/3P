@@ -46,8 +46,13 @@ namespace _3PA.Lib {
                     // replace the library if outdated or if it doesn't exist
                     if (string.IsNullOrEmpty(pathToLib) || !File.Exists(pathToLib) || requestedAssembly.Version.ToString().IsHigherVersionThan(GetAssemblyVersionFromPath(pathToLib))) {
                         var lib = (byte[])Resources.ResourceManager.GetObject(requestedAssembly.Name);
-                        if (lib != null && Npp.NumberOfNppStarted <= 1)
-                            File.WriteAllBytes(pathToLib, lib);
+                        if (lib != null) {
+                            if (Npp.NumberOfNppStarted <= 1)
+                                File.WriteAllBytes(pathToLib, lib);
+                        } else {
+                            // the library doesn't exist in 3P!
+                            return null;
+                        }
                     }
 
                     return Assembly.LoadFrom(pathToLib);

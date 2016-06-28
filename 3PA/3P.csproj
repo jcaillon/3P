@@ -202,6 +202,7 @@
     </Compile>
     <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
+    <Compile Include="NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
     <Compile Include="ThemeManager.cs" />
     <Content Include="Html\Pages\disclaimer.html" />

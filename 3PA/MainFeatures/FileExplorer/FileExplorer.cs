@@ -190,7 +190,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 if (FakeForm == null) {
                     Init();
                     // if just shown, refresh the list
-                    if (Plug.PluginIsFullyLoaded)
+                    if (Plug.PluginIsReady)
                         RebuildFileList();
                 } else {
                     WinApi.SendMessage(Npp.HandleNpp, !FakeForm.Visible ? NppMsg.NPPM_DMMSHOW : NppMsg.NPPM_DMMHIDE, 0, FakeForm.Handle);

@@ -74,7 +74,7 @@ namespace _3PA {
 
                 } catch (Exception e) {
                     // either display the error immediatly or when the plugin is fully loaded...
-                    if (Plug.PluginIsFullyLoaded)
+                    if (Plug.PluginIsReady)
                         ErrorHandler.ShowErrors(e, "Loading a theme");
                     else {
                         Plug.OnPlugReady += () => {

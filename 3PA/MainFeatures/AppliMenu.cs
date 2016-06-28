@@ -101,7 +101,7 @@ namespace _3PA.MainFeatures {
         /// Show the appli main menu at the cursor location
         /// </summary>
         public static void ShowMainMenuAtCursor() {
-            if (!Plug.PluginIsFullyLoaded) {
+            if (!Plug.PluginIsReady) {
                 return;
             }
             ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance._mainMenuList : Instance._mainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
@@ -187,6 +187,10 @@ namespace _3PA.MainFeatures {
 
             var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
+            var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
+                Generic = true
+            };
+            goToPreviousJump.SubText = "Ctrl + Middle click  /  " + goToPreviousJump.SubText;
 
             _mainMenuList = new List<MenuItem> {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") {
@@ -216,9 +220,7 @@ namespace _3PA.MainFeatures {
                     Generic = true
                 },
                 goToDefItem,
-                new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
-                    Generic = true
-                },
+                goToPreviousJump,
 
                 new MenuItem(true), // --------------------------
 

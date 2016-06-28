@@ -40,14 +40,7 @@ namespace _3PA {
 
     internal static partial class Plug {
 
-        #region Static events
-
-        // NOTE : be aware that if you subscribe to one of those events, a reference to the subscribing object is held by the publisher (this class). That means that you have to be very careful about explicitly unsubscribing from static events as they will keep the subscriber alive forever, i.e., you may end up with the managed equivalent of a memory leak.
-
-        /// <summary>
-        /// Published when Npp is shutting down, do your clean up actions
-        /// </summary>
-        public static event Action OnNppShutDown;
+        #region events
 
         /// <summary>
         /// Subscribe to this event, published when the current document in changed (on document open or tab switched)
@@ -60,188 +53,30 @@ namespace _3PA {
         public static event Action OnNppWindowsMove;
 
         /// <summary>
-        /// Event published when notepad++ is ready and the plugin can do its init, you must return true if the init went ok, false otherwise
+        /// Published on click UP (when the mouse was not clicked in scintilla) or every xx seconds,
+        /// handle this event to 
         /// </summary>
-        public static event Func<bool> OnNppReady;
-
-        /// <summary>
-        /// Envent published when the plugin is ready
-        /// </summary>
-        public static event Action OnPlugReady;
+        public static event Action OnNeedToSaveDefaultOptions;
 
         #endregion
 
-        #region Members
-
-        /// <summary>
-        /// this is a delegate to defined actions that must be taken after updating the ui
-        /// </summary>
-        public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
-
-        /// <summary>
-        /// Set to true after the plugin has been fully loaded
-        /// </summary>
-        public static bool PluginIsFullyLoaded { get; private set; }
-
-        #endregion
-
-        #region Npp notifications
-
-        /// <summary>
-        /// handles the notifications send by npp and scintilla to the plugin
-        /// </summary>
-        public static void OnNppNotification(SCNotification nc) {
-            try {
-                uint code = nc.nmhdr.code;
-
-                #region Basic notifications
-
-                switch (code) {
-                    case (uint) NppNotif.NPPN_TBMODIFICATION:
-                        UnmanagedExports.FuncItems.RefreshItems();
-                        InitToolbarImages();
-                        return;
-
-                    case (uint) NppNotif.NPPN_READY:
-                        // notify plugins that all the procedures of launchment of notepad++ are done
-                        // call OnNppReady then OnPlugReady if it all went ok
-                        PluginIsFullyLoaded = OnNppReady == null || OnNppReady();
-                        if (PluginIsFullyLoaded && OnPlugReady != null)
-                            OnPlugReady();
-                        return;
-
-                    case (uint) NppNotif.NPPN_SHUTDOWN:
-                        if (OnNppShutDown != null)
-                            OnNppShutDown();
-                        return;
-                }
-
-                #endregion
-
-                // Only do stuff when the dll is fully loaded
-                if (!PluginIsFullyLoaded) return;
-
-                // the user changed the current document
-                switch (code) {
-                    case (uint) NppNotif.NPPN_FILESAVED:
-                    case (uint) NppNotif.NPPN_BUFFERACTIVATED:
-                        OnDocumentSwitched();
-                        return;
-                }
-
-                // only do extra stuff if we are in a progress file
-                if (!IsCurrentFileProgress) return;
-
-                #region extra
-
-                switch (code) {
-                    case (uint) SciNotif.SCN_CHARADDED:
-                        // called each time the user add a char in the current scintilla
-                        OnCharTyped((char) nc.ch);
-                        return;
-
-                    case (uint) SciNotif.SCN_UPDATEUI:
-                        // we need to set the indentation when we received this notification, not before or it's overwritten
-                        while (ActionsAfterUpdateUi.Any()) {
-                            ActionsAfterUpdateUi.Dequeue()();
-                        }
-
-                        if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
-                            nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
-                            // user scrolled
-                            OnPageScrolled();
-                        } else if (nc.updated == (int) SciMsg.SC_UPDATE_SELECTION) {
-                            // the user changed its selection
-                            OnUpdateSelection();
-                        }
-                        return;
-
-                    case (uint) SciNotif.SCN_MODIFIED:
-                        // observe modification to lines
-                        Npp.UpdateLinesInfo(nc);
-
-                        // if the text has changed, parse
-                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 ||
-                            (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
-                            AutoComplete.ParseCurrentDocument();
-                        }
-
-                        // did the user supress 1 char?
-                        if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 && nc.length == 1) {
-                            AutoComplete.UpdateAutocompletion();
-                        }
-                        return;
-
-                    case (uint) SciNotif.SCN_STYLENEEDED:
-                        // if we use the contained lexer, we will receive this notification and we will have to style the text
-                        //Style.Colorize(Npp.GetSylingNeededStartPos(), nc.position);
-                        return;
-
-                    case (uint) SciNotif.SCN_MARGINCLICK:
-                        // called each time the user click on a margin
-                        // click on the error margin
-                        if (nc.margin == FilesInfo.ErrorMarginNumber) {
-                            // if it's an error symbol that has been clicked, the error on the line will be cleared
-                            if (!FilesInfo.ClearLineErrors(Npp.LineFromPosition(nc.position))) {
-                                // if nothing has been cleared, we go to the next error position
-                                FilesInfo.GoToNextError(Npp.LineFromPosition(nc.position));
-                            }
-                        }
-                        return;
-
-                    case (uint) NppNotif.NPPN_FILEBEFOREOPEN:
-                        // fire when a file is opened
-
-                        return;
-
-                    case (uint) NppNotif.NPPN_SHORTCUTREMAPPED:
-                        // notify plugins that plugin command shortcut is remapped
-                        //NppMenu.ShortcutsUpdated((int) nc.nmhdr.idFrom, (ShortcutKey) Marshal.PtrToStructure(nc.nmhdr.hwndFrom, typeof (ShortcutKey)));
-                        return;
-
-                    case (uint) SciNotif.SCN_MODIFYATTEMPTRO:
-                        // Code a checkout when trying to modify a read-only file
-
-                        return;
-
-                    case (uint) SciNotif.SCN_DWELLSTART:
-                        // when the user hover at a fixed position for too long
-                        OnDwellStart();
-                        return;
-
-                    case (uint) SciNotif.SCN_DWELLEND:
-                        // when he moves his cursor
-                        OnDwellEnd();
-                        return;
-
-                    case (uint) NppNotif.NPPN_FILEBEFORESAVE:
-                        // on file saved
-                        OnFileSaved();
-                        return;
-                }
-
-                #endregion
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in beNotified : code = " + nc.nmhdr.code);
-            }
-        }
-
-        #endregion
 
         #region On mouse message
 
-        private static void OnMouseMessage(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct, out bool handled) {
-            handled = false;
+        private static bool MouseMessageHandler(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct) {
+
             switch (message) {
-                // middle click
+                // middle click : go to definition
                 case WinApi.WindowsMessageMouse.WM_MBUTTONDOWN:
                     Rectangle scintillaRectangle = Rectangle.Empty;
                     WinApi.GetWindowRect(Npp.HandleScintilla, ref scintillaRectangle);
                     if (scintillaRectangle.Contains(Cursor.Position)) {
-                        ProCodeUtils.GoToDefinition(true);
-                        handled = true;
-                        return;
+                        if (KeyboardMonitor.GetModifiers.IsCtrl) {
+                            Npp.GoBackFromDefinition();
+                        } else {
+                            ProCodeUtils.GoToDefinition(true);
+                        }
+                        return true;
                     }
                     break;
                 // (CTRL + ) Right click : show main menu
@@ -254,8 +89,7 @@ namespace _3PA {
                             (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
                             (!AutoComplete.IsVisible ||  !AutoComplete.IsMouseIn())) {
                             AppliMenu.ShowMainMenuAtCursor();
-                            handled = true;
-                            return;
+                            return true;
                         }
                     }
                     break;
@@ -271,16 +105,20 @@ namespace _3PA {
                     break;
                 case WinApi.WindowsMessageMouse.WM_LBUTTONUP:
                 case WinApi.WindowsMessageMouse.WM_NCLBUTTONUP:
-                    if (MouseMonitor.Instance.Remove(WinApi.WindowsMessageMouse.WM_MOUSEMOVE) && OnNppWindowsMove != null) {
-                        OnNppWindowsMove();
+                    if (MouseMonitor.Instance.Remove(WinApi.WindowsMessageMouse.WM_MOUSEMOVE)) {
+                        if (OnNppWindowsMove != null)
+                            OnNppWindowsMove();
+                        if (OnNeedToSaveDefaultOptions != null)
+                            OnNeedToSaveDefaultOptions();
                     }
                     break;
                 case WinApi.WindowsMessageMouse.WM_MOUSEMOVE:
-                    if (OnNppWindowsMove != null) {
+                    if (OnNppWindowsMove != null)
                         OnNppWindowsMove();
-                    }
                     break;
             }
+
+            return false;
             
         }
 
@@ -292,9 +130,9 @@ namespace _3PA {
         /// Called when the user presses a key
         /// </summary>
         // ReSharper disable once RedundantAssignment
-        private static void OnKeyDown(Keys key, KeyModifiers keyModifiers, ref bool handled) {
+        private static bool KeyDownHandler(Keys key, KeyModifiers keyModifiers) {
             // if set to true, the keyinput is completly intercepted, otherwise npp sill does its stuff
-            handled = false;
+            bool handled = false;
 
             MenuItem menuItem = null;
             try {
@@ -319,13 +157,12 @@ namespace _3PA {
 
                 // check if the user triggered a 3P function defined in the AppliMenu
                 menuItem = TriggeredMenuItem(AppliMenu.Instance.ShortcutableItemList, isSpamming, key, keyModifiers, ref handled);
-                if (handled) {
-                    return;
-                }
+                if (handled)
+                    return true;
 
                 // The following is specific to 3P so don't go further if we are not on a valid file
                 if (!IsCurrentFileProgress) {
-                    return;
+                    return false;
                 }
 
                 // Close interfacePopups
@@ -381,6 +218,8 @@ namespace _3PA {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Occured in : " + (menuItem == null ? (new ShortcutKey(keyModifiers.IsCtrl, keyModifiers.IsAlt, keyModifiers.IsShift, key)).ToString() : menuItem.ItemId));
             }
+
+            return handled;
         }
 
         /// <summary>

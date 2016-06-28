@@ -19,7 +19,9 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -3751,10 +3753,29 @@ namespace _3PA {
         /// </summary>
         public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
             _scintillaHandle = scintillaHandle;
+
+            /*
+            // Get the native Scintilla direct function -- the only function the library exports
+            File.AppendAllText(Path.Combine(Npp.GetNppDirectory(), "derp.txt"), GetModuleHandle("scintilla.dll").ToString());
+            _directMessagePointer = GetProcAddress(GetModuleHandle("scintilla.dll"), "Scintilla_DirectFunction");
+            if (_directMessagePointer == IntPtr.Zero) {
+                var message = "The Scintilla module has no export for the 'Scintilla_DirectFunction' procedure.";
+                throw new Win32Exception(message, new Win32Exception()); // Calls GetLastError
+            }
+
+            // Create a managed callback
+            _directFunction = (WinApi.Scintilla_DirectFunction)Marshal.GetDelegateForFunctionPointer(
+                _directMessagePointer,
+                typeof(WinApi.Scintilla_DirectFunction));
+
+            _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            */
+            
             var directFunctionPointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
             _directFunction = (WinApi.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (WinApi.Scintilla_DirectFunction));
             _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {
