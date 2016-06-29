@@ -18,8 +18,13 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -35,7 +40,7 @@ namespace _3PA {
 
     /// <summary>
     /// The entry points for this plugin are the following :<br></br>
-    /// - OnCommandMenuInit (through UnmanagedExports)<br></br>
+    /// - Main (through UnmanagedExports)<br></br>
     /// - OnNppNotification (through UnmanagedExports)<br></br>
     /// - OnWndProcMessage<br></br>
     /// - OnMouseMessage<br></br>
@@ -54,6 +59,11 @@ namespace _3PA {
         public static bool IsCurrentFileProgress { get; private set; }
 
         /// <summary>
+        /// true if the previous file was a progress file, false otherwise
+        /// </summary>
+        public static bool IsPreviousFileProgress { get; private set; }
+
+        /// <summary>
         /// Stores the current file path when switching document
         /// </summary>
         public static string CurrentFilePath { get; private set; }
@@ -68,20 +78,14 @@ namespace _3PA {
         #region Start
 
         /// <summary>
-        /// Called on notepad++ setinfo
+        /// Called by notepad++ when the plugin is loaded
         /// </summary>
-        internal static void OnCommandMenuInit() {
-            var cmdIndex = 0;
-            AppliMenu.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
-            CodeExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
-            FileExplorer.DockableCommandIndex = cmdIndex;
-            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
-
+        internal static void Main() {
             // subscribe to notorious events
+            OnSetFuncItems += SetPlugFuncItems;
             OnNppShutDown += PlugShutDown;
-            OnNppReady += PlugStartup;
+            OnNppReady += PlugInit;
+            OnPlugReady += PlugStartUp;
 
             // This allows to correctly feed the dll with its dependencies
             AppDomain.CurrentDomain.AssemblyResolve += LibLoader.AssemblyResolver;
@@ -93,7 +97,20 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// display images in the npp toolbar
+        /// Called when the plugin menu of the plugin needs to be filled
+        /// </summary>
+        internal static void SetPlugFuncItems() {
+            var cmdIndex = 0;
+            AppliMenu.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
+            CodeExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
+            FileExplorer.DockableCommandIndex = cmdIndex;
+            Npp.SetCommand(cmdIndex, "Toggle file explorer", FileExplorer.Toggle);
+        }
+
+        /// <summary>
+        /// Called when the plugin can set new shorcuts to the toolbar in notepad++
         /// </summary>
         internal static void InitToolbarImages() {
             Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.DockableCommandIndex);
@@ -104,7 +121,7 @@ namespace _3PA {
         /// <summary>
         /// Called on npp ready
         /// </summary>
-        internal static bool PlugStartup() {
+        internal static bool PlugInit() {
             try {
                 // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
@@ -130,7 +147,7 @@ namespace _3PA {
                 }
 
                 // check Npp version, 3P requires version 6.8 or higher
-                if (!string.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("6.7")) {
+                if (!String.IsNullOrEmpty(Npp.GetNppVersion) && !Npp.GetNppVersion.IsHigherVersionThan("6.7")) {
                     UserCommunication.Notify("Dear user,<br><br>Your version of notepad++ (" + Npp.GetNppVersion + ") is outdated.<br>3P <b>requires</b> the version <b>6.8</b> or above, <b>there are known issues with inferior versions</b>. Please upgrade to an up-to-date version of Notepad++ or use 3P at your own risks.<br><br><a href='https://notepad-plus-plus.org/download/'>Download the lastest version of Notepad++ here</a>", MessageImg.MsgError, "Outdated version", "3P requirements are not met");
                 }
 
@@ -140,8 +157,6 @@ namespace _3PA {
 
                 // Try to update the configuration from the distant shared folder
                 ShareExportConf.StartCheckingForUpdates();
-
-                SetHooks();
 
                 // Start pinging
                 // ReSharper disable once ObjectCreationAsStatement
@@ -161,9 +176,6 @@ namespace _3PA {
                     FileExplorer.Toggle();
                 }
 
-                // set the following operations
-                OnPlugReady += AfterPlugStartUp;
-
                 return true;
 
             } catch (Exception e) {
@@ -172,11 +184,15 @@ namespace _3PA {
             return false;
         }
 
-        internal static void AfterPlugStartUp() {
+        internal static void PlugStartUp() {
 
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+
+            OnKeyDown += KeyDownHandler;
+            OnMouseMessage += MouseMessageHandler;
+
 
             Keywords.Import();
             Snippets.Init();
@@ -186,6 +202,7 @@ namespace _3PA {
             AutoComplete.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
+            IsCurrentFileProgress = Abl.IsCurrentProgressFile(); // to correctly init isPreviousProgress
             OnDocumentSwitched(true);
 
             // Make sure to give the focus to scintilla on startup
@@ -201,14 +218,12 @@ namespace _3PA {
         /// </summary>
         internal static void PlugShutDown() {
             try {
+                // clean up timers
+                ReccurentAction.CleanAll();
+                DelayedAction.CleanAll();
+
                 // export modified conf
                 FileTag.Export();
-
-                // uninstall hooks
-                UninstallHooks();
-
-                // set options back to client's default
-                ApplyPluginSpecificOptions(true);
 
                 // save config (should be done but just in case)
                 CodeExplorer.UpdateMenuItemChecked();
@@ -228,112 +243,112 @@ namespace _3PA {
                 AppliMenu.ForceCloseMenu();
 
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "CleanUp");
+                ErrorHandler.ShowErrors(e, "Stop");
             }
         }
 
         #endregion
 
-        #region Hooks and WndProc override
-
-        /// <summary>
-        /// Bascially, this method allows us to hook onto:
-        /// - Keyboard (on key down only) messages  -> OnKeyDown
-        /// - Mouse messages                        -> OnMouseMessage
-        /// It either install the hooks (if they are not installed yet) or just refresh the keyboard keys / mouse messages
-        /// to watch, so it can be called several times safely
-        /// </summary>
-        public static void SetHooks() {
-            
-            // Install a WM_KEYDOWN hook
-            KeyboardMonitor.Instance.Clear();
-            KeyboardMonitor.Instance.Add(
-                Keys.Up, 
-                Keys.Down, 
-                Keys.Left, 
-                Keys.Right, 
-                Keys.Tab, 
-                Keys.Return, 
-                Keys.Escape, 
-                Keys.Back, 
-                Keys.PageDown, 
-                Keys.PageUp, 
-                Keys.Next, 
-                Keys.Prior);
-            // we also add the key that are used as shortcut for 3P functions
-            AppliMenu.Instance = null;
-            if (AppliMenu.Instance != null) {
-                KeyboardMonitor.Instance.Add(AppliMenu.Instance.GetMenuKeysList.ToArray());
-            }
-            if (!KeyboardMonitor.Instance.IsInstalled) {
-                KeyboardMonitor.Instance.KeyDown += OnKeyDown;
-                KeyboardMonitor.Instance.Install();
-            }
-
-            // Install a mouse hook
-            MouseMonitor.Instance.Clear();
-            MouseMonitor.Instance.Add(
-                WinApi.WindowsMessageMouse.WM_NCLBUTTONDOWN,
-                WinApi.WindowsMessageMouse.WM_NCLBUTTONUP,
-                WinApi.WindowsMessageMouse.WM_LBUTTONUP,
-                WinApi.WindowsMessageMouse.WM_MBUTTONDOWN, 
-                WinApi.WindowsMessageMouse.WM_RBUTTONUP);
-
-            if (!MouseMonitor.Instance.IsInstalled) {
-                MouseMonitor.Instance.GetMouseMessage += OnMouseMessage;
-                MouseMonitor.Instance.Install();
-            }
-        }
-
-        private static void UninstallHooks() {
-            KeyboardMonitor.Instance.Uninstall();
-            MouseMonitor.Instance.Uninstall();
-        }
-
-        #endregion
-
-        #region Apply Npp options
+        #region Apply Scintilla options
 
         private static bool _indentWithTabs;
-        private static int _indentWidth = -1;
+        private static int _tabWidth = -1;
         private static Annotation _annotationMode;
         private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
+
+        private static int[] _initiatedScintilla = {0,0};
+        private static bool _hasBeenInit;
+        private static bool _warnedAboutFailStylers;
 
         /// <summary>
         /// We need certain options to be set to specific values when running this plugin, make sure to set everything back to normal
         /// when switch tab or when we leave npp, param can be set to true to force the default values
         /// </summary>
-        /// <param name="forceToDefault"></param>
-        public static void ApplyPluginSpecificOptions(bool forceToDefault) {
+        internal static void ApplyOptionsForScintilla() {
+            if (IsCurrentFileProgress)
+                ApplyPluginOptionsForScintilla();
+            else
+                ApplyDefaultOptionsForScintilla();
+        }
 
-            if (_indentWidth == -1) {
-                _indentWidth = Npp.IndentWidth;
+        internal static void ApplyPluginOptionsForScintilla() {
+            if (!_hasBeenInit || !IsPreviousFileProgress) {
+                // read default options
+                _tabWidth = Npp.TabWidth;
                 _indentWithTabs = Npp.UseTabs;
                 _annotationMode = Npp.AnnotationVisible;
                 _whitespaceMode = Npp.ViewWhitespace;
+            }
+            _hasBeenInit = true;
 
+            // need to do this stuff uniquely for both scintilla
+            var curScintilla = Npp.CurrentScintilla; // 0 or 1
+            if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
                 Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
+                _initiatedScintilla[curScintilla] = 1;
             }
 
-            if (!IsCurrentFileProgress || forceToDefault) {
-                Npp.AutoCStops("");
-                Npp.AnnotationVisible = _annotationMode;
-                Npp.UseTabs = _indentWithTabs;
-                Npp.TabWidth = _indentWidth;
+            Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
+            Npp.UseTabs = false;
+            Npp.AnnotationVisible = Annotation.Indented;
+            if (Config.Instance.CodeShowSpaces)
+                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+
+            // apply style
+            var currentStyle = Style.Current;
+            Npp.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
+            Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
+
+            // we want the default auto-completion to not show
+            // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
+            // TODO: find a better technique to hide the autocompletion!!! this slows npp down
+            Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
+        }
+
+        internal static void ApplyDefaultOptionsForScintilla() {
+            // nothing has been done yet, no need to reset anything! same if we already were on a non progress file
+            if (!_hasBeenInit || !IsPreviousFileProgress)
+                return;
+
+            // apply default options
+            Npp.TabWidth = _tabWidth;
+            Npp.UseTabs = _indentWithTabs;
+            Npp.AnnotationVisible = _annotationMode;
+            if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                 Npp.ViewWhitespace = _whitespaceMode;
-            } else {
-                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
-                // TODO: find a better technique to hide the autocompletion!!! this slows npp down
-                Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-                Npp.AnnotationVisible = Annotation.Indented;
-                Npp.UseTabs = false;
-                Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
-                if (Config.Instance.CodeShowSpaces) {
-                    Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+
+            // apply default style...
+            try {
+                // read npp's stylers.xml file
+                var widgetStyle = XDocument.Load(Config.FileNppStylersXml).Descendants("WidgetStyle");
+                var xElements = widgetStyle as XElement[] ?? widgetStyle.ToArray();
+                var wsFore = GetColorInStylers(xElements, "White space symbol", "fgColor");
+                Npp.SetWhiteSpaceColor(true, Color.Transparent, wsFore);
+                Npp.SetIndentGuideColor(GetColorInStylers(xElements, "Indent guideline style", "bgColor"), GetColorInStylers(xElements, "Indent guideline style", "fgColor"));
+                Npp.SetSelectionColor(true, GetColorInStylers(xElements, "Selected text colour", "bgColor"), Color.Transparent);
+                Npp.CaretLineBackColor = GetColorInStylers(xElements, "Current line background colour", "bgColor");
+            } catch (Exception e) {
+                ErrorHandler.Log(e.ToString());
+                if (!_warnedAboutFailStylers) {
+                    _warnedAboutFailStylers = true;
+                    UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + Config.FileNppStylersXml.ToHtmlLink() + "</div>", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");
                 }
+            }
+            
+            // we wanted the default auto-completion to not show, but no more
+            Npp.AutoCStops("");
+        }
+
+        private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {
+            try {
+                return ColorTranslator.FromHtml("#" + (string)widgetStyle.First(x => x.Attribute("name").Value.Equals(attributeName)).Attribute(attributeToGet));
+            } catch (Exception) {
+                return Color.Transparent;
             }
         }
 

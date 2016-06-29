@@ -101,6 +101,9 @@
     <Compile Include="Controls\YamuiButtonLink.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiTableLayoutPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiSimplePanel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -140,6 +143,9 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResourceFont.resx</DependentUpon>
     </Compile>
+    <Compile Include="Forms\YamuiInputDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Forms\YamuiMenu.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -155,11 +161,11 @@
     <Compile Include="Forms\YamuiForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\YamuiFormMessageBox.cs">
+    <Compile Include="Forms\YamuiMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\YamuiFormMessageBox.Designer.cs">
-      <DependentUpon>YamuiFormMessageBox.cs</DependentUpon>
+    <Compile Include="Forms\YamuiMessageBox.Designer.cs">
+      <DependentUpon>YamuiMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
     <Compile Include="Helper\GenericThemeHolder.cs" />
@@ -283,8 +289,8 @@
     <EmbeddedResource Include="Forms\YamuiForm.resx">
       <DependentUpon>YamuiForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiFormMessageBox.resx">
-      <DependentUpon>YamuiFormMessageBox.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\YamuiMessageBox.resx">
+      <DependentUpon>YamuiMessageBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiNotifications.resx">
       <DependentUpon>YamuiNotifications.cs</DependentUpon>

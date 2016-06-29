@@ -101,7 +101,7 @@ namespace _3PA.MainFeatures {
         /// Show the appli main menu at the cursor location
         /// </summary>
         public static void ShowMainMenuAtCursor() {
-            if (!Plug.PluginIsFullyLoaded) {
+            if (!Plug.PluginIsReady) {
                 return;
             }
             ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance._mainMenuList : Instance._mainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
@@ -156,6 +156,7 @@ namespace _3PA.MainFeatures {
 
         private AppliMenu() {
 
+            // List of item that can be assigned to a shortcut
             ShortcutableItemList = new List<MenuItem> {
                 // add the main menu here, so it can appear in the list of shortcut to set
                 new MenuItem(null, "Open main menu", ImageResources.logo20x20, ShowMainMenuAtCursor, "Show_main_menu", "F6") {
@@ -187,6 +188,10 @@ namespace _3PA.MainFeatures {
 
             var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
+            var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
+                Generic = true
+            };
+            goToPreviousJump.SubText = "Ctrl + Middle click  /  " + goToPreviousJump.SubText;
 
             _mainMenuList = new List<MenuItem> {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") {
@@ -216,9 +221,7 @@ namespace _3PA.MainFeatures {
                     Generic = true
                 },
                 goToDefItem,
-                new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
-                    Generic = true
-                },
+                goToPreviousJump,
 
                 new MenuItem(true), // --------------------------
 
@@ -253,9 +256,9 @@ namespace _3PA.MainFeatures {
             if (Config.IsDevelopper) {
                 _mainMenuList.Add(
                     new MenuItem(this, "Tests", ImageResources.Tests, null, null, null, new List<MenuItem> {
-                            new MenuItem(this, "GetCurrentScrollPageAddOrder", ImageResources.TestTube, PlugDebug.GetCurrentScrollPageAddOrder, "GetCurrentScrollPageAddOrder", "Ctrl+Alt+F12") {Generic = true},
-                            new MenuItem(this, "Test", ImageResources.TestTube, PlugDebug.Test, "Test", "Ctrl+D") {Generic = true},
-                            new MenuItem(this, "DEBUG", ImageResources.TestTube, PlugDebug.StartDebug, "DEBUG", "Ctrl+F12") {Generic = true},
+                            new MenuItem(this, "DebugTest1", ImageResources.TestTube, PlugDebug.DebugTest1, "DebugTest1", "Ctrl+OemQuotes") {Generic = true},
+                            new MenuItem(this, "DebugTest2", ImageResources.TestTube, PlugDebug.DebugTest2, "DebugTest2", "Alt+OemQuotes") {Generic = true},
+                            new MenuItem(this, "DebugTest3", ImageResources.TestTube, PlugDebug.DebugTest3, "DebugTest3", "Shift+OemQuotes") {Generic = true},
                         }) {
                         Generic = true
                     });
@@ -400,10 +403,12 @@ namespace _3PA.MainFeatures {
             }
         }
 
-
         public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action action, string itemId, string defaultKey) :
             this(menuToRegisterTo, name, img, action, itemId, defaultKey, null) { }
 
+        /// <summary>
+        /// constructor for separators
+        /// </summary>
         public MenuItem(bool isSeparator) {
             IsSeparator = isSeparator;
         }

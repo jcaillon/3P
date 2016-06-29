@@ -610,7 +610,7 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Matches a function definition (not the FORWARD prototype)
+        /// Matches a new definition
         /// </summary>
         private void CreateParsedDefine(Token functionToken, bool isDynamic) {
             // info we will extract from the current statement :
@@ -785,6 +785,10 @@ namespace _3PA.MainFeatures.Parser {
                                 // matches USE-INDEX (after a like/like-sequential, we can have this keyword)
                                 state = 26;
                                 break;
+                            case "help":
+                                // a field has a help text:
+                                state = 27;
+                                break;
                             case "extent":
                                 // a field is extent:
                                 currentField.Flag = currentField.Flag | ParsedFieldFlag.Extent;
@@ -808,6 +812,7 @@ namespace _3PA.MainFeatures.Parser {
                         likeTable = token.Value.ToLower();
                         state = 20;
                         break;
+
                     case 22:
                         // define temp-table : matches a FIELD name
                         if (!(token is TokenWord)) break;
@@ -826,6 +831,12 @@ namespace _3PA.MainFeatures.Parser {
                         currentField.TempType = token.Value;
                         // push the field to the fields list
                         fields.Add(currentField);
+                        state = 20;
+                        break;
+                    case 27:
+                        // define temp-table : match HELP for a field
+                        if (!(token is TokenString)) break;
+                        currentField.Description = token.Value;
                         state = 20;
                         break;
 
@@ -853,7 +864,6 @@ namespace _3PA.MainFeatures.Parser {
                         useIndex.Append(token.Value);
                         state = 20;
                         break;
-
 
                     case 30:
                         // define parameter : match a temptable, table, dataset or buffer name

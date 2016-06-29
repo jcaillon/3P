@@ -46,6 +46,7 @@ namespace _3PA {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
             Current.AccentColor = Config.Instance.AccentColor;
+            Current = Current;
         }
 
         #endregion
@@ -74,7 +75,7 @@ namespace _3PA {
 
                 } catch (Exception e) {
                     // either display the error immediatly or when the plugin is fully loaded...
-                    if (Plug.PluginIsFullyLoaded)
+                    if (Plug.PluginIsReady)
                         ErrorHandler.ShowErrors(e, "Loading a theme");
                     else {
                         Plug.OnPlugReady += () => {

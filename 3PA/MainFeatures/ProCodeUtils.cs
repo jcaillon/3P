@@ -253,6 +253,7 @@ namespace _3PA.MainFeatures {
                     UserCommunication.CloseUniqueNotif("KillExistingProcess");
                     ProCompilation.OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
                     StartProgressExec(executionType);
+                    args.Handled = true;
                 }, 5);
                 return;
             }

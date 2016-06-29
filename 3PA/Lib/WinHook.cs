@@ -39,7 +39,6 @@ namespace _3PA.Lib {
         #region private
 
         private HashSet<Keys> _keysToIntercept = new HashSet<Keys>();
-        public delegate void KeyDownHandler(Keys key, KeyModifiers modifiers, ref bool handled);
 
         #endregion
 
@@ -48,9 +47,9 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event KeyDownHandler KeyDown;
+        public event Func<Keys, KeyModifiers, bool> KeyDown;
 
-        public event KeyDownHandler KeyDownByPass;
+        public event Func<Keys, KeyModifiers, bool> KeyDownByPass;
 
         /// <summary>
         /// Add the keys to monitor (does not include any modifier (CTRL/ALT/SHIFT))
@@ -79,23 +78,18 @@ namespace _3PA.Lib {
             var key = (Keys)((int)wParam);
             int context = (int) lParam;
 
-            // bypass the normal keydown handler
+            // bypass the normal keydown handler, send all the messages
             if (KeyDownByPass != null) {
                 // on key down
                 if (!context.IsBitSet(31)) {
-                    bool handled = false;
-                    KeyDownByPass(key, GetModifiers, ref handled);
+                    bool handled = KeyDownByPass(key, GetModifiers);
                     return handled;
                 }
             } else {
-                if (KeyDown == null)
-                    return false;
-
-                if (_keysToIntercept.Contains(key)) {
+                if (KeyDown != null && _keysToIntercept.Contains(key)) {
                     // on key down
                     if (!context.IsBitSet(31)) {
-                        bool handled = false;
-                        KeyDown(key, GetModifiers, ref handled);
+                        bool handled = KeyDown(key, GetModifiers);
                         return handled;
                     }
                 }
@@ -140,8 +134,7 @@ namespace _3PA.Lib {
         /// <summary>
         /// Register to receive on keyPressed events
         /// </summary>
-        public event MessageHandler GetMouseMessage;
-        public delegate void MessageHandler(WinApi.WindowsMessageMouse message, WinApi.MOUSEHOOKSTRUCT mouseStruct, out bool handled);
+        public event Func<WinApi.WindowsMessageMouse, WinApi.MOUSEHOOKSTRUCT, bool> GetMouseMessage;
 
         private HashSet<uint> _messagesToIntercept = new HashSet<uint>();
 
@@ -187,10 +180,8 @@ namespace _3PA.Lib {
                 return false;
             if (!_messagesToIntercept.Contains((uint)wParam))
                 return false;
-            bool handled;
             WinApi.MOUSEHOOKSTRUCT ms = (WinApi.MOUSEHOOKSTRUCT)Marshal.PtrToStructure(lParam, typeof(WinApi.MOUSEHOOKSTRUCT));
-            GetMouseMessage((WinApi.WindowsMessageMouse)wParam, ms, out handled);
-            return handled;
+            return GetMouseMessage((WinApi.WindowsMessageMouse)wParam, ms);
         }
 
         #endregion

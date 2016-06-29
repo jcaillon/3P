@@ -18,6 +18,8 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
@@ -27,7 +29,7 @@ namespace _3PA.Lib {
     /// <summary>
     /// Allows to do a given action every XXX ms for XXX times
     /// </summary>
-    class ReccurentAction : IDisposable {
+    public class ReccurentAction : IDisposable {
 
         #region private fields
 
@@ -40,6 +42,8 @@ namespace _3PA.Lib {
         private int _repeatCounter;
 
         private ReaderWriterLockSlim _lock;
+
+        private static List<ReccurentAction> _savedReccurentActionStarted = new List<ReccurentAction>();
 
         #endregion
 
@@ -70,6 +74,9 @@ namespace _3PA.Lib {
             // do the recurrent action immediatly?
             if (doActionOnCreate)
                 OnTick(null, null);
+
+            // keep a reference to this so we can clean them all if needed
+            _savedReccurentActionStarted.Add(this);
         }
 
         /// <summary>
@@ -83,6 +90,8 @@ namespace _3PA.Lib {
                 }
             } catch (Exception) {
                 // clean up proc
+            } finally {
+                _savedReccurentActionStarted.Remove(this);
             }
         }
 
@@ -92,6 +101,18 @@ namespace _3PA.Lib {
 
         #endregion
 
+        #region public
+
+        /// <summary>
+        /// Clean all recurrent actions started
+        /// </summary>
+        public static void CleanAll() {
+            foreach (var reccurentAction in _savedReccurentActionStarted.ToList()) {
+                reccurentAction.Stop();
+            }
+        }
+
+        #endregion
 
         #region private methods
 

@@ -18,15 +18,16 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Xml.Linq;
+using YamuiFramework.Forms;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
@@ -41,22 +42,50 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
-        public static void GetCurrentScrollPageAddOrder() {
+        public class B {
+            public enum AGender { Female, Male };
+
+            [YamuiInputDialogItemAttribute(Hidden = true)]
+            public bool UnshownSetting = true;
+
+            [YamuiInputDialogItemAttribute("Full name", Order = 0)]
+            public string Name { get; set; }
+            public int Age = 25;
+            public bool Married { get; set; }
+            public AGender Gender { get; set; }
         }
 
-        public static void StartDebug() {
-            Debug.Assert(false);
-            UserCommunication.Notify("debug");
+
+        public static void DebugTest1() {
+            /*
+            var stylersXml = XDocument.Load(Config.FileNppStylersXml);
+            var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
+            UserCommunication.Notify(firstname);
+             */
         }
 
-        public static void Test() {
+        public static void DebugTest2() {
+            /*
+            object s = "";
+            if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
+                // Do something with the 's' variable
+                UserCommunication.Notify((string)s);
+            }
+            object a = new B();
+            YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
+            //Debug.Assert(false);
+            //UserCommunication.Notify("debug");
+             */
+        }
+
+        public static void DebugTest3() {
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
-
+            /*
             Task.Factory.StartNew(() => {
 
                 var ftp = new FtpsClient();
@@ -76,41 +105,23 @@ namespace _3PA.Tests {
                 }
 
                 ftp.Close();
-
-                /*
-                Ftp ftpClient = new Ftp {
-                    Host = "localhost",
-                    User = "progress",
-                    Pass = "progress",
-                    UseSssl = true
-                };
-                if (ftpClient.CanConnect) {
-
-                    UserCommunication.Notify(ftpClient.CreateDirectory("/fuck/more/stuff").ToString());
-                    UserCommunication.Notify(ftpClient.Upload(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\compile\_underescore.r").ToString());
-                    UserCommunication.Notify(ftpClient.Download(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\program.r").ToString());
-
-                    UserCommunication.Notify(ftpClient.ErrorLog.ToString().Replace("\n", "<br>"));
-                    UserCommunication.Notify(ftpClient.Log.ToString().Replace("\n", "<br>"));
-                } else {
-                    // coulnd't connect
-                    UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
-                }
-                */
             });
+             * */
         }
 
         public static void RunParserTests() {
 
+            var inLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "in.p");
+            var outLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "out.p");
+
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            /*
+
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            var inputFile = @"C:\Temp\in.p";
-            Parser tok = new Parser(File.ReadAllText(inputFile), inputFile, null, true);
+            Parser tok = new Parser(File.ReadAllText(inLocation), inLocation, null, true);
 
             OutputVis vis = new OutputVis();
             tok.Accept(vis);
@@ -120,8 +131,8 @@ namespace _3PA.Tests {
             //------------
 
             // OUPUT OF VISITOR
-            File.WriteAllText(@"C:\Temp\out.p", vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-            */
+            File.WriteAllText(outLocation, vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+
 
             // OUTPUT INFO ON EACH LINE
             /*
@@ -140,12 +151,12 @@ namespace _3PA.Tests {
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+            /*
             //------------
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(@"C:\Temp\in.p"));
+            Lexer tok2 = new Lexer(File.ReadAllText(inLocation));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -153,8 +164,8 @@ namespace _3PA.Tests {
             //--------------
             watch2.Stop();
 
-            File.WriteAllText(@"C:\Temp\out.p", vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-
+            File.WriteAllText(outLocation, vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
+            */
         }
 
         #endregion
@@ -315,15 +326,15 @@ namespace _3PA.Tests {
 
     internal class OutputVis : IParserVisitor {
         public void Visit(ParsedBlock pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.BranchType);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.Branch);
         }
 
         public void Visit(ParsedLabel pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedFunctionCall pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
         }
 
         public void Visit(ParsedFoundTableUse pars) {
@@ -333,42 +344,42 @@ namespace _3PA.Tests {
         public StringBuilder Output = new StringBuilder();
 
         public void Visit(ParsedOnEvent pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
         }
 
         public void Visit(ParsedFunction pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
         }
 
         public void Visit(ParsedProcedure pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
         }
 
         public void Visit(ParsedPreProc pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
         }
 
         public void Visit(ParsedDefine pars) {
             //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
             //if (pars.Type == ParseDefineType.Parameter)
             //if (string.IsNullOrEmpty(pars.ViewAs))
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
         }
 
         public void Visit(ParsedTable pars) {
-            //Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
-            //foreach (var field in pars.Fields) {
-            //    Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
-            //}
-            //Output.AppendLine("");
+            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            foreach (var field in pars.Fields) {
+                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+            }
+            Output.AppendLine("");
         }
 
         public void Visit(ParsedRun pars) {
-            //Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
         }
     }
 
@@ -380,7 +391,7 @@ namespace _3PA.Tests {
             Output.AppendLine("C" + (tok.IsSingleLine ? "S" : "M") + " " + tok.Value);
         }
 
-        public void Visit(TokenEol tok) {}
+        public void Visit(TokenEol tok) { }
 
         public void Visit(TokenEos tok) {
             Output.AppendLine("EOS " + tok.Value);
@@ -406,15 +417,15 @@ namespace _3PA.Tests {
             Output.AppendLine("S  " + tok.Value);
         }
 
-        public void Visit(TokenWhiteSpace tok) {}
+        public void Visit(TokenWhiteSpace tok) { }
 
         public void Visit(TokenWord tok) {
             Output.AppendLine("W  " + tok.Value);
         }
 
-        public void Visit(TokenEof tok) {}
+        public void Visit(TokenEof tok) { }
 
-        public void Visit(TokenUnknown tok) {}
+        public void Visit(TokenUnknown tok) { }
 
         public void Visit(TokenPreProcStatement tok) {
             //Output.AppendLine(tok.Value);
@@ -478,58 +489,59 @@ namespace _3PA.Tests {
                         if (File.Exists(@"D:\temp\lgrfeng\" + m.Groups[1].Value))
                             output.AppendLine(keyword + " " + items[1] + "\t" + ExtractFromHtml(m.Groups[1].Value));
                     }
-                    *//*
-                }
-            }
+                    */
+    /*
+}
+}
 
-            File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
-            File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
-        }
+File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
+File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
+}
 
 
-        private static string ExtractFromHtml(string htmlName) {
-            string paragraph = "";
-            var synthax = new StringBuilder();
-            int status = 0;
-            bool first = true;
-            foreach (var lines in File.ReadAllLines(@"D:\temp\lgrfeng\" + htmlName, Encoding.Default)) {
-                var line = lines.Trim();
-                if (status == 0) {
-                    if (line.StartsWith("<div class=\"paragraph\">")) {
-                        paragraph = ClearTags(line);
-                        status++;
-                    }
-                } else if (status == 1) {
-                    if (line.StartsWith("<div class=\"paramete"))
-                        status = -1;
+private static string ExtractFromHtml(string htmlName) {
+string paragraph = "";
+var synthax = new StringBuilder();
+int status = 0;
+bool first = true;
+foreach (var lines in File.ReadAllLines(@"D:\temp\lgrfeng\" + htmlName, Encoding.Default)) {
+var line = lines.Trim();
+if (status == 0) {
+  if (line.StartsWith("<div class=\"paragraph\">")) {
+      paragraph = ClearTags(line);
+      status++;
+  }
+} else if (status == 1) {
+  if (line.StartsWith("<div class=\"paramete"))
+      status = -1;
 
-                    if (line.StartsWith("<table class=\"table_")) {
-                        status++;
-                        first = true;
-                    }
-                } else if (status == 2) {
-                    if (line.StartsWith("</table>")) {
-                        status = 1;
-                        synthax.Append("\t");
-                    }
+  if (line.StartsWith("<table class=\"table_")) {
+      status++;
+      first = true;
+  }
+} else if (status == 2) {
+  if (line.StartsWith("</table>")) {
+      status = 1;
+      synthax.Append("\t");
+  }
 
-                    if (line.StartsWith("<pre class=\"cell_003acode\">")) {
-                        if (!first) synthax.Append("<br>");
-                        if (first) first = false;
-                        synthax.Append(ClearTags(line));
+  if (line.StartsWith("<pre class=\"cell_003acode\">")) {
+      if (!first) synthax.Append("<br>");
+      if (first) first = false;
+      synthax.Append(ClearTags(line));
 
-                    }
-                }
-            }
-            return paragraph + "\t" + synthax;
-        }
+  }
+}
+}
+return paragraph + "\t" + synthax;
+}
 
-        private static string ClearTags(string input) {
-            return Regex.Replace(input.Replace(@"<br />", "~n"), "<.*?>", string.Empty).Replace("~n", "<br>").Replace("\t", " ");
-        }
+private static string ClearTags(string input) {
+return Regex.Replace(input.Replace(@"<br />", "~n"), "<.*?>", string.Empty).Replace("~n", "<br>").Replace("\t", " ");
+}
 
-    }
-    */
+}
+*/
     #endregion
 
 }

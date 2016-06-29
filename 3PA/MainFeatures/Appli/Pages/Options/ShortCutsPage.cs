@@ -24,7 +24,6 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -102,16 +101,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
-                var undoButton = new YamuiButtonImage {
+                button = new YamuiButtonImage {
                     BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width + 10, yPos),
                     Tag = item.ItemId,
                     TabStop = false,
                 };
-                scrollPanel.ContentPanel.Controls.Add(undoButton);
-                undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                tooltip.SetToolTip(undoButton, "Click this button to reset the shortcut to its default value");
+                scrollPanel.ContentPanel.Controls.Add(button);
+                button.ButtonPressed += UndoButtonOnButtonPressed;
+                tooltip.SetToolTip(button, "Click this button to reset the shortcut to its default value");
+
+                // reset
+                button = new YamuiButtonImage {
+                    BackGrndImage = ImageResources.Delete,
+                    Size = new Size(20, 20),
+                    Location = new Point(button.Location.X + button.Width, yPos),
+                    Tag = item.ItemId,
+                    TabStop = false,
+                };
+                scrollPanel.ContentPanel.Controls.Add(button);
+                button.ButtonPressed += ButtonDeleteOnButtonPressed;
+                tooltip.SetToolTip(button, "Click this button to clear this shortcut");
 
                 yPos += label.Height + 15;
             }
@@ -153,13 +164,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             button.BackColor = ThemeManager.Current.AccentColor;
         }
 
-        #endregion
 
-        #region private methods
+        private void ButtonDeleteOnButtonPressed(object sender, EventArgs eventArgs) {
+            _currentItemId = (string)((YamuiButtonImage)sender).Tag;
+            if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
+                Config.Instance.ShortCuts[_currentItemId] = "";
+            else
+                Config.Instance.ShortCuts.Add(_currentItemId, "");
 
-        private void OnNewShortcutPressed(Keys key, KeyModifiers modifiers, ref bool handled) {
+            // take into account the changes
+            Plug.SetHooks();
+
+            ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
+        }
+
+        private bool OnNewShortcutPressed(Keys key, KeyModifiers modifiers) {
             bool stopListening = true;
-            var button = (YamuiButton) scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
+            var button = (YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId];
 
             // the user presses escape to cancel the current shortcut modification
             if (key == Keys.Escape) {
@@ -170,7 +191,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
                     UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
-                    return;
+                    return true;
                 }
 
                 // change the shortcut in the settings
@@ -192,7 +213,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 KeyboardMonitor.Instance.KeyDownByPass -= OnNewShortcutPressed;
                 BlinkButton(button, ThemeManager.Current.ThemeAccentColor);
             }
+
+            return true;
         }
+
+        #endregion
+
+        #region private methods
 
         /// <summary>
         /// Makes the given button blink

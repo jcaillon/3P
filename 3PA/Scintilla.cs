@@ -19,7 +19,9 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -51,6 +53,18 @@ namespace _3PA {
         #endregion
 
         #region Critical Core
+
+        /// <summary>
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
+        /// </summary>
+        public static int CurrentScintilla {
+            get {
+                int curScintilla;
+                WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+                return curScintilla;
+            }
+        }
 
         /// <summary>
         /// Gets the window handle to current Scintilla.
@@ -96,8 +110,8 @@ namespace _3PA {
         /// Updates the current scintilla handle for Npp's functions
         /// Called when the user changes the current document
         /// </summary>
-        public static void UpdateScintilla() {
-            _curScintilla = (CurrentScintilla == 0) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
+        public static void UpdateScintilla(bool reverse = false) {
+            _curScintilla = ((!reverse && CurrentScintilla == 0) || (reverse && CurrentScintilla == 1)) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
             Sci.UpdateScintillaDirectMessage(_curScintilla);
         }
 
@@ -607,6 +621,10 @@ namespace _3PA {
         public static WrapVisualFlagLocation WrapVisualFlagLocation {
             get { return (WrapVisualFlagLocation) Sci.Send(SciMsg.SCI_GETWRAPVISUALFLAGSLOCATION); }
             set { Sci.Send(SciMsg.SCI_SETWRAPVISUALFLAGSLOCATION, new IntPtr((int) value)); }
+        }
+
+        public static IntPtr StartRecordMacro() {
+            return Sci.Send(SciMsg.SCI_STARTRECORD);
         }
 
         #endregion
@@ -1853,7 +1871,15 @@ namespace _3PA {
         public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
+        }
 
+        /// <summary>
+        /// sets the fore/background color of the IndentGuide, overriding the lexer's
+        /// </summary>
+        /// <param name="use"></param>
+        /// <param name="bg"></param>
+        /// <param name="fg"></param>
+        public static void SetIndentGuideColor(Color bg, Color fg) {
             // we also set the indent line color here
             new Style(Style.IndentGuide) {
                 BackColor = bg,
@@ -3751,10 +3777,29 @@ namespace _3PA {
         /// </summary>
         public void UpdateScintillaDirectMessage(IntPtr scintillaHandle) {
             _scintillaHandle = scintillaHandle;
+
+            /*
+            // Get the native Scintilla direct function -- the only function the library exports
+            File.AppendAllText(Path.Combine(Npp.GetNppDirectory(), "derp.txt"), GetModuleHandle("scintilla.dll").ToString());
+            _directMessagePointer = GetProcAddress(GetModuleHandle("scintilla.dll"), "Scintilla_DirectFunction");
+            if (_directMessagePointer == IntPtr.Zero) {
+                var message = "The Scintilla module has no export for the 'Scintilla_DirectFunction' procedure.";
+                throw new Win32Exception(message, new Win32Exception()); // Calls GetLastError
+            }
+
+            // Create a managed callback
+            _directFunction = (WinApi.Scintilla_DirectFunction)Marshal.GetDelegateForFunctionPointer(
+                _directMessagePointer,
+                typeof(WinApi.Scintilla_DirectFunction));
+
+            _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            */
+            
             var directFunctionPointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTFUNCTION, IntPtr.Zero, IntPtr.Zero);
             // Create a managed callback
             _directFunction = (WinApi.Scintilla_DirectFunction) Marshal.GetDelegateForFunctionPointer(directFunctionPointer, typeof (WinApi.Scintilla_DirectFunction));
             _directMessagePointer = WinApi.SendMessage(_scintillaHandle, (int)SciMsg.SCI_GETDIRECTPOINTER, IntPtr.Zero, IntPtr.Zero);
+            
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {

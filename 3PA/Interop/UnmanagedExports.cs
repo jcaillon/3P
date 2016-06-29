@@ -69,7 +69,7 @@ namespace _3PA.Interop {
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static void setInfo(NppData notepadPlusData) {
             NppData = notepadPlusData;
-            Plug.OnCommandMenuInit();
+            Plug.OnPlugLoad();
         }
 
         /// <summary>
@@ -79,6 +79,7 @@ namespace _3PA.Interop {
         /// <returns></returns>
         [DllExport(CallingConvention = CallingConvention.Cdecl)]
         private static IntPtr getFuncsArray(ref int nbF) {
+            Plug.OnFuncItemsNeeded();
             nbF = FuncItems.Items.Count;
             return FuncItems.NativePointer;
         }
