@@ -32,7 +32,6 @@ using _3PA.Lib;
 using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
-using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
 
@@ -47,7 +46,7 @@ namespace _3PA.Tests {
             public enum AGender { Female, Male };
 
             [YamuiInputDialogItemAttribute(Hidden = true)]
-            public bool unshownSetting = true;
+            public bool UnshownSetting = true;
 
             [YamuiInputDialogItemAttribute("Full name", Order = 0)]
             public string Name { get; set; }
@@ -58,27 +57,25 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            UserCommunication.Notify(Npp.IsMacroRecording.ToString());
-            Npp.RunCommand(NppMenuCmd.MacroStartRecording);
-            UserCommunication.Notify(Npp.IsMacroRecording.ToString());
+            /*
             var stylersXml = XDocument.Load(Config.FileNppStylersXml);
-            UserCommunication.Notify(stylersXml.Descendants("WidgetStyle").Count().ToString());
             var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
             UserCommunication.Notify(firstname);
+             */
         }
 
         public static void DebugTest2() {
-            
+            /*
             object s = "";
             if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
                 // Do something with the 's' variable
                 UserCommunication.Notify((string)s);
             }
-
             object a = new B();
             YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
             //Debug.Assert(false);
             //UserCommunication.Notify("debug");
+             */
         }
 
         public static void DebugTest3() {
@@ -88,7 +85,7 @@ namespace _3PA.Tests {
             //        "Updated to version " + AssemblyInfo.Version,
             //        new List<string> { "ok", "cancel" },
             //        true);
-
+            /*
             Task.Factory.StartNew(() => {
 
                 var ftp = new FtpsClient();
@@ -108,28 +105,8 @@ namespace _3PA.Tests {
                 }
 
                 ftp.Close();
-
-                /*
-                Ftp ftpClient = new Ftp {
-                    Host = "localhost",
-                    User = "progress",
-                    Pass = "progress",
-                    UseSssl = true
-                };
-                if (ftpClient.CanConnect) {
-
-                    UserCommunication.Notify(ftpClient.CreateDirectory("/fuck/more/stuff").ToString());
-                    UserCommunication.Notify(ftpClient.Upload(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\compile\_underescore.r").ToString());
-                    UserCommunication.Notify(ftpClient.Download(@"/fuck/more/stuff/program.r", @"C:\Users\AdminLocal\Desktop\program.r").ToString());
-
-                    UserCommunication.Notify(ftpClient.ErrorLog.ToString().Replace("\n", "<br>"));
-                    UserCommunication.Notify(ftpClient.Log.ToString().Replace("\n", "<br>"));
-                } else {
-                    // coulnd't connect
-                    UserCommunication.Notify("An error has occured when connecting to the FTP server,<br><b>Please check your connection information!</b><br><div class='ToolTipcodeSnippet'>" + ftpClient.ErrorLog + "</div><br><i>" + ErrorHandler.GetHtmlLogLink + "</i>", MessageImg.MsgError, "Ftp connection", "Failed");
-                }
-                */
             });
+             * */
         }
 
         public static void RunParserTests() {

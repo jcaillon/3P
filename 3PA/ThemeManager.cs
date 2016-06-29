@@ -46,6 +46,7 @@ namespace _3PA {
             YamuiThemeManager.TabAnimationAllowed = Config.Instance.AppliAllowTabAnimation;
             YamuiThemeManager.GlobalIcon = ImageResources._3p_icon;
             Current.AccentColor = Config.Instance.AccentColor;
+            Current = Current;
         }
 
         #endregion

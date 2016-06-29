@@ -249,15 +249,15 @@ namespace _3PA {
 
         #endregion
 
-        #region Apply Scintilla options for plugin needs
+        #region Apply Scintilla options
 
         private static bool _indentWithTabs;
         private static int _tabWidth = -1;
         private static Annotation _annotationMode;
         private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
 
+        private static int[] _initiatedScintilla = {0,0};
         private static bool _hasBeenInit;
-        private static bool _autoStopSet;
         private static bool _warnedAboutFailStylers;
 
         /// <summary>
@@ -279,13 +279,16 @@ namespace _3PA {
                 _annotationMode = Npp.AnnotationVisible;
                 _whitespaceMode = Npp.ViewWhitespace;
             }
-            
-            if (!_hasBeenInit) {
+            _hasBeenInit = true;
+
+            // need to do this stuff uniquely for both scintilla
+            var curScintilla = Npp.CurrentScintilla; // 0 or 1
+            if (_initiatedScintilla[curScintilla] == 0) {
                 // Extra settings at the start
                 Npp.MouseDwellTime = Config.Instance.ToolTipmsBeforeShowing;
                 Npp.EndAtLastLine = false;
                 Npp.EventMask = (int) (SciMsg.SC_MOD_INSERTTEXT | SciMsg.SC_MOD_DELETETEXT | SciMsg.SC_PERFORMED_USER | SciMsg.SC_PERFORMED_UNDO | SciMsg.SC_PERFORMED_REDO);
-                _hasBeenInit = true;
+                _initiatedScintilla[curScintilla] = 1;
             }
 
             Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
@@ -302,12 +305,9 @@ namespace _3PA {
             Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
 
             // we want the default auto-completion to not show
-            if (!_autoStopSet) {
-                // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
-                // TODO: find a better technique to hide the autocompletion!!! this slows npp down
-                Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
-                _autoStopSet = true;
-            }
+            // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
+            // TODO: find a better technique to hide the autocompletion!!! this slows npp down
+            Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -341,10 +341,7 @@ namespace _3PA {
             }
             
             // we wanted the default auto-completion to not show, but no more
-            if (_autoStopSet) {
-                Npp.AutoCStops("");
-                _autoStopSet = false;
-            }
+            Npp.AutoCStops("");
         }
 
         private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {

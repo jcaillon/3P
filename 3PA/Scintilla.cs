@@ -55,6 +55,18 @@ namespace _3PA {
         #region Critical Core
 
         /// <summary>
+        /// Returns the current instance of scintilla used
+        /// 0/1 corresponding to the main/seconday scintilla currently used
+        /// </summary>
+        public static int CurrentScintilla {
+            get {
+                int curScintilla;
+                WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
+                return curScintilla;
+            }
+        }
+
+        /// <summary>
         /// Gets the window handle to current Scintilla.
         /// </summary>
         public static IntPtr HandleScintilla {
@@ -98,8 +110,8 @@ namespace _3PA {
         /// Updates the current scintilla handle for Npp's functions
         /// Called when the user changes the current document
         /// </summary>
-        public static void UpdateScintilla() {
-            _curScintilla = (CurrentScintilla == 0) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
+        public static void UpdateScintilla(bool reverse = false) {
+            _curScintilla = ((!reverse && CurrentScintilla == 0) || (reverse && CurrentScintilla == 1)) ? UnmanagedExports.NppData._scintillaMainHandle : UnmanagedExports.NppData._scintillaSecondHandle;
             Sci.UpdateScintillaDirectMessage(_curScintilla);
         }
 

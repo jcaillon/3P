@@ -148,35 +148,38 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void SetSyntaxStyles() {
 
-            var curTheme = Current;
+            if (Config.Instance.UseSyntaxHighlightTheme) {
 
-            // Default
-            SetFontStyle((byte)SciMsg.STYLE_DEFAULT, curTheme.Default);
-            SetFontStyle((byte)SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
-            SetFontStyle((byte)UdlStyles.Idk, curTheme.Default);
-            SetFontStyle((byte)UdlStyles.Default, curTheme.Default);
+                var curTheme = Current;
 
-            // categories
-            SetFontStyle((byte)UdlStyles.Comment, curTheme.Comment);
-            SetFontStyle((byte)UdlStyles.CommentLine, curTheme.PreProcessed);
-            SetFontStyle((byte)UdlStyles.Number, curTheme.Numbers);
-            SetFontStyle((byte)UdlStyles.KeyWordsList1, curTheme.JumpStatement);
-            SetFontStyle((byte)UdlStyles.KeyWordsList2, curTheme.Statement);
-            SetFontStyle((byte)UdlStyles.KeyWordsList3, curTheme.VarType);
-            SetFontStyle((byte)UdlStyles.KeyWordsList4, curTheme.OtherKeywords);
-            SetFontStyle((byte)UdlStyles.KeyWordsList5, curTheme.PreProcessed);
-            SetFontStyle((byte)UdlStyles.KeyWordsList6, curTheme.NormedVariables);
-            SetFontStyle((byte)UdlStyles.KeyWordsList7, curTheme.Abbreviations);
-            SetFontStyle((byte)UdlStyles.KeyWordsList8, curTheme.SpecialWord);
-            SetFontStyle((byte)UdlStyles.Operators, curTheme.Operators);
-            SetFontStyle((byte)UdlStyles.FolderInCode2, curTheme.Statement);
-            SetFontStyle((byte)UdlStyles.Delimiter1, curTheme.DoubleQuote);
-            SetFontStyle((byte)UdlStyles.Delimiter2, curTheme.SimpleQuote);
-            SetFontStyle((byte)UdlStyles.Delimiter3, curTheme.Includes);
-            SetFontStyle((byte)UdlStyles.Delimiter4, curTheme.DoubleQuote);
-            SetFontStyle((byte)UdlStyles.Delimiter5, curTheme.SimpleQuote);
-            SetFontStyle((byte)UdlStyles.Delimiter7, curTheme.SingleLineComment);
-            SetFontStyle((byte)UdlStyles.Delimiter8, curTheme.NestedComment);
+                // Default
+                SetFontStyle((byte) SciMsg.STYLE_DEFAULT, curTheme.Default);
+                SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
+                SetFontStyle((byte) UdlStyles.Idk, curTheme.Default);
+                SetFontStyle((byte) UdlStyles.Default, curTheme.Default);
+
+                // categories
+                SetFontStyle((byte) UdlStyles.Comment, curTheme.Comment);
+                SetFontStyle((byte) UdlStyles.CommentLine, curTheme.PreProcessed);
+                SetFontStyle((byte) UdlStyles.Number, curTheme.Numbers);
+                SetFontStyle((byte) UdlStyles.KeyWordsList1, curTheme.JumpStatement);
+                SetFontStyle((byte) UdlStyles.KeyWordsList2, curTheme.Statement);
+                SetFontStyle((byte) UdlStyles.KeyWordsList3, curTheme.VarType);
+                SetFontStyle((byte) UdlStyles.KeyWordsList4, curTheme.OtherKeywords);
+                SetFontStyle((byte) UdlStyles.KeyWordsList5, curTheme.PreProcessed);
+                SetFontStyle((byte) UdlStyles.KeyWordsList6, curTheme.NormedVariables);
+                SetFontStyle((byte) UdlStyles.KeyWordsList7, curTheme.Abbreviations);
+                SetFontStyle((byte) UdlStyles.KeyWordsList8, curTheme.SpecialWord);
+                SetFontStyle((byte) UdlStyles.Operators, curTheme.Operators);
+                SetFontStyle((byte) UdlStyles.FolderInCode2, curTheme.Statement);
+                SetFontStyle((byte) UdlStyles.Delimiter1, curTheme.DoubleQuote);
+                SetFontStyle((byte) UdlStyles.Delimiter2, curTheme.SimpleQuote);
+                SetFontStyle((byte) UdlStyles.Delimiter3, curTheme.Includes);
+                SetFontStyle((byte) UdlStyles.Delimiter4, curTheme.DoubleQuote);
+                SetFontStyle((byte) UdlStyles.Delimiter5, curTheme.SimpleQuote);
+                SetFontStyle((byte) UdlStyles.Delimiter7, curTheme.SingleLineComment);
+                SetFontStyle((byte) UdlStyles.Delimiter8, curTheme.NestedComment);
+            }
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {

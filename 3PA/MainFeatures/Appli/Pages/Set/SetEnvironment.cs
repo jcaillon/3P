@@ -484,7 +484,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void BtConfFtpOnButtonPressed(object sender, EventArgs eventArgs) {
             UserCommunication.Notify("to be done");
-
         }
 
         #endregion

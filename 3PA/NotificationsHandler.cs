@@ -365,10 +365,12 @@ namespace _3PA {
             // close popups..
             ClosePopups();
 
-            if (IsCurrentFileProgress && Config.Instance.UseSyntaxHighlightTheme) {
-                // Syntax Style
+            // Syntax Style
+            if (IsCurrentFileProgress)
                 Style.SetSyntaxStyles();
-            }
+
+            // Apply options to npp and scintilla depending if we are on a progress file or not
+            ApplyOptionsForScintilla();
 
             // set general styles (useful for the file explorer > current status)
             Style.SetGeneralStyles();
@@ -378,9 +380,6 @@ namespace _3PA {
 
             // Need to compute the propath again, because we take into account relative path
             ProEnvironment.Current.ReComputeProPath();
-
-            // Apply options to npp and scintilla depending if we are on a progress file or not
-            ApplyOptionsForScintilla();
 
             // refresh file explorer currently opened file
             FileExplorer.RedrawFileExplorerList();

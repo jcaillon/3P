@@ -37,7 +37,10 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public new double Opacity {
             get { return base.Opacity; }
-            set { base.Opacity = value * Owner.Opacity; }
+            set {
+                if (Owner != null)
+                    base.Opacity = value * Owner.Opacity;
+            }
         }
 
         /// <summary>
@@ -50,7 +53,8 @@ namespace YamuiFramework.Forms {
                     Location = new Point(-100000, -100000);
                 } else {
                     Opacity = 1d;
-                    Location = Owner.PointToScreen(_pageRectangle.Location);
+                    if (Owner != null)
+                        Location = Owner.PointToScreen(_pageRectangle.Location);
                 }
             }
         }
@@ -110,14 +114,18 @@ namespace YamuiFramework.Forms {
         }
 
         protected override void Dispose(bool disposing) {
-            if (Owner != null) {
-                Owner.LocationChanged -= Cover_LocationChanged;
-                Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
-                Owner.VisibleChanged -= Cover_OnVisibleChanged;
-                if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
-                    int value = 0;
-                    DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+            try {
+                if (Owner != null) {
+                    Owner.LocationChanged -= Cover_LocationChanged;
+                    Owner.ClientSizeChanged -= Cover_ClientSizeChanged;
+                    Owner.VisibleChanged -= Cover_OnVisibleChanged;
+                    if (!Owner.IsDisposed && Environment.OSVersion.Version.Major >= 6) {
+                        int value = 0;
+                        DwmApi.DwmSetWindowAttribute(Owner.Handle, DwmApi.DwmwaTransitionsForcedisabled, ref value, 4);
+                    }
                 }
+            } catch (Exception) {
+                // ignored
             }
             base.Dispose(disposing);
         }

@@ -38,7 +38,6 @@ namespace _3PA {
 
         #region fields
 
-        private const int SwShownoactivate = 4;
         private const uint SwpNoactivate = 0x0010;
         public const int SbSettext = 1035;
         public const int SbSetparts = 1028;
@@ -108,18 +107,6 @@ namespace _3PA {
         public static bool IsNppWindowFocused {
             get {
                 return (WinApi.GetForegroundWindow() == HandleNpp);
-            }
-        }
-
-        /// <summary>
-        /// Returns the current instance of scintilla used
-        /// 0/1 corresponding to the main/seconday scintilla currently used
-        /// </summary>
-        public static int CurrentScintilla {
-            get {
-                int curScintilla;
-                WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETCURRENTSCINTILLA, 0, out curScintilla);
-                return curScintilla;
             }
         }
 
@@ -242,12 +229,40 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Gets the file path of each file currently opened in the primary view
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetOpenedFilesPrimary() {
+            var output = new List<string>();
+            int nbFile = (int) WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int) NppMsg.PRIMARY_VIEW);
+            using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
+                if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESPRIMARY, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+                    output.AddRange(cStrArray.ManagedStringsUnicode);
+            }
+            return output;
+        }
+
+        /// <summary>
+        /// Gets the file path of each file currently opened in the secondary view
+        /// </summary>
+        /// <returns></returns>
+        public static List<string> GetOpenedFilesSecondary() {
+            var output = new List<string>();
+            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.SECOND_VIEW);
+            using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
+                if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMESSECOND, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
+                    output.AddRange(cStrArray.ManagedStringsUnicode);
+            }
+            return output;
+        }
+
+        /// <summary>
         /// Gets the file path of each file currently opened
         /// </summary>
         /// <returns></returns>
         public static List<string> GetOpenedFiles() {
             var output = new List<string>();
-            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, 0);
+            int nbFile = (int)WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETNBOPENFILES, 0, (int)NppMsg.ALL_OPEN_FILES);
             using (WinApi.ClikeStringArray cStrArray = new WinApi.ClikeStringArray(nbFile, WinApi.MaxPath)) {
                 if (WinApi.SendMessage(HandleNpp, NppMsg.NPPM_GETOPENFILENAMES, cStrArray.NativePointer, nbFile) != IntPtr.Zero)
                     output.AddRange(cStrArray.ManagedStringsUnicode);

@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,54 @@ using System.Windows.Forms;
 namespace YamuiFramework.Helper {
 
     public static class Utilities {
+
+        #region GetRoundedRect
+
+        /// <summary>
+        /// Return a GraphicPath that is a round cornered rectangle
+        /// </summary>
+        /// <returns>A round cornered rectagle path</returns>
+        /// <remarks>If I could rely on people using C# 3.0+, this should be
+        /// an extension method of GraphicsPath.</remarks>        
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="diameter"></param>
+        public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
+            return GetRoundedRect(new RectangleF(x, y, width, height), diameter);
+        }
+
+        /// <summary>
+        /// Return a GraphicPath that is a round cornered rectangle
+        /// </summary>
+        /// <param name="rect">The rectangle</param>
+        /// <param name="diameter">The diameter of the corners</param>
+        /// <returns>A round cornered rectagle path</returns>
+        /// <remarks>If I could rely on people using C# 3.0+, this should be
+        /// an extension method of GraphicsPath.</remarks>
+        public static GraphicsPath GetRoundedRect(RectangleF rect, float diameter) {
+            GraphicsPath path = new GraphicsPath();
+
+            if (diameter > 0) {
+                RectangleF arc = new RectangleF(rect.X, rect.Y, diameter, diameter);
+                path.AddArc(arc, 180, 90);
+                arc.X = rect.Right - diameter;
+                path.AddArc(arc, 270, 90);
+                arc.Y = rect.Bottom - diameter;
+                path.AddArc(arc, 0, 90);
+                arc.X = rect.Left;
+                path.AddArc(arc, 90, 90);
+                path.CloseFigure();
+            } else {
+                path.AddRectangle(rect);
+            }
+
+            return path;
+        }
+
+        #endregion
+
 
         #region Colors extensions
 
