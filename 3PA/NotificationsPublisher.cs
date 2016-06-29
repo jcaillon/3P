@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (NotificationsHandler.cs) is part of 3P.
+// This file (NotificationsPublisher.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -290,7 +290,7 @@ namespace _3PA {
                 Keys.Next,
                 Keys.Prior);
             // we also add the key that are used as shortcut for 3P functions
-            AppliMenu.Instance = null;
+            AppliMenu.Instance = null; // make sure to recompute the menu
             if (AppliMenu.Instance != null) {
                 KeyboardMonitor.Instance.Add(AppliMenu.Instance.GetMenuKeysList.ToArray());
             }

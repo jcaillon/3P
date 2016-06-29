@@ -601,7 +601,6 @@
     <Content Include="Images\NotifAndMessages\MsgUpdate.png" />
     <Content Include="Images\NotifAndMessages\MsgWarning.png" />
     <Content Include="Images\ToolBar\logo16x16.png" />
-    <Content Include="Images\ToolBar\ShowAllChar16x16.png" />
     <Content Include="Images\tooltips\Output.png" />
     <Content Include="Images\tooltips\InputOutput.png" />
     <Content Include="Images\tooltips\Input.png" />

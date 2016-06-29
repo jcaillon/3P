@@ -296,7 +296,7 @@ namespace _3PA {
 
             // apply style
             var currentStyle = Style.Current;
-            Npp.SetWhiteSpaceColor(true, currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
             Npp.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
             Npp.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
             Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
@@ -319,7 +319,7 @@ namespace _3PA {
             Npp.TabWidth = _tabWidth;
             Npp.UseTabs = _indentWithTabs;
             Npp.AnnotationVisible = _annotationMode;
-            if (Npp.ViewWhitespace != WhitespaceMode.Invisible)
+            if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                 Npp.ViewWhitespace = _whitespaceMode;
 
             // apply default style...

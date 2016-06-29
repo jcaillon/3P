@@ -1573,16 +1573,6 @@ namespace _3PA.Images {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap ShowAllChar16x16 {
-            get {
-                object obj = ResourceManager.GetObject("ShowAllChar16x16", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
-        /// </summary>
         internal static System.Drawing.Bitmap ShowOptions {
             get {
                 object obj = ResourceManager.GetObject("ShowOptions", resourceCulture);

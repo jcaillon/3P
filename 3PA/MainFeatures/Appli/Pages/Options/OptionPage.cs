@@ -221,15 +221,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             scrollPanel.ContentPanel.Height = yPos + 50;
         }
 
-        public override void OnShow() {
-            foreach (Control control in scrollPanel.ContentPanel.Controls) {
-                control.Dispose();
-            }
-            GeneratePage();
-
-            base.OnShow();
-        }
-
         #region on events
 
         private void SaveAllButtonOnButtonPressed(object sender, EventArgs eventArgs) {

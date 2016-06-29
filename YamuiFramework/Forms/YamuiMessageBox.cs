@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiFormMessageBox.cs) is part of YamuiFramework.
+// This file (YamuiMessageBox.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ namespace YamuiFramework.Forms {
         /// </summary>
         private YamuiMessageBox(string htmlContent, List<string> buttonsList, int maxHeight, int maxWidth, int minWidth = 300) {
             InitializeComponent();
+            contentPanel.NoBackgroundImage = true;
 
             // register to the panel onclicked event and propagate it as a public field of this class
             contentLabel.LinkClicked += LinkClicked;

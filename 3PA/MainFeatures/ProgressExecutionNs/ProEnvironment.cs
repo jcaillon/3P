@@ -438,6 +438,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public static void Import() {
             _listOfEnv.Clear();
             _currentEnv = null;
+            Current.ReComputeProPath();
         }
 
         /// <summary>
@@ -521,7 +522,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Change the current environment
         /// </summary>
         public static void SetCurrent(string name, string suffix, string database) {
-
             // determines the current item selected in the envList
             var envList = GetList;
             _currentEnv = envList.FirstOrDefault(environnement =>

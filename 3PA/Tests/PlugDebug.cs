@@ -57,7 +57,7 @@ namespace _3PA.Tests {
         }
 
 
-        public static void GetCurrentScrollPageAddOrder() {
+        public static void DebugTest1() {
             UserCommunication.Notify(Npp.IsMacroRecording.ToString());
             Npp.RunCommand(NppMenuCmd.MacroStartRecording);
             UserCommunication.Notify(Npp.IsMacroRecording.ToString());
@@ -67,7 +67,7 @@ namespace _3PA.Tests {
             UserCommunication.Notify(firstname);
         }
 
-        public static void StartDebug() {
+        public static void DebugTest2() {
             
             object s = "";
             if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
@@ -81,7 +81,7 @@ namespace _3PA.Tests {
             //UserCommunication.Notify("debug");
         }
 
-        public static void Test() {
+        public static void DebugTest3() {
             //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
             //        MessageImg.MsgUpdate,
             //        "A new version has been installed!",
@@ -155,7 +155,7 @@ namespace _3PA.Tests {
 
             // OUPUT OF VISITOR
             File.WriteAllText(outLocation, vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-            return;
+
 
             // OUTPUT INFO ON EACH LINE
             /*
@@ -174,7 +174,7 @@ namespace _3PA.Tests {
             // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
+            /*
             //------------
             var watch2 = Stopwatch.StartNew();
             //------------
@@ -188,7 +188,7 @@ namespace _3PA.Tests {
             watch2.Stop();
 
             File.WriteAllText(outLocation, vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-
+            */
         }
 
         #endregion

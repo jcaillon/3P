@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (InputDialog.cs) is part of YamuiFramework.
+// This file (YamuiInputDialog.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -134,7 +134,6 @@ namespace YamuiFramework.Forms {
         private IContainer components;
         private object _dataObj;
         private ErrorProvider _errorProvider;
-        private Image _image;
         private List<MemberInfo> _items = new List<MemberInfo>();
         private YamuiButton _okBtn;
         private YamuiTableLayoutPanel _table;

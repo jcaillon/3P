@@ -564,7 +564,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     // if preproc, check line of definition and undefine
                     var parsedItem = (ParsedPreProc) compData.ParsedItem;
 
-                    output = output && _currentLineNumber >= parsedItem.Line;
+                    output = output && _currentLineNumber >= (parsedItem.IncludeLine >= 0 ? parsedItem.IncludeLine : parsedItem.Line);
                     if (parsedItem.UndefinedLine > 0)
                         output = output && _currentLineNumber <= parsedItem.UndefinedLine;
                 }

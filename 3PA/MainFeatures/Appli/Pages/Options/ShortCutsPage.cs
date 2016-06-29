@@ -101,16 +101,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
-                var undoButton = new YamuiButtonImage {
+                button = new YamuiButtonImage {
                     BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width + 10, yPos),
                     Tag = item.ItemId,
                     TabStop = false,
                 };
-                scrollPanel.ContentPanel.Controls.Add(undoButton);
-                undoButton.ButtonPressed += UndoButtonOnButtonPressed;
-                tooltip.SetToolTip(undoButton, "Click this button to reset the shortcut to its default value");
+                scrollPanel.ContentPanel.Controls.Add(button);
+                button.ButtonPressed += UndoButtonOnButtonPressed;
+                tooltip.SetToolTip(button, "Click this button to reset the shortcut to its default value");
+
+                // reset
+                button = new YamuiButtonImage {
+                    BackGrndImage = ImageResources.Delete,
+                    Size = new Size(20, 20),
+                    Location = new Point(button.Location.X + button.Width, yPos),
+                    Tag = item.ItemId,
+                    TabStop = false,
+                };
+                scrollPanel.ContentPanel.Controls.Add(button);
+                button.ButtonPressed += ButtonDeleteOnButtonPressed;
+                tooltip.SetToolTip(button, "Click this button to clear this shortcut");
 
                 yPos += label.Height + 15;
             }
@@ -150,6 +162,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             button.Text = @"Enter a new shortcut (or press ESCAPE)";
             button.UseCustomBackColor = true;
             button.BackColor = ThemeManager.Current.AccentColor;
+        }
+
+
+        private void ButtonDeleteOnButtonPressed(object sender, EventArgs eventArgs) {
+            _currentItemId = (string)((YamuiButtonImage)sender).Tag;
+            if (Config.Instance.ShortCuts.ContainsKey(_currentItemId))
+                Config.Instance.ShortCuts[_currentItemId] = "";
+            else
+                Config.Instance.ShortCuts.Add(_currentItemId, "");
+
+            // take into account the changes
+            Plug.SetHooks();
+
+            ((YamuiButton)scrollPanel.ContentPanel.Controls["bt" + _currentItemId]).Text = "";
         }
 
         private bool OnNewShortcutPressed(Keys key, KeyModifiers modifiers) {
