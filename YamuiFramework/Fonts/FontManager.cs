@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Runtime.InteropServices;
@@ -144,31 +145,32 @@ namespace YamuiFramework.Fonts {
         private static IFontResolver _fontResolver;
 
         static FontManager() {
-            try {
-                _fontResolver = new FontResolver();
-                return;
-            } catch (Exception) {
-                // ignore
-            }
-            _fontResolver = new DefaultFontResolver();
-        }
-
-        internal class DefaultFontResolver : IFontResolver {
-            public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
-                return new Font(familyName, emSize, fontStyle, unit);
-            }
+            _fontResolver = new FontResolver();
         }
 
         internal class FontResolver : IFontResolver {
-            public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
-                Font fontTester = new Font(familyName, emSize, fontStyle, unit);
-                if (fontTester.Name == familyName)
-                    return fontTester;
 
-                var familyFont = GetFontFamily(familyName);
-                if (familyFont != null)
-                    fontTester = new Font(familyFont, emSize, fontStyle, unit);
-                return fontTester;
+            private Dictionary<Tuple<string, float, FontStyle>, Font> _savedFonts = new Dictionary<Tuple<string, float, FontStyle>, Font>();
+
+            public Font ResolveFont(string familyName, float emSize, FontStyle fontStyle, GraphicsUnit unit) {
+
+                // we didn't already created the font?
+                var key = new Tuple<string, float, FontStyle>(familyName, emSize, fontStyle);
+                if (!_savedFonts.ContainsKey(key)) {
+
+                    // create it
+                    Font fontTester = new Font(familyName, emSize, fontStyle, unit);
+                    if (fontTester.Name != familyName) {
+                        var familyFont = GetFontFamily(familyName);
+                        if (familyFont != null)
+                            fontTester = new Font(familyFont, emSize, fontStyle, unit);
+                    }
+
+                    // save for future uses
+                    _savedFonts.Add(key, fontTester);
+                }
+
+                return _savedFonts[key]; ;
             }
 
             private PrivateFontCollection _pfc = new PrivateFontCollection();

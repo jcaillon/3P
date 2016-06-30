@@ -108,7 +108,7 @@ namespace YamuiFramework.Controls {
                     var checkRect = ClientRectangle;
                     checkRect.Width = 15;
                     checkRect.Offset(0, Height / 2 - 11);
-                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.9)), checkRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 } else {
                     using (SolidBrush b = new SolidBrush(foreColor)) {
                         Rectangle boxRect = new Rectangle(4, Height / 2 - 2, 5, 5);

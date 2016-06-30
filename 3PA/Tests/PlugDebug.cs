@@ -57,11 +57,16 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            /*
+
+            for (int i = 0; i < 1000; i++) {
+                AppliMenu.ShowMainMenuAtCursor();
+            }
+
+
             var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
             UserCommunication.Notify(firstname);
-             */
+             
         }
 
         public static void DebugTest2() {

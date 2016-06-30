@@ -257,7 +257,7 @@ namespace _3PA.MainFeatures {
                 }, 5);
                 return;
             }
-            if (!Abl.IsCurrentProgressFile()) {
+            if (!Abl.IsCurrentProgressFile) {
                 UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
                 return;
             }

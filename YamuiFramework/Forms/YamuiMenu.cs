@@ -37,6 +37,15 @@ namespace YamuiFramework.Forms {
     /// </summary>
     public sealed class YamuiMenu : Form {
 
+        #region static fields
+
+        /// <summary>
+        /// We keep a list of the menu currently opened so we can know if a menu is still in focus
+        /// </summary>
+        public static List<IntPtr> ListOfOpenededMenuHandle { get; set; }
+
+        #endregion
+
         #region public fields
 
         public bool IamMain = true;
@@ -51,11 +60,6 @@ namespace YamuiFramework.Forms {
         private YamuiMenu _childMenu;
 
         private bool _closing;
-
-        /// <summary>
-        /// We keep a list of the menu currently opened so we can know if a menu is still in focus
-        /// </summary>
-        public static List<IntPtr> ListOfOpenededMenuHandle { get; set; }
 
         private const int LineHeight = 22;
         private const int SeparatorLineHeight = 8;
@@ -89,7 +93,7 @@ namespace YamuiFramework.Forms {
 
         public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null, int minSize = 150) {
             if (content == null || content.Count == 0)
-                return;
+                content = new List<YamuiMenuItem> { new YamuiMenuItem { ItemName = "Empty", IsDisabled = true } };
 
             // init menu form
             SetStyle(
@@ -134,6 +138,7 @@ namespace YamuiFramework.Forms {
 
             // insert buttons
             int index = 0;
+            bool lastButtonWasDisabled = true;
             Controls.Clear();
             foreach (var item in content) {
                 if (item.IsSeparator) {
@@ -146,18 +151,23 @@ namespace YamuiFramework.Forms {
                         Location = new Point(BorderWidth, yPos),
                         Size = new Size(maxWidth - BorderWidth * 2, LineHeight),
                         NoIconImage = !useImageIcon,
-                        IconImage = item.ItemImage,
+                        BackGrndImage = item.ItemImage,
                         SubText = item.SubText,
                         Tag = index,
-                        SubTextOpacity = SubTextOpacity
+                        SubTextOpacity = SubTextOpacity,
+                        Enabled = !item.IsDisabled
                     };
                     button.Click += ButtonOnButtonPressed;
                     button.PreviewKeyDown += OnPreviewKeyDown;
                     Controls.Add(button);
                     _content.Add(item);
                     yPos += LineHeight;
-                    if (item.IsSelectedByDefault)
+                    
+                    // allows to select the correct button at start up
+                    if (item.IsSelectedByDefault || lastButtonWasDisabled)
                         _selectedIndex = index;
+                    if (lastButtonWasDisabled)
+                        lastButtonWasDisabled = item.IsDisabled;
                     index++;
                 }
             }
@@ -189,17 +199,18 @@ namespace YamuiFramework.Forms {
             Activated += OnActivated;
             Closing += OnClosing;
 
-            if (ListOfOpenededMenuHandle == null) {
-                ListOfOpenededMenuHandle = new List<IntPtr>();
-            }
-            ListOfOpenededMenuHandle.Add(Handle);
-
             // keydown
             KeyPreview = true;
             PreviewKeyDown += OnPreviewKeyDown;
 
             // set focused item
             ActiveControl = Controls[_selectedIndex];
+
+            // register to the opened menu list
+            if (ListOfOpenededMenuHandle == null) {
+                ListOfOpenededMenuHandle = new List<IntPtr>();
+            }
+            ListOfOpenededMenuHandle.Add(Handle);
         }
 
         #endregion
@@ -303,38 +314,44 @@ namespace YamuiFramework.Forms {
         /// A key has been pressed on the menu
         /// </summary>
         public void OnKeyDown(Keys pressedKey) {
-            switch (pressedKey) {
-                case Keys.Left:
-                case Keys.Escape:
-                    if (_parentMenu != null) {
-                        WinApi.SetForegroundWindow(_parentMenu.Handle);
-                    }
-                    Close();
-                    break;
-                case Keys.Right:
-                case Keys.Space:
-                case Keys.Enter:
-                    OnItemPressed();
-                    break;
-                case Keys.Up:
-                    _selectedIndex--;
-                    break;
-                case Keys.Down:
-                    _selectedIndex++;
-                    break;
-                case Keys.PageDown:
-                    _selectedIndex = _content.Count - 1;
-                    break;
-                case Keys.PageUp:
+            var initialIndex = _selectedIndex;
+            do {
+                switch (pressedKey) {
+                    case Keys.Left:
+                    case Keys.Escape:
+                        if (_parentMenu != null) {
+                            WinApi.SetForegroundWindow(_parentMenu.Handle);
+                        }
+                        Close();
+                        break;
+                    case Keys.Right:
+                    case Keys.Space:
+                    case Keys.Enter:
+                        OnItemPressed();
+                        break;
+                    case Keys.Up:
+                        _selectedIndex--;
+                        break;
+                    case Keys.Down:
+                        _selectedIndex++;
+                        break;
+                    case Keys.PageDown:
+                        _selectedIndex = _content.Count - 1;
+                        break;
+                    case Keys.PageUp:
+                        _selectedIndex = 0;
+                        break;
+                }
+                if (_selectedIndex > _content.Count - 1)
                     _selectedIndex = 0;
-                    break;
+                if (_selectedIndex < 0)
+                    _selectedIndex = _content.Count - 1;
+                if (Controls.Count > 0)
+                    ActiveControl = Controls[_selectedIndex];
             }
-            if (_selectedIndex > _content.Count - 1)
-                _selectedIndex = 0;
-            if (_selectedIndex < 0)
-                _selectedIndex = _content.Count - 1;
-            if (Controls.Count > 0)
-                ActiveControl = Controls[_selectedIndex];
+            // do this while the current button is disabled and we didn't already try every button
+            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
+
         }
 
         /// <summary>
@@ -372,40 +389,43 @@ namespace YamuiFramework.Forms {
 
             public bool NoIconImage { private get; set; }
             public bool NoChildren { private get; set; }
-            public Image IconImage { private get; set; }
             public string SubText { get; set; }
             public int SubTextOpacity { get; set; }
 
             protected override void OnPaint(PaintEventArgs e) {
 
-                var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered);
-                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered);
+                var backColor = YamuiThemeManager.Current.MenuBg(IsFocused, IsHovered, Enabled);
+                var foreColor = YamuiThemeManager.Current.MenuFg(IsFocused, IsHovered, Enabled);
 
                 // background
                 e.Graphics.Clear(backColor);
 
                 // foreground
                 // left line
-                if (IsFocused) {
+                if (IsFocused && Enabled) {
                     using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
                         e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, ClientRectangle.Height));
                     }
                 }
 
                 // Image icon
-                Image img = IconImage;
-                if (img != null && !NoIconImage)
-                    e.Graphics.DrawImage(img, new Rectangle(8, 1, 20, 20));
+                if (BackGrndImage != null) {
+                    var recImg = new Rectangle(new Point(8, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
+                    e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
+                }
 
                 // sub text 
                 if (!string.IsNullOrEmpty(SubText)) {
                     var textFont = FontManager.GetFont(FontStyle.Bold, 10);
                     var textSize = TextRenderer.MeasureText(SubText, textFont);
-                    var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
-                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb(SubTextOpacity, YamuiThemeManager.Current.SubTextFore)), drawPoint);
+                    var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
 
-                    var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8), YamuiThemeManager.Current.SubTextFore), 1) { Alignment = PenAlignment.Left };
-                    e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
+                    var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
+                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb(SubTextOpacity, subColor)), drawPoint);
+
+                    using (var pen = new Pen(Color.FromArgb((int) (SubTextOpacity*0.8), subColor), 1) {Alignment = PenAlignment.Left}) {
+                        e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
+                    }
                 }
 
                 // text
@@ -413,7 +433,7 @@ namespace YamuiFramework.Forms {
 
                 // arrow
                 if (!NoChildren) {
-                    TextRenderer.DrawText(e.Graphics, ((char) 52).ToString(), new Font("Webdings", (float) (Height*0.50)), new Rectangle(ClientRectangle.Width - 12, 0, 12, ClientRectangle.Height), IsFocused ? YamuiThemeManager.Current.AccentColor : foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    TextRenderer.DrawText(e.Graphics, ((char)52).ToString(), FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.50)), new Rectangle(ClientRectangle.Width - 12, 0, 12, ClientRectangle.Height), IsFocused ? YamuiThemeManager.Current.AccentColor : foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
                 }
             }
         }
@@ -465,6 +485,11 @@ namespace YamuiFramework.Forms {
         /// You can use this field to store any piece of info on this menu item
         /// </summary>
         public object Data { get; set; }
+
+        /// <summary>
+        /// true if the item is disabled
+        /// </summary>
+        public bool IsDisabled { get; set; }
 
         private Action _do;
 

@@ -101,7 +101,7 @@ namespace _3PA {
         /// </summary>
         internal static void SetPlugFuncItems() {
             var cmdIndex = 0;
-            AppliMenu.DockableCommandIndex = cmdIndex;
+            AppliMenu.MainMenuCommandIndex = cmdIndex;
             Npp.SetCommand(cmdIndex++, "Show main menu  [Ctrl + Right click]", AppliMenu.ShowMainMenuAtCursor);
             CodeExplorer.DockableCommandIndex = cmdIndex;
             Npp.SetCommand(cmdIndex++, "Toggle code explorer", CodeExplorer.Toggle);
@@ -113,7 +113,7 @@ namespace _3PA {
         /// Called when the plugin can set new shorcuts to the toolbar in notepad++
         /// </summary>
         internal static void InitToolbarImages() {
-            Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.DockableCommandIndex);
+            Npp.SetToolbarImage(ImageResources.logo16x16, AppliMenu.MainMenuCommandIndex);
             Npp.SetToolbarImage(ImageResources.FileExplorer16x16, FileExplorer.DockableCommandIndex);
             Npp.SetToolbarImage(ImageResources.CodeExplorer16x16, CodeExplorer.DockableCommandIndex);
         }
@@ -164,14 +164,14 @@ namespace _3PA {
 
                 // code explorer
                 if (Config.Instance.CodeExplorerAutoHideOnNonProgressFile) {
-                    CodeExplorer.Toggle(Abl.IsCurrentProgressFile());
+                    CodeExplorer.Toggle(Abl.IsCurrentProgressFile);
                 } else if (Config.Instance.CodeExplorerVisible) {
                     CodeExplorer.Toggle();
                 }
 
                 // File explorer
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
-                    FileExplorer.Toggle(Abl.IsCurrentProgressFile());
+                    FileExplorer.Toggle(Abl.IsCurrentProgressFile);
                 } else if (Config.Instance.FileExplorerVisible) {
                     FileExplorer.Toggle();
                 }
@@ -202,7 +202,7 @@ namespace _3PA {
             AutoComplete.RefreshStaticItems();
 
             // Simulates a OnDocumentSwitched when we start this dll
-            IsCurrentFileProgress = Abl.IsCurrentProgressFile(); // to correctly init isPreviousProgress
+            IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
             OnDocumentSwitched(true);
 
             // Make sure to give the focus to scintilla on startup

@@ -705,7 +705,9 @@ namespace YamuiFramework.Forms {
                 //PaintTransparentBackground(e.Graphics, DisplayRectangle);
 
                 Color foreColor = YamuiThemeManager.Current.ButtonFg(ForeColor, false, false, _isHovered, _isPressed, Enabled);
-                TextRenderer.DrawText(e.Graphics, Text, new Font("Webdings", 9.25f), ClientRectangle, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                using (var font = new Font("Webdings", 9.25f)) {
+                    TextRenderer.DrawText(e.Graphics, Text, font, ClientRectangle, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                }
             }
 
             #endregion

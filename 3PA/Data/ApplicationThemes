@@ -97,6 +97,8 @@ MenuHoverBack	#CEE2FC
 MenuHoverFore	#000000
 MenuFocusedBack	#9AC2F9
 MenuFocusedFore	#000000
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#FEE465
 AutoCompletionHighlightBorder	#FFAB00
 GenericLinkColor	darken(@AccentColor, 20%)
@@ -159,6 +161,8 @@ MenuHoverBack	#181718
 MenuHoverFore	#D7D2D8
 MenuFocusedBack	#0A3259
 MenuFocusedFore	#F5CDA6
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#5F0005
 AutoCompletionHighlightBorder	#9D0008
 GenericLinkColor	@AccentColor
@@ -221,6 +225,8 @@ MenuHoverBack	#CEE2FC
 MenuHoverFore	#000000
 MenuFocusedBack	#9AC2F9
 MenuFocusedFore	#000000
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#D398C0
 AutoCompletionHighlightBorder	#D333A0
 GenericLinkColor	#FF1493
@@ -283,6 +289,8 @@ MenuHoverBack	#222
 MenuHoverFore	#fff
 MenuFocusedBack	#2D2D2D
 MenuFocusedFore	#D8D8D8
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#4D0004
 AutoCompletionHighlightBorder	#BE0000
 GenericLinkColor	#CC0000
@@ -345,6 +353,8 @@ MenuHoverBack	#454B51
 MenuHoverFore	#D8D8D8
 MenuFocusedBack	#4E555B
 MenuFocusedFore	#D8D8D8
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#111
 AutoCompletionHighlightBorder	#000
 GenericLinkColor	#fff
@@ -407,6 +417,8 @@ MenuHoverBack	#B4B4B4
 MenuHoverFore	#4694D8
 MenuFocusedBack	#CCCCCC
 MenuFocusedFore	#000
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	lighten(@AccentColor, 90%)
 AutoCompletionHighlightBorder	darken(@AccentColor, 20%)
 GenericLinkColor	@AccentColor
@@ -469,6 +481,8 @@ MenuHoverBack	lighten(@MenuNormalBack, 25%)
 MenuHoverFore	darken(@MenuNormalFore, 25%)
 MenuFocusedBack	#932C41
 MenuFocusedFore	#D8D8D8
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#CD2342
 AutoCompletionHighlightBorder	#CD7081
 GenericLinkColor	@SubTextFore
@@ -531,6 +545,8 @@ MenuHoverBack	#DDD
 MenuHoverFore	#3A3A3A
 MenuFocusedBack	@FormAltBack
 MenuFocusedFore	#3A3A3A
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#CCC
 AutoCompletionHighlightBorder	#888
 GenericLinkColor	#00ADB5

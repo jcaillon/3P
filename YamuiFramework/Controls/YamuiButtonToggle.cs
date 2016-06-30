@@ -116,7 +116,7 @@ namespace YamuiFramework.Controls {
                     var fuRect = ClientRectangle;
                     fuRect.Width = 15;
                     fuRect.Offset(5, Height / 2 - 11);
-                    TextRenderer.DrawText(e.Graphics, "a", new Font("Webdings", 15f, GraphicsUnit.Pixel), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
+                    TextRenderer.DrawText(e.Graphics, "a", FontManager.GetOtherFont("Webdings", FontStyle.Regular, (float)(Height * 0.9)), fuRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
                 }
 
                 // draw border

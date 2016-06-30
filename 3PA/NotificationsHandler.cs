@@ -352,7 +352,7 @@ namespace _3PA {
 
             // update current file info
             IsPreviousFileProgress = IsCurrentFileProgress;
-            IsCurrentFileProgress = Abl.IsCurrentProgressFile();
+            IsCurrentFileProgress = Abl.IsCurrentProgressFile;
             CurrentFilePath = Npp.GetCurrentFilePath();
             CurrentFileObject = FilesInfo.GetFileInfo(CurrentFilePath);
 

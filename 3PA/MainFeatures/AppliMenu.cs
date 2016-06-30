@@ -59,7 +59,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Command index in the notepad++ plugin menu
         /// </summary>
-        public static int DockableCommandIndex { get; set; }
+        public static int MainMenuCommandIndex { get; set; }
 
         /// <summary>
         /// Closes the visible menu (if any)
@@ -101,20 +101,15 @@ namespace _3PA.MainFeatures {
         /// Show the appli main menu at the cursor location
         /// </summary>
         public static void ShowMainMenuAtCursor() {
-            if (!Plug.PluginIsReady) {
-                return;
-            }
-            ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance._mainMenuList : Instance._mainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
-        }
 
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._mainMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
+        }
 
         /// <summary>
         /// Show the generate code menu at the cursor location
         /// </summary>
         public static void ShowGenerateCodeMenuAtCursor() {
-            if (Abl.IsCurrentProgressFile()) {
-                ShowMenuAtCursor(Instance._generateCodeMenuList.Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
-            }
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._generateCodeMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
         }
 
         /// <summary>
@@ -122,6 +117,16 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void ShowEnvMenuAtCursor() {
             ShowMenuAtCursor(Instance._envMenuList, "Switch environment", "Env", 185);
+        }
+
+        /// <summary>
+        /// Allows to disable the items in a list depending on the conditions (item must be generic or we must be on a progress file to Enable)
+        /// </summary>
+        /// <returns></returns>
+        private static List<MenuItem> DisableItemIfNeeded(List<MenuItem> list) {
+            var isCurrentFileProgressFile = Abl.IsCurrentProgressFile;
+            list.ForEach(item => item.IsDisabled = !isCurrentFileProgressFile && (!item.Generic));
+            return list;
         }
 
         #endregion
