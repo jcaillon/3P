@@ -18,7 +18,9 @@
 // ========================================================================
 #endregion
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -27,6 +29,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.Lib.Ftp;
@@ -57,14 +60,15 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
+            UserCommunication.Notify(Color.Aqua.ConvertToStr());
+
             var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
             UserCommunication.Notify(firstname);
-             
         }
 
         public static void DebugTest2() {
-            /*
+            
             object s = "";
             if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
                 // Do something with the 's' variable
@@ -74,16 +78,16 @@ namespace _3PA.Tests {
             YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
             //Debug.Assert(false);
             //UserCommunication.Notify("debug");
-             */
+             
         }
 
         public static void DebugTest3() {
-            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
-            //        MessageImg.MsgUpdate,
-            //        "A new version has been installed!",
-            //        "Updated to version " + AssemblyInfo.Version,
-            //        new List<string> { "ok", "cancel" },
-            //        true);
+            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", Encoding.Default)).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok", "cancel" },
+                    true);
             /*
             Task.Factory.StartNew(() => {
 

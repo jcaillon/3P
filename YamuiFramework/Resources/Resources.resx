@@ -121,34 +121,37 @@
   <data name="BaseStyleSheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>basestylesheet.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
   </data>
-  <data name="Error" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\error.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="HighImportance" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\highimportance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Info" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\info.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Ok" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\ok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Question" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\question.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="QuestionShield" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\questionshield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Services" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\services.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="Warning" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\warning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="WarningShield" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>msgboxandhtmlimg\warningshield.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="ApplicationThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>applicationthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="MsgError" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msgerror.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgHighImportance" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msghighimportance.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgInfo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msginfo.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msgok.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgQuestion" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msgquestion.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgToolTip" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msgtooltip.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="MsgWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>msgboxandhtmlimg\msgwarning.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoError" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>errorprovidericons\icoerror.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoOk" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>errorprovidericons\icook.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="IcoWarning" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>errorprovidericons\icowarning.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

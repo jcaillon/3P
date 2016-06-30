@@ -19,9 +19,11 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -30,7 +32,204 @@ using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
 
+    /// <summary>
+    /// This class provides various utilies to use in YamuiFramework and outside
+    /// </summary>
     public static class Utilities {
+
+        #region Validation and data type conversions
+
+        public static readonly Dictionary<Type, char[]> KeyPressValidChars = new Dictionary<Type, char[]> {
+            {typeof (byte), GetCultureChars(true, false, true)},
+            {typeof (sbyte), GetCultureChars(true, true, true)},
+            {typeof (short), GetCultureChars(true, true, true)},
+            {typeof (ushort), GetCultureChars(true, false, true)},
+            {typeof (int), GetCultureChars(true, true, true)},
+            {typeof (uint), GetCultureChars(true, false, true)},
+            {typeof (long), GetCultureChars(true, true, true)},
+            {typeof (ulong), GetCultureChars(true, false, true)},
+            {typeof (double), GetCultureChars(true, true, true, true, true, true)},
+            {typeof (float), GetCultureChars(true, true, true, true, true, true)},
+            {typeof (decimal), GetCultureChars(true, true, true, true, true)},
+            {typeof (TimeSpan), GetCultureChars(true, true, false, new[] {'-'})},
+            {typeof (Guid), GetCultureChars(true, false, false, "-{}()".ToCharArray())}
+        };
+
+        public static char[] GetCultureChars(bool digits, bool neg, bool pos, bool dec = false, bool grp = false, bool e = false) {
+            var c = CultureInfo.CurrentCulture.NumberFormat;
+            var l = new List<string>();
+            if (digits) l.AddRange(c.NativeDigits);
+            if (neg) l.Add(c.NegativeSign);
+            if (pos) l.Add(c.PositiveSign);
+            if (dec) l.Add(c.NumberDecimalSeparator);
+            if (grp) l.Add(c.NumberGroupSeparator);
+            if (e) l.Add("Ee");
+            var sb = new StringBuilder();
+            foreach (var s in l)
+                sb.Append(s);
+            char[] ca = sb.ToString().ToCharArray();
+            Array.Sort(ca);
+            return ca;
+        }
+
+        public static char[] GetCultureChars(bool timeChars, bool timeSep, bool dateSep, char[] other) {
+            var c = CultureInfo.CurrentCulture;
+            var l = new List<string>();
+            if (timeChars) l.AddRange(c.NumberFormat.NativeDigits);
+            if (timeSep) {
+                l.Add(c.DateTimeFormat.TimeSeparator);
+                l.Add(c.NumberFormat.NumberDecimalSeparator);
+            }
+            if (dateSep) l.Add(c.DateTimeFormat.DateSeparator);
+            if (other != null && other.Length > 0) l.Add(new string(other));
+            var sb = new StringBuilder();
+            foreach (var s in l)
+                sb.Append(s);
+            char[] ca = sb.ToString().ToCharArray();
+            Array.Sort(ca);
+            return ca;
+        }
+
+        public static readonly Dictionary<Type, Predicate<string>> Validations = new Dictionary<Type, Predicate<string>> {
+            {
+                typeof (byte), s => {
+                    byte n;
+                    return byte.TryParse(s, out n);
+                }
+            }, {
+                typeof (sbyte), s => {
+                    sbyte n;
+                    return sbyte.TryParse(s, out n);
+                }
+            }, {
+                typeof (short), s => {
+                    short n;
+                    return short.TryParse(s, out n);
+                }
+            }, {
+                typeof (ushort), s => {
+                    ushort n;
+                    return ushort.TryParse(s, out n);
+                }
+            }, {
+                typeof (int), s => {
+                    int n;
+                    return int.TryParse(s, out n);
+                }
+            }, {
+                typeof (uint), s => {
+                    uint n;
+                    return uint.TryParse(s, out n);
+                }
+            }, {
+                typeof (long), s => {
+                    long n;
+                    return long.TryParse(s, out n);
+                }
+            }, {
+                typeof (ulong), s => {
+                    ulong n;
+                    return ulong.TryParse(s, out n);
+                }
+            }, {
+                typeof (char), s => {
+                    char n;
+                    return char.TryParse(s, out n);
+                }
+            }, {
+                typeof (double), s => {
+                    double n;
+                    return double.TryParse(s, out n);
+                }
+            }, {
+                typeof (float), s => {
+                    float n;
+                    return float.TryParse(s, out n);
+                }
+            }, {
+                typeof (decimal), s => {
+                    decimal n;
+                    return decimal.TryParse(s, out n);
+                }
+            }, {
+                typeof (DateTime), s => {
+                    DateTime n;
+                    return DateTime.TryParse(s, out n);
+                }
+            }, {
+                typeof (TimeSpan), s => {
+                    TimeSpan n;
+                    return TimeSpan.TryParse(s, out n);
+                }
+            }, {
+                typeof (Guid), s => {
+                    try {
+                        Guid n = new Guid(s);
+                        return true;
+                    } catch {
+                        return false;
+                    }
+                }
+            }
+        };
+
+        public static object ConvertFromStr(this string value, Type destType) {
+            if (destType == typeof (string))
+                return value;
+            if (value.Trim() == string.Empty)
+                return destType.IsValueType ? Activator.CreateInstance(destType) : null;
+            if (typeof (IConvertible).IsAssignableFrom(destType))
+                try {
+                    return Convert.ChangeType(value, destType);
+                } catch {
+                    // ignored
+                }
+            return TypeDescriptor.GetConverter(destType).ConvertFrom(value);
+        }
+
+        public static bool IsSupportedType(Type type) {
+            if (typeof (IConvertible).IsAssignableFrom(type))
+                return true;
+            var cvtr = TypeDescriptor.GetConverter(type);
+            if (cvtr.CanConvertFrom(typeof (string)) && cvtr.CanConvertTo(typeof (string)))
+                return true;
+            return false;
+        }
+
+        public static string ConvertToStr(this object value) {
+            if (value == null)
+                return string.Empty;
+            IConvertible conv = value as IConvertible;
+            if (conv != null)
+                return value.ToString();
+            return (string) TypeDescriptor.GetConverter(value).ConvertTo(value, typeof (string));
+        }
+
+        public static bool IsSimpleType(this Type type) {
+            return type.IsPrimitive || type.IsEnum || Array.Exists(SimpleTypes, t => t == type) || Convert.GetTypeCode(type) != TypeCode.Object ||
+                   (type.IsGenericType && type.GetGenericTypeDefinition() == typeof (Nullable<>) && IsSimpleType(type.GetGenericArguments()[0]));
+        }
+
+        public static readonly Type[] SimpleTypes = {
+            typeof (Enum), typeof (Decimal), typeof (DateTime),
+            typeof (DateTimeOffset), typeof (String), typeof (TimeSpan), typeof (Guid)
+        };
+
+        public static bool IsInvalidKey(char keyChar, Type itemType) {
+            if (char.IsControl(keyChar))
+                return false;
+            char[] chars;
+            KeyPressValidChars.TryGetValue(itemType, out chars);
+            if (chars != null) {
+                int si = Array.BinarySearch(chars, keyChar);
+                if (si < 0)
+                    return true;
+            }
+            return false;
+        }
+
+        #endregion
+
 
         #region GetRoundedRect
 
@@ -78,7 +277,6 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
 
         #region Colors extensions
 

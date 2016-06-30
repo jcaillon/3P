@@ -153,7 +153,7 @@ namespace YamuiFramework.Controls {
         /// Call this method to activate the OnPressedButton event manually
         /// </summary>
         public void HandlePressedButton() {
-            OnButtonPressed(new EventArgs());
+            OnClick(new EventArgs());
         }
 
         private void OnButtonPressed(EventArgs eventArgs) {

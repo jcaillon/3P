@@ -302,17 +302,18 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Resources\ErrorProviderIcons\IcoError.ico" />
+    <Content Include="Resources\ErrorProviderIcons\IcoOk.ico" />
+    <Content Include="Resources\ErrorProviderIcons\IcoWarning.ico" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgError.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgHighImportance.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgInfo.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgOk.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgQuestion.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgToolTip.png" />
+    <Content Include="Resources\MsgBoxAndHtmlImg\MsgWarning.png" />
     <None Include="Animations\readme.txt" />
     <Content Include="Resources\BaseStyleSheet.css" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Error.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\HighImportance.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Info.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Ok.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Question.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\QuestionShield.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Services.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\Warning.png" />
-    <Content Include="Resources\MsgBoxAndHtmlImg\WarningShield.png" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageLoad.png" />
     <EmbeddedResource Include="HtmlRenderer.Core\Core\Utils\ImageError.png" />
     <None Include="Fonts\REDCIRCL.ttf" />

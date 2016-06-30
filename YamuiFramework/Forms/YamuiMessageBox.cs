@@ -202,15 +202,12 @@ namespace YamuiFramework.Forms {
     }
 
     public enum MessageImage {
-        Free,
-        Error,
-        HighImportance,
-        Info,
-        Ok,
-        Question,
-        QuestionShield,
-        Services,
-        Warning,
-        WarningShield,
+        MsgError,
+        MsgHighImportance,
+        MsgInfo,
+        MsgOk,
+        MsgQuestion,
+        MsgToolTip,
+        MsgWarning
     }
 }
