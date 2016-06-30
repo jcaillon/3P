@@ -26,7 +26,6 @@ using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
 
 namespace YamuiFramework.Forms {
     public sealed partial class YamuiMessageBox : YamuiForm {
@@ -189,6 +188,7 @@ namespace YamuiFramework.Forms {
                 msgbox.ShowDialog(new WindowWrapper(ownerHandle));
                 if (yamuiForm != null) 
                     yamuiForm.HasModalOpened = false;
+                msgbox.Dispose();
                 // get focus back to owner
                 WinApi.SetForegroundWindow(ownerHandle);
             } else {

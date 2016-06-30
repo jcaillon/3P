@@ -30,7 +30,6 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -246,17 +245,18 @@ namespace _3PA.Lib {
         /// <param name="filter">txt files (*.txt)|*.txt|All files (*.*)|*.*</param>
         /// <returns></returns>
         public static string ShowFileSelection(string initialFile, string filter) {
-            OpenFileDialog dialog = new OpenFileDialog {
-                Multiselect = false,
-                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
-                Title = @"Select a file"
-            };
-            var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
-            if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
-                dialog.InitialDirectory = initialFolder;
-            if (File.Exists(initialFile))
-                dialog.FileName = initialFile;
-            return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : string.Empty;
+            using (OpenFileDialog dialog = new OpenFileDialog {
+                    Multiselect = false,
+                    Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
+                    Title = @"Select a file"
+                }) {
+                var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
+                if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
+                    dialog.InitialDirectory = initialFolder;
+                if (File.Exists(initialFile))
+                    dialog.FileName = initialFile;
+                return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : string.Empty;
+            }
         }
 
         /// <summary>

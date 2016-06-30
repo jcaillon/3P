@@ -365,6 +365,7 @@ namespace YamuiFramework.Forms {
             if (_childMenu != null) {
                 _childMenu.CloseChildren();
                 _childMenu.Close();
+                _childMenu.Dispose();
             }
         }
 
@@ -372,6 +373,7 @@ namespace YamuiFramework.Forms {
             if (_parentMenu != null) {
                 _parentMenu.CloseParents();
                 _parentMenu.Close();
+                _parentMenu.Dispose();
             }
         }
 
@@ -379,6 +381,7 @@ namespace YamuiFramework.Forms {
             CloseChildren();
             CloseParents();
             Close();
+            Dispose();
         }
 
         #endregion
