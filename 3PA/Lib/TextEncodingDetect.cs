@@ -93,9 +93,13 @@ namespace _3PA.Lib {
 
             // Read in the file in binary
             byte[] buffer;
-
             try {
-                buffer = File.ReadAllBytes(srcFile);
+                using (var file = new FileStream(srcFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    using (var memoryStream = new MemoryStream()) {
+                        file.CopyTo(memoryStream);
+                        buffer = memoryStream.ToArray();
+                    }
+                }
             } catch (Exception) {
                 return encoding;
             }

@@ -112,6 +112,7 @@ namespace _3PA.Lib {
                     r.CallAs(typeIFileDialog, dialog, "Unadvise", num);
                     GC.KeepAlive(pfde);
                 }
+
             } else {
                 using (var fbd = new FolderBrowserDialog {
                         Description = Title,

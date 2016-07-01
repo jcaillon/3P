@@ -26,7 +26,6 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
 
@@ -91,7 +90,7 @@ namespace _3PA.MainFeatures {
                     return;
                 }
 
-                UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(Config.FileVersionLog, TextEncodingDetect.GetFileEncoding(Config.FileVersionLog))).MdToHtml(),
+                UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Config.FileVersionLog, Encoding.Default)).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,

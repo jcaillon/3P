@@ -345,7 +345,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
 
                 if (!string.IsNullOrEmpty(GetPfPath()) && File.Exists(GetPfPath())) {
-                    if (File.ReadAllText(GetPfPath(), Encoding.Default).RegexMatch(@"\s-1", RegexOptions.Singleline))
+                    if (Utils.ReadAllText(GetPfPath()).RegexMatch(@"\s-1", RegexOptions.Singleline))
                         singleUserMode = true;
                 }
 

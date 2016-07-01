@@ -60,11 +60,42 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            UserCommunication.Notify(Color.Aqua.ConvertToStr());
+            UserCommunication.Notify("#000".ConvertFromStr(typeof(Color)).ConvertToStr());
 
-            var stylersXml = XDocument.Load(Config.FileNppStylersXml);
-            var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
-            UserCommunication.Notify(firstname);
+            Stopwatch sw = new Stopwatch();
+
+            sw.Start();
+
+            for (int i = 0; i < 100; i++) {
+                File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log", TextEncodingDetect.GetFileEncoding(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log"));
+            }
+
+
+
+            sw.Stop();
+
+            UserCommunication.Notify(string.Format("Elapsed={0}", sw.Elapsed));
+
+            sw = new Stopwatch();
+
+            sw.Start();
+
+            for (int i = 0; i < 100; i++) {
+                Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log");
+            }
+
+            sw.Stop();
+
+            UserCommunication.Notify(string.Format("Elapsed={0}", sw.Elapsed));
+
+
+            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\utf8.txt"));
+            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\chelou.txt"));
+            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\ansi.txt"));
+
+            //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
+            //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
+            //UserCommunication.Notify(firstname);
         }
 
         public static void DebugTest2() {
@@ -82,7 +113,7 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest3() {
-            UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"C:\Users\Julien\Desktop\content.md", Encoding.Default)).MdToHtml(),
+            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
@@ -124,7 +155,7 @@ namespace _3PA.Tests {
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            Parser tok = new Parser(File.ReadAllText(inLocation), inLocation, null, true);
+            Parser tok = new Parser(Utils.ReadAllText(inLocation), inLocation, null, true);
 
             OutputVis vis = new OutputVis();
             tok.Accept(vis);
@@ -159,7 +190,7 @@ namespace _3PA.Tests {
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(File.ReadAllText(inLocation));
+            Lexer tok2 = new Lexer(Utils.ReadAllText(inLocation));
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -445,7 +476,7 @@ namespace _3PA.Tests {
 
             var output = new StringBuilder();
             var log = new StringBuilder();
-            var indexContent = File.ReadAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\extracted\index.hhk", Encoding.Default);
+            var indexContent = Utils.ReadAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\extracted\index.hhk", Encoding.Default);
 
             foreach (var items in File.ReadAllLines(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.data", Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
 

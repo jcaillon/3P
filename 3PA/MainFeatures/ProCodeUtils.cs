@@ -394,7 +394,7 @@ namespace _3PA.MainFeatures {
                 },
                 OnExecutionOk = execution => {
                     try {
-                        if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && File.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
+                        if (!string.IsNullOrEmpty(execution.LogPath) && File.Exists(execution.LogPath) && Utils.ReadAllText(execution.LogPath).ContainsFast("_ab")) {
                             UserCommunication.Notify("Failed to start the appbuilder, the following commands both failed :<br><div class='ToolTipcodeSnippet'>RUN adeuib/_uibmain.p.<br>RUN _ab.p.</div><br>Your version of progress might be uncompatible with those statements? If this problem looks anormal to you, please open a new issue on github.", MessageImg.MsgRip, "Start Appbuilder", "The command failed");
                         }
                     } catch (Exception e) {

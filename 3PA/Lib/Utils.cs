@@ -30,7 +30,9 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Interop;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli;
 
 namespace _3PA.Lib {
 
@@ -268,7 +270,15 @@ namespace _3PA.Lib {
             var fsd = new FolderSelectDialog();
             if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                 fsd.InitialDirectory = initialFolder;
-            fsd.ShowDialog();
+            if (Appli.IsVisible) {
+                try {
+                    WinApi.EnableWindow(Npp.HandleNpp, false);
+                    fsd.ShowDialog(Appli.Form.Handle);
+                } finally {
+                    WinApi.EnableWindow(Npp.HandleNpp, true);
+                }
+            } else
+                fsd.ShowDialog(Npp.HandleNpp);
             return fsd.FileName ?? string.Empty;
         }
 
@@ -475,7 +485,7 @@ namespace _3PA.Lib {
         public static string ReadAndFormatLogToHtml(string logFullPath) {
             string output = "";
             if (!string.IsNullOrEmpty(logFullPath) && File.Exists(logFullPath)) {
-                output = File.ReadAllText(logFullPath, TextEncodingDetect.GetFileEncoding(logFullPath)).Replace("\n", "<br>");
+                output = ReadAllText(logFullPath, TextEncodingDetect.GetFileEncoding(logFullPath)).Replace("\n", "<br>");
                 output = "<div class='ToolTipcodeSnippet'>" + output + "</div>";
             }
             return output;
@@ -534,7 +544,7 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region configuration file reader
+        #region File read/write
 
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
         /// Apply the action toApplyOnEachLine to each line
@@ -549,6 +559,13 @@ namespace _3PA.Lib {
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
             }
+        }
+
+        public static string ReadAllText(string path, Encoding encoding = null) {
+            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var textReader = new StreamReader(fileStream, encoding == null ? TextEncodingDetect.GetFileEncoding(path) : encoding)) {
+                    return textReader.ReadToEnd();
+                }
         }
 
         #endregion

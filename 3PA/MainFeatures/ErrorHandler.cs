@@ -119,7 +119,7 @@ namespace _3PA.MainFeatures {
 
                     // send to github
                     Task.Factory.StartNew(() => {
-                        if (Config.Instance.GlobalDontAutoPostLog || User.SendIssue(File.ReadAllText(Config.FileErrorToSend), Config.SendLogApi)) {
+                        if (Config.Instance.GlobalDontAutoPostLog || User.SendIssue(Utils.ReadAllText(Config.FileErrorToSend, Encoding.Default), Config.SendLogApi)) {
                             Utils.DeleteFile(Config.FileErrorToSend);
                         }
                     });

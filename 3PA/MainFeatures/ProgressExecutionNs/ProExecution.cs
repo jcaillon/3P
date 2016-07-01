@@ -288,7 +288,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 baseIniPath = Path.Combine(TempDir, "base.ini");
                 // we need to copy the .ini but we must delete the PROPATH= part, as stupid as it sounds, if we leave a huge PROPATH 
                 // in this file, it increases the compilation time by a stupid amount... unbelievable i know, but trust me, it does...
-                var fileContent = File.ReadAllText(ProEnv.IniPath, Encoding.Default);
+                var fileContent = Utils.ReadAllText(ProEnv.IniPath);
                 var regex = new Regex("^PROPATH=.*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                 var matches = regex.Match(fileContent);
                 if (matches.Success) 
@@ -336,7 +336,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     programContent.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProgressQuoter());
                     programContent.AppendLine("&SCOPED-DEFINE FileCorrectionDescription " + fileInfo.CorrectionDecription.Replace("\r", "").Replace("\n", "~n").ProgressQuoter());
                 }
-                File.WriteAllText(Path.Combine(TempDir, fileToExecute), File.ReadAllText(Config.FileStartProlint, TextEncodingDetect.GetFileEncoding(Config.FileStartProlint)).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), Encoding.Default);
+                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), TextEncodingDetect.GetFileEncoding(Config.FileStartProlint));
 
             } else {
 

@@ -91,6 +91,10 @@ namespace _3PA.Interop {
         #region Api
 
         [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+        [DllImport("user32.dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
 
         [DllImport("user32.dll", EntryPoint = "SetWindowPos")]

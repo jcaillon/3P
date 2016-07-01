@@ -289,7 +289,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         /// <returns></returns>
         public bool CompilationFailedOnMaxUser() {
-            return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && File.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog, Encoding.Default).Contains("(748)"));
+            return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && Utils.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog).Contains("(748)"));
         }
 
         #endregion

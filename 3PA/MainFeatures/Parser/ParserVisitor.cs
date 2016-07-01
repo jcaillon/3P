@@ -575,7 +575,7 @@ namespace _3PA.MainFeatures.Parser {
                 parserVisitor = ParserHandler.SavedParserVisitors[fileName];
             } else {
                 // Parse it
-                var ablParser = new Parser(File.ReadAllText(fileName, TextEncodingDetect.GetFileEncoding(fileName)), fileName, ownerName);
+                var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, ownerName);
 
                 parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.GetLineInfo);
                 ablParser.Accept(parserVisitor);
