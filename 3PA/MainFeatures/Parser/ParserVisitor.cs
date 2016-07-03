@@ -239,17 +239,18 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedBlock pars) {
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
-                DisplayText = pars.Name,
-                Branch = pars.Branch,
-                IconType = pars.IconIconType,
-                IsRoot = pars.IsRoot,
-                Flag = AddExternalFlag((CodeExplorerFlag)0),
-                DocumentOwner = pars.FilePath,
-                GoToLine = pars.Line,
-                GoToColumn = pars.Column,
-                SubString = SetExternalInclude(null)
-            });
+            if (pars.ToDisplayOnExplorer)
+                ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                    DisplayText = pars.Name,
+                    Branch = pars.Branch,
+                    IconType = pars.IconIconType,
+                    IsRoot = pars.IsRoot,
+                    Flag = AddExternalFlag((CodeExplorerFlag)0),
+                    DocumentOwner = pars.FilePath,
+                    GoToLine = pars.Line,
+                    GoToColumn = pars.Column,
+                    SubString = SetExternalInclude(null)
+                });
         }
 
         /// <summary>

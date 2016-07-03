@@ -29,7 +29,6 @@ namespace _3PA.Lib {
     /// A class to read and write an object instance
     /// FYI : no fields of the T class can be null when saving an instance
     /// TODO: save more than a simple string, string dico
-    /// <remarks>/!\ THIS CLASS IS DUPLICATED IN YAMUIFRAMEWORK!!!!!!!!</remarks>
     /// </summary>
     public static class Object2Xml<T> {
 
@@ -104,19 +103,11 @@ namespace _3PA.Lib {
                 if (property.FieldType == typeof (Dictionary<string, string>)) {
                     itemElement.Add(DictToXml((Dictionary<string, string>) property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
                 } else {
-                    if (property.FieldType == typeof (Color)) {
-                        if (valueInAttribute)
-                            fieldElement.Add(new XAttribute(ValueString, ColorTranslator.ToHtml((Color) property.GetValue(item))));
-                        else
-                            fieldElement.Add(ColorTranslator.ToHtml((Color) property.GetValue(item)));
-                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof (string)) {
-                        // case of a simple value
-                        if (valueInAttribute)
-                            fieldElement.Add(new XAttribute(ValueString, property.GetValue(item)));
-                        else
-                            fieldElement.Add(property.GetValue(item));
-                        //elm.Add(Convert.ChangeType(property.GetValue(instance), typeof(string)));
-                    }
+                    string strValue = (property.FieldType == typeof(Color)) ? ColorTranslator.ToHtml((Color) property.GetValue(item)) : TypeDescriptor.GetConverter(property.FieldType).ConvertToInvariantString(property.GetValue(item));
+                    if (valueInAttribute)
+                        fieldElement.Add(new XAttribute(ValueString, strValue ?? string.Empty));
+                    else
+                        fieldElement.Add(strValue);
                     itemElement.Add(fieldElement);
                 }
             }
@@ -203,18 +194,8 @@ namespace _3PA.Lib {
                     property.SetValue(item, XmlToDictionary(elm, valueInAttribute));
                 } else {
                     XElement elm = itemElement.Element(property.Name);
-                    if (elm == null) continue;
-
-                    /* color > to hex */
-                    if (property.FieldType == typeof (Color)) {
-                        if (valueInAttribute) property.SetValue(item, ColorTranslator.FromHtml(elm.Attribute(ValueString).Value));
-                        else property.SetValue(item, ColorTranslator.FromHtml(elm.Value));
-
-                        /* other type */
-                    } else if (property.FieldType.IsPrimitive || property.FieldType == typeof (string)) {
-                        var converter = TypeDescriptor.GetConverter(property.FieldType);
-                        if (valueInAttribute) property.SetValue(item, converter.ConvertFromInvariantString(elm.Attribute(ValueString).Value));
-                        else property.SetValue(item, converter.ConvertFromInvariantString(elm.Value));
+                    if (elm != null) {
+                        property.SetValue(item, TypeDescriptor.GetConverter(property.FieldType).ConvertFromInvariantString(valueInAttribute ? elm.Attribute(ValueString).Value : elm.Value));
                     }
                 }
             }

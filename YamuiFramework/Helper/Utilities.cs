@@ -173,20 +173,6 @@ namespace YamuiFramework.Helper {
             }
         };
 
-        public static object ConvertFromStr(this string value, Type destType) {
-            if (destType == typeof (string))
-                return value;
-            if (value.Trim() == string.Empty)
-                return destType.IsValueType ? Activator.CreateInstance(destType) : null;
-            if (typeof (IConvertible).IsAssignableFrom(destType))
-                try {
-                    return Convert.ChangeType(value, destType);
-                } catch {
-                    // ignored
-                }
-            return TypeDescriptor.GetConverter(destType).ConvertFrom(value);
-        }
-
         public static bool IsSupportedType(Type type) {
             if (typeof (IConvertible).IsAssignableFrom(type))
                 return true;
@@ -194,15 +180,6 @@ namespace YamuiFramework.Helper {
             if (cvtr.CanConvertFrom(typeof (string)) && cvtr.CanConvertTo(typeof (string)))
                 return true;
             return false;
-        }
-
-        public static string ConvertToStr(this object value) {
-            if (value == null)
-                return string.Empty;
-            IConvertible conv = value as IConvertible;
-            if (conv != null)
-                return value.ToString();
-            return (string) TypeDescriptor.GetConverter(value).ConvertTo(value, typeof (string));
         }
 
         public static bool IsSimpleType(this Type type) {
@@ -230,6 +207,31 @@ namespace YamuiFramework.Helper {
 
         #endregion
 
+        #region Conversion
+
+        /// <summary>
+        /// Converts a string to an object of the given type
+        /// </summary>
+        public static object ConvertFromStr(this string value, Type destType) {
+            try {
+                if (destType == typeof (string))
+                    return value;
+                return TypeDescriptor.GetConverter(destType).ConvertFromInvariantString(value);
+            } catch (Exception) {
+                return destType.IsValueType ? Activator.CreateInstance(destType) : null;
+            }
+        }
+
+        /// <summary>
+        /// Converts an object to a string
+        /// </summary>
+        public static string ConvertToStr(this object value) {
+            if (value == null)
+                return string.Empty;
+            return TypeDescriptor.GetConverter(value).ConvertToInvariantString(value);
+        }
+
+        #endregion
 
         #region GetRoundedRect
 
@@ -405,27 +407,40 @@ namespace YamuiFramework.Helper {
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
         /// Uses the char # as a comment in the file
         /// </summary>
-        public static bool ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine, Action<Exception> onException) {
+        public static bool ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding, Action<Exception> onException) {
             bool wentOk = true;
             try {
-                SubForEachLine(filePath, dataResources, encoding, toApplyOnEachLine);
+                SubForEachLine(filePath, dataResources, toApplyOnEachLine, encoding);
             } catch (Exception e) {
                 wentOk = false;
                 onException(e);
 
                 // read default file, if it fails then we can't do much but to throw an exception anyway...
                 if (dataResources != null)
-                    SubForEachLine(null, dataResources, encoding, toApplyOnEachLine);
+                    SubForEachLine(null, dataResources, toApplyOnEachLine, encoding);
             }
             return wentOk;
         }
 
-        public static void SubForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
-            using (StringReader reader = new StringReader((!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) ? File.ReadAllText(filePath, encoding) : encoding.GetString(dataResources))) {
-                string line;
+        public static void SubForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding) {
+            string line;
+            // to apply on each line
+            Action<TextReader> action = reader => {
                 while ((line = reader.ReadLine()) != null) {
                     if (line.Length > 0 && line[0] != '#')
                         toApplyOnEachLine(line);
+                }
+            };
+            // either read from the file or from the byte array
+            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
+                using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    using (var reader = new StreamReader(fileStream, encoding)) {
+                        action(reader);
+                    }
+                }
+            } else {
+                using (StringReader reader = new StringReader(encoding.GetString(dataResources))) {
+                    action(reader);
                 }
             }
         }

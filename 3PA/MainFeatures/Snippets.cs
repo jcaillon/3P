@@ -75,10 +75,7 @@ namespace _3PA.MainFeatures {
             var buffer = new StringBuilder();
             var currentTag = "";
 
-            foreach (var line in File.ReadAllLines(file, Encoding.Default)) {
-                if (line.StartsWith("#"))
-                    continue; //comment line
-
+            Utils.ForEachLine(file, null, line => {
                 if (line.EndsWith("=>") && !line.StartsWith(" ")) {
                     if (currentTag != "") {
                         Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));
@@ -88,7 +85,8 @@ namespace _3PA.MainFeatures {
                     currentTag = line.Replace("=>", "").Trim();
                 } else
                     buffer.AppendLine(line);
-            }
+            },
+            Encoding.Default);
 
             if (currentTag != "")
                 Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));

@@ -60,38 +60,7 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            UserCommunication.Notify("#000".ConvertFromStr(typeof(Color)).ConvertToStr());
-
-            Stopwatch sw = new Stopwatch();
-
-            sw.Start();
-
-            for (int i = 0; i < 100; i++) {
-                File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log", TextEncodingDetect.GetFileEncoding(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log"));
-            }
-
-
-
-            sw.Stop();
-
-            UserCommunication.Notify(string.Format("Elapsed={0}", sw.Elapsed));
-
-            sw = new Stopwatch();
-
-            sw.Start();
-
-            for (int i = 0; i < 100; i++) {
-                Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\bs00start_APS.log");
-            }
-
-            sw.Stop();
-
-            UserCommunication.Notify(string.Format("Elapsed={0}", sw.Elapsed));
-
-
-            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\utf8.txt"));
-            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\chelou.txt"));
-            UserCommunication.Notify(Utils.ReadAllText(@"d:\Profiles\jcaillon\Desktop\ansi.txt"));
+            RunParserTests();
 
             //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
@@ -100,15 +69,16 @@ namespace _3PA.Tests {
 
         public static void DebugTest2() {
             
-            object s = "";
-            if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
-                // Do something with the 's' variable
-                UserCommunication.Notify((string)s);
-            }
-            object a = new B();
-            YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
-            //Debug.Assert(false);
-            //UserCommunication.Notify("debug");
+            //object s = "";
+            //if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
+            //    // Do something with the 's' variable
+            //    UserCommunication.Notify((string)s);
+            //}
+            //object a = new B();
+            //YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
+
+            Debug.Assert(false);
+            UserCommunication.Notify("debug");
              
         }
 
@@ -359,61 +329,92 @@ namespace _3PA.Tests {
     #region Parser
 
     internal class OutputVis : IParserVisitor {
-        public void Visit(ParsedBlock pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.Branch);
-        }
-
-        public void Visit(ParsedLabel pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
-        }
-
-        public void Visit(ParsedFunctionCall pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
-        }
-
-        public void Visit(ParsedFoundTableUse pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Name);
-        }
 
         public StringBuilder Output = new StringBuilder();
 
+        public void Visit(ParsedBlock pars) {
+            Output.Append("BLOCK : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.BlockDescription + ", " + pars.Branch);
+            Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedLabel pars) {
+            Output.Append("LEBEL : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedFunctionCall pars) {
+            Output.Append("FCALL : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.ExternalCall);
+            Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedFoundTableUse pars) {
+            Output.Append("USETA : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.IsTempTable);
+            Output.Append("\r\n");
+        }
+
         public void Visit(ParsedOnEvent pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
+            Output.Append("ONEVT : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.On);
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedFunction pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+            Output.Append("FUNCT : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.ReturnType + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.Extend + ", " + pars.PrototypeUpdated + ", (" + pars.Parameters + ")");
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedProcedure pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            Output.Append("PROCE : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.Left + "," + pars.IsExternal + "," + pars.IsPrivate);
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            Output.Append("INCLU : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedPreProc pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+            Output.Append("PREPR : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.UndefinedLine);
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedDefine pars) {
-            //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
-            //if (pars.Type == ParseDefineType.Parameter)
-            //if (string.IsNullOrEmpty(pars.ViewAs))
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+            Output.Append("VARIA : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended);
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedTable pars) {
-            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            Output.Append("TABLE : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.Description + "," + pars.IsTempTable + "," + pars.LcLikeTable + "," + pars.UseIndex + "," + pars.LcFlagString);
             foreach (var field in pars.Fields) {
-                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+                Output.Append("->" + field.Name + "|" + field.AsLike + "|" + field.Type);
             }
-            Output.AppendLine("");
+            Output.Append("\r\n");
         }
 
         public void Visit(ParsedRun pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+            Output.Append("RUNPR : ");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.Left + "," + pars.HasPersistent + "," + pars.IsEvaluateValue);
+            Output.Append("\r\n");
         }
     }
 

@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
@@ -33,7 +32,11 @@ namespace _3PA.MainFeatures.Parser {
     /// from the tokens created by the lexer
     /// </summary>
     internal class Parser {
+
+        #region private fields
+
         private const string RootScopeName = "Root";
+
         /// <summary>
         /// List of the parsed items (output)
         /// </summary>
@@ -77,12 +80,18 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Useful to remember where the function prototype was defined (Point is line, column)
         /// </summary>
-        private Dictionary<string, Point> _functionPrototype = new Dictionary<string, Point>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, ParsedFunction> _functionPrototype = new Dictionary<string, ParsedFunction>(StringComparer.OrdinalIgnoreCase);
+
+        #endregion
+
+        #region public fields
 
         /// <summary>
         /// dictionnay of *line, line info*
         /// </summary>
-        public Dictionary<int, LineInfo> GetLineInfo { get { return _lineInfo; } }
+        public Dictionary<int, LineInfo> GetLineInfo {
+            get { return _lineInfo; }
+        }
 
         /// <summary>
         /// If true the parsing went ok, if false, it means that we matched too much starting block compared to 
@@ -90,6 +99,10 @@ namespace _3PA.MainFeatures.Parser {
         /// Allows to decide if we can reindent the code or not
         /// </summary>
         public bool ParsingOk { get; set; }
+
+        #endregion
+
+        #region Life and death
 
         /// <summary>
         /// Parses a text into a list of parsedItems
@@ -111,7 +124,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // create root item
             if (isRootFile)
-                AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, CodeExplorerBranch.Root) { IsRoot = true });
+                AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, CodeExplorerBranch.Root) { IsRoot = true, ToDisplayOnExplorer = true });
 
             // parse
             _lexer = new Lexer(data);
@@ -129,6 +142,9 @@ namespace _3PA.MainFeatures.Parser {
                     _lineInfo.Add(i, current);
             }
         }
+
+        #endregion
+
 
         /// <summary>
         /// Feed this method with a visitor implementing IParserVisitor to visit all the parsed items
@@ -899,6 +915,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="token"></param>
         private void CreateParsedPreProc(Token token) {
+
             var toParse = token.Value;
             int pos;
             for (pos = 1; pos < toParse.Length; pos++)
@@ -927,40 +944,53 @@ namespace _3PA.MainFeatures.Parser {
                     AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope, toParse.Substring(pos, toParse.Length - pos)));
                     break;
                 case "&ANALYZE-SUSPEND":
+                    // it marks the beggining of an appbuilder block, it can only be at a root/File level
                     _context.Scope = ParsedScope.File;
+
                     // matching different intersting blocks
                     if (toParse.ContainsFast("_MAIN-BLOCK")) {
                         _context.OwnerName = "Main block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.MainBlock) { IsRoot = true });
-                    } 
-                    else if (toParse.ContainsFast("_DEFINITIONS")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.MainBlock) { ToDisplayOnExplorer = true, IsRoot = true };
+                    } else if (toParse.ContainsFast("_DEFINITIONS")) {
                         _context.OwnerName = "Definition block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.DefinitionBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.DefinitionBlock };
                     } 
                     else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         _context.OwnerName = "Preprocessor block";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.PreprocessorBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.PreprocessorBlock };
                     } 
                     else if (toParse.ContainsFast("_XFTR")) {
                         _context.OwnerName = "Xtfr";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.XtfrBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.XtfrBlock };
                     } 
                     else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
                         _context.OwnerName = "Procedure settings";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.SettingsBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.SettingsBlock };
                     } 
                     else if (toParse.ContainsFast("_CREATE-WINDOW")) {
                         _context.OwnerName = "Create window";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.CreateWindowBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.CreateWindowBlock };
                     } 
                     else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
                         _context.OwnerName = "Run-time attributes";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.RuntimeBlock });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock };
                     } 
                     else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
-                        AddParsedItem(new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { IconIconType = CodeExplorerIconType.Prototype });
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.Prototype};
+                    } else {
+                        _context.OwnerName = "Appbuilder block";
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = false };
                     }
+                    // save the block description
+                    _context.CurrentAppbuilderBlock.BlockDescription = toParse.Substring(pos2, toParse.Length - pos2);
+                    AddParsedItem(_context.CurrentAppbuilderBlock);
+                    break;
+                case "&ANALYZE-RESUME":
+                    // it marks the end of an appbuilder block, it can only be at a root/File level
+                    _context.Scope = ParsedScope.File;
+                    if (_context.CurrentAppbuilderBlock != null)
+                        _context.CurrentAppbuilderBlock.EndLine = token.Line;
                     break;
                 case "&UNDEFINE":
                     var found = (ParsedPreProc)_parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
@@ -1014,17 +1044,20 @@ namespace _3PA.MainFeatures.Parser {
         /// Matches a function definition (not the FORWARD prototype)
         /// </summary>
         private bool CreateParsedFunction(Token functionToken) {
+
             // info we will extract from the current statement :
             string name = "";
             _lastTokenWasSpace = true;
             StringBuilder parameters = new StringBuilder();
             bool isPrivate = false;
+            bool isExtent = false;
             ParsedFunction createdFunc = null;
             var parametersList = new List<ParsedItem>();
 
+            Token token;
             int state = 0;
             do {
-                var token = PeekAt(1); // next token
+                token = PeekAt(1); // next token
                 if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 switch (state) {
@@ -1037,13 +1070,15 @@ namespace _3PA.MainFeatures.Parser {
                     case 1:
                         // matching return type
                         if (!(token is TokenWord)) break;
-                        if (token.Value.EqualsCi("returns")) continue;
+                        if (token.Value.EqualsCi("returns") || token.Value.EqualsCi("class") ) 
+                            continue;
 
                         // create the function (returnType = token.Value)
                         createdFunc = new ParsedFunction(name, functionToken.Line, functionToken.Column, token.Value) {
                             FilePath = _filePathBeingParsed,
                             Scope = _context.Scope,
-                            OwnerName = _context.OwnerName
+                            OwnerName = _context.OwnerName,
+                            Extend = string.Empty
                         };
                         state++;
                         break;
@@ -1051,57 +1086,75 @@ namespace _3PA.MainFeatures.Parser {
                         // matching parameters (start)
                         if (token is TokenWord) {
                             if (token.Value.EqualsCi("private")) isPrivate = true;
-                            if (token.Value.EqualsCi("extent") && createdFunc != null) createdFunc.IsExtended = true;
+                            if (token.Value.EqualsCi("extent") && createdFunc != null) {
+                                createdFunc.IsExtended = true;
+                                isExtent = true;
+                            }
 
                             // we didn't match any opening (, but we found a forward
-                            if (token.Value.EqualsCi("forward")) {
-                                if (!_functionPrototype.ContainsKey(name))
-                                    _functionPrototype.Add(name, new Point(functionToken.Line, functionToken.Column));
-                                createdFunc = null;
-                            }
-                        }
-                        else if (!(token is TokenSymbol)) break;
-                        if (token.Value.Equals("(")) state = 3;
+                            if (token.Value.EqualsCi("forward"))
+                                state = 99;
+
+                        } else if (token is TokenSymbol && token.Value.Equals("(")) 
+                            state = 3;
+                        else if (isExtent && token is TokenNumber)
+                            createdFunc.Extend = token.Value;
                         break;
                     case 3:
                         // read parameters, define a ParsedDefineItem for each
                         parametersList = GetParsedParameters(functionToken, parameters, name);
-                        state = 99;
+                        state = 10;
                         break;
-                    case 99:
+                    case 10:
                         // matching prototype, we dont want to create a ParsedItem for prototype
-                        if (token is TokenWord && token.Value.EqualsCi("forward")) {
-                            if (!_functionPrototype.ContainsKey(name))
-                                _functionPrototype.Add(name, new Point(functionToken.Line, functionToken.Column));
-                            createdFunc = null;
-                        }
+                        if (token is TokenWord && token.Value.EqualsCi("forward"))
+                            state = 99;
                         break;
                 }
             } while (MoveNext());
             if (createdFunc == null) return false;
 
+            // it's a proptotype, we matched a forward
+            if (state == 99) {
+                createdFunc.IsPrivate = isPrivate;
+                createdFunc.Parameters = parameters.ToString();
+                if (!_functionPrototype.ContainsKey(name))
+                    _functionPrototype.Add(name, createdFunc);
+                return false;
+            } 
+
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;
             createdFunc.Parameters = parameters.ToString();
+
+            // it has a prototype?
             if (_functionPrototype.ContainsKey(name)) {
-                createdFunc.PrototypeLine = _functionPrototype[name].X;
-                createdFunc.PrototypeColumn = _functionPrototype[name].Y;
+                createdFunc.PrototypeLine = _functionPrototype[name].Line;
+                createdFunc.PrototypeColumn = _functionPrototype[name].Column;
+                createdFunc.PrototypeUpdated = (
+                    createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
+                    createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
+                    createdFunc.Extend.Equals(_functionPrototype[name].Extend) &&
+                    createdFunc.Parameters.Equals(_functionPrototype[name].Parameters));
             } else {
                 createdFunc.PrototypeLine = -1;
-                _functionPrototype.Add(name, new Point());
+                _functionPrototype.Add(name, createdFunc);
             }
             AddParsedItem(createdFunc);
 
-            // modify context
-            _context.Scope = ParsedScope.Function;
-            _context.OwnerName = name;
+            // modify context?
+            if (token is TokenEos && token.Value.Equals(":")) {
+                _context.Scope = ParsedScope.Function;
+                _context.OwnerName = name;
 
-            // add the parameters to the list
-            if (parametersList.Count > 0) {
-                foreach (var parsedItem in parametersList) {
-                    AddParsedItem(parsedItem);
+                // add the parameters to the list
+                if (parametersList.Count > 0) {
+                    foreach (var parsedItem in parametersList) {
+                        AddParsedItem(parsedItem);
+                    }
                 }
             }
+
             return true;
         }
 
@@ -1264,6 +1317,7 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParseContext {
         public ParsedScope Scope { get; set; }
+        public ParsedBlock CurrentAppbuilderBlock { get; set; }
         public string OwnerName { get; set; }
         /// <summary>
         /// Number of words count in the current statement

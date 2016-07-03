@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public static void Import() {
             _filesInfo.Clear();
             try {
-                Utils.ForEachLine(Config.FileFilesInfo, new byte[0], Encoding.Default, s => {
+                Utils.ForEachLine(Config.FileFilesInfo, new byte[0], s => {
                     var items = s.Split('\t');
                     if (items.Count() == 8) {
                         var fileName = items[0].Trim();
@@ -68,11 +68,14 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             });
                         }
                     }
-                });
+                }, 
+                Encoding.Default);
+
                 if (!_filesInfo.ContainsKey(DefaultTag))
                     SetFileTags(DefaultTag, "", "", "", "", "", "", "");
                 if (!_filesInfo.ContainsKey(LastTag))
                     SetFileTags(LastTag, "", "", "", "", "", "", "");
+
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "", Config.FileFilesInfo);
             }

@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace _3PA.Lib {
 
@@ -44,20 +43,21 @@ namespace _3PA.Lib {
             var currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             if (!File.Exists(file)) return;
             _ini[""] = currentSection;
-            foreach (var line in File.ReadAllLines(file, Encoding.Default).Where(t => !string.IsNullOrWhiteSpace(t)).Select(t => t.Trim())) {
+            Utils.ForEachLine(file, null, line => {
+                line = line.Trim();
                 if (line.StartsWith(";"))
-                    continue;
+                    return;
                 if (line.StartsWith("[") && line.EndsWith("]")) {
                     currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
                     _ini[line.Substring(1, line.LastIndexOf("]", StringComparison.CurrentCultureIgnoreCase) - 1)] = currentSection;
-                    continue;
+                    return;
                 }
                 var idx = line.IndexOf("=", StringComparison.CurrentCultureIgnoreCase);
                 if (idx == -1)
                     currentSection[line] = "";
                 else
                     currentSection[line.Substring(0, idx)] = line.Substring(idx + 1);
-            }
+            });
         }
 
         /// <summary>

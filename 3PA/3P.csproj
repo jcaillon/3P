@@ -200,6 +200,7 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="MainFeatures\ProGenerateCode.cs" />
     <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="NotificationsPublisher.cs" />
@@ -306,7 +307,6 @@
     <Compile Include="Lib\Extensions.cs" />
     <Compile Include="Lib\IniReader.cs" />
     <Compile Include="Lib\LibLoader.cs" />
-    <Compile Include="Lib\SpecialDictionary.cs" />
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoComplete.cs" />
@@ -634,6 +634,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Data\ProgressTemplates\" />
     <Folder Include="Images\FunctionsIcons\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

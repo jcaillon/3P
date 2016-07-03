@@ -59,7 +59,7 @@ namespace YamuiFramework.Helper {
             GenericThemeHolder curTheme = null;
             Dictionary<string, string> previousStringValues = new Dictionary<string, string>();
 
-            Utilities.ForEachLine(filePath, dataResources, Encoding.Default,
+            Utilities.ForEachLine(filePath, dataResources,
                 line => {
                     // beggining of a new theme, read its name
                     if (line.Length > 2 && line[0] == '>') {
@@ -76,7 +76,8 @@ namespace YamuiFramework.Helper {
                     var pos = line.IndexOf('\t');
                     if (pos >= 0)
                         curTheme.SetStringValues(line.Substring(0, pos).Trim(), line.Substring(pos + 1).Trim());
-                },
+                }, 
+                Encoding.Default,
                 exception => {
                     // rethrow the same exception to the calling method
                     throw new Exception(exception.ToString());

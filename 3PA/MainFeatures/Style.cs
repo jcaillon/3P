@@ -107,7 +107,8 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var fileContent = File.Exists(Config.FileNppUdlXml) ? Utils.ReadAllText(Config.FileNppUdlXml) : @"<NotepadPlus />";
+            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUdlXml);
+            var fileContent = File.Exists(Config.FileNppUdlXml) ? Utils.ReadAllText(Config.FileNppUdlXml, encoding) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -127,7 +128,7 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
             try {
-                File.WriteAllText(Config.FileNppUdlXml, fileContent, TextEncodingDetect.GetFileEncoding(Config.FileNppUdlXml));
+                File.WriteAllText(Config.FileNppUdlXml, fileContent, encoding);
             } catch (Exception e) {
                 if (e is UnauthorizedAccessException)
                     UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");

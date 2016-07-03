@@ -175,13 +175,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
             try {
                 ParsedDataBase currentDb = null;
                 ParsedTable currentTable = null;
-                foreach (var items in File.ReadAllLines(filePath, TextEncodingDetect.GetFileEncoding(filePath)).Where(items => items.Length > 1 && !items[0].Equals('#'))) {
+                Utils.ForEachLine(filePath, null, items => {
                     var splitted = items.Split('\t');
                     switch (items[0]) {
                         case 'H':
                             // base
                             //#H|<Dump date ISO 8601>|<Dump time>|<Logical DB name>|<Physical DB name>|<Progress version>
-                            if (splitted.Count() != 6) continue;
+                            if (splitted.Count() != 6) 
+                                return;
                             currentDb = new ParsedDataBase(
                                 splitted[3],
                                 splitted[4],
@@ -190,7 +191,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             _dataBases.Add(currentDb);
                             break;
                         case 'S':
-                            if (splitted.Count() != 3 || currentDb == null) continue;
+                            if (splitted.Count() != 3 || currentDb == null) 
+                                return;
                             _sequences.Add(new CompletionData {
                                 DisplayText = splitted[1],
                                 Type = CompletionType.Sequence,
@@ -200,7 +202,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'T':
                             // table
                             //#T|<Table name>|<Table ID>|<Table CRC>|<Dump name>|<Description>
-                            if (splitted.Count() != 6 || currentDb == null) continue;
+                            if (splitted.Count() != 6 || currentDb == null) 
+                                return;
                             currentTable = new ParsedTable(
                                 splitted[1],
                                 0, 0,
@@ -218,7 +221,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'X':
                             // trigger
                             //#X|<Parent table>|<Event>|<Proc name>|<Trigger CRC>
-                            if (splitted.Count() != 5 || currentTable == null) continue;
+                            if (splitted.Count() != 5 || currentTable == null) 
+                                return;
                             currentTable.Triggers.Add(new ParsedTrigger(
                                 splitted[2],
                                 splitted[3]));
@@ -226,7 +230,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'I':
                             // index
                             //#I|<Parent table>|<Index name>|<Primary? 0/1>|<Unique? 0/1>|<Index CRC>|<Fileds separated with %>
-                            if (splitted.Count() != 7 || currentTable == null) continue;
+                            if (splitted.Count() != 7 || currentTable == null) 
+                                return;
                             var flag = splitted[3].Equals("1") ? ParsedIndexFlag.Primary : ParsedIndexFlag.None;
                             if (splitted[4].Equals("1")) flag = flag | ParsedIndexFlag.Unique;
                             currentTable.Indexes.Add(new ParsedIndex(
@@ -237,7 +242,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'F':
                             // field
                             //#F|<Parent table>|<Field name>|<Type>|<Format>|<Order #>|<Mandatory? 0/1>|<Extent? 0/1>|<Part of index? 0/1>|<Part of PK? 0/1>|<Initial value>|<Desription>
-                            if (splitted.Count() != 12 || currentTable == null) continue;
+                            if (splitted.Count() != 12 || currentTable == null) 
+                                return;
                             var flag2 = splitted[6].Equals("1") ? ParsedFieldFlag.Mandatory : ParsedFieldFlag.None;
                             if (splitted[7].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Extent;
                             if (splitted[8].Equals("1")) flag2 = flag2 | ParsedFieldFlag.Index;
@@ -255,7 +261,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             currentTable.Fields.Add(curField);
                             break;
                     }
-                }
+                });
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading database info!", filePath);
             }

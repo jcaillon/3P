@@ -52,7 +52,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public static void Import() {
             // reads keywords
             _keywordList.Clear();
-            Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 5) {
                     // find the KeywordType from items[1]
@@ -75,10 +75,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         });
                     }
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads keywords rank
-            Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2 && _keywordList.ContainsKey(items[0])) {
                     int val;
@@ -86,11 +87,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         _keywordList[items[0]].Ranking = val;
                     }
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads abbreviations
             _abbreviations.Clear();
-            Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2) {
                     _abbreviations.Add(new KeywordsAbbreviations {
@@ -98,11 +100,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         ShortText = items[0]
                     });
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads keywords help
             _help.Clear();
-            Utils.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, s => {
                 var items = s.Split('\t');
                 if (items.Count() > 2) {
                     var listSynthax = new List<string>();
@@ -114,7 +117,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         Synthax = listSynthax
                     });
                 }
-            });
+            }, 
+            Encoding.Default);
         }
 
         /// <summary>

@@ -48,8 +48,6 @@ namespace _3PA.Lib {
         }
 
         #endregion
-   
-    
      */
 
     #region Enumeration attributes
@@ -485,7 +483,7 @@ namespace _3PA.Lib {
         public static string ReadAndFormatLogToHtml(string logFullPath) {
             string output = "";
             if (!string.IsNullOrEmpty(logFullPath) && File.Exists(logFullPath)) {
-                output = ReadAllText(logFullPath, TextEncodingDetect.GetFileEncoding(logFullPath)).Replace("\n", "<br>");
+                output = ReadAllText(logFullPath).Replace("\n", "<br>");
                 output = "<div class='ToolTipcodeSnippet'>" + output + "</div>";
             }
             return output;
@@ -549,21 +547,24 @@ namespace _3PA.Lib {
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
         /// Apply the action toApplyOnEachLine to each line
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
-        /// Uses the char # as a comment in the file
-        public static void ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
+        /// Uses the char # as a comment in the file (must be the first char of a line)
+        public static void ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding = null) {
             try {
                 Exception ex = new Exception("Undetermined");
-                if (!Utilities.ForEachLine(filePath, dataResources, encoding, toApplyOnEachLine, exception => ex = exception)) {
+                if (!Utilities.ForEachLine(filePath, dataResources, toApplyOnEachLine, encoding ?? TextEncodingDetect.GetFileEncoding(filePath), exception => ex = exception)) {
                     ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
             }
         }
-
+        
+        /// <summary>
+        /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
+        /// </summary>
         public static string ReadAllText(string path, Encoding encoding = null) {
             using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var textReader = new StreamReader(fileStream, encoding == null ? TextEncodingDetect.GetFileEncoding(path) : encoding)) {
+                using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
                     return textReader.ReadToEnd();
                 }
         }

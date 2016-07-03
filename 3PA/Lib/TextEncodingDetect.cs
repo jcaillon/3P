@@ -91,6 +91,10 @@ namespace _3PA.Lib {
         public static Encoding GetFileEncoding(string srcFile) {
             Encoding encoding = Encoding.Default;
 
+            if (string.IsNullOrEmpty(srcFile) || !File.Exists(srcFile)) {
+                return encoding;
+            }
+
             // Read in the file in binary
             byte[] buffer;
             try {
@@ -133,6 +137,7 @@ namespace _3PA.Lib {
                     encoding = Encoding.BigEndianUnicode;
                     break;
             }
+
             return encoding;
         }
 

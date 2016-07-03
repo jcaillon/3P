@@ -23,6 +23,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using YamuiFramework.Helper;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
@@ -401,64 +402,61 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return output;
 
             var lastLineNbCouple = new[] { -10, -10 };
-            foreach (var lineFields in File.ReadAllLines(fullPath, TextEncodingDetect.GetFileEncoding(fullPath)).Select(line => line.Split('\t')).Where(items => items.Count() == 7 || items.Count() == 8)) {
-                var fields = lineFields.ToList();
 
-                // the first field should be the file that was compiled, it might not be there for PROLINT.log 
-                // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
-                if (fields.Count() == 7) {
-                    fields.Insert(0, permutePaths.Count > 0 ? permutePaths.First().Value : "");
-                }
+            Utils.ForEachLine(fullPath, null, line => {
 
-                // new file
-                // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
-                var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
-                var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
-                if (!output.ContainsKey(filePath)) {
-                    output.Add(filePath, new List<FileError>());
-                    lastLineNbCouple = new[] { -10, -10 };
-                }
+                var fields =  line.Split('\t').ToList();
+                if (fields.Count == 7 || fields.Count == 8) {
 
-                ErrorLevel errorLevel;
-                if (!Enum.TryParse(fields[2], true, out errorLevel))
-                    errorLevel = ErrorLevel.Error;
+                    // the first field should be the file that was compiled, it might not be there for PROLINT.log 
+                    // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
+                    if (fields.Count == 7)
+                        fields.Insert(0, permutePaths.Count > 0 ? permutePaths.First().Value : "");
 
-                // we store the line/error number couple because we don't want two identical messages to appear
-                var thisLineNbCouple = new[] { fields[3].Equals("?") ? 0 : int.Parse(fields[3]) - 1, fields[5].Equals("?") ? 0 : int.Parse(fields[5]) };
-
-                if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
-                    // same line/error number as previously
-                    if (output[filePath].Count > 0) {
-                        var lastFileError = output[filePath].Last();
-                        if (lastFileError != null)
-                            if (lastFileError.Times == 0)
-                                lastFileError.Times = 2;
-                            else
-                                lastFileError.Times++;
+                    // new file
+                    // the path of the file that triggered the compiler error, it can be empty so we make sure to set it
+                    var compilerFailPath = string.IsNullOrEmpty(fields[1]) ? fields[0] : fields[1];
+                    var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
+                    if (!output.ContainsKey(filePath)) {
+                        output.Add(filePath, new List<FileError>());
+                        lastLineNbCouple = new[] {-10, -10};
                     }
-                    continue;
+
+                    ErrorLevel errorLevel;
+                    if (!Enum.TryParse(fields[2], true, out errorLevel))
+                        errorLevel = ErrorLevel.Error;
+
+                    // we store the line/error number couple because we don't want two identical messages to appear
+                    var thisLineNbCouple = new[] { (int)fields[3].ConvertFromStr(typeof(int)), (int)fields[5].ConvertFromStr(typeof(int)) };
+
+                    if (thisLineNbCouple[0] == lastLineNbCouple[0] && thisLineNbCouple[1] == lastLineNbCouple[1]) {
+                        // same line/error number as previously
+                        if (output[filePath].Count > 0) {
+                            var lastFileError = output[filePath].Last();
+                            if (lastFileError != null)
+                                lastFileError.Times = (lastFileError.Times == 0) ? 2 : lastFileError.Times + 1;
+                        }
+                        return;
+                    }
+                    lastLineNbCouple = thisLineNbCouple;
+
+                    var baseFileName = Path.GetFileName(filePath);
+
+                    // add error
+                    output[filePath].Add(new FileError {
+                        SourcePath = filePath,
+                        Level = errorLevel,
+                        Line = Math.Max(0, lastLineNbCouple[0] - 1),
+                        Column = Math.Max(0, (int) fields[4].ConvertFromStr(typeof (int)) - 1),
+                        ErrorNumber = lastLineNbCouple[1],
+                        Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
+                        Help = fields[7].Replace("<br>", "\n").Trim(),
+                        FromProlint = fromProlint,
+                        CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])
+                    });
                 }
-                lastLineNbCouple = thisLineNbCouple;
+            });
 
-                int column;
-                if (!int.TryParse(fields[4], out column)) column = 0;
-                if (column > 0) column--;
-
-                var baseFileName = Path.GetFileName(filePath);
-
-                // add error
-                output[filePath].Add(new FileError {
-                    SourcePath = filePath,
-                    Level = errorLevel,
-                    Line = lastLineNbCouple[0],
-                    Column = column,
-                    ErrorNumber = lastLineNbCouple[1],
-                    Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
-                    Help = fields[7].Replace("<br>", "\n").Trim(),
-                    FromProlint = fromProlint,
-                    CompiledFilePath = (permutePaths.ContainsKey(fields[0]) ? permutePaths[fields[0]] : fields[0])
-                });
-            }
             return output;
         }
 

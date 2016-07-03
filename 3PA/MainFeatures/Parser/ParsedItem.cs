@@ -118,6 +118,8 @@ namespace _3PA.MainFeatures.Parser {
         public CodeExplorerIconType IconIconType { get; set; }
         public CodeExplorerBranch Branch { get; set; }
         public bool IsRoot { get; set; }
+        public bool ToDisplayOnExplorer { get; set; }
+        public string BlockDescription { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
@@ -164,13 +166,19 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public string ParsedReturnType { get; private set; }
         /// <summary>
-        /// is the return-type "EXTENT [x]"
+        /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
         /// </summary>
+        public string Extend { get; set; }
         public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
         public int PrototypeLine { get; set; }
         public int PrototypeColumn { get; set; }
+
+        /// <summary>
+        /// Boolean to know if the prototype is correct compared to the implementation
+        /// </summary>
+        public bool PrototypeUpdated { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }

@@ -288,12 +288,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 baseIniPath = Path.Combine(TempDir, "base.ini");
                 // we need to copy the .ini but we must delete the PROPATH= part, as stupid as it sounds, if we leave a huge PROPATH 
                 // in this file, it increases the compilation time by a stupid amount... unbelievable i know, but trust me, it does...
-                var fileContent = Utils.ReadAllText(ProEnv.IniPath);
+                var encoding = TextEncodingDetect.GetFileEncoding(ProEnv.IniPath);
+                var fileContent = Utils.ReadAllText(ProEnv.IniPath, encoding);
                 var regex = new Regex("^PROPATH=.*$", RegexOptions.Multiline | RegexOptions.IgnoreCase);
                 var matches = regex.Match(fileContent);
                 if (matches.Success) 
                     fileContent = regex.Replace(fileContent, @"PROPATH=");
-                File.WriteAllText(baseIniPath, fileContent, Encoding.Default);
+                File.WriteAllText(baseIniPath, fileContent, encoding);
             }
 
             // Move pf file into the execution dir
@@ -336,7 +337,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     programContent.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProgressQuoter());
                     programContent.AppendLine("&SCOPED-DEFINE FileCorrectionDescription " + fileInfo.CorrectionDecription.Replace("\r", "").Replace("\n", "~n").ProgressQuoter());
                 }
-                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), TextEncodingDetect.GetFileEncoding(Config.FileStartProlint));
+                var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
+                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), encoding);
 
             } else {
 

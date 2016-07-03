@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void Import() {
             _compilationPathList = new List<CompilationPath>();
-            Utils.ForEachLine(Config.FileCompilPath, new byte[0], Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileCompilPath, new byte[0], s => {
                 var items = s.Split('\t');
                 if (items.Count() == 4) {
                     var obj = new CompilationPath {
@@ -98,7 +98,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             _compilationPathList.Add(obj);
                     }
                 }
-            });
+            }, 
+            Encoding.Default);
 
             if (OnCompilationPathUpdate != null)
                 OnCompilationPathUpdate();
