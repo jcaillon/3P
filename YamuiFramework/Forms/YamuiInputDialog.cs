@@ -28,114 +28,91 @@ using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
+
+    #region YamuiInternalInputDialog
+
     /// <summary>
-    /// Get input based on automatic interpretation of Data object.
+    /// Get an input dialog based on an object fields
     /// </summary>
-    internal class YamuiInternalInputDialog : YamuiForm {
+    public class YamuiInternalInputDialog : YamuiForm {
 
         #region private fields
 
-        private const int PrefWidth = 340;
-
-        private static readonly Size MinSize = new Size(193, 104);
-
-        private YamuiTableLayoutPanel _buttonPanel;
-        private YamuiButton _cancelBtn;
-        private IContainer components;
         private object _dataObj;
         private ErrorProvider _errorProvider;
         private List<MemberInfo> _items = new List<MemberInfo>();
-        private YamuiButton _okBtn;
         private YamuiTableLayoutPanel _table;
-        private HtmlLabel _lbl;
-        private string _header;
-        private string _caption;
 
         #endregion
 
         #region life and death
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YamuiInternalInputDialog"/> class.
-        /// </summary>
-        public YamuiInternalInputDialog(string header) {
-            _header = header;
-            InitializeComponent();
-        }
-
-        internal YamuiInternalInputDialog(string header, string caption, object data, int width)
-            : this(header) {
-            Width = width;
-            _caption = string.IsNullOrEmpty(caption) ? "Question" : caption;
-            Data = data;
-        }
-
-        private void InitializeComponent() {
-            components = new Container();
-            _buttonPanel = new YamuiTableLayoutPanel();
-            _okBtn = new YamuiButton();
-            _cancelBtn = new YamuiButton();
+        internal YamuiInternalInputDialog(string prompt) {
+            IContainer components = new Container();
+            var buttonPanel = new YamuiTableLayoutPanel();
+            var okBtn = new YamuiButton();
+            var cancelBtn = new YamuiButton();
             _table = new YamuiTableLayoutPanel();
             _errorProvider = new ErrorProvider(components);
-            _lbl = new HtmlLabel {
+            var lbl = new HtmlLabel {
                 BackColor = Color.Transparent,
                 AutoSize = true,
-                Text = _header,
+                Text = prompt,
                 Dock = DockStyle.Top,
-                Margin = new Padding(0, 0, 0, 0),
-                Padding = new Padding(0, 0, 28, 10),
+                Margin = new Padding(0),
+                Padding = new Padding(0),
                 IsSelectionEnabled = false,
                 Enabled = false
             };
-            _buttonPanel.SuspendLayout();
-            ((ISupportInitialize)(_errorProvider)).BeginInit();
+            buttonPanel.SuspendLayout();
+            ((ISupportInitialize) (_errorProvider)).BeginInit();
             SuspendLayout();
             //
             // buttonPanel
             //
-            _buttonPanel.AutoSize = true;
-            _buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            _buttonPanel.BackColor = SystemColors.Control;
-            _buttonPanel.ColumnCount = 3;
-            _buttonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            _buttonPanel.ColumnStyles.Add(new ColumnStyle());
-            _buttonPanel.ColumnStyles.Add(new ColumnStyle());
-            _buttonPanel.Controls.Add(_okBtn, 1, 0);
-            _buttonPanel.Controls.Add(_cancelBtn, 2, 0);
-            _buttonPanel.Dock = DockStyle.Bottom;
-            _buttonPanel.Location = new Point(0, 25);
-            _buttonPanel.Margin = new Padding(0);
-            _buttonPanel.Name = "_buttonPanel";
-            _buttonPanel.Padding = new Padding(10, 0, 10, 0);
-            _buttonPanel.RowCount = 1;
-            _buttonPanel.RowStyles.Add(new RowStyle());
-            _buttonPanel.Size = new Size(177, 22);
-            _buttonPanel.TabIndex = 1;
-            _buttonPanel.DontUseTransparentBackGround = true;
+            buttonPanel.AutoSize = true;
+            buttonPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            buttonPanel.BackColor = SystemColors.Control;
+            buttonPanel.ColumnCount = 3;
+            buttonPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            buttonPanel.ColumnStyles.Add(new ColumnStyle());
+            buttonPanel.ColumnStyles.Add(new ColumnStyle());
+            buttonPanel.Controls.Add(okBtn, 1, 0);
+            buttonPanel.Controls.Add(cancelBtn, 2, 0);
+            buttonPanel.Dock = DockStyle.Bottom;
+            buttonPanel.Location = new Point(0, 25);
+            buttonPanel.Margin = new Padding(0);
+            buttonPanel.Name = "_buttonPanel";
+            buttonPanel.Padding = new Padding(10, 0, 10, 0);
+            buttonPanel.RowCount = 1;
+            buttonPanel.RowStyles.Add(new RowStyle());
+            buttonPanel.Size = new Size(177, 22);
+            buttonPanel.TabIndex = 1;
+            buttonPanel.DontUseTransparentBackGround = true;
             //
             // okBtn
             //
-            _okBtn.DialogResult = DialogResult.OK;
-            _okBtn.Location = new Point(10, 8);
-            _okBtn.Margin = new Padding(0, 0, 7, 0);
-            _okBtn.MinimumSize = new Size(75, 23);
-            _okBtn.Name = "_okBtn";
-            _okBtn.Size = new Size(75, 23);
-            _okBtn.TabIndex = 0;
-            _okBtn.Text = @"OK";
-            _okBtn.ButtonPressed += okBtn_Click;
+            okBtn.DialogResult = DialogResult.OK;
+            okBtn.Location = new Point(10, 8);
+            okBtn.Margin = new Padding(0, 0, 7, 0);
+            okBtn.MinimumSize = new Size(75, 23);
+            okBtn.Name = "_okBtn";
+            okBtn.Size = new Size(75, 23);
+            okBtn.TabIndex = 0;
+            okBtn.Text = @"OK";
+            okBtn.ButtonPressed += okBtn_Click;
             //
             // cancelBtn
             //
-            _cancelBtn.DialogResult = DialogResult.Cancel;
-            _cancelBtn.Location = new Point(92, 8);
-            _cancelBtn.Margin = new Padding(0);
-            _cancelBtn.MinimumSize = new Size(75, 23);
-            _cancelBtn.Name = "_cancelBtn";
-            _cancelBtn.Size = new Size(75, 23);
-            _cancelBtn.TabIndex = 1;
-            _cancelBtn.Text = @"&Cancel";
-            _cancelBtn.ButtonPressed += cancelBtn_Click;
+            cancelBtn.DialogResult = DialogResult.Cancel;
+            cancelBtn.Location = new Point(92, 8);
+            cancelBtn.Margin = new Padding(0);
+            cancelBtn.MinimumSize = new Size(75, 23);
+            cancelBtn.Name = "_cancelBtn";
+            cancelBtn.Size = new Size(75, 23);
+            cancelBtn.TabIndex = 1;
+            cancelBtn.Text = @"&Cancel";
+            cancelBtn.ButtonPressed += cancelBtn_Click;
             //
             // table
             //
@@ -152,7 +129,6 @@ namespace YamuiFramework.Forms {
             _table.Padding = new Padding(10);
             _table.RowCount = 1;
             _table.RowStyles.Add(new RowStyle());
-            _table.Size = new Size(177, 24);
             _table.TabIndex = 3;
             _table.DontUseTransparentBackGround = true;
             //
@@ -162,25 +138,19 @@ namespace YamuiFramework.Forms {
             //
             // InternalInputDialog
             //
-            AcceptButton = _okBtn;
-            AutoSize = true;
-            //AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            CancelButton = _cancelBtn;
-            ClientSize = new Size(PrefWidth, 65);
-            Controls.Add(_lbl);
+            AcceptButton = okBtn;
+            CancelButton = cancelBtn;
+            //ClientSize = new Size(50, 50);
+            Controls.Add(lbl);
             Controls.Add(_table);
-            Controls.Add(_buttonPanel);
-            MinimumSize = new Size(PrefWidth, MinSize.Height);
-            //MaximumSize = new Size(PrefWidth, int.MaxValue);
+            Controls.Add(buttonPanel);
             Name = "YamuiInternalInputDialog";
             StartPosition = FormStartPosition.CenterParent;
-            MaximizeBox = false;
-            MinimizeBox = false;
+            ControlBox = false;
             Padding = new Padding(Padding.Left, 8, Padding.Right, Padding.Bottom);
-            Text = _caption;
 
-            _buttonPanel.ResumeLayout(false);
-            ((ISupportInitialize)(_errorProvider)).EndInit();
+            buttonPanel.ResumeLayout(false);
+            ((ISupportInitialize) (_errorProvider)).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -224,16 +194,6 @@ namespace YamuiFramework.Forms {
             }
         }
 
-        public new int Width {
-            get { return base.Width; }
-            set {
-                if (value == 0) value = PrefWidth;
-                value = Math.Max(MinSize.Width, value);
-                MinimumSize = new Size(value, MinSize.Height);
-                MaximumSize = new Size(value, int.MaxValue);
-            }
-        }
-
         #endregion
 
         #region private
@@ -263,9 +223,9 @@ namespace YamuiFramework.Forms {
 
         private Label BuildLabelForItem(int i) {
             var item = _items[i];
-            var lbl = new YamuiLabel { AutoSize = true, Dock = DockStyle.Left, Margin = new Padding(0, 0, 1, 0) };
+            var lbl = new YamuiLabel {AutoSize = true, Dock = DockStyle.Left, Margin = new Padding(0, 0, 1, 0)};
             if (item != null) {
-                lbl.Text = (GetAttr(item) != null ? GetAttr(item).Label : item.Name) + ":";
+                lbl.Text = (GetAttr(item) != null ? GetAttr(item).Label : item.Name) + @":";
                 lbl.Margin = new Padding(0, 10, 4, 0);
             }
             return lbl;
@@ -280,24 +240,24 @@ namespace YamuiFramework.Forms {
             if (item == null)
                 val = _dataObj;
             else if (item is PropertyInfo)
-                val = ((PropertyInfo)item).GetValue(_dataObj, null);
+                val = ((PropertyInfo) item).GetValue(_dataObj, null);
             else
-                val = ((FieldInfo)item).GetValue(_dataObj);
+                val = ((FieldInfo) item).GetValue(_dataObj);
             string t = val.ConvertToStr();
 
             // Build control type
             Control retVal;
-            if (itemType == typeof(bool)) {
-                retVal = new YamuiButtonToggle { AutoSize = false, Checked = (bool)val, Margin = new Padding(0, 10, 0, 0), Size = new Size(40, 20) };
+            if (itemType == typeof (bool)) {
+                retVal = new YamuiButtonToggle {AutoSize = false, Checked = (bool) val, Margin = new Padding(0, 10, 0, 0), Size = new Size(40, 20)};
             } else if (itemType.IsEnum) {
-                var cb = new YamuiComboBox { Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList };
+                var cb = new YamuiComboBox {Dock = DockStyle.Fill, DropDownStyle = ComboBoxStyle.DropDownList};
                 cb.Items.AddRange(Enum.GetNames(itemType));
                 cb.Text = t;
                 retVal = cb;
             } else {
-                var tb = new YamuiTextBox { CausesValidation = true, Dock = DockStyle.Fill, Text = t };
+                var tb = new YamuiTextBox {CausesValidation = true, Dock = DockStyle.Fill, Text = t};
                 tb.Enter += (s, e) => tb.SelectAll();
-                if (itemType == typeof(char))
+                if (itemType == typeof (char))
                     tb.KeyPress += (s, e) => e.Handled = !char.IsControl(e.KeyChar) && tb.TextLength > 0;
                 else
                     tb.KeyPress += (s, e) => e.Handled = Utilities.IsInvalidKey(e.KeyChar, itemType);
@@ -331,7 +291,7 @@ namespace YamuiFramework.Forms {
                 Control c = _table.Controls["input" + i];
                 object val;
                 if (c is YamuiButtonToggle)
-                    val = ((YamuiButtonToggle)c).Checked;
+                    val = ((YamuiButtonToggle) c).Checked;
                 else
                     val = c.Text.ConvertFromStr(itemType);
 
@@ -339,9 +299,9 @@ namespace YamuiFramework.Forms {
                 if (item == null)
                     _dataObj = val;
                 else if (item is PropertyInfo)
-                    ((PropertyInfo)item).SetValue(_dataObj, val, null);
+                    ((PropertyInfo) item).SetValue(_dataObj, val, null);
                 else
-                    ((FieldInfo)item).SetValue(_dataObj, val);
+                    ((FieldInfo) item).SetValue(_dataObj, val);
             }
         }
 
@@ -367,183 +327,67 @@ namespace YamuiFramework.Forms {
         }
 
         private YamuiInputDialogItemAttribute GetAttr(MemberInfo mi) {
-            return (YamuiInputDialogItemAttribute)Attribute.GetCustomAttribute(mi, typeof(YamuiInputDialogItemAttribute), true);
+            return (YamuiInputDialogItemAttribute) Attribute.GetCustomAttribute(mi, typeof (YamuiInputDialogItemAttribute), true);
         }
 
         private Type GetItemType(MemberInfo mi) {
-            return mi == null ? _dataObj.GetType() : (mi is PropertyInfo ? ((PropertyInfo)mi).PropertyType : ((FieldInfo)mi).FieldType);
+            return mi == null ? _dataObj.GetType() : (mi is PropertyInfo ? ((PropertyInfo) mi).PropertyType : ((FieldInfo) mi).FieldType);
+        }
+
+        #endregion
+
+        #region static
+
+        /// <summary>
+        /// Displays an input dialog that will automatically update the values of the given object according
+        /// to the user's answers
+        /// </summary>
+        public static DialogResult Show(IWin32Window owner, string prompt, string caption, ref object data, int width = 500) {
+            using (var dialog = new YamuiInternalInputDialog(prompt)) {
+                dialog.Width = width;
+                dialog.Text = string.IsNullOrEmpty(caption) ? "Question" : caption;
+                dialog.AutoSize = true;
+                dialog.MinimumSize = new Size(width, 50);
+                dialog.ClientSize = new Size(width, 50);
+                dialog.Data = data;
+                var ret = owner == null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
+                if (ret == DialogResult.OK)
+                    data = dialog.Data;
+                return ret;
+            }
         }
 
         #endregion
 
     }
 
-    #region YamuiInputDialog
-
-    /// <summary>
-    /// An input dialog that automatically creates controls to collect the values of the object supplied via the <see cref="Data"/> property.
-    /// Credits goes to : http://www.codeproject.com/Articles/1057961/Content-driven-Input-Dialog
-    /// </summary>
-    public class YamuiInputDialog : CommonDialog {
-        private object _data;
-
-        /// <summary>
-        /// Gets or sets the data for the input dialog box. The data type will determine the type of input mechanism displayed. For simple
-        /// types, a <see cref="YamuiTextBox"/> with validation, or a <see cref="YamuiButtonToggle"/> or a <see cref="YamuiComboBox"/> will
-        /// be displayed. For classes and structures, all of the public, top-level, fields and properties will have
-        /// input mechanisms shown for each. See Remarks for more detail.
-        /// </summary>
-        /// <value>
-        /// The data for the input dialog box.
-        /// </value>
-        /// <remarks>TBD</remarks>
-        [DefaultValue(null), Category("Data"), Description("The data for the input dialog box.")]
-        public object Data {
-            get { return _data; }
-            set { _data = value; }
-        }
-
-        /// <summary>
-        /// Gets or sets the image to display on the top left corner of the dialog. This value can be <c>null</c> to display no image.
-        /// </summary>
-        /// <value>
-        /// The image to display on the top left corner of the dialog.
-        /// </value>
-        [DefaultValue(null), Category("Appearance"), Description("The image to display on the top left corner of the dialog.")]
-        public Image Image { get; set; }
-
-        /// <summary>
-        /// Gets or sets the text prompt to display above all input options. This value can be <c>null</c>.
-        /// </summary>
-        /// <value>
-        /// The text prompt to display above all input options.
-        /// </value>
-        [DefaultValue(null), Category("Appearance"), Description("The text prompt to display above all input options.")]
-        public string Prompt { get; set; }
-
-        /// <summary>
-        /// Gets or sets the input dialog box title.
-        /// </summary>
-        /// <value>
-        /// The input dialog box title.
-        /// </value>
-        [DefaultValue(""), Category("Window"), Description("The input dialog box title.")]
-        public string Title { get; set; }
-
-        /// <summary>
-        /// Displays an input dialog in front of the specified object and with the specified prompt, caption, data, and image.
-        /// </summary>
-        /// <param name="owner">An implementation of <see cref="IWin32Window"/> that will own the modal dialog box.</param>
-        /// <param name="prompt">The text prompt to display above all input options. This value can be <c>null</c>.</param>
-        /// <param name="caption">The caption for the dialog.</param>
-        /// <param name="data">
-        /// The data for the input. The data type will determine the type of input mechanism displayed. For simple
-        /// types, a <see cref="YamuiTextBox"/> with validation, or a <see cref="YamuiButtonToggle"/> or a <see cref="YamuiComboBox"/> will
-        /// be displayed. For classes and structures, all of the public, top-level, fields and properties will have
-        /// input mechanisms shown for each. See Remarks for more detail.
-        /// </param>
-        /// <param name="width">
-        /// The desired width of the <see cref="YamuiInternalInputDialog"/>. A value of <c>0</c> indicates a default width.
-        /// </param>
-        /// <returns>
-        /// Either <see cref="DialogResult.OK"/> or <see cref="DialogResult.Cancel"/>. On OK, the
-        /// <paramref name="data"/> parameter will include the updated values from the <see cref="YamuiInternalInputDialog"/>.
-        /// </returns>
-        /// <remarks></remarks>
-        public static DialogResult Show(IWin32Window owner, string prompt, string caption, ref object data, int width = 0) {
-            using (var dlg = new YamuiInternalInputDialog(prompt, caption, data, width)) {
-                var ret = owner == null ? dlg.ShowDialog() : dlg.ShowDialog(owner);
-                if (ret == DialogResult.OK)
-                    data = dlg.Data;
-                return ret;
-            }
-        }
-
-        /// <summary>
-        /// Displays an input dialog with the specified prompt, caption, data, and image.
-        /// </summary>
-        /// <param name="prompt">The text prompt to display above all input options. This value can be <c>null</c>.</param>
-        /// <param name="caption">The caption for the dialog.</param>
-        /// <param name="data">
-        /// The data for the input. The data type will determine the type of input mechanism displayed. For simple
-        /// types, a <see cref="YamuiTextBox"/> with validation, or a <see cref="YamuiButtonToggle"/> or a <see cref="YamuiComboBox"/> will
-        /// be displayed. For classes and structures, all of the public, top-level, fields and properties will have
-        /// input mechanisms shown for each. See Remarks for more detail.
-        /// </param>
-        /// <param name="width">
-        /// The desired width of the <see cref="YamuiInternalInputDialog"/>. A value of <c>0</c> indicates a default width.
-        /// </param>
-        /// <returns>
-        /// Either <see cref="DialogResult.OK"/> or <see cref="DialogResult.Cancel"/>. On OK, the
-        /// <paramref name="data"/> parameter will include the updated values from the <see cref="YamuiInternalInputDialog"/>.
-        /// </returns>
-        /// <remarks></remarks>
-        public static DialogResult Show(string prompt, string caption, ref object data, int width = 0) {
-            return Show(null, prompt, caption, ref data, width);
-        }
-
-        /// <summary>
-        /// Resets all properties to their default values.
-        /// </summary>
-        public override void Reset() { }
-
-        /// <summary>
-        /// <para>This API supports the.NET Framework infrastructure and is not intended to be used directly from your code.</para>
-        /// <para>Specifies a common dialog box.</para>
-        /// </summary>
-        /// <param name="hwndOwner">A value that represents the window handle of the owner window for the common dialog box.</param>
-        /// <returns><c>true</c> if the data was collected; otherwise, <c>false</c>.</returns>
-        protected override bool RunDialog(IntPtr hwndOwner) {
-            return Show(NativeWindow.FromHandle(hwndOwner), Prompt, Title, ref _data) == DialogResult.OK;
-        }
-    }
-
     #endregion
+
 
     #region YamuiInputDialogItemAttribute
 
-    /// <summary>
-    /// Allows a developer to attribute a property or field with text that gets shown instead of the field or property name in an <see cref="YamuiInputDialog"/>.
-    /// Credits goes to : http://www.codeproject.com/Articles/1057961/Content-driven-Input-Dialog
-    /// </summary>
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Property)]
-    public sealed class YamuiInputDialogItemAttribute : Attribute {
+    public class YamuiInputDialogItemAttribute : Attribute {
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YamuiInputDialogItemAttribute" /> class.
-        /// </summary>
         public YamuiInputDialogItemAttribute() { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YamuiInputDialogItemAttribute" /> class.
-        /// </summary>
-        /// <param name="label">The label to use in the <see cref="YamuiInputDialog"/> as the label for this field or property.</param>
         public YamuiInputDialogItemAttribute(string label) {
             Label = label;
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this item is hidden and not displayed by the <see cref="YamuiInputDialog"/>.
+        /// Gets or sets a value indicating whether this item is hidden and not displayed
         /// </summary>
-        /// <value>
-        /// <c>true</c> if hidden; otherwise, <c>false</c>.
-        /// </value>
         public bool Hidden { get; set; }
 
         /// <summary>
-        /// Gets or sets the label to use in the <see cref="YamuiInputDialog"/> as the label for this field or property.
+        /// Gets or sets the label to use as the label for this field or property
         /// </summary>
-        /// <value>
-        /// The label for this item.
-        /// </value>
         public string Label { get; set; }
 
         /// <summary>
-        /// Gets or sets the order in which to display the input for this field or property within the <see cref="YamuiInputDialog"/>.
+        /// Gets or sets the order in which to display the input for this field
         /// </summary>
-        /// <value>
-        /// The display order for this item.
-        /// </value>
         public int Order { get; set; }
     }
 

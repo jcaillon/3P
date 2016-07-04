@@ -45,22 +45,10 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
-        public class B {
-            public enum AGender { Female, Male };
-
-            [YamuiInputDialogItemAttribute(Hidden = true)]
-            public bool UnshownSetting = true;
-
-            [YamuiInputDialogItemAttribute("Full name", Order = 0)]
-            public string Name { get; set; }
-            public int Age = 25;
-            public bool Married { get; set; }
-            public AGender Gender { get; set; }
-        }
-
-
         public static void DebugTest1() {
-            RunParserTests();
+            ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure);
+            
+            //RunParserTests();
 
             //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
@@ -69,14 +57,6 @@ namespace _3PA.Tests {
 
         public static void DebugTest2() {
             
-            //object s = "";
-            //if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
-            //    // Do something with the 's' variable
-            //    UserCommunication.Notify((string)s);
-            //}
-            //object a = new B();
-            //YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
-
             Debug.Assert(false);
             UserCommunication.Notify("debug");
              

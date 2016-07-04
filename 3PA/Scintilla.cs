@@ -19,9 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -1551,6 +1549,17 @@ namespace _3PA {
             anchor = Lines.CharToBytePosition(anchor);
 
             Sci.Send(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(anchor));
+        }
+
+        /// <summary>
+        /// Set a single selection from anchor to caret as the ONLY selection.
+        /// </summary>
+        /// <param name="caret">The zero-based document position to end the selection.</param>
+        public static void SetSelection(int caret) {
+            var textLength = TextLength;
+            caret = Clamp(caret, 0, textLength);
+            caret = Lines.CharToBytePosition(caret);
+            Sci.Send(SciMsg.SCI_SETSELECTION, new IntPtr(caret), new IntPtr(caret));
         }
 
         /// <summary>

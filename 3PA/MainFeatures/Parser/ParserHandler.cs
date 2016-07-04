@@ -143,17 +143,18 @@ namespace _3PA.MainFeatures.Parser {
         /// List of parsed items
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> GetParsedItemsList() {
-            return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionData>();
+        public static List<CompletionData> GetParsedItemsList {
+            get { return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionData>(); }
         }
 
         /// <summary>
         /// List of parsed explorer items
         /// </summary>
         /// <returns></returns>
-        public static List<CodeExplorerItem> GetParsedExplorerItemsList() {
-            return _parserVisitor != null ? _parserVisitor.ParsedExplorerItemsList.ToList() : new List<CodeExplorerItem>();
+        public static List<CodeExplorerItem> GetParsedExplorerItemsList {
+            get { return _parserVisitor != null ? _parserVisitor.ParsedExplorerItemsList.ToList() : new List<CodeExplorerItem>(); }
         }
+
         #endregion
 
         #region handling item ranking

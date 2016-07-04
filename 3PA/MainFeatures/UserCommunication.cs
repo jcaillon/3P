@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.NppInterfaceForm;
 
@@ -182,5 +183,21 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
+
+        #region Input
+
+        /// <summary>
+        /// Allows to ask information to the user, return DialogResult.OK if the user clicked the ok button
+        /// </summary>
+        /// <param name="title"></param>
+        /// <param name="subTitle"></param>
+        /// <param name="obj"></param>
+        /// <returns></returns>
+        public static DialogResult Input(string title, string subTitle, ref object obj) {
+            return YamuiInternalInputDialog.Show(new WindowWrapper(Npp.HandleNpp), ThemeManager.FormatMessage(null, MessageImg.MsgQuestion, title, subTitle), "3P - Input required", ref obj);
+        }
+
+        #endregion
+
     }
 }

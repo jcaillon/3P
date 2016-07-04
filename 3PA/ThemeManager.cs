@@ -143,7 +143,7 @@ namespace _3PA {
         public static string FormatMessage(string content, MessageImg image, string title, string subtitle, bool forMessageBox = false) {
             return @"
             <div style='margin-bottom: 1px;'>
-                <table style='margin-bottom: " + (forMessageBox ? "15px" : "5px") + @"; width: 100%'>
+                <table style='margin-bottom: " + (string.IsNullOrEmpty(content) ? "0px" : (forMessageBox ? "15px" : "5px")) + @"; width: 100%'>
                     <tr>
                         <td rowspan='2' style='" + (forMessageBox ? "width: 95px; padding-left: 15px" : "width: 80px") + @"'><img src='" + image + @"' width='64' height='64' /></td>
                         <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
@@ -151,11 +151,13 @@ namespace _3PA {
                     <tr>
                         <td class='NotificationSubTitle'>" + subtitle + @"</td>
                     </tr>
-                </table>
-                <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px;'>
+                </table>" +
+                (string.IsNullOrEmpty(content) ? "" :
+                @"<div style='margin-left: 8px; margin-right: 8px; margin-top: 0px;'>
                     " + content + @"
-                </div>
-            </div>";
+                </div>"
+                )+
+            "</div>";
         }
 
         /// <summary>

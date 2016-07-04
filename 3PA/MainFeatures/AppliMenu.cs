@@ -183,8 +183,8 @@ namespace _3PA.MainFeatures {
             #region Generate code
 
             _generateCodeMenuList = new List<MenuItem> {
-                new MenuItem(this, "Insert new function", ImageResources.Function, null, null, ""),
-                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, null, null, "")
+                new MenuItem(this, "Insert new function", ImageResources.Function, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Function), "Insert_new_function", ""),
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure), "Insert_new_procedure", "")
             };
 
             #endregion
@@ -205,7 +205,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space"),
                 _envMenu,
 
-                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(true), // --------------------------
 
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1") {
                     Generic = true
@@ -220,7 +220,7 @@ namespace _3PA.MainFeatures {
                     Generic = true
                 },
 
-                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(true), // --------------------------
 
                 new MenuItem(this, "Start searching files", ImageResources.Search, FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q") {
                     Generic = true
@@ -239,9 +239,9 @@ namespace _3PA.MainFeatures {
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
                 
-                //new MenuItem(this, "Generate code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
-                //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
-                //},
+                new MenuItem(this, "Generate code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
+                    Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                },
 
                 new MenuItem(true), // --------------------------
 
@@ -249,7 +249,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
                 new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
 
-                new MenuItem(true) {Generic = true}, // --------------------------
+                new MenuItem(true), // --------------------------
 
                 new MenuItem(this, "Options", ImageResources.ShowOptions, () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
             };

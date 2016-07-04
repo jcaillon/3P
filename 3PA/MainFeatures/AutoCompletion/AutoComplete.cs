@@ -266,7 +266,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             ParserHandler.RefreshParser();
 
                             // we had the dynamic items to the list
-                            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList());
+                            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList);
 
                             // update autocompletion
                             CurrentTypeOfList = TypeOfList.Reset;

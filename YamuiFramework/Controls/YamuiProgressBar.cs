@@ -37,9 +37,7 @@ namespace YamuiFramework.Controls {
 
         private float _progress;
 
-        [Description("The value ranging from 0-100 which represents progress")]
-        [DefaultValue(0)]
-        [Category("Yamui")]
+        [DefaultValue(0), Description("The value ranging from 0-100 which represents progress"), Category("Yamui")]
         public float Progress {
             get { return _progress; }
             set {
@@ -56,8 +54,7 @@ namespace YamuiFramework.Controls {
 
         private ProgressStyle _progressStyle;
 
-        [DefaultValue(ProgressStyle.Normal)]
-        [Description("The progress animation style"), Category("Yamui")]
+        [DefaultValue(ProgressStyle.Normal), Description("The progress animation style"), Category("Yamui")]
         public ProgressStyle Style {
             get { return _progressStyle; }
             set {
@@ -68,9 +65,7 @@ namespace YamuiFramework.Controls {
 
         private CenterElement _centerElement;
 
-        [Description("The element to draw at the center")]
-        [Category("Yamui")]
-        [DefaultValue(CenterElement.None)]
+        [DefaultValue(CenterElement.None), Description("The element to draw at the center"), Category("Yamui")]
         public CenterElement CenterText {
             get { return _centerElement; }
             set {
@@ -81,9 +76,7 @@ namespace YamuiFramework.Controls {
 
         private bool _vertical;
 
-        [Description("Determines the orientation of the progress bar")]
-        [Category("Yamui")]
-        [DefaultValue(false)]
+        [DefaultValue(false), Description("Determines the orientation of the progress bar"), Category("Yamui")]
         public bool Vertical {
             get { return _vertical; }
             set {
@@ -99,9 +92,7 @@ namespace YamuiFramework.Controls {
 
         private bool _useMarquee;
 
-        [Description("Determines whether to use the marquee in opposed to direction")]
-        [Category("Yamui")]
-        [DefaultValue(false)]
+        [DefaultValue(false), Description("Determines whether to use the marquee in opposed to direction"), Category("Yamui")]
         public bool UseMarquee {
             get { return _useMarquee; }
             set {
@@ -111,16 +102,12 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        [Description("The width of the animated marquee")]
-        [Category("Yamui")]
-        [DefaultValue(80)]
+        [DefaultValue(80), Description("The width of the animated marquee"), Category("Yamui")]
         public int MarqueeWidth { get; set; }
 
         private int _gradientIntensity;
 
-        [Description("The intensity of the outer color in relation to the inner")]
-        [Category("Yamui")]
-        [DefaultValue(20)]
+        [DefaultValue(20), Description("The intensity of the outer color in relation to the inner"), Category("Yamui")]
         public int GradientIntensity {
             get { return _gradientIntensity; }
             set {
@@ -132,9 +119,7 @@ namespace YamuiFramework.Controls {
 
         private bool _autoSetOrientation = true;
 
-        [Description("When true, automatically sets the Vertical property according to the controls size")]
-        [Category("Yamui")]
-        [DefaultValue(true)]
+        [DefaultValue(true), Description("When true, automatically sets the Vertical property according to the controls size"), Category("Yamui")]
         public bool AutoSetOrientation {
             get { return _autoSetOrientation; }
             set {

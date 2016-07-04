@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             public string CmdLineParameters = "";
             public string LogFilePath = "";
 
-            public bool CompileLocally;
+            public bool CompileLocally = true;
             public bool CompileWithListing = true;
             public bool CompilePushToFtp;
 
