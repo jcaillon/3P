@@ -34,6 +34,7 @@ using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
+using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA {
@@ -189,6 +190,13 @@ namespace _3PA {
             // subscribe to static events
             ProEnvironment.OnEnvironmentChange += FileExplorer.RebuildFileList;
             ProEnvironment.OnEnvironmentChange += DataBase.UpdateDatabaseInfo;
+            DataBase.OnDatabaseInfoUpdated += AutoComplete.RefreshStaticItems;
+
+            ParserHandler.OnParseStarted += () => { CodeExplorer.Refreshing = true; };
+            ParserHandler.OnParseEnded += AutoComplete.RefreshDynamicItems;
+            ParserHandler.OnParseEnded += CodeExplorer.UpdateCodeExplorer;
+
+            AutoComplete.OnUpdatedStaticItems += Parser.UpdateKnownStaticItems;
 
             OnKeyDown += KeyDownHandler;
             OnMouseMessage += MouseMessageHandler;
@@ -203,7 +211,7 @@ namespace _3PA {
 
             // Simulates a OnDocumentSwitched when we start this dll
             IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
-            OnDocumentSwitched(true);
+            OnDocumentSwitched(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
             WinApi.SetForegroundWindow(Npp.HandleNpp);

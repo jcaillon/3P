@@ -25,6 +25,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA {
@@ -197,7 +198,7 @@ namespace _3PA {
                         // if the text has changed, parse
                         if ((nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0 ||
                             (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
-                            AutoComplete.ParseCurrentDocument();
+                            ParserHandler.ParseCurrentDocument();
                         }
 
                         // did the user supress 1 char?

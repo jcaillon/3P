@@ -27,6 +27,7 @@ using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
@@ -299,7 +300,7 @@ namespace _3PA.MainFeatures {
             Keywords.Import();
             // Update autocompletion
             AutoComplete.RefreshStaticItems();
-            AutoComplete.ParseCurrentDocument();
+            ParserHandler.ParseCurrentDocument();
         }
 
         #endregion

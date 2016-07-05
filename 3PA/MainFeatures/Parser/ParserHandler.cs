@@ -21,51 +21,134 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.CodeExplorer;
+using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
 
     internal static class ParserHandler {
 
+        #region event
+        
+        /// <summary>
+        /// Event published when the parser starts doing its job
+        /// </summary>
+        public static event Action OnParseStarted;
+
+        /// <summary>
+        /// Event published when the parser has done its job and it's time to get the results
+        /// </summary>
+        public static event Action OnParseEnded;
+        
+        #endregion
+
         #region fields
 
-        /// <summary>
-        /// This dictionnary is what is used to remember the ranking of each word for the current session
-        /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
-        /// </summary>
-        public static Dictionary<string, int> DisplayTextRankingParsedItems = new Dictionary<string, int>();
+        private static string _lastParsedFilePath;
 
-        /// <summary>
-        /// Same as above but for static stuff (= database)
-        /// (it is especially useful for fields because we recreate the list each time!
-        /// otherwise it is not that useful indeed)
-        /// </summary>
-        public static Dictionary<string, int> DisplayTextRankingDatabase = new Dictionary<string, int>();
+        private static Parser _ablParser = new Parser();
 
-        /// <summary>
-        /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
-        /// </summary>
-        public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
+        private static ParserVisitor _parserVisitor = new ParserVisitor();
 
-        public static string LastParsedFilePath;
+        private static ReaderWriterLockSlim _parserLock = new ReaderWriterLockSlim();
 
-        private static Parser _ablParser;
+        private static ReaderWriterLockSlim _timerLock = new ReaderWriterLockSlim();
 
-        private static ParserVisitor _parserVisitor;
+        private static ReaderWriterLockSlim _parsingLock = new ReaderWriterLockSlim();
+
+        private static Timer _parserTimer;
+
+        private static volatile bool _parseRequestedWhenBusy;
 
         #endregion
 
-        #region misc
+        #region public accessors (thread safe)
+
+        /// <summary>
+        /// Access the parser
+        /// </summary>
+        public static Parser AblParser {
+            get {
+                if (_parserLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _ablParser;
+                    } finally {
+                        _parserLock.ExitReadLock();
+                    }
+                }
+                return new Parser();
+            }
+        }
+
+        /// <summary>
+        /// Access the parser visitor
+        /// </summary>
+        public static ParserVisitor ParserVisitor {
+            get {
+                if (_parserLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _parserVisitor;
+                    } finally {
+                        _parserLock.ExitReadLock();
+                    }
+                }
+                return new ParserVisitor();
+            }
+        }
+
+        #endregion
+
+        #region Public
+
+        /// <summary>
+        /// List of completion item found
+        /// </summary>
+        /// <returns></returns>
+        public static List<CompletionItem> CompletionItemsList {
+            get { return ParserVisitor.ParsedItemsList.ToList(); }
+        }
+
+        /// <summary>
+        /// List of parsed explorer items
+        /// </summary>
+        /// <returns></returns>
+        public static List<CodeExplorerItem> CodeExplorerItemsList {
+            get { return ParserVisitor.ParsedExplorerItemsList.ToList(); }
+        }
+
+        /// <summary>
+        /// List of parsed items
+        /// </summary>
+        public static List<ParsedItem> ParsedItemsList {
+            get { return AblParser.ParsedItemsList.ToList(); }
+        }
+
+        /// <summary>
+        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
+        /// </summary>
+        /// <returns></returns>
+        public static bool CanIndent {
+            get { return AblParser.ParsingOk; }
+        }
+
+        /// <summary>
+        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
+        /// </summary>
+        /// <returns></returns>
+        public static Dictionary<int, LineInfo> GetLineInfo {
+            get { return AblParser.LineInfo; }
+        }
 
         /// <summary>
         /// Returns the owner name (currentScopeName) of the caret line
         /// </summary>
         /// <returns></returns>
         public static string GetCarretLineOwnerName(int line) {
-            if (_ablParser == null) return "";
-            return !_ablParser.LineInfo.ContainsKey(line) ? string.Empty : _ablParser.LineInfo[line].CurrentScopeName;
+            return !AblParser.LineInfo.ContainsKey(line) ? string.Empty : AblParser.LineInfo[line].CurrentScopeName;
         }
 
         /// <summary>
@@ -82,131 +165,116 @@ namespace _3PA.MainFeatures.Parser {
                 ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
         }
 
-        /// <summary>
-        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
-        /// </summary>
-        /// <returns></returns>
-        public static bool CanIndent() {
-            if (_ablParser == null) return false;
-            return _ablParser.ParsingOk;
-        }
-
-        /// <summary>
-        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
-        /// </summary>
-        /// <returns></returns>
-        public static Dictionary<int, LineInfo> GetLineInfo() {
-            if (_ablParser == null) return null;
-            return _ablParser.LineInfo;
-        }
-
         #endregion
 
         #region do the parsing and get the results
 
         /// <summary>
-        /// this method should be called to refresh the Items list with all the static items
-        /// as well as the dynamic items found by the parser
+        /// Call this method to parse the current document after a small delay 
+        /// (delay that is reset each time this function is called, so if you call it continously, nothing is done)
+        /// or set doNow = true to do it without waiting a timer
         /// </summary>
-        public static void RefreshParser() {
-            // we launch the parser, that will fill the DynamicItems
-            try {
-                // if this document is in the Saved parsed visitors, we remove it because it might change so we want to re parse it later
-                LastParsedFilePath = Plug.CurrentFilePath;
-                if (SavedParserVisitors.ContainsKey(LastParsedFilePath))
-                    SavedParserVisitors.Remove(LastParsedFilePath);
+        public static void ParseCurrentDocument(bool doNow = false) {
 
-                // Parse the document
-                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, LastParsedFilePath, null, true);
+            // parse immediatly
+            if (doNow) {
+                ParseCurrentDocumentTick();
+                return;
+            }
 
-                // visitor
-                _parserVisitor = new ParserVisitor(true, Path.GetFileName(LastParsedFilePath), _ablParser.LineInfo);
-                _ablParser.Accept(_parserVisitor);
-
-                // correct the internal/external type of run statements :
-                foreach (var item in _parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                    if (_parserVisitor.DefinedProcedures.Contains(item.DisplayText))
-                        item.IconType = CodeExplorerIconType.RunInternal;
+            // parse in 800ms, if nothing delays the timer
+            if (_timerLock.TryEnterWriteLock(100)) {
+                try {
+                    if (_parserTimer == null) {
+                        _parserTimer = new Timer { AutoReset = false, Interval = 800 };
+                        _parserTimer.Elapsed += (sender, args) => ParseCurrentDocumentTick();
+                        _parserTimer.Start();
+                    } else {
+                        // reset timer
+                        _parserTimer.Stop();
+                        _parserTimer.Start();
+                    }
+                } finally {
+                    _timerLock.ExitWriteLock();
                 }
-
-                // save the info for uses in an another file, where this file is run in persistent or included
-                if (!SavedParserVisitors.ContainsKey(LastParsedFilePath))
-                    SavedParserVisitors.Add(LastParsedFilePath, _parserVisitor);
-                else
-                    SavedParserVisitors[LastParsedFilePath] = _parserVisitor;
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in RefreshParser");
             }
         }
 
         /// <summary>
-        /// List of completion item found
+        /// Called when the _parserTimer ticks
+        /// refresh the Items list with all the static items
+        /// as well as the dynamic items found by the parser
         /// </summary>
-        /// <returns></returns>
-        public static List<CompletionItem> CompletionItemsList {
-            get { return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionItem>(); }
+        private static void ParseCurrentDocumentTick() {
+            Task.Factory.StartNew(() => {
+                if (_parsingLock.TryEnterWriteLock(100)) {
+                    _parseRequestedWhenBusy = false;
+                    try {
+                        if (OnParseStarted != null)
+                            OnParseStarted();
+
+                        // make sure to always parse the current file
+                        do {
+                            // we launch the parser, that will fill the DynamicItems
+                            if (_parserLock.TryEnterWriteLock(200)) {
+                                try {
+                                    RefreshParser();
+                                } finally {
+                                    _parserLock.ExitWriteLock();
+                                }
+                            } else {
+                                _parseRequestedWhenBusy = true;
+                            }
+                        } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath) || _parseRequestedWhenBusy);
+
+                        if (OnParseEnded != null)
+                            OnParseEnded();
+
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                    } finally {
+                        _parsingLock.ExitWriteLock();
+                    }
+                } else {
+                    _parseRequestedWhenBusy = true;
+                }
+            });
         }
 
         /// <summary>
-        /// List of parsed explorer items
+        /// this method should be called to refresh the Items list with all the static items
+        /// as well as the dynamic items found by the parser
         /// </summary>
-        /// <returns></returns>
-        public static List<CodeExplorerItem> CodeExplorerItemsList {
-            get { return _parserVisitor != null ? _parserVisitor.ParsedExplorerItemsList.ToList() : new List<CodeExplorerItem>(); }
-        }
+        private static void RefreshParser() {
 
-        /// <summary>
-        /// List of parsed items
-        /// </summary>
-        public static List<ParsedItem> ParsedItemsList {
-            get { return _ablParser != null ? _ablParser.ParsedItemsList.ToList() : new List<ParsedItem>(); }
-        }
+            //var watch = Stopwatch.StartNew();
 
-        #endregion
+            // if this document is in the Saved parsed visitors, we remove it because it might change so we want to re parse it later
+            _lastParsedFilePath = Plug.CurrentFilePath;
+            if (ParserVisitor.SavedParserVisitors.ContainsKey(_lastParsedFilePath))
+                ParserVisitor.SavedParserVisitors.Remove(_lastParsedFilePath);
 
-        #region handling item ranking
+            // Parse the document
+            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
 
-        /// <summary>
-        /// Find ranking of a parsed item
-        /// </summary>
-        /// <param name="displayText"></param>
-        /// <returns></returns>
-        public static int FindRankingOfParsedItem(string displayText) {
-            return DisplayTextRankingParsedItems.ContainsKey(displayText) ? DisplayTextRankingParsedItems[displayText] : 0;
-        }
+            // visitor
+            _parserVisitor = new ParserVisitor(true, Path.GetFileName(_lastParsedFilePath), _ablParser.LineInfo);
+            _ablParser.Accept(_parserVisitor);
 
-        /// <summary>
-        /// Find ranking of a database item
-        /// </summary>
-        /// <param name="displayText"></param>
-        /// <returns></returns>
-        public static int FindRankingOfDatabaseItem(string displayText) {
-            return DisplayTextRankingDatabase.ContainsKey(displayText) ? DisplayTextRankingDatabase[displayText] : 0;
-        }
+            // correct the internal/external type of run statements :
+            foreach (var item in _parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                if (_parserVisitor.DefinedProcedures.Contains(item.DisplayText))
+                    item.IconType = CodeExplorerIconType.RunInternal;
+            }
 
-        /// <summary>
-        /// remember the use of a particular item in the completion list
-        /// (for dynamic items = parsed items)
-        /// </summary>
-        /// <param name="displayText"></param>
-        public static void RememberUseOfParsedItem(string displayText) {
-            if (!DisplayTextRankingParsedItems.ContainsKey(displayText))
-                DisplayTextRankingParsedItems.Add(displayText, 1);
+            // save the info for uses in an another file, where this file is run in persistent or included
+            if (!ParserVisitor.SavedParserVisitors.ContainsKey(_lastParsedFilePath))
+                ParserVisitor.SavedParserVisitors.Add(_lastParsedFilePath, _parserVisitor);
             else
-                DisplayTextRankingParsedItems[displayText]++;
-        }
+                ParserVisitor.SavedParserVisitors[_lastParsedFilePath] = _parserVisitor;
 
-        /// <summary>
-        /// remember the use of a particular item in the completion list
-        /// (for database items!)
-        /// </summary>
-        /// <param name="displayText"></param>
-        public static void RememberUseOfDatabaseItem(string displayText) {
-            if (!DisplayTextRankingDatabase.ContainsKey(displayText))
-                DisplayTextRankingDatabase.Add(displayText, 1);
-            else
-                DisplayTextRankingDatabase[displayText]++;
+            //watch.Stop();
+            //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
         }
 
         #endregion
@@ -220,48 +288,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="name"></param>
         /// <returns></returns>
         public static ParsedTable FindAnyTableOrBufferByName(string name) {
-            // temptable or table
-            var foundTable = FindAnyTableByName(name);
-            if (foundTable != null)
-                return foundTable;
-            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
-            if (_parserVisitor != null) {
-                var foundParsedItem = _parserVisitor.ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
-                return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Find the table referenced among database and defined temp tables; 
-        /// name is the table's name (can also be BASE.TABLE)
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedTable FindAnyTableByName(string name) {
-            if (name.CountOccurences(".") > 0) {
-                var splitted = name.Split('.');
-                // find db then find table
-                var foundDb = DataBase.FindDatabaseByName(splitted[0]);
-                return foundDb == null ? null : DataBase.FindTableByName(splitted[1], foundDb);
-            }
-            // search in databse then in temp tables
-            var foundTable = DataBase.FindTableByName(name);
-            return foundTable ?? FindTempTableByName(name);
-        }
-
-        /// <summary>
-        /// Find a temptable by name
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        private static ParsedTable FindTempTableByName(string name) {
-            if (_parserVisitor != null) {
-                var foundTable = _parserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
-                if (foundTable != null && foundTable.ParsedItem is ParsedTable)
-                    return (ParsedTable) foundTable.ParsedItem;
-            }
-            return null;
+            return ParserVisitor.FindAnyTableOrBufferByName(name);
         }
 
         #endregion
@@ -271,98 +298,10 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// convertion
         /// </summary>
-        /// <param name="str"></param>
-        /// <param name="analyseLike"></param>
-        /// <returns></returns>
         public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            str = str.ToLower();
-            // LIKE
-            if (analyseLike)
-                return FindPrimitiveTypeOfLike(str);
-
-            // AS
-            switch (str) {
-                case "com-handle":
-                    return ParsedPrimitiveType.Comhandle;
-                case "datetime-tz":
-                    return ParsedPrimitiveType.Datetimetz;
-                case "unsigned-short":
-                    return ParsedPrimitiveType.UnsignedShort;
-                case "unsigned-long":
-                    return ParsedPrimitiveType.UnsignedLong;
-                case "table-handle":
-                    return ParsedPrimitiveType.TableHandle;
-                case "dataset-handle":
-                    return ParsedPrimitiveType.DatasetHandle;
-                case "widget-handle":
-                    return ParsedPrimitiveType.WidgetHandle;
-                default:
-                    var token1 = str;
-                    foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                        return (ParsedPrimitiveType) Enum.Parse(typeof (ParsedPrimitiveType), typ, true);
-                    }
-                    break;
-            }
-
-            // try to find the complete word in abbreviations list
-            var completeStr = Keywords.GetFullKeyword(str);
-            if (completeStr != null)
-                foreach (var typ in Enum.GetNames(typeof (ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
-                    return (ParsedPrimitiveType) Enum.Parse(typeof (ParsedPrimitiveType), typ, true);
-                }
-            return ParsedPrimitiveType.Unknow;
-        }
-
-        /// <summary>
-        /// Search through the available completionData to find the primitive type of a 
-        /// "like xx" phrase
-        /// </summary>
-        /// <param name="likeStr"></param>
-        /// <returns></returns>
-        private static ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
-            // determines the format
-            var nbPoints = likeStr.CountOccurences(".");
-            var splitted = likeStr.Split('.');
-
-            // if it's another var
-            if (nbPoints == 0) {
-                var foundVar = _parserVisitor.ParsedItemsList.Find(data =>
-                    (data.Type == CompletionType.VariablePrimitive ||
-                     data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
-                return foundVar != null ? ((ParsedDefine) foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
-            }
-
-            var tableName = splitted[nbPoints == 2 ? 1 : 0];
-            var fieldName = splitted[nbPoints == 2 ? 2 : 1];
-
-            // Search through database
-            if (DataBase.List.Count > 0) {
-                ParsedDataBase foundDb = DataBase.List.First();
-                if (nbPoints == 2)
-                    // find database
-                    foundDb = DataBase.FindDatabaseByName(splitted[0]) ?? DataBase.List.First();
-                if (foundDb == null) return ParsedPrimitiveType.Unknow;
-
-                // find table
-                var foundTable = DataBase.FindTableByName(tableName, foundDb);
-                if (foundTable != null) {
-
-                    // find field
-                    var foundField = DataBase.FindFieldByName(fieldName, foundTable);
-                    if (foundField != null) return foundField.Type;
-                }
-            }
-
-            // Search in temp tables
-            if (nbPoints != 1) return ParsedPrimitiveType.Unknow;
-            var foundTtable = FindAnyTableOrBufferByName(tableName);
-            if (foundTtable == null) return ParsedPrimitiveType.Unknow;
-
-            var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
-            return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
+            return ParserVisitor.ConvertStringToParsedPrimitiveType(str, analyseLike);
         }
 
         #endregion
-
     }
 }

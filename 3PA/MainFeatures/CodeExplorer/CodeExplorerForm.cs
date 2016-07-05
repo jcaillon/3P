@@ -679,7 +679,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         public void RefreshParserAndCodeExplorer() {
             ClearFilter();
-            ParserHandler.SavedParserVisitors.Clear();
+            ParserHandler.ParserVisitor.ClearSavedParserVisitors();
             Plug.OnDocumentSwitched();
         }
 

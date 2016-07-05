@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 }
             }
         }
-        private bool _refreshing;
+        private volatile bool _refreshing;
 
         private bool _refreshRequiredWhileRefreshing;
 

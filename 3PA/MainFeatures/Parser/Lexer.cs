@@ -28,9 +28,11 @@ namespace _3PA.MainFeatures.Parser {
     /// it implements a visitor pattern
     /// </summary>
     internal class Lexer {
+
         private const int LineStartAt = 0;
         private const int ColumnStartAt = 0;
         private const char Eof = (char)0;
+
         private int _commentDepth;
         private int _includeDepth;
         private int _column;

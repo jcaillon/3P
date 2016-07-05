@@ -34,6 +34,21 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParserVisitor : IParserVisitor {
 
+        #region static
+
+        /// <summary>
+        /// We keep tracks of the parsed files, to avoid parsing the same file twice
+        /// </summary>
+        private static HashSet<string> _parsedFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+        /// <summary>
+        /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
+        /// </summary>
+        public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
+
+        #endregion
+
+
         #region Fields
 
         private const string BlockTooLongString = "Too long!";
@@ -72,25 +87,21 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
 
-        /// <summary>
-        /// We keep tracks of the parsed files, to avoid parsing the same file twice
-        /// </summary>
-        private static HashSet<string> _parsedFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-
         #endregion
 
         #region constructor
 
+        public ParserVisitor() {}
+
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="isBaseFile"></param>
-        /// <param name="currentParsedFile"></param>
-        /// <param name="lineInfo"></param>
         public ParserVisitor(bool isBaseFile, string currentParsedFile, Dictionary<int, LineInfo> lineInfo) {
             _isBaseFile = isBaseFile;
             _currentParsedFile = currentParsedFile;
             _lineInfo = lineInfo;
+            if (_lineInfo == null)
+                _lineInfo = new Dictionary<int, LineInfo>();
 
             // reset the parsed files for the session
             if (isBaseFile)
@@ -293,13 +304,13 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // to completion data
-            pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
+            pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
             ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
                 Flag = AddExternalFlag((pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0)),
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -334,7 +345,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
                 Flag = AddExternalFlag((pars.IsExternal ? ParseFlag.ExternalProc : 0) | (pars.IsPrivate ? ParseFlag.Private : 0)),
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -351,7 +362,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
                 Flag = AddExternalFlag(pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope),
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -384,7 +395,7 @@ namespace _3PA.MainFeatures.Parser {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
                 Flag = 0,
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -403,7 +414,7 @@ namespace _3PA.MainFeatures.Parser {
             // find primitive type
             var hasPrimitive = !string.IsNullOrEmpty(pars.TempPrimitiveType);
             if (hasPrimitive)
-                pars.PrimitiveType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like);
+                pars.PrimitiveType = ConvertStringToParsedPrimitiveType(pars.TempPrimitiveType, pars.AsLike == ParsedAsLike.Like);
 
             // which completionData type is it?
             CompletionType type;
@@ -415,7 +426,7 @@ namespace _3PA.MainFeatures.Parser {
                 type = CompletionType.TempTable;
 
                 // find the table or temp table that the buffer is FOR
-                var foundTable = ParserHandler.FindAnyTableByName(pars.BufferFor);
+                var foundTable = FindAnyTableByName(pars.BufferFor);
                 if (foundTable != null) {
                     subString = foundTable.Name;
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
@@ -497,7 +508,7 @@ namespace _3PA.MainFeatures.Parser {
                 Type = type,
                 SubString = subString,
                 Flag = AddExternalFlag(SetFlags(flag, pars.LcFlagString)),
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
@@ -512,11 +523,11 @@ namespace _3PA.MainFeatures.Parser {
 
             // find all primitive types
             foreach (var parsedField in pars.Fields)
-                parsedField.Type = ParserHandler.ConvertStringToParsedPrimitiveType(parsedField.TempType, parsedField.AsLike == ParsedAsLike.Like);
+                parsedField.Type = ConvertStringToParsedPrimitiveType(parsedField.TempType, parsedField.AsLike == ParsedAsLike.Like);
 
             // temp table is LIKE another table? copy fields
             if (!string.IsNullOrEmpty(pars.LcLikeTable)) {
-                var foundTable = ParserHandler.FindAnyTableByName(pars.LcLikeTable);
+                var foundTable = FindAnyTableByName(pars.LcLikeTable);
                 if (foundTable != null) {
                     // add the fields of the found table (minus the primary information)
                     subStr = @"Like " + foundTable.Name;
@@ -553,10 +564,158 @@ namespace _3PA.MainFeatures.Parser {
                 Type = CompletionType.TempTable,
                 SubString = subStr,
                 Flag = AddExternalFlag(SetFlags(0, pars.LcFlagString)),
-                Ranking = ParserHandler.FindRankingOfParsedItem(pars.Name),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true
             });
+        }
+
+        #endregion
+
+        #region find table, buffer, temptable
+
+        /// <summary>
+        /// finds a ParsedTable for the input name, it can either be a database table,
+        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ParsedTable FindAnyTableOrBufferByName(string name) {
+            // temptable or table
+            var foundTable = FindAnyTableByName(name);
+            if (foundTable != null)
+                return foundTable;
+            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
+            var foundParsedItem = ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
+        }
+
+        /// <summary>
+        /// Find the table referenced among database and defined temp tables; 
+        /// name is the table's name (can also be BASE.TABLE)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public ParsedTable FindAnyTableByName(string name) {
+            if (name.CountOccurences(".") > 0) {
+                var splitted = name.Split('.');
+                // find db then find table
+                var foundDb = DataBase.FindDatabaseByName(splitted[0]);
+                return foundDb == null ? null : DataBase.FindTableByName(splitted[1], foundDb);
+            }
+            // search in databse then in temp tables
+            var foundTable = DataBase.FindTableByName(name);
+            return foundTable ?? FindTempTableByName(name);
+        }
+
+        /// <summary>
+        /// Find a temptable by name
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        private ParsedTable FindTempTableByName(string name) {
+            var foundTable = ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
+            if (foundTable != null && foundTable.ParsedItem is ParsedTable)
+                return (ParsedTable) foundTable.ParsedItem;
+            return null;
+        }
+
+        #endregion
+
+        #region find primitive type
+
+        /// <summary>
+        /// convertion
+        /// </summary>
+        /// <param name="str"></param>
+        /// <param name="analyseLike"></param>
+        /// <returns></returns>
+        public ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
+            str = str.ToLower();
+            // LIKE
+            if (analyseLike)
+                return FindPrimitiveTypeOfLike(str);
+
+            // AS
+            switch (str) {
+                case "com-handle":
+                    return ParsedPrimitiveType.Comhandle;
+                case "datetime-tz":
+                    return ParsedPrimitiveType.Datetimetz;
+                case "unsigned-short":
+                    return ParsedPrimitiveType.UnsignedShort;
+                case "unsigned-long":
+                    return ParsedPrimitiveType.UnsignedLong;
+                case "table-handle":
+                    return ParsedPrimitiveType.TableHandle;
+                case "dataset-handle":
+                    return ParsedPrimitiveType.DatasetHandle;
+                case "widget-handle":
+                    return ParsedPrimitiveType.WidgetHandle;
+                default:
+                    var token1 = str;
+                    foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => token1.Equals(typ.ToLower()))) {
+                        return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                    }
+                    break;
+            }
+
+            // try to find the complete word in abbreviations list
+            var completeStr = Keywords.GetFullKeyword(str);
+            if (completeStr != null)
+                foreach (var typ in Enum.GetNames(typeof(ParsedPrimitiveType)).Where(typ => completeStr.ToLower().Equals(typ.ToLower()))) {
+                    return (ParsedPrimitiveType)Enum.Parse(typeof(ParsedPrimitiveType), typ, true);
+                }
+            return ParsedPrimitiveType.Unknow;
+        }
+
+        /// <summary>
+        /// Search through the available completionData to find the primitive type of a 
+        /// "like xx" phrase
+        /// </summary>
+        /// <param name="likeStr"></param>
+        /// <returns></returns>
+        private ParsedPrimitiveType FindPrimitiveTypeOfLike(string likeStr) {
+            // determines the format
+            var nbPoints = likeStr.CountOccurences(".");
+            var splitted = likeStr.Split('.');
+
+            // if it's another var
+            if (nbPoints == 0) {
+                var foundVar = ParsedItemsList.Find(data =>
+                    (data.Type == CompletionType.VariablePrimitive ||
+                     data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
+                return foundVar != null ? ((ParsedDefine)foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
+            }
+
+            var tableName = splitted[nbPoints == 2 ? 1 : 0];
+            var fieldName = splitted[nbPoints == 2 ? 2 : 1];
+
+            // Search through database
+            if (DataBase.List.Count > 0) {
+                ParsedDataBase foundDb = DataBase.List.First();
+                if (nbPoints == 2)
+                    // find database
+                    foundDb = DataBase.FindDatabaseByName(splitted[0]) ?? DataBase.List.First();
+                if (foundDb == null) return ParsedPrimitiveType.Unknow;
+
+                // find table
+                var foundTable = DataBase.FindTableByName(tableName, foundDb);
+                if (foundTable != null) {
+
+                    // find field
+                    var foundField = DataBase.FindFieldByName(fieldName, foundTable);
+                    if (foundField != null) return foundField.Type;
+                }
+            }
+
+            // Search in temp tables
+            if (nbPoints != 1) return ParsedPrimitiveType.Unknow;
+            var foundTtable = FindAnyTableOrBufferByName(tableName);
+            if (foundTtable == null) return ParsedPrimitiveType.Unknow;
+
+            var foundTtField = foundTtable.Fields.Find(field => field.Name.EqualsCi(fieldName));
+            return foundTtField == null ? ParsedPrimitiveType.Unknow : foundTtField.Type;
         }
 
         #endregion
@@ -572,8 +731,8 @@ namespace _3PA.MainFeatures.Parser {
             ParserVisitor parserVisitor;
             
             // did we already parsed this file in a previous parse session?
-            if (ParserHandler.SavedParserVisitors.ContainsKey(fileName)) {
-                parserVisitor = ParserHandler.SavedParserVisitors[fileName];
+            if (SavedParserVisitors.ContainsKey(fileName)) {
+                parserVisitor = SavedParserVisitors[fileName];
             } else {
                 // Parse it
                 var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, ownerName);
@@ -582,7 +741,7 @@ namespace _3PA.MainFeatures.Parser {
                 ablParser.Accept(parserVisitor);
 
                 // save it for future uses
-                ParserHandler.SavedParserVisitors.Add(fileName, parserVisitor);
+                SavedParserVisitors.Add(fileName, parserVisitor);
             }
 
             return parserVisitor;
@@ -658,6 +817,18 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private static int NbExtraCharBetweenLines(int startLine, int endLine) {
             return (Npp.StartBytePosOfLine(endLine) - Npp.StartBytePosOfLine(startLine)) - Config.Instance.GlobalMaxNbCharInBlock;
+        }
+
+        #endregion
+
+        #region others
+
+        /// <summary>
+        /// Allows the clear the SavedParserVisitors (not static because we want to control when
+        /// it can be called
+        /// </summary>
+        public void ClearSavedParserVisitors() {
+            SavedParserVisitors.Clear();
         }
 
         #endregion

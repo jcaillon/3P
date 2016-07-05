@@ -89,6 +89,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private bool _isReversed;
 
+        /// <summary>
+        /// returns the ranking of each CompletionType, helps sorting them as we wish
+        /// </summary>
+        public static List<int> GetPriorityList {
+            get {
+                if (_completionTypePriority != null) return _completionTypePriority;
+                _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
+                return _completionTypePriority;
+            }
+        }
+
+        // holds the display order of the CompletionType
+        private static List<int> _completionTypePriority;
+
         #endregion
 
         #region constructor
@@ -176,7 +190,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // display the sub string
             if (offset < -5) offset -= 5; 
-            if (!string.IsNullOrEmpty(item.SubString)) {
+            if (!String.IsNullOrEmpty(item.SubString)) {
                 TextDecoration decoration = new TextDecoration(item.SubString, 100) {
                     Alignment = ContentAlignment.MiddleRight,
                     Offset = new Size(offset, 0),
@@ -493,7 +507,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (!(e is NullReferenceException))
                     ErrorHandler.Log(e.ToString());
             }
-            if (string.IsNullOrEmpty(_filterByText)) {
+            if (String.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
             } else {
                 fastOLV.SetObjects(_initialObjectsList.OrderBy(data => data.FilterDispertionLevel).ToList());
@@ -599,7 +613,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public int Compare(CompletionItem x, CompletionItem y) {
 
             // compare first by CompletionType
-            int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
+            int compare = AutoCompletionForm.GetPriorityList[(int)x.Type].CompareTo(AutoCompletionForm.GetPriorityList[(int)y.Type]);
             if (compare != 0) return compare;
 
             // then by ranking

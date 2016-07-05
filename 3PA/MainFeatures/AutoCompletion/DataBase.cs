@@ -313,7 +313,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Database,
                 FromParser = false,
-                Ranking = ParserHandler.FindRankingOfDatabaseItem(@base.LogicalName),
+                Ranking = AutoComplete.FindRankingOfDatabaseItem(@base.LogicalName),
                 Flag = 0
             }).ToList();
         }
@@ -349,7 +349,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 SubString = dataBase.LogicalName,
                 Type = CompletionType.Table,
                 FromParser = false,
-                Ranking = ParserHandler.FindRankingOfDatabaseItem(table.Name),
+                Ranking = AutoComplete.FindRankingOfDatabaseItem(table.Name),
                 Flag = 0
             }).ToList());
             return output;
@@ -368,7 +368,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
-                Ranking = ParserHandler.FindRankingOfDatabaseItem(field.Name),
+                Ranking = AutoComplete.FindRankingOfDatabaseItem(field.Name),
                 Flag = (field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParseFlag.Mandatory : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Index) ? ParseFlag.Index : 0) |
                        (field.Flag.HasFlag(ParsedFieldFlag.Extent) ? ParseFlag.Extent : 0),

@@ -26,6 +26,7 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using YamuiFramework.Forms;
@@ -46,13 +47,17 @@ namespace _3PA.Tests {
         #region tests and dev
 
         public static void DebugTest1() {
-            ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure);
+
             
             //RunParserTests();
 
             //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
             //UserCommunication.Notify(firstname);
+        }
+
+        private static void ParserTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
+            UserCommunication.Notify("yop");
         }
 
         public static void DebugTest2() {

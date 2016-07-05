@@ -394,7 +394,7 @@ namespace _3PA {
             }
 
             // Parse the document
-            AutoComplete.ParseCurrentDocument(true);
+            ParserHandler.ParseCurrentDocument(true);
 
             // publish an event
             if (OnDocumentChangedEnd != null) {

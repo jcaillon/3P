@@ -33,6 +33,24 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class Parser {
 
+        #region static
+
+        /// <summary>
+        /// A dictionnary of known keywords and database info
+        /// </summary>
+        private static Dictionary<string, CompletionType> _knownStaticItems = new Dictionary<string, CompletionType>();
+
+        public static void UpdateKnownStaticItems() {
+
+            // Update the known items! (made of BASE.TABLE, TABLE and all the KEYWORDS)
+            _knownStaticItems = DataBase.GetDbDictionnary();
+            foreach (var keyword in Keywords.GetList().Where(keyword => !_knownStaticItems.ContainsKey(keyword.DisplayText))) {
+                _knownStaticItems[keyword.DisplayText] = keyword.Type;
+            }
+        }
+
+        #endregion
+
         #region private fields
 
         private const string RootScopeName = "Root";
@@ -111,6 +129,8 @@ namespace _3PA.MainFeatures.Parser {
 
         #region Life and death
 
+        public Parser() {}
+
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
@@ -120,12 +140,12 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="matchKnownWords"></param>
         public Parser(string data, string filePathBeingParsed, string defaultOwnerName, bool matchKnownWords = false) {
             // process inputs
-            bool isRootFile = string.IsNullOrEmpty(defaultOwnerName);
+            bool isRootFile = String.IsNullOrEmpty(defaultOwnerName);
             defaultOwnerName = isRootFile ? RootScopeName : defaultOwnerName;
             _context.OwnerName = defaultOwnerName;
             _filePathBeingParsed = filePathBeingParsed;
 
-            _matchKnownWords = matchKnownWords && AutoComplete.KnownStaticItems != null;
+            _matchKnownWords = matchKnownWords && _knownStaticItems != null;
 
             ParsingOk = true;
 
@@ -152,6 +172,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
+        #region Visitor implementation
 
         /// <summary>
         /// Feed this method with a visitor implementing IParserVisitor to visit all the parsed items
@@ -189,6 +210,10 @@ namespace _3PA.MainFeatures.Parser {
             return _lexer.MoveNextToken();
         }
 
+        #endregion
+
+        #region Do the job 
+
         private void Analyze() {
             var token = PeekAt(0);
 
@@ -198,10 +223,10 @@ namespace _3PA.MainFeatures.Parser {
 
             // starting a new statement, we need to remember its starting line
             if (_context.StatementStartLine == -1 && (
-                token is TokenWord || 
+                token is TokenWord ||
                 token is TokenPreProcStatement ||
                 token is TokenInclude))
-                    _context.StatementStartLine = token.Line;
+                _context.StatementStartLine = token.Line;
 
             // matching a word
             if (token is TokenWord) {
@@ -299,7 +324,7 @@ namespace _3PA.MainFeatures.Parser {
                             _context.FirstWordToken = token;
                             break;
                     }
-                    
+
                 } else {
                     // not the first word of a statement
 
@@ -322,9 +347,9 @@ namespace _3PA.MainFeatures.Parser {
                         default:
                             // try to match a known keyword
                             if (_matchKnownWords) {
-                                if (AutoComplete.KnownStaticItems.ContainsKey(lowerTok)) {
+                                if (_knownStaticItems.ContainsKey(lowerTok)) {
                                     // we known the word
-                                    if (AutoComplete.KnownStaticItems[lowerTok] == CompletionType.Table) {
+                                    if (_knownStaticItems[lowerTok] == CompletionType.Table) {
                                         // it's a table from the database
                                         AddParsedItem(new ParsedFoundTableUse(token.Value, token.Line, token.Column, false));
                                     }
@@ -399,7 +424,7 @@ namespace _3PA.MainFeatures.Parser {
             if (_context.BlockStack.Count == 0) {
                 // did we match an end of a proc, func or on event block?
                 if (_context.Scope != ParsedScope.File) {
-                    var parsedScope = (ParsedScopeItem)_parsedItemList.FindLast(item => item is ParsedScopeItem);
+                    var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem);
                     if (parsedScope != null) parsedScope.EndLine = token.Line;
                     _context.OwnerName = RootScopeName;
                     _context.Scope = ParsedScope.File;
@@ -554,8 +579,8 @@ namespace _3PA.MainFeatures.Parser {
                             name += token.Value;
                             state = 0;
                             break;
-                        } 
-                        if (!(token is TokenWord)) 
+                        }
+                        if (!(token is TokenWord))
                             break;
                         if (token.Value.EqualsCi("persistent"))
                             hasPersistent = true;
@@ -599,7 +624,7 @@ namespace _3PA.MainFeatures.Parser {
                             name.Append("anywhere");
                             AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
                             _context.Scope = ParsedScope.Trigger;
-                            _context.OwnerName = string.Join(" ", onType.ToString().ToUpper(), name);
+                            _context.OwnerName = String.Join(" ", onType.ToString().ToUpper(), name);
                             return;
                         }
                         if (!token.Value.EqualsCi("of")) return;
@@ -620,7 +645,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
                         _context.Scope = ParsedScope.Trigger;
-                        _context.OwnerName = string.Join(" ", onType.ToString().ToUpper(), name.ToString());
+                        _context.OwnerName = String.Join(" ", onType.ToString().ToUpper(), name.ToString());
                         if (token.Value.EqualsCi("or")) {
                             state = 0;
                             name.Clear();
@@ -685,8 +710,8 @@ namespace _3PA.MainFeatures.Parser {
                             case "sub-menu":
                             case "parameter":
                                 var token1 = lowerToken;
-                                foreach (var typ in Enum.GetNames(typeof(ParseDefineType)).Where(typ => token1.Equals(typ.ToLower()))) {
-                                    type = (ParseDefineType)Enum.Parse(typeof(ParseDefineType), typ, true);
+                                foreach (var typ in Enum.GetNames(typeof (ParseDefineType)).Where(typ => token1.Equals(typ.ToLower()))) {
+                                    type = (ParseDefineType) Enum.Parse(typeof (ParseDefineType), typ, true);
                                     break;
                                 }
                                 state++;
@@ -819,10 +844,10 @@ namespace _3PA.MainFeatures.Parser {
                             default:
                                 // matches a LIKE table
                                 // ReSharper disable once ConditionIsAlwaysTrueOrFalse, resharper doesn't get this one
-                                if ((lowerToken.Equals("like") || lowerToken.Equals("like-sequential")) && !matchedLikeTable) 
+                                if ((lowerToken.Equals("like") || lowerToken.Equals("like-sequential")) && !matchedLikeTable)
                                     state = 21;
                                 // After a USE-UNDEX and the index name, we can match a AS PRIMARY for the previously defined index
-                                if (lowerToken.Equals("primary") && useIndex.Length > 0) 
+                                if (lowerToken.Equals("primary") && useIndex.Length > 0)
                                     useIndex.Append("!");
                                 break;
                         }
@@ -926,15 +951,15 @@ namespace _3PA.MainFeatures.Parser {
             var toParse = token.Value;
             int pos;
             for (pos = 1; pos < toParse.Length; pos++)
-                if (char.IsWhiteSpace(toParse[pos])) break;
+                if (Char.IsWhiteSpace(toParse[pos])) break;
 
             // extract first word
             var firstWord = toParse.Substring(0, pos);
             int pos2;
             for (pos2 = pos; pos2 < toParse.Length; pos2++)
-                if (!char.IsWhiteSpace(toParse[pos2])) break;
+                if (!Char.IsWhiteSpace(toParse[pos2])) break;
             for (pos = pos2; pos < toParse.Length; pos++)
-                if (char.IsWhiteSpace(toParse[pos])) break;
+                if (Char.IsWhiteSpace(toParse[pos])) break;
 
             // extract define name
             var name = toParse.Substring(pos2, pos - pos2);
@@ -957,37 +982,31 @@ namespace _3PA.MainFeatures.Parser {
                     // matching different intersting blocks
                     if (toParse.ContainsFast("_MAIN-BLOCK")) {
                         _context.OwnerName = "Main block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.MainBlock) { ToDisplayOnExplorer = true, IsRoot = true };
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.MainBlock) {ToDisplayOnExplorer = true, IsRoot = true};
                     } else if (toParse.ContainsFast("_DEFINITIONS")) {
                         _context.OwnerName = "Definition block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.DefinitionBlock };
-                    } 
-                    else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.DefinitionBlock};
+                    } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         _context.OwnerName = "Preprocessor block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.PreprocessorBlock };
-                    } 
-                    else if (toParse.ContainsFast("_XFTR")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.PreprocessorBlock};
+                    } else if (toParse.ContainsFast("_XFTR")) {
                         _context.OwnerName = "Xtfr";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.XtfrBlock };
-                    } 
-                    else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.XtfrBlock};
+                    } else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
                         _context.OwnerName = "Procedure settings";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.SettingsBlock };
-                    } 
-                    else if (toParse.ContainsFast("_CREATE-WINDOW")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.SettingsBlock};
+                    } else if (toParse.ContainsFast("_CREATE-WINDOW")) {
                         _context.OwnerName = "Create window";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.CreateWindowBlock };
-                    } 
-                    else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.CreateWindowBlock};
+                    } else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
                         _context.OwnerName = "Run-time attributes";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock };
-                    } 
-                    else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock};
+                    } else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
                         _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.Prototype};
                     } else {
                         _context.OwnerName = "Appbuilder block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) { ToDisplayOnExplorer = false };
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = false};
                     }
                     // save the block description
                     _context.CurrentAppbuilderBlock.BlockDescription = toParse.Substring(pos2, toParse.Length - pos2);
@@ -1000,7 +1019,7 @@ namespace _3PA.MainFeatures.Parser {
                         _context.CurrentAppbuilderBlock.EndLine = token.Line;
                     break;
                 case "&UNDEFINE":
-                    var found = (ParsedPreProc)_parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
+                    var found = (ParsedPreProc) _parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
                     if (found != null)
                         found.UndefinedLine = _context.StatementStartLine;
                     break;
@@ -1077,7 +1096,7 @@ namespace _3PA.MainFeatures.Parser {
                     case 1:
                         // matching return type
                         if (!(token is TokenWord)) break;
-                        if (token.Value.EqualsCi("returns") || token.Value.EqualsCi("class") ) 
+                        if (token.Value.EqualsCi("returns") || token.Value.EqualsCi("class"))
                             continue;
 
                         // create the function (returnType = token.Value)
@@ -1085,7 +1104,7 @@ namespace _3PA.MainFeatures.Parser {
                             FilePath = _filePathBeingParsed,
                             Scope = _context.Scope,
                             OwnerName = _context.OwnerName,
-                            Extend = string.Empty
+                            Extend = String.Empty
                         };
                         state++;
                         break;
@@ -1102,7 +1121,7 @@ namespace _3PA.MainFeatures.Parser {
                             if (token.Value.EqualsCi("forward"))
                                 state = 99;
 
-                        } else if (token is TokenSymbol && token.Value.Equals("(")) 
+                        } else if (token is TokenSymbol && token.Value.Equals("("))
                             state = 3;
                         else if (isExtent && token is TokenNumber)
                             createdFunc.Extend = token.Value;
@@ -1128,7 +1147,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdFunc);
                 return false;
-            } 
+            }
 
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;
@@ -1253,7 +1272,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (token is TokenWord && token.Value.EqualsCi("extent")) isExtended = true;
                         else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
                             // create a variable for this function scope
-                            if (!string.IsNullOrEmpty(paramName))
+                            if (!String.IsNullOrEmpty(paramName))
                                 parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
                                     FilePath = _filePathBeingParsed,
                                     Scope = ParsedScope.Function,
@@ -1277,7 +1296,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             return parametersList;
         }
-        
+
 
         /// <summary>
         /// matches a include file
@@ -1289,7 +1308,7 @@ namespace _3PA.MainFeatures.Parser {
             // skip whitespaces
             int startPos = 1;
             while (startPos < toParse.Length) {
-                if (!char.IsWhiteSpace(toParse[startPos])) break;
+                if (!Char.IsWhiteSpace(toParse[startPos])) break;
                 startPos++;
             }
             if (toParse[startPos] == '&') return;
@@ -1297,7 +1316,7 @@ namespace _3PA.MainFeatures.Parser {
             // read first word as the filename
             int curPos = startPos;
             while (curPos < toParse.Length) {
-                if (char.IsWhiteSpace(toParse[curPos]) || toParse[curPos] == '}') break;
+                if (Char.IsWhiteSpace(toParse[curPos]) || toParse[curPos] == '}') break;
                 curPos++;
             }
             toParse = toParse.Substring(startPos, curPos - startPos);
@@ -1317,45 +1336,59 @@ namespace _3PA.MainFeatures.Parser {
         private string GetTokenStrippedValue(Token token) {
             return (token is TokenString) ? token.Value.Substring(1, token.Value.Length - 2) : token.Value;
         }
-    }
 
-    /// <summary>
-    /// contains the info on the current context (as we move through tokens)
-    /// </summary>
-    internal class ParseContext {
-        public ParsedScope Scope { get; set; }
-        public ParsedBlock CurrentAppbuilderBlock { get; set; }
-        public string OwnerName { get; set; }
-        /// <summary>
-        /// Number of words count in the current statement
-        /// </summary>
-        public int StatementWordCount { get; set; }
-        /// <summary>
-        /// the line at which the current statement starts
-        /// </summary>
-        public int StatementStartLine { get; set; }
-        public int StatementCount { get; set; }
-        public Token FirstWordToken { get; set; }
-        public Stack<BlockInfo> BlockStack { get; set; }
-    }
+        #endregion
 
-    internal struct BlockInfo {
-        public int LineStart { get; set; }
-        public int LineTriggerWord { get; set; }
-        public BlockType BlockType { get; set; }
-        public int StatementNumber { get; set; }
-        public BlockInfo(int lineStart, int lineTriggerWord, BlockType blockType, int statementNumber) : this() {
-            LineStart = lineStart;
-            LineTriggerWord = lineTriggerWord;
-            BlockType = blockType;
-            StatementNumber = statementNumber;
+        #region internal classes
+
+        /// <summary>
+        /// contains the info on the current context (as we move through tokens)
+        /// </summary>
+        internal class ParseContext {
+            public ParsedScope Scope { get; set; }
+            public ParsedBlock CurrentAppbuilderBlock { get; set; }
+            public string OwnerName { get; set; }
+
+            /// <summary>
+            /// Number of words count in the current statement
+            /// </summary>
+            public int StatementWordCount { get; set; }
+
+            /// <summary>
+            /// the line at which the current statement starts
+            /// </summary>
+            public int StatementStartLine { get; set; }
+
+            public int StatementCount { get; set; }
+            public Token FirstWordToken { get; set; }
+            public Stack<BlockInfo> BlockStack { get; set; }
         }
+
+        internal struct BlockInfo {
+            public int LineStart { get; set; }
+            public int LineTriggerWord { get; set; }
+            public BlockType BlockType { get; set; }
+            public int StatementNumber { get; set; }
+
+            public BlockInfo(int lineStart, int lineTriggerWord, BlockType blockType, int statementNumber)
+                : this() {
+                LineStart = lineStart;
+                LineTriggerWord = lineTriggerWord;
+                BlockType = blockType;
+                StatementNumber = statementNumber;
+            }
+        }
+
+        internal enum BlockType {
+            DoEnd,
+            ThenElse
+        }
+
+        #endregion
+
     }
 
-    internal enum BlockType {
-        DoEnd,
-        ThenElse
-    }
+    #region LineInfo
 
     /// <summary>
     /// Contains the info of a specific line number (built during the parsing)
@@ -1365,10 +1398,12 @@ namespace _3PA.MainFeatures.Parser {
         /// Block depth for the current line (= number of indents)
         /// </summary>
         public int BlockDepth { get; set; }
+
         /// <summary>
         /// Scope for the current line, see ParsedScope Enum
         /// </summary>
         public ParsedScope Scope { get; set; }
+
         /// <summary>
         /// Name of the current procedure/part of main, definitions, preproc
         /// all in lower case
@@ -1381,4 +1416,7 @@ namespace _3PA.MainFeatures.Parser {
             CurrentScopeName = currentScopeName;
         }
     }
+
+    #endregion
+
 }
