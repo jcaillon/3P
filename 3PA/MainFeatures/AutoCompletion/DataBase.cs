@@ -48,7 +48,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// List of sequences of the database
         /// </summary>
-        private static List<CompletionData> _sequences = new List<CompletionData>();
+        private static List<CompletionItem> _sequences = new List<CompletionItem>();
 
         private static bool _isExtracting;
 
@@ -193,7 +193,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         case 'S':
                             if (splitted.Count() != 3 || currentDb == null) 
                                 return;
-                            _sequences.Add(new CompletionData {
+                            _sequences.Add(new CompletionItem {
                                 DisplayText = splitted[1],
                                 Type = CompletionType.Sequence,
                                 SubString = currentDb.LogicalName
@@ -307,9 +307,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// returns the list of databases
         /// </summary>
-        public static List<CompletionData> GetDbList() {
-            if (_dataBases.Count <= 0) return new List<CompletionData>();
-            return _dataBases.Select(@base => new CompletionData {
+        public static List<CompletionItem> GetDbList() {
+            if (_dataBases.Count <= 0) return new List<CompletionItem>();
+            return _dataBases.Select(@base => new CompletionItem {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Database,
                 FromParser = false,
@@ -321,7 +321,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// returns the list of keywords
         /// </summary>
-        public static List<CompletionData> GetSequencesList() {
+        public static List<CompletionItem> GetSequencesList() {
             return _sequences;
         }
 
@@ -329,8 +329,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the list tables of each database
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> GetTablesList() {
-            var output = new List<CompletionData>();
+        public static List<CompletionItem> GetTablesList() {
+            var output = new List<CompletionItem>();
             foreach (var dataBase in _dataBases)
                 output.AddRange(GetTablesList(dataBase));
             return output;
@@ -341,10 +341,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="dataBase"></param>
         /// <returns></returns>
-        public static List<CompletionData> GetTablesList(ParsedDataBase dataBase) {
-            var output = new List<CompletionData>();
+        public static List<CompletionItem> GetTablesList(ParsedDataBase dataBase) {
+            var output = new List<CompletionItem>();
             if (dataBase == null || dataBase.Tables == null || dataBase.Tables.Count == 0) return output;
-            output.AddRange(dataBase.Tables.Select(table => new CompletionData {
+            output.AddRange(dataBase.Tables.Select(table => new CompletionItem {
                 DisplayText = table.Name,
                 SubString = dataBase.LogicalName,
                 Type = CompletionType.Table,
@@ -360,10 +360,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="table"></param>
         /// <returns></returns>
-        public static List<CompletionData> GetFieldsList(ParsedTable table) {
-            var output = new List<CompletionData>();
+        public static List<CompletionItem> GetFieldsList(ParsedTable table) {
+            var output = new List<CompletionItem>();
             if (table == null) return output;
-            output.AddRange(table.Fields.Select(field => new CompletionData {
+            output.AddRange(table.Fields.Select(field => new CompletionItem {
                 DisplayText = field.Name,
                 Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,

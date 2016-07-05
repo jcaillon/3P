@@ -82,7 +82,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         // remember the list that was passed to the autocomplete form when we set the items, we need this
         // because we reorder the list each time the user filters stuff, but we need the original order
-        private List<CompletionData> _initialObjectsList;
+        private List<CompletionItem> _initialObjectsList;
 
         /// <summary>
         /// True if the form is ABOVE the text it autocompletes
@@ -112,7 +112,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // set the image list to use for the keywords
             Keyword.ImageGetter += rowObject => {
-                var x = (CompletionData)rowObject;
+                var x = (CompletionItem)rowObject;
                 if (x == null) return ImageResources.Error;
                 return GetTypeImageFromStr(x.Type.ToString());
             };
@@ -154,13 +154,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="sender"></param>
         /// <param name="args"></param>
         private void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
-            CompletionData data = (CompletionData)args.Model;
-            if (data == null)
+            CompletionItem item = (CompletionItem)args.Model;
+            if (item == null)
                 return;
 
             // display the flags
             int offset = -5;
-            data.DoForEachFlag((name, flag) => {
+            item.DoForEachFlag((name, flag) => {
                 Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
                 if (tryImg != null) {
                     ImageDecoration decoration = new ImageDecoration(tryImg, 100, ContentAlignment.MiddleRight) {
@@ -176,8 +176,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // display the sub string
             if (offset < -5) offset -= 5; 
-            if (!string.IsNullOrEmpty(data.SubString)) {
-                TextDecoration decoration = new TextDecoration(data.SubString, 100) {
+            if (!string.IsNullOrEmpty(item.SubString)) {
+                TextDecoration decoration = new TextDecoration(item.SubString, 100) {
                     Alignment = ContentAlignment.MiddleRight,
                     Offset = new Size(offset, 0),
                     Font = FontManager.GetFont(FontStyle.Bold, 10),
@@ -201,7 +201,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="objectsList"></param>
         /// <param name="resetSelectorButtons"></param>
-        public void SetItems(List<CompletionData> objectsList, bool resetSelectorButtons = true) {
+        public void SetItems(List<CompletionItem> objectsList, bool resetSelectorButtons = true) {
             objectsList.Sort(new CompletionDataSortingClass());
             _initialObjectsList = objectsList;
 
@@ -340,9 +340,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Get the current selected item
         /// </summary>
         /// <returns></returns>
-        public CompletionData GetCurrentSuggestion() {
+        public CompletionItem GetCurrentSuggestion() {
             try {
-                return (CompletionData) fastOLV.SelectedItem.RowObject;
+                return (CompletionItem) fastOLV.SelectedItem.RowObject;
             } catch (Exception x) {
                 if (!(x is NullReferenceException))
                     ErrorHandler.Log(x.Message);
@@ -530,7 +530,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="o"></param>
         /// <returns></returns>
         private static bool FilterPredicate(object o) {
-            var compData = (CompletionData)o;
+            var compData = (CompletionItem)o;
             if (compData == null)
                 return false;
 
@@ -577,7 +577,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Applies the same sorting / filtering as the autocompletion form to a given list
         /// of items
         /// </summary>
-        public static List<CompletionData> ExternalFilterItems(List<CompletionData> objectsList, int line, bool dontCheckLine = false) {
+        public static List<CompletionItem> ExternalFilterItems(List<CompletionItem> objectsList, int line, bool dontCheckLine = false) {
             objectsList.Sort(new CompletionDataSortingClass());
             if (_displayedTypes == null)
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
@@ -595,8 +595,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// Class used in objectlist.Sort method
     /// </summary>
-    internal class CompletionDataSortingClass : IComparer<CompletionData> {
-        public int Compare(CompletionData x, CompletionData y) {
+    internal class CompletionDataSortingClass : IComparer<CompletionItem> {
+        public int Compare(CompletionItem x, CompletionItem y) {
 
             // compare first by CompletionType
             int compare = AutoComplete.GetPriorityList[(int)x.Type].CompareTo(AutoComplete.GetPriorityList[(int)y.Type]);
@@ -658,9 +658,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// the link href that was clicked
         /// </summary>
-        public CompletionData CompletionItem;
+        public CompletionItem CompletionItem;
 
-        public TabCompletedEventArgs(CompletionData completionItem) {
+        public TabCompletedEventArgs(CompletionItem completionItem) {
             CompletionItem = completionItem;
         }
     }

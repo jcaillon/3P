@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (CompletionData.cs) is part of 3P.
+// This file (CompletionItem.cs) is part of 3P.
 // 
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
-    internal class CompletionData : FilteredItem {
+    internal class CompletionItem : FilteredItem {
 
         /// <summary>
         /// Type of completion

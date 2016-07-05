@@ -1,16 +1,19 @@
 &IF DEFINED(EXCLUDE-{&name}) = 0 &THEN
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE {&name} Procedure
-PROCEDURE {&name}:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION {&name} Procedure 
+FUNCTION {&name} RETURNS {&Type}
+  ( /* parameter-definitions */ ) :
 /*------------------------------------------------------------------------------
   Purpose:     
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
 
-    RETURN "".
+    DEFINE VARIABLE retVal AS {&Type} NO-UNDO.
 
-END PROCEDURE.
+    RETURN retVal.
+
+END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME

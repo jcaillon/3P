@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// dictionnay of *line, line info*
         /// </summary>
-        public Dictionary<int, LineInfo> GetLineInfo {
+        public Dictionary<int, LineInfo> LineInfo {
             get { return _lineInfo; }
         }
 
@@ -99,6 +99,13 @@ namespace _3PA.MainFeatures.Parser {
         /// Allows to decide if we can reindent the code or not
         /// </summary>
         public bool ParsingOk { get; set; }
+
+        /// <summary>
+        /// returns the list of the parsed items
+        /// </summary>
+        public List<ParsedItem> ParsedItemsList {
+            get { return _parsedItemList; }
+        }
 
         #endregion
 

@@ -18,9 +18,12 @@
 // ========================================================================
 #endregion
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Windows.Forms;
 using YamuiFramework.Forms;
+using _3PA.Data;
 using _3PA.Interop;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
@@ -53,19 +56,22 @@ namespace _3PA.MainFeatures {
                         return;
 
                     // at caret position
-                    RepositionCaretForInsertion(proNew);
-                    Npp.ModifyTextAroundCaret(0, 0, "new function" + Npp.GetEolString);
+                    RepositionCaretForInsertion(proNew, CompletionType.Procedure);
+                    Npp.ModifyTextAroundCaret(0, 0, StripAppBuilderMarkup(Encoding.Default.GetString(DataResources.InternalProcedure)).Trim());
 
                     break;
             }
         }
 
-        private static void RepositionCaretForInsertion(IProNew proNew) {
+        /// <summary>
+        /// Reposition the cursor to the best position for inserting a new IProNew
+        /// </summary>
+        private static void RepositionCaretForInsertion(IProNew proNew, CompletionType completionType) {
             // at caret position
             if (proNew.InsertPosition == ProInsertPosition.CaretPosition) {
                 Npp.SetSelection(Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0));
             } else {
-                var findExisting = ParserHandler.GetParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.Procedure);
+                var findExisting = ParserHandler.CompletionItemsList.FirstOrDefault(data => data.Type == completionType);
 
                 // is there already a proc existing?
                 if (findExisting != null) {
@@ -86,12 +92,38 @@ namespace _3PA.MainFeatures {
 
                     } else {
                         // we find the ideal pos considering the blocks
-                        //var findBlock = ParserHandler.GetParsedItemsList.FirstOrDefault(data => data.Type == )
+                        //var findBlock = ParserHandler.ParsedItemsList.FirstOrDefault(data => data.Type == )
+
+                        // function proto : après &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
+                        // proc : avant function implementation or last
+                        // function implem : last
 
                         Npp.SetSelection(Npp.CurrentPosition);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Allows to clear the appbuilder markup from a given string
+        /// </summary>
+        private static string StripAppBuilderMarkup(string inputSnippet) {
+            // consist in suppressing the lines starting with :
+            // &ANALYZE-SUSPEND
+            // &ANALYZE-RESUME
+            // /* _UIB-CODE-BLOCK-END */
+            // and, for this method only, also strips :
+            // &IF DEFINED(EXCLUDE-&{name}) = 0 &THEN
+            // &ENDIF
+            var outputSnippet = new StringBuilder();
+            string line;
+            using (StringReader reader = new StringReader(inputSnippet)) {
+                while ((line = reader.ReadLine()) != null) {
+                    if (line.Length == 0 || (line[0] != '&' && !line.Equals(@"/* _UIB-CODE-BLOCK-END */")))
+                        outputSnippet.AppendLine(line);
+                }
+            }
+            return outputSnippet.ToString();
         }
 
         internal interface IProNew {
@@ -100,21 +132,28 @@ namespace _3PA.MainFeatures {
         }
 
         internal class ProNewProcedure : IProNew {
+
             [YamuiInputDialogItem("Name", Order = 0)]
             public string Name { get; set; }
+
             [YamuiInputDialogItem("Private procedure", Order = 1)]
             public bool IsPrivate { get; set; }
+
             [YamuiInputDialogItem("Insertion position", Order = 2)]
             public ProInsertPosition InsertPosition { get; set; }
         }
 
         internal class ProNewFunction : IProNew {
+
             [YamuiInputDialogItem("Name", Order = 0)]
             public string Name { get; set; }
+
             [YamuiInputDialogItem("Return type", Order = 1)]
             public ProFunctionType Type { get; set; }
+
             [YamuiInputDialogItem("Private function", Order = 2)]
             public bool IsPrivate { get; set; }
+
             [YamuiInputDialogItem("Insertion position", Order = 3)]
             public ProInsertPosition InsertPosition { get; set; }
         }

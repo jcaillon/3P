@@ -10,10 +10,30 @@
     Created     :
     Notes       :
   ----------------------------------------------------------------------*/
-/*   This was created with the 3P :  https://jcaillon.github.io/3P/     */
-/*----------------------------------------------------------------------*/
+/* MODIFICATIONS : */
+/*  ______ ____________ ___________ ________________________________________________________________  */
+/* |      |            |           |                                                                | */
+/* |  N°  |    DATE    |   AUTHOR  | DESCRIPTION                                                    | */
+/* |______|____________|___________|________________________________________________________________| */
+/*                                                                                                    */
 
 /* ***************************  Definitions  ************************** */
+
+/* ******************************************************************** */
+/* *** Temp-Tables Definition                                       *** */
+/* ******************************************************************** */
+
+/* ******************************************************************** */
+/* *** Buffers Definition                                           *** */
+/* ******************************************************************** */
+
+/* ******************************************************************** */
+/* *** Parameters Definition                                        *** */
+/* ******************************************************************** */
+
+/* ******************************************************************** */
+/* *** Global Variables Definition                                  *** */
+/* ******************************************************************** */
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -34,17 +54,6 @@
 
 /* ************************  Function Prototypes ********************** */
 
-&IF DEFINED(EXCLUDE-12) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD 12 Procedure 
-FUNCTION 12 RETURNS CHARACTER
-  ( /* parameter-definitions */ )  FORWARD.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
-
 
 /* *********************** Procedure Settings ************************ */
 
@@ -54,7 +63,7 @@ FUNCTION 12 RETURNS CHARACTER
    Allow: 
    Frames: 0
    Add Fields to: Neither
-   Other Settings: CODE-ONLY COMPILE
+   Other Settings: CODE-ONLY
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
 
@@ -83,40 +92,6 @@ FUNCTION 12 RETURNS CHARACTER
 
 /* **********************  Internal Procedures  *********************** */
 
-&IF DEFINED(EXCLUDE-aaz) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE aaz Procedure 
-PROCEDURE aaz :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF
 
 /* ************************  Function Implementations ***************** */
 
-&IF DEFINED(EXCLUDE-12) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION 12 Procedure 
-FUNCTION 12 RETURNS CHARACTER
-  ( /* parameter-definitions */ ) :
-/*------------------------------------------------------------------------------
-  Purpose:  
-    Notes:  
-------------------------------------------------------------------------------*/
-
-  RETURN "".   /* Function return value. */
-
-END FUNCTION.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ENDIF

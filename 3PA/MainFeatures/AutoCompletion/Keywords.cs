@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region fields
 
-        private static Dictionary<string, CompletionData> _keywordList = new Dictionary<string, CompletionData>(); 
+        private static Dictionary<string, CompletionItem> _keywordList = new Dictionary<string, CompletionItem>(); 
         private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
         private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -47,7 +47,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region Import / Export
 
         /// <summary>
-        /// To call in order to read all the keywords to the private List CompletionData
+        /// To call in order to read all the keywords to the private List CompletionItem
         /// </summary>
         public static void Import() {
             // reads keywords
@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
                     if (!_keywordList.ContainsKey(items[0])) {
-                        _keywordList.Add(items[0], new CompletionData {
+                        _keywordList.Add(items[0], new CompletionItem {
                             DisplayText = items[1],
                             Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                             Ranking = int.Parse(items[4]),
@@ -140,7 +140,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// returns the list of keywords
         /// </summary>
-        public static List<CompletionData> GetList() {
+        public static List<CompletionItem> GetList() {
             return _keywordList.Values.ToList();
         }
 

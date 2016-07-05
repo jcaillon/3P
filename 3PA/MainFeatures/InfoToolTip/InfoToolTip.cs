@@ -41,7 +41,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static InfoToolTipForm _form;
 
         // we save the conditions with which we showed the tooltip to be able to update it as is
-        private static List<CompletionData> _currentCompletionList;
+        private static List<CompletionItem> _currentCompletionList;
 
         /// <summary>
         /// Was the form opened because the user left his mouse too long on a word?
@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
         /// <summary>
         /// Index of the tooltip to show in case where a word corresponds to several items in the
-        /// CompletionData list
+        /// CompletionItem list
         /// </summary>
         public static int IndexToShow;
 
@@ -74,10 +74,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #region public misc
 
         /// <summary>
-        /// Returns the current CompletionData used in the tooltip
+        /// Returns the current CompletionItem used in the tooltip
         /// </summary>
         /// <returns></returns>
-        public static CompletionData GetCurrentlyDisplayedCompletionData() {
+        public static CompletionItem GetCurrentlyDisplayedCompletionData() {
             if (_currentCompletionList == null) return null;
             if (IndexToShow < 0) IndexToShow = _currentCompletionList.Count - 1;
             if (IndexToShow >= _currentCompletionList.Count) IndexToShow = 0;
@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <summary>
         /// Method called when the tooltip is opened to help the user during autocompletion
         /// </summary>
-        public static void ShowToolTipFromAutocomplete(CompletionData data, Rectangle completionRectangle, bool reversedForm) {
+        public static void ShowToolTipFromAutocomplete(CompletionItem item, Rectangle completionRectangle, bool reversedForm) {
             if (Config.Instance.ToolTipDeactivate) return;
             
             bool lockTaken = false;
@@ -158,7 +158,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 InitIfneeded();
 
                 // sets the tooltip content
-                _currentCompletionList = new List<CompletionData> { data };
+                _currentCompletionList = new List<CompletionItem> { item };
                 SetToolTip();
 
                 // update position
@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     </tr>
                 </table>");
 
-            // the rest depends on the data type
+            // the rest depends on the item type
             try {
                 switch (data.Type) {
                     case CompletionType.TempTable:

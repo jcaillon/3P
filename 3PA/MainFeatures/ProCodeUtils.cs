@@ -297,7 +297,7 @@ namespace _3PA.MainFeatures {
 
             /*
             // clear error on include files as well
-            var explorerItemsList = ParserHandler.GetParsedExplorerItemsList();
+            var explorerItemsList = ParserHandler.CodeExplorerItemsList();
             if (explorerItemsList != null) {
                 foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Branch == CodeExplorerBranch.Include && !codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.NotFound))) {
                     FilesInfo.ClearAllErrors(ProEnvironment.Current.FindFirstFileInPropath(codeExplorerItem.DisplayText), false);

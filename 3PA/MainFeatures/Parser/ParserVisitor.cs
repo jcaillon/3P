@@ -65,7 +65,7 @@ namespace _3PA.MainFeatures.Parser {
         /// contains the list of items that depend on the current file, that list
         /// is updated by the parser's visitor class
         /// </summary>
-        public List<CompletionData> ParsedItemsList = new List<CompletionData>();
+        public List<CompletionItem> ParsedItemsList = new List<CompletionItem>();
 
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
@@ -294,7 +294,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // to completion data
             pars.ReturnType = ParserHandler.ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
@@ -329,7 +329,7 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
@@ -346,7 +346,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
             // to completion data
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
@@ -380,7 +380,7 @@ namespace _3PA.MainFeatures.Parser {
             pars.UndefinedLine = line;
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
                 Flag = 0,
@@ -492,7 +492,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to completion data
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = type,
                 SubString = subString,
@@ -548,7 +548,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
             }
 
-            ParsedItemsList.Add(new CompletionData {
+            ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.TempTable,
                 SubString = subStr,
@@ -578,7 +578,7 @@ namespace _3PA.MainFeatures.Parser {
                 // Parse it
                 var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, ownerName);
 
-                parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.GetLineInfo);
+                parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.LineInfo);
                 ablParser.Accept(parserVisitor);
 
                 // save it for future uses

@@ -451,7 +451,7 @@ namespace _3PA {
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder() && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
-                var explorerItemsList = ParserHandler.GetParsedExplorerItemsList;
+                var explorerItemsList = ParserHandler.CodeExplorerItemsList;
 
                 if (explorerItemsList != null) {
                     foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))

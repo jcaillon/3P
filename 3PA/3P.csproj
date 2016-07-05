@@ -255,7 +255,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
     <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
@@ -368,9 +368,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.resx">
       <DependentUpon>SetCompilationPath.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
       <DependentUpon>SetFtp.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
@@ -396,9 +398,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
       <DependentUpon>EmptyForm.cs</DependentUpon>
@@ -417,6 +421,9 @@
     <None Include="Data\CompilationPath" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
+    <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
+    <None Include="Data\ProgressTemplates\FunctionPrototype.p" />
+    <None Include="Data\ProgressTemplates\InternalProcedure.p" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\Progress\StartProlint.p" />
@@ -634,7 +641,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Data\ProgressTemplates\" />
     <Folder Include="Images\FunctionsIcons\" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

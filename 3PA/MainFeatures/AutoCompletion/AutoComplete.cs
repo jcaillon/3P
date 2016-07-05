@@ -76,13 +76,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static bool _needToSetActiveTypes;
 
         // contains the list of items currently display in the form
-        private static List<CompletionData> _currentItems = new List<CompletionData>();
+        private static List<CompletionItem> _currentItems = new List<CompletionItem>();
 
         // contains the whole list of items (minus the fields) to show, can be updated through FillItems() method
-        private static List<CompletionData> _savedAllItems = new List<CompletionData>();
+        private static List<CompletionItem> _savedAllItems = new List<CompletionItem>();
 
         // contains the list of items that do not depend on the current file (keywords, database, snippets)
-        private static List<CompletionData> _staticItems = new List<CompletionData>();
+        private static List<CompletionItem> _staticItems = new List<CompletionItem>();
 
         // holds the display order of the CompletionType
         private static List<int> _completionTypePriority;
@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     if (tableFound != null) {
                         var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
                         if (fieldFound != null) {
-                            RememberUseOf(new CompletionData {
+                            RememberUseOf(new CompletionItem {
                                 FromParser = false,
                                 DisplayText = fieldFound.Name,
                                 Type = CompletionType.Field,
@@ -166,10 +166,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
         /// <returns></returns>
-        public static CompletionData FindInSavedItems(string keyword, int line) {
+        public static CompletionItem FindInSavedItems(string keyword, int line) {
             var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), line);
             if (filteredList == null || filteredList.Count <= 0) return null;
-            CompletionData found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
+            CompletionItem found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
             return found;
         }
 
@@ -178,7 +178,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Uses the position to filter the list the same way the autocompletion form would
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
+        public static List<CompletionItem> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
             var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
@@ -197,7 +197,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the keyword currently selected in the completion list
         /// </summary>
         /// <returns></returns>
-        public static CompletionData GetCurrentSuggestion() {
+        public static CompletionItem GetCurrentSuggestion() {
             return _form.GetCurrentSuggestion();
         }
 
@@ -266,7 +266,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                             ParserHandler.RefreshParser();
 
                             // we had the dynamic items to the list
-                            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList);
+                            _savedAllItems.AddRange(ParserHandler.CompletionItemsList);
 
                             // update autocompletion
                             CurrentTypeOfList = TypeOfList.Reset;
@@ -304,7 +304,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             _staticItems.Clear();
             _staticItems = Keywords.GetList().ToList();
-            _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
+            _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionItem {
                 DisplayText = x,
                 Type = CompletionType.Snippet,
                 Ranking = 0,
@@ -541,19 +541,19 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Increase ranking of a given CompletionData
+        /// Increase ranking of a given CompletionItem
         /// </summary>
-        /// <param name="data"></param>
-        private static void RememberUseOf(CompletionData data) {
+        /// <param name="item"></param>
+        private static void RememberUseOf(CompletionItem item) {
             // handles unwanted rank progression (when the user enter several times the same keyword)
-            if (data.DisplayText.Equals(_lastRememberedKeyword)) return;
-            _lastRememberedKeyword = data.DisplayText;
+            if (item.DisplayText.Equals(_lastRememberedKeyword)) return;
+            _lastRememberedKeyword = item.DisplayText;
 
-            data.Ranking++;
-            if (data.FromParser)
-                ParserHandler.RememberUseOfParsedItem(data.DisplayText);
-            else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
-                ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
+            item.Ranking++;
+            if (item.FromParser)
+                ParserHandler.RememberUseOfParsedItem(item.DisplayText);
+            else if (item.Type != CompletionType.Keyword && item.Type != CompletionType.Snippet)
+                ParserHandler.RememberUseOfDatabaseItem(item.DisplayText);
 
             // sort the items, to reflect the latest ranking
             if (_form != null)

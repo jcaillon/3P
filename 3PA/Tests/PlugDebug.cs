@@ -122,7 +122,7 @@ namespace _3PA.Tests {
             /*
                 StringBuilder x = new StringBuilder();
                 var i = 0;
-                var dic = tok.GetLineInfo;
+                var dic = tok.LineInfo;
                 while (dic.ContainsKey(i)) {
                     x.AppendLine((i+1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);

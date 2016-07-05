@@ -54,6 +54,7 @@ namespace _3PA.MainFeatures.Parser {
         private static Parser _ablParser;
 
         private static ParserVisitor _parserVisitor;
+
         #endregion
 
         #region misc
@@ -64,19 +65,19 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static string GetCarretLineOwnerName(int line) {
             if (_ablParser == null) return "";
-            return !_ablParser.GetLineInfo.ContainsKey(line) ? string.Empty : _ablParser.GetLineInfo[line].CurrentScopeName;
+            return !_ablParser.LineInfo.ContainsKey(line) ? string.Empty : _ablParser.LineInfo[line].CurrentScopeName;
         }
 
         /// <summary>
         /// Returns a list of "parameters" for a given internal procedure
         /// </summary>
-        /// <param name="procedureData"></param>
+        /// <param name="procedureItem"></param>
         /// <returns></returns>
-        public static List<CompletionData> FindProcedureParameters(CompletionData procedureData) {
-            var parserVisitor = ParserVisitor.ParseFile(procedureData.ParsedItem.FilePath, "");
+        public static List<CompletionItem> FindProcedureParameters(CompletionItem procedureItem) {
+            var parserVisitor = ParserVisitor.ParseFile(procedureItem.ParsedItem.FilePath, "");
             return parserVisitor.ParsedItemsList.Where(data =>
                 data.FromParser &&
-                data.ParsedItem.OwnerName.EqualsCi(procedureData.DisplayText) &&
+                data.ParsedItem.OwnerName.EqualsCi(procedureItem.DisplayText) &&
                 (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget) &&
                 ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
         }
@@ -96,7 +97,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static Dictionary<int, LineInfo> GetLineInfo() {
             if (_ablParser == null) return null;
-            return _ablParser.GetLineInfo;
+            return _ablParser.LineInfo;
         }
 
         #endregion
@@ -119,7 +120,7 @@ namespace _3PA.MainFeatures.Parser {
                 _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, LastParsedFilePath, null, true);
 
                 // visitor
-                _parserVisitor = new ParserVisitor(true, Path.GetFileName(LastParsedFilePath), _ablParser.GetLineInfo);
+                _parserVisitor = new ParserVisitor(true, Path.GetFileName(LastParsedFilePath), _ablParser.LineInfo);
                 _ablParser.Accept(_parserVisitor);
 
                 // correct the internal/external type of run statements :
@@ -140,19 +141,26 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// List of parsed items
+        /// List of completion item found
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> GetParsedItemsList {
-            get { return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionData>(); }
+        public static List<CompletionItem> CompletionItemsList {
+            get { return _parserVisitor != null ? _parserVisitor.ParsedItemsList.ToList() : new List<CompletionItem>(); }
         }
 
         /// <summary>
         /// List of parsed explorer items
         /// </summary>
         /// <returns></returns>
-        public static List<CodeExplorerItem> GetParsedExplorerItemsList {
+        public static List<CodeExplorerItem> CodeExplorerItemsList {
             get { return _parserVisitor != null ? _parserVisitor.ParsedExplorerItemsList.ToList() : new List<CodeExplorerItem>(); }
+        }
+
+        /// <summary>
+        /// List of parsed items
+        /// </summary>
+        public static List<ParsedItem> ParsedItemsList {
+            get { return _ablParser != null ? _ablParser.ParsedItemsList.ToList() : new List<ParsedItem>(); }
         }
 
         #endregion
@@ -216,7 +224,7 @@ namespace _3PA.MainFeatures.Parser {
             var foundTable = FindAnyTableByName(name);
             if (foundTable != null)
                 return foundTable;
-            // for buffer, we return the referenced temptable/table (stored in CompletionData.SubString)
+            // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
             if (_parserVisitor != null) {
                 var foundParsedItem = _parserVisitor.ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
                 return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
