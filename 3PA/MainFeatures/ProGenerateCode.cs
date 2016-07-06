@@ -25,6 +25,7 @@ using System.Windows.Forms;
 using YamuiFramework.Forms;
 using _3PA.Data;
 using _3PA.Interop;
+using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
 
@@ -37,7 +38,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
             // make sure to parse the current document before checking anything
-            ParserHandler.ParseCurrentDocument(true);
+            ParserHandler.ParseCurrentDocument(true, true);
 
             // list the outdated proto
             var listOfOutDatedProto = ParserHandler.ParsedItemsList.Where(item => {
@@ -64,10 +65,15 @@ namespace _3PA.MainFeatures {
                 // start of the function statement
                 var startImplemPos = Npp.GetPosFromLineColumn(function.Line, function.Column);
                 var protoStr = Npp.GetTextByRange(startImplemPos, function.EndPosition);
-                protoStr = protoStr.Substring(0, protoStr.Length - 1) + "FORWARD.";
-                Npp.SetTextByRange(startProtoPos, function.PrototypeEndPosition, protoStr);
 
-                outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + function.PrototypeLine + "#" + function.PrototypeColumn + "'>" + function.Name + "</a>");
+                // we take caution here...
+                if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) { 
+
+                    protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
+                    Npp.SetTextByRange(startProtoPos, function.PrototypeEndPosition, protoStr);
+
+                    outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + function.PrototypeLine + "#" + function.PrototypeColumn + "'>" + function.Name + "</a>");
+                }
             }
             Npp.EndUndoAction();
 

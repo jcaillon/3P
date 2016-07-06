@@ -193,12 +193,13 @@ namespace _3PA.MainFeatures.Parser {
         /// Call this method to parse the current document after a small delay 
         /// (delay that is reset each time this function is called, so if you call it continously, nothing is done)
         /// or set doNow = true to do it without waiting a timer
+        /// (you can also set forceAsync = true if doNow = true to do the parsing asynchronously, BE CAREFUL!!)
         /// </summary>
-        public static void ParseCurrentDocument(bool doNow = false) {
+        public static void ParseCurrentDocument(bool doNow = false, bool forceAsync = false) {
 
             // parse immediatly
             if (doNow) {
-                ParseCurrentDocumentTick();
+                ParseCurrentDocumentTick(forceAsync);
                 return;
             }
 
@@ -225,53 +226,58 @@ namespace _3PA.MainFeatures.Parser {
         /// refresh the Items list with all the static items
         /// as well as the dynamic items found by the parser
         /// </summary>
-        private static void ParseCurrentDocumentTick() {
+        private static void ParseCurrentDocumentTick(bool forceAsync = false) {
             if (_parsing) {
                 _parseRequestedWhenBusy = true;
                 return;
             }
             _parseRequestedWhenBusy = false;
             _parsing = true;
-            Task.Factory.StartNew(() => {
-                try {
-                    if (OnParseStarted != null)
-                        OnParseStarted();
+            if (forceAsync)
+                DoParse();
+            else
+                Task.Factory.StartNew(DoParse);
+        }
 
-                    if (_parserLock.TryEnterWriteLock(200)) {
-                        try {
-                            // make sure to always parse the current file
-                            do {
-                                //var watch = Stopwatch.StartNew();
+        private static void DoParse() {
+            try {
+                if (OnParseStarted != null)
+                    OnParseStarted();
 
-                                _lastParsedFilePath = Plug.CurrentFilePath;
+                if (_parserLock.TryEnterWriteLock(200)) {
+                    try {
+                        // make sure to always parse the current file
+                        do {
+                            //var watch = Stopwatch.StartNew();
 
-                                // Parse the document
-                                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
+                            _lastParsedFilePath = Plug.CurrentFilePath;
 
-                                // visitor
-                                _parserVisitor = new ParserVisitor(true, _lastParsedFilePath, _ablParser.LineInfo);
-                                _ablParser.Accept(_parserVisitor);
+                            // Parse the document
+                            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
 
-                                //watch.Stop();
-                                //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
+                            // visitor
+                            _parserVisitor = new ParserVisitor(true, _lastParsedFilePath, _ablParser.LineInfo);
+                            _ablParser.Accept(_parserVisitor);
 
-                            } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath));
+                            //watch.Stop();
+                            //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
 
-                        } finally {
-                            _parserLock.ExitWriteLock();
-                        }
+                        } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath));
+
+                    } finally {
+                        _parserLock.ExitWriteLock();
                     }
-
-                    if (OnParseEnded != null)
-                        OnParseEnded();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
-                } finally {
-                    _parsing = false;
-                    if (_parseRequestedWhenBusy)
-                        ParseCurrentDocumentTick();
                 }
-            });
+
+                if (OnParseEnded != null)
+                    OnParseEnded();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+            } finally {
+                _parsing = false;
+                if (_parseRequestedWhenBusy)
+                    ParseCurrentDocumentTick();
+            }
         }
 
         #endregion

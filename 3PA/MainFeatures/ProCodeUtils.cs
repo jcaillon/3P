@@ -270,6 +270,9 @@ namespace _3PA.MainFeatures {
                 return;
             }
 
+            // update function prototypes
+            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+
             // prolint? check that the StartProlint.p program is created, or do it
             if (executionType == ExecutionType.Prolint) {
                 if (!File.Exists(Config.FileStartProlint))
