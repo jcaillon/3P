@@ -20,20 +20,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using System.Timers;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using YamuiFramework.Forms;
-using YamuiFramework.Helper;
-using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 
@@ -48,16 +38,12 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            
-            //RunParserTests();
+
+            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
 
             //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
             //UserCommunication.Notify(firstname);
-        }
-
-        private static void ParserTimerOnElapsed(object sender, ElapsedEventArgs elapsedEventArgs) {
-            UserCommunication.Notify("yop");
         }
 
         public static void DebugTest2() {
@@ -68,12 +54,15 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest3() {
+            RunParserTests(Npp.Text);
+            /*
             UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
                     MessageImg.MsgUpdate,
                     "A new version has been installed!",
                     "Updated to version " + AssemblyInfo.Version,
                     new List<string> { "ok", "cancel" },
                     true);
+             */
             /*
             Task.Factory.StartNew(() => {
 
@@ -98,9 +87,8 @@ namespace _3PA.Tests {
              * */
         }
 
-        public static void RunParserTests() {
+        public static void RunParserTests(string content) {
 
-            var inLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "in.p");
             var outLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "out.p");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -110,7 +98,7 @@ namespace _3PA.Tests {
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            Parser tok = new Parser(Utils.ReadAllText(inLocation), inLocation, null, true);
+            Parser tok = new Parser(content, "", null, true);
 
             OutputVis vis = new OutputVis();
             tok.Accept(vis);
@@ -145,7 +133,7 @@ namespace _3PA.Tests {
             var watch2 = Stopwatch.StartNew();
             //------------
 
-            Lexer tok2 = new Lexer(Utils.ReadAllText(inLocation));
+            Lexer tok2 = new Lexer(content);
             tok2.Tokenize();
             OutputLexer vis2 = new OutputLexer();
             tok2.Accept(vis2);
@@ -326,7 +314,7 @@ namespace _3PA.Tests {
 
         public void Visit(ParsedBlock pars) {
             Output.Append("BLOCK : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
             Output.Append(", " + pars.BlockDescription + ", " + pars.Branch);
             Output.Append("\r\n");
         }
@@ -360,15 +348,15 @@ namespace _3PA.Tests {
 
         public void Visit(ParsedFunction pars) {
             Output.Append("FUNCT : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.ReturnType + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.Extend + ", " + pars.PrototypeUpdated + ", (" + pars.Parameters + ")");
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append(", endPosition=" + pars.EndPosition + ", return-type=" + pars.ReturnType + ", isPrivate=" + pars.IsPrivate + ", HasPrototype=" + pars.HasPrototype + ", protoLine=" + pars.PrototypeLine + ", protoCol=" + pars.PrototypeColumn + ", ProtoEnd=" + pars.PrototypeEndPosition + ", Extend=" + pars.Extend + ", ProtoUpdated=" + pars.PrototypeUpdated + ", param=(" + pars.Parameters + ")");
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedProcedure pars) {
             Output.Append("PROCE : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.Left + "," + pars.IsExternal + "," + pars.IsPrivate);
+            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.Left + ", " + pars.IsExternal + ", " + pars.IsPrivate);
             Output.Append("\r\n");
         }
 
@@ -388,14 +376,14 @@ namespace _3PA.Tests {
         public void Visit(ParsedDefine pars) {
             Output.Append("VARIA : ");
             Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended);
+            Output.Append(", " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + ", " + pars.LcFlagString + ", " + pars.AsLike + ", " + pars.TempPrimitiveType + ", " + pars.IsDynamic + ", " + pars.ViewAs + ", " + pars.BufferFor + ", " + pars.Left + ", " + pars.IsExtended);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedTable pars) {
             Output.Append("TABLE : ");
             Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.Description + "," + pars.IsTempTable + "," + pars.LcLikeTable + "," + pars.UseIndex + "," + pars.LcFlagString);
+            Output.Append(", " + pars.Description + ", " + pars.IsTempTable + ", " + pars.LcLikeTable + ", " + pars.UseIndex + ", " + pars.LcFlagString);
             foreach (var field in pars.Fields) {
                 Output.Append("->" + field.Name + "|" + field.AsLike + "|" + field.Type);
             }
@@ -405,7 +393,7 @@ namespace _3PA.Tests {
         public void Visit(ParsedRun pars) {
             Output.Append("RUNPR : ");
             Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.Left + "," + pars.HasPersistent + "," + pars.IsEvaluateValue);
+            Output.Append(", " + pars.Left + ", " + pars.HasPersistent + ", " + pars.IsEvaluateValue);
             Output.Append("\r\n");
         }
     }

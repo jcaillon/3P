@@ -206,7 +206,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 return;
                             currentTable = new ParsedTable(
                                 splitted[1],
-                                0, 0,
                                 splitted[2],
                                 splitted[3],
                                 splitted[4],

@@ -31,7 +31,62 @@ using _3PA.MainFeatures.Parser;
 namespace _3PA.MainFeatures {
     internal class ProGenerateCode {
 
+        /// <summary>
+        /// This method checks if the current document contains function prototypes that are not updated
+        /// and correct them if needed
+        /// </summary>
+        public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
+            // make sure to parse the current document before checking anything
+            ParserHandler.ParseCurrentDocument(true);
+
+            // list the outdated proto
+            var listOfOutDatedProto = ParserHandler.ParsedItemsList.Where(item => {
+                var funcItem = item as ParsedFunction;
+                if (funcItem != null) {
+                    return funcItem.HasPrototype && !funcItem.PrototypeUpdated;
+                }
+                return false;
+            }).Select(item => (ParsedFunction)item).ToList();
+
+            // if everything is up to date
+            if (listOfOutDatedProto.Count == 0) {
+                if (!silent)
+                    UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
+                return;
+            }
+
+            // we update the prototypes
+            StringBuilder outputMessage = new StringBuilder("The following functions have had their prototype synchronized :<br>");
+            Npp.BeginUndoAction();
+            foreach (var function in listOfOutDatedProto) {
+                // start of the prototype statement
+                var startProtoPos = Npp.GetPosFromLineColumn(function.PrototypeLine, function.PrototypeColumn);
+                // start of the function statement
+                var startImplemPos = Npp.GetPosFromLineColumn(function.Line, function.Column);
+                var protoStr = Npp.GetTextByRange(startImplemPos, function.EndPosition);
+                protoStr = protoStr.Substring(0, protoStr.Length - 1) + "FORWARD.";
+                Npp.SetTextByRange(startProtoPos, function.PrototypeEndPosition, protoStr);
+
+                outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + function.PrototypeLine + "#" + function.PrototypeColumn + "'>" + function.Name + "</a>");
+            }
+            Npp.EndUndoAction();
+
+            UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
+                var split = args.Link.Split('#');
+                if (split.Length == 3) {
+                    Npp.Goto(split[0], int.Parse(split[1]), int.Parse(split[2]));
+                    args.Handled = true;
+                }
+            }, 5);
+        }
+
+        /// <summary>
+        /// Call this method to insert a new piece of code
+        /// </summary>
+        /// <param name="type"></param>
         public static void InsertNew(ProInsertNewType type) {
+
+            string insertText = null;
 
             switch (type) {
 
@@ -39,7 +94,6 @@ namespace _3PA.MainFeatures {
                     object newFunc = new ProNewFunction();
                     if (UserCommunication.Input("Insert function", "Define a new function", ref newFunc) != DialogResult.OK)
                         return;
-
                     break;
 
                 case ProInsertNewType.Procedure:
@@ -55,12 +109,18 @@ namespace _3PA.MainFeatures {
                     if (proNew == null)
                         return;
 
-                    // at caret position
+                    // reposition caret
                     RepositionCaretForInsertion(proNew, CompletionType.Procedure);
                     Npp.ModifyTextAroundCaret(0, 0, StripAppBuilderMarkup(Encoding.Default.GetString(DataResources.InternalProcedure)).Trim());
 
                     break;
+                default:
+                    return;
             }
+
+            // stip appbuilder markup from the piece of code?
+            if (!Abl.IsCurrentFileFromAppBuilder)
+                insertText = StripAppBuilderMarkup(insertText);
         }
 
         /// <summary>

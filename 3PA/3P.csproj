@@ -502,6 +502,7 @@
     <Content Include="Images\Backgrounds\bg_oss.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\Menu\Synchronize.png" />
     <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />

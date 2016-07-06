@@ -371,7 +371,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append("None");
 
                         toDisplay.Append(FormatSubtitle("PROTOTYPE"));
-                        if (funcItem.PrototypeLine > 0)
+                        if (funcItem.HasPrototype)
                             toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>"));
                         else
                             toDisplay.Append("Has none");

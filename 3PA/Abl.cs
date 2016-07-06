@@ -90,10 +90,12 @@ namespace _3PA {
         /// which indicates that it will be opened as a structured proc in the appbuilder
         /// </summary>
         /// <returns></returns>
-        public static bool IsCurrentFileFromAppBuilder() {
-            if (!Npp.GetLine(0).Text.Trim().StartsWith("&ANALYZE-SUSPEND _VERSION-NUMBER", StringComparison.CurrentCultureIgnoreCase))
-                return false;
-            return true;
+        public static bool IsCurrentFileFromAppBuilder {
+            get {
+                if (!Npp.GetLine(0).Text.Trim().StartsWith("&ANALYZE-SUSPEND _VERSION-NUMBER", StringComparison.CurrentCultureIgnoreCase))
+                    return false;
+                return true;
+            }
         }
     }
 }

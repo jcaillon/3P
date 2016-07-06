@@ -38,6 +38,16 @@ namespace _3PA.MainFeatures.Parser {
         /// Column of the first keyword of the statement where the item is found
         /// </summary>
         public int Column { get; private set; }
+        /// <summary>
+        /// The starting position of the first keyword of the statement where the item is found
+        /// </summary>
+        public int StartPosition { get; private set; }
+        /// <summary>
+        /// The ending position of the first keyword of the statement where the item is found
+        /// OR the ending position of the EOS of the statement (be careful to verify this 
+        /// before using this property...)
+        /// </summary>
+        public int EndPosition { get; set; }
         public ParsedScope Scope { get; set; }
         public string OwnerName { get; set; }
         /// <summary>
@@ -46,11 +56,17 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public int IncludeLine { get; set; }
         public abstract void Accept(IParserVisitor visitor);
-        protected ParsedItem(string name, int line, int column) {
+        protected ParsedItem(string name, Token token) {
             Name = name;
-            Line = line;
-            Column = column;
+            Line = token.Line;
+            Column = token.Column;
+            StartPosition = token.StartPosition;
+            EndPosition = token.EndPosition;
             IncludeLine = -1;
+        }
+
+        protected ParsedItem(string name) {
+            Name = name;
         }
     }
 
@@ -101,14 +117,14 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// line of the "end" keyword that ends the block
         /// </summary>
-        public int EndLine { get; set; }
+        public int EndBlockLine { get; set; }
 
         /// <summary>
         /// If true, the block contains too much characters and will not be openable in the
         /// appbuilder
         /// </summary>
         public bool TooLongForAppbuilder { get; set; }
-        protected ParsedScopeItem(string name, int line, int column) : base(name, line, column) {}
+        protected ParsedScopeItem(string name, Token token) : base(name, token) {}
     }
 
     /// <summary>
@@ -124,7 +140,7 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedBlock(string name, int line, int column, CodeExplorerBranch branch) : base(name, line, column) {
+        public ParsedBlock(string name, Token token, CodeExplorerBranch branch) : base(name, token) {
             Branch = branch;
         }
     }
@@ -147,8 +163,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string left, bool isExternal, bool isPrivate)
-            : base(name, line, column) {
+        public ParsedProcedure(string name, Token token, string left, bool isExternal, bool isPrivate)
+            : base(name, token) {
             Left = left;
             IsExternal = isExternal;
             IsPrivate = isPrivate;
@@ -173,17 +189,22 @@ namespace _3PA.MainFeatures.Parser {
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
         public int PrototypeLine { get; set; }
+        public int PrototypeEndPosition { get; set; }
         public int PrototypeColumn { get; set; }
-
         /// <summary>
         /// Boolean to know if the prototype is correct compared to the implementation
         /// </summary>
         public bool PrototypeUpdated { get; set; }
+        /// <summary>
+        /// true if the function is an implementation AND has a prototype
+        /// </summary>
+        public bool HasPrototype { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, int line, int column, string parsedReturnType) : base(name, line, column) {
+        public ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token) {
             ParsedReturnType = parsedReturnType;
         }
     }
@@ -197,8 +218,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedOnEvent(string name, int line, int column, string @on)
-            : base(name, line, column) {
+        public ParsedOnEvent(string name, Token token, string @on)
+            : base(name, token) {
             On = @on;
         }
     }
@@ -212,8 +233,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFoundTableUse(string name, int line, int column, bool isTempTable)
-            : base(name, line, column) {
+        public ParsedFoundTableUse(string name, Token token, bool isTempTable)
+            : base(name, token) {
             IsTempTable = isTempTable;
         }
     }
@@ -228,7 +249,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedLabel(string name, int line, int column) : base(name, line, column) {
+        public ParsedLabel(string name, Token token) : base(name, token) {
         }
     }
 
@@ -245,8 +266,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFunctionCall(string name, int line, int column, bool externalCall)
-            : base(name, line, column) {
+        public ParsedFunctionCall(string name, Token token, bool externalCall)
+            : base(name, token) {
             ExternalCall = externalCall;
         }
     }
@@ -265,7 +286,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedRun(string name, int line, int column, string left, bool isEvaluateValue, bool hasPersistent) : base(name, line, column) {
+        public ParsedRun(string name, Token token, string left, bool isEvaluateValue, bool hasPersistent) : base(name, token) {
             Left = left;
             IsEvaluateValue = isEvaluateValue;
             HasPersistent = hasPersistent;
@@ -281,7 +302,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, int line, int column) : base(name, line, column) {}
+        public ParsedIncludeFile(string name, Token token) : base(name, token) {}
     }
 
     /// <summary>
@@ -295,7 +316,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedPreProc(string name, int line, int column, int undefinedLine, ParsedPreProcFlag flag, string value) : base(name, line, column) {
+        public ParsedPreProc(string name, Token token, int undefinedLine, ParsedPreProcFlag flag, string value) : base(name, token) {
             UndefinedLine = undefinedLine;
             Flag = flag;
             Value = value;
@@ -356,8 +377,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, int line, int column, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
-            : base(name, line, column) {
+        public ParsedDefine(string name, Token token, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
+            : base(name, token) {
             LcFlagString = lcFlagString;
             AsLike = asLike;
             Left = left;
@@ -512,7 +533,22 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, line, column) {
+        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, token) {
+            Id = id;
+            Crc = crc;
+            DumpName = dumpName;
+            Description = description;
+            LcLikeTable = lcLikeTable;
+            IsTempTable = isTempTable;
+            Fields = fields;
+            Indexes = indexes;
+            Triggers = triggers;
+            LcFlagString = lcFlagString;
+            UseIndex = useIndex;
+        }
+
+        public ParsedTable(string name, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex)
+            : base(name) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;

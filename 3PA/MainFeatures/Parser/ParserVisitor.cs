@@ -308,7 +308,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedOnEvent pars) {
             // check lenght of block
-            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // To code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
@@ -318,7 +318,7 @@ namespace _3PA.MainFeatures.Parser {
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
+                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null)
             });
         }
 
@@ -328,7 +328,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedFunction pars) {
             // check lenght of block
-            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // to code explorer
             ParsedExplorerItemsList.Add(new CodeExplorerItem {
@@ -338,7 +338,7 @@ namespace _3PA.MainFeatures.Parser {
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
+                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null)
             });
 
             // to completion data
@@ -360,7 +360,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
             // check lenght of block
-            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndLine);
+            pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // fill dictionnary containing the name of all procedures defined
             if (!DefinedProcedures.Contains(pars.Name))
@@ -374,7 +374,7 @@ namespace _3PA.MainFeatures.Parser {
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
-                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndLine) + ")" : null)
+                SubString = SetExternalInclude(pars.TooLongForAppbuilder ? BlockTooLongString + " (+" + NbExtraCharBetweenLines(pars.Line, pars.EndBlockLine) + ")" : null)
             });
 
             // to completion data

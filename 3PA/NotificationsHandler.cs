@@ -447,9 +447,12 @@ namespace _3PA {
         /// Called when the user saves the current document
         /// </summary>
         public static void OnFileSaved() {
-    
+
+            // update function prototypes
+            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+
             // check for block that are too long and display a warning
-            if (Abl.IsCurrentFileFromAppBuilder() && !CurrentFileObject.WarnedTooLong) {
+            if (Abl.IsCurrentFileFromAppBuilder && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
                 var explorerItemsList = ParserHandler.CodeExplorerItemsList;
 

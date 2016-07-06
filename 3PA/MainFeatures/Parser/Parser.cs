@@ -151,7 +151,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // create root item
             if (isRootFile)
-                AddParsedItem(new ParsedBlock(defaultOwnerName, 0, 0, CodeExplorerBranch.Root) { IsRoot = true, ToDisplayOnExplorer = true });
+                AddParsedItem(new ParsedBlock(defaultOwnerName, new TokenEos(null, 0, 0, 0, 0), CodeExplorerBranch.Root) { IsRoot = true, ToDisplayOnExplorer = true });
 
             // parse
             _lexer = new Lexer(data);
@@ -356,12 +356,12 @@ namespace _3PA.MainFeatures.Parser {
                                     // we known the word
                                     if (_knownStaticItems[lowerTok] == CompletionType.Table) {
                                         // it's a table from the database
-                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token.Line, token.Column, false));
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, false));
                                     }
                                 } else if (_knownWords.ContainsKey(lowerTok)) {
                                     if (_knownWords[lowerTok] == CompletionType.Table) {
                                         // it's a temp table
-                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token.Line, token.Column, true));
+                                        AddParsedItem(new ParsedFoundTableUse(token.Value, token, true));
                                     }
                                 }
                             }
@@ -388,7 +388,7 @@ namespace _3PA.MainFeatures.Parser {
             else if (token is TokenSymbol && token.Value.Equals("(")) {
                 var prevToken = PeekAtNextNonSpace(0, true);
                 if (prevToken is TokenWord && _functionPrototype.ContainsKey(prevToken.Value))
-                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken.Line, prevToken.Column, false));
+                    AddParsedItem(new ParsedFunctionCall(prevToken.Value, prevToken, false));
             }
 
             // end of statement
@@ -430,7 +430,7 @@ namespace _3PA.MainFeatures.Parser {
                 // did we match an end of a proc, func or on event block?
                 if (_context.Scope != ParsedScope.File) {
                     var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem);
-                    if (parsedScope != null) parsedScope.EndLine = token.Line;
+                    if (parsedScope != null) parsedScope.EndBlockLine = token.Line;
                     _context.OwnerName = RootScopeName;
                     _context.Scope = ParsedScope.File;
                 }
@@ -476,6 +476,7 @@ namespace _3PA.MainFeatures.Parser {
         /// updates the scope and file name
         /// </summary>
         private void AddParsedItem(ParsedItem item) {
+
             item.FilePath = _filePathBeingParsed;
             item.Scope = _context.Scope;
             item.OwnerName = _context.OwnerName;
@@ -534,14 +535,14 @@ namespace _3PA.MainFeatures.Parser {
 
             if (state == 0) return;
 
-            AddParsedItem(new ParsedFunctionCall(name, tokenFun.Line, tokenFun.Column, !_functionPrototype.ContainsKey(name)));
+            AddParsedItem(new ParsedFunctionCall(name, tokenFun, !_functionPrototype.ContainsKey(name)));
         }
 
         /// <summary>
         /// Creates a label parsed item
         /// </summary>
         private void CreateParsedLabel() {
-            AddParsedItem(new ParsedLabel(_context.FirstWordToken.Value, _context.FirstWordToken.Line, _context.FirstWordToken.Column));
+            AddParsedItem(new ParsedLabel(_context.FirstWordToken.Value, _context.FirstWordToken));
         }
 
         /// <summary>
@@ -595,7 +596,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             if (state == 0) return;
-            AddParsedItem(new ParsedRun(name, runToken.Line, runToken.Column, leftStr.ToString(), isValue, hasPersistent));
+            AddParsedItem(new ParsedRun(name, runToken, leftStr.ToString(), isValue, hasPersistent));
         }
 
         /// <summary>
@@ -627,7 +628,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         if (token.Value.EqualsCi("anywhere")) {
                             name.Append("anywhere");
-                            AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
+                            AddParsedItem(new ParsedOnEvent(name.ToString(), onToken, onType.ToString()));
                             _context.Scope = ParsedScope.Trigger;
                             _context.OwnerName = String.Join(" ", onType.ToString().ToUpper(), name);
                             return;
@@ -648,7 +649,7 @@ namespace _3PA.MainFeatures.Parser {
                     case 3:
                         // matching "or", create another parsed item, otherwise leave to match a block start
                         if (!(token is TokenWord)) break;
-                        AddParsedItem(new ParsedOnEvent(name.ToString(), onToken.Line, onToken.Column, onType.ToString()));
+                        AddParsedItem(new ParsedOnEvent(name.ToString(), onToken, onType.ToString()));
                         _context.Scope = ParsedScope.Trigger;
                         _context.OwnerName = String.Join(" ", onType.ToString().ToUpper(), name.ToString());
                         if (token.Value.EqualsCi("or")) {
@@ -686,9 +687,10 @@ namespace _3PA.MainFeatures.Parser {
             StringBuilder useIndex = new StringBuilder();
             bool isPrimary = false;
 
+            Token token;
             int state = 0;
             do {
-                var token = PeekAt(1); // next token
+                token = PeekAt(1); // next token
                 if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 string lowerToken;
@@ -940,11 +942,18 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                 }
             } while (MoveNext());
+
             if (state <= 1) return;
             if (isTempTable)
-                AddParsedItem(new ParsedTable(name, functionToken.Line, functionToken.Column, "", "", name, "", likeTable, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()));
+                AddParsedItem(new ParsedTable(name, functionToken, "", "", name, "", likeTable, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()) {
+                    // = end position of the EOS of the statement
+                    EndPosition = token.EndPosition
+                });
             else
-                AddParsedItem(new ParsedDefine(name, functionToken.Line, functionToken.Column, strFlags.ToString(), asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, isExtended, isDynamic));
+                AddParsedItem(new ParsedDefine(name, functionToken, strFlags.ToString(), asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, isExtended, isDynamic) {
+                    // = end position of the EOS of the statement
+                    EndPosition = token.EndPosition
+                });
         }
 
         /// <summary>
@@ -974,11 +983,11 @@ namespace _3PA.MainFeatures.Parser {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Global, toParse.Substring(pos, toParse.Length - pos)));
+                    AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcFlag.Global, toParse.Substring(pos, toParse.Length - pos)));
                     break;
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    AddParsedItem(new ParsedPreProc(name, token.Line, token.Column, 0, ParsedPreProcFlag.Scope, toParse.Substring(pos, toParse.Length - pos)));
+                    AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcFlag.Scope, toParse.Substring(pos, toParse.Length - pos)));
                     break;
                 case "&ANALYZE-SUSPEND":
                     // it marks the beggining of an appbuilder block, it can only be at a root/File level
@@ -987,31 +996,31 @@ namespace _3PA.MainFeatures.Parser {
                     // matching different intersting blocks
                     if (toParse.ContainsFast("_MAIN-BLOCK")) {
                         _context.OwnerName = "Main block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.MainBlock) {ToDisplayOnExplorer = true, IsRoot = true};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.MainBlock) {ToDisplayOnExplorer = true, IsRoot = true};
                     } else if (toParse.ContainsFast("_DEFINITIONS")) {
                         _context.OwnerName = "Definition block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.DefinitionBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.DefinitionBlock};
                     } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
                         _context.OwnerName = "Preprocessor block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.PreprocessorBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.PreprocessorBlock};
                     } else if (toParse.ContainsFast("_XFTR")) {
                         _context.OwnerName = "Xtfr";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.XtfrBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.XtfrBlock};
                     } else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
                         _context.OwnerName = "Procedure settings";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.SettingsBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.SettingsBlock};
                     } else if (toParse.ContainsFast("_CREATE-WINDOW")) {
                         _context.OwnerName = "Create window";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.CreateWindowBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.CreateWindowBlock};
                     } else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
                         _context.OwnerName = "Run-time attributes";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock};
                     } else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.Prototype};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.Prototype};
                     } else {
                         _context.OwnerName = "Appbuilder block";
-                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token.Line, token.Column, CodeExplorerBranch.Block) {ToDisplayOnExplorer = false};
+                        _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = false};
                     }
                     // save the block description
                     _context.CurrentAppbuilderBlock.BlockDescription = toParse.Substring(pos2, toParse.Length - pos2);
@@ -1021,7 +1030,7 @@ namespace _3PA.MainFeatures.Parser {
                     // it marks the end of an appbuilder block, it can only be at a root/File level
                     _context.Scope = ParsedScope.File;
                     if (_context.CurrentAppbuilderBlock != null)
-                        _context.CurrentAppbuilderBlock.EndLine = token.Line;
+                        _context.CurrentAppbuilderBlock.EndBlockLine = token.Line;
                     break;
                 case "&UNDEFINE":
                     var found = (ParsedPreProc) _parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
@@ -1043,9 +1052,10 @@ namespace _3PA.MainFeatures.Parser {
             _lastTokenWasSpace = true;
             StringBuilder leftStr = new StringBuilder();
 
+            Token token;
             int state = 0;
             do {
-                var token = PeekAt(1); // next token
+                token = PeekAt(1); // next token
                 if (token is TokenEos) break;
                 if (token is TokenComment) continue;
                 switch (state) {
@@ -1064,8 +1074,12 @@ namespace _3PA.MainFeatures.Parser {
                 }
                 AddTokenToStringBuilder(leftStr, token);
             } while (MoveNext());
+
             if (state < 1) return false;
-            AddParsedItem(new ParsedProcedure(name, procToken.Line, procToken.Column, leftStr.ToString(), isExternal, isPrivate));
+            AddParsedItem(new ParsedProcedure(name, procToken, leftStr.ToString(), isExternal, isPrivate) {
+                // = end position of the EOS of the statement
+                EndPosition = token.EndPosition
+            });
             _context.Scope = ParsedScope.Procedure;
             _context.OwnerName = name;
             return true;
@@ -1105,7 +1119,7 @@ namespace _3PA.MainFeatures.Parser {
                             continue;
 
                         // create the function (returnType = token.Value)
-                        createdFunc = new ParsedFunction(name, functionToken.Line, functionToken.Column, token.Value) {
+                        createdFunc = new ParsedFunction(name, functionToken, token.Value) {
                             FilePath = _filePathBeingParsed,
                             Scope = _context.Scope,
                             OwnerName = _context.OwnerName,
@@ -1145,10 +1159,14 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
             if (createdFunc == null) return false;
 
+            // = end position of the EOS of the statement
+            createdFunc.EndPosition = token.EndPosition;
+
             // it's a proptotype, we matched a forward
             if (state == 99) {
                 createdFunc.IsPrivate = isPrivate;
                 createdFunc.Parameters = parameters.ToString();
+                createdFunc.HasPrototype = true; // set HasPrototype to true for the prototype!!
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdFunc);
                 return false;
@@ -1160,15 +1178,19 @@ namespace _3PA.MainFeatures.Parser {
 
             // it has a prototype?
             if (_functionPrototype.ContainsKey(name)) {
-                createdFunc.PrototypeLine = _functionPrototype[name].Line;
-                createdFunc.PrototypeColumn = _functionPrototype[name].Column;
-                createdFunc.PrototypeUpdated = (
-                    createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
-                    createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
-                    createdFunc.Extend.Equals(_functionPrototype[name].Extend) &&
-                    createdFunc.Parameters.Equals(_functionPrototype[name].Parameters));
+                // make sure it was a prototype!
+                if (_functionPrototype[name].HasPrototype) {
+                    createdFunc.HasPrototype = true;
+                    createdFunc.PrototypeLine = _functionPrototype[name].Line;
+                    createdFunc.PrototypeColumn = _functionPrototype[name].Column;
+                    createdFunc.PrototypeEndPosition = _functionPrototype[name].EndPosition;
+                    createdFunc.PrototypeUpdated = (
+                        createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
+                        createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
+                        createdFunc.Extend.Equals(_functionPrototype[name].Extend) &&
+                        createdFunc.Parameters.Equals(_functionPrototype[name].Parameters));
+                }
             } else {
-                createdFunc.PrototypeLine = -1;
                 _functionPrototype.Add(name, createdFunc);
             }
             AddParsedItem(createdFunc);
@@ -1278,7 +1300,7 @@ namespace _3PA.MainFeatures.Parser {
                         else if (token is TokenSymbol && (token.Value.Equals(")") || token.Value.Equals(","))) {
                             // create a variable for this function scope
                             if (!String.IsNullOrEmpty(paramName))
-                                parametersList.Add(new ParsedDefine(paramName, functionToken.Line, functionToken.Column, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
+                                parametersList.Add(new ParsedDefine(paramName, functionToken, strFlags, paramAsLike, "", ParseDefineType.Parameter, paramPrimitiveType, "", parameterFor, isExtended, false) {
                                     FilePath = _filePathBeingParsed,
                                     Scope = ParsedScope.Function,
                                     OwnerName = ownerName
@@ -1330,7 +1352,7 @@ namespace _3PA.MainFeatures.Parser {
                 return;
 
             // we matched the include file name
-            AddParsedItem(new ParsedIncludeFile(toParse, token.Line, token.Column));
+            AddParsedItem(new ParsedIncludeFile(toParse, token));
         }
 
         /// <summary>
