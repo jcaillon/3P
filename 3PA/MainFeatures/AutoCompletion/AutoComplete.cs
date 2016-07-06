@@ -115,7 +115,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region public accessors (thread safe)
 
         /// <summary>
-        /// List of the current items in the autocompletion
+        /// List of the current items in the autocompletion (thread safe)
         /// </summary>
         public static List<CompletionItem> CurrentItems {
             get {
@@ -131,7 +131,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// List of all the items (minus fields)
+        /// List of all the items (minus fields) (thread safe)
         /// </summary>
         public static List<CompletionItem> SavedAllItems {
             get {
@@ -147,7 +147,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// List of static items
+        /// List of static items (thread safe)
         /// </summary>
         public static List<CompletionItem> StaticItems {
             get {
@@ -261,37 +261,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region core mechanism
 
         /// <summary>
-        /// Method called when the event OnParseEnded triggers, i.e. when we just parsed the document and
-        /// need to refresh the autocompletion
-        /// </summary>
-        public static void RefreshDynamicItems() {
-            if (_itemsListLock.TryEnterWriteLock(-1)) {
-                try {
-                    // init with static items
-                    _savedAllItems.Clear();
-                    _savedAllItems = _staticItems.ToList();
-
-                    // we add the dynamic items to the list
-                    _savedAllItems.AddRange(ParserHandler.CompletionItemsList);
-
-                    // update autocompletion
-                    CurrentTypeOfList = TypeOfList.Reset;
-                } finally {
-                    _itemsListLock.ExitWriteLock();
-                }
-            }
-
-            if (IsVisible)
-                UpdateAutocompletion();
-        }
-        
-        /// <summary>
         /// this method should be called at the plugin's start and when we change the current database
         /// It refreshed the "static" items of the autocompletion : keywords, snippets, databases, tables, sequences
         /// </summary>
         public static void RefreshStaticItems() {
             if (_itemsListLock.TryEnterWriteLock(-1)) {
                 try {
+
                     _staticItems.Clear();
                     _staticItems = Keywords.GetList().ToList();
                     _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionItem {
@@ -307,130 +283,160 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                     // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
                     _staticItems.Sort(new CompletionDataSortingClass());
-                    _savedAllItems = _staticItems.ToList();
 
-                    // Update the form
-                    CurrentTypeOfList = TypeOfList.Reset;
-
-                    // update parser?
-                    if (_initialized)
-                        ParserHandler.ParseCurrentDocument();
-
-                    _initialized = true;
                 } finally {
                     _itemsListLock.ExitWriteLock();
                 }
             }
 
+            // update parser?
+            if (_initialized)
+                ParserHandler.ParseCurrentDocument();
+
+            _initialized = true;
+
+            // OnUpdatedStaticItems
             if (OnUpdatedStaticItems != null)
                 OnUpdatedStaticItems();
 
+            // refresh the list of all the saved items (static + dynamic)
+            RefreshDynamicItems();
+        }
+
+        /// <summary>
+        /// Method called when the event OnParseEnded triggers, i.e. when we just parsed the document and
+        /// need to refresh the autocompletion
+        /// </summary>
+        public static void RefreshDynamicItems() {
+            if (_itemsListLock.TryEnterWriteLock(-1)) {
+                try {
+
+                    // init with static items
+                    _savedAllItems.Clear();
+                    _savedAllItems = _staticItems.ToList();
+
+                    // we add the dynamic items to the list
+                    _savedAllItems.AddRange(ParserHandler.CompletionItemsList);
+
+                } finally {
+                    _itemsListLock.ExitWriteLock();
+                }
+            }
+
+            // update the autocompletion (if shown)
+            CurrentTypeOfList = TypeOfList.Reset;
             if (IsVisible)
                 UpdateAutocompletion();
         }
 
         /// <summary>
-        /// handles the opening or the closing of the autocompletion form on key input, 
-        /// it is only called when the user adds or delete a char
+        /// Set the list of current items, handles the lock
         /// </summary>
-        public static void UpdateAutocompletion() {
+        private static void SetCurrentItems(List<CompletionItem> currentItems) {
             if (_itemsListLock.TryEnterWriteLock(-1)) {
                 try {
-                    if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
-                        return;
-
-                    // dont show in string/comments..?
-                    if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
-                        return;
-
-                    // get current word, current previous word (table or database name)
-                    int nbPoints;
-                    string previousWord = "";
-                    var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
-                    var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
-                    var splitted = keyword.Split('.');
-                    string lastCharBeforeWord = "";
-                    switch (nbPoints) {
-                        case 0:
-                            int startPos = strOnLeft.Length - 1 - keyword.Length;
-                            lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : String.Empty;
-                            break;
-                        case 1:
-                            previousWord = splitted[0];
-                            keyword = splitted[1];
-                            break;
-                        case 2:
-                            previousWord = splitted[1];
-                            keyword = splitted[2];
-                            break;
-                        default:
-                            keyword = splitted[nbPoints];
-                            break;
-                    }
-
-                    // list of fields or tables
-                    if (!String.IsNullOrEmpty(previousWord)) {
-                        // are we entering a field from a known table?
-                        var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-                        if (foundTable != null) {
-                            if (CurrentTypeOfList != TypeOfList.Fields) {
-                                CurrentTypeOfList = TypeOfList.Fields;
-                                _currentItems = DataBase.GetFieldsList(foundTable).ToList();
-                            }
-                            ShowSuggestionList(keyword);
-                            return;
-                        }
-
-                        // are we entering a table from a connected database?
-                        var foundDatabase = DataBase.FindDatabaseByName(previousWord);
-                        if (foundDatabase != null) {
-                            if (CurrentTypeOfList != TypeOfList.Tables) {
-                                CurrentTypeOfList = TypeOfList.Tables;
-                                _currentItems = DataBase.GetTablesList(foundDatabase).ToList();
-                            }
-                            ShowSuggestionList(keyword);
-                            return;
-                        }
-                    }
-
-                    // close if there is nothing to suggest
-                    if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
-                        Close();
-                        return;
-                    }
-
-                    // if the current is directly preceded by a :, we are entering an object field/method
-                    if (lastCharBeforeWord.Equals(":")) {
-                        if (CurrentTypeOfList != TypeOfList.KeywordObject) {
-                            CurrentTypeOfList = TypeOfList.KeywordObject;
-                            _currentItems = _savedAllItems;
-                        }
-                        ShowSuggestionList(keyword);
-                        return;
-                    }
-
-                    // show normal complete list
-                    if (CurrentTypeOfList != TypeOfList.Complete) {
-                        CurrentTypeOfList = TypeOfList.Complete;
-                        _currentItems = _savedAllItems;
-                    }
-                    ShowSuggestionList(keyword);
-
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error in UpdateAutocompletion");
+                    _currentItems = currentItems;
                 } finally {
                     _itemsListLock.ExitWriteLock();
                 }
             }
+        }
+
+        /// <summary>
+        /// Updates the CURRENT ITEMS LIST,
+        /// handles the opening or the closing of the autocompletion form on key input, 
+        /// it is only called when the user adds or delete a char
+        /// </summary>
+        public static void UpdateAutocompletion() {
+            if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
+                return;
+
+            // dont show in string/comments..?
+            if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+                return;
+
+            // get current word, current previous word (table or database name)
+            int nbPoints;
+            string previousWord = "";
+            var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
+            var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
+            var splitted = keyword.Split('.');
+            string lastCharBeforeWord = "";
+            switch (nbPoints) {
+                case 0:
+                    int startPos = strOnLeft.Length - 1 - keyword.Length;
+                    lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : String.Empty;
+                    break;
+                case 1:
+                    previousWord = splitted[0];
+                    keyword = splitted[1];
+                    break;
+                case 2:
+                    previousWord = splitted[1];
+                    keyword = splitted[2];
+                    break;
+                default:
+                    keyword = splitted[nbPoints];
+                    break;
+            }
+
+            // list of fields or tables
+            if (!string.IsNullOrEmpty(previousWord)) {
+
+                // are we entering a field from a known table?
+                var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+                if (foundTable != null) {
+                    if (CurrentTypeOfList != TypeOfList.Fields) {
+                        CurrentTypeOfList = TypeOfList.Fields;
+                        SetCurrentItems(DataBase.GetFieldsList(foundTable).ToList());
+                    }
+                    ShowSuggestionList(keyword);
+                    return;
+                }
+
+                // are we entering a table from a connected database?
+                var foundDatabase = DataBase.FindDatabaseByName(previousWord);
+                if (foundDatabase != null) {
+                    if (CurrentTypeOfList != TypeOfList.Tables) {
+                        CurrentTypeOfList = TypeOfList.Tables;
+                        SetCurrentItems(DataBase.GetTablesList(foundDatabase).ToList());
+                    }
+                    ShowSuggestionList(keyword);
+                    return;
+                }
+            }
+
+            // close if there is nothing to suggest
+            if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                Close();
+                return;
+            }
+
+            // if the current is directly preceded by a :, we are entering an object field/method
+            if (lastCharBeforeWord.Equals(":")) {
+                if (CurrentTypeOfList != TypeOfList.KeywordObject) {
+                    CurrentTypeOfList = TypeOfList.KeywordObject;
+                    SetCurrentItems(SavedAllItems);
+                }
+                ShowSuggestionList(keyword);
+                return;
+            }
+
+            // show normal complete list
+            if (CurrentTypeOfList != TypeOfList.Complete) {
+                CurrentTypeOfList = TypeOfList.Complete;
+                SetCurrentItems(SavedAllItems);
+            }
+            ShowSuggestionList(keyword);
             
         }
 
         /// <summary>
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
-        /// <param name="keyword"></param>
         private static void ShowSuggestionList(string keyword) {
-            if (_currentItems.Count == 0) {
+
+            if (CurrentItems.Count == 0) {
                 Close();
                 return;
             }
@@ -443,11 +449,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 };
                 _form.InsertSuggestion += OnInsertSuggestion;
                 _form.Show(Npp.Win32WindowNpp);
-                _form.SetItems(_currentItems);
+                _form.SetItems(CurrentItems);
             } else if (_needToSetItems) {
                 // we changed the mode, we need to Set the items of the autocompletion
-                _form.SetItems(_currentItems, _needToSetActiveTypes || !_form.Visible);
+                _form.SetItems(CurrentItems, _needToSetActiveTypes || !_form.Visible);
                 _needToSetItems = false;
+            } else {
+                _form.SortItems();
             }
 
             // only activate certain types
@@ -536,11 +544,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             if (item.FromParser)
                 RememberUseOfParsedItem(item.DisplayText);
             else if (item.Type != CompletionType.Keyword && item.Type != CompletionType.Snippet)
-                RememberUseOfDatabaseItem(item.DisplayText);
-
-            // sort the items, to reflect the latest ranking
-            if (_form != null)
-                _form.SortItems();
+                RememberUseOfDatabaseItem(item.DisplayText);                
         }
 
         #endregion
@@ -600,7 +604,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         #endregion
-
 
         #region handling item ranking
 

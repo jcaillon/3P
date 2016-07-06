@@ -100,7 +100,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
         private volatile bool _refreshing;
 
-        private bool _refreshRequiredWhileRefreshing;
+        private volatile bool _refreshRequiredWhileRefreshing;
 
         #endregion
 

@@ -20,6 +20,7 @@
 namespace _3PA.MainFeatures.Parser {
 
     internal interface IParserVisitor {
+        void PreVisit();
         void Visit(ParsedFunction pars);
         void Visit(ParsedProcedure pars);
         void Visit(ParsedIncludeFile pars);
@@ -32,5 +33,6 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(ParsedLabel pars);
         void Visit(ParsedFunctionCall pars);
         void Visit(ParsedFoundTableUse pars);
+        void PostVisit();
     }
 }

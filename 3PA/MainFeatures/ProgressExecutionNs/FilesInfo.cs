@@ -406,12 +406,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             Utils.ForEachLine(fullPath, null, line => {
 
                 var fields =  line.Split('\t').ToList();
-                if (fields.Count == 7 || fields.Count == 8) {
-
-                    // the first field should be the file that was compiled, it might not be there for PROLINT.log 
-                    // because at the time i didn't specify it in the interface contract... So it is added here if it is missing
-                    if (fields.Count == 7)
-                        fields.Insert(0, permutePaths.Count > 0 ? permutePaths.First().Value : "");
+                if (fields.Count == 8) {
 
                     // new file
                     // the path of the file that triggered the compiler error, it can be empty so we make sure to set it

@@ -29,20 +29,21 @@
     &SCOPED-DEFINE propathToUse ""
     &SCOPED-DEFINE ExtraPf ""
     &SCOPED-DEFINE BasePfPath ""
-    &SCOPED-DEFINE ToCompileListFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.d"
-    &SCOPED-DEFINE CreateFileIfConnectFails "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fail.log"
+    &SCOPED-DEFINE ToCompileListFile "files.list"
+    &SCOPED-DEFINE CreateFileIfConnectFails "db.ko"
     &SCOPED-DEFINE CompileProgressionFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\compile.progression"
     &SCOPED-DEFINE DbConnectionMandatory FALSE
+    &SCOPED-DEFINE NotificationOutputPath "postExecution.notif"
 &ENDIF
 
 
 /* ***************************  Definitions  ************************** */
 
+DEFINE STREAM str_writer.
 DEFINE STREAM str_reader.
 DEFINE STREAM str_reader2.
 DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
-DEFINE STREAM str_progres.
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 DEFINE VARIABLE gc_conn AS CHARACTER NO-UNDO.
@@ -93,6 +94,8 @@ IF {&ExtraPf} > "" THEN DO:
     IF fi_output_last_error_db() THEN
         ASSIGN gl_dbKo = TRUE.
 END.
+
+SUBSCRIBE "eventToPublishToNotifyTheUserAfterExecution" ANYWHERE RUN-PROCEDURE "pi_feedNotification".
 
 IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
 
@@ -147,6 +150,8 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
     END CASE.
 
 END.
+
+UNSUBSCRIBE TO "eventToPublishToNotifyTheUserAfterExecution".
 
 OUTPUT STREAM str_logout CLOSE.
 OUTPUT STREAM str_dbout CLOSE.
@@ -257,9 +262,9 @@ PROCEDURE pi_compileList:
             fi_output_last_error().
             
             /* the following stream / file is used to inform the C# side of the progression of the compilation */
-            OUTPUT STREAM str_progres TO VALUE({&CompileProgressionFile}) APPEND BINARY.
-            PUT STREAM str_progres UNFORMATTED "x".
-            OUTPUT STREAM str_progres CLOSE.
+            OUTPUT STREAM str_writer TO VALUE({&CompileProgressionFile}) APPEND BINARY.
+            PUT STREAM str_writer UNFORMATTED "x".
+            OUTPUT STREAM str_writer CLOSE.
         END.
     END.
     INPUT STREAM str_reader2 CLOSE.
@@ -267,6 +272,50 @@ PROCEDURE pi_compileList:
     RETURN "".
 
 END PROCEDURE.
+
+PROCEDURE pi_feedNotification:
+/*------------------------------------------------------------------------------
+  Purpose: called when the associated event is published, allows to display a
+    custom notification to the user after executing this program
+  Parameters:  
+    ipc_message = my message content, <b>HTML</b> format! You can also set a <a href='location'>link</a> or whatever you want
+    ipi_type = from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance"
+    ipc_title = My notification title
+    ipc_subtitle = My notification subtitle
+    ipi_duration = duration of the notification in seconds (0 for infinite time)
+    ipc_uniqueTag = unique name for the notification, if it it set, the notif will close on a click on a link and 
+                    will automatically be closed if another notification with the same name pops up
+------------------------------------------------------------------------------*/
+
+    DEFINE INPUT PARAMETER ipc_message AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER ipi_type AS INTEGER NO-UNDO.
+    DEFINE INPUT PARAMETER ipc_title AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER ipc_subtitle AS CHARACTER NO-UNDO.
+    DEFINE INPUT PARAMETER ipi_duration AS INTEGER NO-UNDO.
+    DEFINE INPUT PARAMETER ipc_uniqueTag AS CHARACTER NO-UNDO.
+    
+    DEFINE VARIABLE lc_messageType AS CHARACTER NO-UNDO.
+    
+    CASE ipi_type :
+        WHEN 0 THEN lc_messageType = "MsgOk".
+        WHEN 1 THEN lc_messageType = "MsgError".
+        WHEN 2 THEN lc_messageType = "MsgWarning".
+        WHEN 3 THEN lc_messageType = "MsgInfo".
+        WHEN 4 THEN lc_messageType = "MsgHighImportance".
+    END CASE.
+    
+    OUTPUT STREAM str_writer TO VALUE({&NotificationOutputPath}) APPEND BINARY.
+    PUT STREAM str_writer UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6",
+        ipc_message,
+        lc_messageType,
+        ipc_title,
+        ipc_subtitle,
+        STRING(ipi_duration),
+        ipc_uniqueTag
+        ) SKIP.
+    OUTPUT STREAM str_writer CLOSE.
+    
+END.
 
 /* ************************  Function Implementations ***************** */
 

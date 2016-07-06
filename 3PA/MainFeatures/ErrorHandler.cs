@@ -48,9 +48,17 @@ namespace _3PA.MainFeatures {
         /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
             Log(e.ToString());
-            MessageBox.Show("Attention user! An error has occurred while loading the following file :" + "\n\n"
-                + fileName +
-                "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            if (UserCommunication.Ready)
+                UserCommunication.Notify("An error has occurred while loading the following file :<div>" + fileName.ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.<br><br>Uou might want to check out the error log below: " + (File.Exists(Config.FileErrorLog) ? " < br > " + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no.log found!"),
+                        MessageImg.MsgPoison, "File load error", message,
+                        args => {
+                            if (args.Link.EndsWith(".log")) {
+                                Npp.Goto(args.Link);
+                                args.Handled = true;
+                            }
+                        });
+            else 
+                MessageBox.Show("An error has occurred while loading the following file :" + "\n\n" + fileName + "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
             if (File.Exists(fileName + "_errors"))
                 File.Delete(fileName + "_errors");
             File.Move(fileName, fileName + "_errors");
@@ -73,8 +81,7 @@ namespace _3PA.MainFeatures {
                                 Npp.Goto(args.Link);
                                 args.Handled = true;
                             }
-                        },
-                        0, 500);
+                        });
                 } else {
                     // show an old school message
                     MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);

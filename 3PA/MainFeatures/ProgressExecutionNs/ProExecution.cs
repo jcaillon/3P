@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using YamuiFramework.Helper;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -98,6 +99,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// Full file path to the output file of Prolint
         /// </summary>
         public string ProlintOutputPath { get; set; }
+
+        /// <summary>
+        /// Full file path to the output file for the custom post-execution notification
+        /// </summary>
+        public string NotificationOutputPath { get; set; }
 
         /// <summary>
         /// set to true if a valid database connection is mandatory
@@ -355,6 +361,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
             ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
             DatabaseConnectionLog = Path.Combine(TempDir, "db.ko");
+            NotificationOutputPath = Path.Combine(TempDir, "postExecution.notif");
 
             // prepare the .p runner
             var runnerPath = Path.Combine(TempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
@@ -370,6 +377,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE DbConnectionMandatory " + NeedDatabaseConnection);
+            programContent.AppendLine("&SCOPED-DEFINE NotificationOutputPath " + NotificationOutputPath.ProgressQuoter());
             programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
 
             File.WriteAllText(runnerPath, programContent.ToString(), Encoding.Default);
@@ -493,6 +501,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 if (OnExecutionOk != null) {
                     OnExecutionOk(this);
                 }
+
+                // display a custom post execution notification if needed
+                DisplayPostExecutionNotification();
             }
         }
 
@@ -507,6 +518,34 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     // if it fails it is not really a problem
                 }
             }
+        }
+
+        /// <summary>
+        /// Read a file in which each line represents a notification to display to the user,
+        /// and displays each notification
+        /// </summary>
+        private void DisplayPostExecutionNotification() {
+
+            // no notifications?
+            if (string.IsNullOrEmpty(NotificationOutputPath) || !File.Exists(NotificationOutputPath))
+                return;
+
+            Utils.ForEachLine(NotificationOutputPath, null, line => {
+                var fields = line.Split('\t').ToList();
+                if (fields.Count == 6) {
+
+                    MessageImg messageImg;
+                    if (!Enum.TryParse(fields[1], true, out messageImg))
+                        messageImg = MessageImg.MsgDebug;
+
+                    if (string.IsNullOrEmpty(fields[5]))
+                        UserCommunication.Notify(fields[0], messageImg, fields[2], fields[3], (int)fields[4].ConvertFromStr(typeof(int)));
+                    else
+                        UserCommunication.NotifyUnique(fields[5], fields[0], messageImg, fields[2], fields[3], args => {
+                            UserCommunication.CloseUniqueNotif(fields[5]);
+                        }, (int)fields[4].ConvertFromStr(typeof(int)));
+                }
+            });
         }
 
         #endregion

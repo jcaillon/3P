@@ -315,7 +315,14 @@ namespace _3PA.Tests {
 
     internal class OutputVis : IParserVisitor {
 
-        public StringBuilder Output = new StringBuilder();
+        public void PreVisit() {
+            Output = new StringBuilder();
+        }
+
+        public void PostVisit() {
+        }
+
+        public StringBuilder Output;
 
         public void Visit(ParsedBlock pars) {
             Output.Append("BLOCK : ");

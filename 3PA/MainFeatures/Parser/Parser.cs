@@ -168,6 +168,9 @@ namespace _3PA.MainFeatures.Parser {
                 else
                     _lineInfo.Add(i, current);
             }
+
+            // dispose
+            _lexer = null;
         }
 
         #endregion
@@ -179,9 +182,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="visitor"></param>
         public void Accept(IParserVisitor visitor) {
+            visitor.PreVisit();
             foreach (var item in _parsedItemList) {
                 item.Accept(visitor);
             }
+            visitor.PostVisit();
         }
 
         /// <summary>

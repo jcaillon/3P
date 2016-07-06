@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,7 +32,7 @@ namespace _3PA.MainFeatures.Parser {
     internal static class ParserHandler {
 
         #region event
-        
+
         /// <summary>
         /// Event published when the parser starts doing its job
         /// </summary>
@@ -43,7 +42,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Event published when the parser has done its job and it's time to get the results
         /// </summary>
         public static event Action OnParseEnded;
-        
+
         #endregion
 
         #region fields
@@ -57,12 +56,16 @@ namespace _3PA.MainFeatures.Parser {
         private static ReaderWriterLockSlim _parserLock = new ReaderWriterLockSlim();
 
         private static ReaderWriterLockSlim _timerLock = new ReaderWriterLockSlim();
-
-        private static ReaderWriterLockSlim _parsingLock = new ReaderWriterLockSlim();
-
+        
         private static Timer _parserTimer;
 
+        /// <summary>
+        /// I could, and maybe i should, use a lock on those 2 booleans
+        /// At least make it volatile so the compiler always takes the most updated value...
+        /// </summary>
         private static volatile bool _parseRequestedWhenBusy;
+
+        private static volatile bool _parsing;
 
         #endregion
 
@@ -165,6 +168,23 @@ namespace _3PA.MainFeatures.Parser {
                 ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
         }
 
+        /// <summary>
+        /// finds a ParsedTable for the input name, it can either be a database table,
+        /// a temptable, or a buffer name (in which case we return the associated table)
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public static ParsedTable FindAnyTableOrBufferByName(string name) {
+            return ParserVisitor.FindAnyTableOrBufferByName(name);
+        }
+
+        /// <summary>
+        /// convertion
+        /// </summary>
+        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
+            return ParserVisitor.ConvertStringToParsedPrimitiveType(str, analyseLike);
+        }
+
         #endregion
 
         #region do the parsing and get the results
@@ -183,7 +203,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // parse in 800ms, if nothing delays the timer
-            if (_timerLock.TryEnterWriteLock(100)) {
+            if (_timerLock.TryEnterWriteLock(50)) {
                 try {
                     if (_parserTimer == null) {
                         _parserTimer = new Timer { AutoReset = false, Interval = 800 };
@@ -206,102 +226,55 @@ namespace _3PA.MainFeatures.Parser {
         /// as well as the dynamic items found by the parser
         /// </summary>
         private static void ParseCurrentDocumentTick() {
+            if (_parsing) {
+                _parseRequestedWhenBusy = true;
+                return;
+            }
+            _parseRequestedWhenBusy = false;
+            _parsing = true;
             Task.Factory.StartNew(() => {
-                if (_parsingLock.TryEnterWriteLock(100)) {
-                    _parseRequestedWhenBusy = false;
-                    try {
-                        if (OnParseStarted != null)
-                            OnParseStarted();
+                try {
+                    if (OnParseStarted != null)
+                        OnParseStarted();
 
-                        // make sure to always parse the current file
-                        do {
-                            // we launch the parser, that will fill the DynamicItems
-                            if (_parserLock.TryEnterWriteLock(200)) {
-                                try {
-                                    RefreshParser();
-                                } finally {
-                                    _parserLock.ExitWriteLock();
-                                }
-                            } else {
-                                _parseRequestedWhenBusy = true;
-                            }
-                        } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath) || _parseRequestedWhenBusy);
+                    if (_parserLock.TryEnterWriteLock(200)) {
+                        try {
+                            // make sure to always parse the current file
+                            do {
+                                //var watch = Stopwatch.StartNew();
 
-                        if (OnParseEnded != null)
-                            OnParseEnded();
+                                _lastParsedFilePath = Plug.CurrentFilePath;
 
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
-                    } finally {
-                        _parsingLock.ExitWriteLock();
+                                // Parse the document
+                                _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
+
+                                // visitor
+                                _parserVisitor = new ParserVisitor(true, _lastParsedFilePath, _ablParser.LineInfo);
+                                _ablParser.Accept(_parserVisitor);
+
+                                //watch.Stop();
+                                //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
+
+                            } while (!_lastParsedFilePath.Equals(Plug.CurrentFilePath));
+
+                        } finally {
+                            _parserLock.ExitWriteLock();
+                        }
                     }
-                } else {
-                    _parseRequestedWhenBusy = true;
+
+                    if (OnParseEnded != null)
+                        OnParseEnded();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
+                } finally {
+                    _parsing = false;
+                    if (_parseRequestedWhenBusy)
+                        ParseCurrentDocumentTick();
                 }
             });
         }
 
-        /// <summary>
-        /// this method should be called to refresh the Items list with all the static items
-        /// as well as the dynamic items found by the parser
-        /// </summary>
-        private static void RefreshParser() {
-
-            //var watch = Stopwatch.StartNew();
-
-            // if this document is in the Saved parsed visitors, we remove it because it might change so we want to re parse it later
-            _lastParsedFilePath = Plug.CurrentFilePath;
-            if (ParserVisitor.SavedParserVisitors.ContainsKey(_lastParsedFilePath))
-                ParserVisitor.SavedParserVisitors.Remove(_lastParsedFilePath);
-
-            // Parse the document
-            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
-
-            // visitor
-            _parserVisitor = new ParserVisitor(true, Path.GetFileName(_lastParsedFilePath), _ablParser.LineInfo);
-            _ablParser.Accept(_parserVisitor);
-
-            // correct the internal/external type of run statements :
-            foreach (var item in _parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                if (_parserVisitor.DefinedProcedures.Contains(item.DisplayText))
-                    item.IconType = CodeExplorerIconType.RunInternal;
-            }
-
-            // save the info for uses in an another file, where this file is run in persistent or included
-            if (!ParserVisitor.SavedParserVisitors.ContainsKey(_lastParsedFilePath))
-                ParserVisitor.SavedParserVisitors.Add(_lastParsedFilePath, _parserVisitor);
-            else
-                ParserVisitor.SavedParserVisitors[_lastParsedFilePath] = _parserVisitor;
-
-            //watch.Stop();
-            //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
-        }
-
         #endregion
 
-        #region find table, buffer, temptable
-
-        /// <summary>
-        /// finds a ParsedTable for the input name, it can either be a database table,
-        /// a temptable, or a buffer name (in which case we return the associated table)
-        /// </summary>
-        /// <param name="name"></param>
-        /// <returns></returns>
-        public static ParsedTable FindAnyTableOrBufferByName(string name) {
-            return ParserVisitor.FindAnyTableOrBufferByName(name);
-        }
-
-        #endregion
-
-        #region find primitive type
-
-        /// <summary>
-        /// convertion
-        /// </summary>
-        public static ParsedPrimitiveType ConvertStringToParsedPrimitiveType(string str, bool analyseLike) {
-            return ParserVisitor.ConvertStringToParsedPrimitiveType(str, analyseLike);
-        }
-
-        #endregion
     }
 }

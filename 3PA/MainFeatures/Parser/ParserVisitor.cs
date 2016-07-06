@@ -44,7 +44,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
         /// </summary>
-        public static Dictionary<string, ParserVisitor> SavedParserVisitors = new Dictionary<string, ParserVisitor>();
+        private static Dictionary<string, ParserVisitor> _savedParserVisitors = new Dictionary<string, ParserVisitor>();
 
         #endregion
 
@@ -62,7 +62,12 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Stores the file name of the file currently visited/parsed
         /// </summary>
-        private string _currentParsedFile;
+        private string _currentParsedFileName;
+
+        /// <summary>
+        /// Stores the file path of the file currently visited/parsed
+        /// </summary>
+        private string _currentParsedFilePath;
 
         /// <summary>
         /// this dictionnary is used to reference the procedures defined
@@ -96,21 +101,54 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor
         /// </summary>
-        public ParserVisitor(bool isBaseFile, string currentParsedFile, Dictionary<int, LineInfo> lineInfo) {
+        public ParserVisitor(bool isBaseFile, string parsedFilePath, Dictionary<int, LineInfo> lineInfo) {
             _isBaseFile = isBaseFile;
-            _currentParsedFile = currentParsedFile;
+            _currentParsedFilePath = parsedFilePath;
+            _currentParsedFileName = Path.GetFileName(parsedFilePath);
             _lineInfo = lineInfo;
             if (_lineInfo == null)
                 _lineInfo = new Dictionary<int, LineInfo>();
 
-            // reset the parsed files for the session
-            if (isBaseFile)
+            if (_isBaseFile) {
+                // resets the parsed files for this parsing session
                 _parsedFiles.Clear();
+
+                // if this document is in the Saved parsed visitors, we remove it now and we will add it back when it is parsed
+                if (_savedParserVisitors.ContainsKey(_currentParsedFilePath))
+                    _savedParserVisitors.Remove(_currentParsedFilePath);
+            }
         }
 
         #endregion
 
         #region visit implementation
+
+        /// <summary>
+        /// To be executed before the visit starts
+        /// </summary>
+        public void PreVisit() {}
+
+        /// <summary>
+        /// To be executed after the visit ends
+        /// </summary>
+        public void PostVisit() {
+
+            if (_isBaseFile) {
+
+                // correct the internal/external type of run statements :
+                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                    if (DefinedProcedures.Contains(item.DisplayText))
+                        item.IconType = CodeExplorerIconType.RunInternal;
+                }
+
+                // save the info for uses in an another file, where this file is run in persistent or included
+                if (!_savedParserVisitors.ContainsKey(_currentParsedFilePath))
+                    _savedParserVisitors.Add(_currentParsedFilePath, this);
+                else
+                    _savedParserVisitors[_currentParsedFilePath] = this;
+            }
+
+        }
 
         /// <summary>
         /// Run statement,
@@ -343,7 +381,7 @@ namespace _3PA.MainFeatures.Parser {
             ParsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
-                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
+                SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
                 Flag = AddExternalFlag((pars.IsExternal ? ParseFlag.ExternalProc : 0) | (pars.IsPrivate ? ParseFlag.Private : 0)),
                 Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
@@ -360,7 +398,7 @@ namespace _3PA.MainFeatures.Parser {
             ParsedItemsList.Add(new CompletionItem {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
-                SubString = !_isBaseFile ? _currentParsedFile : string.Empty,
+                SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
                 Flag = AddExternalFlag(pars.Scope == ParsedScope.File ? ParseFlag.FileScope : ParseFlag.LocalScope),
                 Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
@@ -731,8 +769,8 @@ namespace _3PA.MainFeatures.Parser {
             ParserVisitor parserVisitor;
             
             // did we already parsed this file in a previous parse session?
-            if (SavedParserVisitors.ContainsKey(fileName)) {
-                parserVisitor = SavedParserVisitors[fileName];
+            if (_savedParserVisitors.ContainsKey(fileName)) {
+                parserVisitor = _savedParserVisitors[fileName];
             } else {
                 // Parse it
                 var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, ownerName);
@@ -741,7 +779,7 @@ namespace _3PA.MainFeatures.Parser {
                 ablParser.Accept(parserVisitor);
 
                 // save it for future uses
-                SavedParserVisitors.Add(fileName, parserVisitor);
+                _savedParserVisitors.Add(fileName, parserVisitor);
             }
 
             return parserVisitor;
@@ -789,7 +827,7 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         private string SetExternalInclude(string subString) {
-            return _isBaseFile ? subString : subString ?? _currentParsedFile;
+            return _isBaseFile ? subString : subString ?? _currentParsedFileName;
         }
 
         /// <summary>
@@ -828,7 +866,7 @@ namespace _3PA.MainFeatures.Parser {
         /// it can be called
         /// </summary>
         public void ClearSavedParserVisitors() {
-            SavedParserVisitors.Clear();
+            _savedParserVisitors.Clear();
         }
 
         #endregion
