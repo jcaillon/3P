@@ -198,6 +198,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (ListToCompile == null)
                 ListToCompile = new List<FileToCompile>();
 
+            ExecutionType = executionType;
+
             // check prowin32.exe
             if (!File.Exists(ProEnv.ProwinPath)) {
                 UserCommunication.NotifyUnique("ProExecutionChecks", "The file path to Prowin.exe is incorrect : <div class='ToolTipcodeSnippet'>" + ProEnv.ProwinPath + "</div>You must provide a valid path before executing this action<br><i>You can change this path in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
@@ -209,7 +211,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
 
             // check compilation dir
-            if (!ProEnv.CompileLocally && (!Path.IsPathRooted(ProEnv.BaseCompilationPath))) {
+            if (executionType == ExecutionType.Compile && !ProEnv.CompileLocally && (!Path.IsPathRooted(ProEnv.BaseCompilationPath))) {
                 UserCommunication.NotifyUnique("ProExecutionChecks", "The path for the compilation base directory is incorrect : <div class='ToolTipcodeSnippet'>" + (string.IsNullOrEmpty(ProEnv.BaseCompilationPath) ? "it's empty!" : ProEnv.BaseCompilationPath) + "</div>You must provide a valid path before executing this action :<br><br><i>1. Either change the compilation directory<br>2. Or toggle the option to compile next to the source file!<br><br>The options are configurable in the <a href='go'>set environment page</a></i>", MessageImg.MsgWarning, "Execution error", "Invalid file path", args => {
                     Appli.Appli.GoToPage(PageNames.SetEnvironment);
                     UserCommunication.CloseUniqueNotif("ProExecutionChecks");
@@ -354,7 +356,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // set info on the execution
             LogPath = Path.Combine(TempDir, "run.log");
-            ExecutionType = executionType;
             ProcessStartDir = (ListToCompile.Count == 1) ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? TempDir : TempDir;
             ProgressWin32 = ProEnv.ProwinPath;
             if (executionType == ExecutionType.Database)
@@ -373,6 +374,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnv.ExtraPf.Trim().ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
+            programContent.AppendLine("&SCOPED-DEFINE CompileWithLst " + ProEnv.CompileWithListing);
             programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
             programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
@@ -394,7 +396,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // Parameters
             StringBuilder Params = new StringBuilder();
             
-            if (executionType == ExecutionType.Prolint)
+            if (executionType != ExecutionType.Run)
                 Params.Append(" -T " + TempDir.Trim('\\').ProgressQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
                 Params.Append(" -ini " + baseIniPath.ProgressQuoter());

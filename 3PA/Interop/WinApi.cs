@@ -54,6 +54,9 @@ namespace _3PA.Interop {
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam);
 
         [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam);
+
+        [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam);
 
         [DllImport("user32.dll")]

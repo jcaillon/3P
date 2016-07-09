@@ -48,7 +48,6 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-
         #region Fields
 
         private const string BlockTooLongString = "Too long!";
@@ -458,7 +457,7 @@ namespace _3PA.MainFeatures.Parser {
             CompletionType type;
             string subString;
             // special case for buffers, they go into the temptable or table section
-            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer) {
+            if (pars.PrimitiveType == ParsedPrimitiveType.Buffer && pars.Type != ParseDefineType.Parameter) {
                 flag = flag | ParseFlag.Buffer;
                 subString = "?";
                 type = CompletionType.TempTable;

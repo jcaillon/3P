@@ -23,8 +23,6 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
-using YamuiFramework.Fonts;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
@@ -104,12 +102,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // sets the tooltip content
-            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
+            var data = AutoComplete.FindInCompletionData(Npp.GetAblWordAtPosition(position), position);
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
                 return;
- 
+
             // in strings, only functions trigger the tooltip
             if ((curContext == UdlStyles.Delimiter1 || curContext == UdlStyles.Delimiter2 || curContext == UdlStyles.Delimiter4 || curContext == UdlStyles.Delimiter5) && _currentCompletionList.First().Type != CompletionType.Function)
                 return;
@@ -223,7 +221,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
-            
+
+            var popupMinWidth = 250;
             var toDisplay = new StringBuilder();
 
             GoToDefinitionFile = null;
@@ -231,10 +230,6 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
             if (data == null) return;
-
-            // Measure the max size of the title (ensure that the title isn't cropped
-            var size = TextRenderer.MeasureText(data.DisplayText, FontManager.GetFont(FontStyle.Bold, 13));
-            var size2 = TextRenderer.MeasureText(data.Type.ToString(), FontManager.GetFont(FontStyle.Bold, 13));
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
@@ -272,6 +267,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 switch (data.Type) {
                     case CompletionType.TempTable:
                     case CompletionType.Table:
+                        popupMinWidth = Math.Min(500, Npp.GetNppScreen().WorkingArea.Width / 2);
                         // buffer
                         if (data.FromParser) {
                             if (data.ParsedItem is ParsedDefine) {
@@ -500,7 +496,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             toDisplay.Append("</div>");
 
-            _form.SetText(toDisplay.ToString(), (Math.Max(size.Width, size2.Width) + 10 + 70));
+            _form.SetText(toDisplay.ToString(), popupMinWidth);
 
         }
 
@@ -515,11 +511,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         private static string FormatRowParam(string paramType, string text) {
-            var image = "Output";
+            var image = "Input";
             if (paramType.ContainsFast("input-output"))
                 image = "InputOutput";
-            else if (paramType.ContainsFast("input"))
-                image = "Input";
+            else if (paramType.ContainsFast("output"))
+                image = "Output";
             return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 

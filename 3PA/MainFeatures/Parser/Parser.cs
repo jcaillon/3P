@@ -888,12 +888,6 @@ namespace _3PA.MainFeatures.Parser {
                         fields.Add(currentField);
                         state = 20;
                         break;
-                    case 27:
-                        // define temp-table : match HELP for a field
-                        if (!(token is TokenString)) break;
-                        currentField.Description = token.Value;
-                        state = 20;
-                        break;
 
                     case 25:
                         // define temp-table : match an index definition
@@ -917,6 +911,13 @@ namespace _3PA.MainFeatures.Parser {
                         if (!(token is TokenWord)) break;
                         useIndex.Append(",");
                         useIndex.Append(token.Value);
+                        state = 20;
+                        break;
+
+                    case 27:
+                        // define temp-table : match HELP for a field
+                        if (!(token is TokenString)) break;
+                        currentField.Description = GetTokenStrippedValue(token);
                         state = 20;
                         break;
 
@@ -1188,6 +1189,7 @@ namespace _3PA.MainFeatures.Parser {
                         createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
                         createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
                         createdFunc.Extend.Equals(_functionPrototype[name].Extend) &&
+                        createdFunc.ParsedReturnType.Equals(_functionPrototype[name].ParsedReturnType) &&
                         createdFunc.Parameters.Equals(_functionPrototype[name].Parameters));
                 }
             } else {

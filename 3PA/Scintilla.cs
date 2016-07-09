@@ -43,7 +43,7 @@ namespace _3PA {
 
         #region fields
 
-        public const int KeywordMaxLength = 30;
+        public const int KeywordMaxLength = 60;
         private static IntPtr _curScintilla;
         private static DocumentLines _lines;
         private static Scintilla _scintilla;
@@ -1162,7 +1162,7 @@ namespace _3PA {
         /// </summary>
         /// <param name="position"></param>
         /// <returns></returns>
-        public static string GetWordAtPosition(int position) {
+        public static string GetAblWordAtPosition(int position) {
             return Abl.ReadAblWord(GetTextOnLeftOfPos(position), true) + Abl.ReadAblWord(GetTextOnRightOfPos(position), true, false);
         }
 

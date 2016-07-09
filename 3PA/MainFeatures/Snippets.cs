@@ -163,7 +163,7 @@ namespace _3PA.MainFeatures {
                 string currentParamOriginalText = LocSnippetContext.CurrentParameterValue;
 
                 Npp.SetSelection(currentParam.X, currentParam.X);
-                string currentParamDetectedText = Npp.GetWordAtPosition(Npp.CurrentPosition);
+                string currentParamDetectedText = Npp.GetAblWordAtPosition(Npp.CurrentPosition);
 
 
                 if (currentParamOriginalText != currentParamDetectedText) {

@@ -24,14 +24,15 @@
 &IF DEFINED(ExecutionType) = 0 &THEN 
     &SCOPED-DEFINE ExecutionType "DICTIONNARY"
     &SCOPED-DEFINE ToExecute ""
-    &SCOPED-DEFINE LogFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\fuck.log"
+    &SCOPED-DEFINE LogFile "execution.log"
     &SCOPED-DEFINE ExtractDbOutputPath ""
     &SCOPED-DEFINE propathToUse ""
     &SCOPED-DEFINE ExtraPf ""
     &SCOPED-DEFINE BasePfPath ""
     &SCOPED-DEFINE ToCompileListFile "files.list"
+    &SCOPED-DEFINE CompileWithLst FALSE
     &SCOPED-DEFINE CreateFileIfConnectFails "db.ko"
-    &SCOPED-DEFINE CompileProgressionFile "D:\Profiles\jcaillon\AppData\Local\Temp\3P\compile.progression"
+    &SCOPED-DEFINE CompileProgressionFile "compile.progression"
     &SCOPED-DEFINE DbConnectionMandatory FALSE
     &SCOPED-DEFINE NotificationOutputPath "postExecution.notif"
 &ENDIF
@@ -44,6 +45,7 @@ DEFINE STREAM str_reader.
 DEFINE STREAM str_reader2.
 DEFINE STREAM str_logout.
 DEFINE STREAM str_dbout.
+
 DEFINE VARIABLE gi_db AS INTEGER NO-UNDO.
 DEFINE VARIABLE gl_dbKo AS LOGICAL NO-UNDO.
 DEFINE VARIABLE gc_conn AS CHARACTER NO-UNDO.
@@ -255,7 +257,9 @@ PROCEDURE pi_compileList:
         IF lc_from > "" THEN DO:
             COMPILE VALUE(lc_from)
                 SAVE INTO VALUE(lc_to)
+                &IF {&CompileWithLst} &THEN
                 DEBUG-LIST VALUE(lc_lst)
+                &ENDIF
                 NO-ERROR.
             fi_output_last_error().
             RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
@@ -432,7 +436,7 @@ END FUNCTION.
 
 FUNCTION fi_add_connec_try RETURNS CHARACTER ( INPUT ipc_conn AS CHARACTER) :
 /*------------------------------------------------------------------------------
-  Purpose: adds a -ct 2 option for each connection
+  Purpose: adds a -ct 1 option for each connection
     Notes:
 ------------------------------------------------------------------------------*/
 

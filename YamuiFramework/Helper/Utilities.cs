@@ -29,6 +29,8 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using YamuiFramework.HtmlRenderer.WinForms;
+using YamuiFramework.Themes;
 
 namespace YamuiFramework.Helper {
 
@@ -36,6 +38,22 @@ namespace YamuiFramework.Helper {
     /// This class provides various utilies to use in YamuiFramework and outside
     /// </summary>
     public static class Utilities {
+
+        #region Html utilities
+
+        public static Size MeasureHtml(string htmlContent, int maxWidth) {
+            // Measure the size of the html
+            using (var gImg = new Bitmap(1, 1))
+            using (var g = Graphics.FromImage(gImg)) {
+                var size = HtmlRender.Measure(g, htmlContent, maxWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                return new Size((int) size.Width, (int) size.Height);
+            }
+        }
+
+
+
+        #endregion
+
 
         #region Validation and data type conversions
 

@@ -184,28 +184,45 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
         public void SetNeededSize(string content, int minWidth, int maxWidth) {
+
             // find max height taken by the html
-            Width = maxWidth;
-            Text = content;
-            var prefHeight = Height;
+            // Measure the size of the html
+            using (var gImg = new Bitmap(1, 1))
+            using (var g = Graphics.FromImage(gImg)) {
+                // get the minimum size required to display everything
+                var sizef = HtmlRender.Measure(g, content, 10, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                var realMinWidth = Math.Max(Math.Min(maxWidth, (int)sizef.Width), minWidth);
 
-            // now we got the final height, resize width until height changes
-            int j = 0;
-            int detla = maxWidth / 20;
-            int curWidth = maxWidth;
-            do {
-                curWidth -= detla;
-                Width = Math.Max(Math.Min(maxWidth, curWidth), minWidth);
-                PerformLayout();
-                //Invalidate();
-                if (Height > prefHeight) {
-                    curWidth += detla;
-                    detla /= 2;
+                // set to max Width, get the height at max Width
+                var width = Math.Max(maxWidth, realMinWidth);
+                sizef = HtmlRender.Measure(g, content, width, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                var prefHeight = sizef.Height;
+
+                // now we got the final height, resize width until height changes
+                int j = 0;
+                int detla = maxWidth / 10;
+                do {
+                    width -= detla;
+                    width = Math.Max(Math.Min(maxWidth, width), realMinWidth);
+
+                    sizef = HtmlRender.Measure(g, content, width, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+
+                    if (sizef.Height > prefHeight) {
+                        width += detla;
+                        detla /= 2;
+                    }
+                    j++;
+                } while (j < 10);
+
+                // make it more square shaped if possible
+                if (width > sizef.Height) {
+                    width = Math.Max(Math.Min(maxWidth, (int)(Math.Sqrt(width * sizef.Height))), realMinWidth);
                 }
-                j++;
-            } while (j < 20);
 
-            Width += 10;
+                Width = width + detla / 2;
+                Text = content;
+            }
+
         }
 
         /// <summary>

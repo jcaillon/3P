@@ -500,6 +500,7 @@
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="Images\Backgrounds\bg_oss.png" />
+    <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\Menu\Synchronize.png" />
@@ -535,7 +536,7 @@
     <Content Include="Images\DockableExplorer\buttons\eraser.png" />
     <Content Include="Images\DockableExplorer\buttons\expand.png" />
     <Content Include="Images\DockableExplorer\Type\MainBlock.png" />
-    <Content Include="Images\DockableExplorer\buttons\numerical_sorting_12.png" />
+    <Content Include="Images\DockableExplorer\buttons\numerical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refresh.png" />
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />

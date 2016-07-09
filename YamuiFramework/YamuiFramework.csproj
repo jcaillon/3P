@@ -149,6 +149,12 @@
     <Compile Include="Forms\YamuiMenu.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Forms\YamuiInput.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiInput.Designer.cs">
+      <DependentUpon>YamuiInput.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\YamuiNotifications.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -288,6 +294,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiForm.resx">
       <DependentUpon>YamuiForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\YamuiInput.resx">
+      <DependentUpon>YamuiInput.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiMessageBox.resx">
       <DependentUpon>YamuiMessageBox.cs</DependentUpon>

@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
@@ -316,6 +317,7 @@ namespace YamuiFramework.Forms {
         }
 
         private void okBtn_Click(object sender, EventArgs e) {
+            File.AppendAllText(@"C:\Work\3P_notepad++\plugins\Config\3P\Nouveau document texte.txt", "yo\n");
             if (ValidateChildren()) {
                 BindToData();
                 Close();

@@ -103,7 +103,13 @@ namespace _3PA.Lib {
                 if (property.FieldType == typeof (Dictionary<string, string>)) {
                     itemElement.Add(DictToXml((Dictionary<string, string>) property.GetValue(item), PrefixToParentOfDico + property.Name, property.Name, valueInAttribute));
                 } else {
-                    string strValue = (property.FieldType == typeof(Color)) ? ColorTranslator.ToHtml((Color) property.GetValue(item)) : TypeDescriptor.GetConverter(property.FieldType).ConvertToInvariantString(property.GetValue(item));
+                    string strValue;
+                    if (property.FieldType == typeof (Color))
+                        strValue = ColorTranslator.ToHtml((Color) property.GetValue(item));
+                    else if (property.FieldType.IsEnum)
+                        strValue = Convert.ChangeType(property.GetValue(item), typeof(long)).ToString();
+                    else
+                        strValue = TypeDescriptor.GetConverter(property.FieldType).ConvertToInvariantString(property.GetValue(item));
                     if (valueInAttribute)
                         fieldElement.Add(new XAttribute(ValueString, strValue ?? string.Empty));
                     else

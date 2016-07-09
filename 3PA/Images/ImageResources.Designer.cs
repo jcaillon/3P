@@ -93,6 +93,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap alphabetical_sorting {
+            get {
+                object obj = ResourceManager.GetObject("alphabetical_sorting", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Autocompletion {
             get {
                 object obj = ResourceManager.GetObject("Autocompletion", resourceCulture);
@@ -1193,9 +1203,9 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
-        internal static System.Drawing.Bitmap numerical_sorting_12 {
+        internal static System.Drawing.Bitmap numerical_sorting {
             get {
-                object obj = ResourceManager.GetObject("numerical_sorting_12", resourceCulture);
+                object obj = ResourceManager.GetObject("numerical_sorting", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

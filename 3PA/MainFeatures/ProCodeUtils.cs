@@ -55,7 +55,7 @@ namespace _3PA.MainFeatures {
             var position = fromMouseClick ? Npp.GetPositionFromMouseLocation() : Npp.CurrentPosition;
             if (fromMouseClick && position <= 0)
                 return;
-            var curWord = Npp.GetWordAtPosition(position);
+            var curWord = Npp.GetAblWordAtPosition(position);
 
 
             // match a word in the autocompletion? go to definition

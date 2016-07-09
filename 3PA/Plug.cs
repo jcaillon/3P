@@ -313,9 +313,10 @@ namespace _3PA {
             Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
 
             // we want the default auto-completion to not show
-            // barbarian method to force the default autocompletion window to hide, it makes npp slows down when there is too much text...
-            // TODO: find a better technique to hide the autocompletion!!! this slows npp down
+            // we block on a scintilla level (pretty bad solution because it slows down npp on big documents)
+            // and we also block it in Npp (pull request on going for v6.9.?)
             Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -350,6 +351,7 @@ namespace _3PA {
             
             // we wanted the default auto-completion to not show, but no more
             Npp.AutoCStops("");
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
         }
 
         private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {

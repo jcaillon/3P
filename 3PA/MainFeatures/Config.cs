@@ -25,6 +25,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using _3PA.Lib;
+using _3PA.MainFeatures.CodeExplorer;
 
 // ReSharper disable LocalizableElement
 
@@ -375,6 +376,8 @@ namespace _3PA.MainFeatures {
                 GroupName = "Code explorer",
                 AutoGenerateField = false)]
             public bool CodeExplorerAutoHideOnNonProgressFile = false;
+
+            public CodeExplorerForm.SortingType CodeExplorerSortingType;
 
             #endregion
 

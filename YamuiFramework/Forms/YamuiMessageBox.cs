@@ -65,7 +65,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Constructor, you should the method ShwDlg instead
         /// </summary>
-        private YamuiMessageBox(string htmlContent, List<string> buttonsList, int maxHeight, int maxWidth, int minWidth = 300) {
+        private YamuiMessageBox(string htmlContent, List<string> buttonsList, int maxHeight, int maxWidth, int minWidth = 350) {
             InitializeComponent();
             contentPanel.NoBackgroundImage = true;
 

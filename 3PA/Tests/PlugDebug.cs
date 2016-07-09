@@ -20,9 +20,11 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Text;
 using System.Timers;
+using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
@@ -38,6 +40,7 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
+            UserCommunication.Message(Utils.ReadAllText(@"C:\Work\3P_notepad++\plugins\Config\3P\Tests\content.md").MdToHtml(), MessageImg.MsgDebug, "TRUC ", "fuckaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", new List<string> {"ok", "ance"}, true);
 
             RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
 

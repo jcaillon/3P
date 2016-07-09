@@ -47,12 +47,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private bool _isExpanded = true;
 
         /// <summary>
-        /// tracks if we want to display the "normal" list, with folders and stuff, or the
-        /// unsorted list, which is the list in code order
-        /// </summary>
-        private bool _displayUnSorted;
-
-        /// <summary>
         /// The filter to apply to the autocompletion form
         /// </summary>
         public string FilterByText {
@@ -204,9 +198,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonCleanText.BackGrndImage = ImageResources.eraser;
             buttonExpandRetract.BackGrndImage = ImageResources.collapse;
             buttonRefresh.BackGrndImage = ImageResources.refresh;
-            buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
             buttonIncludeExternal.BackGrndImage = ImageResources.External;
             buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
+
+            RefreshSortButton();
 
             // Register buttons to events
             buttonCleanText.ButtonPressed += buttonCleanText_Click;
@@ -221,7 +216,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             toolTipHtml.SetToolTip(buttonExpandRetract, "Toggle <b>Expand/Collapse</b>");
             toolTipHtml.SetToolTip(buttonCleanText, "<b>Clean</b> the current text filter");
             toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
-            toolTipHtml.SetToolTip(buttonSort, "Toggle <b>Categories/Code order sorting</b>");
+            toolTipHtml.SetToolTip(buttonSort, "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order<br>-Uncategorized, unsorted");
             toolTipHtml.SetToolTip(buttonIncludeExternal, "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)");
             toolTipHtml.SetToolTip(textBoxFilter, "Allows to <b>filter</b> the items of the list below");
 
@@ -369,9 +364,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
             _initialObjectsList = new List<CodeExplorerItem>();
 
-            if (!_displayUnSorted) {
+            if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
                 // we built the tree "manually"
-                tempList.Sort(new ExplorerObjectSortingClass());
+                tempList.Sort(new ExplorerObjectSortingClass(Config.Instance.CodeExplorerSortingType));
 
                 HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
 
@@ -602,7 +597,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             }
 
             // display as tree or flat list?
-            ((FilteredItemTreeRenderer)fastOLV.DefaultRenderer).DoNotDrawTree = _displayUnSorted || _isFiltering;
+            ((FilteredItemTreeRenderer)fastOLV.DefaultRenderer).DoNotDrawTree = (Config.Instance.CodeExplorerSortingType == SortingType.Unsorted) || _isFiltering;
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
@@ -630,7 +625,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 output = item.FilterFullyMatch;
 
                 // when filtering, only display items not branches
-                if (_displayUnSorted || _isFiltering)
+                if (Config.Instance.CodeExplorerSortingType == SortingType.Unsorted || _isFiltering)
                     output = output && !item.CanExpand;
                 else
                     // branches it belongs to must be expanded
@@ -710,15 +705,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         private void buttonSort_Click(object sender, EventArgs e) {
-            _displayUnSorted = !_displayUnSorted;
-
+            Config.Instance.CodeExplorerSortingType++;
+            if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
+                Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             ClearFilter();
             UpdateTreeData();
 
-            buttonSort.BackGrndImage = _displayUnSorted ? ImageResources.clear_filters : ImageResources.numerical_sorting_12;
-            buttonSort.Invalidate();
+            RefreshSortButton();
 
             Npp.GrabFocus();
+        }
+
+        private void RefreshSortButton() {
+            buttonSort.BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
+            buttonSort.Invalidate();
         }
 
         private void buttonCleanText_Click(object sender, EventArgs e) {
@@ -751,6 +751,16 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #endregion
 
+        #region SortingType
+
+        public enum SortingType {
+            NaturalOrder = 0,
+            Alphabetical = 1,
+            Unsorted = 2
+        }
+
+        #endregion
+
     }
 
     #region Sorting class
@@ -759,6 +769,12 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// Class used in objectlist.Sort method
     /// </summary>
     internal class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
+
+        private CodeExplorerForm.SortingType _sortingType;
+        public ExplorerObjectSortingClass(CodeExplorerForm.SortingType sortingType) {
+            _sortingType = sortingType;
+        }
+
         public int Compare(CodeExplorerItem x, CodeExplorerItem y) {
 
             // compare first by BranchType
@@ -770,8 +786,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (compare != 0) return compare;
 
             // sort by display text
-            compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
-            if (compare != 0) return compare;
+            if (_sortingType == CodeExplorerForm.SortingType.Alphabetical) {
+                compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                if (compare != 0) return compare;
+            }
+
             return x.GoToLine.CompareTo(y.GoToLine);
         }
     }

@@ -514,18 +514,7 @@ namespace _3PA {
                 Marshal.FreeHGlobal(text0);
             }
             return retval;
-        }
-
-        /// <summary>
-        /// Returns a bool informing if a macro is being recorded or not
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsMacroRecording {
-            get {
-                return (int) WinApi.SendMessage(HandleNpp, NppMsg.WM_GETCURRENTMACROSTATUS, 0, 0) == 1;
-            }
-        }
-            
+        }          
 
         /// <summary>
         /// Allows to execute one of Npp's command

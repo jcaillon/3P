@@ -77,14 +77,14 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// </summary>
         /// <param name="content"></param>
         /// <param name="minimumWidth"></param>
-        public void SetText(string content, int minimumWidth = 150) {
+        public void SetText(string content, int minimumWidth = 200) {
 
             if (Visible)
                 Cloack();
 
             var screen = Npp.GetNppScreen();
 
-            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Height / 2 - 20);
+            _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width / 2 - 20);
 
             _panel.ContentPanel.Size = _labelContent.Size;
             Size = new Size(_panel.ContentPanel.Width + 10, Math.Min(_labelContent.Height, screen.WorkingArea.Height / 2 - 10) + 10);
