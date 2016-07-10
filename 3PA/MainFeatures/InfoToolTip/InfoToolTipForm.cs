@@ -82,7 +82,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             if (Visible)
                 Cloack();
 
-            var screen = Npp.GetNppScreen();
+            var screen = Npp.NppScreen;
 
             _labelContent.SetNeededSize(content, minimumWidth, screen.WorkingArea.Width / 2 - 20);
 

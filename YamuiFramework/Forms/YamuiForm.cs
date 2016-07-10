@@ -23,6 +23,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.IO;
+using System.Linq;
 using System.Security;
 using System.Timers;
 using System.Web.UI.Design.WebControls;
@@ -97,7 +99,7 @@ namespace YamuiFramework.Forms {
         [Browsable(false)]
         public bool HasModalOpened { get; set; }
 
-        private const int BorderWidth = 2;
+        public const int BorderWidth = 2;
 
         /// <summary>
         /// Tooltip for close buttons
@@ -109,6 +111,8 @@ namespace YamuiFramework.Forms {
         private YamuiTabButtons _topLinks;
 
         private YamuiNotifLabel _bottomNotif;
+
+        public const int FormButtonWidth = 25;
 
         #endregion
 
@@ -655,24 +659,11 @@ namespace YamuiFramework.Forms {
 
             var priorityOrder = new Dictionary<int, WindowButtons>(3) { { 0, WindowButtons.Close }, { 1, WindowButtons.Maximize }, { 2, WindowButtons.Minimize } };
 
-            var firstButtonLocation = new Point(ClientRectangle.Width - BorderWidth - 25, BorderWidth);
-            var lastDrawedButtonPosition = firstButtonLocation.X - 25;
+            var buttonsWidth = 0;
 
-            YamuiFormButton firstButton = null;
-
-            foreach (var button in priorityOrder) {
-                var buttonExists = _windowButtonList.ContainsKey(button.Value);
-
-                if (firstButton == null && buttonExists) {
-                    firstButton = _windowButtonList[button.Value];
-                    firstButton.Location = firstButtonLocation;
-                    continue;
-                }
-
-                if (firstButton == null || !buttonExists) continue;
-
-                _windowButtonList[button.Value].Location = new Point(lastDrawedButtonPosition, BorderWidth);
-                lastDrawedButtonPosition = lastDrawedButtonPosition - 25;
+            foreach (var button in priorityOrder.Where(button => _windowButtonList.ContainsKey(button.Value))) {
+                buttonsWidth += _windowButtonList[button.Value].Width;
+                _windowButtonList[button.Value].Location = new Point(ClientRectangle.Width - BorderWidth - buttonsWidth, BorderWidth);
             }
 
             if (_windowButtonList.ContainsKey(WindowButtons.CloseAllVisible)) {

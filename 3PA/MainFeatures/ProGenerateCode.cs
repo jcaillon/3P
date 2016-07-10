@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures {
 
                 case ProInsertNewType.Function:
                     object newFunc = new ProNewFunction();
-                    if (UserCommunication.Input("Insert function", "Define a new function", ref newFunc) != DialogResult.OK)
+                    if (UserCommunication.Input(ref newFunc, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
                         return;
                     break;
 
@@ -108,7 +108,7 @@ namespace _3PA.MainFeatures {
                     var appbuilderAfter = @"&ANALYZE-RESUME" + eol;
 
                     object newProc = new ProNewProcedure();
-                    if (UserCommunication.Input("Insert procedure", "Define a new internal procedure", ref newProc) != DialogResult.OK)
+                    if (UserCommunication.Input(ref newProc, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
                         return;
 
                     var proNew = newProc as IProNew;
@@ -199,29 +199,30 @@ namespace _3PA.MainFeatures {
 
         internal class ProNewProcedure : IProNew {
 
-            [YamuiInputDialogItem("Name", Order = 0)]
+            [YamuiInputAttribute("Name", Order = 0)]
             public string Name { get; set; }
 
-            [YamuiInputDialogItem("Private procedure", Order = 1)]
+            [YamuiInputAttribute("Private procedure", Order = 1)]
             public bool IsPrivate { get; set; }
 
-            [YamuiInputDialogItem("Insertion position", Order = 2)]
+            [YamuiInputAttribute("Insertion position", Order = 2)]
             public ProInsertPosition InsertPosition { get; set; }
         }
 
         internal class ProNewFunction : IProNew {
 
-            [YamuiInputDialogItem("Name", Order = 0)]
+            [YamuiInputAttribute("Name", Order = 0)]
             public string Name { get; set; }
 
-            [YamuiInputDialogItem("Return type", Order = 1)]
+            [YamuiInputAttribute("Return type", Order = 1)]
             public ProFunctionType Type { get; set; }
 
-            [YamuiInputDialogItem("Private function", Order = 2)]
+            [YamuiInputAttribute("Private function", Order = 2)]
             public bool IsPrivate { get; set; }
 
-            [YamuiInputDialogItem("Insertion position", Order = 3)]
+            [YamuiInputAttribute("Insertion position", Order = 3)]
             public ProInsertPosition InsertPosition { get; set; }
+
         }
 
         internal enum ProInsertNewType {

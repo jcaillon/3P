@@ -647,7 +647,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"
+if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName).pdb"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

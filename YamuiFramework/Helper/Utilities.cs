@@ -41,16 +41,62 @@ namespace YamuiFramework.Helper {
 
         #region Html utilities
 
-        public static Size MeasureHtml(string htmlContent, int maxWidth) {
+        /// <summary>
+        /// Returns a faire size in which an html can be displayed...
+        /// </summary>
+        public static Size MeasureHtmlPrefSize(string htmlContent, int minWidth, int maxWidth, bool dontSquareIt = false) {
+
+            // find max height taken by the html
             // Measure the size of the html
             using (var gImg = new Bitmap(1, 1))
             using (var g = Graphics.FromImage(gImg)) {
-                var size = HtmlRender.Measure(g, htmlContent, maxWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
-                return new Size((int) size.Width, (int) size.Height);
+
+                // get the minimum size required to display everything
+                var sizef = HtmlRender.Measure(g, htmlContent, 10, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                var realMinWidth = Math.Max(Math.Min(maxWidth, (int)sizef.Width), minWidth);
+
+                // set to max Width, get the height at max Width
+                var calcWidth = Math.Max(maxWidth, realMinWidth);
+                sizef = HtmlRender.Measure(g, htmlContent, calcWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                var prefHeight = sizef.Height;
+
+                // now we got the final height, resize width until height changes
+                int j = 0;
+                int detla = maxWidth / 8;
+                do {
+                    calcWidth -= detla;
+                    calcWidth = Math.Max(Math.Min(maxWidth, calcWidth), realMinWidth);
+
+                    sizef = HtmlRender.Measure(g, htmlContent, calcWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+
+                    if (sizef.Height > prefHeight) {
+                        calcWidth += detla;
+                        detla /= 2;
+                    }
+                    j++;
+                } while (j < 12);
+
+                // make it more square shaped if possible
+                if (!dontSquareIt && calcWidth > sizef.Height) {
+                    calcWidth = Math.Max(Math.Min(maxWidth, (int)(Math.Sqrt(calcWidth * sizef.Height))), realMinWidth);
+                }
+
+                return HtmlRender.Measure(g, htmlContent, calcWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args)).ToSize();
             }
+
         }
 
-
+        /// <summary>
+        /// Returns the minimum width necessary to draw the html, can be the longest word of the biggest image width...
+        /// </summary>
+        public static int GetHtmlMinWidth(string htmlContent) {
+            // Measure the size of the html
+            using (var gImg = new Bitmap(1, 1))
+            using (var g = Graphics.FromImage(gImg)) {
+                var size = HtmlRender.Measure(g, htmlContent, 1, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
+                return (int)size.Width;
+            }
+        }
 
         #endregion
 
@@ -182,7 +228,8 @@ namespace YamuiFramework.Helper {
             }, {
                 typeof (Guid), s => {
                     try {
-                        Guid n = new Guid(s);
+                        // ReSharper disable once ObjectCreationAsStatement
+                        new Guid(s);
                         return true;
                     } catch {
                         return false;

@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO;
 using System.Net.Mime;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
@@ -183,46 +184,9 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
-        public void SetNeededSize(string content, int minWidth, int maxWidth) {
-
-            // find max height taken by the html
-            // Measure the size of the html
-            using (var gImg = new Bitmap(1, 1))
-            using (var g = Graphics.FromImage(gImg)) {
-                // get the minimum size required to display everything
-                var sizef = HtmlRender.Measure(g, content, 10, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
-                var realMinWidth = Math.Max(Math.Min(maxWidth, (int)sizef.Width), minWidth);
-
-                // set to max Width, get the height at max Width
-                var width = Math.Max(maxWidth, realMinWidth);
-                sizef = HtmlRender.Measure(g, content, width, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
-                var prefHeight = sizef.Height;
-
-                // now we got the final height, resize width until height changes
-                int j = 0;
-                int detla = maxWidth / 10;
-                do {
-                    width -= detla;
-                    width = Math.Max(Math.Min(maxWidth, width), realMinWidth);
-
-                    sizef = HtmlRender.Measure(g, content, width, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
-
-                    if (sizef.Height > prefHeight) {
-                        width += detla;
-                        detla /= 2;
-                    }
-                    j++;
-                } while (j < 10);
-
-                // make it more square shaped if possible
-                if (width > sizef.Height) {
-                    width = Math.Max(Math.Min(maxWidth, (int)(Math.Sqrt(width * sizef.Height))), realMinWidth);
-                }
-
-                Width = width + detla / 2;
-                Text = content;
-            }
-
+        public void SetNeededSize(string content, int minWidth, int maxWidth, bool dontSquareIt = false) {
+            Size = Helper.Utilities.MeasureHtmlPrefSize(content, minWidth, maxWidth, dontSquareIt);
+            Text = content;
         }
 
         /// <summary>

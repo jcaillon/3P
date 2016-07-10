@@ -20,11 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Text;
-using System.Timers;
-using YamuiFramework.HtmlRenderer.WinForms;
+using YamuiFramework.Forms;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
@@ -40,9 +38,19 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            UserCommunication.Message(Utils.ReadAllText(@"C:\Work\3P_notepad++\plugins\Config\3P\Tests\content.md").MdToHtml(), MessageImg.MsgDebug, "TRUC ", "fuckaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", new List<string> {"ok", "ance"}, true);
+            UserCommunication.Notify(Utils.ReadAllText(@"C:\Work\3P_notepad++\plugins\Config\3P\Tests\content.md").MdToHtml(), MessageImg.MsgOk, "Blabla blaz zieuf fiuh zeifh zeufh", "efzefze zef zef zefz z END", null);
 
-            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
+            UserCommunication.Notify("fuck");
+            UserCommunication.Notify("fuck");
+
+            //UserCommunication.Notify(clickedButton.ToString() + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Name
+            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).InsertPosition
+            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).IsPrivate
+            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Type);
+
+            object yop = "";
+
+//            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
 
             //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
             //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");

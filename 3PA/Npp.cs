@@ -114,10 +114,12 @@ namespace _3PA {
         /// Returns the screen on which npp is displayed
         /// </summary>
         /// <returns></returns>
-        public static Screen GetNppScreen() {
-            Rectangle output = new Rectangle();
-            WinApi.GetWindowRect(HandleScintilla, ref output);
-            return Screen.FromPoint(output.Location);
+        public static Screen NppScreen {
+            get {
+                Rectangle output = new Rectangle();
+                WinApi.GetWindowRect(HandleScintilla, ref output);
+                return Screen.FromPoint(output.Location);
+            }
         }
 
         /// <summary>

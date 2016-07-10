@@ -143,8 +143,11 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResourceFont.resx</DependentUpon>
     </Compile>
-    <Compile Include="Forms\YamuiInputDialog.cs">
+    <Compile Include="Forms\YamuiNotification.cs">
       <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiNotification.Designer.cs">
+      <DependentUpon>YamuiNotification.cs</DependentUpon>
     </Compile>
     <Compile Include="Forms\YamuiMenu.cs">
       <SubType>Form</SubType>
@@ -155,23 +158,11 @@
     <Compile Include="Forms\YamuiInput.Designer.cs">
       <DependentUpon>YamuiInput.cs</DependentUpon>
     </Compile>
-    <Compile Include="Forms\YamuiNotifications.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\YamuiNotifications.Designer.cs">
-      <DependentUpon>YamuiNotifications.cs</DependentUpon>
-    </Compile>
     <Compile Include="Forms\YamuiSmokeScreen.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiForm.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\YamuiMessageBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\YamuiMessageBox.Designer.cs">
-      <DependentUpon>YamuiMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
     <Compile Include="Helper\GenericThemeHolder.cs" />
@@ -295,14 +286,11 @@
     <EmbeddedResource Include="Forms\YamuiForm.resx">
       <DependentUpon>YamuiForm.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\YamuiNotification.resx">
+      <DependentUpon>YamuiNotification.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiInput.resx">
       <DependentUpon>YamuiInput.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiMessageBox.resx">
-      <DependentUpon>YamuiMessageBox.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiNotifications.resx">
-      <DependentUpon>YamuiNotifications.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -330,7 +318,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)3PA\Lib\YamuiFolder\" copy /Y "$(TargetPath)" "$(SolutionDir)3PA\Lib\YamuiFolder\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>if exist "$(SolutionDir)3PA\Lib\YamuiFolder\" copy /Y "$(TargetPath)" "$(SolutionDir)3PA\Lib\YamuiFolder\$(TargetFileName)"
+if exist "$(SolutionDir)..\3P_notepad++\plugins\Config\3P\Libraries\" copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\Config\3P\Libraries\$(TargetName).pdb"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

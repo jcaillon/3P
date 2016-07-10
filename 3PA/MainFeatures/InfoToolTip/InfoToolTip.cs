@@ -267,7 +267,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 switch (data.Type) {
                     case CompletionType.TempTable:
                     case CompletionType.Table:
-                        popupMinWidth = Math.Min(500, Npp.GetNppScreen().WorkingArea.Width / 2);
+                        popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
                         // buffer
                         if (data.FromParser) {
                             if (data.ParsedItem is ParsedDefine) {
