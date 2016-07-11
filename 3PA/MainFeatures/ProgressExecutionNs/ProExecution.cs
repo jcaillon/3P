@@ -27,6 +27,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using YamuiFramework.Helper;
 using _3PA.Data;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 
@@ -449,6 +450,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             try {
                 Process.Kill();
                 Process.Close();
+            } catch (Exception) {
+                // ignored
+            }
+        }
+
+        /// <summary>
+        /// Allows to kill the process of this execution (be careful, the OnExecutionEnd, Ok, Fail events are not executed in that case!) 
+        /// </summary>
+        public void BringProcessToFront() {
+            HasBeenKilled = true;
+            try {
+                WinApi.SetForegroundWindow(Process.MainWindowHandle);
             } catch (Exception) {
                 // ignored
             }

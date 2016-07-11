@@ -77,7 +77,7 @@ namespace YamuiFramework.Forms {
         private const int MinButtonWidth = 80;
         private const int ButtonPadding = 10;
         private const int InputDefaultWidth = 200;
-        private const int InputPadding = 15;
+        private const int InputPadding = 10;
 
         #endregion
 
@@ -90,8 +90,7 @@ namespace YamuiFramework.Forms {
 
             InitializeComponent();
 
-            var maxWidthInPanel = formMaxWidth - ButtonPadding - (contentPanel.Padding.Left + contentPanel.Padding.Right);
-            int realFormMinWidth = formMinWidth;
+            var maxWidthInPanel = formMaxWidth - (Padding.Left + Padding.Right);
             contentPanel.NoBackgroundImage = true;
 
             // if there was an object data passed on, need to check the max width needed to draw the inputs
@@ -118,18 +117,19 @@ namespace YamuiFramework.Forms {
                 }
 
                 // redefine the minimum Form Width for each input we will need to display
+                var widthSpace = InputDefaultWidth + InputPadding*3 + Padding.Left + Padding.Right;
                 for (int i = 0; i < _items.Count; i++) {
                     var item = _items[i];
                     if (item != null)
-                        _dataLabelWidth = Math.Max(_dataLabelWidth, Utilities.MeasureHtmlPrefSize((GetAttr(item) != null ? GetAttr(item).Label : item.Name), 0, maxWidthInPanel, true).Width);
+                        _dataLabelWidth = Math.Max(_dataLabelWidth, Utilities.MeasureHtmlPrefWidth((GetAttr(item) != null ? GetAttr(item).Label : item.Name), 0, maxWidthInPanel - widthSpace, true));
                 }
-                realFormMinWidth = Math.Max(realFormMinWidth, _dataLabelWidth + InputDefaultWidth + InputPadding * 3);
+                formMinWidth = Math.Max(formMinWidth, _dataLabelWidth + widthSpace);
             }
 
             // Set title, it will define a new minimum width for the message box
             var space = FormButtonWidth * 2 + BorderWidth * 2 + titleLabel.Padding.Left + 5;
-            titleLabel.SetNeededSize(htmlTitle, realFormMinWidth, formMaxWidth - space, true);
-            realFormMinWidth = Math.Max(realFormMinWidth, titleLabel.Width + space);
+            titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
+            formMinWidth = Math.Max(formMinWidth, titleLabel.Width + space);
             var newPadding = Padding;
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
@@ -142,15 +142,17 @@ namespace YamuiFramework.Forms {
             }
 
             // set content label
-            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, Math.Max(cumButtonWidth + ButtonPadding + BorderWidth + 30, realFormMinWidth), maxWidthInPanel);
-            contentLabel.Width = Math.Max(contentLabel.Width, realFormMinWidth);
+            space = Padding.Left + Padding.Right;
+            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, Math.Max(cumButtonWidth + ButtonPadding + BorderWidth * 2 + 20, formMinWidth - space), maxWidthInPanel);
+            contentLabel.Width = Math.Max(contentLabel.Width, formMinWidth - space);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
             contentLabel.Anchor = contentLabel.Anchor | AnchorStyles.Right;
             var yPos = contentLabel.Location.Y + contentLabel.Height;
+
             // ensure a minimum width if there is no message
-            contentPanel.ContentPanel.Width = Math.Max(contentPanel.ContentPanel.Width, realFormMinWidth);
+            contentPanel.ContentPanel.Width = Math.Max(contentPanel.ContentPanel.Width, formMinWidth - space);
 
             // if there was an object data passed on, need to set up inputs for the user to fill in
             if (HasData) {
@@ -161,15 +163,14 @@ namespace YamuiFramework.Forms {
                     contentPanel.ContentPanel.Controls.Add(InsertInputForItem(i, ref yPos));
                     contentPanel.ContentPanel.Controls.Add(InsertLabelForItem(i, ref yPos));
                 }
-
                 contentPanel.ContentPanel.Height = yPos;
             }
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + contentPanel.Padding.Left + contentPanel.Padding.Right, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + yPos));
-            if (!contentPanel.HasNoScrolls) {
+            Size = new Size(contentPanel.ContentPanel.Width + space, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + yPos));
+            if (contentPanel.HasScrolls) {
                 _hasScrollMessage = true;
-                Width += 15;
+                Width += 10;
             }
             MinimumSize = Size;
 

@@ -126,9 +126,9 @@ namespace _3PA.MainFeatures {
                                 ThemeManager.FormatContent(htmlContent),
                                 duration,
                                 nppScreen,
+                                Math.Min(width, nppScreen.WorkingArea.Width / 3),
                                 nppScreen.WorkingArea.Width / 3,
                                 nppScreen.WorkingArea.Height / 3,
-                                Math.Min(width, nppScreen.WorkingArea.Width / 3),
                                 (sender, args) => {
                                     if (clickHandler != null) clickHandler(args);
                                     else Utils.OpenPathClickHandler(sender, args);

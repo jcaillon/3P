@@ -359,7 +359,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
-            this.toolTip.TooltipCssClass = "htmltooltip";
             // 
             // SetFtp
             // 

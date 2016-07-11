@@ -64,7 +64,7 @@ namespace YamuiFramework.Controls {
         /// <summary>
         /// Exposes the states of the scroll bars, true if they are displayed
         /// </summary>
-        public bool HasNoScrolls { get; private set; }
+        public bool HasScrolls { get; private set; }
 
         private Rectangle _barRectangle;
         private Rectangle _thumbRectangle;
@@ -101,7 +101,7 @@ namespace YamuiFramework.Controls {
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
-            if (HasNoScrolls && !NoBackgroundImage && !DesignMode) {
+            if (!HasScrolls && !NoBackgroundImage && !DesignMode) {
                 var img = YamuiThemeManager.CurrentThemeImage;
                 if (img != null) {
                     Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
@@ -109,7 +109,7 @@ namespace YamuiFramework.Controls {
                 }
             }
 
-            if (!HasNoScrolls)
+            if (HasScrolls)
                 OnPaintForeground(e);
         }
 
@@ -136,7 +136,7 @@ namespace YamuiFramework.Controls {
 
         [SecuritySafeCritical]
         protected override void WndProc(ref Message message) {
-            if (!HasNoScrolls)
+            if (HasScrolls)
                 HandleWindowsProc(message);
             base.WndProc(ref message);
         }
@@ -245,16 +245,16 @@ namespace YamuiFramework.Controls {
             // if the content is not too tall, no need to display the scroll bars
             if (_contentPanel.Height <= Height) {
                 _contentPanel.Width = Width;
-                HasNoScrolls = true;
+                HasScrolls = false;
             } else {
                 // thumb heigh is a ratio of displayed height and the content panel height
                 _thumbRectangle.Height = Math.Max(Convert.ToInt32(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
                 _contentPanel.Width = Width - 10;
-                HasNoScrolls = false;
+                HasScrolls = true;
             }
 
             if (!NoBackgroundImage)
-                _contentPanel.DontUseTransparentBackGround = !HasNoScrolls;
+                _contentPanel.DontUseTransparentBackGround = HasScrolls;
 
             DoScroll(0);
         }

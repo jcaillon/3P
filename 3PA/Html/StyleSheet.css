@@ -1,15 +1,8 @@
 ﻿/* ==================================== */
 /* GENRAL STUFF */
-html {
-    padding: 0;
-    margin: 0;
-    Font: 12px "Segoe UI";
-    color: @FormFore;
-}
 
-body {
-    padding: 0;
-    margin: 0;
+html {
+    color: @FormFore;
 }
 
 hr {
@@ -22,22 +15,12 @@ hr {
 a:link {
     color: @GenericLinkColor;
     text-decoration: underline;
-    /*margin: 0px;
-    padding: 0px;*/
 }
 
 code {
     background-color: @FormAltBack;
     padding-left: 5px;
     padding-right: 5px;
-}
-
-
-/* this decorates the htmllabels */
-.yamui-text { 
-    color: @FormFore;
-    margin: 0;
-    padding: 0;
 }
 
 /*This is the class of the HtmlToolTip*/
@@ -77,12 +60,6 @@ code {
     color: @FormFore;
 }
 
-.NormalForeColor {
-    color: @FormFore;
-}
-
-
-
 
 
 /* ==================================== */
@@ -109,7 +86,6 @@ code {
     background-color: @FormAltBack;
     margin-top: 10px;
     padding: 4px;
-
     font-size: 11px;
 }
 .ToolGotoDefinition:link {

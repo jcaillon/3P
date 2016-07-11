@@ -243,15 +243,10 @@ namespace _3PA.MainFeatures {
             if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
                 currentOperation = CurrentOperation.Run;
 
-            // check conditions
-            if (Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.CheckSyntax) || 
-                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Compile) || 
-                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Run) ||
-                Plug.CurrentFileObject.CurrentOperation.HasFlag(CurrentOperation.Prolint)) {
-                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a><b", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
-                    Plug.CurrentFileObject.ProgressExecution.KillProcess();
-                    UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                    ProCompilation.OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+            // process already running?
+            if (Plug.CurrentFileObject.CurrentOperation > CurrentOperation.Prolint) {
+                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
+                    KillCurrentProcess();
                     StartProgressExec(executionType);
                     args.Handled = true;
                 }, 5);
@@ -309,6 +304,16 @@ namespace _3PA.MainFeatures {
              * */
         }
 
+        /// <summary>
+        /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
+        /// </summary>
+        public static void KillCurrentProcess() {
+            if (Plug.CurrentFileObject.ProgressExecution != null) {
+                Plug.CurrentFileObject.ProgressExecution.KillProcess();
+                UserCommunication.CloseUniqueNotif("KillExistingProcess");
+                ProCompilation.OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+            }
+        }
 
         #endregion
 

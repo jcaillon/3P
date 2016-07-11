@@ -520,6 +520,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         Default = 0,
         [DisplayAttr(Name = "Appbuilder section!")]
         AppbuilderSection = 32,
+
+        // above linting, we start a prowin process to do it
         [DisplayAttr(Name = "Linting", ActionText = "prolint-ing")]
         Prolint = 64,
         [DisplayAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]

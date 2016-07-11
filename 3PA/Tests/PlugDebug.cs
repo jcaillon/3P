@@ -38,7 +38,7 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            UserCommunication.Notify("long text?<br>new line", MessageImg.MsgOk, "Blabla blaz zieuf fiuh zeifh zeufh", "efzefze zef zef zefz z END", null);
+            UserCommunication.Notify(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), @"Tests\content.md")).MdToHtml(), MessageImg.MsgOk, "Blabla blaz zieuf fiuh zeifh zeufh", "efzefze zef zef zefz z END", null);
 
             UserCommunication.Notify("fuck");
             UserCommunication.Notify("fuck");

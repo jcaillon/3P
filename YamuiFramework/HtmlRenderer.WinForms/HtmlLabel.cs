@@ -171,10 +171,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 _text = value;
                 base.Text = value;
                 if (!IsDisposed) {
-                    if (_text.StartsWith(@"<div class='yamui-text'>"))
-                        _htmlContainer.SetHtml(_text, YamuiThemeManager.CurrentThemeCss);
-                    else
-                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", YamuiThemeManager.CurrentThemeCss);
+                    _htmlContainer.SetHtml(YamuiThemeManager.WrapLabelText(_text), YamuiThemeManager.CurrentThemeCss);
                     PerformLayout();
                     Invalidate();
                 }
@@ -185,7 +182,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
         public void SetNeededSize(string content, int minWidth, int maxWidth, bool dontSquareIt = false) {
-            Size = Helper.Utilities.MeasureHtmlPrefSize(content, minWidth, maxWidth, dontSquareIt);
+            Width = Helper.Utilities.MeasureHtmlPrefWidth(YamuiThemeManager.WrapLabelText(content), minWidth, maxWidth, dontSquareIt);
             Text = content;
         }
 

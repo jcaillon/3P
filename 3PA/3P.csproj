@@ -503,6 +503,8 @@
     <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\FileExplorer\BringToFront.png" />
+    <Content Include="Images\FileExplorer\Stop.png" />
     <Content Include="Images\Menu\Synchronize.png" />
     <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />

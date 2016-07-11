@@ -57,7 +57,6 @@ namespace YamuiFramework.Forms {
 
         #endregion
 
-
         #region Fields
         
         private bool _allowFocus;
@@ -109,7 +108,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Create a new notification, to be displayed with Show() later
         /// </summary>
-        public YamuiNotification(string htmlTitle, string htmlMessage, int duration, Screen screenToUse = null, int formMaxWidth = 0, int formMaxHeight = 0, int formMinWidth = 0, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
+        public YamuiNotification(string htmlTitle, string htmlMessage, int duration, Screen screenToUse = null, int formMinWidth = 0, int formMaxWidth = 0, int formMaxHeight = 0, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked = null) {
 
             // close all notif button
             ShowCloseAllVisibleButton = true;
@@ -126,33 +125,30 @@ namespace YamuiFramework.Forms {
             if (formMinWidth == 0)
                 formMinWidth = 300;
 
-
-            int realFormMinWidth = formMinWidth;
             contentPanel.NoBackgroundImage = true;
 
             // Set title, it will define a new minimum width for the message box
             var space = FormButtonWidth + BorderWidth*2 + titleLabel.Padding.Left + 5;
-            titleLabel.SetNeededSize(htmlTitle, realFormMinWidth, formMaxWidth - space, true);
-            realFormMinWidth = Math.Max(realFormMinWidth, titleLabel.Width + space);
+            titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
+            formMinWidth = Math.Max(formMinWidth, titleLabel.Width + space);
             var newPadding = Padding;
             newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 10 : 0); 
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
-
             titleLabel.Location = new Point(5,5);
 
             // set content label
-            contentLabel.SetNeededSize(htmlMessage ?? "Empty", realFormMinWidth, formMaxWidth - (contentPanel.Padding.Left + contentPanel.Padding.Right), true);
-            contentLabel.Width = Math.Max(contentLabel.Width, realFormMinWidth);
+            space = Padding.Left + Padding.Right;
+            contentLabel.SetNeededSize(htmlMessage, formMinWidth - space, formMaxWidth - space, true);
+            contentLabel.Width = Math.Max(contentLabel.Width, formMinWidth - space);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
-            //contentLabel.Anchor = contentLabel.Anchor | AnchorStyles.Right;
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + contentPanel.Padding.Left + contentPanel.Padding.Right, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + contentLabel.Height));
-            if (!contentPanel.HasNoScrolls)
-                Width += 15;
+            Size = new Size(contentPanel.ContentPanel.Width + space, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + contentLabel.Height));
+            if (contentPanel.HasScrolls)
+                Width += 10;
             MinimumSize = Size;
 
             // do we need to animate a panel on the bottom to visualise time left?
@@ -257,6 +253,9 @@ namespace YamuiFramework.Forms {
 
         #region Show
 
+        /// <summary>
+        /// Call this method to show the notification
+        /// </summary>
         public new void Show() {
             // Prevent the form taking focus when it is initially shown
             _currentForegroundWindow = WinApi.GetForegroundWindow();
@@ -264,7 +263,6 @@ namespace YamuiFramework.Forms {
         }
 
         #endregion
-
 
     }
 

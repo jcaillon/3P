@@ -57,7 +57,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tooltip.MaximumSize = new System.Drawing.Size(0, 0);
             this.tooltip.OwnerDraw = true;
             this.tooltip.ReshowDelay = 10;
-            this.tooltip.TooltipCssClass = "htmltooltip";
             this.tooltip.UseAnimation = false;
             this.tooltip.UseFading = false;
             // 

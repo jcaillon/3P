@@ -52,6 +52,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lblEnv = new YamuiFramework.Controls.YamuiLabel();
             this.btEnvList = new YamuiFramework.Controls.YamuiButtonImage();
             this.btEnvModify = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btStopExecution = new YamuiFramework.Controls.YamuiButtonImage();
+            this.btBringProcessToFront = new YamuiFramework.Controls.YamuiButtonImage();
             ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).BeginInit();
             this.SuspendLayout();
             // 
@@ -65,14 +67,14 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.ReshowDelay = 100;
             this.toolTipHtml.ShowAlways = true;
-            this.toolTipHtml.TooltipCssClass = "htmltooltip";
             // 
             // btGetHelp
             // 
             this.btGetHelp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btGetHelp.BackGrndImage = null;
-            this.btGetHelp.Location = new System.Drawing.Point(473, 23);
+            this.btGetHelp.Location = new System.Drawing.Point(546, 23);
             this.btGetHelp.Name = "btGetHelp";
+            this.btGetHelp.SetImgSize = new System.Drawing.Size(0, 0);
             this.btGetHelp.Size = new System.Drawing.Size(20, 20);
             this.btGetHelp.TabIndex = 24;
             this.btGetHelp.Text = "yamuiImageButton1";
@@ -96,7 +98,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lbErrorText.Location = new System.Drawing.Point(93, 23);
             this.lbErrorText.Margin = new System.Windows.Forms.Padding(3);
             this.lbErrorText.Name = "lbErrorText";
-            this.lbErrorText.Size = new System.Drawing.Size(374, 20);
+            this.lbErrorText.Size = new System.Drawing.Size(447, 20);
             this.lbErrorText.TabIndex = 22;
             this.lbErrorText.Text = "errors";
             this.lbErrorText.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -106,6 +108,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.btClearAllErrors.BackGrndImage = null;
             this.btClearAllErrors.Location = new System.Drawing.Point(44, 23);
             this.btClearAllErrors.Name = "btClearAllErrors";
+            this.btClearAllErrors.SetImgSize = new System.Drawing.Size(0, 0);
             this.btClearAllErrors.Size = new System.Drawing.Size(20, 20);
             this.btClearAllErrors.TabIndex = 21;
             this.btClearAllErrors.Text = "yamuiImageButton1";
@@ -115,6 +118,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.btNextError.BackGrndImage = null;
             this.btNextError.Location = new System.Drawing.Point(24, 23);
             this.btNextError.Name = "btNextError";
+            this.btNextError.SetImgSize = new System.Drawing.Size(0, 0);
             this.btNextError.Size = new System.Drawing.Size(20, 20);
             this.btNextError.TabIndex = 20;
             this.btNextError.Text = "yamuiImageButton1";
@@ -124,10 +128,10 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lbStatus.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.lbStatus.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.lbStatus.Location = new System.Drawing.Point(102, 1);
+            this.lbStatus.Location = new System.Drawing.Point(112, 1);
             this.lbStatus.Margin = new System.Windows.Forms.Padding(3);
             this.lbStatus.Name = "lbStatus";
-            this.lbStatus.Size = new System.Drawing.Size(394, 19);
+            this.lbStatus.Size = new System.Drawing.Size(457, 20);
             this.lbStatus.TabIndex = 19;
             this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
@@ -136,6 +140,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.btPrevError.BackGrndImage = null;
             this.btPrevError.Location = new System.Drawing.Point(4, 23);
             this.btPrevError.Name = "btPrevError";
+            this.btPrevError.SetImgSize = new System.Drawing.Size(0, 0);
             this.btPrevError.Size = new System.Drawing.Size(20, 20);
             this.btPrevError.TabIndex = 18;
             this.btPrevError.Text = "yamuiImageButton1";
@@ -194,7 +199,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.fastOLV.ShowGroups = false;
             this.fastOLV.ShowHeaderInAllViews = false;
             this.fastOLV.ShowSortIndicators = false;
-            this.fastOLV.Size = new System.Drawing.Size(494, 331);
+            this.fastOLV.Size = new System.Drawing.Size(567, 331);
             this.fastOLV.SortGroupItemsByPrimaryColumn = false;
             this.fastOLV.TabIndex = 28;
             this.fastOLV.UseCellFormatEvents = true;
@@ -236,6 +241,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.btRefresh.BackGrndImage = null;
             this.btRefresh.Location = new System.Drawing.Point(4, 135);
             this.btRefresh.Name = "btRefresh";
+            this.btRefresh.SetImgSize = new System.Drawing.Size(0, 0);
             this.btRefresh.Size = new System.Drawing.Size(20, 20);
             this.btRefresh.TabIndex = 31;
             this.btRefresh.Text = "yamuiImageButton1";
@@ -244,14 +250,15 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.textFilter.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.textFilter.Lines = new string[0];
+            this.textFilter.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(230)))), ((int)(((byte)(230)))), ((int)(((byte)(230)))));
+            this.textFilter.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.textFilter.CustomBackColor = System.Drawing.Color.Empty;
+            this.textFilter.CustomForeColor = System.Drawing.Color.Empty;
+            this.textFilter.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
+            this.textFilter.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textFilter.Location = new System.Drawing.Point(30, 135);
-            this.textFilter.MaxLength = 32767;
             this.textFilter.Name = "textFilter";
-            this.textFilter.PasswordChar = '\0';
-            this.textFilter.ScrollBars = System.Windows.Forms.ScrollBars.None;
-            this.textFilter.SelectedText = "";
-            this.textFilter.Size = new System.Drawing.Size(437, 20);
+            this.textFilter.Size = new System.Drawing.Size(510, 20);
             this.textFilter.TabIndex = 32;
             this.textFilter.WaterMark = "Filter here!";
             // 
@@ -259,8 +266,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.btErase.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btErase.BackGrndImage = null;
-            this.btErase.Location = new System.Drawing.Point(473, 135);
+            this.btErase.Location = new System.Drawing.Point(546, 135);
             this.btErase.Name = "btErase";
+            this.btErase.SetImgSize = new System.Drawing.Size(0, 0);
             this.btErase.Size = new System.Drawing.Size(20, 20);
             this.btErase.TabIndex = 33;
             this.btErase.Text = "yamuiImageButton2";
@@ -270,18 +278,21 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.btDirectory.BackGrndImage = null;
             this.btDirectory.Location = new System.Drawing.Point(4, 115);
             this.btDirectory.Name = "btDirectory";
+            this.btDirectory.SetImgSize = new System.Drawing.Size(0, 0);
             this.btDirectory.Size = new System.Drawing.Size(20, 20);
             this.btDirectory.TabIndex = 34;
             this.btDirectory.Text = "yamuiImageButton1";
             // 
             // lbDirectory
             // 
+            this.lbDirectory.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.lbDirectory.BackColor = System.Drawing.Color.Transparent;
             this.lbDirectory.Function = YamuiFramework.Fonts.FontFunction.Small;
             this.lbDirectory.Location = new System.Drawing.Point(30, 117);
             this.lbDirectory.Margin = new System.Windows.Forms.Padding(3);
             this.lbDirectory.Name = "lbDirectory";
-            this.lbDirectory.Size = new System.Drawing.Size(350, 18);
+            this.lbDirectory.Size = new System.Drawing.Size(510, 18);
             this.lbDirectory.TabIndex = 35;
             this.lbDirectory.Text = "yamuiLabel5";
             this.lbDirectory.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -290,8 +301,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.btGotoDir.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btGotoDir.BackGrndImage = null;
-            this.btGotoDir.Location = new System.Drawing.Point(473, 115);
+            this.btGotoDir.Location = new System.Drawing.Point(546, 115);
             this.btGotoDir.Name = "btGotoDir";
+            this.btGotoDir.SetImgSize = new System.Drawing.Size(0, 0);
             this.btGotoDir.Size = new System.Drawing.Size(20, 20);
             this.btGotoDir.TabIndex = 36;
             this.btGotoDir.Text = "yamuiImageButton2";
@@ -315,7 +327,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lblEnv.Location = new System.Drawing.Point(4, 69);
             this.lblEnv.Margin = new System.Windows.Forms.Padding(3);
             this.lblEnv.Name = "lblEnv";
-            this.lblEnv.Size = new System.Drawing.Size(443, 20);
+            this.lblEnv.Size = new System.Drawing.Size(516, 20);
             this.lblEnv.TabIndex = 38;
             this.lblEnv.Text = "BOI - A";
             this.lblEnv.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -324,8 +336,9 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.btEnvList.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btEnvList.BackGrndImage = null;
-            this.btEnvList.Location = new System.Drawing.Point(473, 69);
+            this.btEnvList.Location = new System.Drawing.Point(546, 69);
             this.btEnvList.Name = "btEnvList";
+            this.btEnvList.SetImgSize = new System.Drawing.Size(0, 0);
             this.btEnvList.Size = new System.Drawing.Size(20, 20);
             this.btEnvList.TabIndex = 39;
             this.btEnvList.Text = "yamuiImageButton1";
@@ -334,17 +347,42 @@ namespace _3PA.MainFeatures.FileExplorer {
             // 
             this.btEnvModify.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btEnvModify.BackGrndImage = null;
-            this.btEnvModify.Location = new System.Drawing.Point(453, 69);
+            this.btEnvModify.Location = new System.Drawing.Point(526, 69);
             this.btEnvModify.Name = "btEnvModify";
+            this.btEnvModify.SetImgSize = new System.Drawing.Size(0, 0);
             this.btEnvModify.Size = new System.Drawing.Size(20, 20);
             this.btEnvModify.TabIndex = 40;
             this.btEnvModify.Text = "yamuiImageButton1";
+            // 
+            // btStopExecution
+            // 
+            this.btStopExecution.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btStopExecution.BackGrndImage = null;
+            this.btStopExecution.Location = new System.Drawing.Point(546, 1);
+            this.btStopExecution.Name = "btStopExecution";
+            this.btStopExecution.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btStopExecution.Size = new System.Drawing.Size(20, 20);
+            this.btStopExecution.TabIndex = 41;
+            this.btStopExecution.Text = "yamuiImageButton1";
+            // 
+            // btBringProcessToFront
+            // 
+            this.btBringProcessToFront.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.btBringProcessToFront.BackGrndImage = null;
+            this.btBringProcessToFront.Location = new System.Drawing.Point(526, 1);
+            this.btBringProcessToFront.Name = "btBringProcessToFront";
+            this.btBringProcessToFront.SetImgSize = new System.Drawing.Size(0, 0);
+            this.btBringProcessToFront.Size = new System.Drawing.Size(20, 20);
+            this.btBringProcessToFront.TabIndex = 42;
+            this.btBringProcessToFront.Text = "yamuiImageButton1";
             // 
             // FileExplorerForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(497, 525);
+            this.ClientSize = new System.Drawing.Size(570, 525);
+            this.Controls.Add(this.btBringProcessToFront);
+            this.Controls.Add(this.btStopExecution);
             this.Controls.Add(this.btEnvModify);
             this.Controls.Add(this.btEnvList);
             this.Controls.Add(this.lblEnv);
@@ -401,6 +439,8 @@ namespace _3PA.MainFeatures.FileExplorer {
         private YamuiLabel lblEnv;
         private YamuiButtonImage btEnvList;
         private YamuiButtonImage btEnvModify;
+        private YamuiButtonImage btStopExecution;
+        private YamuiButtonImage btBringProcessToFront;
 
 
     }

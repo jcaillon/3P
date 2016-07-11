@@ -107,7 +107,6 @@ namespace _3PA.MainFeatures.CodeExplorer {
             this.toolTipHtml.OwnerDraw = true;
             this.toolTipHtml.ReshowDelay = 100;
             this.toolTipHtml.ShowAlways = true;
-            this.toolTipHtml.TooltipCssClass = "htmltooltip";
             // 
             // buttonIncludeExternal
             // 

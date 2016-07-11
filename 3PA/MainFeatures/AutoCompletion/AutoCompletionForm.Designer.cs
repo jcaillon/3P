@@ -152,7 +152,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.htmlToolTip.OwnerDraw = true;
             this.htmlToolTip.ReshowDelay = 100;
             this.htmlToolTip.ShowAlways = true;
-            this.htmlToolTip.TooltipCssClass = "htmltooltip";
             // 
             // AutoCompletionForm
             // 

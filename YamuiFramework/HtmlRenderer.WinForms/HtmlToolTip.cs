@@ -32,6 +32,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
     /// Provides HTML rendering on the tooltips.
     /// </summary>
     public class HtmlToolTip : ToolTip {
+
         #region Fields and Consts
 
         /// <summary>
@@ -53,11 +54,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// The text rendering hint to be used for text rendering.
         /// </summary>
         protected TextRenderingHint _textRenderingHint = TextRenderingHint.SystemDefault;
-
-        /// <summary>
-        /// The CSS class used for tooltip html root div
-        /// </summary>
-        private string _tooltipCssClass = "htmltooltip";
 
 #if !MONO
 
@@ -198,19 +194,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
             }
         }
 
-        /// <summary>
-        /// The CSS class used for tooltip html root div (default: htmltooltip)<br/>
-        /// Setting to 'null' clear base style on the tooltip.<br/>
-        /// Set custom class found in <see cref="BaseStylesheet"/> to change the base style of the tooltip.
-        /// </summary>
-        [Browsable(true)]
-        [Description("The CSS class used for tooltip html root div.")]
-        [Category("Appearance")]
-        public virtual string TooltipCssClass {
-            get { return _tooltipCssClass; }
-            set { _tooltipCssClass = value; }
-        }
-
 #if !MONO
         /// <summary>
         /// If to handle links in the tooltip (default: false).<br/>
@@ -247,9 +230,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         /// </summary>
         protected virtual void OnToolTipPopup(PopupEventArgs e) {
             //Create fragment container
-            var cssClass = string.IsNullOrEmpty(_tooltipCssClass) ? null : string.Format(" class=\"{0}\"", "yamui-tooltip");
-            var toolipHtml = string.Format("<div{0}>{1}</div>", cssClass, GetToolTip(e.AssociatedControl));
-            HtmlContainer.SetHtml(toolipHtml, YamuiThemeManager.CurrentThemeCss);
+            HtmlContainer.SetHtml(YamuiThemeManager.WrapToolTipText(GetToolTip(e.AssociatedControl)), YamuiThemeManager.CurrentThemeCss);
             HtmlContainer.MaxSize = MaximumSize;
 
             //Measure size of the container
@@ -420,7 +401,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
 #endif
         }
 
-
         #region Private event handlers
 
         private void OnToolTipPopup(object sender, PopupEventArgs e) {
@@ -456,7 +436,6 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
         }
 
         #endregion
-
 
         #endregion
     }

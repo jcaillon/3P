@@ -146,12 +146,18 @@ namespace _3PA.MainFeatures.FileExplorer {
             btNextError.ButtonPressed += BtNextErrorOnButtonPressed;
             btClearAllErrors.ButtonPressed += BtClearAllErrorsOnButtonPressed;
             btGetHelp.ButtonPressed += BtGetHelpOnButtonPressed;
+            btStopExecution.ButtonPressed += BtStopExecutionOnButtonPressed;
+            btBringProcessToFront.ButtonPressed += BtBringProcessToFrontOnButtonPressed;
 
             btPrevError.BackGrndImage = ImageResources.Previous;
             btNextError.BackGrndImage = ImageResources.Next;
             btClearAllErrors.BackGrndImage = ImageResources.ClearAll;
             btGetHelp.BackGrndImage = ImageResources.GetHelp;
             btGetHelp.UseGreyScale = !Config.Instance.GlobalShowDetailedHelpForErrors;
+            btStopExecution.BackGrndImage = ImageResources.Stop;
+            btBringProcessToFront.BackGrndImage = ImageResources.BringToFront;
+            btStopExecution.Hide();
+            btBringProcessToFront.Hide();
 
             UpdateErrorButtons(false);
 
@@ -160,6 +166,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             toolTipHtml.SetToolTip(btNextError, "<b>Move the caret</b> to the next error");
             toolTipHtml.SetToolTip(btClearAllErrors, "<b>Clear</b> all the displayed errors");
             toolTipHtml.SetToolTip(lbStatus, "Provides information on the current status of the file");
+            toolTipHtml.SetToolTip(btStopExecution, "Click to <b>kill</b> the current processus");
+            toolTipHtml.SetToolTip(btBringProcessToFront, "Click to <b>bring</b> the current process to foreground");
 
             lbStatus.BackColor = ThemeManager.Current.FormBack;
 
@@ -412,53 +420,51 @@ namespace _3PA.MainFeatures.FileExplorer {
             _initialObjectsList.Sort(new FilesSortingClass());
 
             // invoke on ui thread
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    try {
-                        // delete any existing buttons
-                        if (_displayedTypes != null) {
-                            foreach (var selectorButton in _displayedTypes) {
-                                selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                                if (Controls.Contains(selectorButton.Value))
-                                    Controls.Remove(selectorButton.Value);
-                                selectorButton.Value.Dispose();
-                            }
+            ExecuteOnThread(() => {
+                try {
+                    // delete any existing buttons
+                    if (_displayedTypes != null) {
+                        foreach (var selectorButton in _displayedTypes) {
+                            selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                            if (Controls.Contains(selectorButton.Value))
+                                Controls.Remove(selectorButton.Value);
+                            selectorButton.Value.Dispose();
                         }
-
-                        // get distinct types, create a button for each
-                        int xPos = 59;
-                        int yPox = Height - 28;
-                        _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
-                        foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                            var but = new SelectorButton<FileType> {
-                                BackGrndImage = GetImageFromStr(type + "Type"), 
-                                Activated = true, 
-                                Size = new Size(24, 24), 
-                                TabStop = false, 
-                                Location = new Point(xPos, yPox), 
-                                Type = type, 
-                                AcceptsRightClick = true, 
-                                Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-                                HideFocusedIndicator = true
-                            };
-                            but.ButtonPressed += HandleTypeClick;
-                            toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                            _displayedTypes.Add(type, but);
-                            Controls.Add(but);
-                            xPos += but.Width;
-                        }
-
-                        // label for the number of items
-                        TotalItems = _initialObjectsList.Count;
-                        nbitems.Text = TotalItems + StrItems;
-                        fastOLV.SetObjects(_initialObjectsList);
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error while showing the list of files");
                     }
-                });
-            }
 
-            ApplyFilter();
+                    // get distinct types, create a button for each
+                    int xPos = 59;
+                    int yPox = Height - 28;
+                    _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
+                    foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
+                        var but = new SelectorButton<FileType> {
+                            BackGrndImage = GetImageFromStr(type + "Type"),
+                            Activated = true,
+                            Size = new Size(24, 24),
+                            TabStop = false,
+                            Location = new Point(xPos, yPox),
+                            Type = type,
+                            AcceptsRightClick = true,
+                            Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                            HideFocusedIndicator = true
+                        };
+                        but.ButtonPressed += HandleTypeClick;
+                        toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                        _displayedTypes.Add(type, but);
+                        Controls.Add(but);
+                        xPos += but.Width;
+                    }
+
+                    // label for the number of items
+                    TotalItems = _initialObjectsList.Count;
+                    nbitems.Text = TotalItems + StrItems;
+                    fastOLV.SetObjects(_initialObjectsList);
+
+                    ApplyFilter();
+                } catch (Exception e) {
+                    ErrorHandler.ShowErrors(e, "Error while showing the list of files");
+                }
+            });
         }
 
         /// <summary>
@@ -738,6 +744,11 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilterByText = "";
         }
 
+        private void ExecuteOnThread(Action action) {
+            if (IsHandleCreated)
+                BeginInvoke(action);
+        }
+
         #endregion
 
         #endregion
@@ -801,27 +812,38 @@ namespace _3PA.MainFeatures.FileExplorer {
         private int _currentOperation = - 1;
 
         private void FilesInfoOnUpdatedOperation(UpdatedOperationEventArgs updatedOperationEventArgs) {
+            ExecuteOnThread(() => {
+                if (_currentOperation == (int)updatedOperationEventArgs.CurrentOperation)
+                    return;
 
-            if (_currentOperation == (int) updatedOperationEventArgs.CurrentOperation)
-                return;
-
-            // status text, take the last flag found
-            foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
-                CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
-                if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
-                    lbStatus.Text = ((DisplayAttr) flag.GetAttributes()).Name;
+                // status text, take the last flag found
+                foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
+                    CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
+                    if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
+                        lbStatus.Text = ((DisplayAttr)flag.GetAttributes()).Name;
+                    }
                 }
-            }
 
-            // blink back color
-            lbStatus.UseCustomBackColor = true;
-            if (updatedOperationEventArgs.CurrentOperation > 0) {
-                Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.BackColor = ThemeManager.Current.AccentColor; lbStatus.Invalidate(); });
-            } else {
-                Transition.run(lbStatus, "BackColor", ThemeManager.Current.AccentColor, ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; lbStatus.Invalidate(); });
-            }
+                // blink back color
+                lbStatus.UseCustomBackColor = true;
+                if (updatedOperationEventArgs.CurrentOperation > 0) {
+                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.BackColor = ThemeManager.Current.AccentColor; lbStatus.Invalidate(); });
+                } else {
+                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.AccentColor, ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; lbStatus.Invalidate(); });
+                }
 
-            _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
+                _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
+
+                if (btStopExecution.Visible != (_currentOperation > (int) CurrentOperation.Prolint)) {
+                    btStopExecution.Visible = (_currentOperation > (int) CurrentOperation.Prolint);
+                    lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1) * btStopExecution.Width;
+                }
+
+                if (btBringProcessToFront.Visible != updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run)) {
+                    btBringProcessToFront.Visible = updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run);
+                    lbStatus.Width = lbStatus.Width + (btBringProcessToFront.Visible ? -1 : 1) * btBringProcessToFront.Width;
+                }
+            });
         }
 
         private void FilesInfoOnUpdatedErrors(UpdatedErrorsEventArgs updatedErrorsEventArgs) {
@@ -871,6 +893,15 @@ namespace _3PA.MainFeatures.FileExplorer {
             FilesInfo.ClearAnnotationsAndMarkers();
             FilesInfo.UpdateErrorsInScintilla();
             Npp.GrabFocus();
+        }
+
+        private void BtStopExecutionOnButtonPressed(object sender, EventArgs eventArgs) {
+            ProCodeUtils.KillCurrentProcess();
+        }
+
+        private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {
+            if (Plug.CurrentFileObject.ProgressExecution != null)
+                Plug.CurrentFileObject.ProgressExecution.BringProcessToFront();
         }
 
         #endregion
