@@ -138,7 +138,7 @@ namespace _3PA {
             if (string.IsNullOrEmpty(content))
                 return null;
             return @"
-                <div style='margin: 8px; margin-top: 0px;'>
+                <div style='margin-left: 10px; margin-right: 10px; margin-bottom: 4px;'>
                     " + content + @"
                 </div>";
         }

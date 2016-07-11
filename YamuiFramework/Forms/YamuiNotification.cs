@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
@@ -143,7 +142,7 @@ namespace YamuiFramework.Forms {
             titleLabel.Location = new Point(5,5);
 
             // set content label
-            contentLabel.SetNeededSize(htmlMessage ?? "Empty", realFormMinWidth, formMaxWidth - (contentPanel.Padding.Left + contentPanel.Padding.Right));
+            contentLabel.SetNeededSize(htmlMessage ?? "Empty", realFormMinWidth, formMaxWidth - (contentPanel.Padding.Left + contentPanel.Padding.Right), true);
             contentLabel.Width = Math.Max(contentLabel.Width, realFormMinWidth);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
@@ -185,7 +184,6 @@ namespace YamuiFramework.Forms {
 
         // get activated window
         protected override void OnShown(EventArgs e) {
-            File.AppendAllText(@"E:\Download\jb\Nouveau document texte.txt", "\nOnShown");
             // Once the animation has completed the form can receive focus
             _allowFocus = true;
             if (_duration > 0) {
@@ -211,7 +209,6 @@ namespace YamuiFramework.Forms {
         }
 
         protected override void OnLoad(EventArgs e) {
-            File.AppendAllText(@"E:\Download\jb\Nouveau document texte.txt", "\nOnLoad");
             // Display the form just above the system tray.
             Location = new Point(_screen.WorkingArea.X + _screen.WorkingArea.Width - Width - 5, _screen.WorkingArea.Y + _screen.WorkingArea.Height - Height - 5);
 
@@ -228,7 +225,6 @@ namespace YamuiFramework.Forms {
         }
 
         protected override void OnActivated(EventArgs e) {
-            File.AppendAllText(@"E:\Download\jb\Nouveau document texte.txt", "\nOnActivated");
             // Prevent the form taking focus when it is initially shown
             if (!_allowFocus) {
                 // Activate the window that previously had focus
