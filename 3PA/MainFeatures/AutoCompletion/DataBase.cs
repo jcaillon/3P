@@ -173,6 +173,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             _dataBases.Clear();
             _sequences.Clear();
             try {
+                var defaultToken = new TokenEos(null, 0, 0, 0, 0);
                 ParsedDataBase currentDb = null;
                 ParsedTable currentTable = null;
                 Utils.ForEachLine(filePath, null, items => {
@@ -206,6 +207,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                                 return;
                             currentTable = new ParsedTable(
                                 splitted[1],
+                                defaultToken, 
                                 splitted[2],
                                 splitted[3],
                                 splitted[4],

@@ -284,9 +284,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <param name="args"></param>
         private static void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
             CodeExplorerItem obj = (CodeExplorerItem) args.Model;
+            var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
 
             // currently selected block
-            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
+            if (curScope != null && !obj.IsNotBlock && obj.DisplayText.Equals(curScope.Name)) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
                     FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
                     BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedBack.IsColorDark() ? ControlPaint.Light(ThemeManager.Current.MenuFocusedBack, 0.10f) : ControlPaint.Dark(ThemeManager.Current.MenuFocusedBack, 0.10f)), 1),

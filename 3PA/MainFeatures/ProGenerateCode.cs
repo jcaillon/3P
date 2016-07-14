@@ -106,14 +106,14 @@ namespace _3PA.MainFeatures {
 
                 ParsedBlock protoBlock = null;
 
-                // if we parsed the UIB (appbuilder) block correctly
+                // if we parsed the UIB (appbuilder) blocks correctly
                 if (ParserHandler.AblParser.ParsedUibBlockOk) {
 
                     // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
                     var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+_FUNCTION-FORWARD\s+" + function.Name, RegexOptions.IgnoreCase);
                     protoBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => {
                         var blockItem = item as ParsedBlock;
-                        if (blockItem != null && blockItem.IconIconType == CodeExplorerIconType.Prototype &&
+                        if (blockItem != null && blockItem.BlockType == ParsedBlockType.FunctionForward &&
                             protoRegex.Match(blockItem.BlockDescription).Success)
                             return true;
                         return false;
@@ -224,7 +224,7 @@ namespace _3PA.MainFeatures {
             if (proNew.InsertPosition == ProInsertPosition.CaretPosition) {
                 Npp.SetSelection(Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0));
             } else {
-                var findExisting = ParserHandler.ParserVisitor.ParsedItemsList.FirstOrDefault(data => data.Type == completionType);
+                var findExisting = ParserHandler.ParserVisitor.ParsedCompletionItemsList.FirstOrDefault(data => data.Type == completionType);
 
                 // is there already a proc existing?
                 if (findExisting != null) {

@@ -24,7 +24,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.CodeExplorer;
 using Timer = System.Timers.Timer;
 
 namespace _3PA.MainFeatures.Parser {
@@ -108,11 +107,11 @@ namespace _3PA.MainFeatures.Parser {
         #region Public
 
         /// <summary>
-        /// Returns the owner name (currentScopeName) of the caret line
+        /// Returns Scope of the given line
         /// </summary>
         /// <returns></returns>
-        public static string GetCarretLineOwnerName(int line) {
-            return !AblParser.LineInfo.ContainsKey(line) ? string.Empty : AblParser.LineInfo[line].CurrentScopeName;
+        public static ParsedScopeItem GetScopeOfLine(int line) {
+            return !AblParser.LineInfo.ContainsKey(line) ? null : AblParser.LineInfo[line].Scope;
         }
 
         /// <summary>
@@ -121,12 +120,12 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="procedureItem"></param>
         /// <returns></returns>
         public static List<CompletionItem> FindProcedureParameters(CompletionItem procedureItem) {
-            var parserVisitor = ParserVisitor.ParseFile(procedureItem.ParsedItem.FilePath, "");
-            return parserVisitor.ParsedItemsList.Where(data =>
+            var parserVisitor = ParserVisitor.GetParserVisitor(procedureItem.ParsedItem.FilePath);
+            return parserVisitor.ParsedCompletionItemsList.Where(data =>
                 data.FromParser &&
-                data.ParsedItem.OwnerName.EqualsCi(procedureItem.DisplayText) &&
-                (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget) &&
-                ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter).ToList();
+                data.ParsedItem.Scope.Name.EqualsCi(procedureItem.DisplayText) &&
+                ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter &&
+                (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget)).ToList();
         }
 
         /// <summary>

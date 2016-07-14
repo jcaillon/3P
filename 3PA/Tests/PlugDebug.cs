@@ -318,6 +318,10 @@ namespace _3PA.Tests {
             Output = new StringBuilder();
         }
 
+        public void Visit(ParsedFile pars) {
+            
+        }
+
         public void PostVisit() {
         }
 
@@ -325,75 +329,75 @@ namespace _3PA.Tests {
 
         public void Visit(ParsedBlock pars) {
             Output.Append("BLOCK : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.BlockDescription + ", " + pars.Branch);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.BlockDescription + ", " + pars.BlockType);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedLabel pars) {
             Output.Append("LEBEL : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedFunctionCall pars) {
             Output.Append("FCALL : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append(", " + pars.ExternalCall);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedFoundTableUse pars) {
             Output.Append("USETA : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append(", " + pars.IsTempTable);
             Output.Append("\r\n");
         }
 
-        public void Visit(ParsedOnEvent pars) {
+        public void Visit(ParsedOnStatement pars) {
             Output.Append("ONEVT : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.On);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.EventList);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedFunction pars) {
             Output.Append("FUNCT : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
             Output.Append(", endPosition=" + pars.EndPosition + ", return-type=" + pars.ReturnType + ", isPrivate=" + pars.IsPrivate + ", HasPrototype=" + pars.HasPrototype + ", protoLine=" + pars.PrototypeLine + ", protoCol=" + pars.PrototypeColumn + ", ProtoEnd=" + pars.PrototypeEndPosition + ", Extend=" + pars.Extend + ", ProtoUpdated=" + pars.PrototypeUpdated + ", param=(" + pars.Parameters + ")");
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedProcedure pars) {
             Output.Append("PROCE : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
             Output.Append(", " + pars.Left + ", " + pars.IsExternal + ", " + pars.IsPrivate);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedIncludeFile pars) {
             Output.Append("INCLU : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedPreProc pars) {
             Output.Append("PREPR : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append(", " + pars.UndefinedLine);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedDefine pars) {
             Output.Append("VARIA : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + ", " + pars.LcFlagString + ", " + pars.AsLike + ", " + pars.TempPrimitiveType + ", " + pars.IsDynamic + ", " + pars.ViewAs + ", " + pars.BufferFor + ", " + pars.Left + ", " + pars.IsExtended);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append(", " + pars.Type.GetDescription() + ", " + pars.LcFlagString + ", " + pars.AsLike + ", " + pars.TempPrimitiveType + ", " + pars.IsDynamic + ", " + pars.ViewAs + ", " + pars.BufferFor + ", " + pars.Left + ", " + pars.IsExtended);
             Output.Append("\r\n");
         }
 
         public void Visit(ParsedTable pars) {
             Output.Append("TABLE : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append(", " + pars.Description + ", " + pars.IsTempTable + ", " + pars.LcLikeTable + ", " + pars.UseIndex + ", " + pars.LcFlagString);
             foreach (var field in pars.Fields) {
                 Output.Append("->" + field.Name + "|" + field.AsLike + "|" + field.Type);
@@ -403,7 +407,7 @@ namespace _3PA.Tests {
 
         public void Visit(ParsedRun pars) {
             Output.Append("RUNPR : ");
-            Output.Append("[" + pars.Scope + ":" + pars.OwnerName + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
+            Output.Append("[" + pars.Scope + ":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
             Output.Append(", " + pars.Left + ", " + pars.HasPersistent + ", " + pars.IsEvaluateValue);
             Output.Append("\r\n");
         }

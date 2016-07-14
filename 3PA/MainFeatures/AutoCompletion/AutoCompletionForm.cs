@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static Dictionary<CompletionType, SelectorButton<CompletionType>> _displayedTypes;
         private static bool _useTypeFiltering;
         private static bool _useTextFiltering;
-        private static string _currentOwnerName = "";
+        private static ParsedScopeItem _currrentScope;
         private static int _currentLineNumber;
 
         private int _currentType;
@@ -516,7 +516,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             // + need to be in the right scope for variables
             _currentLineNumber = Npp.Line.CurrentLine;
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(_currentLineNumber);
+            _currrentScope = ParserHandler.GetScopeOfLine(_currentLineNumber);
             if (!Config.Instance.AutoCompleteOnlyShowDefinedVar) {
                 _currentLineNumber = -1;
             }
@@ -561,8 +561,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // case of Parsed define or temp table define
             if (compData.ParsedItem is ParsedDefine || compData.ParsedItem is ParsedTable || compData.ParsedItem is ParsedLabel) {
                 // check for scope
-                if (compData.ParsedItem.Scope != ParsedScope.File)
-                    output = output && compData.ParsedItem.OwnerName.Equals(_currentOwnerName);
+                if (_currrentScope != null && !(compData.ParsedItem.Scope is ParsedFile)) {
+                    output = output && compData.ParsedItem.Scope.ScopeType == _currrentScope.ScopeType;
+                    output = output && compData.ParsedItem.Scope.Name.Equals(_currrentScope.Name);
+                }
 
                 if (_currentLineNumber >= 0) {
                     // check for the definition line
@@ -597,7 +599,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
             _useTypeFiltering = false;
             _useTextFiltering = false;
-            _currentOwnerName = ParserHandler.GetCarretLineOwnerName(line);
+            _currrentScope = ParserHandler.GetScopeOfLine(line);
             _currentLineNumber = (!Config.Instance.AutoCompleteOnlyShowDefinedVar || dontCheckLine) ? -1 : line;
             return objectsList.Where(FilterPredicate).ToList();
         }
@@ -610,6 +612,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// Class used in objectlist.Sort method
     /// </summary>
     internal class CompletionDataSortingClass : IComparer<CompletionItem> {
+
+        /// <summary>
+        /// to sort ascending : if x > y then return 1 if x < y then return -1; and
+        /// x.compareTo(y) -> if x > y then return 1 if x < y then return -1;
+        /// </summary>
         public int Compare(CompletionItem x, CompletionItem y) {
 
             // compare first by CompletionType
@@ -626,13 +633,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (compare != 0) return compare;
             }
 
-            // then sort by scope
+            // then sort by scope type (descending, smaller scope first)
             if (x.ParsedItem != null && y.ParsedItem != null) {
-                compare = ((int)y.ParsedItem.Scope).CompareTo(((int)x.ParsedItem.Scope));
+                compare = ((int)y.ParsedItem.Scope.ScopeType).CompareTo(((int)x.ParsedItem.Scope.ScopeType));
                 if (compare != 0) return compare;
             }
 
-            // if keyword
+            // if keyword (ascending)
             if (x.Type == CompletionType.Keyword || x.Type == CompletionType.KeywordObject) {
                 compare = ((int)x.KeywordType).CompareTo(((int)y.KeywordType));
                 if (compare != 0) return compare;

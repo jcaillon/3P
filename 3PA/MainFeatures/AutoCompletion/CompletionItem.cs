@@ -22,6 +22,7 @@ using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
+
     /// <summary>
     /// class used in the auto completion feature
     /// </summary>
@@ -81,6 +82,39 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
         }
 
+    }
+    
+    /// <summary>
+    /// Flags applicable for every ParsedItems
+    /// </summary>
+    [Flags]
+    internal enum ParseFlag {
+        // indicates that the parsed item is not coming from the originally parsed source (= from .i)
+        External = 1,
+        // Local/File define the scope of a defined variable...
+        LocalScope = 2,
+        FileScope = 4,
+        Parameter = 8,
+        // is used for keywords
+        Reserved = 16,
+        Abbreviation = 32,
+        New = 64,
+        // Special flag for DEFINE
+        Global = 128,
+        Shared = 256,
+        Private = 512,
+        // flags for fields
+        Mandatory = 1024,
+        Extent = 2048,
+        Index = 4096,
+        // is a buffer
+        Buffer = 8192,
+        // the variable was defined with a CREATE and not a DEFINE
+        Dynamic = 16384,
+        // the procedure is EXTERNAL
+        ExternalProc = 32768,
+        // a proc or func was loaded in persistent
+        Persistent = 65536
     }
 
     internal enum CompletionType {

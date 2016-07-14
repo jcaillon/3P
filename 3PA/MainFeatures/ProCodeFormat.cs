@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures {
                 var i = 0;
                 var dic = ParserHandler.AblParser.LineInfo;
                 while (dic.ContainsKey(i)) {
-                    x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
+                    x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].Scope.Name);
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
                     i++;
                 }

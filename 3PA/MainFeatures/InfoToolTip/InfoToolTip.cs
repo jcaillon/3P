@@ -466,7 +466,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // parsed item?
             if (data.FromParser) {
                 toDisplay.Append(FormatSubtitle("ORIGINS"));
-                toDisplay.Append(FormatRow("Scope name", data.ParsedItem.OwnerName));
+                toDisplay.Append(FormatRow("Scope name", data.ParsedItem.Scope.Name));
                 if (!Plug.CurrentFilePath.Equals(data.ParsedItem.FilePath))
                     toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + data.ParsedItem.FilePath + "'>" + data.ParsedItem.FilePath + "</a>"));
             }
