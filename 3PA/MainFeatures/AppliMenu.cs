@@ -192,7 +192,7 @@ namespace _3PA.MainFeatures {
 
             #region All
 
-            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
+            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
             var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
                 Generic = true
@@ -208,16 +208,16 @@ namespace _3PA.MainFeatures {
 
                 new MenuItem(true), // --------------------------
 
-                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1") {
+                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProUtils.Open4GlHelp, "Open_4GL_help", "F1") {
                     Generic = true
                 },
-                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProCodeUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
-                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
-                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
+                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
 
-                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
-                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
-                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D") {
+                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProUtils.OpenDictionary, "Open_dictionary", "Alt+D") {
                     Generic = true
                 },
 
@@ -235,7 +235,7 @@ namespace _3PA.MainFeatures {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
 
-                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, ProCodeUtils.ToggleComment, "Toggle_Comment", "Ctrl+Q"),
+                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, ProGenerateCode.ToggleComment, "Toggle_Comment", "Ctrl+Q"),
 
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
@@ -247,8 +247,8 @@ namespace _3PA.MainFeatures {
                 new MenuItem(true), // --------------------------
 
                 new MenuItem(this, "Edit current file info", ImageResources.FileInfo, () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
-                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
-                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
+                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProGenerateCode.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProGenerateCode.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
 
                 new MenuItem(true), // --------------------------
 

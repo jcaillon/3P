@@ -896,7 +896,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtStopExecutionOnButtonPressed(object sender, EventArgs eventArgs) {
-            ProCodeUtils.KillCurrentProcess();
+            ProUtils.KillCurrentProcess();
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {

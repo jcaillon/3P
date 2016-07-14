@@ -67,7 +67,7 @@ namespace _3PA {
                         if (KeyboardMonitor.GetModifiers.IsCtrl) {
                             Npp.GoBackFromDefinition();
                         } else {
-                            ProCodeUtils.GoToDefinition(true);
+                            ProUtils.GoToDefinition(true);
                         }
                         return true;
                     }
@@ -454,7 +454,7 @@ namespace _3PA {
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder && !CurrentFileObject.WarnedTooLong) {
                 var warningMessage = new StringBuilder();
-                var explorerItemsList = ParserHandler.CodeExplorerItemsList;
+                var explorerItemsList = ParserHandler.ParserVisitor.ParsedExplorerItemsList;
 
                 if (explorerItemsList != null) {
                     foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.IsTooLong)))

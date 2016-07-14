@@ -316,7 +316,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     _savedAllItems = _staticItems.ToList();
 
                     // we add the dynamic items to the list
-                    _savedAllItems.AddRange(ParserHandler.CompletionItemsList);
+                    _savedAllItems.AddRange(ParserHandler.ParserVisitor.ParsedItemsList.ToList());
 
                 } finally {
                     _itemsListLock.ExitWriteLock();

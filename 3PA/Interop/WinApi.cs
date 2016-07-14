@@ -19,16 +19,16 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
-
-// ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
 
+    [SuppressUnmanagedCodeSecurity]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class WinApi {
 
         #region SendMessage

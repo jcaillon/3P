@@ -358,7 +358,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private void UpdateTreeDataAction() {
             // get the list of items
-            var tempList = ParserHandler.CodeExplorerItemsList;
+            var tempList = ParserHandler.ParserVisitor.ParsedExplorerItemsList.ToList();
             if (tempList == null || tempList.Count == 0)
                 return;
 

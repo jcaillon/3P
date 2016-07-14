@@ -108,45 +108,6 @@ namespace _3PA.MainFeatures.Parser {
         #region Public
 
         /// <summary>
-        /// List of completion item found
-        /// </summary>
-        /// <returns></returns>
-        public static List<CompletionItem> CompletionItemsList {
-            get { return ParserVisitor.ParsedItemsList.ToList(); }
-        }
-
-        /// <summary>
-        /// List of parsed explorer items
-        /// </summary>
-        /// <returns></returns>
-        public static List<CodeExplorerItem> CodeExplorerItemsList {
-            get { return ParserVisitor.ParsedExplorerItemsList.ToList(); }
-        }
-
-        /// <summary>
-        /// List of parsed items
-        /// </summary>
-        public static List<ParsedItem> ParsedItemsList {
-            get { return AblParser.ParsedItemsList.ToList(); }
-        }
-
-        /// <summary>
-        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
-        /// </summary>
-        /// <returns></returns>
-        public static bool CanIndent {
-            get { return AblParser.ParsingOk; }
-        }
-
-        /// <summary>
-        /// Returns true if the parser detected a syntax correct enough for it to indent the ABL code of the parsed document
-        /// </summary>
-        /// <returns></returns>
-        public static Dictionary<int, LineInfo> GetLineInfo {
-            get { return AblParser.LineInfo; }
-        }
-
-        /// <summary>
         /// Returns the owner name (currentScopeName) of the caret line
         /// </summary>
         /// <returns></returns>

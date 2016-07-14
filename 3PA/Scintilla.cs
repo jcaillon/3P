@@ -1053,6 +1053,13 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Deletes the given range of text
+        /// </summary>
+        public static void DeleteTextByRange(int start, int end) {
+            SetTextByRange(start, end, null);
+        }
+
+        /// <summary>
         /// Sets the text of a specific range, can and must be used to delete text from range
         /// </summary>
         public static void SetTextByRange(int start, int end, string text) {

@@ -28,7 +28,16 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal abstract class ParsedItem {
         public string Name { get; private set; }
+
+        /// <summary>
+        /// full file path in which this item has been parsed
+        /// </summary>
         public string FilePath { get; set; }
+
+        /// <summary>
+        /// The starting position of the first keyword of the statement where the item is found
+        /// </summary>
+        public int Position { get; private set; }
         /// <summary>
         /// Line of the first keyword of the statement where the item is found
         /// <remarks>THE LINE COUNT START AT 0 NOT 1!!</remarks>
@@ -38,29 +47,35 @@ namespace _3PA.MainFeatures.Parser {
         /// Column of the first keyword of the statement where the item is found
         /// </summary>
         public int Column { get; private set; }
-        /// <summary>
-        /// The starting position of the first keyword of the statement where the item is found
-        /// </summary>
-        public int StartPosition { get; private set; }
+
         /// <summary>
         /// The ending position of the first keyword of the statement where the item is found
         /// OR the ending position of the EOS of the statement (be careful to verify this 
         /// before using this property...)
         /// </summary>
         public int EndPosition { get; set; }
+
+        /// <summary>
+        /// Scope in which this item has been parsed
+        /// </summary>
+        //public ParsedScopeItem Scoope { get; set; }
+        
         public ParsedScope Scope { get; set; }
         public string OwnerName { get; set; }
+
         /// <summary>
         /// When including a file, each item parsed has a definition line that corresponds to the line in the file where the item was parsed,
         /// but we also need to need to know where, in the current file parsed, this include is, so we can know filter the items correctly...
         /// </summary>
         public int IncludeLine { get; set; }
+
         public abstract void Accept(IParserVisitor visitor);
+
         protected ParsedItem(string name, Token token) {
             Name = name;
             Line = token.Line;
             Column = token.Column;
-            StartPosition = token.StartPosition;
+            Position = token.StartPosition;
             EndPosition = token.EndPosition;
             IncludeLine = -1;
         }
@@ -120,11 +135,19 @@ namespace _3PA.MainFeatures.Parser {
         public int EndBlockLine { get; set; }
 
         /// <summary>
+        /// end position of the EOS that closes the block, initiated to -1 by default
+        /// </summary>
+        public int EndBlockPosition { get; set; }
+
+        /// <summary>
         /// If true, the block contains too much characters and will not be openable in the
         /// appbuilder
         /// </summary>
         public bool TooLongForAppbuilder { get; set; }
-        protected ParsedScopeItem(string name, Token token) : base(name, token) {}
+
+        protected ParsedScopeItem(string name, Token token) : base(name, token) {
+            EndBlockPosition = -1;
+        }
     }
 
     /// <summary>
@@ -188,6 +211,15 @@ namespace _3PA.MainFeatures.Parser {
         public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
+
+        /// <summary>
+        /// true if this function is actually just a prototype
+        /// </summary>
+        public bool IsPrototype { get; set; }
+        /// <summary>
+        /// true if this function is an implementation AND has a prototype
+        /// </summary>
+        public bool HasPrototype { get; set; }
         public int PrototypeLine { get; set; }
         public int PrototypeEndPosition { get; set; }
         public int PrototypeColumn { get; set; }
@@ -195,10 +227,6 @@ namespace _3PA.MainFeatures.Parser {
         /// Boolean to know if the prototype is correct compared to the implementation
         /// </summary>
         public bool PrototypeUpdated { get; set; }
-        /// <summary>
-        /// true if the function is an implementation AND has a prototype
-        /// </summary>
-        public bool HasPrototype { get; set; }
 
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);

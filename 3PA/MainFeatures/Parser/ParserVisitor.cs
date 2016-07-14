@@ -48,9 +48,11 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #region Fields
+        #region private fields
 
         private const string BlockTooLongString = "Too long!";
+
+        private bool _prototypeAdded;
 
         /// <summary>
         /// Are we currently visiting the current file opened in npp or
@@ -73,7 +75,7 @@ namespace _3PA.MainFeatures.Parser {
         /// in the program we are parsing, dictionnary is faster that list when it comes to
         /// test if a procedure/function exists in the program
         /// </summary>
-        public HashSet<string> DefinedProcedures = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        private HashSet<string> _definedProcedures = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Line info from the parser
@@ -84,12 +86,41 @@ namespace _3PA.MainFeatures.Parser {
         /// contains the list of items that depend on the current file, that list
         /// is updated by the parser's visitor class
         /// </summary>
-        public List<CompletionItem> ParsedItemsList = new List<CompletionItem>();
+        private List<CompletionItem> _parsedItemsList = new List<CompletionItem>();
 
         /// <summary>
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
-        public List<CodeExplorerItem> ParsedExplorerItemsList = new List<CodeExplorerItem>();
+        private List<CodeExplorerItem> _parsedExplorerItemsList = new List<CodeExplorerItem>();
+
+        #endregion
+
+        #region public accessors
+
+        /// <summary>
+        /// Contains the list of explorer items for the current file, updated by the parser's visitor class
+        /// </summary>
+        public List<CodeExplorerItem> ParsedExplorerItemsList {
+            get { return _parsedExplorerItemsList; }
+        }
+
+        /// <summary>
+        /// contains the list of items that depend on the current file, that list
+        /// is updated by the parser's visitor class
+        /// </summary>
+        public List<CompletionItem> ParsedItemsList {
+            get { return _parsedItemsList; }
+        }
+
+        /// <summary>
+        /// this dictionnary is used to reference the procedures defined
+        /// in the program we are parsing, dictionnary is faster that list when it comes to
+        /// test if a procedure/function exists in the program
+        /// </summary>
+        public HashSet<string> DefinedProcedures {
+            get { return _definedProcedures; }
+            set { _definedProcedures = value; }
+        }
 
         #endregion
 
@@ -135,8 +166,8 @@ namespace _3PA.MainFeatures.Parser {
             if (_isBaseFile) {
 
                 // correct the internal/external type of run statements :
-                foreach (var item in ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
-                    if (DefinedProcedures.Contains(item.DisplayText))
+                foreach (var item in _parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
+                    if (_definedProcedures.Contains(item.DisplayText))
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
 
@@ -170,7 +201,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Run,
                 IconType = CodeExplorerIconType.RunExternal,
@@ -200,7 +231,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedFunctionCall pars) {
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.DynamicFunctionCall,
                 IconType = pars.ExternalCall ? CodeExplorerIconType.FunctionCallExternal : CodeExplorerIconType.FunctionCallInternal,
@@ -222,7 +253,7 @@ namespace _3PA.MainFeatures.Parser {
             var name = pars.Name.Split('.');
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = missingDbName ? pars.Name : name[1],
                 Branch = pars.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
                 IconType = pars.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
@@ -245,7 +276,7 @@ namespace _3PA.MainFeatures.Parser {
             var fullFilePath = ProEnvironment.Current.FindFirstFileInPropath(pars.Name);
 
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Include,
                 IsNotBlock = true,
@@ -265,19 +296,19 @@ namespace _3PA.MainFeatures.Parser {
             _parsedFiles.Add(fullFilePath);
 
             ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.OwnerName);
-            var parserItemList = parserVisitor.ParsedItemsList.ToList();
+            var parserItemList = parserVisitor._parsedItemsList.ToList();
 
             // correct the line number of each parsed element, so we can filter the items correctly in the completion list
             parserItemList.ForEach(data => { if (data.FromParser) data.ParsedItem.IncludeLine = pars.Line; });
 
             // add info from the parser
-            ParsedItemsList.AddRange(parserItemList);
+            _parsedItemsList.AddRange(parserItemList);
             if (Config.Instance.CodeExplorerDisplayExternalItems)
-                ParsedExplorerItemsList.AddRange(parserVisitor.ParsedExplorerItemsList.ToList());
+                _parsedExplorerItemsList.AddRange(parserVisitor._parsedExplorerItemsList.ToList());
 
             // fill the defined procedures dictionnary
-            foreach (var definedProcedure in parserVisitor.DefinedProcedures.Where(definedProcedure => !DefinedProcedures.Contains(definedProcedure))) {
-                DefinedProcedures.Add(definedProcedure);
+            foreach (var definedProcedure in parserVisitor._definedProcedures.Where(definedProcedure => !_definedProcedures.Contains(definedProcedure))) {
+                _definedProcedures.Add(definedProcedure);
             }
         }
 
@@ -286,9 +317,16 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="pars"></param>
         public void Visit(ParsedBlock pars) {
+
+            // add the prototype block only once, for the first proto
+            if (pars.IconIconType == CodeExplorerIconType.Prototype) {
+                if (_prototypeAdded) return;
+                _prototypeAdded = true;
+            }
+
             // to code explorer
             if (pars.ToDisplayOnExplorer)
-                ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                _parsedExplorerItemsList.Add(new CodeExplorerItem {
                     DisplayText = pars.Name,
                     Branch = pars.Branch,
                     IconType = pars.IconIconType,
@@ -310,7 +348,7 @@ namespace _3PA.MainFeatures.Parser {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // To code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = string.Join(" ", pars.On.ToUpper(), pars.Name),
                 Branch = CodeExplorerBranch.OnEvent,
                 Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
@@ -330,7 +368,7 @@ namespace _3PA.MainFeatures.Parser {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Function,
                 Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
@@ -342,7 +380,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // to completion data
             pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Function,
                 SubString = pars.ReturnType.ToString(),
@@ -362,11 +400,11 @@ namespace _3PA.MainFeatures.Parser {
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
             // fill dictionnary containing the name of all procedures defined
-            if (!DefinedProcedures.Contains(pars.Name))
-                DefinedProcedures.Add(pars.Name);
+            if (!_definedProcedures.Contains(pars.Name))
+                _definedProcedures.Add(pars.Name);
 
             // to code explorer
-            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Procedure,
                 Flag = AddExternalFlag((pars.IsPrivate ? CodeExplorerFlag.Private : 0) | (pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0)),
@@ -377,7 +415,7 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // to completion data
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Procedure,
                 SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
@@ -394,7 +432,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="pars"></param>
         public void Visit(ParsedPreProc pars) {
             // to completion data
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
@@ -428,7 +466,7 @@ namespace _3PA.MainFeatures.Parser {
             pars.UndefinedLine = line;
 
             // to completion data
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.Label,
                 Flag = 0,
@@ -469,7 +507,7 @@ namespace _3PA.MainFeatures.Parser {
                     type = foundTable.IsTempTable ? CompletionType.TempTable : CompletionType.Table;
 
                     // To code explorer, list buffers and associated tables
-                    ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                    _parsedExplorerItemsList.Add(new CodeExplorerItem {
                         DisplayText = foundTable.Name,
                         Branch = foundTable.IsTempTable ? CodeExplorerBranch.TempTableUsed : CodeExplorerBranch.TableUsed,
                         IconType = foundTable.IsTempTable ? CodeExplorerIconType.TempTable : CodeExplorerIconType.Table,
@@ -491,7 +529,7 @@ namespace _3PA.MainFeatures.Parser {
 
                         // To code explorer, program parameters
                         if (_isBaseFile && pars.Scope == ParsedScope.File)
-                            ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                            _parsedExplorerItemsList.Add(new CodeExplorerItem {
                                 DisplayText = pars.Name,
                                 Branch = CodeExplorerBranch.ProgramParameter,
                                 IconType = CodeExplorerIconType.Parameter,
@@ -528,7 +566,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // To explorer code for browse
             if (pars.Type == ParseDefineType.Browse) {
-                ParsedExplorerItemsList.Add(new CodeExplorerItem {
+                _parsedExplorerItemsList.Add(new CodeExplorerItem {
                     DisplayText = pars.Name,
                     Branch = CodeExplorerBranch.Browse,
                     Flag = AddExternalFlag((CodeExplorerFlag)0),
@@ -540,7 +578,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // to completion data
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = type,
                 SubString = subString,
@@ -596,7 +634,7 @@ namespace _3PA.MainFeatures.Parser {
                 }
             }
 
-            ParsedItemsList.Add(new CompletionItem {
+            _parsedItemsList.Add(new CompletionItem {
                 DisplayText = pars.Name,
                 Type = CompletionType.TempTable,
                 SubString = subStr,
@@ -623,7 +661,7 @@ namespace _3PA.MainFeatures.Parser {
             if (foundTable != null)
                 return foundTable;
             // for buffer, we return the referenced temptable/table (stored in CompletionItem.SubString)
-            var foundParsedItem = ParsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
+            var foundParsedItem = _parsedItemsList.Find(data => (data.Type == CompletionType.Table || data.Type == CompletionType.TempTable) && data.DisplayText.EqualsCi(name));
             return foundParsedItem != null ? FindAnyTableByName(foundParsedItem.SubString) : null;
         }
 
@@ -651,7 +689,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="name"></param>
         /// <returns></returns>
         private ParsedTable FindTempTableByName(string name) {
-            var foundTable = ParsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
+            var foundTable = _parsedItemsList.FirstOrDefault(data => data.Type == CompletionType.TempTable && data.DisplayText.EqualsCi(name));
             if (foundTable != null && foundTable.ParsedItem is ParsedTable)
                 return (ParsedTable) foundTable.ParsedItem;
             return null;
@@ -719,7 +757,7 @@ namespace _3PA.MainFeatures.Parser {
 
             // if it's another var
             if (nbPoints == 0) {
-                var foundVar = ParsedItemsList.Find(data =>
+                var foundVar = _parsedItemsList.Find(data =>
                     (data.Type == CompletionType.VariablePrimitive ||
                      data.Type == CompletionType.VariableComplex) && data.DisplayText.EqualsCi(likeStr));
                 return foundVar != null ? ((ParsedDefine)foundVar.ParsedItem).PrimitiveType : ParsedPrimitiveType.Unknow;
@@ -795,19 +833,19 @@ namespace _3PA.MainFeatures.Parser {
             ParserVisitor parserVisitor = ParseFile(fileName, ownerName);
 
             // add info to the completion list
-            var listToAdd = parserVisitor.ParsedItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList();
+            var listToAdd = parserVisitor._parsedItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList();
             foreach (var completionData in listToAdd) {
                 completionData.Flag = completionData.Flag | ParseFlag.Persistent;
             }
-            ParsedItemsList.AddRange(listToAdd);
+            _parsedItemsList.AddRange(listToAdd);
 
             // add info to the code explorer
             if (runPersistentIsInFile && Config.Instance.CodeExplorerDisplayExternalItems) {
-                var listExpToAdd = parserVisitor.ParsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Procedure || item.Branch == CodeExplorerBranch.Function).ToList();
+                var listExpToAdd = parserVisitor._parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Procedure || item.Branch == CodeExplorerBranch.Function).ToList();
                 foreach (var codeExplorerItem in listExpToAdd) {
                     codeExplorerItem.Flag = codeExplorerItem.Flag | CodeExplorerFlag.Persistent;
                 }
-                ParsedExplorerItemsList.AddRange(listExpToAdd);
+                _parsedExplorerItemsList.AddRange(listExpToAdd);
 
             }
         }

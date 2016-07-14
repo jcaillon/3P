@@ -116,13 +116,25 @@ namespace _3PA.MainFeatures.Parser {
         /// ending block statements (or the opposite), in short, was the parsing OK or not?
         /// Allows to decide if we can reindent the code or not
         /// </summary>
-        public bool ParsingOk { get; set; }
+        public bool ParsedBlockOk { get; private set; }
+
+        /// <summary>
+        /// same as ParsedBlockOk but for the UIB block (appbuilder blocks)
+        /// </summary>
+        public bool ParsedUibBlockOk { get; private set; }
 
         /// <summary>
         /// returns the list of the parsed items
         /// </summary>
         public List<ParsedItem> ParsedItemsList {
             get { return _parsedItemList; }
+        }
+
+        /// <summary>
+        /// returns the list of the prototypes
+        /// </summary>
+        public Dictionary<string, ParsedFunction> ParsedPrototypes {
+            get { return _functionPrototype; }
         }
 
         #endregion
@@ -147,7 +159,9 @@ namespace _3PA.MainFeatures.Parser {
 
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
 
-            ParsingOk = true;
+            // assume correct parsed
+            ParsedBlockOk = true;
+            ParsedUibBlockOk = true;
 
             // create root item
             if (isRootFile)
@@ -258,7 +272,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "function":
                             // parse a function definition
                             if (CreateParsedFunction(token)) {
-                                if (_context.BlockStack.Count != 0) ParsingOk = false;
+                                if (_context.BlockStack.Count != 0) ParsedBlockOk = false;
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
@@ -267,7 +281,7 @@ namespace _3PA.MainFeatures.Parser {
                         case "proce":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
-                                if (_context.BlockStack.Count != 0) ParsingOk = false;
+                                if (_context.BlockStack.Count != 0) ParsedBlockOk = false;
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(BlockType.DoEnd, token.Line);
                             }
@@ -311,7 +325,7 @@ namespace _3PA.MainFeatures.Parser {
                                     popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
                                     _context.BlockStack.Pop();
                             } else
-                                ParsingOk = false;
+                                ParsedBlockOk = false;
                             break;
                         case "else":
                             // add a one time indent after a then or else
@@ -430,7 +444,10 @@ namespace _3PA.MainFeatures.Parser {
                 // did we match an end of a proc, func or on event block?
                 if (_context.Scope != ParsedScope.File) {
                     var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem);
-                    if (parsedScope != null) parsedScope.EndBlockLine = token.Line;
+                    if (parsedScope != null) {
+                        parsedScope.EndBlockLine = token.Line;
+                        parsedScope.EndBlockPosition = token.EndPosition;
+                    }
                     _context.OwnerName = RootScopeName;
                     _context.Scope = ParsedScope.File;
                 }
@@ -994,6 +1011,10 @@ namespace _3PA.MainFeatures.Parser {
                     // it marks the beggining of an appbuilder block, it can only be at a root/File level
                     _context.Scope = ParsedScope.File;
 
+                    // we match a new block start but we didn't match the previous block end, flag mismatch
+                    if (_context.CurrentAppbuilderBlock != null && _context.CurrentAppbuilderBlock.EndBlockPosition == -1)
+                        ParsedUibBlockOk = false;
+
                     // matching different intersting blocks
                     if (toParse.ContainsFast("_MAIN-BLOCK")) {
                         _context.OwnerName = "Main block";
@@ -1016,7 +1037,7 @@ namespace _3PA.MainFeatures.Parser {
                     } else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
                         _context.OwnerName = "Run-time attributes";
                         _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.RuntimeBlock};
-                    } else if (_functionPrototype.Count == 0 && toParse.ContainsFast("_FUNCTION-FORWARD")) {
+                    } else if (toParse.ContainsFast("_FUNCTION-FORWARD")) {
                         _context.OwnerName = "Function prototypes";
                         _context.CurrentAppbuilderBlock = new ParsedBlock(_context.OwnerName, token, CodeExplorerBranch.Block) {ToDisplayOnExplorer = true, IconIconType = CodeExplorerIconType.Prototype};
                     } else {
@@ -1030,8 +1051,13 @@ namespace _3PA.MainFeatures.Parser {
                 case "&ANALYZE-RESUME":
                     // it marks the end of an appbuilder block, it can only be at a root/File level
                     _context.Scope = ParsedScope.File;
-                    if (_context.CurrentAppbuilderBlock != null)
+                    if (_context.CurrentAppbuilderBlock != null && _context.CurrentAppbuilderBlock.EndBlockPosition == -1) {
                         _context.CurrentAppbuilderBlock.EndBlockLine = token.Line;
+                        _context.CurrentAppbuilderBlock.EndBlockPosition = token.EndPosition;
+                    } else {
+                        // we match an end w/o beggining, flag a mismatch
+                        ParsedUibBlockOk = false;
+                    }
                     break;
                 case "&UNDEFINE":
                     var found = (ParsedPreProc) _parsedItemList.FindLast(item => (item is ParsedPreProc && item.Name.Equals(name)));
@@ -1167,7 +1193,7 @@ namespace _3PA.MainFeatures.Parser {
             if (state == 99) {
                 createdFunc.IsPrivate = isPrivate;
                 createdFunc.Parameters = parameters.ToString();
-                createdFunc.HasPrototype = true; // set HasPrototype to true for the prototype!!
+                createdFunc.IsPrototype = true;
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdFunc);
                 return false;
@@ -1180,7 +1206,7 @@ namespace _3PA.MainFeatures.Parser {
             // it has a prototype?
             if (_functionPrototype.ContainsKey(name)) {
                 // make sure it was a prototype!
-                if (_functionPrototype[name].HasPrototype) {
+                if (_functionPrototype[name].IsPrototype) {
                     createdFunc.HasPrototype = true;
                     createdFunc.PrototypeLine = _functionPrototype[name].Line;
                     createdFunc.PrototypeColumn = _functionPrototype[name].Column;

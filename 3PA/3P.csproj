@@ -233,7 +233,7 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.Designer.cs">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\CodeBeautifier.cs" />
+    <Compile Include="MainFeatures\ProCodeFormat.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -269,7 +269,7 @@
     <Compile Include="MainFeatures\ProgressExecutionNs\FileTag.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
-    <Compile Include="MainFeatures\ProCodeUtils.cs" />
+    <Compile Include="MainFeatures\ProUtils.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
@@ -422,7 +422,6 @@
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
-    <None Include="Data\ProgressTemplates\FunctionPrototype.p" />
     <None Include="Data\ProgressTemplates\InternalProcedure.p" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />

@@ -106,7 +106,6 @@ namespace YamuiFramework.Helper {
 
         #endregion
 
-
         #region Validation and data type conversions
 
         public static readonly Dictionary<Type, char[]> KeyPressValidChars = new Dictionary<Type, char[]> {
@@ -309,16 +308,9 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Return a GraphicPath that is a round cornered rectangle
         /// </summary>
-        /// <returns>A round cornered rectagle path</returns>
-        /// <remarks>If I could rely on people using C# 3.0+, this should be
-        /// an extension method of GraphicsPath.</remarks>        
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="diameter"></param>
+        /// <returns>A round cornered rectagle path</returns>   
         public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
-            return GetRoundedRect(new RectangleF(x, y, width, height), diameter);
+            return new RectangleF(x, y, width, height).GetRoundedRect(diameter);
         }
 
         /// <summary>
@@ -327,9 +319,7 @@ namespace YamuiFramework.Helper {
         /// <param name="rect">The rectangle</param>
         /// <param name="diameter">The diameter of the corners</param>
         /// <returns>A round cornered rectagle path</returns>
-        /// <remarks>If I could rely on people using C# 3.0+, this should be
-        /// an extension method of GraphicsPath.</remarks>
-        public static GraphicsPath GetRoundedRect(RectangleF rect, float diameter) {
+        public static GraphicsPath GetRoundedRect(this RectangleF rect, float diameter) {
             GraphicsPath path = new GraphicsPath();
 
             if (diameter > 0) {
@@ -470,7 +460,7 @@ namespace YamuiFramework.Helper {
 
         #endregion
 
-        #region Read a configuration file line by line
+        #region Read a configuration file
 
         /// <summary>
         /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
@@ -493,7 +483,7 @@ namespace YamuiFramework.Helper {
             return wentOk;
         }
 
-        public static void SubForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding) {
+        private static void SubForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding) {
             string line;
             // to apply on each line
             Action<TextReader> action = reader => {
@@ -510,7 +500,8 @@ namespace YamuiFramework.Helper {
                     }
                 }
             } else {
-                using (StringReader reader = new StringReader(encoding.GetString(dataResources))) {
+                // we use the default encoding for the resoures since we can control the encoding on this...
+                using (StringReader reader = new StringReader(Encoding.Default.GetString(dataResources))) {
                     action(reader);
                 }
             }
@@ -552,7 +543,6 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
 
     }
 }

@@ -24,19 +24,19 @@ using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures {
 
-    internal static class CodeBeautifier {
+    internal static class ProCodeFormat {
 
         /// <summary>
         /// Tries to re-indent the code of the whole document
         /// </summary>
         public static void CorrectCodeIndentation() {
 
-            var canIndent = ParserHandler.CanIndent;
+            var canIndent = ParserHandler.AblParser.ParsedBlockOk;
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(Config.FolderTemp, "lines.log") + "'>" + Path.Combine(Config.FolderTemp, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
             if (!canIndent) {
                 StringBuilder x = new StringBuilder();
                 var i = 0;
-                var dic = ParserHandler.GetLineInfo;
+                var dic = ParserHandler.AblParser.LineInfo;
                 while (dic.ContainsKey(i)) {
                     x.AppendLine((i + 1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures {
             }
 
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
-            if (ParserHandler.CanIndent) {
+            if (ParserHandler.AblParser.ParsedBlockOk) {
                 
             } else {
                 UserCommunication.NotifyUnique("FormatDocumentFail", "This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br><a href='#about'>Open the about window to get the github url</a>", MessageImg.MsgRip, "Format document", "Incorrect grammar", args => {
@@ -54,6 +54,28 @@ namespace _3PA.MainFeatures {
                     UserCommunication.CloseUniqueNotif("FormatDocumentFail");
                 }, 20);
             }
+        }
+
+        /// <summary>
+        /// Allows to clear the appbuilder markup from a given string
+        /// </summary>
+        public static string StripAppBuilderMarkup(string inputSnippet) {
+            // consist in suppressing the lines starting with :
+            // &ANALYZE-SUSPEND
+            // &ANALYZE-RESUME
+            // /* _UIB-CODE-BLOCK-END */
+            // and, for this method only, also strips :
+            // &IF DEFINED(EXCLUDE-&{name}) = 0 &THEN
+            // &ENDIF
+            var outputSnippet = new StringBuilder();
+            string line;
+            using (StringReader reader = new StringReader(inputSnippet)) {
+                while ((line = reader.ReadLine()) != null) {
+                    if (line.Length == 0 || (line[0] != '&' && !line.Equals(@"/* _UIB-CODE-BLOCK-END */")))
+                        outputSnippet.AppendLine(line);
+                }
+            }
+            return outputSnippet.ToString();
         }
     }
 }

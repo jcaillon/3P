@@ -22,16 +22,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
-    internal static class ProCodeUtils {
+    internal static class ProUtils {
 
         #region Go to definition
 
@@ -126,80 +124,6 @@ namespace _3PA.MainFeatures {
 
         public static void GoToDefinition() {
             GoToDefinition(false);
-        }
-
-        #endregion
-
-        #region Toggle comment
-
-        /// <summary>
-        /// If no selection, comment the line of the caret
-        /// If selection, comment the selection as a block
-        /// </summary>
-        public static void ToggleComment() {
-            Npp.BeginUndoAction();
-
-            // for each selection (limit selection number)
-            for (var i = 0; i < Npp.Selection.Count; i++) {
-                var selection = Npp.GetSelection(i);
-
-                int startPos;
-                int endPos;
-                bool singleLineComm = false;
-                if (selection.Caret == selection.Anchor) {
-                    // comment line
-                    var thisLine = new Npp.Line(Npp.LineFromPosition(selection.Caret));
-                    startPos = thisLine.IndentationPosition;
-                    endPos = thisLine.EndPosition;
-                    singleLineComm = true;
-                } else {
-                    startPos = selection.Start;
-                    endPos = selection.End;
-                }
-
-                var toggleMode = ToggleCommentOnRange(startPos, endPos);
-                if (toggleMode == 3)
-                    selection.SetPosition(startPos + 3);
-
-                // correct selection...
-                if (!singleLineComm && toggleMode == 2) {
-                    selection.End += 2;
-                }
-            }
-
-            Npp.EndUndoAction();
-        }
-
-        /// <summary>
-        /// Toggle comment on the specified range, returns a value indicating what has been done
-        /// 0: null, 1: toggle off; 2: toggle on, 3: added
-        /// </summary>
-        /// <param name="startPos"></param>
-        /// <param name="endPos"></param>
-        /// <returns></returns>
-        private static int ToggleCommentOnRange(int startPos, int endPos) {
-            // the line is essentially empty
-            if ((endPos - startPos) == 0) {
-                Npp.SetTextByRange(startPos, startPos, "/*  */");
-                return 3;
-            }
-
-            // line is surrounded by /* */
-            if (Npp.GetTextOnRightOfPos(startPos, 2).Equals("/*") && Npp.GetTextOnLeftOfPos(endPos, 2).Equals("*/")) {
-                if (Npp.GetTextByRange(startPos, endPos).Equals("/*  */")) {
-                    // delete an empty comment
-                    Npp.SetTextByRange(startPos, endPos, String.Empty);
-                } else {
-                    // delete /* */
-                    Npp.SetTextByRange(endPos - 2, endPos, String.Empty);
-                    Npp.SetTextByRange(startPos, startPos + 2, String.Empty);
-                }
-                return 1;
-            }
-
-            Npp.SetTextByRange(endPos, endPos, "*/");
-            Npp.SetTextByRange(startPos, startPos, "/*");
-            return 2;
         }
 
         #endregion
@@ -317,79 +241,6 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Modification tags
-
-        /// <summary>
-        /// Allows the user to surround its selection with custom modification tags
-        /// </summary>
-        public static void SurroundSelectionWithTag() {
-            CommonTagAction(fileInfo => {
-                var output = new StringBuilder();
-
-                Npp.TargetFromSelection();
-                var indent = new String(' ', Npp.GetLine(Npp.LineFromPosition(Npp.TargetStart)).Indentation);
-
-                var opener = FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifOpener);
-                var eol = Npp.GetEolString;
-                output.Append(opener);
-                output.Append(eol);
-                output.Append(indent);
-                output.Append(Npp.SelectedText);
-                output.Append(eol);
-                output.Append(indent);
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagModifCloser));
-
-                Npp.TargetFromSelection();
-                Npp.ReplaceTarget(output.ToString());
-
-                Npp.SetSel(Npp.TargetStart + opener.Length + eol.Length);
-            });
-        }
-
-        /// <summary>
-        /// Allows the user to generate a title block at the caret location, using the current file info
-        /// </summary>
-        public static void AddTitleBlockAtCaret() {
-            CommonTagAction(fileInfo => {
-                var output = new StringBuilder();
-                var eol = Npp.GetEolString;
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock1));
-                output.Append(eol);
-
-                // description
-                var regex = new Regex(@"({&de\s*})");
-                var match = regex.Match(Config.Instance.TagTitleBlock2);
-                if (match.Success && !string.IsNullOrEmpty(fileInfo.CorrectionDecription)) {
-                    var matchedStr = match.Groups[1].Value;
-                    foreach (var line in fileInfo.CorrectionDecription.BreakText(matchedStr.Length).Split('\n')) {
-                        output.Append(Config.Instance.TagTitleBlock2.Replace(matchedStr, string.Format("{0,-" + matchedStr.Length + @"}", line)));
-                        output.Append(eol);
-                    }
-                }
-
-                output.Append(FileTag.ReplaceTokens(fileInfo, Config.Instance.TagTitleBlock3));
-                output.Append(eol);
-
-                Npp.SetTextByRange(Npp.CurrentPosition, Npp.CurrentPosition, output.ToString());
-                Npp.SetSel(Npp.CurrentPosition + output.Length);
-            });
-        }
-
-        public static void CommonTagAction(Action<FileTagObject> performAction) {
-            var filename = Path.GetFileName(Plug.CurrentFilePath);
-            if (FileTag.Contains(filename)) {
-                var fileInfo = FileTag.GetLastFileTag(filename);
-                Npp.BeginUndoAction();
-                performAction(fileInfo);
-                Npp.EndUndoAction();
-            } else {
-                UserCommunication.Notify("No info available for this file, please fill the file info form first!", MessageImg.MsgToolTip, "Insert modification tags", "No info available", 4);
-                Appli.Appli.GoToPage(PageNames.FileInfo);
-            }
-        }
-
-        #endregion
-
         #region Open in appbuilder / dictionary
 
         /// <summary>
@@ -420,6 +271,5 @@ namespace _3PA.MainFeatures {
         }
 
         #endregion
-
     }
 }
