@@ -335,38 +335,38 @@ namespace _3PA.MainFeatures.Parser {
         /// Main block, definitions block...
         /// </summary>
         /// <param name="pars"></param>
-        public void Visit(ParsedBlock pars) {
+        public void Visit(ParsedPreProcBlock pars) {
             
             // add the prototype block only once, for the first proto
-            if (pars.BlockType == ParsedBlockType.FunctionForward) {
+            if (pars.PreProcBlockType == ParsedPreProcBlockType.FunctionForward) {
                 if (_prototypeAdded) return;
                 _prototypeAdded = true;
             }
 
             CodeExplorerIconType type;
-            switch (pars.BlockType) {
-                case ParsedBlockType.MainBlock:
+            switch (pars.PreProcBlockType) {
+                case ParsedPreProcBlockType.MainBlock:
                     type = CodeExplorerIconType.BranchIcon;
                     break;
-                case ParsedBlockType.FunctionForward:
+                case ParsedPreProcBlockType.FunctionForward:
                     type = CodeExplorerIconType.Prototype;
                     break;
-                case ParsedBlockType.Definitions:
+                case ParsedPreProcBlockType.Definitions:
                     type = CodeExplorerIconType.DefinitionBlock;
                     break;
-                case ParsedBlockType.UibPreprocessorBlock:
+                case ParsedPreProcBlockType.UibPreprocessorBlock:
                     type = CodeExplorerIconType.PreprocessorBlock;
                     break;
-                case ParsedBlockType.Xftr:
+                case ParsedPreProcBlockType.Xftr:
                     type = CodeExplorerIconType.XtfrBlock;
                     break;
-                case ParsedBlockType.ProcedureSettings:
+                case ParsedPreProcBlockType.ProcedureSettings:
                     type = CodeExplorerIconType.SettingsBlock;
                     break;
-                case ParsedBlockType.CreateWindow:
+                case ParsedPreProcBlockType.CreateWindow:
                     type = CodeExplorerIconType.CreateWindowBlock;
                     break;
-                case ParsedBlockType.RunTimeAttributes:
+                case ParsedPreProcBlockType.RunTimeAttributes:
                     type = CodeExplorerIconType.RuntimeBlock;
                     break;
                 default:
@@ -376,9 +376,9 @@ namespace _3PA.MainFeatures.Parser {
             // to code explorer
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
-                Branch = pars.BlockType == ParsedBlockType.MainBlock ? CodeExplorerBranch.MainBlock : CodeExplorerBranch.Block,
+                Branch = pars.PreProcBlockType == ParsedPreProcBlockType.MainBlock ? CodeExplorerBranch.MainBlock : CodeExplorerBranch.Block,
                 IconType = type,
-                IsRoot = pars.BlockType == ParsedBlockType.MainBlock,
+                IsRoot = pars.PreProcBlockType == ParsedPreProcBlockType.MainBlock,
                 Flag = AddExternalFlag((CodeExplorerFlag)0),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,

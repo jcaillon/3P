@@ -103,6 +103,8 @@ namespace _3PA.Tests {
 
             // create unique temporary folder
             var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+
+            var perfFile = Path.Combine(testDir, "perfs.txt");
             if (!Utils.CreateDirectory(testDir))
                 return;
 
@@ -123,7 +125,8 @@ namespace _3PA.Tests {
 
             OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
             lexer.Accept(lexerVisitor);
-            File.WriteAllText(outLocation, lexerVisitor.Output.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").AppendLine("Found ").ToString());
+            File.WriteAllText(outLocation, lexerVisitor.Output.ToString());
+            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
@@ -142,8 +145,8 @@ namespace _3PA.Tests {
 
             OutputParserVisitor parserVisitor = new OutputParserVisitor();
             parser.Accept(parserVisitor);
-            File.WriteAllText(outLocation, parserVisitor.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
+            File.WriteAllText(outLocation, parserVisitor.Output.ToString());
+            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.ParsedItemsList.Count + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LINE INFO
@@ -157,7 +160,8 @@ namespace _3PA.Tests {
                 lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;
             }
-            File.WriteAllText(outLocation, lineInfo.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
+            File.WriteAllText(outLocation, lineInfo.ToString());
+            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.LineInfo.Count + "\r\n");
         }
 
         #endregion
@@ -334,10 +338,10 @@ namespace _3PA.Tests {
             Output.Append("\r\n");
         }
 
-        public void Visit(ParsedBlock pars) {
+        public void Visit(ParsedPreProcBlock pars) {
             Output.Append("BLOCK\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name ?? "");
-            Output.Append(", " + pars.BlockDescription + ", " + pars.BlockType);
+            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            Output.Append(", " + pars.BlockDescription + ", " + pars.PreProcBlockType);
             Output.Append("\r\n");
         }
 
@@ -422,58 +426,72 @@ namespace _3PA.Tests {
 
     internal class OutputLexerVisitor : ILexerVisitor {
 
+        public int NbItems;
         public StringBuilder Output = new StringBuilder();
 
         public void Visit(TokenComment tok) {
             Output.AppendLine("CO" + (tok.IsSingleLine ? "S" : "M") +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenEol tok) {
             Output.AppendLine("EOL" + "\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value.Replace('\r', 'r').Replace('\n', 'n') + "`");
+            NbItems++;
         }
 
         public void Visit(TokenEos tok) {
             Output.AppendLine("EOS" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenInclude tok) {
             Output.AppendLine("INC" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenNumber tok) {
             Output.AppendLine("NUM" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenString tok) {
             Output.AppendLine("STR" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenStringDescriptor tok) {
             Output.AppendLine("SDR" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenSymbol tok) {
             Output.AppendLine("SYM" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenWhiteSpace tok) {
             Output.AppendLine("SPA" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenWord tok) {
             Output.AppendLine("WRD" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenEof tok) {
             Output.AppendLine("EOF" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenUnknown tok) {
             Output.AppendLine("UNK" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
 
         public void Visit(TokenPreProcStatement tok) {
             Output.AppendLine("PRE" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            NbItems++;
         }
     }
 

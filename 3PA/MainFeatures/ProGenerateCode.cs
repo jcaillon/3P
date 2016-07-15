@@ -103,25 +103,25 @@ namespace _3PA.MainFeatures {
             // delete proto
             foreach (var function in listOfUselessProto) {
 
-                ParsedBlock protoBlock = null;
+                ParsedPreProcBlock protoPreProcBlock = null;
 
                 // if we parsed the UIB (appbuilder) blocks correctly
                 if (ParserHandler.AblParser.ParsedUibBlockOk) {
 
                     // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
                     var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+_FUNCTION-FORWARD\s+" + function.Name, RegexOptions.IgnoreCase);
-                    protoBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => {
-                        var blockItem = item as ParsedBlock;
-                        if (blockItem != null && blockItem.BlockType == ParsedBlockType.FunctionForward &&
+                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => {
+                        var blockItem = item as ParsedPreProcBlock;
+                        if (blockItem != null && blockItem.PreProcBlockType == ParsedPreProcBlockType.FunctionForward &&
                             protoRegex.Match(blockItem.BlockDescription).Success)
                             return true;
                         return false;
-                    }) as ParsedBlock;
+                    }) as ParsedPreProcBlock;
                 }
 
-                if (protoBlock != null) {
+                if (protoPreProcBlock != null) {
                     UserCommunication.Notify("Delete bloock : " + function.Name);
-                    Npp.DeleteTextByRange(protoBlock.Position, protoBlock.EndBlockPosition);
+                    Npp.DeleteTextByRange(protoPreProcBlock.Position, protoPreProcBlock.EndBlockPosition);
                 } else {
                     // if not found, we just delete the proto statement
                     UserCommunication.Notify("Delete : " + function.Name);

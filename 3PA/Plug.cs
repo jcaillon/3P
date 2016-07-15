@@ -110,6 +110,8 @@ namespace _3PA {
 
         #endregion
 
+        #region Called with no conditions
+
         #region Start
 
         /// <summary>
@@ -453,7 +455,7 @@ namespace _3PA {
             // check if the user triggered a 3P function defined in the AppliMenu
             foreach (var item in list) {
                 // shortcut corresponds to the item?
-                if ((byte)key == item.Shortcut._key &&
+                if ((byte) key == item.Shortcut._key &&
                     keyModifiers.IsCtrl == item.Shortcut.IsCtrl &&
                     keyModifiers.IsShift == item.Shortcut.IsShift &&
                     keyModifiers.IsAlt == item.Shortcut.IsAlt &&
@@ -469,6 +471,10 @@ namespace _3PA {
         }
 
         #endregion
+
+        #endregion
+
+        #region Called when PluginIsReady
 
         #region On document switch
 
@@ -549,6 +555,22 @@ namespace _3PA {
 
         #endregion
 
+        #region OnNppFileBeforeLoad
+
+        /// <summary>
+        /// Called when a new file is being opened in notepad++
+        /// </summary>
+        private static void OnNppFileBeforeLoad() {
+            // assume the file is not a progress file
+            CurrentFileAllowed = false;
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Called when CurrentFileAllowed
+
         #region On char typed
 
         /// <summary>
@@ -558,7 +580,7 @@ namespace _3PA {
         public static void OnSciCharTyped(char c) {
 
             // CTRL + S : char code 19
-            if (c == (char)19) {
+            if (c == (char) 19) {
                 Npp.Undo();
                 Npp.SaveCurrentDocument();
                 return;
@@ -662,11 +684,11 @@ namespace _3PA {
                 ActionsAfterUpdateUi.Dequeue()();
             }
 
-            if (nc.updated == (int)SciMsg.SC_UPDATE_V_SCROLL ||
-                nc.updated == (int)SciMsg.SC_UPDATE_H_SCROLL) {
+            if (nc.updated == (int) SciMsg.SC_UPDATE_V_SCROLL ||
+                nc.updated == (int) SciMsg.SC_UPDATE_H_SCROLL) {
                 // user scrolled
                 OnPageScrolled();
-            } else if (nc.updated == (int)SciMsg.SC_UPDATE_SELECTION) {
+            } else if (nc.updated == (int) SciMsg.SC_UPDATE_SELECTION) {
                 // the user changed its selection
                 OnUpdateSelection();
             }
@@ -677,10 +699,10 @@ namespace _3PA {
         #region OnSciModified
 
         public static void OnSciModified(SCNotification nc) {
-            bool deletedText = (nc.modificationType & (int)SciMsg.SC_MOD_DELETETEXT) != 0;
+            bool deletedText = (nc.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) != 0;
 
             // if the text has changed
-            if (deletedText || (nc.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) != 0) {
+            if (deletedText || (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
 
                 // observe modification to lines
                 Npp.UpdateLinesInfo(nc, !deletedText);
@@ -697,16 +719,7 @@ namespace _3PA {
 
         #endregion
 
-
         #region Other
-
-        /// <summary>
-        /// Called when a new file is being opened in notepad++
-        /// </summary>
-        private static void OnNppFileBeforeLoad() {
-            // assume the file is not a progress file
-            CurrentFileAllowed = false;
-        }
 
         /// <summary>
         /// When the user click on the margin
@@ -789,6 +802,8 @@ namespace _3PA {
                 }
             }
         }
+
+        #endregion
 
         #endregion
 

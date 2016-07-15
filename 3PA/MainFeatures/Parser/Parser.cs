@@ -166,7 +166,7 @@ namespace _3PA.MainFeatures.Parser {
             // init context
             _context = new ParseContext {
                 BlockStack = new Stack<BlockInfo>(),
-                PreProcIfStack = new Stack<ParsedBlock>()
+                PreProcIfStack = new Stack<ParsedPreProcBlock>()
             };
 
             // create root item
@@ -370,6 +370,14 @@ namespace _3PA.MainFeatures.Parser {
                         case "dynamic-function":
                             CreateParsedDynamicFunction(token);
                             break;
+                        case "&if":
+                            _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
+                            break;
+                        case "&endif":
+                            var prevIf = _context.PreProcIfStack.Pop();
+                            prevIf.EndBlockLine = token.Line;
+                            prevIf.EndBlockPosition = token.EndPosition;
+                            break;
                         default:
                             // it's a potential label
                             _context.StatementUnknownFirstWord = true;
@@ -481,7 +489,7 @@ namespace _3PA.MainFeatures.Parser {
             if (_context.BlockStack.Count == 0) {
                 // did we match an end of a proc, func or on event block?
                 if (!(_context.Scope is ParsedFile)) {
-                    var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem);
+                    var parsedScope = (ParsedScopeItem) _parsedItemList.FindLast(item => item is ParsedScopeItem && !(item is ParsedPreProcBlock));
                     if (parsedScope != null) {
                         parsedScope.EndBlockLine = token.Line;
                         parsedScope.EndBlockPosition = token.EndPosition;
@@ -1066,21 +1074,6 @@ namespace _3PA.MainFeatures.Parser {
                     AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcType.Scope, toParse.Substring(pos, toParse.Length - pos)));
                     break;
 
-                case "&IF":
-                    var newIf = new ParsedBlock(null, token) {
-                        BlockType = ParsedBlockType.IfEndIf,
-                        BlockDescription = toParse.Substring(pos2, toParse.Length - pos2),
-                    };
-                    AddParsedItem(newIf);
-                    _context.PreProcIfStack.Push(newIf);
-                    break;
-
-                case "&ENDIF":
-                    var prevIf = _context.PreProcIfStack.Pop();
-                    prevIf.EndBlockLine = token.Line;
-                    prevIf.EndBlockPosition = token.EndPosition;
-                    break;
-
                 case "&ANALYZE-SUSPEND":
                     // it marks the beggining of an appbuilder block, it can only be at a root/File level, otherwise flag mismatch
                     if (!(_context.Scope is ParsedFile)) {
@@ -1089,45 +1082,45 @@ namespace _3PA.MainFeatures.Parser {
                     }
 
                     // we match a new block start but we didn't match the previous block end, flag mismatch
-                    if (_context.CurrentAppbuilderBlock != null && _context.CurrentAppbuilderBlock.EndBlockPosition == -1) {
+                    if (_context.CurrentAppbuilderPreProcBlock != null && _context.CurrentAppbuilderPreProcBlock.EndBlockPosition == -1) {
                         ParsedUibBlockOk = false;
                     }
 
                     // matching different intersting blocks
-                    ParsedBlockType type = ParsedBlockType.Unknown;
+                    ParsedPreProcBlockType type = ParsedPreProcBlockType.Unknown;
                     string blockName = "Appbuilder block";
                     if (toParse.ContainsFast("_FUNCTION-FORWARD")) {
-                        type = ParsedBlockType.FunctionForward;
+                        type = ParsedPreProcBlockType.FunctionForward;
                         blockName = "Function prototype";
                     } else if (toParse.ContainsFast("_MAIN-BLOCK")) {
-                        type = ParsedBlockType.MainBlock;
+                        type = ParsedPreProcBlockType.MainBlock;
                         blockName = "Main block";
                     } else if (toParse.ContainsFast("_DEFINITIONS")) {
-                        type = ParsedBlockType.Definitions;
+                        type = ParsedPreProcBlockType.Definitions;
                         blockName = "Definitions";
                     } else if (toParse.ContainsFast("_UIB-PREPROCESSOR-BLOCK")) {
-                        type = ParsedBlockType.UibPreprocessorBlock;
+                        type = ParsedPreProcBlockType.UibPreprocessorBlock;
                         blockName = "Pre-processor definitions";
                     } else if (toParse.ContainsFast("_XFTR")) {
-                        type = ParsedBlockType.Xftr;
+                        type = ParsedPreProcBlockType.Xftr;
                         blockName = "Xtfr";
                     } else if (toParse.ContainsFast("_PROCEDURE-SETTINGS")) {
-                        type = ParsedBlockType.ProcedureSettings;
+                        type = ParsedPreProcBlockType.ProcedureSettings;
                         blockName = "Procedure settings";
                     } else if (toParse.ContainsFast("_CREATE-WINDOW")) {
-                        type = ParsedBlockType.CreateWindow;
+                        type = ParsedPreProcBlockType.CreateWindow;
                         blockName = "Window settings";
                     } else if (toParse.ContainsFast("_RUN-TIME-ATTRIBUTES")) {
-                        type = ParsedBlockType.RunTimeAttributes;
+                        type = ParsedPreProcBlockType.RunTimeAttributes;
                         blockName = "Runtime attributes";
                     }
-                    _context.CurrentAppbuilderBlock = new ParsedBlock(blockName, token) {
-                        BlockType = type,
+                    _context.CurrentAppbuilderPreProcBlock = new ParsedPreProcBlock(blockName, token) {
+                        PreProcBlockType = type,
                         BlockDescription = toParse.Substring(pos2, toParse.Length - pos2),
                     };
 
                     // save the block description
-                    AddParsedItem(_context.CurrentAppbuilderBlock);
+                    AddParsedItem(_context.CurrentAppbuilderPreProcBlock);
                     break;
 
                 case "&ANALYZE-RESUME":
@@ -1138,9 +1131,9 @@ namespace _3PA.MainFeatures.Parser {
                     }
 
                     // end position of the current appbuilder block
-                    if (_context.CurrentAppbuilderBlock != null && _context.CurrentAppbuilderBlock.EndBlockPosition == -1) {
-                        _context.CurrentAppbuilderBlock.EndBlockLine = token.Line;
-                        _context.CurrentAppbuilderBlock.EndBlockPosition = token.EndPosition;
+                    if (_context.CurrentAppbuilderPreProcBlock != null && _context.CurrentAppbuilderPreProcBlock.EndBlockPosition == -1) {
+                        _context.CurrentAppbuilderPreProcBlock.EndBlockLine = token.Line;
+                        _context.CurrentAppbuilderPreProcBlock.EndBlockPosition = token.EndPosition;
                     } else {
                         // we match an end w/o beggining, flag a mismatch
                         ParsedUibBlockOk = false;
@@ -1153,6 +1146,28 @@ namespace _3PA.MainFeatures.Parser {
                         found.UndefinedLine = _context.StatementFirstToken.Line;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Matches a & IF.. & THEN pre-processed statement
+        /// </summary>
+        private ParsedPreProcBlock CreateParsedIfEndIfPreProc(Token ifToken) {
+            _lastTokenWasSpace = true;
+            StringBuilder expression = new StringBuilder();
+
+            do {
+                var token = PeekAt(1);
+                if (token is TokenEos) break;
+                if (token is TokenComment) continue;
+                 AddTokenToStringBuilder(expression, token);
+            } while (MoveNext());
+
+            var newIf = new ParsedPreProcBlock(string.Empty, ifToken) {
+                PreProcBlockType = ParsedPreProcBlockType.IfEndIf,
+                BlockDescription = expression.ToString(),
+            };
+            AddParsedItem(newIf);
+            return newIf;
         }
 
         /// <summary>
@@ -1486,7 +1501,7 @@ namespace _3PA.MainFeatures.Parser {
             /// <summary>
             /// Keep info on the current appbuidler block in which we are (ANALYSE-SUSPEND to ANALYSE-RESUME)
             /// </summary>
-            public ParsedBlock CurrentAppbuilderBlock { get; set; }
+            public ParsedPreProcBlock CurrentAppbuilderPreProcBlock { get; set; }
 
             /// <summary>
             /// Number of words count in the current statement
@@ -1517,7 +1532,7 @@ namespace _3PA.MainFeatures.Parser {
             /// To know the current depth for IF ENDIF pre-processed statement, allows us
             /// to know if the document is correct or not
             /// </summary>
-            public Stack<ParsedBlock> PreProcIfStack { get; set; }
+            public Stack<ParsedPreProcBlock> PreProcIfStack { get; set; }
 
         }
 

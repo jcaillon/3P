@@ -141,12 +141,12 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedBlock : ParsedScopeItem {
+    internal class ParsedPreProcBlock : ParsedScopeItem {
 
         /// <summary>
         /// type of this block
         /// </summary>
-        public ParsedBlockType BlockType { get; set; }
+        public ParsedPreProcBlockType PreProcBlockType { get; set; }
 
         /// <summary>
         /// Everything after ANALYZE-SUSPEND
@@ -155,11 +155,11 @@ namespace _3PA.MainFeatures.Parser {
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {
+        public ParsedPreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {
         }
     }
 
-    internal enum ParsedBlockType {
+    internal enum ParsedPreProcBlockType {
         Unknown,
         FunctionForward,
         MainBlock,

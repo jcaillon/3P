@@ -3,16 +3,16 @@
 .
 .
 
-&I~
-F FALS~
-E &THEN 
+MESSAGE "hel
+~377
+
+lo".
+~t
 
 RUN omgderp.
   
 proc~
-edure omgd~ 
-erp:
+edure omgde~
+rp:
     MESSAGE "fml...".
 END.
- 
-&  
