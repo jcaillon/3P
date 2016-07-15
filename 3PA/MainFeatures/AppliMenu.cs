@@ -183,9 +183,9 @@ namespace _3PA.MainFeatures {
             #region Generate code
 
             _generateCodeMenuList = new List<MenuItem> {
-                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure), "Insert_new_procedure", ""),
-                new MenuItem(this, "Insert new function", ImageResources.Function, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Function), "Insert_new_function", ""),
-                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, () => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "")
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure), "Insert_new_procedure", "Ctrl+Shift+P"),
+                new MenuItem(this, "Insert new function", ImageResources.Function, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Function), "Insert_new_function", "Ctrl+Shift+F"),
+                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, () => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Ctrl+Shift+2")
             };
 
             #endregion

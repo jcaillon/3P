@@ -168,7 +168,8 @@ namespace _3PA.MainFeatures.Parser {
         Xftr,
         ProcedureSettings,
         CreateWindow,
-        RunTimeAttributes
+        RunTimeAttributes,
+        IfEndIf
     }
 
     /// <summary>

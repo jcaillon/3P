@@ -30,7 +30,6 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
@@ -126,6 +125,7 @@ namespace _3PA.MainFeatures {
                 } else {
                     // if not found, we just delete the proto statement
                     UserCommunication.Notify("Delete : " + function.Name);
+                    Npp.DeleteTextByRange(function.Position, function.EndPosition);
                 }
 
                 

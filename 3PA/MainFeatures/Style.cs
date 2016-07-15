@@ -82,7 +82,7 @@ namespace _3PA.MainFeatures {
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
-            Plug.OnDocumentSwitched();
+            Plug.OnNppDocumentSwitched();
         }
 
         #endregion
@@ -143,6 +143,38 @@ namespace _3PA.MainFeatures {
 
         #region set styles
 
+        public static List<Color> BgErrorLevelColors;
+        public static List<Color> FgErrorLevelColors;
+
+        public static void SetGeneralStyles() {
+
+            var curTheme = Current;
+
+            // Setting styles for errors 
+            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
+
+            BgErrorLevelColors = new List<Color> {
+                curTheme.NoError.BackColor,
+                curTheme.Error0.BackColor,
+                curTheme.Error1.BackColor,
+                curTheme.Error2.BackColor,
+                curTheme.Error3.BackColor,
+                curTheme.Error4.BackColor
+            };
+            FgErrorLevelColors = new List<Color> {
+                curTheme.NoError.ForeColor,
+                curTheme.Error0.ForeColor,
+                curTheme.Error1.ForeColor,
+                curTheme.Error2.ForeColor,
+                curTheme.Error3.ForeColor,
+                curTheme.Error4.ForeColor
+            };
+        }
+
         /// <summary>
         /// Call this method to set the back/fore color and font type of each type used in 3P according to the 
         /// styles defined in the SyntaxHighlighting file
@@ -191,38 +223,6 @@ namespace _3PA.MainFeatures {
                 nppStyle.ForeColor = styleItem.ForeColor;
             nppStyle.Bold = styleItem.FontType.IsBitSet(1);
             nppStyle.Italic = styleItem.FontType.IsBitSet(2);
-        }
-
-        public static List<Color> BgErrorLevelColors;
-        public static List<Color> FgErrorLevelColors;
-
-        public static void SetGeneralStyles() {
-
-            var curTheme = Current;
-            
-            // Setting styles for errors 
-            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
-
-            BgErrorLevelColors = new List<Color> {
-                curTheme.NoError.BackColor,
-                curTheme.Error0.BackColor,
-                curTheme.Error1.BackColor,
-                curTheme.Error2.BackColor,
-                curTheme.Error3.BackColor,
-                curTheme.Error4.BackColor
-            };
-            FgErrorLevelColors = new List<Color> {
-                curTheme.NoError.ForeColor,
-                curTheme.Error0.ForeColor,
-                curTheme.Error1.ForeColor,
-                curTheme.Error2.ForeColor,
-                curTheme.Error3.ForeColor,
-                curTheme.Error4.ForeColor
-            };
         }
 
         /// <summary>

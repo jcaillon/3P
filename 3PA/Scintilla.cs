@@ -95,9 +95,8 @@ namespace _3PA {
         /// <summary>
         /// Call this on SCN_MODIFIED event from scintilla to update the info on lines
         /// </summary>
-        /// <param name="scn"></param>
-        public static void UpdateLinesInfo(SCNotification scn) {
-            Lines.OnScnModified(scn);
+        public static void UpdateLinesInfo(SCNotification scn, bool isInsertion) {
+            Lines.OnScnModified(scn, isInsertion);
         }
 
         public static bool IsLinesInfoUpdated {

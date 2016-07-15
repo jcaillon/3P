@@ -268,7 +268,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
             // label for the number of items
             TotalItems = objectsList.Count;
-            nbitems.Text = TotalItems + StrItems;
+            ExecuteOnThread(() => {
+                nbitems.Text = TotalItems + StrItems;
+            });
         }
 
         /// <summary>
@@ -605,6 +607,16 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         #endregion
+
+        #region misc
+
+        private void ExecuteOnThread(Action action) {
+            if (IsHandleCreated)
+                BeginInvoke(action);
+        }
+
+        #endregion
+
     }
 
     #region sorting

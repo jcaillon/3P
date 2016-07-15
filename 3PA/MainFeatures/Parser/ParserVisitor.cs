@@ -345,6 +345,9 @@ namespace _3PA.MainFeatures.Parser {
 
             CodeExplorerIconType type;
             switch (pars.BlockType) {
+                case ParsedBlockType.MainBlock:
+                    type = CodeExplorerIconType.BranchIcon;
+                    break;
                 case ParsedBlockType.FunctionForward:
                     type = CodeExplorerIconType.Prototype;
                     break;

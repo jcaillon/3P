@@ -676,7 +676,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void RefreshParserAndCodeExplorer() {
             ClearFilter();
             ParserHandler.ParserVisitor.ClearSavedParserVisitors();
-            Plug.OnDocumentSwitched();
+            Plug.OnNppDocumentSwitched();
         }
 
         #endregion
@@ -745,7 +745,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             // parse document
-            Plug.OnDocumentSwitched();
+            Plug.OnNppDocumentSwitched();
 
             Npp.GrabFocus();
         }

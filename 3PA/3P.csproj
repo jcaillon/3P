@@ -325,7 +325,6 @@
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
-    <Compile Include="NotificationsHandler.cs" />
     <Compile Include="Npp.cs" />
     <Compile Include="Scintilla.cs" />
     <Compile Include="Plug.cs" />

@@ -62,7 +62,7 @@ namespace _3PA.Lib._3pUpdater {
 
             // subscribe to the Npp shutdown event if it's not already done
             if (_typeOfExeNeeded == TypeOfExeNeeded.None)
-                Plug.OnNppShutDown += ExecuteUpdateAsync;
+                Plug.OnShutDown += ExecuteUpdateAsync;
 
             // test if the destination directory is writable
             var typeOfExeNeeded = Utils.IsDirectoryWritable(Path.GetDirectoryName(to)) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights;
