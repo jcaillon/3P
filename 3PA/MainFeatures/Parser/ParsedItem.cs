@@ -146,7 +146,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// type of this block
         /// </summary>
-        public ParsedPreProcBlockType PreProcBlockType { get; set; }
+        public ParsedPreProcBlockType Type { get; set; }
 
         /// <summary>
         /// Everything after ANALYZE-SUSPEND
@@ -217,16 +217,18 @@ namespace _3PA.MainFeatures.Parser {
         public bool IsPrivate { get; set; }
 
         /// <summary>
-        /// true if this function is actually just a prototype
+        /// the type of this function : implementation, forward (in local procedure), forward in foreign procedure
         /// </summary>
-        public bool IsPrototype { get; set; }
+        public ParsedFunctionType Type { set; get; }
+
         /// <summary>
         /// true if this function is an implementation AND has a prototype
         /// </summary>
         public bool HasPrototype { get; set; }
         public int PrototypeLine { get; set; }
-        public int PrototypeEndPosition { get; set; }
         public int PrototypeColumn { get; set; }
+        public int PrototypePosition { get; set; }
+        public int PrototypeEndPosition { get; set; }
         /// <summary>
         /// Boolean to know if the prototype is correct compared to the implementation
         /// </summary>
@@ -240,6 +242,21 @@ namespace _3PA.MainFeatures.Parser {
             ParsedReturnType = parsedReturnType;
             Extend = String.Empty;
         }
+    }
+
+    internal enum ParsedFunctionType {
+        /// <summary>
+        /// For function prototypes that are defined in the same procedure
+        /// </summary>
+        ForwardSimple,
+        /// <summary>
+        /// For prototypes that are defined in another procedure
+        /// </summary>
+        ForwardIn,
+        /// <summary>
+        /// For function body (implementation)
+        /// </summary>
+        Implementation,
     }
 
     /// <summary>

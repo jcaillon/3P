@@ -21,6 +21,6 @@
 # Syntax:
 #  #         - comment line indicator
 #  <name>=>  - snippet name line; start of the snippet section; name must be a ingle token without any delimiters 
-#  $<value>$ - snippet parameter 
-#  $|$       - special snippet parameter indicating the 
+#  |<value>| - snippet parameter 
+#  |||       - special snippet parameter indicating the 
 #              caret position after the snippet insertion is completed. 

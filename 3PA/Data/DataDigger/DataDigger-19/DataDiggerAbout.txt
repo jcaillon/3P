@@ -1,0 +1,72 @@
+ ____    __   ____   __    ____  ____  ___   ___  ____  ____ 
+(  _ \  /__\ (_  _) /__\  (  _ \(_  _)/ __) / __)( ___)(  _ \
+ )(_) )/(__)\  )(  /(__)\  )(_) )_)(_( (_-.( (_-. )__)  )   /
+(____/(__)(__)(__)(__)(__)(____/(____)\___/ \___/(____)(_)\_)
+
+==============================================================
+
+In 2008 I needed a tool like this and ended up with DataHack
+made by Richard Tardivon. Soon I started fiddling with the
+program and after a few months I decided to fork it under the
+name of DataDigger. Build 13 of 13 jan 2010 was the first that
+appeared on the OpenEdge Hive.
+
+New versions can be found at:
+    http://www.oehive.org/project/datadigger
+
+Suggestions and bugreports are welcome. Please send them to
+    patrick@tingen.net
+
+==============================================================
+Special thanks to the members of the DataDigger test team
+
+            Albert Flikkema      
+            Chris Knickerbocker  
+            Didier Dujardin      
+            Edwin Schutten
+            Eugene Kim           
+            Gert Scheper         
+            Istvan Hollo         
+            Jayson Johnson       
+            Jeroen Beugels       
+            Jeroen Eeuwes        
+            Jeroen Stam          
+            Lorraine Whitaker    
+            Mike Derrick         
+            Peter Frederick      
+            Peter Van den houdt  
+            Peter W. Frees       
+            Pieter van der Vyver 
+            Richard Kelters      
+            Richard Uchytil      
+            Rob Willoughby       
+            Scott Dulecki        
+            Stephen Booth        
+            Stuart Roberts       
+            Tim Lewis            
+            Venkateswaran Nataraj
+
+==============================================================
+
+Version names:
+
+DataDigger build 19 - 30 jun 2014 (Straight A's)
+DataDigger build 18 - 31 may 2013 (Never grow up)
+DataDigger build 17 -  6 sep 2012 (Haiku)
+DataDigger build 16 - 18 mar 2011 (Sweet-16 edition)
+DataDigger build 15 - 18 mar 2010 (Bregje-15 Edition)
+DataDigger build 14 - 03 mar 2010 (Election Day Edition)
+DataDigger build 13 - 13 jan 2010 (Bad Luck Edition)
+DataDigger build 12 -  6 jan 2010
+DataDigger build 11 - 12 dec 2009 (Double Dozen Edition)
+DataDigger build 10 - 21 oct 2009 (Progression revisited Edition)
+DataDigger build  9 - 16 oct 2009 (Revolution nr 9 edition)
+DataDigger build  8 - 22 sep 2009 (Brand New Day edition)
+DataDigger build  7 - 18 sep 2009 (Mullerman edition)
+DataDigger build  6 -  9 sep 2009 (Triple-9 version)
+DataDigger build  5 - 16 jul 2009 (Bugleman edition)
+DataDigger build  4 - 14 jul 2009 (France Liberty Edition)
+DataDigger build  3 -  9 jul 2009
+DataDigger build  2 -  6 feb 2009 (Mother-in-law edition)
+DataDigger build  1 - jan 2009
+DataDigger build  0 - dec 2008

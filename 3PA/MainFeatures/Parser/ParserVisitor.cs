@@ -338,13 +338,13 @@ namespace _3PA.MainFeatures.Parser {
         public void Visit(ParsedPreProcBlock pars) {
             
             // add the prototype block only once, for the first proto
-            if (pars.PreProcBlockType == ParsedPreProcBlockType.FunctionForward) {
+            if (pars.Type == ParsedPreProcBlockType.FunctionForward) {
                 if (_prototypeAdded) return;
                 _prototypeAdded = true;
             }
 
             CodeExplorerIconType type;
-            switch (pars.PreProcBlockType) {
+            switch (pars.Type) {
                 case ParsedPreProcBlockType.MainBlock:
                     type = CodeExplorerIconType.BranchIcon;
                     break;
@@ -376,9 +376,9 @@ namespace _3PA.MainFeatures.Parser {
             // to code explorer
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
-                Branch = pars.PreProcBlockType == ParsedPreProcBlockType.MainBlock ? CodeExplorerBranch.MainBlock : CodeExplorerBranch.Block,
+                Branch = pars.Type == ParsedPreProcBlockType.MainBlock ? CodeExplorerBranch.MainBlock : CodeExplorerBranch.Block,
                 IconType = type,
-                IsRoot = pars.PreProcBlockType == ParsedPreProcBlockType.MainBlock,
+                IsRoot = pars.Type == ParsedPreProcBlockType.MainBlock,
                 Flag = AddExternalFlag((CodeExplorerFlag)0),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,

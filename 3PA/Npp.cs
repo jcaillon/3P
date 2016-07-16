@@ -142,21 +142,21 @@ namespace _3PA {
         /// <summary>
         /// Switch to a document, can be already opended or not
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="line"></param>
-        /// <param name="column"></param>
         public static void Goto(string document, int line = -1, int column = -1) {
-            Goto(document, line, column, true);
+            Goto(document, -1, line, column, true);
+        }
+
+        /// <summary>
+        /// Switch to a document, can be already opended or not
+        /// </summary>
+        public static void GotoPos(string document, int position) {
+            Goto(document, position, -1, -1, true);
         }
 
         /// <summary>
         /// Switch to a document, can be already opended or not, can decide to remember the current position to jump back to it
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="line"></param>
-        /// <param name="column"></param>
-        /// <param name="saveHistoric"></param>
-        public static void Goto(string document, int line, int column, bool saveHistoric) {
+        public static void Goto(string document, int position, int line, int column, bool saveHistoric) {
             if (!File.Exists(document)) {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
@@ -169,10 +169,16 @@ namespace _3PA {
                 else
                     OpenFile(document);
             }
-            if (line >= 0) {
+            if (position >= 0) {
+                GoToLine(LineFromPosition(position));
+                SetSel(position);
+            } else if (line >= 0) {
                 GoToLine(line);
                 if (column >= 0)
                     SetSel(GetPosFromLineColumn(line, column));
+                else
+                    SetSel(GetLine(line).Position);
+
             }
             GrabFocus();
         }
@@ -191,7 +197,7 @@ namespace _3PA {
             try {
                 if (_goToHistory.Count > 0) {
                     var lastPoint = _goToHistory.Pop();
-                    Goto(lastPoint.Item1, lastPoint.Item3.X, lastPoint.Item3.Y, false);
+                    Goto(lastPoint.Item1, -1, lastPoint.Item3.X, lastPoint.Item3.Y, false);
                     FirstVisibleLine = lastPoint.Item2;
                 }
             } catch (Exception e) {

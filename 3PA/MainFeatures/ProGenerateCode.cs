@@ -19,6 +19,7 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -29,122 +30,395 @@ using _3PA.Data;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
-using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
     internal class ProGenerateCode {
 
-        #region Update function prototype
+        #region Update/delete/add function prototype
 
         /// <summary>
         /// This method checks if the current document contains function prototypes that are not updated
         /// and correct them if needed
         /// </summary>
         public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
+
+            List<ParsedFunction> listOfOutDatedProto;
+            List<ParsedFunction> listOfSoloImplementation;
+            List<ParsedFunction> listOfUselessProto;
+
+            StringBuilder outputMessage = new StringBuilder();
+            bool nothingDone = true;
+
+            // if there is at least 1 thing to do
+            if (GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto)) {
+
+                Npp.BeginUndoAction();
+
+                // Add proto
+                if (listOfSoloImplementation.Count > 0) {
+                    var tempMes = new StringBuilder("The following function prototypes have been created :");
+                    var nbNotCreated = 0;
+                    while (listOfSoloImplementation.Count > nbNotCreated) {
+                        var ok = AddPrototypes(ref tempMes, listOfSoloImplementation[0]);
+                        if (!ok) nbNotCreated++;
+                        nothingDone = !ok && nothingDone;
+                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                    }
+                    tempMes.Append("<br><br>");
+                    if (!nothingDone)
+                        outputMessage.Append(tempMes);
+                }
+
+                // delete proto
+                if (listOfUselessProto.Count > 0) {
+                    outputMessage.Append("The following prototypes have been deleted :");
+                    while (listOfUselessProto.Count > 0) {
+                        nothingDone = !DeletePrototypes(ref outputMessage, listOfUselessProto[0]) && nothingDone;
+                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                    }
+                    outputMessage.Append("<br><br>");
+                }
+
+                // update proto
+                if (listOfOutDatedProto.Count > 0) {
+                    outputMessage.Append("The following functions have had their prototype synchronized :");
+                    while (listOfOutDatedProto.Count > 0) {
+                        nothingDone = !UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]) && nothingDone;
+                        GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                    }
+                    outputMessage.Append("<br><br>");
+                }
+
+                Npp.EndUndoAction();
+
+            }
+
+            if (nothingDone) {
+                if (!silent)
+                    UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
+            } else {
+                outputMessage.Append("<div><i>CTRL + Z will cancel the above-mentionned modifications</i></div>");
+                UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
+                    var split = args.Link.Split('#');
+                    if (split.Length == 2) {
+                        Npp.GotoPos(split[0], Int32.Parse(split[1]));
+                        args.Handled = true;
+                    }
+                }, 5);
+            }
+        }
+
+        /// <summary>
+        /// Gets the list of functions/proto of interest
+        /// </summary>
+        private static bool GetPrototypesLists(out List<ParsedFunction> listOfOutDatedProto, out List<ParsedFunction> listOfSoloImplementation, out List<ParsedFunction> listOfUselessProto) {
+
             // make sure to parse the current document before checking anything
             ParserHandler.ParseCurrentDocument(true, true);
 
             // list the outdated proto
-            var listOfOutDatedProto = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+            listOfOutDatedProto = ParserHandler.AblParser.ParsedItemsList.Where(item => {
                 var funcItem = item as ParsedFunction;
                 return funcItem != null && funcItem.HasPrototype && !funcItem.PrototypeUpdated;
-            }).Select(item => (ParsedFunction) item).ToList();
+            }).Select(item => (ParsedFunction)item).ToList();
+
+            // list the implementation w/o prototypes
+            listOfSoloImplementation = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+                var funcItem = item as ParsedFunction;
+                return funcItem != null && !funcItem.HasPrototype;
+            }).Select(item => (ParsedFunction)item).ToList();
 
             // list the prototypes w/o implementation
-            var listOfUselessProto = ParserHandler.AblParser.ParsedPrototypes.Where(item => {
+            listOfUselessProto = ParserHandler.AblParser.ParsedPrototypes.Where(item => {
                 // it's a prototype with no implementation
-                if (item.Value.IsPrototype && !ParserHandler.AblParser.ParsedItemsList.Exists(func => (func is ParsedFunction && func.Name.EqualsCi(item.Value.Name) && !((ParsedFunction)func).IsPrototype)))
+                if (item.Value.Type == ParsedFunctionType.ForwardSimple && !ParserHandler.AblParser.ParsedItemsList.Exists(func => func is ParsedFunction && func.Name.EqualsCi(item.Value.Name) && ((ParsedFunction)func).Type == ParsedFunctionType.Implementation))
                     return true;
                 return false;
             }).Select(item => item.Value).ToList();
 
-            // list the implementation w/o prototypes
-            var listOfSoloImplementation = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                var funcItem = item as ParsedFunction;
-                return funcItem != null && !funcItem.HasPrototype;
-            }).Select(item => (ParsedFunction) item).ToList();
+            return listOfOutDatedProto.Count > 0 || listOfSoloImplementation.Count > 0 || listOfUselessProto.Count > 0;
+        }
 
+        /// <summary>
+        /// This method checks if the current document contains function prototypes that are not updated
+        /// and correct them if needed
+        /// </summary>
+        private static bool UpdatePrototypes(ref StringBuilder outputMessage, ParsedFunction function) {
 
-            // if everything is up to date, dont go further
-            if ((listOfOutDatedProto.Count + listOfUselessProto.Count + listOfSoloImplementation.Count) == 0) {
-                if (!silent)
-                    UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
-                return;
+            var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
+
+            // we take caution here... ensure that the implementation syntax is correct
+            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) {
+
+                // replace the end ":" by a " FOWARD."
+                protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
+                Npp.SetTextByRange(function.PrototypePosition, function.PrototypeEndPosition, protoStr);
+
+                outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + (function.PrototypePosition) + "'>" + function.Name + "</a>");
             }
 
+            return true;
+        }
 
-            Npp.BeginUndoAction();
+        private static bool AddPrototypes(ref StringBuilder outputMessage, ParsedFunction function) {
 
-            // we update the prototypes
-            StringBuilder outputMessage = new StringBuilder("The following functions have had their prototype synchronized :<br>");
+            var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
 
-            // update proto
-            foreach (var function in listOfOutDatedProto) {
-                // start of the prototype statement
-                var startProtoPos = Npp.GetPosFromLineColumn(function.PrototypeLine, function.PrototypeColumn);
+            // we take caution here... ensure that the implementation syntax is correct
+            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) {
 
-                // start of the function statement
-                var startImplemPos = Npp.GetPosFromLineColumn(function.Line, function.Column);
-                var protoStr = Npp.GetTextByRange(startImplemPos, function.EndPosition);
+                // get the best position to insert the prototype
+                bool insertBefore;
+                int insertPos = GetCaretPositionForInsertion<ParsedFunction>(new ProNewPrototype { Name = function.Name }, out insertBefore);
 
-                // we take caution here... ensure that the prototype's syntax is correct
-                if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) {
+                // if we didn't find a good position, then let's assume the user doesn't need one
+                if (insertPos > 0) {
 
                     // replace the end ":" by a " FOWARD."
-                    protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
-                    Npp.SetTextByRange(startProtoPos, function.PrototypeEndPosition, protoStr);
+                    protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
 
-                    outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + function.PrototypeLine + "#" + function.PrototypeColumn + "'>" + function.Name + "</a>");
+                    Npp.SetTextByRange(insertPos, insertPos, protoStr);
+
+                    //outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + insertPos + "'>" + function.Name + "</a>");
+                    outputMessage.Append("<br> - " + function.Name);
+
+                    return true;
                 }
             }
 
-            // delete proto
-            foreach (var function in listOfUselessProto) {
+            return false;
+        }
 
-                ParsedPreProcBlock protoPreProcBlock = null;
+        private static bool DeletePrototypes(ref StringBuilder outputMessage, ParsedFunction function) {
 
-                // if we parsed the UIB (appbuilder) blocks correctly
-                if (ParserHandler.AblParser.ParsedUibBlockOk) {
+            var protoPreProcBlock = GetPreProcBlock(function.Name, function.Position, "_FUNCTION-FORWARD");
+
+            // we also want to delete the trailing new lines
+            int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : function.EndPosition);
+            while (Npp.GetTextByRange(endPosition, endPosition + 2).Equals(Npp.GetEolString)) {
+                endPosition += 2;
+            }
+
+            if (protoPreProcBlock != null) {
+                Npp.DeleteTextByRange(protoPreProcBlock.Position, endPosition);
+            } else {
+                // if not found, we just delete the proto statement
+                Npp.DeleteTextByRange(function.Position, endPosition);
+            }
+
+            outputMessage.Append("<br> - " + function.Name);
+
+            return true;
+        }
+
+        #endregion
+
+        #region Utilities
+
+        /// <summary>
+        /// returns the best caret position for inserting a new IProNew
+        /// </summary>
+        private static int GetCaretPositionForInsertion<T>(IProNew proNew, out bool insertBefore) where T : ParsedScopeItem {
+            insertBefore = false;
+
+            // at caret position
+            if (proNew.InsertPosition == ProInsertPosition.CaretPosition && !(proNew is ProNewPrototype))
+                return Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
+
+
+            T refItem = null;
+
+            #region set insertBefore and refItem
+
+            // the following is a little annoying to code and understand...
+            // the idea is to get (or dont get if it doesn't exist) the previous or the next item
+            // of type T in the existing list of said types so we can "anchor" on it to insert
+            // our new stuff...
+            if (proNew is ProNewPrototype) {
+                // find the previous/next function implementation with a prototype
+                bool found = false;
+                foreach (var item2 in ParserHandler.AblParser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).OrderBy(item => item.Line)) {
+                    var item = item2 as T;
+                    if (item != null) {
+                        // we didn't match our current function implementation yet
+                        if (!found) {
+                            // we just did
+                            if (item.Name.Equals(proNew.Name)) {
+                                found = true;
+                                continue;
+                            }
+                            // set previous item
+                            if (((ParsedFunction)item2).HasPrototype && ((ParsedFunction)item2).Type == ParsedFunctionType.Implementation)
+                                refItem = item;
+                        } else {
+                            // match first item after we found our implementation
+                            insertBefore = true;
+                            if (((ParsedFunction)item2).HasPrototype && ((ParsedFunction)item2).Type == ParsedFunctionType.Implementation) {
+                                refItem = item;
+                                break;
+                            }
+                        }
+                    }
+                }
+                if (!found)
+                    refItem = null;
+
+                // now we need its proto
+                if (refItem != null) {
+                    refItem = ParserHandler.AblParser.ParsedPrototypes.Select(pair => pair.Value).FirstOrDefault(fun => fun.Type == ParsedFunctionType.ForwardSimple && fun.Name.Equals(refItem.Name)) as T;
+                }
+
+            } else {
+                var existingList = ParserHandler.AblParser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).Select(item => (T)item).ToList();
+                if (existingList.Count > 0) {
+
+                    // alphabetical order
+                    if (proNew.InsertPosition == ProInsertPosition.AlphabeticalOrder) {
+                        // find the position that would take our new code
+                        int index = existingList.Select(item => item.Name).ToList().BinarySearch(proNew.Name);
+                        if (index < 0) {
+                            index = ~index - 1; // we get the index in which it should be inserted - 1
+                            if (index == -1) {
+                                insertBefore = true;
+                                refItem = existingList[0];
+                            } else {
+                                refItem = existingList[index];
+                            }
+                        }
+
+                        // first of its kind
+                    } else if (proNew.InsertPosition == ProInsertPosition.First) {
+                        refItem = existingList.FirstOrDefault();
+                        insertBefore = true;
+                    } else if (proNew.InsertPosition == ProInsertPosition.Last) {
+                        refItem = existingList.LastOrDefault();
+                    }
+                }
+
+            }
+
+            #endregion
+
+            // is there already an item existing?
+            if (refItem != null) {
+                // try to find a proc block, otherwise do from the proc itself
+
+                // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
+                var preProcBlock = GetPreProcBlock(refItem.Name, refItem.Position);
+                if (preProcBlock != null)
+                    return (insertBefore ? preProcBlock.Position : preProcBlock.EndBlockPosition);
+
+                // otherwise return the position of the function itself
+                return (insertBefore ? refItem.Position : refItem.EndBlockPosition);
+            }
+
+            // can we find a comment indicating where the proc should be inserted?
+            string typeComment = null;
+            if (proNew is ProNewFunction) {
+                typeComment = @"Function\s+Implementations";
+            } else if (proNew is ProNewPrototype) {
+                typeComment = @"Function\s+Prototypes";
+            } else if (proNew is ProNewProcedure) {
+                typeComment = @"Internal\s+Procedures";
+            }
+            if (typeComment != null) {
+                Npp.TargetWholeDocument();
+                var previousFlags = Npp.SearchFlags;
+                Npp.SearchFlags = SearchFlags.Regex;
+                var streg = @"\/\*\s+[\*]+\s+" + typeComment + @"\s+[\*]+";
+                var foundPos = Npp.SearchInTarget(streg);
+                Npp.SearchFlags = previousFlags;
+                if (foundPos == -1) {
+                    foundPos = new Regex(@"\/\*\s+[\*]+\s+" + typeComment + @"\s+[\*]+").Match(Npp.Text).Index;
+                    if (foundPos == 0) foundPos = -1;
+                }
+                if (foundPos > -1) {
+                    return Npp.GetPosFromLineColumn(Npp.LineFromPosition(foundPos) + 1, 0);
+                }
+            }
+
+            // At last, we find the best position considering the appbuilder blocks
+            if (proNew is ProNewFunction) {
+                // function implementation goes all the way bottom
+                return Npp.TextLength;
+
+            }
+            if (proNew is ProNewProcedure) {
+                // new procedure goes before the first function implementation of last
+                var firstFunc = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedFunction);
+                if (firstFunc != null) {
+                    insertBefore = true;
+
+                    // try to find a &IF DEFINED(EXCLUDE- block that surrounds the func
+                    var preProcBlock = GetPreProcBlock(firstFunc.Name, firstFunc.Position);
+                    if (preProcBlock != null)
+                        return preProcBlock.Position;
+
+                    return firstFunc.Position;
+                }
+            }
+            if (proNew is ProNewPrototype) {
+                // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
+                var preprocessorBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock)item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
+                if (preprocessorBlock != null) {
+                    return ((ParsedPreProcBlock)preprocessorBlock).EndBlockPosition;
+                }
+            }
+
+            return -1;
+        }
+
+        /// <summary>
+        /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
+        /// otherwise returns null
+        /// </summary>
+        private static ParsedPreProcBlock GetPreProcBlock(string functionName, int surroundedPosition, string typeStr = @"[\w-]+") {
+
+            // if we parsed the UIB (appbuilder) blocks correctly
+            if (ParserHandler.AblParser.ParsedUibBlockOk) {
+
+                // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
+                var protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+                    var blockItem = item as ParsedPreProcBlock;
+                    if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
+                        blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + functionName + @")"))
+                        return true;
+                    return false;
+                }).ToList();
+                if (protoPreProcBlock.Count == 0) {
 
                     // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
-                    var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+_FUNCTION-FORWARD\s+" + function.Name, RegexOptions.IgnoreCase);
-                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => {
+                    var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + functionName + @"\s", RegexOptions.IgnoreCase);
+                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
                         var blockItem = item as ParsedPreProcBlock;
-                        if (blockItem != null && blockItem.PreProcBlockType == ParsedPreProcBlockType.FunctionForward &&
-                            protoRegex.Match(blockItem.BlockDescription).Success)
+                        if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
                             return true;
                         return false;
-                    }) as ParsedPreProcBlock;
+                    }).ToList();
                 }
 
-                if (protoPreProcBlock != null) {
-                    UserCommunication.Notify("Delete bloock : " + function.Name);
-                    Npp.DeleteTextByRange(protoPreProcBlock.Position, protoPreProcBlock.EndBlockPosition);
-                } else {
-                    // if not found, we just delete the proto statement
-                    UserCommunication.Notify("Delete : " + function.Name);
-                    Npp.DeleteTextByRange(function.Position, function.EndPosition);
+                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
+                    if (item.Position < surroundedPosition && surroundedPosition < item.EndBlockPosition)
+                        return item;
                 }
-
-                
             }
+            return null;
+        }
 
-            // add proto
-            foreach (var function in listOfSoloImplementation) {
-                UserCommunication.Notify("Add : " + function.Name);
+        /// <summary>
+        /// Surround the text to insert with the appbuilder directives if needed
+        /// </summary>
+        private static string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
+            var eol = Npp.GetEolString;
+            if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
+                insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
+                insertText += eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME";
             }
-
-            Npp.EndUndoAction();
-
-            UserCommunication.NotifyUnique("Prototype_synchro", outputMessage.ToString(), MessageImg.MsgOk, "Function prototypes", "Synchronization done", args => {
-                var split = args.Link.Split('#');
-                if (split.Length == 3) {
-                    Npp.Goto(split[0], Int32.Parse(split[1]), Int32.Parse(split[2]));
-                    args.Handled = true;
-                }
-            }, 5);
+            if (insertBefore) insertText += eol + eol;
+            else insertText = eol + eol + insertText;
+            return insertText;
         }
 
         #endregion
@@ -154,112 +428,89 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Call this method to insert a new piece of code
         /// </summary>
-        /// <param name="type"></param>
-        public static void InsertNew(ProInsertNewType type) {
-            object newCode;
-            switch (type) {
+        public static void InsertNew<T>() where T : ParsedScopeItem {
+            IProNew newCode;
+            string insertText;
+            string blockDescription;
 
-                case ProInsertNewType.Function:
-                    newCode = new ProNewFunction();
-                    if (UserCommunication.Input(ref newCode, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
-                        return;
-                    break;
-
-                case ProInsertNewType.Procedure:
-                    newCode = new ProNewProcedure();
-                    if (UserCommunication.Input(ref newCode, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
-                        return;
-                    break;
-
-                default:
+            if (typeof(ParsedFunction) == typeof(T)) {
+                object input = new ProNewFunction();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
                     return;
-            }
-            InsertNew(type, newCode as IProNew);
-        }
+                newCode = (IProNew) input;
 
-        /// <summary>
-        /// Call this method to insert a new piece of code
-        /// </summary>
-        public static void InsertNew(ProInsertNewType type, IProNew newCode) {
-            string insertText = null;
-            string blockDescription = null;
-            switch (type) {
+                blockDescription = @"_FUNCTION " + newCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
+                insertText = insertText.Replace("{&type}", ((ProNewFunction)newCode).Type.GetDescription());
+                insertText = insertText.Replace("{&private}", ((ProNewFunction)newCode).IsPrivate ? " PRIVATE" : "");
 
-                case ProInsertNewType.Function:
-                    break;
-
-                case ProInsertNewType.Procedure:
-
-                    object newProc = new ProNewProcedure();
-                    if (UserCommunication.Input(ref newProc, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
-                        return;
-
-                    var proNew = newProc as IProNew;
-                    if (proNew == null)
-                        return;
-
-                    // reposition caret
-                    RepositionCaretForInsertion(proNew, CompletionType.Procedure);
-                    Npp.ModifyTextAroundCaret(0, 0, Encoding.Default.GetString(DataResources.InternalProcedure).Trim());
-
-                    break;
-                default:
+            } else if (typeof(ParsedProcedure) == typeof(T)) {
+                object input = new ProNewProcedure();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
                     return;
-            }
+                newCode = (IProNew)input;
 
-            var eol = Npp.GetEolString;
-            if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
-                insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
-                insertText = insertText + eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME" + eol;
-            }
+                blockDescription = @"_PROCEDURE " + newCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
+                insertText = insertText.Replace("{&private}", ((ProNewProcedure)newCode).IsPrivate ? " PRIVATE" : "");
 
-
-        }
-
-        /// <summary>
-        /// Reposition the cursor to the best position for inserting a new IProNew
-        /// </summary>
-        private static void RepositionCaretForInsertion(IProNew proNew, CompletionType completionType) {
-            // at caret position
-            if (proNew.InsertPosition == ProInsertPosition.CaretPosition) {
-                Npp.SetSelection(Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0));
             } else {
-                var findExisting = ParserHandler.ParserVisitor.ParsedCompletionItemsList.FirstOrDefault(data => data.Type == completionType);
+                return;
+            }
 
-                // is there already a proc existing?
-                if (findExisting != null) {
-                    // try to find a proc block, otherwise do from the proc itself
-                    UserCommunication.Notify("existing proc");
-                    Npp.SetSelection(Npp.CurrentPosition);
+            if (string.IsNullOrEmpty(newCode.Name))
+                return;
 
-                } else {
-                    Npp.TargetWholeDocument();
-                    var previousFlags = Npp.SearchFlags;
-                    Npp.SearchFlags = SearchFlags.Regex;
-                    var foundPos = Npp.SearchInTarget(@"/\*\s+[\*]+\s+Internal Procedures");
-                    Npp.SearchFlags = previousFlags;
+            // make sure to parse the current document before checking anything
+            ParserHandler.ParseCurrentDocument(true, true);
 
-                    // we found a comment indicating where the proc should be inserted?
-                    if (foundPos > -1) {
-                        Npp.SetSelection(Npp.GetPosFromLineColumn(Npp.LineFromPosition(foundPos), 0));
+            insertText = insertText.Replace("{&name}", newCode.Name);
 
-                    } else {
-                        // we find the ideal pos considering the blocks
-                        //var findBlock = ParserHandler.ParsedItemsList.FirstOrDefault(data => data.Type == )
+            // reposition caret and insert
+            bool insertBefore;
+            int insertPos = GetCaretPositionForInsertion<T>(newCode, out insertBefore);
+            if (insertPos < 0) insertPos = Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
 
-                        // function proto : après &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
-                        // proc : avant function implementation or last
-                        // function implem : last
+            insertText = FormatInsertion(insertText, blockDescription, insertBefore);
+            int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
+            insertText = insertText.Replace("|||", "");
 
-                        Npp.SetSelection(Npp.CurrentPosition);
-                    }
-                }
+            Npp.SetSelection(insertPos);
+            Npp.ModifyTextAroundCaret(0, 0, insertText);
+
+            Npp.GoToLine(Npp.LineFromPosition(insertPos));
+            Npp.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
+
+            // in the case of a new function, create the prototype if needed
+            if (typeof(ParsedFunction) == typeof(T)) {
+                UpdateFunctionPrototypesIfNeeded(true);
             }
         }
+
+        internal enum ProInsertNewType {
+            Procedure,
+            Function
+        }
+
 
         internal interface IProNew {
             string Name { get; set; }
             ProInsertPosition InsertPosition { get; set; }
+        }
+        internal enum ProInsertPosition {
+            [Description("Alphabetical order")]
+            AlphabeticalOrder,
+            [Description("First")]
+            First,
+            [Description("Last")]
+            Last,
+            [Description("At caret position")]
+            CaretPosition
+        }
+
+        internal class ProNewPrototype : IProNew {
+            public string Name { get; set; }
+            public ProInsertPosition InsertPosition { get; set; }
         }
 
         internal class ProNewProcedure : IProNew {
@@ -290,37 +541,41 @@ namespace _3PA.MainFeatures {
 
         }
 
-        internal enum ProInsertNewType {
-            Procedure,
-            Prototype,
-            Function
-        }
-
-        internal enum ProInsertPosition {
-            [Description("Alphabetical order")] AlphabeticalOrder,
-            [Description("First")] First,
-            [Description("Last")] Last,
-            [Description("At caret position")] CaretPosition
-        }
-
         internal enum ProFunctionType {
-            [Description("CHARACTER")] Character,
-            [Description("HANDLE")] Handle,
-            [Description("INTEGER")] Integer,
-            [Description("LOGICAL")] Logical,
-            [Description("COM-HANDLE")] ComHandle,
-            [Description("DECIMAL")] Decimal,
-            [Description("DATE")] Date,
-            [Description("DATETIME")] Datetime,
-            [Description("DATETIME-TZ")] DatetimeTz,
-            [Description("INT64")] Int64,
-            [Description("LONGCHAR")] Longchar,
-            [Description("MEMPTR")] Memptr,
-            [Description("RAW")] Raw,
-            [Description("RECID")] Recid,
-            [Description("ROWID")] Rowid,
-            [Description("WIDGET-HANDLE")] WidgetHandle,
-            [Description("CLASS XXX")] Class
+            [Description("CHARACTER")]
+            Character,
+            [Description("HANDLE")]
+            Handle,
+            [Description("INTEGER")]
+            Integer,
+            [Description("LOGICAL")]
+            Logical,
+            [Description("COM-HANDLE")]
+            ComHandle,
+            [Description("DECIMAL")]
+            Decimal,
+            [Description("DATE")]
+            Date,
+            [Description("DATETIME")]
+            Datetime,
+            [Description("DATETIME-TZ")]
+            DatetimeTz,
+            [Description("INT64")]
+            Int64,
+            [Description("LONGCHAR")]
+            Longchar,
+            [Description("MEMPTR")]
+            Memptr,
+            [Description("RAW")]
+            Raw,
+            [Description("RECID")]
+            Recid,
+            [Description("ROWID")]
+            Rowid,
+            [Description("WIDGET-HANDLE")]
+            WidgetHandle,
+            [Description("CLASS XXX")]
+            Class
         }
 
         #endregion

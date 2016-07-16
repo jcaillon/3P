@@ -551,6 +551,10 @@ namespace _3PA {
 
             // the user can open a .txt and save it as a .p
             OnNppDocumentSwitched();
+
+            // update function prototypes
+            if (IsCurrentFileProgress)
+                ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion
@@ -777,9 +781,6 @@ namespace _3PA {
         /// Called when the user saves the current document
         /// </summary>
         public static void OnNppFileBeforeSaved() {
-
-            // update function prototypes
-            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
 
             // check for block that are too long and display a warning
             if (Abl.IsCurrentFileFromAppBuilder && !CurrentFileObject.WarnedTooLong) {

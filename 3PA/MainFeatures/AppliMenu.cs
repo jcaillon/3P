@@ -27,6 +27,7 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
+using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 using _3PA.Tests;
 
@@ -183,8 +184,9 @@ namespace _3PA.MainFeatures {
             #region Generate code
 
             _generateCodeMenuList = new List<MenuItem> {
-                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Procedure), "Insert_new_procedure", "Alt+P"),
-                new MenuItem(this, "Insert new function", ImageResources.Function, () => ProGenerateCode.InsertNew(ProGenerateCode.ProInsertNewType.Function), "Insert_new_function", "Alt+F"),
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, ProGenerateCode.InsertNew<ParsedProcedure>, "Insert_new_procedure", "Alt+P"),
+                new MenuItem(this, "Insert new function", ImageResources.Function, ProGenerateCode.InsertNew<ParsedFunction>, "Insert_new_function", "Alt+F"),
+                new MenuItem(true), // --------------------------
                 new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, () => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
             };
 

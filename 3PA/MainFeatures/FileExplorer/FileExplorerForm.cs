@@ -834,8 +834,8 @@ namespace _3PA.MainFeatures.FileExplorer {
 
                 _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
 
-                if (btStopExecution.Visible != (_currentOperation > (int) CurrentOperation.Prolint)) {
-                    btStopExecution.Visible = (_currentOperation > (int) CurrentOperation.Prolint);
+                if (btStopExecution.Visible != (_currentOperation >= (int) CurrentOperation.Prolint)) {
+                    btStopExecution.Visible = (_currentOperation >= (int) CurrentOperation.Prolint);
                     lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1) * btStopExecution.Width;
                 }
 

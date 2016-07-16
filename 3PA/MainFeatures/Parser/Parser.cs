@@ -1118,7 +1118,7 @@ namespace _3PA.MainFeatures.Parser {
                         blockName = "Runtime attributes";
                     }
                     _context.CurrentAppbuilderPreProcBlock = new ParsedPreProcBlock(blockName, token) {
-                        PreProcBlockType = type,
+                        Type = type,
                         BlockDescription = toParse.Substring(pos2, toParse.Length - pos2),
                     };
 
@@ -1166,7 +1166,7 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             var newIf = new ParsedPreProcBlock(string.Empty, ifToken) {
-                PreProcBlockType = ParsedPreProcBlockType.IfEndIf,
+                Type = ParsedPreProcBlockType.IfEndIf,
                 BlockDescription = expression.ToString(),
             };
             AddParsedItem(newIf);
@@ -1267,6 +1267,8 @@ namespace _3PA.MainFeatures.Parser {
                             // we didn't match any opening (, but we found a forward
                             if (token.Value.EqualsCi("forward"))
                                 state = 99;
+                            else if (token.Value.EqualsCi("in"))
+                                state = 100;
 
                         } else if (token is TokenSymbol && token.Value.Equals("("))
                             state = 3;
@@ -1280,41 +1282,55 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                     case 10:
                         // matching prototype, we dont want to create a ParsedItem for prototype
-                        if (token is TokenWord && token.Value.EqualsCi("forward"))
-                            state = 99;
+                        if (token is TokenWord) {
+                            if (token.Value.EqualsCi("forward"))
+                                state = 99;
+                            else if (token.Value.EqualsCi("in"))
+                                state = 100;
+                        }
                         break;
                 }
             } while (MoveNext());
-            if (createdFunc == null) return false;
+            if (createdFunc == null) 
+                return false;
 
             // = end position of the EOS of the statement
             createdFunc.EndPosition = token.EndPosition;
 
             // it's a proptotype, we matched a forward
-            if (state == 99) {
+            if (state >= 99) {
                 createdFunc.Scope = _context.Scope;
                 createdFunc.FilePath = _filePathBeingParsed;
 
                 createdFunc.IsPrivate = isPrivate;
                 createdFunc.Parameters = parameters.ToString();
-                createdFunc.IsPrototype = true;
+                createdFunc.Type = state == 99 ? ParsedFunctionType.ForwardSimple : ParsedFunctionType.ForwardIn;
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdFunc);
                 return false;
-            }
+            } 
+
+            // otherwise it needs to ends with :
+            if (!(token is TokenEos) || !token.Value.Equals(":"))
+                return false;
 
             // complete the info on the function and add it to the parsed list
             createdFunc.IsPrivate = isPrivate;
             createdFunc.Parameters = parameters.ToString();
+            createdFunc.Type = ParsedFunctionType.Implementation;
 
             // it has a prototype?
             if (_functionPrototype.ContainsKey(name)) {
                 // make sure it was a prototype!
-                if (_functionPrototype[name].IsPrototype) {
+                if (_functionPrototype[name].Type != ParsedFunctionType.Implementation) {
+
                     createdFunc.HasPrototype = true;
                     createdFunc.PrototypeLine = _functionPrototype[name].Line;
                     createdFunc.PrototypeColumn = _functionPrototype[name].Column;
+                    createdFunc.PrototypePosition = _functionPrototype[name].Position;
                     createdFunc.PrototypeEndPosition = _functionPrototype[name].EndPosition;
+
+                    // boolean to know if the implementation matches the prototype
                     createdFunc.PrototypeUpdated = (
                         createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
                         createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
@@ -1327,15 +1343,13 @@ namespace _3PA.MainFeatures.Parser {
             }
             AddParsedItem(createdFunc);
 
-            // modify context?
-            if (token is TokenEos && token.Value.Equals(":")) {
-                _context.Scope = createdFunc;
+            // modify context
+            _context.Scope = createdFunc;
 
-                // add the parameters to the list
-                if (parametersList.Count > 0) {
-                    foreach (var parsedItem in parametersList) {
-                        AddParsedItem(parsedItem);
-                    }
+            // add the parameters to the list
+            if (parametersList.Count > 0) {
+                foreach (var parsedItem in parametersList) {
+                    AddParsedItem(parsedItem);
                 }
             }
 

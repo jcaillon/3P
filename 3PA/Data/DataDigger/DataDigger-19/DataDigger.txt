@@ -1,0 +1,700 @@
+ ____    __   ____   __    ____  ____  ___   ___  ____  ____
+(  _ \  /__\ (_  _) /__\  (  _ \(_  _)/ __) / __)( ___)(  _ \
+ )(_) )/(__)\  )(  /(__)\  )(_) )_)(_( (_-.( (_-. )__)  )   /
+(____/(__)(__)(__)(__)(__)(____/(____)\___/ \___/(____)(_)\_)
+
+====================================================================================================
+
+DataDigger version 19 - 22 jul 2014 (Straight A's)
+
+- Solved: Field browse refreshes when data filters change (Mike Derrick,Tim Lewis)
+- Solved: Errors when making window extremely wide (Rob Willoughby)
+
+[RC1] 20140702
+- Solved: SHARE-LOCK on _file table (Peter W. Frees)
+- Solved: Error on tables with > 500 columns
+- Solved: Filter fields appear above wrong column (Rob Willoughby)
+- Solved: Field columns can be moved between columns that are part of an extent
+- Solved: Close DD when focus is on filterfield results in errors
+- Solved: Error converting v18-to-v19 saved filter values
+- Solved: Select-all toggle box on field browse should only work on visible fields
+- New   : Expand recid formats to prevent display errors
+- New   : Possibility to specify max nr of extent fields to show in settings
+- New   : Red line around data filter to emphasize the use of filters
+
+[Beta] 20140529
+- Solved: When deleting records, no hourglass was shown
+- Solved: Yellow helper not positioned correct (Tim Lewis)
+- Solved: Time format resulted in format error (Tim Lewis)
+- Solved: Large character values cause errors when editing records (Mike Derrick)
+- Solved: Empty editor opens after closing DD (Istvan Hollo)
+- Solved: CLOB field appears in edit window (Didier Dujardin)
+- Solved: Edit window does not show extent fields (Didier Dujardin)
+- Solved: DATETIME-TZ field is not exported to 4GL properly (Istvan Hollo)
+- Solved: Dictionary changes result in internal CRC errors
+- Solved: Errors when switching to database with same name but different CRC
+- Solved: Fieldorder not saved on table change (Mike Derrick)
+- Solved: On start, main window starts off-screen (Mike Derrick)
+- Solved: Rendering error on startup when starting with index tab
+- Solved: Rendering error when moving the resize bar far up
+- Solved: Errors when working with SQL views (Peter W. Frees)
+- Solved: Error when trying to dump a RECID or ROWID field (Peter W. Frees)
+- Change: Swapped images for favourite/table view
+- Change: Cleanup of messages in datadiggerhelp.ini
+- Change: Show a startup-message when starting DataDigger
+- Change: When in ReadOnly mode, the OK button in the edit window is disabled (Peter W. Frees)
+- New   : Show color on filterbutton when filtering on fields within table
+- New   : Highlight matching fields when filtering on fields within table
+- New   : Table/field filter now remembers last used filters
+- New   : Time format HH:MM:SS can also be used on decimals 
+
+[Beta 20140314]
+- Solved: Weird tooltip on resize bar
+- Solved: Format starting with $ generates error (Peter Frederick)
+- Solved: Format change ignored when pressing CTRL-ENTER while changing format
+- Solved: SHIFT-DEL in filter field left shadowtext floating around
+- Solved: Field browse did not auto refresh on changes in filters
+- Solved: Error for PSTimer on closing DD (Didier Dujardin)
+- Solved: Extent fields show their own name as filter value
+- Change: Removed unreachable code (Rob Willoughby)
+- Change: Removed obsolete code
+- Change: Removed functionality for "Restore Last Used Data Filter"
+- New   : Added feature to perform actions prior to recompile of DataDigger
+
+[Beta 20140307]
+- Solved: Flashing scrollbars (Richard Kelters)
+- Solved: Format for custom format too short (Jani György)
+- Solved: Replace-error when running with codepage other than UTF-8/1252 (Edwin Schutten)
+- Solved: No chance to abort dumping process
+- Solved: Error when dumping data to DD-dir and opening dump-dir (Erik Weiffenbach)
+- Solved: Error when showing message on the use of -rereadnolock parameter
+- Solved: UseSystemColors in settings could not be disabled
+- Solved: Table-Field-Filter could not handle negative search (PUG Challenge)
+- Solved: Table-Field-Filter is slow. Now near-instant
+- Solved: Error when choosing "no" to overwrite-question on dumping data (Scott Dulecki)
+
+- Change: Failing queries are no longer saved in the query history (Didier Dujardin)
+- Change: Query editor shows error messages in results pane instead of a dialog window
+- Change: Settings for customFilter removed: no performance impact.
+- Change: Inserting RECID or ROWID field now uses appropriate syntax (Tim Lewis)
+- Change: Warn when dumping data to DataDigger dir itself
+- Change: Extra information written to DataDigger.log
+- Change: Extra options in the help button
+
+- New   : New custimization routine customQuery added to myDataDigger.txt
+- New   : New custimization routine customFormat added to myDataDigger.txt (John Abdoelrazak)
+- New   : New setting "Automatically set fonts", defaults to YES
+- New   : Date formats with 2 digits for year are automatically set to 4-digit year format
+- New   : Expand integer and decimal formats to prevent display errors
+- New   : Table list is cached to improve startup time. Disable via settings.
+- New   : Table and field definitions are pre-cached in the background. Disable via settings.
+- New   : History on data filters is now saved. Disable via settings.
+- New   : Remove obsolete quotes in data filter (Maarten Bril)
+- New   : Favourites view on table list 
+- New   : Extra columns shown in fields browse
+- New   : Columns in fields browse can be hidden
+- New   : Resize the fields/index browse with the drag bar
+
+====================================================================================================
+
+DataDigger version 18 - 01-06-2013
+
+- Solved: when restoring the DD window, it is places begind the progress editor window (Dick Knol)
+- Solved: Copy-to-clipboard without a databrowse gives query that ends with "WHERE" 
+- Solved: On first run, the help file could not be found (Jeroen Eeuwes)
+- Solved: Record-already-exist-error on cloning records (Jeroen Eeuwes)
+- Solved: Export to HTML broken due to characters like < and >
+- Solved: Fieldlist is not saved correctly when table contains extent fields (Dick Knol)
+- Solved: Reset field order gives error when table contains an extent field.
+- Solved: When scrolling the data browse horizontally with cursor keys, the filters don't scroll
+- Solved: Errors with non-standard datatypes on some VST tables
+- Solved: Dump window closes on F2, but does not dump
+- Solved: Mismatched number of parameters error on dumping (Rob Willoughby)
+- Solved: Double backslashes on tag <LASTDIR> when dumping records.
+- Solved: Tables added via dictionary are not listed in the table browse
+- Solved: When no table is listed due to filter, executing query gives errors (Edwin Schutten)
+- Solved: Exclude filter values from cache (Edwin Schutten)
+- Solved: Error "clipboard is empty" on startup (Rob Willoughby)
+- Solved: Error "Cannot reposition query" after adding record (Rob Willoughby)
+- Solved: Error "An open comment string was found but no closing string" on compile (Peter van den Houdt)
+- Solved: Export to 4GL failed on files with long names
+- Solved: Table list only showed first 22 characters of file name (Rob Willoughby)
+- Solved: Errors when switching DB inside dictionary from within DD (Rob Willoughby)
+- Solved: Settings windows could not be run if started with wDataDigger.w
+- Solved: Field filters fill-ins were not cleaned up properly
+- Solved: Field browse not refreshed on switch to table with same name (Jeroen Beugels)
+- Solved: Menu on data browse lacked options to add/clone etc (Edwin Schutten)
+- Solved: Compile-time warning on redefine of global preprocessors (Stefan Drissen)
+- Solved: Scrollbars on color/font pick windows if run with non standard progress.ini
+- Solved: Startup fail on progress version < 10.1B without clear message (Federico Perevicins)
+- Solved: Replace-error when running with UTF-8 codepage (Jos Hennen)
+- Solved: Login name containing ".d" gives errors in saving settings (Didier Dujardin)
+
+- Change: New icon set
+- Change: Default operator for character fields in queries BEGINS instead of MATCHES
+- Change: Searching with MATCHES does not add extra wildcards to search term
+- Change: Option on settings screen "Use MATCHES when filtering data" removed
+- Change: Table browse focusses on exact match when filtering (Edwin Schutten)
+- Change: Field definitions are cached to improve performance of switching between tables
+- Change: Data browse is created once and not everytime the data query is (re)opened
+- Change: INI file settings are cached to improve performance (see below)
+- Change: Toggling visibility of all fields now much faster
+- Change: Column sort toggles between no sort, ascending, descending
+- Change: Better location for table filter window
+- Change: Icons are a bit darker now for better viewability (Ronald Zijlstra)
+- Change: Custom dump routine moved to myDataDigger.p
+
+- New   : Possibility to start own customizations to DD via myDataDigger.p (Dick Knol)
+- New   : Automatic filters (Dick Knol)
+- New   : You can start a filter with an operator like < = <= ! etc (Dick Knol)
+- New   : Check on value for -s when starting
+- New   : KeepAlive function to prevent time-out on your databases (Chris Knickerbocker)
+- New   : Option to always start on primary monitor (Rob Willoughby)
+- New   : Option to enable/disable triggers on edit/delete (Jeroen Eeuwes)
+- New   : Option to dump data as 4GL code (Jeroen Eeuwes)
+- New   : Added filter on RECID and ROWID fields (Edwin Schutten)
+- New   : Added column nr to column label (Edwin Schutten)
+- New   : Doubleclick on field name will force that column into view (Edwin Schutten)
+- New   : Drag and drop of .db / .pf files on connection window
+- New   : Ability to specify in which section the settings for a connection must be saved
+- New   : If text is on the clipboard when DD starts, DD filters tables on that text
+- New   : Specify how column label on data browse should look
+- New   : Quick-dump of table DF from context menu on table browse
+- New   : CTRL-ALT-D opens an internal debugger to see what DD is doing
+- New   : Changes to make DD work on Oracle DataServer (Nelson Alcala)
+- New   : Right-click on index name inserts "USE-INDEX <indexname>" in query editor (Nelson Alcala)
+- New   : On startup, move image files to image-dir when they are in the DD directory (Rick Taylor)
+- New   : Option to use DD uncompiled via setting in DataDigger.ini (Stefan Drissen)
+- New   : Option to switch off caching via setting in DataDigger.ini
+- New   : Settings for making backup-on-delete are checked at startup (Jeroen Beugels)
+- New   : Guided tour for new users
+
+Caching Benchmarks on a table with 500 fields:
+Run | No cache | Schema | Registry | Both
+----+----------+--------+----------+-------
+ 1  | 01,369   | 01,422 | 00,510   | 00,062
+ 2  | 01,450   | 00,010 | 00,010   | 00,010
+
+====================================================================================================
+
+DataDigger version 17 - 6 sep 2012 (Haiku)
+
+       serious data
+    but with a DataDigger
+   will it remain the same?
+
+[beta 20120906 RC3]
+- Solved: When choosing CANCEL on question to overwrite dumpfile, DD continues write (Chris Knickerbocker)
+- Solved: Dump to Excel fails when no path is specified (Stuart Roberts)
+- Solved: Settings screen saves Dump&Load settings to wrong section in ini-file
+- Solved: dSettings.w was deleted on first DD17 run (obsolete now), but was still in the zipfile.
+- Solved: DD Window is placed behind other windows on resize (Dick Knol)
+- Solved: Inconsistent behavior on copying the query
+
+[beta 20120531 RC2]
+- Solved: When starting, font check failed.
+- Solved: Helpfile not available in non-compile environment (Jeroen Beugels)
+- Solved: DD does not start on only .r files (tip: run wDataDigger.r)
+- Solved: Full path to datadigger.p in datadigger.pf
+- Solved: Rectangle does not fit in screen for query history (Didier Dujardin)
+- Change: Disable updates if started without sources (Jeroen Beugels)
+- Change: Do not delete object files if started without sources (Jeroen Beugels)
+
+[beta 20120522 RC1]
+- Solved: Flashing when scrolling mousewheel on data browse (Dick Knol)
+- Change: Added shortcuts in tooltips
+- New: Auto-update from OEHive.org
+
+[beta 20120402]
+- Solved: Filtering on extent gives query error and no results
+- Solved: Clear table filter button gone in index view
+- Change: disabled old settings screen, new settings screen is fully functional now
+- Change: added Query Tester to tools panel (thanks to Marius Fiere)
+- New: If text is selected when DD starts, DD filters tables on that text
+- New: Added keyboard shortcuts for options in the settings frame
+- New: Extra startup program DataReader to start DataDigger in read-only mode. 
+- New: ALT-F and ALT-I will switch screen to Field view / Index view and set focus on field/index name
+- New: Auto-hide of settings frame after 2 seconds, unless mouse is over frame
+- New: When you start Data Dictionary, the window is made resizable (Thanks to Sebastien Lacroix)
+
+[beta 20120305]
+- Solved: View record shows all ? when one of the fields is unknown (Albert Flikkema)
+- Solved: Removed scrollbars on settings frame when non-standard fonts used
+- Solved: 'select all fields' toggle only works on all fields (not restrained by filter)
+- Solved: Records with dictionary validation give error 7347. Now deleted with generated program
+- Change: When changing tables, the field and index filters are cleared.
+- Change: View record shows fields in the same order as in the main window (Albert Flikkema)
+- Change: On startup, DD will try to set proper fonts by itself 
+- Change: Column sort of the Edit window is saved in the settings.
+- Change: On startup, check settings and set some defaults instead of nagging around
+- Change: Do not show individual extents in field combo in query editor
+- Change: When sorting/filtering the databrowse, focus tries to remain on the same record
+- New: During editing, a field can be changed with SHIFT-UP / DOWN / HOME / END
+- New: Added DUMPNAME tag as option for FileTemplate (Create/Update/Delete)
+- New: Added Procedure Editor button to toolbar
+- New: SHIFT-INS on databrowse adds a record based on the one that is selected
+- New: Default filtering is now MATCHES instead of EQ. Can be changed in Settings Window
+- New: ListEditor for comma separated values added to Edit window
+
+[beta 20110622]
+- Solved: Bug in dump routine prevented record from being deleted (Rob Willoughby)
+- Solved: When a record is deleted but still visible in the browse, double click gives an error
+- Solved: Red rectangle around table browse is positioned wrong when used with non-standard fonts
+- Solved: After changing settings, window would restore to old location on the screen
+- Solved: After changing settings, window would flash
+- Solved: Help automatically pops up on every start of DataDigger (Ronald Zijlstra)
+- Solved: Table description was not shown anymore (Ronald Zijlstra)
+- Solved: Edit window was confused after sorting on columns
+- Change: Data Browse uses system color for odd/even rows (Dick Knol)
+- Change: Use default values for nr of Columns / query history length- 
+- New: New settings window
+- New: Section [DataDigger:fonts] with font definitions
+- New: Fonts can be set on the Settings Window
+
+[beta 20110511]
+- Solved: When started as plugin, the persistent library was not cleaned up (Dick Knol)
+- Solved: Edit window flashes briefly when opening (Dick Knol)
+- Solved: Edit button insensitive after CTRL-A on data browse
+- Solved: Edit window allowed only maximum string format of x(256) (Ronald Zijlstra)
+- Solved: Replication Triggers still fired (due to error in Progress docs)
+- Solved: Min/Max buttons on window missing (Albert Flikkema) 
+- Change: CTRL-C in query editor just copies what is selected instead of whole query
+- Change: Table and field browse are now a bit larger
+- Change: Protection against editing of VST files
+- New: Add records to table via 'Add' button or INS on table/data browse
+- New: Edit window also shows order nr of fields
+- New: Fields in edit window can be sorted by clicking on header
+- New: Record can be backed up on create/update/delete
+- New: Added ACTION tag as option for DirTemplate and FileTemplate (Create/Update/Delete)
+- New: New setting MaxQueryTime to set maximum nr of msec for query to open 
+- New: Nr of selected records is shown in the right lower corner of the data browse
+- New: Possibility to start data dictionary from tools menu
+- New: Encode button in edit window to instantly encode the current value
+
+[beta 20110328]
+- Change: CTRL-Enter on data browse refreshes it
+- New: When changing the order of fields, the data browse is updated immediately
+- New: Column widths of data browse is now saved in INI file
+
+====================================================================================================
+
+DataDigger version 16 - 18 mar 2011 (Sweet-16 edition)
+
+Special thanks to the following people for testing and suggestion. Great job guys!
+
+  - Albert Flikkema 
+  - Jeroen Beugels 
+  - Richard Kelters
+  - Tim Lewis 
+
+- solved: Copy to clipboard could contain double 'where' in query
+- solved: No recompile when old version has been compiled after release date of new version
+- solved: Change of database in database combo was not remembered in INI 
+- solved: Maximum window size is now same as monitor (was 1680x1200)
+- solved: DataDigger looks bad if default font is changed in progress.ini 
+- solved: When toggling 'Show Hidden Tables' the table browse is not refreshed (2nd attempt)
+- solved: dump stopped at 2000 records (thanks to Tim Lewis)
+- solved: messages about the dumping process showed up in the .d dump file itself
+- solved: wrong file name was written to dumpfile when filename contained an underscore
+- solved: Favourites showed ? when database name was blank
+- solved: Context menu on DataBrowse was killed after sorting columns
+- solved: Displaying records with raw fields shows error
+- solved: On more complex queriy/filter/sort combinations, query errors could occur
+- solved: Fields of type clob/blob/raw should not be shown in the data browse
+
+- Change: Say goodbye Wiki, say hello helpfile
+- Change: Reordering of tool buttons
+- Change: When dumping to XML format, date and numeric format are fixed
+- Change: Database combo is sorted
+- Change: Recompile logfile has more informative layout 
+- Change: DataBrowse is no longer updatable 
+- Change: Minimum window size is now 650x430 (was 790x530)
+- Change: Expanded query editor is now a popup frame 
+- Change: Dump data to Excel now applies autofilter to your sheet
+- Change: Dump data to Excel or Html now use normal label instead of column-label
+- Change: when selecting a field to display (or not) using RETURN, focus moves to the next row
+- Change: when started, the initial focus is on the table filter
+- Change: no recompile when the Progress version does not allow it
+- Change: editing records now opens a new window and multiple records can be edited together
+- Change: sorting arrows are set when you define a sorting order in the query
+
+- New: Filter the table list to show only tables that have certain fields 
+- New: Possibility to start the DWP query editor or DWP debugger together with the DataDigger
+- New: Instant show/hide of columns in the data browse on toggling 'show' in fields browse
+- New: Right-click on databrowse gives option to hide individual columns
+- New: Right-click on databrowse gives option to show data value
+- New: Possibility to start DataDigger with no databases connected
+- New: Added USERID tag as option for DumpFileTemplate (userid of first connected db)
+- New: Added TIMESTAMP tag as option for DumpFileTemplate (setting in ini file)
+- New: Added LASTDIR tag as option for DumpFileTemplate (last used dir for dumping)
+- New: Added WEEKDAY tag as option for DumpFileTemplate (nr 1-7 from weekday function)
+- New: Added DAYNAME tag as option for DumpFileTemplate (3 letter name for weekday)
+- New: Added HH, MM, SS tags as option for DumpFileTemplate (Time portions)
+- New: When deleting records, a backup will be saved in an XML file
+- New: You can specify your own dump program, see CustomDump
+- New: DataDigger file date/times are saved in DataDigger.ini
+- New: Notify user when an error occurs on recompile of all sources.
+- New: DataFilters above data browse to filter query results
+- New: Warn when DataDigger is started with non-standard FontSettings
+- New: Warn when DataDigger is started without -rereadnolock parameter
+- New: View multiple selected records at once.
+- New: View selected records as TXT, Excel or HTML
+- New: Added context menu to DataBrowse to view, dump or delete records
+- New: define your own trigger program for changes/deletes 
+- New: when dumping in html or excel, you can choose which format to use
+- New: Dump data to TXT from DumpAndLoad window
+- New: Dumping data can be aborted during dump
+- New: Double Click on record shows selected record
+- New: fields of type int64 can be shown using time format like normal integers
+- New: CTRL-A and CTRL-D select/deselect all records in the data browse
+
+====================================================================================================
+
+DataDigger version 15 - 18 mar 2010 (Bregje-15 Edition)
+
+- New: A logfile is generated when DataDigger recompiles itself
+- New: New ViewRecordDetails window: non-modal, resizable, printable
+- New: ViewRecordDetails window shows same fields in the same order as main window 
+- New: ViewRecordDetails window shows values of primary index fields in its title
+- New: Added Alt-T to jump to table filter
+- New: Added Alt-Q to jump to QueryWindow
+- New: Possibility to set date and numeric format in DumpAndLoad window
+- New: When changing dump type in DumpAndLoad window, only the dump file extention is changed
+- New: Before dumping, a check is done whether the desired output file is valid and writable
+- New: Possibility to edit or delete queries in the QueryWindow
+- New: Dump data to HTML from DumpAndLoad window
+- New: Dump data to Excel sheet from DumpAndLoad window
+
+- Solved: Navigation between queries was confused after cancelling out of QueryWindow
+- Solved: When toggling 'Show Hidden Tables' the table browse is not refreshed
+- Solved: When saving changes on an even nr of records, DataBrowse swaps colors
+
+====================================================================================================
+
+DataDigger version 14 - 03 mar 2010 (Election Day Edition)
+
+- Solved: Right click on empty line in field or index browse generates errors
+- Solved: Message "Only first 500 columns are shown" is placed on top of dump button
+- Solved: Strange error when expanding empty query editor with UTF-8 (Stefan Houtzager)
+- Solved: When using environment vars in DumpDir, these are resolved and then written back
+- Solved: When started from more than 1 environment date-format is saved in INI file for DumpAndLoad window
+- Solved: Starting DataDigger and executing query without changing table causes error
+- Solved: When scrolling with mouse, field browse filters flash
+- Solved: Jumping to the end of a very large table takes (almost) forever
+- Solved: "Basedir not found" error when overruling the filename in DumpAndLoad window
+- Solved: Button 'open dir of last dump' opens dir of current dumpfile instead of last dumped file
+
+- New: When started, DataDigger checks if at least 1 database is connected
+- New: Welcome message can be told to never show up again
+- New: Automatically recompile all DataDigger files if needed
+- New: Title of DataDigger window is also shown in [[Windows Task Manager]]
+- New: Search-as-you-type on tables, fields and indexes filter
+- New: Show query execution time together with [[Number Of Records]]
+- New: Show index information on executed query
+- New: Clear current input with SHIFT-DEL on tables, field and index filter and query editor
+- New: Show date/time of last acces of a table in table browse
+- New: Columns in table browse are resizable
+- New: Added Year, Month, Day, Progdir to DumpFileTemplate
+- New: Added checkboxes to set DumpReadyAction in DumpAndLoad window
+- New: Format errors are immediately cleared from ini file 
+- New: Show progress bar while dumping records
+- New: Warn when trying to dump empty browse or empty selection
+
+
+====================================================================================================
+
+DataDigger version 13 - 13 jan 2010 (Bad Luck Edition)
+
+Solved: Startup with a lot of database or database with lots of tables takes too long
+Solved: 'Show hidden tables' (ShowHiddenTables) setting was not saved
+Solved: Strange errors when disconnecting a database
+
+Change: Documentation wiki behaves more like a normal wiki showing 1 page at a time
+Change: Count button removed. Functionality moved to double click of new record count field
+Change: Double click on database in ConnectionWindow connects or disconnects database
+Change: Connection of a database in ConnectionWindow does not automatically closes window
+Change: Button 'Copy to clipboard' or CTRL-C of query editor now copies full query to clipboard
+
+New: Added [[Query Navigation Buttons]] to jump to previous or next query of this table
+New: Show (approx) [[Number Of Records]] below DataBrowse.
+New: Added 'disconnect' button on ConnectionWindow
+New: It is now possible to include OS Environment Variables in the settings DumpFileTemplate and DumpDir
+New: Added possibility to sort connections in ConnectionWindow
+
+
+====================================================================================================
+
+DataDigger version 12 - 6 jan 2010
+
+Solved: On startup without .ini file, session crashes.
+Solved: If no explicit position is specified in INI, window is located out of sight
+Solved: "Table occurs in more than 1 database" error on startup
+Solved: Removed debug messages
+Solved: When updating a running version of DataDigger, close open windows and restart library.
+Solved: Sometimes CHR(1) characters were not removed from queries that were read from ini file
+Solved: When run as .r without .p startup failed
+
+Change: Buttons 'Yes/No/Cancel' instead of 'OK/Cancel' on delete of record
+Change: Database/Table navigation changed to enable listing of all tables
+Change: Connect/disconnect/quick connect now available as context menu on table browse
+
+New: Show number of exectuted queries on a table.
+New: Added Alt-w to jump to Where-editor
+New: Added Count button to count total number of records of the query
+
+====================================================================================================
+
+DataDigger version 11 - 12 dec 2009 (Double Dozen Edition)
+
+NOTE: To support multiple history of queries on a table, this version of DataDigger uses a slightly 
+      different way of saving queries in your settings file. On first start of build 11, your current 
+      settings file will be automatically converted. An old version of your settings file will be 
+      saved with the extention .bak. See also QueryWindow
+
+- Solved: Error on lockWindowUpdate when DataDigger was used in combination with DWP
+- Solved: Wrong quotation on insertion of linkInfo fields (none on integer, double on characters)
+- Solved: Scrollbars appearing on frame
+- Solved: Edit panel remains active after db switch althoug databrowse is hidden
+- Solved: Flashing on startup
+
+- Change: Removed buttons for navigation (first, prev, next last)
+- Change: Replaced LockWindowUpdate with RedrawWindow
+- Change: Connection numbers for databases in INI file must be sequential. 
+- Change: Startup is now faster due to limited scanning of connections.
+- Change: Save nr of queries on a table (for future use)
+- Change: Different behavior on table list since this has been changed from selection-list to browse
+- Change: Order of fields is now the sequence number, not the _Order field from the dictionary
+- Change: Button 'watskeburt' now opens wiki. Right mouse click opens DataDigger.txt
+- Change: Moved all images to separate dir
+- Change: Behavior for LinkInfo has been reversed: press ctrl to escape it instead of using it
+
+- New: DumpAndLoad window for export to .XML / .D (thanks to Jeroen Beugels)
+- New: Executed queries are saved and can be recalled via pageUp/pageDown on query editor
+- New: QueryWindow to recall executed queries
+- New: Maximum nr of queries to save is set via setting MaxQueryHistory. Default value is 10
+- New: Field _Order of field can be changed. If changed, color is red, just like format field. 
+- New: New setting DumpReadyAction to specify action to perform after dumping
+- New: Added <#> tag as option for DumpFileTemplate 
+- New: When F1 is pressed, the DataDigger wiki is opened
+- New: Added buttons to change order of fields
+
+
+====================================================================================================
+
+DataDigger version 10 - 21 oct 2009 (Progression revisited Edition)
+
+- New: insert and delete key execute corresponding buttons on databrowse
+- New: queries are published for use with the query analyzer as: publish 'query' (query-string).
+- New: when query editor is expanded/collapsed, returns are transformed to spaces and back
+- New: A column with the rowid is always added to the DataBrowse
+- New: If you specify a time format like HH:MM:SS for an integer field, the value will be displayed as time
+- New: Order of field selection is preserved when a table is selected
+- New: Right click on 'Indexes' tab immediately inserts fields + LinkInfo from primary index in query editor. 
+- New: Added 'copy to clipboard' button next to query editor 
+- New: Introduced LinkInfo like Progression in the old days: DataDigger remembers the values of fields you display.
+       This value can be reused in other DataDigger instances (in the same session). 
+- New: CTRL+right click on field uses LinkInfo
+- New: Right click on index or index tab uses LinkInfo
+- New: New settings in INI file:
+       AutoExpandQueryEditor=no      : Do not expand query editor on right-click of index or index-tab
+       MaxColumns=n                  : Overrule default Maximum number of columns of 500
+       AddDataColumnForRecid=no      : Do not add recid column to DataBrowse
+       AddDataColumnForRowid=no      : Do not add rowid column to DataBrowse
+- Solved: Error 'subscript 0 is out of range' error when viewing records with extent fields. 
+
+
+====================================================================================================
+
+DataDigger version 9 - 16 oct 2009 (Revolution nr 9 edition)
+
+NOTE: This version uses a different naming convention for the .ini file. 
+      Rename your .ini file from DataDigger.ini to DataDigger-XXX.ini 
+      where XXX is the name you use to logon to Windows. 
+      
+- New: Added a 'DataDigger.p' program to launch DataDigger when used outside of Pro*Tools
+- New: Disconnect button disconnects selected database 
+- New: A column with the recid is always added to the DataBrowse
+- New: flag 'inactive' for inactive indexes
+- New: Show inactive indexes in red font
+- New: Delay refresh of field and index browse when changing table within 300 msec
+- New: Option to specify an extra title element by adding -PARAM "extra title" to your startup shortcut
+- New: Settings file is now personal, based on Windows logon ID 
+- New: Button to directly edit your settings file.
+- New: Only first 500 fields of a table are shown to prevent out-of-memory errors
+- New: When sorting fields, index or DataBrowse, focus remains on the same row
+- New: Right-click on index inserts a query that uses all fields of that index.
+
+- Solved: pressing esc while updating a field in the browse minimize window 
+- Solved: format for field 'Format' is too small.
+- Solved: small annoyances with gray text in filter fields
+- Solved: flashing when changing tables or when switching tabs
+- Solved: column sort was not saved.
+- Solved: a second instance of DataDigger was positioned exactly at the place of the invoking one. 
+- Solved: right-click on field selected wrong field when clicked too low
+- Solved: sorting DataBrowse sometimes made the background colors flash
+- Solved: it is not possible to start more than one extra Digger from one window
+- Solved: double-click on table name to execute query ignores changed query but re-uses previously saved one
+
+
+====================================================================================================
+
+DataDigger version 8 - 22 sep 2009 (Brand New Day edition)
+
+- Solved: startup error when no .ini file present
+- Solved: ini file is not created when not present on startup
+- Solved: right click on field does not replace selected text in query editor
+- Solved: Browses are built twice on startup
+
+- New: Right-click on field browse repositions cursor and pastes expected field
+- New: Icons
+- New: Button 'Clear query' also clears query from ini file.
+
+
+====================================================================================================
+
+DataDigger version 7 - 18 sep 2009 (Mullerman edition)
+
+- Solved: "Unable to find image" error on startup
+- Minor UI changes to connection window
+- Aligned button panels at bottom of DataDigger screen
+- On table change, remove DataBrowse since it points to another table
+- Do not show original format as tooltip anymore
+- field browse now also shows array information
+- Solved Font errors when starting more than once from pro*tools
+- When deleting or changing records, triggers for that table are disabled
+- When dumping records, the dump name of the file is used as default
+- Some new icons 
+- Correctly quit session without showing empty editor window
+- Added possibility to actually edit and save extent fields
+- Use default colours of Progress instead of dynamically changing color 25
+- Sorting on extent field in databrowse gave error.
+- Added protection against too much (extent) fields in databrowse
+- Added sort arrows to databrowse
+- Show original format as floating message when it is changed
+- Return-key on table name executes query
+- Filterbutton reversed sorting direction. Fixed. 
+- Added favourite connections to "+" button
+
+Known issues:
+- View on table _UserLock view data gives "Array subscript 0 is out of range (26)"
+
+
+====================================================================================================
+
+DataDigger version 6 - 9 sep 2009 (Triple-9 version)
+
+- Changed format of .INI file. Please throw away old .INI file
+- When expanding query editor, check whether window is large enough 
+- When viewing data, check whether window is large enough 
+- Window with record details resizes (a bit) to fit data
+- Repaired some 'Font 0 not in font set' errors.
+- Better handling of query; don't nag if it starts with AND/OR
+- Show or hide query editor on alt-cursor-up and down
+- Reshuffled query buttons 
+- Added button to open extra window
+- Changed DataDigger text logo to real button 
+- Added connection favourites
+- Added index information in separate browse
+- Save/restore active tab (Fields or Indexes)
+- Save/restore whether or not to show hidden fields
+- Count total number of queries served (just for fun)
+- When changing format of field, show original format in browse tooltip
+- Button 'Clear Filters' now resets filterfields to original state
+- Remember which version has run and show welcome message when needed
+- When the query editor is small, ENTER acts as 'execute query'
+
+
+====================================================================================================
+
+DataDigger version 5 - 16 jul 2009 (Bugleman edition)
+
+- 'select all fields' toggle only works on fields currently shown by filter
+- Added button to make hide/show extended query options
+- Save/restore state of query editor in INI
+- Fields with strange labels were sometimes not displayed in list
+- Save/restore selected fields in INI
+
+
+====================================================================================================
+
+DataDigger version 4 - 14 jul 2009 (France Liberty Edition)
+
+- Jump from field filters to field browse and back
+- Execute query on CTRL-ENTER of filterfields
+- Disable View button/select all toggle when no fields
+- Added DataDigger logo + revision history on doubleclick
+- Added DataDigger favicon
+- Added table description field :-)
+- ESC minimizes the window instead of closing it
+- Provided picture for usage in Pro*Tools palette
+- Close INI file on close of program to avoid font errors
+
+
+====================================================================================================
+
+DataDigger version 3 - 9 jul 2009
+
+- Minor UI changes
+- Changed name to DataDigger to avoid confusion with DataHack
+- Use default progress.ini 
+- Added filters to fields browse
+- Save/restore column size in INI 
+- Let column filters adapt to column size
+- Save/restore field format in INI 
+- Save/restore fields sort in INI
+- Field Format in red when changed 
+- Reset 'select all fields' toggle on table change
+- Rightclick on field browse inserts fieldname only
+- Added 'clear all filters' button
+- Save/restore field sort in INI
+- Connect/disconnect on + and - key
+- Reset color of where-editor on table change
+- Added buttons with default text (= <> > < "" TODAY)
+- Save/restore query in INI
+- Put selected text between brackets on click of () button in where-editor
+- Replace selected text with buttontext in where-editor
+- Jump from table filter field to selection list and back
+- Add tooltip to EDITOR if query is invalid
+
+
+====================================================================================================
+
+DataDigger version 2 - 6 feb 2009 (Mother-in-law edition)
+
+- Use INI file to save last used db, table and window position
+- Rightclick on field browse inserts fieldname + '='
+- Added connect and disconnect buttons
+- Added 'Clear query' button :-)
+- Added buttons with default text (AND OR NOT ())
+- Added fields to quickly insert query parts to where-editor
+- Added colors to fields browse to indicate primary key :-)
+- Added keyboard shortcuts to execute query
+- Added table filter field
+- Removed table quickselect fill-in
+
+
+====================================================================================================
+
+DataDigger version 1 - jan 2009
+
+- Major changes to the internals to clean things up
+- Removed all references to Dynamics
+- Removed 'Use outer join' toggle
+- Removed 'Struct Copy' button
+- Removed colors from fields browse
+- Removed table description field
+- Removed 'Clear query' button
+- Made columns of fields browse resizable 
+- Added _order and _label to fields browse
+- Added toggles to select/deselect fields to show
+- Where-field changed to editor 
+- Make WHERE field red on invalid query and reopen without query
+- Fields browse is sortable
+- Added possibility to change field format
+
+
+====================================================================================================
+
+DataDigger version 0 - dec 2008
+
+- Started out with DataHack of Richard Tardivon

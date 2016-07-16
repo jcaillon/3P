@@ -58,7 +58,6 @@ namespace _3PA.Tests {
 
         public static void DebugTest2() {
 
-
         }
 
         public static void DebugTest3() {
@@ -341,7 +340,7 @@ namespace _3PA.Tests {
         public void Visit(ParsedPreProcBlock pars) {
             Output.Append("BLOCK\t:");
             Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.BlockDescription + ", " + pars.PreProcBlockType);
+            Output.Append(", " + pars.BlockDescription + ", " + pars.Type);
             Output.Append("\r\n");
         }
 

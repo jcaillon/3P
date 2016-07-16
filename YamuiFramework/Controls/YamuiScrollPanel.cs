@@ -248,7 +248,7 @@ namespace YamuiFramework.Controls {
                 HasScrolls = false;
             } else {
                 // thumb heigh is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = Math.Max(Convert.ToInt32(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
+                _thumbRectangle.Height = Math.Max((int)(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
                 _contentPanel.Width = Width - 10;
                 HasScrolls = true;
             }

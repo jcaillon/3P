@@ -1,5 +1,4 @@
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION {&name} Procedure 
-FUNCTION {&name} RETURNS {&Type}
+FUNCTION {&name} RETURNS {&type}{&private}
   ( /* parameter-definitions */ ) :
 /*------------------------------------------------------------------------------
   Summary    :     
@@ -8,11 +7,10 @@ FUNCTION {&name} RETURNS {&Type}
   Remarks    :       
 ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE retVal AS {&Type} NO-UNDO.
+    DEFINE VARIABLE retVal AS {&type} NO-UNDO.
+
+    |||
 
     RETURN retVal.
 
 END FUNCTION.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME

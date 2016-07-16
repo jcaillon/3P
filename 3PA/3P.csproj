@@ -418,6 +418,7 @@
   <ItemGroup>
     <None Include="Data\Abbreviations" />
     <None Include="Data\CompilationPath" />
+    <None Include="Data\DataDigger\DataDigger-19.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
