@@ -374,9 +374,12 @@ namespace _3PA.MainFeatures.Parser {
                             _context.PreProcIfStack.Push(CreateParsedIfEndIfPreProc(token));
                             break;
                         case "&endif":
-                            var prevIf = _context.PreProcIfStack.Pop();
-                            prevIf.EndBlockLine = token.Line;
-                            prevIf.EndBlockPosition = token.EndPosition;
+                            if (_context.PreProcIfStack.Count > 0) {
+                                var prevIf = _context.PreProcIfStack.Pop();
+                                prevIf.EndBlockLine = token.Line;
+                                prevIf.EndBlockPosition = token.EndPosition;
+                            } else
+                                ParsedIfEndIfBlockOk = false;
                             break;
                         default:
                             // it's a potential label
