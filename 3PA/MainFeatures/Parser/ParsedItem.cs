@@ -109,7 +109,8 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public ParsedScopeType ScopeType { get; private set; }
 
-        protected ParsedScopeItem(string name, Token token, ParsedScopeType scopeType) : base(name, token) {
+        protected ParsedScopeItem(string name, Token token, ParsedScopeType scopeType)
+            : base(name, token) {
             ScopeType = scopeType;
             EndBlockPosition = -1;
         }
@@ -202,7 +203,7 @@ namespace _3PA.MainFeatures.Parser {
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    internal class ParsedFunction : ParsedScopeItem {
+    internal abstract class ParsedFunction : ParsedScopeItem {
         public ParsedPrimitiveType ReturnType { get; set; }
         /// <summary>
         /// Parsed string for the return type, use ReturnType instead!
@@ -216,10 +217,36 @@ namespace _3PA.MainFeatures.Parser {
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
 
+        protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
+            ParsedReturnType = parsedReturnType;
+            Extend = String.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Function parsed item
+    /// </summary>
+    internal class ParsedPrototype : ParsedFunction {
+
         /// <summary>
-        /// the type of this function : implementation, forward (in local procedure), forward in foreign procedure
+        /// true if it's a simple FORWARD and the implementation is in the same proc,
+        /// false otherwise (meaning we matched a IN)
         /// </summary>
-        public ParsedFunctionType Type { set; get; }
+        public bool SimpleForward { get; set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedPrototype(string name, Token token, string parsedReturnType) : base(name, token, parsedReturnType) {
+            Extend = String.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Function parsed item
+    /// </summary>
+    internal class ParsedImplementation : ParsedFunction {
 
         /// <summary>
         /// true if this function is an implementation AND has a prototype
@@ -238,27 +265,10 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
-            ParsedReturnType = parsedReturnType;
+        public ParsedImplementation(string name, Token token, string parsedReturnType)
+            : base(name, token, parsedReturnType) {
             Extend = String.Empty;
         }
-    }
-
-
-
-    internal enum ParsedFunctionType {
-        /// <summary>
-        /// For function prototypes that are defined in the same procedure
-        /// </summary>
-        ForwardSimple,
-        /// <summary>
-        /// For prototypes that are defined in another procedure
-        /// </summary>
-        ForwardIn,
-        /// <summary>
-        /// For function body (implementation)
-        /// </summary>
-        Implementation,
     }
 
     /// <summary>

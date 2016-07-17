@@ -407,11 +407,7 @@ namespace _3PA.MainFeatures.Parser {
             });
         }
 
-        /// <summary>
-        /// Functions
-        /// </summary>
-        /// <param name="pars"></param>
-        public void Visit(ParsedFunction pars) {
+        public void Visit(ParsedImplementation pars) {
             // check lenght of block
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);
 
@@ -437,6 +433,10 @@ namespace _3PA.MainFeatures.Parser {
                 ParsedItem = pars,
                 FromParser = true
             });
+        }
+
+        public void Visit(ParsedPrototype pars) {
+            // there are no prototypes to visit
         }
 
         /// <summary>

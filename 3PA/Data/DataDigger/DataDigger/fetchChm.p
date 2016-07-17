@@ -113,8 +113,14 @@ run initializeObject.
 cRemoteFile = getRegistry("DataDigger:Update","ChmDownloadUrl").
 if cRemoteFile = ? then
     gcError = "Download-URL not defined in settings.".
-ELSE
+ELSE DO:
     run upgradeDataDigger(input cRemoteFile, INPUT gcProgramDir + "DataDigger.chm", output gcError).
+    IF gcError > "" THEN DO:
+        cRemoteFile = getRegistry("DataDigger:Update","ChmDownloadUrl2").
+        if cRemoteFile <> ? then
+            run upgradeDataDigger(input cRemoteFile, INPUT gcProgramDir + "DataDigger.chm", output gcError).
+    END.
+END.
     
   /* Show the window at least some time, otherwise it will flash, which is annoying */
   REPEAT WHILE ETIME < 1500:

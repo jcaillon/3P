@@ -1224,12 +1224,13 @@ namespace _3PA.MainFeatures.Parser {
         private bool CreateParsedFunction(Token functionToken) {
 
             // info we will extract from the current statement :
-            string name = "";
+            string name = null;
+            string returnType = null;
+            string extend = null;
+            bool isExtent = false;
             _lastTokenWasSpace = true;
             StringBuilder parameters = new StringBuilder();
             bool isPrivate = false;
-            bool isExtent = false;
-            ParsedFunction createdFunc = null;
             var parametersList = new List<ParsedItem>();
 
             Token token;
@@ -1251,18 +1252,17 @@ namespace _3PA.MainFeatures.Parser {
                         if (token.Value.EqualsCi("returns") || token.Value.EqualsCi("class"))
                             continue;
 
-                        // create the function (returnType = token.Value)
-                        createdFunc = new ParsedFunction(name, functionToken, token.Value);
+                        returnType = token.Value;
+                        
                         state++;
                         break;
                     case 2:
                         // matching parameters (start)
                         if (token is TokenWord) {
-                            if (token.Value.EqualsCi("private")) isPrivate = true;
-                            if (token.Value.EqualsCi("extent") && createdFunc != null) {
-                                createdFunc.IsExtended = true;
+                            if (token.Value.EqualsCi("private")) 
+                                isPrivate = true;
+                            if (token.Value.EqualsCi("extent"))
                                 isExtent = true;
-                            }
 
                             // we didn't match any opening (, but we found a forward
                             if (token.Value.EqualsCi("forward"))
@@ -1273,7 +1273,7 @@ namespace _3PA.MainFeatures.Parser {
                         } else if (token is TokenSymbol && token.Value.Equals("("))
                             state = 3;
                         else if (isExtent && token is TokenNumber)
-                            createdFunc.Extend = token.Value;
+                            extend = token.Value;
                         break;
                     case 3:
                         // read parameters, define a ParsedDefineItem for each
@@ -1291,22 +1291,24 @@ namespace _3PA.MainFeatures.Parser {
                         break;
                 }
             } while (MoveNext());
-            if (createdFunc == null) 
+            if (name == null || returnType == null) 
                 return false;
 
-            // = end position of the EOS of the statement
-            createdFunc.EndPosition = token.EndPosition;
-
-            // it's a proptotype, we matched a forward
+            // New proptotype, we matched a forward
             if (state >= 99) {
-                createdFunc.Scope = _context.Scope;
-                createdFunc.FilePath = _filePathBeingParsed;
-
-                createdFunc.IsPrivate = isPrivate;
-                createdFunc.Parameters = parameters.ToString();
-                createdFunc.Type = state == 99 ? ParsedFunctionType.ForwardSimple : ParsedFunctionType.ForwardIn;
+                ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, returnType) {
+                    Scope = _context.Scope,
+                    FilePath = _filePathBeingParsed,
+                    SimpleForward = state == 99, // allows us to know if we expect an implementation in this .p or not
+                    EndPosition = token.EndPosition,
+                    EndBlockPosition = token.EndPosition,
+                    IsPrivate = isPrivate,
+                    IsExtended = isExtent,
+                    Extend = extend ?? string.Empty,
+                    Parameters = parameters.ToString()
+                };
                 if (!_functionPrototype.ContainsKey(name))
-                    _functionPrototype.Add(name, createdFunc);
+                    _functionPrototype.Add(name, createdProto);
                 return false;
             } 
 
@@ -1314,37 +1316,42 @@ namespace _3PA.MainFeatures.Parser {
             if (!(token is TokenEos) || !token.Value.Equals(":"))
                 return false;
 
-            // complete the info on the function and add it to the parsed list
-            createdFunc.IsPrivate = isPrivate;
-            createdFunc.Parameters = parameters.ToString();
-            createdFunc.Type = ParsedFunctionType.Implementation;
+            // New function
+            ParsedImplementation createdImp = new ParsedImplementation(name, functionToken, returnType) {
+                EndPosition = token.EndPosition,
+                IsPrivate = isPrivate,
+                IsExtended = isExtent,
+                Extend = extend ?? string.Empty,
+                Parameters = parameters.ToString()
+            };
 
             // it has a prototype?
             if (_functionPrototype.ContainsKey(name)) {
                 // make sure it was a prototype!
-                if (_functionPrototype[name].Type != ParsedFunctionType.Implementation) {
+                var proto = _functionPrototype[name] as ParsedPrototype;
+                if (proto != null && proto.SimpleForward) {
 
-                    createdFunc.HasPrototype = true;
-                    createdFunc.PrototypeLine = _functionPrototype[name].Line;
-                    createdFunc.PrototypeColumn = _functionPrototype[name].Column;
-                    createdFunc.PrototypePosition = _functionPrototype[name].Position;
-                    createdFunc.PrototypeEndPosition = _functionPrototype[name].EndPosition;
+                    createdImp.HasPrototype = true;
+                    createdImp.PrototypeLine = proto.Line;
+                    createdImp.PrototypeColumn = proto.Column;
+                    createdImp.PrototypePosition = proto.Position;
+                    createdImp.PrototypeEndPosition = proto.EndPosition;
 
                     // boolean to know if the implementation matches the prototype
-                    createdFunc.PrototypeUpdated = (
-                        createdFunc.IsExtended == _functionPrototype[name].IsExtended &&
-                        createdFunc.IsPrivate == _functionPrototype[name].IsPrivate &&
-                        createdFunc.Extend.Equals(_functionPrototype[name].Extend) &&
-                        createdFunc.ParsedReturnType.Equals(_functionPrototype[name].ParsedReturnType) &&
-                        createdFunc.Parameters.Equals(_functionPrototype[name].Parameters));
+                    createdImp.PrototypeUpdated = (
+                        createdImp.IsExtended == proto.IsExtended &&
+                        createdImp.IsPrivate == proto.IsPrivate &&
+                        createdImp.Extend.Equals(proto.Extend) &&
+                        createdImp.ParsedReturnType.Equals(proto.ParsedReturnType) &&
+                        createdImp.Parameters.Equals(proto.Parameters));
                 }
             } else {
-                _functionPrototype.Add(name, createdFunc);
+                _functionPrototype.Add(name, createdImp);
             }
-            AddParsedItem(createdFunc);
+            AddParsedItem(createdImp);
 
             // modify context
-            _context.Scope = createdFunc;
+            _context.Scope = createdImp;
 
             // add the parameters to the list
             if (parametersList.Count > 0) {

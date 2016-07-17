@@ -584,6 +584,7 @@ namespace _3PA.MainFeatures {
         public static string FolderTemplates { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Templates")); } }
         public static string FolderThemes { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Themes")); } }
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
+        public static string FolderDataDigger { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DataDigger")); } }
 
         // themes
         public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); } }

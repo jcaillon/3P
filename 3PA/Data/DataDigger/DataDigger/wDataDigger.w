@@ -7433,6 +7433,7 @@ PROCEDURE initializeSettingsFile :
     setRegistry("DataDigger:Update", "UpdateUrl"    , "http://www.oehive.org/files/DataDiggerVersion.txt").
     setRegistry("DataDigger:Update", "UpdateChannel", "0"). /* default channel */
     setRegistry("DataDigger:Update", "ChmDownloadUrl"  , "https://github.com/jcaillon/3P/blob/beta/3PA/Data/DataDigger/DataDigger.chm?raw=true").
+    setRegistry("DataDigger:Update", "ChmDownloadUrl2"  , "https://github.com/jcaillon/3P/blob/master/3PA/Data/DataDigger/DataDigger.chm?raw=true").
   END.
 
   {&timerStop}
@@ -10867,10 +10868,6 @@ PROCEDURE startSession :
    */
   if lNewUser then run showTour.
   else if lUpgraded then run showNewFeatures.
-
-  /* Start up the page on WordPress.com for this build */
-  IF lNewBuild THEN
-    OS-COMMAND NO-WAIT START VALUE("http://datadigger.wordpress.com/{&build}").
 
 end procedure. /* startSession */
 

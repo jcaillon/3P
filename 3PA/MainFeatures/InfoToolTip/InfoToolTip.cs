@@ -352,7 +352,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append("None");
                         break;
                     case CompletionType.Function:
-                        var funcItem = (ParsedFunction) data.ParsedItem;
+                        var funcItem = (ParsedImplementation) data.ParsedItem;
                         toDisplay.Append(FormatSubtitle("RETURN TYPE"));
                         toDisplay.Append(FormatRowParam("output", "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
 

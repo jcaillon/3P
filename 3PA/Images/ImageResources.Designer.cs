@@ -323,6 +323,26 @@ namespace _3PA.Images {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap DatabaseTools {
+            get {
+                object obj = ResourceManager.GetObject("DatabaseTools", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DataDigger {
+            get {
+                object obj = ResourceManager.GetObject("DataDigger", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap DefinitionBlock {
             get {
                 object obj = ResourceManager.GetObject("DefinitionBlock", resourceCulture);
@@ -346,6 +366,26 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Delete {
             get {
                 object obj = ResourceManager.GetObject("Delete", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeleteFunction {
+            get {
+                object obj = ResourceManager.GetObject("DeleteFunction", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap DeleteProcedure {
+            get {
+                object obj = ResourceManager.GetObject("DeleteProcedure", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

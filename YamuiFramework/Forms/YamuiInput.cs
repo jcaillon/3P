@@ -361,6 +361,15 @@ namespace YamuiFramework.Forms {
                 object val;
                 if (c is YamuiButtonToggle)
                     val = ((YamuiButtonToggle)c).Checked;
+                else if (c is YamuiComboBox && itemType.IsEnum) {
+                    val = c.Text.ConvertFromStr(itemType);
+                    foreach (var name in Enum.GetNames(itemType)) {
+                        var attribute = Attribute.GetCustomAttribute(itemType.GetField(name), typeof(DescriptionAttribute), true) as DescriptionAttribute;
+                        if (name.Equals(c.Text) || attribute != null && attribute.Description.Equals(c.Text)) {
+                            val = name.ConvertFromStr(itemType);
+                        }
+                    }
+                }
                 else
                     val = c.Text.ConvertFromStr(itemType);
 
@@ -385,6 +394,8 @@ namespace YamuiFramework.Forms {
         }
 
         private YamuiInputAttribute GetAttr(MemberInfo mi) {
+            if (mi == null)
+                return null;
             return (YamuiInputAttribute)Attribute.GetCustomAttribute(mi, typeof(YamuiInputAttribute), true);
         }
 

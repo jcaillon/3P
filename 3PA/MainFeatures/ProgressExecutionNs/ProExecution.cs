@@ -226,7 +226,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (!Utils.CreateDirectory(TempDir))
                 return false;
             
-            // for each file of the list
+            // for each file of the list (there can be none)
             var filesListPath = Path.Combine(TempDir, "files.list");
             StringBuilder filesListcontent = new StringBuilder();
             var count = 1;
@@ -290,7 +290,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
             File.WriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
 
-
             // Move ini file into the execution dir
             var baseIniPath = "";
             if (File.Exists(ProEnv.IniPath)) {
@@ -313,9 +312,19 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 File.Copy(ProEnv.GetPfPath(), basePfPath);
             }
 
-            StringBuilder programContent = new StringBuilder();
-
+            // set common info on the execution
+            LogPath = Path.Combine(TempDir, "run.log");
+            ProcessStartDir = (ListToCompile.Count == 1) ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? TempDir : TempDir;
+            ProgressWin32 = ProEnv.ProwinPath;
+            if (executionType == ExecutionType.Database)
+                ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
+            ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
+            DatabaseConnectionLog = Path.Combine(TempDir, "db.ko");
+            NotificationOutputPath = Path.Combine(TempDir, "postExecution.notif");
+            var propathToUse = (TempDir + "," + string.Join(",", ProEnv.GetProPathDirList));
             string fileToExecute = "";
+
+
             if (executionType == ExecutionType.Appbuilder) {
                 fileToExecute = ListToCompile.First().InputPath;
 
@@ -330,24 +339,35 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 // prolint, we need to copy the StartProlint program
                 fileToExecute = "prolint_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
                 ProlintOutputPath = Path.Combine(TempDir, "prolint.log");
-                programContent.AppendLine("&SCOPED-DEFINE PathFileToProlint " + ListToCompile.First().TempInputPath.ProgressQuoter());
-                programContent.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + ProlintOutputPath.ProgressQuoter());
-                programContent.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProgressQuoter());
-                programContent.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProgressQuoter());
-                programContent.AppendLine("&SCOPED-DEFINE PathActualFilePath " + ListToCompile.First().InputPath.ProgressQuoter());
+                StringBuilder prolintProgram = new StringBuilder();
+                prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + ListToCompile.First().TempInputPath.ProgressQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + ProlintOutputPath.ProgressQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProgressQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProgressQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE PathActualFilePath " + ListToCompile.First().InputPath.ProgressQuoter());
                 var filename = Path.GetFileName(Plug.CurrentFilePath);
                 if (FileTag.Contains(filename)) {
                     var fileInfo = FileTag.GetLastFileTag(filename);
-                    programContent.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProgressQuoter());
-                    programContent.AppendLine("&SCOPED-DEFINE FileCorrectionDescription " + fileInfo.CorrectionDecription.Replace("\r", "").Replace("\n", "~n").ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationName " + fileInfo.ApplicationName.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileApplicationVersion " + fileInfo.ApplicationVersion.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileWorkPackage " + fileInfo.WorkPackage.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileBugID " + fileInfo.BugId.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionNumber " + fileInfo.CorrectionNumber.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProgressQuoter());
+                    prolintProgram.AppendLine("&SCOPED-DEFINE FileCorrectionDescription " + fileInfo.CorrectionDecription.Replace("\r", "").Replace("\n", "~n").ProgressQuoter());
                 }
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
-                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", programContent.ToString()), encoding);
+                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
+
+            } else if (executionType == ExecutionType.DataDigger) {
+                // need to init datadigger?
+                if (!File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
+                    File.WriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger);
+                    if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
+                        return false;
+                }
+                // add the datadigger folder to the propath
+                propathToUse = Config.FolderDataDigger + "," + propathToUse;
 
             } else {
 
@@ -355,37 +375,26 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     fileToExecute = ListToCompile.First().TempInputPath;
             }
 
-            // set info on the execution
-            LogPath = Path.Combine(TempDir, "run.log");
-            ProcessStartDir = (ListToCompile.Count == 1) ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? TempDir : TempDir;
-            ProgressWin32 = ProEnv.ProwinPath;
-            if (executionType == ExecutionType.Database)
-                ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
-            ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
-            DatabaseConnectionLog = Path.Combine(TempDir, "db.ko");
-            NotificationOutputPath = Path.Combine(TempDir, "postExecution.notif");
-
             // prepare the .p runner
             var runnerPath = Path.Combine(TempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
-            programContent.Clear();
-            programContent.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ToExecute " + fileToExecute.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE propathToUse " + (TempDir + "," + string.Join(",", ProEnv.GetProPathDirList)).ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnv.ExtraPf.Trim().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CompileWithLst " + ProEnv.CompileWithListing);
-            programContent.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
-            programContent.AppendLine("&SCOPED-DEFINE DbConnectionMandatory " + NeedDatabaseConnection);
-            programContent.AppendLine("&SCOPED-DEFINE NotificationOutputPath " + NotificationOutputPath.ProgressQuoter());
-            programContent.Append(Encoding.Default.GetString(DataResources.ProgressRun));
+            StringBuilder runnerProgram = new StringBuilder();
+            runnerProgram.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE ToExecute " + fileToExecute.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE propathToUse " + propathToUse.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnv.ExtraPf.Trim().ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE CompileWithLst " + ProEnv.CompileWithListing);
+            runnerProgram.AppendLine("&SCOPED-DEFINE ToCompileListFile " + filesListPath.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE CreateFileIfConnectFails " + DatabaseConnectionLog.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE CompileProgressionFile " + ProgressionFilePath.ProgressQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE DbConnectionMandatory " + NeedDatabaseConnection);
+            runnerProgram.AppendLine("&SCOPED-DEFINE NotificationOutputPath " + NotificationOutputPath.ProgressQuoter());
+            runnerProgram.Append(Encoding.Default.GetString(DataResources.ProgressRun));
+            File.WriteAllText(runnerPath, runnerProgram.ToString(), Encoding.Default);
 
-            File.WriteAllText(runnerPath, programContent.ToString(), Encoding.Default);
-
-            // preferably, we use the batch mode becauce it's faster than the client mode
+            // preferably, we use the batch mode because it's faster than the client mode
             var batchMode = (executionType == ExecutionType.CheckSyntax || executionType == ExecutionType.Compile || executionType == ExecutionType.Database);
 
             // no batch mode option?
@@ -396,7 +405,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // Parameters
             StringBuilder Params = new StringBuilder();
-            
+
+            if (executionType == ExecutionType.DataDigger)
+                Params.Append(" -s 1000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8");
             if (executionType != ExecutionType.Run)
                 Params.Append(" -T " + TempDir.Trim('\\').ProgressQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
@@ -737,7 +748,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         Database = 10,
         Appbuilder = 11,
-        Dictionary = 12
+        Dictionary = 12,
+        DataDigger = 13
     }
 
     internal class FileToCompile {

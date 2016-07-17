@@ -93,9 +93,9 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] DataDigger_19 {
+        internal static byte[] DataDigger {
             get {
-                object obj = ResourceManager.GetObject("DataDigger_19", resourceCulture);
+                object obj = ResourceManager.GetObject("DataDigger", resourceCulture);
                 return ((byte[])(obj));
             }
         }

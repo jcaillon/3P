@@ -114,6 +114,13 @@ namespace _3PA.MainFeatures {
         }
 
         /// <summary>
+        /// Show the menu at the cursor location
+        /// </summary>
+        public static void ShowDatabaseToolsMenuAtCursor() {
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem)item).ToList(), "Database tools", "DatabaseTools");
+        }
+
+        /// <summary>
         /// Show the environment menu at the cursor location
         /// </summary>
         public static void ShowEnvMenuAtCursor() {
@@ -152,6 +159,8 @@ namespace _3PA.MainFeatures {
 
         private List<MenuItem> _generateCodeMenuList;
 
+        private List<MenuItem> _databaseTools;
+
         private List<YamuiMenuItem> _envMenuList;
 
         private MenuItem _envMenu;
@@ -185,12 +194,29 @@ namespace _3PA.MainFeatures {
 
             _generateCodeMenuList = new List<MenuItem> {
                 new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, ProGenerateCode.InsertCode<ParsedProcedure>, "Insert_new_procedure", "Alt+P"),
-                new MenuItem(this, "Insert new function", ImageResources.Function, ProGenerateCode.InsertCode<ParsedFunction>, "Insert_new_function", "Alt+F"),
+                new MenuItem(this, "Insert new function", ImageResources.Function, ProGenerateCode.InsertCode<ParsedImplementation>, "Insert_new_function", "Alt+F"),
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, ProGenerateCode.DeleteCode<ParsedProcedure>, "Delete_procedure", ""),
+                new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, ProGenerateCode.DeleteCode<ParsedImplementation>, "Delete_function", ""),
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, () => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S")
             };
 
             #endregion
+
+            #region database tools
+
+            _databaseTools = new List<MenuItem> {
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProUtils.OpenDictionary, "Data_dictionary", "") {
+                    Generic = true
+                },
+                new MenuItem(this, "Explore your data (data digger!)", ImageResources.DataDigger, ProUtils.OpenDataDigger, "Data_digger", "") {
+                    Generic = true
+                },
+            };
+
+            #endregion
+
 
             #region All
 
@@ -219,8 +245,16 @@ namespace _3PA.MainFeatures {
 
                 new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
-                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProUtils.OpenDictionary, "Open_dictionary", "Alt+D") {
-                    Generic = true
+
+                new MenuItem(true), // --------------------------
+
+                new MenuItem(this, "Database tools", ImageResources.DatabaseTools, ShowDatabaseToolsMenuAtCursor, "DatabaseTools", "Alt+D") {
+                    Generic = true,
+                    Children = _databaseTools.Select(item => (YamuiMenuItem)item).ToList(),
+                },
+
+                new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
+                    Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 },
 
                 new MenuItem(true), // --------------------------
@@ -242,10 +276,6 @@ namespace _3PA.MainFeatures {
                 //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
                 //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
                 
-                new MenuItem(this, "Generate code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
-                    Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
-                },
-
                 new MenuItem(true), // --------------------------
 
                 new MenuItem(this, "Edit current file info", ImageResources.FileInfo, () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),

@@ -242,7 +242,7 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Open in appbuilder / dictionary
+        #region Open appbuilder / dictionary / Datadigger
 
         /// <summary>
         /// Opens the current file in the appbuilder
@@ -264,11 +264,12 @@ namespace _3PA.MainFeatures {
             }.Do(ExecutionType.Appbuilder);
         }
 
-        /// <summary>
-        /// Opens the current file in the appbuilder
-        /// </summary>
         public static void OpenDictionary() {
             new ProExecution().Do(ExecutionType.Dictionary);
+        }
+
+        public static void OpenDataDigger() {
+            new ProExecution().Do(ExecutionType.DataDigger);
         }
 
         #endregion

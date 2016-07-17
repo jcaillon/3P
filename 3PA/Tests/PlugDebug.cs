@@ -361,6 +361,14 @@ namespace _3PA.Tests {
             AppendEverything(pars);
         }
 
+        public void Visit(ParsedImplementation pars) {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedPrototype pars) {
+            AppendEverything(pars);
+        }
+
         public void Visit(ParsedLabel pars) {
             AppendEverything(pars);
         }
@@ -374,10 +382,6 @@ namespace _3PA.Tests {
         }
 
         public void Visit(ParsedOnStatement pars) {
-            AppendEverything(pars);
-        }
-
-        public void Visit(ParsedFunction pars) {
             AppendEverything(pars);
         }
 

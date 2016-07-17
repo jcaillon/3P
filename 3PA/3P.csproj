@@ -418,7 +418,7 @@
   <ItemGroup>
     <None Include="Data\Abbreviations" />
     <None Include="Data\CompilationPath" />
-    <None Include="Data\DataDigger\DataDigger-19.zip" />
+    <None Include="Data\DataDigger\DataDigger.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
@@ -504,6 +504,10 @@
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\FileExplorer\BringToFront.png" />
     <Content Include="Images\FileExplorer\Stop.png" />
+    <Content Include="Images\Menu\DatabaseTools.png" />
+    <Content Include="Images\Menu\DataDigger.png" />
+    <Content Include="Images\Menu\DeleteFunction.png" />
+    <Content Include="Images\Menu\DeleteProcedure.png" />
     <Content Include="Images\Menu\Synchronize.png" />
     <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />

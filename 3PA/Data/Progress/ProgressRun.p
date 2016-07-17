@@ -138,6 +138,9 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
                 DELETE ALIAS "DICTDB".
             END.
         END.
+        WHEN "DATADIGGER" THEN DO:
+            RUN DataDigger.p.
+        END.
         WHEN "DICTIONARY" THEN DO:
             RUN _dict.p.
         END.
