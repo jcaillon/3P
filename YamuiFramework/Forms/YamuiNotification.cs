@@ -128,11 +128,11 @@ namespace YamuiFramework.Forms {
             contentPanel.NoBackgroundImage = true;
 
             // Set title, it will define a new minimum width for the message box
-            var space = FormButtonWidth + BorderWidth*2 + titleLabel.Padding.Left + 5;
+            var space = FormButtonWidth + BorderWidth*2 + titleLabel.Location.X + 5;
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
-            formMinWidth = Math.Max(formMinWidth, titleLabel.Width + space);
+            formMinWidth = formMinWidth.ClampMin(titleLabel.Width + space);
             var newPadding = Padding;
-            newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 10 : 0); 
+            newPadding.Bottom = newPadding.Bottom + (duration > 0 ? 8 : 0); 
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
             titleLabel.Location = new Point(5,5);
@@ -140,13 +140,12 @@ namespace YamuiFramework.Forms {
             // set content label
             space = Padding.Left + Padding.Right;
             contentLabel.SetNeededSize(htmlMessage, formMinWidth - space, formMaxWidth - space, true);
-            contentLabel.Width = Math.Max(contentLabel.Width, formMinWidth - space);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + space, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + contentLabel.Height));
+            Size = new Size(contentPanel.ContentPanel.Width + space, (Padding.Top + Padding.Bottom + contentLabel.Height).ClampMax(formMaxHeight));
             if (contentPanel.HasScrolls)
                 Width += 10;
             MinimumSize = Size;
@@ -156,9 +155,9 @@ namespace YamuiFramework.Forms {
                 _progressSimplePanel = new YamuiSimplePanel {
                     BackColor = YamuiThemeManager.Current.AccentColor,
                     AutoScroll = false,
-                    Location = new Point(1, Height - 11),
+                    Location = new Point(1, Height - 9),
                     Name = "progressPanel",
-                    Size = new Size(Width - 2, 10),
+                    Size = new Size(Width - 2, 8),
                     TabStop = false,
                     UseCustomBackColor = true
                 };

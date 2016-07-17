@@ -19,9 +19,11 @@
 #endregion
 
 using System;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
+using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
@@ -57,7 +59,7 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest2() {
-
+            UserCommunication.Notify("This class is only for debug/dev purposes, it will not be used in production<br>This class is only for debug/dev purposes, it will not be used in production<br>");
         }
 
         public static void DebugTest3() {
@@ -98,6 +100,13 @@ namespace _3PA.Tests {
              * */
         }
 
+        public static void MeasureIt(Action toMeasure) {
+            var watch = Stopwatch.StartNew();
+            toMeasure();
+            watch.Stop();
+            UserCommunication.Notify(watch.ElapsedMilliseconds + "ms");
+        }
+
         public static void RunParserTests(string content) {
 
             // create unique temporary folder
@@ -125,7 +134,7 @@ namespace _3PA.Tests {
             OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
             lexer.Accept(lexerVisitor);
             File.WriteAllText(outLocation, lexerVisitor.Output.ToString());
-            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
+            File.AppendAllText(perfFile, @"LEXER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // PARSER
@@ -145,7 +154,7 @@ namespace _3PA.Tests {
             OutputParserVisitor parserVisitor = new OutputParserVisitor();
             parser.Accept(parserVisitor);
             File.WriteAllText(outLocation, parserVisitor.Output.ToString());
-            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.ParsedItemsList.Count + "\r\n");
+            File.AppendAllText(perfFile, @"PARSER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.ParsedItemsList.Count + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
             // LINE INFO
@@ -160,7 +169,9 @@ namespace _3PA.Tests {
                 i++;
             }
             File.WriteAllText(outLocation, lineInfo.ToString());
-            File.AppendAllText(perfFile, @"DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.LineInfo.Count + "\r\n");
+            File.AppendAllText(perfFile, @"nb items in Line info = " + parser.LineInfo.Count + "\r\n");
+
+            UserCommunication.Notify("Done :<br>" + testDir.ToHtmlLink());
         }
 
         #endregion
@@ -330,96 +341,74 @@ namespace _3PA.Tests {
 
         public StringBuilder Output;
 
+        private void AppendEverything<T>(T item) {
+            // type
+            Output.Append(typeof(T).Name + "\t:");
 
-        public void Visit(ParsedFile pars) {
-            Output.Append("FILE\t:");
-            Output.Append("[] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
+            // for each field
+            foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(item)) {
+                Output.Append("\t" + prop.Name + "=[" + prop.GetValue(item).ConvertToStr() + "]");
+            }
+
             Output.Append("\r\n");
+        }
+        
+        public void Visit(ParsedFile pars) {
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedPreProcBlock pars) {
-            Output.Append("BLOCK\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.BlockDescription + ", " + pars.Type);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedLabel pars) {
-            Output.Append("LEBEL\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFunctionCall pars) {
-            Output.Append("FCALL\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.ExternalCall);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFoundTableUse pars) {
-            Output.Append("USETA\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.IsTempTable);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedOnStatement pars) {
-            Output.Append("ONEVT\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.EventList);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFunction pars) {
-            Output.Append("FUNCT\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
-            Output.Append(", endPosition=" + pars.EndPosition + ", return-type=" + pars.ReturnType + ", isPrivate=" + pars.IsPrivate + ", HasPrototype=" + pars.HasPrototype + ", protoLine=" + pars.PrototypeLine + ", protoCol=" + pars.PrototypeColumn + ", ProtoEnd=" + pars.PrototypeEndPosition + ", Extend=" + pars.Extend + ", ProtoUpdated=" + pars.PrototypeUpdated + ", param=(" + pars.Parameters + ")");
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedProcedure pars) {
-            Output.Append("PROCE\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + ", end line " + (pars.EndBlockLine + 1) + " : " + pars.Name);
-            Output.Append(", " + pars.Left + ", " + pars.IsExternal + ", " + pars.IsPrivate);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            Output.Append("INCLU\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedPreProc pars) {
-            Output.Append("PREPR\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.UndefinedLine);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedDefine pars) {
-            Output.Append("VARIA\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.Type.GetDescription() + ", " + pars.LcFlagString + ", " + pars.AsLike + ", " + pars.TempPrimitiveType + ", " + pars.IsDynamic + ", " + pars.ViewAs + ", " + pars.BufferFor + ", " + pars.Left + ", " + pars.IsExtended);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedTable pars) {
-            Output.Append("TABLE\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.Description + ", " + pars.IsTempTable + ", " + pars.LcLikeTable + ", " + pars.UseIndex + ", " + pars.LcFlagString);
+            AppendEverything(pars);
             foreach (var field in pars.Fields) {
-                Output.Append("->" + field.Name + "|" + field.AsLike + "|" + field.Type);
+                AppendEverything(field);
             }
-            Output.Append("\r\n");
+            foreach (var index in pars.Indexes) {
+                AppendEverything(index);
+            }
         }
 
         public void Visit(ParsedRun pars) {
-            Output.Append("RUNPR\t:");
-            Output.Append("[" + pars.Scope +":" + pars.Scope.Name + "] line " + (pars.Line + 1) + ", col" + pars.Column + " : " + pars.Name);
-            Output.Append(", " + pars.Left + ", " + pars.HasPersistent + ", " + pars.IsEvaluateValue);
-            Output.Append("\r\n");
+            AppendEverything(pars);
         }
     }
 
@@ -428,68 +417,80 @@ namespace _3PA.Tests {
         public int NbItems;
         public StringBuilder Output = new StringBuilder();
 
+        private void AppendEverything<T>(T item) {
+            // type
+            Output.Append(typeof(T).Name + "\t:");
+
+            // for each field
+            foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(item)) {
+                Output.Append("\t" + prop.Name + "=[" + prop.GetValue(item).ConvertToStr() + "]");
+            }
+
+            Output.Append("\r\n");
+        }
+
         public void Visit(TokenComment tok) {
-            Output.AppendLine("CO" + (tok.IsSingleLine ? "S" : "M") +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenEol tok) {
-            Output.AppendLine("EOL" + "\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value.Replace('\r', 'r').Replace('\n', 'n') + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenEos tok) {
-            Output.AppendLine("EOS" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenInclude tok) {
-            Output.AppendLine("INC" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenNumber tok) {
-            Output.AppendLine("NUM" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenString tok) {
-            Output.AppendLine("STR" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenStringDescriptor tok) {
-            Output.AppendLine("SDR" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenSymbol tok) {
-            Output.AppendLine("SYM" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenWhiteSpace tok) {
-            Output.AppendLine("SPA" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenWord tok) {
-            Output.AppendLine("WRD" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenEof tok) {
-            Output.AppendLine("EOF" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenUnknown tok) {
-            Output.AppendLine("UNK" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
 
         public void Visit(TokenPreProcStatement tok) {
-            Output.AppendLine("PRE" +"\t:" + tok.StartPosition + "/" + tok.EndPosition + "," + tok.Line + "/" + tok.Column + " = `" + tok.Value + "`");
+            AppendEverything(tok);
             NbItems++;
         }
     }

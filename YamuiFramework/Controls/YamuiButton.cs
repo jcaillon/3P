@@ -126,7 +126,7 @@ namespace YamuiFramework.Controls {
         /// Returns a grey scale version of the image
         /// </summary>
         public Image GreyScaleBackGrndImage {
-            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = Utilities.MakeGreyscale3(BackGrndImage)); }
+            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
         }
 
         #endregion
@@ -192,6 +192,8 @@ namespace YamuiFramework.Controls {
                 }
             }
         }
+
+        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
 

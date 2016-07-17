@@ -68,10 +68,10 @@ namespace _3PA {
                     case (uint) NppNotif.NPPN_READY:
                         // notify plugins that all the procedures of launchment of notepad++ are done
                         // call OnNppReady then OnPlugReady if it all went ok
-                        PluginIsReady = OnNppReady();
+                        PluginIsReady = DoNppReady();
                         if (PluginIsReady) {
 
-                            OnPlugStart();
+                            DoPlugStart();
 
                             // set hooks on mouse/keyboard
                             SetHooks();
@@ -84,7 +84,7 @@ namespace _3PA {
                         // uninstall hooks on mouse/keyboard
                         UninstallHooks();
 
-                        OnNppShutDown();
+                        DoNppShutDown();
 
                         PluginIsReady = false;
                         return;
@@ -99,17 +99,17 @@ namespace _3PA {
                 switch (code) {
                     // the user changed the current document
                     case (uint) NppNotif.NPPN_BUFFERACTIVATED:
-                        OnNppDocumentSwitched();
+                        DoNppDocumentSwitched();
                         return;
 
                     case (uint)NppNotif.NPPN_FILESAVED:
-                        OnNppDocumentSaved();
+                        DoNppDocumentSaved();
                         return;
 
                     case (uint)NppNotif.NPPN_FILEBEFORELOAD:
                         // fire when a file is opened (the event NPPN_FILEBEFOREOPEN is fired after SciNotif.SCN_MODIFIED
                         // and just before NppNotif.NPPN_BUFFERACTIVATED so it's not very useful...)
-                        OnNppFileBeforeLoad();
+                        DoNppFileBeforeLoad();
                         return;
                 }
 

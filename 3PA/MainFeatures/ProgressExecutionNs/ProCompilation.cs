@@ -24,6 +24,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using YamuiFramework.Helper;
 using _3PA.Data;
 using YamuiFramework.Themes;
 using _3PA.Lib;
@@ -341,7 +342,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     if (fileInfo.Length > 0) {
                         // the .log is not empty, maybe something went wrong in the runner, display errors
                         UserCommunication.Notify(
-                            "Something went wrong while " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
+                            "Something went wrong while " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
                             Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
                             "Critical error", "Action failed");
                         return;
@@ -358,7 +359,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
 
                 // Prepare the notification content
-                var notifTitle = ((DisplayAttr)currentOperation.GetAttributes()).Name;
+                var notifTitle = currentOperation.GetAttribute<CurrentOperationAttr>().Name;
                 var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
                 var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
                 var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
@@ -383,7 +384,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + ((DisplayAttr)currentOperation.GetAttributes()).ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");

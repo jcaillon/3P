@@ -148,7 +148,7 @@ namespace _3PA {
         /// </summary>
         public static string FormatTitle(MessageImg image, string title, string subtitle, bool forMessageBox = false) {
             return @"
-            <table style='margin: 0px; width: 100%'>
+            <table style='width: 100%'>
                 <tr>
                     <td rowspan='2' style='width: 70px'><img src='" + image + @"' width='64' height='64' /></td>
                     <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>

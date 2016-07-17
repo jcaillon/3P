@@ -42,6 +42,8 @@ namespace YamuiFramework.Controls {
 
         #region Paint Methods
 
+        protected override void OnPaintBackground(PaintEventArgs e) { }
+
         protected override void OnPaint(PaintEventArgs e) {
             try {
                 // draw background

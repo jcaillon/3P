@@ -50,21 +50,6 @@ namespace _3PA.Lib {
         #endregion
      */
 
-    #region Enumeration attributes
-
-    /// <summary>
-    /// in an enumeration, above the item:
-    /// [DisplayAttr(Name = "my stuff")]
-    /// how to use it:
-    /// ((DisplayAttr)myenumValue.GetAttributes()).Name)
-    /// </summary>
-    internal class DisplayAttr : Extensions.EnumAttr {
-        public string Name { get; set; }
-        public string ActionText { get; set; }
-    }
-
-    #endregion
-
     /// <summary>
     /// Class that exposes utility methods
     /// </summary>

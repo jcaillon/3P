@@ -379,7 +379,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                     // add an extra item that will be a new branch
                     if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
-                        var branchDisplayText = ((DisplayAttr) item.Branch.GetAttributes()).Name;
+                        var branchDisplayText = item.Branch.GetDescription();
 
                         currentLvl1Parent = new CodeExplorerItem {
                             DisplayText = branchDisplayText,
@@ -676,7 +676,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public void RefreshParserAndCodeExplorer() {
             ClearFilter();
             ParserHandler.ParserVisitor.ClearSavedParserVisitors();
-            Plug.OnNppDocumentSwitched();
+            Plug.DoNppDocumentSwitched();
         }
 
         #endregion
@@ -745,7 +745,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             // parse document
-            Plug.OnNppDocumentSwitched();
+            Plug.DoNppDocumentSwitched();
 
             Npp.GrabFocus();
         }

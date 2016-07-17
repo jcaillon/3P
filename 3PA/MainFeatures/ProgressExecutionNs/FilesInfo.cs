@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -511,24 +512,35 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     }
 
     /// <summary>
+    /// in an enumeration, above the item:
+    /// [DisplayAttr(Name = "my stuff")]
+    /// how to use it:
+    /// ((DisplayAttr)myenumValue.GetAttributes()).Name)
+    /// </summary>
+    internal class CurrentOperationAttr : Extensions.EnumAttribute {
+        public string Name { get; set; }
+        public string ActionText { get; set; }
+    }
+
+    /// <summary>
     /// Current undergoing operation on the file
     /// Retrieve the DisplayText value with ((CurrentOperationAttr)currentOperation.GetAttributes()).DisplayText
     /// </summary>
     [Flags]
     internal enum CurrentOperation {
-        [DisplayAttr(Name = "Editing")]
+        [CurrentOperationAttr(Name = "Editing")]
         Default = 0,
-        [DisplayAttr(Name = "Appbuilder section!")]
+        [CurrentOperationAttr(Name = "Appbuilder section!")]
         AppbuilderSection = 32,
 
         // above linting, we start a prowin process to do it
-        [DisplayAttr(Name = "Linting", ActionText = "prolint-ing")]
+        [CurrentOperationAttr(Name = "Linting", ActionText = "prolint-ing")]
         Prolint = 64,
-        [DisplayAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
+        [CurrentOperationAttr(Name = "Checking syntax", ActionText = "checking the syntax of")]
         CheckSyntax = 128,
-        [DisplayAttr(Name = "Compiling", ActionText = "compiling")]
+        [CurrentOperationAttr(Name = "Compiling", ActionText = "compiling")]
         Compile = 216,
-        [DisplayAttr(Name = "Executing", ActionText = "executing")]
+        [CurrentOperationAttr(Name = "Executing", ActionText = "executing")]
         Run = 512
     }
 
@@ -579,17 +591,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     /// and thus must start at 0
     /// </summary>
     internal enum ErrorLevel {
-        [DisplayAttr(Name = "Error(s), good!")]
+        [Description("Error(s), good!")]
         NoErrors,
-        [DisplayAttr(Name = "Info")]
+        [Description("Info")]
         Information,
-        [DisplayAttr(Name = "Warning(s)")]
+        [Description("Warning(s)")]
         Warning,
-        [DisplayAttr(Name = "Huge warning(s)")]
+        [Description("Huge warning(s)")]
         StrongWarning,
-        [DisplayAttr(Name = "Error(s)")]
+        [Description("Error(s)")]
         Error,
-        [DisplayAttr(Name = "Critical error(s)!")]
+        [Description("Critical error(s)!")]
         Critical
     }
 

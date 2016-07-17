@@ -171,7 +171,7 @@ namespace _3PA.MainFeatures {
 
                 // get the best position to insert the prototype
                 bool insertBefore;
-                int insertPos = GetCaretPositionForInsertion<ParsedFunction>(new ProNewPrototype { Name = function.Name }, out insertBefore);
+                int insertPos = GetCaretPositionForInsertion<ParsedFunction>(new ProCodePrototype { Name = function.Name }, out insertBefore);
 
                 // if we didn't find a good position, then let's assume the user doesn't need one
                 if (insertPos > 0) {
@@ -193,7 +193,7 @@ namespace _3PA.MainFeatures {
 
         private static bool DeletePrototypes(ref StringBuilder outputMessage, ParsedFunction function) {
 
-            var protoPreProcBlock = GetPreProcBlock(function.Name, function.Position, "_FUNCTION-FORWARD");
+            var protoPreProcBlock = GetPreProcBlock(function, "_FUNCTION-FORWARD");
 
             // we also want to delete the trailing new lines
             int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : function.EndPosition);
@@ -218,13 +218,213 @@ namespace _3PA.MainFeatures {
         #region Utilities
 
         /// <summary>
+        /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
+        /// otherwise returns null
+        /// </summary>
+        private static ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr = @"[\w-]+") where T : ParsedScopeItem {
+
+            // if we parsed the UIB (appbuilder) blocks correctly
+            if (ParserHandler.AblParser.ParsedUibBlockOk) {
+
+                // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
+                var protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+                    var blockItem = item as ParsedPreProcBlock;
+                    if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
+                        blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + parsedScopeItem.Name + @")"))
+                        return true;
+                    return false;
+                }).ToList();
+                if (protoPreProcBlock.Count == 0) {
+
+                    // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
+                    var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
+                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+                        var blockItem = item as ParsedPreProcBlock;
+                        if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
+                            return true;
+                        return false;
+                    }).ToList();
+                }
+
+                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
+                    if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
+                        return item;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Surround the text to insert with the appbuilder directives if needed
+        /// </summary>
+        private static string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
+            var eol = Npp.GetEolString;
+            if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
+                insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
+                insertText += eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME";
+            }
+            if (insertBefore) insertText += eol + eol;
+            else insertText = eol + eol + insertText;
+            return insertText;
+        }
+
+        #endregion
+
+        #region Delete existing
+
+        public static void DeleteCode<T>() where T : ParsedScopeItem {
+            IProCode codeCode;
+            string insertText;
+            string blockDescription;
+
+            if (typeof(ParsedFunction) == typeof(T)) {
+                object input = new ProCodeFunction();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
+                    return;
+                codeCode = (IProCode) input;
+
+                blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
+                insertText = insertText.Replace("{&type}", ((ProCodeFunction) codeCode).Type);
+                insertText = insertText.Replace("{&private}", ((ProCodeFunction) codeCode).IsPrivate ? " PRIVATE" : "");
+
+            } else if (typeof(ParsedProcedure) == typeof(T)) {
+                object input = new ProCodeProcedure();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
+                    return;
+                codeCode = (IProCode) input;
+
+                blockDescription = @"_PROCEDURE " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
+                insertText = insertText.Replace("{&private}", ((ProCodeProcedure) codeCode).IsPrivate ? " PRIVATE" : "");
+
+            } else {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(codeCode.Name))
+                return;
+
+            // make sure to parse the current document before checking anything
+            ParserHandler.ParseCurrentDocument(true, true);
+
+        }
+
+        /// <summary>
+        /// Delete the given ParsedScopeItem whose name is qualified through proCode.Name
+        /// </summary>
+        public static bool DeleteCode<T>(IProCode proCode) where T : ParsedScopeItem {
+
+            string preProcBlockType = null;
+
+            if (proCode is ProCodeFunction) {
+                preProcBlockType = @"_FUNCTION";
+            } else if (proCode is ProCodePrototype) {
+                preProcBlockType = @"_FUNCTION-FORWARD";
+            } else if (proCode is ProCodeProcedure) {
+                preProcBlockType = @"_PROCEDURE";
+            }
+
+            // find the code to delete
+            T toDelete = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item.GetType() == typeof(T) &&
+                item.Name.EqualsCi(proCode.Name)) as T;
+
+            if (toDelete == null)
+                return false;
+
+            // find a pre proc block that surrounds it
+            var protoPreProcBlock = GetPreProcBlock(toDelete, preProcBlockType);
+
+            // we also want to delete the trailing new lines
+            int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : toDelete.EndPosition);
+            while (Npp.GetTextByRange(endPosition, endPosition + 2).Equals(Npp.GetEolString)) {
+                endPosition += 2;
+            }
+
+            if (protoPreProcBlock != null) {
+                Npp.DeleteTextByRange(protoPreProcBlock.Position, endPosition);
+            } else {
+                // if not found, we just delete the proto statement
+                Npp.DeleteTextByRange(toDelete.Position, endPosition);
+            }
+
+            return true;
+        }
+
+        #endregion
+
+        #region Insert new
+
+        /// <summary>
+        /// Call this method to insert a new piece of code
+        /// </summary>
+        public static void InsertCode<T>() where T : ParsedScopeItem {
+            IProCode codeCode;
+            string insertText;
+            string blockDescription;
+
+            if (typeof(ParsedFunction) == typeof(T)) {
+                object input = new ProCodeFunction();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
+                    return;
+                codeCode = (IProCode) input;
+
+                blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
+                insertText = insertText.Replace("{&type}", ((ProCodeFunction)codeCode).Type);
+                insertText = insertText.Replace("{&private}", ((ProCodeFunction)codeCode).IsPrivate ? " PRIVATE" : "");
+
+            } else if (typeof(ParsedProcedure) == typeof(T)) {
+                object input = new ProCodeProcedure();
+                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
+                    return;
+                codeCode = (IProCode)input;
+
+                blockDescription = @"_PROCEDURE " + codeCode.Name + " Procedure";
+                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
+                insertText = insertText.Replace("{&private}", ((ProCodeProcedure)codeCode).IsPrivate ? " PRIVATE" : "");
+
+            } else {
+                return;
+            }
+
+            if (string.IsNullOrEmpty(codeCode.Name))
+                return;
+
+            // make sure to parse the current document before checking anything
+            ParserHandler.ParseCurrentDocument(true, true);
+
+            insertText = insertText.Replace("{&name}", codeCode.Name);
+
+            // reposition caret and insert
+            bool insertBefore;
+            int insertPos = GetCaretPositionForInsertion<T>(codeCode, out insertBefore);
+            if (insertPos < 0) insertPos = Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
+
+            insertText = FormatInsertion(insertText, blockDescription, insertBefore);
+            int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
+            insertText = insertText.Replace("|||", "");
+
+            Npp.SetSelection(insertPos);
+            Npp.ModifyTextAroundCaret(0, 0, insertText);
+
+            Npp.GoToLine(Npp.LineFromPosition(insertPos));
+            Npp.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
+
+            // in the case of a new function, create the prototype if needed
+            if (typeof(ParsedFunction) == typeof(T)) {
+                UpdateFunctionPrototypesIfNeeded(true);
+            }
+        }
+
+        /// <summary>
         /// returns the best caret position for inserting a new IProNew
         /// </summary>
-        private static int GetCaretPositionForInsertion<T>(IProNew proNew, out bool insertBefore) where T : ParsedScopeItem {
+        private static int GetCaretPositionForInsertion<T>(IProCode proCode, out bool insertBefore) where T : ParsedScopeItem {
             insertBefore = false;
 
             // at caret position
-            if (proNew.InsertPosition == ProInsertPosition.CaretPosition && !(proNew is ProNewPrototype))
+            if (proCode.InsertPosition == ProInsertPosition.CaretPosition && !(proCode is ProCodePrototype))
                 return Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
 
 
@@ -236,7 +436,7 @@ namespace _3PA.MainFeatures {
             // the idea is to get (or dont get if it doesn't exist) the previous or the next item
             // of type T in the existing list of said types so we can "anchor" on it to insert
             // our new stuff...
-            if (proNew is ProNewPrototype) {
+            if (proCode is ProCodePrototype) {
                 // find the previous/next function implementation with a prototype
                 bool found = false;
                 foreach (var item2 in ParserHandler.AblParser.ParsedItemsList.Where(item => item.GetType() == typeof(T)).OrderBy(item => item.Line)) {
@@ -245,7 +445,7 @@ namespace _3PA.MainFeatures {
                         // we didn't match our current function implementation yet
                         if (!found) {
                             // we just did
-                            if (item.Name.Equals(proNew.Name)) {
+                            if (item.Name.Equals(proCode.Name)) {
                                 found = true;
                                 continue;
                             }
@@ -275,9 +475,9 @@ namespace _3PA.MainFeatures {
                 if (existingList.Count > 0) {
 
                     // alphabetical order
-                    if (proNew.InsertPosition == ProInsertPosition.AlphabeticalOrder) {
+                    if (proCode.InsertPosition == ProInsertPosition.AlphabeticalOrder) {
                         // find the position that would take our new code
-                        int index = existingList.Select(item => item.Name).ToList().BinarySearch(proNew.Name);
+                        int index = existingList.Select(item => item.Name).ToList().BinarySearch(proCode.Name);
                         if (index < 0) {
                             index = ~index - 1; // we get the index in which it should be inserted - 1
                             if (index == -1) {
@@ -289,10 +489,10 @@ namespace _3PA.MainFeatures {
                         }
 
                         // first of its kind
-                    } else if (proNew.InsertPosition == ProInsertPosition.First) {
+                    } else if (proCode.InsertPosition == ProInsertPosition.First) {
                         refItem = existingList.FirstOrDefault();
                         insertBefore = true;
-                    } else if (proNew.InsertPosition == ProInsertPosition.Last) {
+                    } else if (proCode.InsertPosition == ProInsertPosition.Last) {
                         refItem = existingList.LastOrDefault();
                     }
                 }
@@ -301,12 +501,21 @@ namespace _3PA.MainFeatures {
 
             #endregion
 
+            string preProcBlockType = null;
+            if (proCode is ProCodeFunction) {
+                preProcBlockType = @"_FUNCTION";
+            } else if (proCode is ProCodePrototype) {
+                preProcBlockType = @"_FUNCTION-FORWARD";
+            } else if (proCode is ProCodeProcedure) {
+                preProcBlockType = @"_PROCEDURE";
+            }
+
             // is there already an item existing?
             if (refItem != null) {
                 // try to find a proc block, otherwise do from the proc itself
 
                 // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
-                var preProcBlock = GetPreProcBlock(refItem.Name, refItem.Position);
+                var preProcBlock = GetPreProcBlock(refItem, preProcBlockType);
                 if (preProcBlock != null)
                     return (insertBefore ? preProcBlock.Position : preProcBlock.EndBlockPosition);
 
@@ -316,11 +525,11 @@ namespace _3PA.MainFeatures {
 
             // can we find a comment indicating where the proc should be inserted?
             string typeComment = null;
-            if (proNew is ProNewFunction) {
+            if (proCode is ProCodeFunction) {
                 typeComment = @"Function\s+Implementations";
-            } else if (proNew is ProNewPrototype) {
+            } else if (proCode is ProCodePrototype) {
                 typeComment = @"Function\s+Prototypes";
-            } else if (proNew is ProNewProcedure) {
+            } else if (proCode is ProCodeProcedure) {
                 typeComment = @"Internal\s+Procedures";
             }
             if (typeComment != null) {
@@ -340,26 +549,26 @@ namespace _3PA.MainFeatures {
             }
 
             // At last, we find the best position considering the appbuilder blocks
-            if (proNew is ProNewFunction) {
+            if (proCode is ProCodeFunction) {
                 // function implementation goes all the way bottom
                 return Npp.TextLength;
 
             }
-            if (proNew is ProNewProcedure) {
+            if (proCode is ProCodeProcedure) {
                 // new procedure goes before the first function implementation of last
-                var firstFunc = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedFunction);
+                var firstFunc = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedFunction) as ParsedFunction;
                 if (firstFunc != null) {
                     insertBefore = true;
 
                     // try to find a &IF DEFINED(EXCLUDE- block that surrounds the func
-                    var preProcBlock = GetPreProcBlock(firstFunc.Name, firstFunc.Position);
+                    var preProcBlock = GetPreProcBlock(firstFunc, preProcBlockType);
                     if (preProcBlock != null)
                         return preProcBlock.Position;
 
                     return firstFunc.Position;
                 }
             }
-            if (proNew is ProNewPrototype) {
+            if (proCode is ProCodePrototype) {
                 // prototypes go after &ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK 
                 var preprocessorBlock = ParserHandler.AblParser.ParsedItemsList.FirstOrDefault(item => item is ParsedPreProcBlock && ((ParsedPreProcBlock)item).Type == ParsedPreProcBlockType.UibPreprocessorBlock);
                 if (preprocessorBlock != null) {
@@ -370,150 +579,28 @@ namespace _3PA.MainFeatures {
             return -1;
         }
 
-        /// <summary>
-        /// returns the surrounding IF DEFINED or _UIB-CODE-BLOCK of a function, procedure.. if it exists
-        /// otherwise returns null
-        /// </summary>
-        private static ParsedPreProcBlock GetPreProcBlock(string functionName, int surroundedPosition, string typeStr = @"[\w-]+") {
-
-            // if we parsed the UIB (appbuilder) blocks correctly
-            if (ParserHandler.AblParser.ParsedUibBlockOk) {
-
-                // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
-                var protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                    var blockItem = item as ParsedPreProcBlock;
-                    if (blockItem != null && blockItem.Type == ParsedPreProcBlockType.IfEndIf &&
-                        blockItem.BlockDescription.ContainsFast(@"DEFINED(EXCLUDE-" + functionName + @")"))
-                        return true;
-                    return false;
-                }).ToList();
-                if (protoPreProcBlock.Count == 0) {
-
-                    // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
-                    var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + functionName + @"\s", RegexOptions.IgnoreCase);
-                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                        var blockItem = item as ParsedPreProcBlock;
-                        if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
-                            return true;
-                        return false;
-                    }).ToList();
-                }
-
-                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
-                    if (item.Position < surroundedPosition && surroundedPosition < item.EndBlockPosition)
-                        return item;
-                }
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Surround the text to insert with the appbuilder directives if needed
-        /// </summary>
-        private static string FormatInsertion(string insertText, string blockDescription, bool insertBefore) {
-            var eol = Npp.GetEolString;
-            if (!String.IsNullOrEmpty(blockDescription) && Abl.IsCurrentFileFromAppBuilder) {
-                insertText = @"&ANALYZE-SUSPEND _UIB-CODE-BLOCK " + blockDescription + eol + insertText;
-                insertText += eol + eol + @"/* _UIB-CODE-BLOCK-END */" + eol + @"&ANALYZE-RESUME";
-            }
-            if (insertBefore) insertText += eol + eol;
-            else insertText = eol + eol + insertText;
-            return insertText;
-        }
-
         #endregion
 
-        #region Insert new
+        #region Pro code class
 
-        /// <summary>
-        /// Call this method to insert a new piece of code
-        /// </summary>
-        public static void InsertNew<T>() where T : ParsedScopeItem {
-            IProNew newCode;
-            string insertText;
-            string blockDescription;
-
-            if (typeof(ParsedFunction) == typeof(T)) {
-                object input = new ProNewFunction();
-                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new function") != 0)
-                    return;
-                newCode = (IProNew) input;
-
-                blockDescription = @"_FUNCTION " + newCode.Name + " Procedure";
-                insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
-                insertText = insertText.Replace("{&type}", ((ProNewFunction)newCode).Type.GetDescription());
-                insertText = insertText.Replace("{&private}", ((ProNewFunction)newCode).IsPrivate ? " PRIVATE" : "");
-
-            } else if (typeof(ParsedProcedure) == typeof(T)) {
-                object input = new ProNewProcedure();
-                if (UserCommunication.Input(ref input, "Please provide information about the procedure that will be created", MessageImg.MsgQuestion, "Generate code", "Insert a new procedure") != 0)
-                    return;
-                newCode = (IProNew)input;
-
-                blockDescription = @"_PROCEDURE " + newCode.Name + " Procedure";
-                insertText = Encoding.Default.GetString(DataResources.InternalProcedure).Trim();
-                insertText = insertText.Replace("{&private}", ((ProNewProcedure)newCode).IsPrivate ? " PRIVATE" : "");
-
-            } else {
-                return;
-            }
-
-            if (string.IsNullOrEmpty(newCode.Name))
-                return;
-
-            // make sure to parse the current document before checking anything
-            ParserHandler.ParseCurrentDocument(true, true);
-
-            insertText = insertText.Replace("{&name}", newCode.Name);
-
-            // reposition caret and insert
-            bool insertBefore;
-            int insertPos = GetCaretPositionForInsertion<T>(newCode, out insertBefore);
-            if (insertPos < 0) insertPos = Npp.GetPosFromLineColumn(Npp.Line.CurrentLine, 0);
-
-            insertText = FormatInsertion(insertText, blockDescription, insertBefore);
-            int internalCaretPos = insertText.IndexOf("|||", StringComparison.Ordinal);
-            insertText = insertText.Replace("|||", "");
-
-            Npp.SetSelection(insertPos);
-            Npp.ModifyTextAroundCaret(0, 0, insertText);
-
-            Npp.GoToLine(Npp.LineFromPosition(insertPos));
-            Npp.GotoPosition(insertPos + (internalCaretPos > 0 ? internalCaretPos : 0));
-
-            // in the case of a new function, create the prototype if needed
-            if (typeof(ParsedFunction) == typeof(T)) {
-                UpdateFunctionPrototypesIfNeeded(true);
-            }
-        }
-
-        internal enum ProInsertNewType {
-            Procedure,
-            Function
-        }
-
-
-        internal interface IProNew {
+        internal interface IProCode {
             string Name { get; set; }
             ProInsertPosition InsertPosition { get; set; }
         }
+
         internal enum ProInsertPosition {
-            [Description("Alphabetical order")]
-            AlphabeticalOrder,
-            [Description("First")]
-            First,
-            [Description("Last")]
-            Last,
-            [Description("At caret position")]
-            CaretPosition
+            [Description("Alphabetical order")] AlphabeticalOrder,
+            [Description("First")] First,
+            [Description("Last")] Last,
+            [Description("At caret position")] CaretPosition
         }
 
-        internal class ProNewPrototype : IProNew {
+        internal class ProCodePrototype : IProCode {
             public string Name { get; set; }
             public ProInsertPosition InsertPosition { get; set; }
         }
 
-        internal class ProNewProcedure : IProNew {
+        internal class ProCodeProcedure : IProCode {
 
             [YamuiInput("Name", Order = 0)]
             public string Name { get; set; }
@@ -525,13 +612,12 @@ namespace _3PA.MainFeatures {
             public ProInsertPosition InsertPosition { get; set; }
         }
 
-        internal class ProNewFunction : IProNew {
+        internal class ProCodeFunction : IProCode {
 
             [YamuiInput("Name", Order = 0)]
             public string Name { get; set; }
 
-            [YamuiInput("Return type", Order = 1)]
-            public ProFunctionType Type { get; set; }
+            [YamuiInput("Return type", Order = 1, AllowListedValuesOnly = true)] public string Type = "CHARACTER|HANDLE|INTEGER|LOGICAL|COM-HANDLE|DECIMAL|DATE|DATETIME|DATETIME-TZ|INT64|LONGCHAR|MEMPTR|RAW|RECID|ROWID|WIDGET-HANDLE|CLASS XXX";
 
             [YamuiInput("Private function", Order = 2)]
             public bool IsPrivate { get; set; }
@@ -541,45 +627,8 @@ namespace _3PA.MainFeatures {
 
         }
 
-        internal enum ProFunctionType {
-            [Description("CHARACTER")]
-            Character,
-            [Description("HANDLE")]
-            Handle,
-            [Description("INTEGER")]
-            Integer,
-            [Description("LOGICAL")]
-            Logical,
-            [Description("COM-HANDLE")]
-            ComHandle,
-            [Description("DECIMAL")]
-            Decimal,
-            [Description("DATE")]
-            Date,
-            [Description("DATETIME")]
-            Datetime,
-            [Description("DATETIME-TZ")]
-            DatetimeTz,
-            [Description("INT64")]
-            Int64,
-            [Description("LONGCHAR")]
-            Longchar,
-            [Description("MEMPTR")]
-            Memptr,
-            [Description("RAW")]
-            Raw,
-            [Description("RECID")]
-            Recid,
-            [Description("ROWID")]
-            Rowid,
-            [Description("WIDGET-HANDLE")]
-            WidgetHandle,
-            [Description("CLASS XXX")]
-            Class
-        }
-
         #endregion
-
+        
         #region Modification tags
 
         /// <summary>

@@ -82,7 +82,7 @@ namespace _3PA.MainFeatures {
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
-            Plug.OnNppDocumentSwitched();
+            Plug.DoNppDocumentSwitched();
         }
 
         #endregion

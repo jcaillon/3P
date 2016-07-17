@@ -28,6 +28,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
+using YamuiFramework.Helper;
 
 namespace _3PA.Lib {
 
@@ -36,40 +37,7 @@ namespace _3PA.Lib {
     /// </summary>
     public static class Extensions {
 
-        #region misc
-
-        public static List<T> ToNonNullList<T>(this IEnumerable<T> obj) {
-            return obj == null ? new List<T>() : obj.ToList();
-        }
-
-        public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate) {
-            if (predicate == null) throw new ArgumentNullException("predicate");
-
-            int retVal = 0;
-            foreach (var item in items) {
-                if (predicate(item)) return retVal;
-                retVal++;
-            }
-            return -1;
-        }
-
-        public static int IndexOf<T>(this IEnumerable<T> items, T itemToFind) {
-            int retVal = 0;
-            foreach (var item in items) {
-                if (item.Equals(itemToFind)) return retVal;
-                retVal++;
-            }
-            return -1;
-        }
-
-        /// <summary>
-        /// Get string value between [first] a and [last] b (not included)
-        /// </summary>
-        public static string GetValueBetween(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
-            int posA = value.IndexOf(a, comparer);
-            int posB = value.LastIndexOf(b, comparer);
-            return posB == -1 ? value.Substring(posA + 1) : value.Substring(posA + 1, posB - posA - 1);
-        }
+        #region object
 
         /// <summary>
         /// Use : var name = player.GetAttributeFrom DisplayAttribute>("PlayerDescription").Name;
@@ -83,6 +51,46 @@ namespace _3PA.Lib {
             var property = instance.GetType().GetProperty(propertyName);
             return (T)property.GetCustomAttributes(attrType, false).First();
         }
+
+        #endregion
+
+        #region Enumerable
+
+        /// <summary>
+        /// Same as ToList but returns an empty list on Null instead of an exception
+        /// </summary>
+        public static List<T> ToNonNullList<T>(this IEnumerable<T> obj) {
+            return obj == null ? new List<T>() : obj.ToList();
+        }
+
+        /// <summary>
+        /// Find the index of the first element satisfaying the predicate
+        /// </summary>
+        public static int FindIndex<T>(this IEnumerable<T> items, Func<T, bool> predicate) {
+            if (predicate == null) throw new ArgumentNullException("predicate");
+            int retVal = 0;
+            foreach (var item in items) {
+                if (predicate(item)) return retVal;
+                retVal++;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// Find the index of the first element equals to itemToFind
+        /// </summary>
+        public static int IndexOf<T>(this IEnumerable<T> items, T itemToFind) {
+            int retVal = 0;
+            foreach (var item in items) {
+                if (item.Equals(itemToFind)) return retVal;
+                retVal++;
+            }
+            return -1;
+        }
+
+        #endregion
+
+        #region int
 
         /// <summary>
         /// Returns true if the bit at the given position is set to true
@@ -113,69 +121,80 @@ namespace _3PA.Lib {
 
         #region ui thread safe invoke
 
-        /* http://www.codeproject.com/Articles/52752/Updating-Your-Form-from-Another-Thread-without-Cre */
-
+        /// <summary>
+        /// Executes a function on the thread of the given object
+        /// </summary>
         public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
             if (isi.InvokeRequired) {
-                IAsyncResult result = isi.BeginInvoke(call, new object[] {isi});
+                IAsyncResult result = isi.BeginInvoke(call, new object[] { isi });
                 object endResult = isi.EndInvoke(result);
-                return (TResult) endResult;
+                return (TResult)endResult;
             }
             return call(isi);
         }
 
+        /// <summary>
+        /// Executes an action on the thread of the given object
+        /// </summary>
         public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] {isi});
+            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] { isi });
             else
                 call(isi);
         }
 
         #endregion
 
-        #region Enum extensions
-
-        //flags |= flag;// SetFlag
-        //flags &= ~flag; // ClearFlag 
+        #region Enum and attributes extensions
 
         /// <summary>
-        /// Allows to describe a field of an enum like this :
-        /// [DescriptionAttribute(Value = "DATA-SOURCE")]
-        /// and use the value "Value" with :
-        /// ((DisplayAttr)currentOperation.GetAttributes()).Name 
-        /// where you used the decoration :
-        /// [DisplayAttr(Name = "Editing")]
-        /// on your enum value
+        /// Returns the attribute array for the given Type T and the given value,
+        /// not to self : dont use that on critical path -> reflection is costly
         /// </summary>
-        [AttributeUsage(AttributeTargets.Field)]
-        public class EnumAttr : Attribute {}
-
-        public static EnumAttr GetAttributes(this Enum value) {
-            Type type = value.GetType();
-            FieldInfo fieldInfo = type.GetField(value.ToString());
-            var atts = (EnumAttr[]) fieldInfo.GetCustomAttributes(typeof (EnumAttr), false);
-            return atts.Length > 0 ? atts[0] : null;
-        }
-
-        /// <summary>
-        /// Decorate enum values with [Description("Description for Foo")] and get their description with x.Foo.GetDescription()
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns></returns>
-        public static string GetDescription(this Enum value) {
+        public static T[] GetAttributes<T>(this Enum value) where T : Attribute {
             Type type = value.GetType();
             string name = Enum.GetName(type, value);
             if (name != null) {
                 FieldInfo field = type.GetField(name);
                 if (field != null) {
-                    DescriptionAttribute attr =
-                           Attribute.GetCustomAttribute(field,
-                             typeof(DescriptionAttribute)) as DescriptionAttribute;
-                    if (attr != null) {
-                        return attr.Description;
-                    }
+                    var attributeArray = (T[])Attribute.GetCustomAttributes(field, typeof(T), true);
+                    return attributeArray;
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Returns the attribute for the given Type T and the given value,
+        /// not to self : dont use that on critical path -> reflection is costly
+        /// </summary>
+        public static T GetAttribute<T>(this Enum value) where T : Attribute {
+            Type type = value.GetType();
+            string name = Enum.GetName(type, value);
+            if (name != null) {
+                FieldInfo field = type.GetField(name);
+                if (field != null) {
+                    var attribute = Attribute.GetCustomAttribute(field, typeof(T), true) as T;
+                    return attribute;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Allows to describe a field of an enum like this :
+        /// [EnumAttribute(Value = "DATA-SOURCE")]
+        /// and use the value "Value" with :
+        /// currentOperation.GetAttribute!EnumAttribute>().Value 
+        /// </summary>
+        [AttributeUsage(AttributeTargets.Field)]
+        public class EnumAttribute : Attribute { }
+
+        /// <summary>
+        /// Decorate enum values with [Description("Description for Foo")] and get their description with x.Foo.GetDescription()
+        /// </summary>
+        public static string GetDescription(this Enum value) {
+            var attr = value.GetAttribute<DescriptionAttribute>();
+            return attr != null ? attr.Description : null;
         }
 
         /// <summary>
@@ -199,6 +218,9 @@ namespace _3PA.Lib {
         public static bool IsFlagSet(this Enum input, Enum matchTo) {
             return (Convert.ToUInt32(input) & Convert.ToUInt32(matchTo)) != 0;
         }
+        
+        //flags |= flag;// SetFlag
+        //flags &= ~flag; // ClearFlag 
 
         #endregion
 
@@ -237,18 +259,6 @@ namespace _3PA.Lib {
         public static MatchCollection RegexFind(this string source, string regexString, RegexOptions options = RegexOptions.IgnoreCase) {
             var regex = new Regex(regexString, options);
             return regex.Matches(source);
-        }   
-
-        /// <summary>
-        /// Get string value between [first] a and [last] b (not included), returns null if it failes
-        /// </summary>
-        public static string Between(this string value, string a, string b, StringComparison comparer = StringComparison.CurrentCultureIgnoreCase) {
-            int posA = value.IndexOf(a, comparer);
-            int posB = value.LastIndexOf(b, comparer);
-            if (posA == -1 || posB == -1)
-                return null;
-            int adjustedPosA = posA + a.Length;
-            return adjustedPosA >= posB ? null : value.Substring(adjustedPosA, posB - adjustedPosA);
         }
 
         /// <summary>
@@ -272,7 +282,7 @@ namespace _3PA.Lib {
         /// <param name="urlName"></param>
         /// <returns></returns>
         public static string ToHtmlLink(this string url, string urlName = null) {
-            return string.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
+            return String.Format("<a href='{0}'>{1}</a>", url, urlName ?? url);
         }
 
         /// <summary>
@@ -304,15 +314,6 @@ namespace _3PA.Lib {
         }
 
         /// <summary>
-        /// Delete every trailing \r or\n
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public static string TrimEol(this string text) {
-            return text.TrimEnd('\r', '\n');
-        }
-
-        /// <summary>
         /// Breaks new lines every lineLength char, taking into account words to not
         /// split them
         /// </summary>
@@ -322,10 +323,10 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static string BreakText(this string text, int lineLength, string eolString = "\n") {
             var charCount = 0;
-            var lines = text.Split(new [] { " " }, StringSplitOptions.RemoveEmptyEntries)
+            var lines = text.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)
                 .GroupBy(w => (charCount += w.Length + 1) / lineLength)
-                .Select(g => string.Join(" ", g));
-            return string.Join(eolString, lines.ToArray());
+                .Select(g => String.Join(" ", g));
+            return String.Join(eolString, lines.ToArray());
         }
 
         /// <summary>
@@ -341,9 +342,9 @@ namespace _3PA.Lib {
             try {
                 var i = 0;
                 while (i <= (splitLocal.Length - 1) && i <= (splitDistant.Length - 1)) {
-                    if (int.Parse(splitLocal[i]) > int.Parse(splitDistant[i]))
+                    if (Int32.Parse(splitLocal[i]) > Int32.Parse(splitDistant[i]))
                         return true;
-                    if (int.Parse(splitLocal[i]) < int.Parse(splitDistant[i]))
+                    if (Int32.Parse(splitLocal[i]) < Int32.Parse(splitDistant[i]))
                         return false;
                     i++;
                 }
@@ -362,7 +363,7 @@ namespace _3PA.Lib {
             var max = word.Length - 1;
             int count = 0;
             while (count <= max) {
-                if (char.IsLetter(word[count]))
+                if (Char.IsLetter(word[count]))
                     return true;
                 count++;
             }
@@ -405,9 +406,9 @@ namespace _3PA.Lib {
         /// <returns></returns>
         public static bool EqualsCi(this string s, string comp) {
             //string.Equals(a, b, StringComparison.CurrentCultureIgnoreCase);
-            return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase); 
+            return s.Equals(comp, StringComparison.CurrentCultureIgnoreCase);
         }
-         
+
 
         /// <summary>
         /// convert the word to Title Case
@@ -415,21 +416,7 @@ namespace _3PA.Lib {
         /// <param name="s"></param>
         /// <returns></returns>
         public static string ToTitleCase(this string s) {
-            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.ToLower()); 
-        }
-
-        /// <summary>
-        /// Converts from ANSI
-        /// </summary>
-        public static string AnsiToXencode(this string str, Encoding xencode) {
-            return xencode.GetString(Encoding.Default.GetBytes(str));
-        }
-
-        /// <summary>
-        /// Converts to ANSI
-        /// </summary>
-        public static string XencodeToAnsi(this string str, Encoding xencode) {
-            return Encoding.Default.GetString(xencode.GetBytes(str));
+            return CultureInfo.InvariantCulture.TextInfo.ToTitleCase(s.ToLower());
         }
 
         /// <summary>
@@ -444,99 +431,15 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region region string misc
-
-        private static readonly string[] LineDelimiters = { "\r\n", "\n" };
+        #region string builder
 
         /// <summary>
-        /// Normalizes the line breaks by replacing a single-"\n" breaks with "\r\n".
+        /// Append a text X times
         /// </summary>
-        /// <param name="text">The text to be normalized.</param>
-        /// <returns></returns>
-        public static string NormalizeLineBreaks(this string text) {
-            return text == null ? null : text.Replace("\r\n", "\n").Replace("\n", Environment.NewLine);
-        }
-
-
-        public static int MatchingStartChars(this string text, string pattern, bool ignoreCase = false) {
-            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(pattern))
-                return 0;
-
-            if (ignoreCase) {
-                text = text.ToLower();
-                pattern = pattern.ToLower();
-            }
-
-            for (int i = 0; i < pattern.Length && i < text.Length; i++) {
-                if (text[i] != pattern[i])
-                    return i;
-            }
-            return Math.Min(pattern.Length, text.Length);
-        }
-
-        public static string TruncateLines(this string text, int maxLineCount, string truncationPrompt) {
-            if (!string.IsNullOrEmpty(text)) {
-                string[] lines = text.Split(LineDelimiters, maxLineCount + 1, StringSplitOptions.None);
-
-                if (lines.Count() > maxLineCount)
-                    return string.Join("\n", lines.Take(maxLineCount)) + "\n" + truncationPrompt;
-            }
-            return text;
-        }
-
-        public static bool IsOneOf(this char ch, params char[] patterns) {
-            return patterns.Any(c => c == ch);
-        }
-
-        public static bool IsNonWhitespaceNext(this string text, string pattern, int startPos) {
-            if (startPos < text.Length)
-                for (int i = startPos; i < text.Length; i++) {
-                    if (!char.IsWhiteSpace(text[i]))
-                        return (text.IndexOf(pattern, i, StringComparison.CurrentCultureIgnoreCase) == i);
-                }
-            return false;
-        }
-
-        public static int GetByteCount(this string text) {
-            return Encoding.Default.GetByteCount(text);
-        }
-
-        public static int GetUtf8ByteCount(this string text) {
-            return Encoding.UTF8.GetByteCount(text);
-        }
-
-        public static bool IsInlineElseIf(this string text) {
-            text = text.TrimEnd();
-
-            if (text.EndsWith(")")) {
-                if (Regex.Match(text, @"\s*else\s*if \s*\(").Success)
-                    return text.EndsWith("}") || text.EndsWith(";");
-            }
-
-            return false;
-        }
-
         public static StringBuilder Append(this StringBuilder builder, string text, int count) {
             for (int i = 0; i < count; i++)
                 builder.Append(text);
             return builder;
-        }
-
-        public static string MultiplyBy(this string text, int count) {
-            string retval = "";
-            for (int i = 0; i < count; i++)
-                retval += text;
-            return retval;
-        }
-
-        public static bool IsSameLine(this StringBuilder builder, int startPos, int endPos) {
-            if (builder.Length > startPos && builder.Length > endPos) {
-                for (int i = startPos; i <= endPos; i++)
-                    if (builder[i] == '\n')
-                        return false;
-                return true;
-            }
-            return false;
         }
 
         public static bool EndsWith(this StringBuilder builder, string pattern) {
@@ -549,163 +452,11 @@ namespace _3PA.Lib {
             return false;
         }
 
-        public static bool EndsWithEscapeChar(this StringBuilder builder, char escapeChar) {
-            if (builder.Length > 0) {
-                int matchCount = 0;
-                for (int i = builder.Length - 1; i >= 0; i--) {
-                    if (builder[i] == escapeChar)
-                        matchCount++;
-                    else
-                        break;
-                }
-
-                return matchCount % 2 != 0;
-            }
-            return false;
-        }
-
-        //public static bool EndsWith(this StringBuilder builder, params char[] patterns)
-        //{
-        //    if (builder.Length > 0)
-        //    {
-        //        char endChar = builder[builder.Length - 1];
-
-        //        foreach(char c in patterns)
-        //            if (c == endChar)
-        //                return false;
-        //        return true;
-        //    }
-        //    else
-        //        return false;
-        //}
-
-        public static bool ContainsAt(this StringBuilder builder, string pattern, int pos) {
-            if ((builder.Length - pos) >= pattern.Length) {
-                for (int i = 0; i < pattern.Length; i++)
-                    if (pattern[i] != builder[pos + i])
-                        return false;
-                return true;
-            }
-            return false;
-        }
-
-        public static bool EndsWithWhiteSpacesLine(this StringBuilder builder) {
-            if (builder.Length > 0) {
-                for (int i = builder.Length - 1; i >= 0 && builder[i] != '\n'; i--)
-                    if (!char.IsWhiteSpace(builder[i]))
-                        return false;
-                return true;
-            }
-            return false;
-        }
-
-        public static string GetLastLine(this StringBuilder builder) {
-            return builder.GetLineFrom(builder.Length - 1);
-        }
-
-        public static char LastChar(this StringBuilder builder) {
-            return builder[builder.Length - 1];
-        }
-
-        public static string GetLineFrom(this StringBuilder builder, int position) {
-            if (position == (builder.Length - 1) && builder[position] == '\n')
-                return "";
-
-            if (builder.Length > 0 && position < builder.Length) {
-                int lineEnd = position;
-                for (; lineEnd < builder.Length; lineEnd++) {
-                    if (builder[lineEnd] == '\n') {
-                        lineEnd -= Environment.NewLine.Length - 1;
-                        break;
-                    }
-                }
-
-                int lineStart = position - 1;
-                for (; lineStart >= 0; lineStart--)
-                    if (builder[lineStart] == '\n') {
-                        lineStart = lineStart + 1;
-                        break;
-                    }
-
-                if (lineStart == -1)
-                    lineStart = 0;
-
-                var chars = new char[lineEnd - lineStart];
-
-                builder.CopyTo(lineStart, chars, 0, chars.Length);
-                return new string(chars);
-            }
-            return null;
-        }
-
-        public static StringBuilder TrimEmptyEndLines(this StringBuilder builder, int maxLineToLeave = 1) {
-            int lastNonWs = builder.LastNonWhiteSpace();
-
-            if (lastNonWs == -1)
-                builder.Length = 0; //the whole content was empty lines only
-            else {
-                int count = 0;
-                int maxLineBreak = maxLineToLeave + 1;
-
-                for (int i = lastNonWs + 1; i < builder.Length; i++) {
-                    if (builder.ContainsAt(Environment.NewLine, i))
-                        count++;
-                    if (count > maxLineBreak) {
-                        builder.Length = i;
-                        break;
-                    }
-                }
-            }
-            return builder;
-        }
-
-        public static int LastNonWhiteSpace(this StringBuilder builder) {
-            for (int i = builder.Length - 1; i >= 0; i--)
-                if (!char.IsWhiteSpace(builder[i]))
-                    return i;
-            return -1;
-        }
-
-        public static bool IsLastWhiteSpace(this StringBuilder builder) {
-            if (builder.Length != 0)
-                return char.IsWhiteSpace(builder[builder.Length - 1]);
-            return false;
-        }
-
-        public static bool LastNonWhiteSpaceToken(this StringBuilder builder, string expected) {
-            int pos = builder.LastNonWhiteSpace();
-
-            if (pos != -1 && pos >= expected.Length) {
-                int startPos = pos - (expected.Length - 1);
-                for (int i = 0; i < expected.Length; i++) {
-                    if (expected[i] != builder[startPos + i])
-                        return false;
-                }
-
-                if (startPos == 0 || char.IsWhiteSpace(builder[startPos - 1]))
-                    return true;
-            }
-
-            return false;
-        }
-
         public static StringBuilder TrimEnd(this StringBuilder builder) {
             if (builder.Length > 0) {
                 int i;
                 for (i = builder.Length - 1; i >= 0; i--)
-                    if (!char.IsWhiteSpace(builder[i]))
-                        break;
-
-                builder.Length = i + 1;
-            }
-            return builder;
-        }
-
-        public static StringBuilder TrimLineEnd(this StringBuilder builder) {
-            if (builder.Length > 0) {
-                int i;
-                for (i = builder.Length - 1; i >= 0 && builder[i] != '\n'; i--)
-                    if (!char.IsWhiteSpace(builder[i]))
+                    if (!Char.IsWhiteSpace(builder[i]))
                         break;
 
                 builder.Length = i + 1;

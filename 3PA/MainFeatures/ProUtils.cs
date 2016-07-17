@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using YamuiFramework.Helper;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
@@ -169,7 +170,7 @@ namespace _3PA.MainFeatures {
 
             // process already running?
             if (Plug.CurrentFileObject.CurrentOperation > CurrentOperation.Prolint) {
-                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, ((DisplayAttr)currentOperation.GetAttributes()).Name, "Already being compiled/run", args => {
+                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
                     KillCurrentProcess();
                     StartProgressExec(executionType);
                     args.Handled = true;

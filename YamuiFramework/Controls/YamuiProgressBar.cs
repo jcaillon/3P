@@ -136,8 +136,7 @@ namespace YamuiFramework.Controls {
         private int _marqueePos;
 
         #endregion
-
-
+        
         public YamuiProgressBar() {
             _tmrMarquee.Tick += _tmrMarquee_Tick;
 
@@ -152,6 +151,7 @@ namespace YamuiFramework.Controls {
         }
 
         #region Virtual and Overridden
+
         [Description("Occurs when the progress property has changed and the control has invalidated")]
         public event EventHandler ProgressChanged;
         /// <summary>
@@ -191,6 +191,8 @@ namespace YamuiFramework.Controls {
             _bufGraphics = _bufContext.Allocate(CreateGraphics(), ClientRectangle);
             UpdateLgBrushes();
         }
+
+        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
             //Draw grey backdrop
@@ -348,6 +350,7 @@ namespace YamuiFramework.Controls {
                 _bufGraphics.Graphics.FillRectangle(_foreLgb, 0, y, Width, pixelPercent);
             }
         }
+
         #endregion
     }
 

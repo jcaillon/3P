@@ -244,6 +244,8 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+
+
     internal enum ParsedFunctionType {
         /// <summary>
         /// For function prototypes that are defined in the same procedure

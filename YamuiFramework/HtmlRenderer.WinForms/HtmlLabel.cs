@@ -25,6 +25,7 @@ using System.Drawing.Text;
 using System.IO;
 using System.Net.Mime;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -182,8 +183,15 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
         public void SetNeededSize(string content, int minWidth, int maxWidth, bool dontSquareIt = false) {
-            Width = Helper.Utilities.MeasureHtmlPrefWidth(YamuiThemeManager.WrapLabelText(content), minWidth, maxWidth, dontSquareIt);
+            Width = Helper.Utilities.MeasureHtmlPrefWidth(content, minWidth, maxWidth);
             Text = content;
+
+            // make it more square shaped if possible
+            if (!dontSquareIt && Width > Height) {
+                Width = ((int) Math.Sqrt(Width*Height)).Clamp(minWidth, maxWidth);
+                PerformLayout();
+                Invalidate();
+            }
         }
 
         /// <summary>

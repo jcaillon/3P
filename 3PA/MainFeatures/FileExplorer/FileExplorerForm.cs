@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -820,7 +821,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
                     CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
                     if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
-                        lbStatus.Text = ((DisplayAttr)flag.GetAttributes()).Name;
+                        lbStatus.Text = flag.GetAttribute<CurrentOperationAttr>().Name;
                     }
                 }
 
@@ -863,7 +864,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             // text
             t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
-            t.add(lbErrorText, "Text", ((DisplayAttr)updatedErrorsEventArgs.ErrorLevel.GetAttributes()).Name);
+            t.add(lbErrorText, "Text", updatedErrorsEventArgs.ErrorLevel.GetDescription());
 
             t.run();
         }

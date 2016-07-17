@@ -112,7 +112,6 @@ namespace YamuiFramework.Forms {
                             _items.Add(pi);
                         }
                     }
-
                     _items.Sort((x, y) => (GetAttr(x) != null ? GetAttr(x).Order : int.MaxValue) - (GetAttr(y) != null ? GetAttr(y).Order : int.MaxValue));
                 }
 
@@ -121,15 +120,14 @@ namespace YamuiFramework.Forms {
                 for (int i = 0; i < _items.Count; i++) {
                     var item = _items[i];
                     if (item != null)
-                        _dataLabelWidth = Math.Max(_dataLabelWidth, Utilities.MeasureHtmlPrefWidth((GetAttr(item) != null ? GetAttr(item).Label : item.Name), 0, maxWidthInPanel - widthSpace, true));
+                        _dataLabelWidth = _dataLabelWidth.ClampMin(Utilities.MeasureHtmlPrefWidth((GetAttr(item) != null ? GetAttr(item).Label : item.Name), 0, maxWidthInPanel - widthSpace));
                 }
-                formMinWidth = Math.Max(formMinWidth, _dataLabelWidth + widthSpace);
+                formMinWidth = formMinWidth.ClampMin(_dataLabelWidth + widthSpace);
             }
 
             // Set title, it will define a new minimum width for the message box
             var space = FormButtonWidth * 2 + BorderWidth * 2 + titleLabel.Padding.Left + 5;
             titleLabel.SetNeededSize(htmlTitle, formMinWidth - space, formMaxWidth - space, true);
-            formMinWidth = Math.Max(formMinWidth, titleLabel.Width + space);
             var newPadding = Padding;
             newPadding.Top = titleLabel.Height + 10;
             Padding = newPadding;
@@ -143,8 +141,8 @@ namespace YamuiFramework.Forms {
 
             // set content label
             space = Padding.Left + Padding.Right;
-            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, Math.Max(cumButtonWidth + ButtonPadding + BorderWidth * 2 + 20, formMinWidth - space), maxWidthInPanel);
-            contentLabel.Width = Math.Max(contentLabel.Width, formMinWidth - space);
+            contentLabel.SetNeededSize(htmlMessage ?? string.Empty, (cumButtonWidth + ButtonPadding + BorderWidth * 2 + 20).ClampMin(formMinWidth - space), maxWidthInPanel);
+            contentLabel.Width = (formMinWidth - space).ClampMin(contentLabel.Width);
             contentPanel.ContentPanel.Size = contentLabel.Size;
             if (onLinkClicked != null)
                 contentLabel.LinkClicked += onLinkClicked;
@@ -152,7 +150,7 @@ namespace YamuiFramework.Forms {
             var yPos = contentLabel.Location.Y + contentLabel.Height;
 
             // ensure a minimum width if there is no message
-            contentPanel.ContentPanel.Width = Math.Max(contentPanel.ContentPanel.Width, formMinWidth - space);
+            contentPanel.ContentPanel.Width = (formMinWidth - space).ClampMin(contentPanel.ContentPanel.Width);
 
             // if there was an object data passed on, need to set up inputs for the user to fill in
             if (HasData) {
@@ -167,7 +165,7 @@ namespace YamuiFramework.Forms {
             }
 
             // set form size
-            Size = new Size(contentPanel.ContentPanel.Width + space, Math.Min(formMaxHeight, Padding.Top + Padding.Bottom + yPos));
+            Size = new Size(contentPanel.ContentPanel.Width + space, (Padding.Top + Padding.Bottom + yPos).ClampMax(formMaxHeight));
             if (contentPanel.HasScrolls) {
                 _hasScrollMessage = true;
                 Width += 10;
@@ -196,7 +194,7 @@ namespace YamuiFramework.Forms {
             if (_hasScrollMessage)
                 ActiveControl = contentLabel;
             else if (HasData)
-                ActiveControl = Controls.Find("input0", false).FirstOrDefault();
+                ActiveControl = contentPanel.ContentPanel.Controls.Find("input0", false).FirstOrDefault();
             else
                 ActiveControl = Controls.Find("yamuiButton0", false).FirstOrDefault();
         }
@@ -256,7 +254,7 @@ namespace YamuiFramework.Forms {
                 Location = new Point(InputPadding, yPos),
                 Size = new Size(_dataLabelWidth + InputPadding - 1, 20),
                 IsSelectionEnabled = false,
-                Text = item != null ? ((GetAttr(item) != null ? GetAttr(item).Label : item.Name)) : ""
+                Text = item != null ? (GetAttr(item) != null ? GetAttr(item).Label : item.Name) : ""
             };
             yPos += Math.Max(30, lbl.Height + 5);
             return lbl;
@@ -290,7 +288,8 @@ namespace YamuiFramework.Forms {
                     Checked = (bool)val
                 };
 
-            } else if (itemType.IsEnum) {
+            // for enum or list of strings
+            } else if (itemType.IsEnum || (itemType == typeof(string) && GetAttr(item) != null && GetAttr(item).AllowListedValuesOnly)) {
 
                 var cb = new YamuiComboBox {
                     Location = new Point(_dataLabelWidth + InputPadding * 2, yPos),
@@ -298,10 +297,21 @@ namespace YamuiFramework.Forms {
                     DropDownStyle = ComboBoxStyle.DropDownList,
                     Anchor = Anchor | AnchorStyles.Right
                 };
-                cb.DataSource = Enum.GetNames(itemType).ToList();
+                var dataSource = new List<string>();
+                if (itemType.IsEnum) {
+                    foreach (var name in Enum.GetNames(itemType)) {
+                        var attribute = Attribute.GetCustomAttribute(itemType.GetField(name), typeof(DescriptionAttribute), true) as DescriptionAttribute;
+                        dataSource.Add(attribute != null ? attribute.Description : name);
+                    }
+                } else {
+                    dataSource = strValue.Split('|').ToList();
+                    strValue = dataSource[0];
+                }
+                cb.DataSource = dataSource;
                 cb.Text = strValue;
                 retVal = cb;
 
+            // for everything else
             } else {
 
                 var tb = new YamuiTextBox {
@@ -478,6 +488,12 @@ namespace YamuiFramework.Forms {
         /// Gets or sets the order in which to display the input for this field
         /// </summary>
         public int Order { get; set; }
+
+        /// <summary>
+        /// For strings, you can constrain the values to a list of string delimited by |, the input will then be a combo box,
+        /// set this to true and set the default value value for the field with the list
+        /// </summary>
+        public bool AllowListedValuesOnly { get; set; }
     }
 
     #endregion

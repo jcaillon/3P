@@ -81,6 +81,8 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e) { }
+
         protected override void OnPaint(PaintEventArgs e) {
 
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(_isFocused, _isHovered, _isPressed, Enabled, CheckState == CheckState.Checked);

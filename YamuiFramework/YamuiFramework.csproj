@@ -169,6 +169,7 @@
     <Compile Include="Helper\TabOrderManager.cs" />
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />
+    <Compile Include="Helper\YamuiExtensions.cs" />
     <Compile Include="HtmlRenderer.Core\Adapters\Entities\RColor.cs" />
     <Compile Include="HtmlRenderer.Core\Adapters\Entities\RDashStyle.cs" />
     <Compile Include="HtmlRenderer.Core\Adapters\Entities\RFontStyle.cs" />

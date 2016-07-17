@@ -28,7 +28,9 @@ namespace YamuiFramework.Controls {
     [ToolboxBitmap(typeof(TrackBar))]
     [DefaultEvent("Scroll")]
     public class YamuiSlider : Control {
+
         #region Fields
+
         private int _trackerValue = 50;
         [DefaultValue(50)]
         [Category("Yamui")]

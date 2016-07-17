@@ -131,6 +131,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             this.lbStatus.Location = new System.Drawing.Point(112, 1);
             this.lbStatus.Margin = new System.Windows.Forms.Padding(3);
             this.lbStatus.Name = "lbStatus";
+            this.lbStatus.Padding = new System.Windows.Forms.Padding(0, 0, 5, 0);
             this.lbStatus.Size = new System.Drawing.Size(457, 20);
             this.lbStatus.TabIndex = 19;
             this.lbStatus.TextAlign = System.Drawing.ContentAlignment.MiddleRight;

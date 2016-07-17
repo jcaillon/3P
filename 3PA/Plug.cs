@@ -152,7 +152,7 @@ namespace _3PA {
         /// <summary>
         /// Called on npp ready
         /// </summary>
-        internal static bool OnNppReady() {
+        internal static bool DoNppReady() {
             try {
                 // need to set some values in the yamuiThemeManager
                 ThemeManager.OnStartUp();
@@ -214,7 +214,7 @@ namespace _3PA {
             return false;
         }
 
-        internal static void OnPlugStart() {
+        internal static void DoPlugStart() {
 
             if (OnPlugReady != null)
                 OnPlugReady();
@@ -239,7 +239,7 @@ namespace _3PA {
 
             // Simulates a OnDocumentSwitched when we start this dll
             IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
-            OnNppDocumentSwitched(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
+            DoNppDocumentSwitched(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
             WinApi.SetForegroundWindow(Npp.HandleNpp);
@@ -252,7 +252,7 @@ namespace _3PA {
         /// <summary>
         /// Called on Npp shutdown
         /// </summary>
-        internal static void OnNppShutDown() {
+        internal static void DoNppShutDown() {
             try {
                 if (OnShutDown != null)
                     OnShutDown();
@@ -482,7 +482,7 @@ namespace _3PA {
         /// Called when the user switches tab document, 
         /// no matter if the document is a Progress file or not
         /// </summary>
-        public static void OnNppDocumentSwitched(bool initiating = false) {
+        public static void DoNppDocumentSwitched(bool initiating = false) {
 
             // update current file info
             IsPreviousFileProgress = IsCurrentFileProgress;
@@ -527,7 +527,7 @@ namespace _3PA {
                 // Need to compute the propath again, because we take into account relative path
                 ProEnvironment.Current.ReComputeProPath();
 
-                // rebuild lines info
+                // rebuild lines info (MANDATORY)
                 Npp.RebuildLinesInfo();
             }
 
@@ -547,10 +547,10 @@ namespace _3PA {
         /// Called when the current document is saved, 
         /// no matter if the document is a Progress file or not
         /// </summary>
-        public static void OnNppDocumentSaved() {
+        public static void DoNppDocumentSaved() {
 
             // the user can open a .txt and save it as a .p
-            OnNppDocumentSwitched();
+            DoNppDocumentSwitched();
 
             // update function prototypes
             if (IsCurrentFileProgress)
@@ -564,9 +564,13 @@ namespace _3PA {
         /// <summary>
         /// Called when a new file is being opened in notepad++
         /// </summary>
-        private static void OnNppFileBeforeLoad() {
+        private static void DoNppFileBeforeLoad() {
             // assume the file is not a progress file
             CurrentFileAllowed = false;
+
+            // Reset the scintilla option for the indentation mode, as crazy as this is, it DESTROYS the performances
+            // when opening big files in scintilla...
+            Npp.AnnotationVisible = _annotationMode;
         }
 
         #endregion
@@ -708,7 +712,7 @@ namespace _3PA {
             // if the text has changed
             if (deletedText || (nc.modificationType & (int) SciMsg.SC_MOD_INSERTTEXT) != 0) {
 
-                // observe modification to lines
+                // observe modifications to lines (MANDATORY)
                 Npp.UpdateLinesInfo(nc, !deletedText);
 
                 // parse
@@ -778,7 +782,7 @@ namespace _3PA {
         }
 
         /// <summary>
-        /// Called when the user saves the current document
+        /// Called when the user saves the current document (just before it saves itself)
         /// </summary>
         public static void OnNppFileBeforeSaved() {
 
@@ -865,8 +869,8 @@ namespace _3PA {
 
             // we want the default auto-completion to not show
             // we block on a scintilla level (pretty bad solution because it slows down npp on big documents)
-            // and we also block it in Npp (pull request on going for v6.9.?)
             Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
+            // and we also block it in Npp (pull request on going for v6.9.?)
             WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
         }
 
