@@ -332,7 +332,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // for database extraction, we need to copy the DumpDatabase program
                 fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
-                File.WriteAllBytes(Path.Combine(TempDir, fileToExecute), DataResources.DumpDatabase);
+                if (!Utils.FileWriteAllBytes(Path.Combine(TempDir, fileToExecute), DataResources.DumpDatabase))
+                    return false;
 
             } else if (executionType == ExecutionType.Prolint) {
 
@@ -362,7 +363,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             } else if (executionType == ExecutionType.DataDigger) {
                 // need to init datadigger?
                 if (!File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
-                    File.WriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger);
+                    if (!Utils.FileWriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger))
+                        return false;
                     if (!Utils.ExtractAll(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), Config.FolderDataDigger))
                         return false;
                 }

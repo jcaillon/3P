@@ -21,9 +21,10 @@
 /* Buildnr, temp-tables and forward defs */
 { DataDigger.i }
 
+define INPUT PARAMETER ipc_programDir as character no-undo.
+
 define variable cRemoteFile as character no-undo.
 define variable gcError as character no-undo.
-define variable gcProgramDir as character no-undo.
 define variable winCompile as handle no-undo.
 
 /* Needed for upgrade of DataDigger */
@@ -114,11 +115,11 @@ cRemoteFile = getRegistry("DataDigger:Update","ChmDownloadUrl").
 if cRemoteFile = ? then
     gcError = "Download-URL not defined in settings.".
 ELSE DO:
-    run upgradeDataDigger(input cRemoteFile, INPUT gcProgramDir + "DataDigger.chm", output gcError).
+    run upgradeDataDigger(input cRemoteFile, INPUT ipc_programDir + "DataDigger.chm", output gcError).
     IF gcError > "" THEN DO:
         cRemoteFile = getRegistry("DataDigger:Update","ChmDownloadUrl2").
         if cRemoteFile <> ? then
-            run upgradeDataDigger(input cRemoteFile, INPUT gcProgramDir + "DataDigger.chm", output gcError).
+            run upgradeDataDigger(input cRemoteFile, INPUT ipc_programDir + "DataDigger.chm", output gcError).
     END.
 END.
     
@@ -149,23 +150,20 @@ PROCEDURE initializeObject :
   ----------------------------------------------------------------------
   16-04-2010 pti Created
   ----------------------------------------------------------------------*/
-  
-  /* Where are we running from? */
-  gcProgramDir = SUBSTRING(THIS-PROCEDURE:FILE-NAME,1,R-INDEX(THIS-PROCEDURE:FILE-NAME,'\')).
-  
+
   /* Add program dir to propath (if not already in) */
   if search('framelib.i') = ? then
-    propath = gcProgramDir + ',' + propath.
+    propath = ipc_programDir + ',' + propath.
 
   /* If the general ini file does not exist, create it */
-  if search(gcProgramDir + 'DataDigger.ini') = ? then
+  if search(ipc_programDir + 'DataDigger.ini') = ? then
   do:
-    output to value(gcProgramDir + 'DataDigger.ini').
+    output to value(ipc_programDir + 'DataDigger.ini').
     output close. 
   end.
 
   /* In any case, load it */
-  load 'DataDigger' dir gcProgramDir base-key 'ini' no-error.
+  load 'DataDigger' dir ipc_programDir base-key 'ini' no-error.
 
 end procedure. /* initializeObject */
 

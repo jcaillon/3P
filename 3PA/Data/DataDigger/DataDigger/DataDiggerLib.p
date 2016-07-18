@@ -3052,7 +3052,7 @@ PROCEDURE startWinHelp :
   cHelpfile = getProgramDir() + 'DataDigger.chm'.
   
   IF SEARCH(cHelpfile) = ? THEN 
-    RUN fetchChm.p NO-ERROR.
+    RUN fetchChm.p (INPUT getProgramDir()) NO-ERROR.
   IF ERROR-STATUS:ERROR OR SEARCH(cHelpfile) = ? THEN
     RETURN "". 
 

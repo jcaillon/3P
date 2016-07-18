@@ -168,7 +168,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     marginError.Width = 1;
                     marginError.Width = 0;
                 }
+                // reset annotation to default
+                Npp.AnnotationVisible = Plug.AnnotationMode;
                 return;
+            } else {
+                // activate annotation if needed
+                Plug.AnnotationMode = Annotation.Indented;
             }
 
             // show margin
@@ -178,6 +183,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 marginError.Type = MarginType.Symbol;
             if (marginError.Mask != EveryMarkersMask)
                 marginError.Mask = EveryMarkersMask;
+
+            
+            
 
             StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;

@@ -616,8 +616,7 @@ namespace _3PA.MainFeatures {
         // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
         public static string FileDownloadedPlugin { get { return Path.Combine(FolderUpdate, "3P.dll"); } }
-        public static string FileZipExe { get { return Path.Combine(FolderUpdate, "7z.exe"); } }
-        public static string FileZipDll { get { return Path.Combine(FolderUpdate, "7z.dll"); } }
+        public static string FileDownloadedPdb { get { return Path.Combine(FolderUpdate, "3P.pdb"); } }
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
         public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }

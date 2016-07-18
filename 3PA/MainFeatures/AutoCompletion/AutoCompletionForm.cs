@@ -48,8 +48,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public string FilterByText {
             get { return _filterByText; }
             set {
-                _filterByText = value.ToLower();
-                ApplyFilter();
+                this.SafeInvoke(form => {
+                    _filterByText = value.ToLower();
+                    ApplyFilter();
+                });
             }
         }
 
@@ -66,7 +68,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Raised when the user presses TAB or ENTER or double click
         /// </summary>
-        public event EventHandler<TabCompletedEventArgs> InsertSuggestion;
+        public event Action<CompletionItem> InsertSuggestion;
 
         // the private fields below are used for the filter function
         private static Dictionary<CompletionType, SelectorButton<CompletionType>> _displayedTypes;
@@ -88,20 +90,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// True if the form is ABOVE the text it autocompletes
         /// </summary>
         private bool _isReversed;
-
-        /// <summary>
-        /// returns the ranking of each CompletionType, helps sorting them as we wish
-        /// </summary>
-        public static List<int> GetPriorityList {
-            get {
-                if (_completionTypePriority != null) return _completionTypePriority;
-                _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
-                return _completionTypePriority;
-            }
-        }
-
-        // holds the display order of the CompletionType
-        private static List<int> _completionTypePriority;
 
         #endregion
 
@@ -216,59 +204,50 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="objectsList"></param>
         /// <param name="resetSelectorButtons"></param>
         public void SetItems(List<CompletionItem> objectsList, bool resetSelectorButtons = true) {
-            objectsList.Sort(new CompletionDataSortingClass());
-            _initialObjectsList = objectsList;
+            this.SafeInvoke(form => {
+                objectsList.Sort(new CompletionDataSortingClass());
+                _initialObjectsList = objectsList;
 
-            // set the default height / width
-            fastOLV.Height = 21 * Config.Instance.AutoCompleteShowListOfXSuggestions;
-            Height = fastOLV.Height + 32;
-            //Width = 280;
+                // set the default height / width
+                fastOLV.Height = 21*Config.Instance.AutoCompleteShowListOfXSuggestions;
+                Height = fastOLV.Height + 32;
+                //Width = 280;
 
-            if (resetSelectorButtons) {
-                // delete any existing buttons
-                if (_displayedTypes != null) {
-                    foreach (var selectorButton in _displayedTypes) {
-                        selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                        if (Controls.Contains(selectorButton.Value))
-                            Controls.Remove(selectorButton.Value);
-                        selectorButton.Value.Dispose();
+                if (resetSelectorButtons) {
+                    // delete any existing buttons
+                    if (_displayedTypes != null) {
+                        foreach (var selectorButton in _displayedTypes) {
+                            selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                            if (Controls.Contains(selectorButton.Value))
+                                Controls.Remove(selectorButton.Value);
+                            selectorButton.Value.Dispose();
+                        }
+                    }
+
+                    // get distinct types, create a button for each
+                    int xPos = 4;
+                    _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
+                    foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
+                        var but = new SelectorButton<CompletionType> {BackGrndImage = GetTypeImageFromStr(type.ToString()), Activated = true, Size = new Size(24, 24), TabStop = false, Location = new Point(xPos, Height - 28), Type = type, AcceptsRightClick = true, HideFocusedIndicator = true};
+                        but.ButtonPressed += HandleTypeClick;
+                        htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                        _displayedTypes.Add(type, but);
+                        Controls.Add(but);
+                        xPos += but.Width;
+                    }
+                    xPos += 65;
+
+                    // correct width
+                    var neededWidth = Math.Max(280, xPos);
+                    if (neededWidth != Width) {
+                        Width = Math.Max(310, xPos);
+                        _normalWidth = Width - 2;
+                        Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
                     }
                 }
 
-                // get distinct types, create a button for each
-                int xPos = 4;
-                _displayedTypes = new Dictionary<CompletionType, SelectorButton<CompletionType>>();
-                foreach (var type in objectsList.Select(x => x.Type).Distinct()) {
-                    var but = new SelectorButton<CompletionType> {
-                        BackGrndImage = GetTypeImageFromStr(type.ToString()),
-                        Activated = true,
-                        Size = new Size(24, 24),
-                        TabStop = false,
-                        Location = new Point(xPos, Height - 28),
-                        Type = type,
-                        AcceptsRightClick = true,
-                        HideFocusedIndicator = true
-                    };
-                    but.ButtonPressed += HandleTypeClick;
-                    htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
-                    _displayedTypes.Add(type, but);
-                    Controls.Add(but);
-                    xPos += but.Width;
-                }
-                xPos += 65;
-
-                // correct width
-                var neededWidth = Math.Max(280, xPos);
-                if (neededWidth != Width) {
-                    Width = Math.Max(310, xPos);
-                    _normalWidth = Width - 2;
-                    Keyword.Width = _normalWidth - (Config.Instance.AutoCompleteHideScrollBar ? 0 : 17);
-                }
-            }
-
-            // label for the number of items
-            TotalItems = objectsList.Count;
-            ExecuteOnThread(() => {
+                // label for the number of items
+                TotalItems = objectsList.Count;
                 nbitems.Text = TotalItems + StrItems;
             });
         }
@@ -278,7 +257,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// items (it is already called by SetItems())
         /// </summary>
         public void SortItems() {
-            _initialObjectsList.Sort(new CompletionDataSortingClass());
+            this.SafeInvoke(form => {
+                _initialObjectsList.Sort(new CompletionDataSortingClass());
+            });
         }
 
         /// <summary>
@@ -286,11 +267,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="allowedType"></param>
         public void SetActiveType(List<CompletionType> allowedType) {
-            if (_displayedTypes == null) return;
-            if (allowedType == null) allowedType = new List<CompletionType>();
-            foreach (var selectorButton in _displayedTypes) {
-                selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
-            }
+            this.SafeInvoke(form => {
+                if (_displayedTypes == null)
+                    return;
+                if (allowedType == null)
+                    allowedType = new List<CompletionType>();
+                foreach (var selectorButton in _displayedTypes) {
+                    selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
+                }
+            });
         }
 
         /// <summary>
@@ -298,31 +283,40 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         /// <param name="allowedType"></param>
         public void SetUnActiveType(List<CompletionType> allowedType) {
-            if (_displayedTypes == null) return;
-            if (allowedType == null) allowedType = new List<CompletionType>();
-            foreach (var selectorButton in _displayedTypes) {
-                selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
-            }
+            this.SafeInvoke(form => {
+                if (_displayedTypes == null)
+                    return;
+                if (allowedType == null)
+                    allowedType = new List<CompletionType>();
+                foreach (var selectorButton in _displayedTypes) {
+                    selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
+                }
+            });
         }
 
         /// <summary>
         /// reset all the button Types to activated
         /// </summary>
         public void ResetActiveType() {
-            if (_displayedTypes == null) return;
-            foreach (var selectorButton in _displayedTypes) {
-                selectorButton.Value.Activated = true;
-            }
+            this.SafeInvoke(form => {
+                if (_displayedTypes == null)
+                    return;
+                foreach (var selectorButton in _displayedTypes) {
+                    selectorButton.Value.Activated = true;
+                }
+            });
         }
 
         /// <summary>
         /// allows to programmatically select the first item of the list
         /// </summary>
         public void SelectFirstItem() {
-            if (TotalItems > 0) {
-                fastOLV.TopItemIndex = 0;
-                fastOLV.SelectedIndex = 0;
-            }
+            this.SafeInvoke(form => {
+                if (TotalItems > 0) {
+                    fastOLV.TopItemIndex = 0;
+                    fastOLV.SelectedIndex = 0;
+                }
+            });
         }
 
         /// <summary>
@@ -331,22 +325,24 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="position"></param>
         /// <param name="lineHeight"></param>
         public void SetPosition(Point position, int lineHeight) {
-            var screen = Screen.FromPoint(position);
-            // position the window smartly
-            if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width / 2)
-                position.X = position.X - Width;
-            if (position.Y > screen.WorkingArea.Y + screen.WorkingArea.Height / 2) {
-                position.Y = position.Y - Height - lineHeight;
-                _isReversed = true;
-            } else
-                _isReversed = false;
-            Location = position;
+            this.SafeInvoke(form => {
+                var screen = Screen.FromPoint(position);
+                // position the window smartly
+                if (position.X > screen.WorkingArea.X + screen.WorkingArea.Width/2)
+                    position.X = position.X - Width;
+                if (position.Y > screen.WorkingArea.Y + screen.WorkingArea.Height/2) {
+                    position.Y = position.Y - Height - lineHeight;
+                    _isReversed = true;
+                } else
+                    _isReversed = false;
+                Location = position;
+            });
         }
 
         /// <summary>
         /// autocomplete with the currently selected item
         /// </summary>
-        public void AcceptCurrentSuggestion() {
+        private void AcceptCurrentSuggestion() {
             var obj = GetCurrentSuggestion();
             if (obj != null)
                 OnTabCompleted(new TabCompletedEventArgs(obj));
@@ -358,7 +354,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public CompletionItem GetCurrentSuggestion() {
             try {
-                return (CompletionItem) fastOLV.SelectedItem.RowObject;
+                return (CompletionItem) this.SafeInvoke(form => fastOLV.SelectedItem.RowObject);
             } catch (Exception x) {
                 if (!(x is NullReferenceException))
                     ErrorHandler.Log(x.Message);
@@ -422,62 +418,64 @@ namespace _3PA.MainFeatures.AutoCompletion {
             GiveFocusBack();
         }
 
-        protected void CustomOnMouseLeave(object sender, EventArgs e) {
+        private void CustomOnMouseLeave(object sender, EventArgs e) {
             if (IsActivated) GiveFocusBack();
         }
 
-        protected virtual void OnTabCompleted(TabCompletedEventArgs e) {
-            var handler = InsertSuggestion;
-            if (handler != null) handler(this, e);
+        private void OnTabCompleted(TabCompletedEventArgs e) {
+            if (InsertSuggestion != null)
+                InsertSuggestion(e.CompletionItem);
         }
         #endregion
 
         #region on key events
 
         public bool OnKeyDown(Keys key) {
-            bool handled = true;
-            // down and up change the selection
-            if (key == Keys.Up) {
-                if (fastOLV.SelectedIndex > 0)
-                    fastOLV.SelectedIndex--;
-                else
-                    fastOLV.SelectedIndex = (TotalItems - 1);
-                if (fastOLV.SelectedIndex >= 0)
-                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
-            } else if (key == Keys.Down) {
-                if (fastOLV.SelectedIndex < (TotalItems - 1))
-                    fastOLV.SelectedIndex++;
-                else
-                    fastOLV.SelectedIndex = 0;
-                if (fastOLV.SelectedIndex >= 0)
-                    fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+            return this.SafeInvoke(form => {
+                bool handled = true;
+                // down and up change the selection
+                if (key == Keys.Up) {
+                    if (fastOLV.SelectedIndex > 0)
+                        fastOLV.SelectedIndex--;
+                    else
+                        fastOLV.SelectedIndex = (TotalItems - 1);
+                    if (fastOLV.SelectedIndex >= 0)
+                        fastOLV.EnsureVisible(fastOLV.SelectedIndex);
+                } else if (key == Keys.Down) {
+                    if (fastOLV.SelectedIndex < (TotalItems - 1))
+                        fastOLV.SelectedIndex++;
+                    else
+                        fastOLV.SelectedIndex = 0;
+                    if (fastOLV.SelectedIndex >= 0)
+                        fastOLV.EnsureVisible(fastOLV.SelectedIndex);
 
-                // escape close
-            } else if (key == Keys.Escape) {
-                Close();
-                InfoToolTip.InfoToolTip.Close();
+                    // escape close
+                } else if (key == Keys.Escape) {
+                    Close();
+                    InfoToolTip.InfoToolTip.Close();
 
-                // left and right keys
-            } else if (key == Keys.Left) {
-                LeftRight(true);
+                    // left and right keys
+                } else if (key == Keys.Left) {
+                    LeftRight(true);
 
-            } else if (key == Keys.Right) {
-                LeftRight(false);
+                } else if (key == Keys.Right) {
+                    LeftRight(false);
 
-                // enter and tab accept the current selection
-            } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept) || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
-                AcceptCurrentSuggestion();
+                    // enter and tab accept the current selection
+                } else if ((key == Keys.Enter && Config.Instance.AutoCompleteUseEnterToAccept) || (key == Keys.Tab && Config.Instance.AutoCompleteUseTabToAccept)) {
+                    AcceptCurrentSuggestion();
 
-                // else, any other key needs to be analysed by Npp
-            } else {
-                handled = false;
-            }
+                    // else, any other key needs to be analysed by Npp
+                } else {
+                    handled = false;
+                }
 
-            // down and up activate the display of tooltip
-            if (key == Keys.Up || key == Keys.Down) {
-                InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
-            }
-            return handled;
+                // down and up activate the display of tooltip
+                if (key == Keys.Up || key == Keys.Down) {
+                    InfoToolTip.InfoToolTip.ShowToolTipFromAutocomplete(GetCurrentSuggestion(), new Rectangle(new Point(Location.X, Location.Y), new Size(Width, Height)), _isReversed);
+                }
+                return handled;
+            });
         }
 
         private void LeftRight(bool isLeft) {
@@ -608,15 +606,6 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-        #region misc
-
-        private void ExecuteOnThread(Action action) {
-            if (IsHandleCreated)
-                BeginInvoke(action);
-        }
-
-        #endregion
-
     }
 
     #region sorting
@@ -626,13 +615,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
     internal class CompletionDataSortingClass : IComparer<CompletionItem> {
 
         /// <summary>
+        /// returns the ranking of each CompletionType, helps sorting them as we wish
+        /// </summary>
+        public static unsafe List<int> GetPriorityList {
+            get {
+                if (_completionTypePriority != null) return _completionTypePriority;
+                _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
+                return _completionTypePriority;
+            }
+        }
+
+        // holds the display order of the CompletionType
+        private static List<int> _completionTypePriority;
+
+        /// <summary>
         /// to sort ascending : if x > y then return 1 if x < y then return -1; and
         /// x.compareTo(y) -> if x > y then return 1 if x < y then return -1;
         /// </summary>
         public int Compare(CompletionItem x, CompletionItem y) {
 
             // compare first by CompletionType
-            int compare = AutoCompletionForm.GetPriorityList[(int)x.Type].CompareTo(AutoCompletionForm.GetPriorityList[(int)y.Type]);
+            int compare = GetPriorityList[(int)x.Type].CompareTo(GetPriorityList[(int)y.Type]);
             if (compare != 0) return compare;
 
             // then by ranking
@@ -658,7 +661,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // sort by display text in last resort
-            return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+            return String.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }
     }
     #endregion

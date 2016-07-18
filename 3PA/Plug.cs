@@ -102,7 +102,6 @@ namespace _3PA {
         /// </summary>
         public static FileInfoObject CurrentFileObject { get; private set; }
 
-
         /// <summary>
         /// this is a delegate to defined actions that must be taken after updating the ui
         /// </summary>
@@ -570,7 +569,7 @@ namespace _3PA {
 
             // Reset the scintilla option for the indentation mode, as crazy as this is, it DESTROYS the performances
             // when opening big files in scintilla...
-            Npp.AnnotationVisible = _annotationMode;
+            Npp.AnnotationVisible = AnnotationMode;
         }
 
         #endregion
@@ -814,9 +813,21 @@ namespace _3PA {
 
         #region Apply Scintilla options
 
+        public static Annotation AnnotationMode {
+            get { return _annotationMode; }
+            set {
+                // we want to set to our value
+                if (value == Annotation.Indented) {
+                    Npp.AnnotationVisible = Annotation.Indented;
+                } else {
+                    _annotationMode = value;
+                }
+            }
+        }
+        private static Annotation _annotationMode = Annotation.Hidden;
+
         private static bool _indentWithTabs;
         private static int _tabWidth = -1;
-        private static Annotation _annotationMode;
         private static WhitespaceMode _whitespaceMode = WhitespaceMode.Invisible;
 
         private static int[] _initiatedScintilla = {0,0};
@@ -839,8 +850,8 @@ namespace _3PA {
                 // read default options
                 _tabWidth = Npp.TabWidth;
                 _indentWithTabs = Npp.UseTabs;
-                _annotationMode = Npp.AnnotationVisible;
                 _whitespaceMode = Npp.ViewWhitespace;
+                AnnotationMode = Npp.AnnotationVisible;
             }
             _hasBeenInit = true;
 
@@ -856,7 +867,6 @@ namespace _3PA {
 
             Npp.TabWidth = Config.Instance.CodeTabSpaceNb;
             Npp.UseTabs = false;
-            Npp.AnnotationVisible = Annotation.Indented;
             if (Config.Instance.CodeShowSpaces)
                 Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
 
@@ -882,7 +892,7 @@ namespace _3PA {
             // apply default options
             Npp.TabWidth = _tabWidth;
             Npp.UseTabs = _indentWithTabs;
-            Npp.AnnotationVisible = _annotationMode;
+            Npp.AnnotationVisible = AnnotationMode;
             if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                 Npp.ViewWhitespace = _whitespaceMode;
 

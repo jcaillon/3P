@@ -503,12 +503,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Method called by the form when the user accepts a suggestion (tab or enter or doubleclick)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="tabCompletedEventArgs"></param>
-        private static void OnInsertSuggestion(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
+        private static void OnInsertSuggestion(CompletionItem data) {
             try {
-                var data = tabCompletedEventArgs.CompletionItem;
-
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
                 if (Config.Instance.CodeReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {

@@ -81,16 +81,12 @@ namespace _3PA.Lib._3pUpdater {
         private void ExecuteUpdateAsync() {
             try {
                 // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                File.WriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? Resources._3pUpdater_user : Resources._3pUpdater);
+                if (Utils.FileWriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? Resources._3pUpdater_user : Resources._3pUpdater)) {
 
-                // execute it, don't wait for the end
-                var process = new Process {
-                    StartInfo = {
-                        FileName = Config.FileUpdaterExe,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    }
-                };
-                process.Start();
+                    // execute it, don't wait for the end
+                    var process = new Process {StartInfo = {FileName = Config.FileUpdaterExe, WindowStyle = ProcessWindowStyle.Hidden}};
+                    process.Start();
+                }
 
             } catch (Exception e) {
                 if (!(e is Win32Exception))

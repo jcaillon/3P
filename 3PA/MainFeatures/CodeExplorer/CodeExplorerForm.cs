@@ -49,7 +49,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// The filter to apply to the autocompletion form
         /// </summary>
-        public string FilterByText {
+        private string FilterByText {
             get { return _filterByText; }
             set {
                 _filterByText = value.ToLower();
@@ -70,41 +70,29 @@ namespace _3PA.MainFeatures.CodeExplorer {
             get { return _refreshing; }
             set {
                 _refreshing = value;
-                if (IsHandleCreated) {
-                    BeginInvoke((Action)delegate {
-                        if (_refreshing) {
-                            buttonRefresh.BackGrndImage = ImageResources.refreshing;
-                            buttonRefresh.Invalidate();
-                            toolTipHtml.SetToolTip(buttonRefresh, "The tree is being refreshed, please wait");
-                        } else {
-                            buttonRefresh.BackGrndImage = ImageResources.refresh;
-                            buttonRefresh.Invalidate();
-                            toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
-                        }
-                    });
-                }
+                this.SafeInvoke(form => {
+                    if (_refreshing) {
+                        buttonRefresh.BackGrndImage = ImageResources.refreshing;
+                        buttonRefresh.Invalidate();
+                        toolTipHtml.SetToolTip(buttonRefresh, "The tree is being refreshed, please wait");
+                    } else {
+                        buttonRefresh.BackGrndImage = ImageResources.refresh;
+                        buttonRefresh.Invalidate();
+                        toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
+                    }
+                });
             }
         }
-        private bool _refreshing;
+        private volatile bool _refreshing;
+
+        private volatile bool _updating;
 
         private bool _isFiltering;
 
         /// <summary>
-        /// returns the ranking of each BranchType, helps sorting them as we wish
-        /// </summary>
-        public static List<int> GetPriorityList {
-            get {
-                if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
-                _explorerBranchTypePriority = Config.GetPriorityList(typeof (CompletionType), "CodeExplorerPriorityList");
-                return _explorerBranchTypePriority;
-            }
-        }
-        private static List<int> _explorerBranchTypePriority;
-
-        /// <summary>
         ///  gets or sets the total items currently displayed in the form
         /// </summary>
-        public int TotalItems { get; set; }
+        private int TotalItems { get; set; }
 
         // remember the original list of items
         private List<CodeExplorerItem> _initialObjectsList;
@@ -114,7 +102,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private OLVColumn _displayText;
         private FastObjectListView fastOLV;
-        
+
         #endregion
 
         #region constructor
@@ -334,8 +322,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            OlvStyler.StyleIt(fastOLV, StrEmptyList);
-            fastOLV.DefaultRenderer = new FilteredItemTreeRenderer();
+            this.SafeInvoke(form => {
+                OlvStyler.StyleIt(fastOLV, StrEmptyList);
+                fastOLV.DefaultRenderer = new FilteredItemTreeRenderer();
+            });
         }
 
         #endregion
@@ -347,25 +337,33 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public void UpdateTreeData() {
             Task.Factory.StartNew(() => {
-                try {
-                    UpdateTreeDataAction();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
-                } finally {
-                    Refreshing = false;
-                }
+                this.SafeInvoke(form => {
+                    try {
+                        if (!_updating) {
+                            _updating = true;
+                            UpdateTreeDataAction();
+                        }
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
+                    } finally {
+                        _updating = false;
+                        Refreshing = false;
+                    }
+                });
             });
         }
 
         private void UpdateTreeDataAction() {
+
             // get the list of items
             var tempList = ParserHandler.ParserVisitor.ParsedExplorerItemsList.ToList();
-            if (tempList == null || tempList.Count == 0)
+            if (tempList.Count == 0)
                 return;
 
             _initialObjectsList = new List<CodeExplorerItem>();
 
             if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
+
                 // we built the tree "manually"
                 tempList.Sort(new ExplorerObjectSortingClass(Config.Instance.CodeExplorerSortingType));
 
@@ -468,17 +466,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 _initialObjectsList = tempList;
             }
 
-            // invoke on ui thread
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    try {
-                        TotalItems = _initialObjectsList.Count;
-                        ApplyFilter();
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error while displaying the code explorer content");
-                    }
-                });
-            }
+            TotalItems = _initialObjectsList.Count;
+            ApplyFilter();
         }
 
         #endregion
@@ -488,7 +477,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Executed when the user double click an item or press enter
         /// </summary>
-        public void OnActivateItem() {
+        private void OnActivateItem() {
             var curItem = GetCurrentItem();
             if (curItem == null)
                 return;
@@ -527,7 +516,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region on key events
 
-        public bool OnKeyDown(Keys key) {
+        private bool OnKeyDown(Keys key) {
             bool handled = true;
             // down and up change the selection
             if (key == Keys.Up) {
@@ -643,7 +632,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Get the current selected item
         /// </summary>
         /// <returns></returns>
-        public CodeExplorerItem GetCurrentItem() {
+        private CodeExplorerItem GetCurrentItem() {
             try {
                 if (fastOLV.SelectedItem != null)
                     return (CodeExplorerItem)fastOLV.SelectedItem.RowObject;
@@ -653,30 +642,32 @@ namespace _3PA.MainFeatures.CodeExplorer {
             return null;
         }
 
-        internal void Redraw() {
-            fastOLV.Invalidate();
+        public void Redraw() {
+            this.SafeInvoke(form => { fastOLV.Invalidate(); });
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
-        public void GiveFocustoTextBox() {
+        private void GiveFocustoTextBox() {
             textBoxFilter.Focus();
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
-        public void ClearFilter() {
+        private void ClearFilter() {
             textBoxFilter.Text = "";
             FilterByText = "";
             textBoxFilter.Invalidate();
         }
 
         public void RefreshParserAndCodeExplorer() {
-            ClearFilter();
-            ParserHandler.ParserVisitor.ClearSavedParserVisitors();
-            Plug.DoNppDocumentSwitched();
+            this.SafeInvoke(form => {
+                ClearFilter();
+                ParserHandler.ParserVisitor.ClearSavedParserVisitors();
+                Plug.DoNppDocumentSwitched();
+            });
         }
 
         #endregion
@@ -771,7 +762,21 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// </summary>
     internal class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
 
+        /// <summary>
+        /// returns the ranking of each BranchType, helps sorting them as we wish
+        /// </summary>
+        public static List<int> GetPriorityList {
+            get {
+                if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
+                _explorerBranchTypePriority = Config.GetPriorityList(typeof(CompletionType), "CodeExplorerPriorityList");
+                return _explorerBranchTypePriority;
+            }
+        }
+
+        private static List<int> _explorerBranchTypePriority;
+
         private CodeExplorerForm.SortingType _sortingType;
+
         public ExplorerObjectSortingClass(CodeExplorerForm.SortingType sortingType) {
             _sortingType = sortingType;
         }
@@ -779,7 +784,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         public int Compare(CodeExplorerItem x, CodeExplorerItem y) {
 
             // compare first by BranchType
-            int compare = CodeExplorerForm.GetPriorityList[(int)x.Branch].CompareTo(CodeExplorerForm.GetPriorityList[(int)y.Branch]);
+            int compare = GetPriorityList[(int)x.Branch].CompareTo(GetPriorityList[(int)y.Branch]);
             if (compare != 0) return compare;
 
             // compare by IconType
@@ -788,7 +793,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
             // sort by display text
             if (_sortingType == CodeExplorerForm.SortingType.Alphabetical) {
-                compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                compare = String.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
                 if (compare != 0) return compare;
             }
 
