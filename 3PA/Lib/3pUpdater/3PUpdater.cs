@@ -58,7 +58,7 @@ namespace _3PA.Lib._3pUpdater {
                 return false;
 
             // configure the update
-            File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", from, to), Encoding.Default);
+            File.AppendAllText(Config.FileUpdaterLst, string.Join("\t", from, to) + "\r\n", Encoding.Default);
 
             // subscribe to the Npp shutdown event if it's not already done
             if (_typeOfExeNeeded == TypeOfExeNeeded.None)
