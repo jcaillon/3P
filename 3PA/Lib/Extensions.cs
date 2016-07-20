@@ -309,7 +309,7 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static string ProgressQuoter(this string text) {
+        public static string ProQuoter(this string text) {
             return "\"" + (text ?? "").Replace("\"", "~\"").Replace("\n", " ").Replace("\r", "") + "\"";
         }
 

@@ -153,7 +153,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     var toCompile = fileToCompile;
 
-                    bool moveFail = _currentCompil.MovedFiles.Exists(move => move.Origin.Equals(fileToCompile.InputPath) && !move.IsOk);
+                    bool moveFail = _currentCompil.TransferedFiles.Exists(move => move.Origin.Equals(fileToCompile.InputPath) && !move.IsOk);
                     var errorsOfTheFile = _currentCompil.ErrorsList.Where(error => error.CompiledFilePath.Equals(toCompile.InputPath)).ToList();
                     bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
                     bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
@@ -162,7 +162,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     line.Append("<tr><td style='width: 50px; padding-bottom: 15px;'><img src='" + (moveFail || hasError ? "MsgError" : (hasWarning ? "MsgWarning" : "MsgOk")) + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 10px;'>");
 
-                    line.Append(ProExecution.FormatCompilationResult(fileToCompile, errorsOfTheFile, _currentCompil.MovedFiles.Where(move => move.Origin.Equals(toCompile.InputPath)).ToList()));
+                    line.Append(ProExecution.FormatCompilationResult(fileToCompile, errorsOfTheFile, _currentCompil.TransferedFiles.Where(move => move.Origin.Equals(toCompile.InputPath)).ToList()));
 
                     line.Append("</td></tr>");
 

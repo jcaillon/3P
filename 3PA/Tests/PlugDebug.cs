@@ -58,8 +58,90 @@ namespace _3PA.Tests {
             //UserCommunication.Notify(firstname);
         }
 
+
+        public static string RunExternalExe(string filename, string arguments = null) {
+            var process = new Process();
+
+            process.StartInfo.FileName = filename;
+            if (!string.IsNullOrEmpty(arguments)) {
+                process.StartInfo.Arguments = arguments;
+            }
+
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+            process.StartInfo.UseShellExecute = false;
+
+            process.StartInfo.RedirectStandardError = true;
+            process.StartInfo.RedirectStandardOutput = true;
+            var stdOutput = new StringBuilder();
+            process.OutputDataReceived += (sender, args) => stdOutput.Append(args.Data);
+
+            string stdError = null;
+            try {
+                process.Start();
+                process.BeginOutputReadLine();
+                stdError = process.StandardError.ReadToEnd();
+                process.WaitForExit();
+            } catch (Exception e) {
+                throw new Exception("OS error while executing " + filename + (arguments ?? "") + ": " + e.Message, e);
+            }
+
+            if (process.ExitCode == 0) {
+                return stdOutput.ToString();
+            } else {
+                var message = new StringBuilder();
+
+                if (!string.IsNullOrEmpty(stdError)) {
+                    message.AppendLine(stdError);
+                }
+
+                if (stdOutput.Length != 0) {
+                    message.AppendLine("Std output:");
+                    message.AppendLine(stdOutput.ToString());
+                }
+
+                throw new Exception(process.ExitCode + ": " + message);
+            }
+        }
+
         public static void DebugTest2() {
-            UserCommunication.Notify("This class is only for debug/dev purposes, it will not be used in production<br>This class is only for debug/dev purposes, it will not be used in production<br>");
+            string message;
+
+            StringBuilder str = new StringBuilder();
+            StringBuilder str2 = new StringBuilder();
+
+            try {
+                message = RunExternalExe(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe", @"V:\appli\progress\_others\derp.pl".ProQuoter() + " -create");
+            } catch (Exception e) {
+                message = e.Message;
+            }
+            UserCommunication.Notify(message);
+
+            MeasureIt(() => {
+                try {
+                    message = RunExternalExe(@"V:\appli\progress\_others\yo.bat");
+                } catch (Exception e) {
+                    message = e.Message;
+                }
+            });
+
+            MeasureIt(() => {
+                // -replace -add -create -compress?
+                for (int i = 0; i < 100; i++) {
+                    for (int j = 0; j < 5; j++) {
+                        str2.AppendLine(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe".ProQuoter() + " " + @"V:\appli\progress\_others\derp.pl".ProQuoter() + " -a " + (@"V:\appli\progress\_others\fuck\compil-" + j + ".r").ProQuoter());
+                        try {
+                            str.Append(RunExternalExe(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe", @"V:\appli\progress\_others\derp.pl".ProQuoter() + " -a " + (@"V:\appli\progress\_others\fuck\compil-" + j + ".r").ProQuoter()));
+                        } catch (Exception e) {
+                            str.Append(e.Message);
+                        }
+                    }
+                }
+            });
+
+            File.AppendAllText(@"V:\appli\progress\_others\yo.bat", str2.ToString());
+            UserCommunication.Notify(str.ToString());
+
         }
 
         public static void DebugTest3() {

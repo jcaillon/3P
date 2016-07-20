@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
 using _3PA.Lib;
 
@@ -362,50 +361,51 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             private List<CompilationPath> GetCompilationPathList {
                 get {
                     if (_compilationPathList == null) {
+
                         // where (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
                         _compilationPathList = CompilationPath.GetCompilationPathList.Where(
                             item => string.IsNullOrWhiteSpace(item.ApplicationFilter) || (item.ApplicationFilter.EqualsCi(Name) && (item.EnvLetterFilter.EqualsCi(Suffix) || string.IsNullOrWhiteSpace(item.EnvLetterFilter)))
                         ).ToList();
 
-                        // sort, null or space appli/suffix last
-                        _compilationPathList.Sort((item1, item2) => {
-                            int compare = string.IsNullOrWhiteSpace(item1.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(item2.ApplicationFilter));
-                            if (compare != 0) return compare;
-                            compare = string.IsNullOrWhiteSpace(item1.EnvLetterFilter).CompareTo(string.IsNullOrWhiteSpace(item2.EnvLetterFilter));
-                            return compare;
-                        });
                     }
                     return _compilationPathList;
                 }
             }
 
             /// <summary>
-            /// This method returns the compilation directory for the given source path
+            /// This method returns the compilation directories for the given source path, for each :
             /// If CompileLocally, returns the directory of the source
             /// If the base compilation is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
-            public string GetCompilationDirectory(string sourcePath) {
+            public Dictionary<string, CompilationPath.TransferType> GetTransfersNeeded(string sourcePath) {
 
                 // local compilation?
                 if (CompileLocally)
-                    return Path.GetDirectoryName(sourcePath);
+                    return new Dictionary<string, CompilationPath.TransferType> { { Path.GetDirectoryName(sourcePath), CompilationPath.TransferType.Move } };
 
-                var baseComp = BaseCompilationPath;
+                var outList = new Dictionary<string, CompilationPath.TransferType>();
 
-                // try to find the first item that match the input pattern
-                if (GetCompilationPathList.Count > 0) {
-                    var canFind = GetCompilationPathList.FirstOrDefault(item => sourcePath.RegexMatch(item.InputPathPattern.WildCardToRegex()));
-                    if (canFind != null) {
-                        if (Path.IsPathRooted(canFind.OutputPathAppend)) {
-                            baseComp = canFind.OutputPathAppend;
-                        } else {
-                            if (!string.IsNullOrEmpty(baseComp))
-                                baseComp = Path.Combine(baseComp, canFind.OutputPathAppend);
-                        }
+                // try to find the items that match the input pattern
+                foreach (var matchedPath in GetCompilationPathList.Where(path => sourcePath.RegexMatch(path.InputPathPattern.WildCardToRegex()))) {
+                    string outPath;
+                    if (Path.IsPathRooted(matchedPath.OutputPathAppend)) {
+                        outPath = matchedPath.OutputPathAppend;
+                    } else {
+                        outPath = Path.Combine(BaseCompilationPath, matchedPath.OutputPathAppend);
                     }
+                    if (!outList.ContainsKey(outPath))
+                        outList.Add(outPath, matchedPath.Type);
+
+                    // stop at first Move
+                    if (matchedPath.Type == CompilationPath.TransferType.Move)
+                        break;
                 }
 
-                return string.IsNullOrEmpty(baseComp) ? Path.GetDirectoryName(sourcePath) : baseComp;
+                // nothing matched? move to compilation path
+                if (outList.Count == 0)
+                    outList.Add(BaseCompilationPath, CompilationPath.TransferType.Move);
+
+                return outList;
             }
 
             #endregion

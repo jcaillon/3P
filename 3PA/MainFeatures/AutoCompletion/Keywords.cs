@@ -24,7 +24,6 @@ using System.Linq;
 using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 

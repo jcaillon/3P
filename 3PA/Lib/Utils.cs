@@ -181,6 +181,8 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool CopyFile(string sourceFile, string targetFile) {
             try {
+                if (sourceFile.Equals(targetFile))
+                    return true;
                 if (!File.Exists(sourceFile)) {
                     UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
                     return false;

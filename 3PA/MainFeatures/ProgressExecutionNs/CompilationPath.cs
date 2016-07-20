@@ -49,9 +49,29 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public string OutputPathAppend { get; set; }
 
+        /// <summary>
+        /// The type of transfer that should occur for this compilation path
+        /// </summary>
+        public TransferType Type { get; set; }
+
+        /// <summary>
+        /// The line from which we read this info, allows to sort by line
+        /// </summary>
+        public int Line { get; set; }
+
         #endregion
 
+        #region TransferType
 
+        public enum TransferType {
+            Copy,
+            Ftp,
+            Library,
+            Move
+        }
+
+        #endregion
+        
         #region public event
 
         /// <summary>
@@ -61,13 +81,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-
         #region private fields
 
         private static List<CompilationPath> _compilationPathList;
 
         #endregion
-
 
         #region public methods
 
@@ -76,30 +94,44 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// if the file is present in the Config dir, use it
         /// </summary>
         public static void Import() {
+            var i = 0;
             _compilationPathList = new List<CompilationPath>();
             Utils.ForEachLine(Config.FileCompilPath, new byte[0], s => {
                 var items = s.Split('\t');
-                if (items.Count() == 4) {
+                if (items.Count() == 5) {
+                    // find the TransferType from items[3]
+                    TransferType type;
+                    if (!Enum.TryParse(items[3].ToTitleCase(), true, out type))
+                        type = TransferType.Move;
+
                     var obj = new CompilationPath {
                         ApplicationFilter = items[0].Trim(),
                         EnvLetterFilter = items[1].Trim(),
                         InputPathPattern = items[2].Trim().Replace('/', '\\'),
-                        OutputPathAppend = items[3].Trim().Replace('/', '\\')
+                        Type = type,
+                        OutputPathAppend = items[4].Trim().Replace('/', '\\'),
+                        Line = i++
                     };
                     if (!string.IsNullOrEmpty(obj.InputPathPattern) && !string.IsNullOrEmpty(obj.OutputPathAppend)) {
                         if (obj.ApplicationFilter.Equals("*"))
                             obj.ApplicationFilter = "";
                         if (obj.EnvLetterFilter.Equals("*"))
                             obj.EnvLetterFilter = "";
-                        if (!_compilationPathList.Exists(item =>
-                            item.ApplicationFilter.Equals(obj.ApplicationFilter) &&
-                            item.EnvLetterFilter.Equals(obj.EnvLetterFilter) &&
-                            item.InputPathPattern.Equals(obj.InputPathPattern)))
-                            _compilationPathList.Add(obj);
+                        _compilationPathList.Add(obj);
                     }
                 }
             }, 
             Encoding.Default);
+
+            _compilationPathList.Sort((item1, item2) => {
+                int compare = string.IsNullOrWhiteSpace(item1.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(item2.ApplicationFilter));
+                if (compare != 0) return compare;
+                compare = string.IsNullOrWhiteSpace(item1.EnvLetterFilter).CompareTo(string.IsNullOrWhiteSpace(item2.EnvLetterFilter));
+                if (compare != 0) return compare;
+                compare = item1.Type.CompareTo(item2.Type);
+                if (compare != 0) return compare;
+                return item1.Line.CompareTo(item2.Line);
+            });
 
             if (OnCompilationPathUpdate != null)
                 OnCompilationPathUpdate();
@@ -125,9 +157,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (GetCompilationPathList.Any()) {
 
                 strBuilder.Append("<table width='100%;'>");
-                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' width='40%'>Append to output path</td></tr>");
+                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' align='center'>Transfer type</td><td class='CompPathHead' width='40%'>Append to output path</td></tr>");
                 foreach (var compLine in GetCompilationPathList) {
-                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.ApplicationFilter) ? "*" : compLine.ApplicationFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.EnvLetterFilter) ? "*" : compLine.EnvLetterFilter) + "</td><td>" + (compLine.InputPathPattern.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.InputPathPattern.Length - 40) : compLine.InputPathPattern) + "</td><td>" + (compLine.OutputPathAppend.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.OutputPathAppend.Length - 40) : compLine.OutputPathAppend) + "</td></tr>");
+                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.ApplicationFilter) ? "*" : compLine.ApplicationFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.EnvLetterFilter) ? "*" : compLine.EnvLetterFilter) + "</td><td>" + (compLine.InputPathPattern.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.InputPathPattern.Length - 40) : compLine.InputPathPattern) + "</td><td align='center'>" + compLine.Type + "</td><td>" + (compLine.OutputPathAppend.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.OutputPathAppend.Length - 40) : compLine.OutputPathAppend) + "</td></tr>");
                 }
                 strBuilder.Append("</table>");
 

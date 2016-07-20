@@ -97,12 +97,6 @@ namespace _3PA.MainFeatures {
                     new List<string> { "ok" },
                     false);
 
-                // TODO: remove this after 1.6.2
-                // if the release was containing a .pdb file, we want to copied it as well
-                if (File.Exists(Config.FileDownloadedPdb)) {
-                    Utils.CopyFile(Config.FileDownloadedPdb, Path.Combine(Path.GetDirectoryName(AssemblyInfo.Location) ?? "", Path.GetFileName(Config.FileDownloadedPdb) ?? ""));
-                }
-
                 // delete update related files/folders
                 Utils.DeleteFile(Config.FileVersionLog);
                 Utils.DeleteDirectory(Config.FolderUpdate, true);

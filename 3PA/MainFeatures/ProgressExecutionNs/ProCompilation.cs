@@ -21,12 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
-using YamuiFramework.Helper;
-using _3PA.Data;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
 
@@ -69,7 +64,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// After the compilation, each file is moved to its destination folder (distant or source folder)
         /// This list keeps tracks of the moved files and the success of the move command
         /// </summary>
-        public List<FileToMove> MovedFiles { get; private set; }
+        public List<FileToTransfer> TransferedFiles { get; private set; }
 
         /// <summary>
         /// After the compilation, stores each compilation errors found here
@@ -98,7 +93,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        private long _nbFilesMoved;
+        private long _nbFilesTransfered;
 
         private bool _hasBeenKilled;
 
@@ -173,7 +168,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     _listOfCompilationProcesses.Add(new CompilationProcess());
 
                 // assign the file to the current process
-                _listOfCompilationProcesses[currentProcess].FilesToCompile.Add(new FileToCompile { InputPath = file.Path });
+                _listOfCompilationProcesses[currentProcess].FilesToCompile.Add(new FileToCompile(file.Path));
 
                 // we will assign the next file to the next process...
                 currentProcess++;
@@ -187,7 +182,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             _processesRunning = _listOfCompilationProcesses.Count;
             NumberOfProcesses = _listOfCompilationProcesses.Count;
             NumberOfProcessesEndedOk = 0;
-            MovedFiles = new List<FileToMove>();
+            TransferedFiles = new List<FileToTransfer>();
             ErrorsList = new List<FileError>();
 
             // lets start the compilation on each process
@@ -214,7 +209,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // if the compilation is over, we need to dipslay the progression of the files being moved...
             if (CompilationDone)
-                return (float)_nbFilesMoved / MovedFiles.Count * 100;
+                return (float)_nbFilesTransfered / TransferedFiles.Count * 100;
 
             // else we find the total of files that have already been compiled by ready the size of compilation.progress files...
             long nbFilesDone = 0;
@@ -373,18 +368,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     errorsList.AddRange(keyValue.Value);
                 }
 
-                // when compiling, move .r/.lst to compilation dir
-                var fileToMoveList = new List<FileToMove>();
+                // when compiling, transfering .r/.lst to compilation dir
+                var listTransferFiles = new List<FileToTransfer>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
-                    fileToMoveList = lastExec.CreateListOfFilesToMove();
-                    foreach (var fileToMove in fileToMoveList) {
-                        fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
-                    }
+                    listTransferFiles = lastExec.CreateListOfFilesToTransfer();
+                    ProExecution.TransferFiles(listTransferFiles);
                 }
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, fileToMoveList), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
@@ -407,26 +400,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // everything ended ok, we do postprocess actions
             if (NumberOfProcesses == NumberOfProcessesEndedOk) {
 
-                // we need to move all the files... (keep only distinct target files)
+                // we need to transfer all the files... (keep only distinct target files)
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
-                    MovedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToMove());
+                    TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToTransfer());
                 }
-                MovedFiles = MovedFiles.GroupBy(move => move.To).Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First()).ToList();
-
-                try {
-                    Parallel.ForEach(MovedFiles, fileToMove => {
-                        _nbFilesMoved++;
-                        fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
-                    });
-                } catch (Exception) {
-                    _nbFilesMoved = 0;
-                    foreach (var fileToMove in MovedFiles) {
-                        _nbFilesMoved++;
-                        if (!fileToMove.IsOk) {
-                            fileToMove.IsOk = Utils.MoveFile(fileToMove.From, fileToMove.To, true);
-                        }
-                    }
-                }
+                ProExecution.TransferFiles(TransferedFiles, i => _nbFilesTransfered = i);
 
                 // Read all the log files stores the errors
                 foreach (var compilationProcess in _listOfCompilationProcesses) {

@@ -22,11 +22,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using YamuiFramework.Helper;
 using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures {
@@ -186,7 +184,7 @@ namespace _3PA.MainFeatures {
                 return;
             }
             if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
-                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProgressQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
                 return;
             }
 
@@ -203,7 +201,7 @@ namespace _3PA.MainFeatures {
             // launch the compile process for the current file
             Plug.CurrentFileObject.ProgressExecution = new ProExecution {
                 ListToCompile = new List<FileToCompile> {
-                    new FileToCompile { InputPath = Plug.CurrentFilePath }
+                    new FileToCompile(Plug.CurrentFilePath)
                 },
                 OnExecutionEnd = ProCompilation.OnSingleExecutionEnd,
                 OnExecutionOk = ProCompilation.OnSingleExecutionOk
@@ -250,7 +248,7 @@ namespace _3PA.MainFeatures {
         public static void OpenCurrentInAppbuilder() {
             new ProExecution {
                 ListToCompile = new List<FileToCompile> {
-                    new FileToCompile { InputPath = Plug.CurrentFilePath }
+                    new FileToCompile(Plug.CurrentFilePath)
                 },
                 OnExecutionOk = execution => {
                     try {
