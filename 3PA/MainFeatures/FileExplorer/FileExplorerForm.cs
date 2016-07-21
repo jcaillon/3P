@@ -174,6 +174,8 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             lbStatus.BackColor = ThemeManager.Current.FormBack;
 
+            FilesInfoOnUpdatedErrors(new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
+
             #endregion
 
             #region File list

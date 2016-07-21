@@ -20,6 +20,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -633,6 +634,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// x.compareTo(y) -> if x > y then return 1 if x < y then return -1;
         /// </summary>
         public int Compare(CompletionItem x, CompletionItem y) {
+
+            Debug.Assert(x != null && y != null);
 
             // compare first by CompletionType
             int compare = GetPriorityList[(int)x.Type].CompareTo(GetPriorityList[(int)y.Type]);

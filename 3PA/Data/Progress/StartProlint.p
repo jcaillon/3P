@@ -90,7 +90,6 @@
     &SCOPED-DEFINE FileBugID ""
     &SCOPED-DEFINE FileCorrectionNumber ""
     &SCOPED-DEFINE FileDate ""
-    &SCOPED-DEFINE FileCorrectionDescription ""
 &ENDIF
 
 
@@ -164,7 +163,6 @@ IF NOT SESSION:BATCH-MODE THEN
         "~{~&FileBugID~} = " + {&FileBugID} SKIP
         "~{~&FileCorrectionNumber~} = " + {&FileCorrectionNumber} SKIP
         "~{~&FileDate~} = " + {&FileDate} SKIP
-        "~{~&FileCorrectionDescription~} = " + {&FileCorrectionDescription} SKIP
         VIEW-AS ALERT-BOX INFORMATION
         BUTTONS OK
         TITLE "Prolint not configured".

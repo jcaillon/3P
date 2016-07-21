@@ -598,7 +598,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // reposition the cursor in the list
             if (TotalItems > 0) {
                 fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
-                fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+                try {
+                    fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+                } catch(Exception) {
+                    // ignored
+                }
             }
         }
 

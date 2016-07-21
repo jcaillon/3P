@@ -271,11 +271,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     btCancel.SafeInvoke(button => button.Visible = true);
 
-                    // start a recurrent event (every second) to update the progression of the compilation
-                    _progressTimer = new Timer();
-                    _progressTimer.Interval = 1000;
-                    _progressTimer.Tick += (o, args) => UpdateProgressBar();
-                    _progressTimer.Start();
+                    this.SafeInvoke(page => {
+                        // start a recurrent event (every second) to update the progression of the compilation
+                        _progressTimer = new Timer();
+                        _progressTimer.Interval = 1000;
+                        _progressTimer.Tick += (o, args) => UpdateProgressBar();
+                        _progressTimer.Start();
+                    });
                     
                 } else {
                     // nothing started
