@@ -29,7 +29,6 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
-using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
@@ -53,7 +52,10 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public string FilterByText {
             get { return _filterByText; }
-            set { _filterByText = value.ToLower(); ApplyFilter(); }
+            set {
+                _filterByText = value.ToLower();
+                this.SafeInvoke(form => ApplyFilter());
+            }
         }
 
         /// <summary>
@@ -339,8 +341,11 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            OlvStyler.StyleIt(fastOLV, StrEmptyList);
-            fastOLV.DefaultRenderer = new FilteredItemTextRenderer();
+            this.SafeInvoke(form => {
+                OlvStyler.StyleIt(fastOLV, StrEmptyList);
+                fastOLV.DefaultRenderer = new FilteredItemTextRenderer();
+            });
+
         }
 
         #endregion
@@ -359,7 +364,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             Refreshing = true;
             Task.Factory.StartNew(() => {
                 try {
-                    RefreshFileListAction();
+                    this.SafeInvoke(form => RefreshFileListAction());
                 } catch (Exception e) {
                     ErrorHandler.ShowErrors(e, "Error while listing files");
                 } finally {
@@ -370,7 +375,7 @@ namespace _3PA.MainFeatures.FileExplorer {
             });
         }
 
-        public void RefreshFileListAction() {
+        private void RefreshFileListAction() {
             // get the list of FileObjects
             _initialObjectsList = new List<FileListItem>();
             switch (Config.Instance.FileExplorerViewMode) {
@@ -420,59 +425,56 @@ namespace _3PA.MainFeatures.FileExplorer {
             // apply custom sorting
             _initialObjectsList.Sort(new FilesSortingClass());
 
-            // invoke on ui thread
-            ExecuteOnThread(() => {
-                try {
-                    // delete any existing buttons
-                    if (_displayedTypes != null) {
-                        foreach (var selectorButton in _displayedTypes) {
-                            selectorButton.Value.ButtonPressed -= HandleTypeClick;
-                            if (Controls.Contains(selectorButton.Value))
-                                Controls.Remove(selectorButton.Value);
-                            selectorButton.Value.Dispose();
-                        }
+            try {
+                // delete any existing buttons
+                if (_displayedTypes != null) {
+                    foreach (var selectorButton in _displayedTypes) {
+                        selectorButton.Value.ButtonPressed -= HandleTypeClick;
+                        if (Controls.Contains(selectorButton.Value))
+                            Controls.Remove(selectorButton.Value);
+                        selectorButton.Value.Dispose();
                     }
-
-                    // get distinct types, create a button for each
-                    int xPos = 59;
-                    int yPox = Height - 28;
-                    _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
-                    foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
-                        var but = new SelectorButton<FileType> {
-                            BackGrndImage = GetImageFromStr(type + "Type"),
-                            Activated = true,
-                            Size = new Size(24, 24),
-                            TabStop = false,
-                            Location = new Point(xPos, yPox),
-                            Type = type,
-                            AcceptsRightClick = true,
-                            Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-                            HideFocusedIndicator = true
-                        };
-                        but.ButtonPressed += HandleTypeClick;
-                        toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
-                        _displayedTypes.Add(type, but);
-                        Controls.Add(but);
-                        xPos += but.Width;
-                    }
-
-                    // label for the number of items
-                    TotalItems = _initialObjectsList.Count;
-                    nbitems.Text = TotalItems + StrItems;
-                    fastOLV.SetObjects(_initialObjectsList);
-
-                    ApplyFilter();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while showing the list of files");
                 }
-            });
+
+                // get distinct types, create a button for each
+                int xPos = 59;
+                int yPox = Height - 28;
+                _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
+                foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
+                    var but = new SelectorButton<FileType> {
+                        BackGrndImage = GetImageFromStr(type + "Type"),
+                        Activated = true,
+                        Size = new Size(24, 24),
+                        TabStop = false,
+                        Location = new Point(xPos, yPox),
+                        Type = type,
+                        AcceptsRightClick = true,
+                        Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                        HideFocusedIndicator = true
+                    };
+                    but.ButtonPressed += HandleTypeClick;
+                    toolTipHtml.SetToolTip(but, "Type of item : <b>" + type + "</b>:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this type only");
+                    _displayedTypes.Add(type, but);
+                    Controls.Add(but);
+                    xPos += but.Width;
+                }
+
+                // label for the number of items
+                TotalItems = _initialObjectsList.Count;
+                nbitems.Text = TotalItems + StrItems;
+                fastOLV.SetObjects(_initialObjectsList);
+
+                ApplyFilter();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while showing the list of files");
+            }
         }
 
         /// <summary>
         /// use this to programmatically uncheck any type that is not in the given list
         /// </summary>
         /// <param name="allowedType"></param>
-        public void SetActiveType(List<FileType> allowedType) {
+        private void SetActiveType(List<FileType> allowedType) {
             if (_displayedTypes == null) return;
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
@@ -484,19 +486,12 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// use this to programmatically check any type that is not in the given list
         /// </summary>
         /// <param name="allowedType"></param>
-        public void SetUnActiveType(List<FileType> allowedType) {
+        private void SetUnActiveType(List<FileType> allowedType) {
             if (_displayedTypes == null) return;
             if (allowedType == null) allowedType = new List<FileType>();
             foreach (var selectorButton in _displayedTypes) {
                 selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
             }
-        }
-
-        /// <summary>
-        /// allows to programmatically select the first item of the list
-        /// </summary>
-        public void SelectFirstItem() {
-            if (TotalItems > 0) fastOLV.SelectedIndex = 0;
         }
 
         #endregion
@@ -506,7 +501,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// <summary>
         /// Executed when the user double click an item or press enter
         /// </summary>
-        public void OnActivateItem() {
+        private void OnActivateItem() {
             var curItem = GetCurrentFile();
             if (curItem == null)
                 return;
@@ -581,7 +576,7 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         #region on key events
 
-        public bool OnKeyDown(Keys key) {
+        private bool OnKeyDown(Keys key) {
             bool handled = true;
             // down and up change the selection
             if (key == Keys.Up) {
@@ -716,7 +711,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// Get the current selected item
         /// </summary>
         /// <returns></returns>
-        public FileListItem GetCurrentFile() {
+        private FileListItem GetCurrentFile() {
             try {
                 if (fastOLV.SelectedItem != null)
                     return (FileListItem) fastOLV.SelectedItem.RowObject;
@@ -727,27 +722,24 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         internal void Redraw() {
-            fastOLV.Invalidate();
+            this.SafeInvoke(form => form.Invalidate());
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
         public void GiveFocustoTextBox() {
-            textFilter.Focus();
+            textFilter.SafeInvoke(box => box.Focus());
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
         public void ClearFilter() {
-            textFilter.Text = "";
-            FilterByText = "";
-        }
-
-        private void ExecuteOnThread(Action action) {
-            if (IsHandleCreated)
-                BeginInvoke(action);
+            this.SafeInvoke(form => {
+                textFilter.Text = "";
+                FilterByText = "";
+            });
         }
 
         #endregion
@@ -812,14 +804,14 @@ namespace _3PA.MainFeatures.FileExplorer {
 
         private int _currentOperation = - 1;
 
-        private void FilesInfoOnUpdatedOperation(UpdatedOperationEventArgs updatedOperationEventArgs) {
-            ExecuteOnThread(() => {
-                if (_currentOperation == (int)updatedOperationEventArgs.CurrentOperation)
+        public void FilesInfoOnUpdatedOperation(UpdatedOperationEventArgs updatedOperationEventArgs) {
+            this.SafeInvoke(form => {
+                if (_currentOperation == (int) updatedOperationEventArgs.CurrentOperation)
                     return;
 
                 // status text, take the last flag found
-                foreach (var name in Enum.GetNames(typeof(CurrentOperation))) {
-                    CurrentOperation flag = (CurrentOperation)Enum.Parse(typeof(CurrentOperation), name);
+                foreach (var name in Enum.GetNames(typeof (CurrentOperation))) {
+                    CurrentOperation flag = (CurrentOperation) Enum.Parse(typeof (CurrentOperation), name);
                     if (updatedOperationEventArgs.CurrentOperation.HasFlag(flag)) {
                         lbStatus.Text = flag.GetAttribute<CurrentOperationAttr>().Name;
                     }
@@ -828,45 +820,52 @@ namespace _3PA.MainFeatures.FileExplorer {
                 // blink back color
                 lbStatus.UseCustomBackColor = true;
                 if (updatedOperationEventArgs.CurrentOperation > 0) {
-                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.BackColor = ThemeManager.Current.AccentColor; lbStatus.Invalidate(); });
+                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.FormBack, ThemeManager.Current.AccentColor, new TransitionType_Flash(3, 400), (o, args) => {
+                        lbStatus.BackColor = ThemeManager.Current.AccentColor;
+                        lbStatus.Invalidate();
+                    });
                 } else {
-                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.AccentColor, ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => { lbStatus.UseCustomBackColor = false; lbStatus.Invalidate(); });
+                    Transition.run(lbStatus, "BackColor", ThemeManager.Current.AccentColor, ThemeManager.Current.FormBack, new TransitionType_Flash(3, 400), (o, args) => {
+                        lbStatus.UseCustomBackColor = false;
+                        lbStatus.Invalidate();
+                    });
                 }
 
-                _currentOperation = (int)updatedOperationEventArgs.CurrentOperation;
+                _currentOperation = (int) updatedOperationEventArgs.CurrentOperation;
 
                 if (btStopExecution.Visible != (_currentOperation >= (int) CurrentOperation.Prolint)) {
                     btStopExecution.Visible = (_currentOperation >= (int) CurrentOperation.Prolint);
-                    lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1) * btStopExecution.Width;
+                    lbStatus.Width = lbStatus.Width + (btStopExecution.Visible ? -1 : 1)*btStopExecution.Width;
                 }
 
                 if (btBringProcessToFront.Visible != updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run)) {
                     btBringProcessToFront.Visible = updatedOperationEventArgs.CurrentOperation.HasFlag(CurrentOperation.Run);
-                    lbStatus.Width = lbStatus.Width + (btBringProcessToFront.Visible ? -1 : 1) * btBringProcessToFront.Width;
+                    lbStatus.Width = lbStatus.Width + (btBringProcessToFront.Visible ? -1 : 1)*btBringProcessToFront.Width;
                 }
             });
         }
 
-        private void FilesInfoOnUpdatedErrors(UpdatedErrorsEventArgs updatedErrorsEventArgs) {
+        public void FilesInfoOnUpdatedErrors(UpdatedErrorsEventArgs updatedErrorsEventArgs) {
+            this.SafeInvoke(form => {
+                lbNbErrors.UseCustomBackColor = true;
+                lbNbErrors.UseCustomForeColor = true;
+                var t = new Transition(new TransitionType_Linear(500));
 
-            lbNbErrors.UseCustomBackColor = true;
-            lbNbErrors.UseCustomForeColor = true;
-            var t = new Transition(new TransitionType_Linear(500));
+                // disable/enable buttons
+                UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
 
-            // disable/enable buttons
-            UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
+                // colors
+                if (Style.BgErrorLevelColors != null && Style.BgErrorLevelColors.Count > 0) {
+                    t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
+                    t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
+                }
 
-            // colors
-            if (Style.BgErrorLevelColors != null && Style.BgErrorLevelColors.Count > 0) {
-                t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
-                t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int)updatedErrorsEventArgs.ErrorLevel]);
-            }
+                // text
+                t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
+                t.add(lbErrorText, "Text", updatedErrorsEventArgs.ErrorLevel.GetDescription());
 
-            // text
-            t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
-            t.add(lbErrorText, "Text", updatedErrorsEventArgs.ErrorLevel.GetDescription());
-
-            t.run();
+                t.run();
+            });
         }
 
         private void UpdateErrorButtons(bool activate) {

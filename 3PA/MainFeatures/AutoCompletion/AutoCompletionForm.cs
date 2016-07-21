@@ -649,7 +649,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // then sort by scope type (descending, smaller scope first)
-            if (x.ParsedItem != null && y.ParsedItem != null) {
+            if (x.ParsedItem != null && y.ParsedItem != null && x.ParsedItem.Scope != null && y.ParsedItem.Scope != null) {
                 compare = ((int)y.ParsedItem.Scope.ScopeType).CompareTo(((int)x.ParsedItem.Scope.ScopeType));
                 if (compare != 0) return compare;
             }

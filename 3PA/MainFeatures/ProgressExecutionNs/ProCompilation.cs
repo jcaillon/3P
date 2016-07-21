@@ -372,7 +372,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 var listTransferFiles = new List<FileToTransfer>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
                     listTransferFiles = lastExec.CreateListOfFilesToTransfer();
-                    ProExecution.TransferFiles(listTransferFiles);
+                    listTransferFiles = ProExecution.TransferFiles(listTransferFiles);
                 }
 
                 // Notify the user, or not
@@ -404,7 +404,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
                     TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToTransfer());
                 }
-                ProExecution.TransferFiles(TransferedFiles, i => _nbFilesTransfered = i);
+                TransferedFiles = ProExecution.TransferFiles(TransferedFiles, i => _nbFilesTransfered = i);
 
                 // Read all the log files stores the errors
                 foreach (var compilationProcess in _listOfCompilationProcesses) {

@@ -686,9 +686,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         }
 
         /// <summary>
-        /// Transfer a given list of files
+        /// Transfer a given list of files (can reduce the list if there are duplicated items so it returns it)
         /// </summary>
-        public static void TransferFiles(List<FileToTransfer> transfersNeeded, Action<int> onOneFileDone = null) {
+        public static List<FileToTransfer> TransferFiles(List<FileToTransfer> transfersNeeded, Action<int> onOneFileDone = null) {
 
             // make sure to transfer a given file only once at the same place
             transfersNeeded = transfersNeeded.GroupBy(trans => trans.To).Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First()).ToList();
@@ -713,6 +713,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         onOneFileDone(nbFilesDone[0]);
                 }
             }
+
+            return transfersNeeded;
         }
 
         /// <summary>

@@ -29,7 +29,6 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
-using YamuiFramework.Themes;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.ProgressExecutionNs;
@@ -270,18 +269,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     UpdateReport("");
                     UpdateProgressBar();
 
-                    if (IsHandleCreated) {
-                        BeginInvoke((Action)delegate {
-                            btCancel.Visible = true;
+                    btCancel.SafeInvoke(button => button.Visible = true);
 
-                            // start a recurrent event (every second) to update the progression of the compilation
-                            _progressTimer = new Timer();
-                            _progressTimer.Interval = 1000;
-                            _progressTimer.Tick += (o, args) => UpdateProgressBar();
-                            _progressTimer.Start();
-
-                        });
-                    }
+                    // start a recurrent event (every second) to update the progression of the compilation
+                    _progressTimer = new Timer();
+                    _progressTimer.Interval = 1000;
+                    _progressTimer.Tick += (o, args) => UpdateProgressBar();
+                    _progressTimer.Start();
                     
                 } else {
                     // nothing started
@@ -292,30 +286,32 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // called when the compilation ended
         private void OnCompilationEnd() {
-            // Update the progress bar
-            progressBar.Progress = 100;
-            progressBar.Text = @"Generating the report, please wait...";
+            this.SafeInvoke(page => {
+                // Update the progress bar
+                progressBar.Progress = 100;
+                progressBar.Text = @"Generating the report, please wait...";
 
-            // get rid of the timer
-            if (_progressTimer != null) {
-                _progressTimer.Stop();
-                _progressTimer.Dispose();
-                _progressTimer = null;
-            }
+                // get rid of the timer
+                if (_progressTimer != null) {
+                    _progressTimer.Stop();
+                    _progressTimer.Dispose();
+                    _progressTimer = null;
+                }
 
-            // create the report and display it
-            BuildReport();
+                // create the report and display it
+                BuildReport();
 
-            ResetScreen();
+                ResetScreen();
 
-            // notify the user
-            if (!_currentCompil.HasBeenCancelled)
-                UserCommunication.NotifyUnique("ReportAvailable", "The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => {
-                    Appli.GoToPage(PageNames.MassCompiler); 
-                    UserCommunication.CloseUniqueNotif("ReportAvailable");
-                }, Appli.IsFocused() ? 10 : 0);
+                // notify the user
+                if (!_currentCompil.HasBeenCancelled)
+                    UserCommunication.NotifyUnique("ReportAvailable", "The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => {
+                        Appli.GoToPage(PageNames.MassCompiler);
+                        UserCommunication.CloseUniqueNotif("ReportAvailable");
+                    }, Appli.IsFocused() ? 10 : 0);
 
-            bt_export.Visible = true;
+                bt_export.Visible = true;
+            });
         }
 
         /// <summary>
@@ -408,73 +404,67 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // allows to update the progression bar
         private void UpdateProgressBar() {
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    var progression = _currentCompil.GetOverallProgression();
+            this.SafeInvoke(page => {
+                var progression = _currentCompil.GetOverallProgression();
 
-                    // we represent the progression of the files being moved to the compilation folder in reverse
-                    if (_currentCompil.CompilationDone) {
-                        if (progressBar.Style != ProgressStyle.Reversed) {
-                            progressBar.Style = ProgressStyle.Reversed;
-                            btCancel.Visible = false;
-                        }
-                    } else if (progressBar.Style != ProgressStyle.Normal)
-                        progressBar.Style = ProgressStyle.Normal;
+                // we represent the progression of the files being moved to the compilation folder in reverse
+                if (_currentCompil.CompilationDone) {
+                    if (progressBar.Style != ProgressStyle.Reversed) {
+                        progressBar.Style = ProgressStyle.Reversed;
+                        btCancel.Visible = false;
+                    }
+                } else if (progressBar.Style != ProgressStyle.Normal)
+                    progressBar.Style = ProgressStyle.Normal;
 
-                    progressBar.Text = (Math.Abs(progression) < 0.01 ? "Initialization" : (!_currentCompil.CompilationDone ? "Compiling... " : "Moving files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
-                    progressBar.Progress = progression;
-                });
-            }
+                progressBar.Text = (Math.Abs(progression) < 0.01 ? "Initialization" : (!_currentCompil.CompilationDone ? "Compiling... " : "Moving files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                progressBar.Progress = progression;
+            });
         }
 
         // update the report, activates the scroll bars when needed
         private void UpdateReport(string htmlContent) {
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    // ensure it's visible 
-                    lbl_report.Visible = true;
+            this.SafeInvoke(page => {
+                // ensure it's visible 
+                lbl_report.Visible = true;
 
-                    lbl_report.Text = @"
-                        <div class='NormalBackColor'>
-                            <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
-                                <tr>
-                                    <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report' width='64' height='64' /></td>
-                                    <td class='NotificationTitle'>Compilation report</td>
-                                </tr>
-                                <tr>
-                                    <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
-                                </tr>
-                            </table>                
-                            <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
-                                <br><h2 style='margin-top: 0px; padding-top: 0;'>Parameters :</h2>
-                                <table style='width: 100%' class='NormalBackColor'>
-                                    <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
-                                    <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
-                                    <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + _currentCompil.GetNbFilesPerType().Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + kpv.Key + "Type' height='15px'><span style='padding-right: 15px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
-                                    <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
-                                    <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
-                                    <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (ProEnvironment.Current.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
-                                </table>
-                                " + htmlContent + @"                    
-                            </div>
-                        </div>";
+                lbl_report.Text = @"
+                    <div class='NormalBackColor'>
+                        <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
+                            <tr>
+                                <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report' width='64' height='64' /></td>
+                                <td class='NotificationTitle'>Compilation report</td>
+                            </tr>
+                            <tr>
+                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
+                            </tr>
+                        </table>                
+                        <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
+                            <br><h2 style='margin-top: 0px; padding-top: 0;'>Parameters :</h2>
+                            <table style='width: 100%' class='NormalBackColor'>
+                                <tr><td style='width: 40%; padding-right: 20px'>Compilation starting time :</td><td><b>" + _currentCompil.StartingTime + @"</b></td></tr>
+                                <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
+                                <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + _currentCompil.GetNbFilesPerType().Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + kpv.Key + "Type' height='15px'><span style='padding-right: 15px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
+                                <tr><td style='padding-right: 20px'>Number of cores detected on this computer :</td><td><b>" + Environment.ProcessorCount + @" cores</b></td></tr>
+                                <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
+                                <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (ProEnvironment.Current.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
+                            </table>
+                            " + htmlContent + @"                    
+                        </div>
+                    </div>";
 
-                    // Activate scrollbars if needed
-                    scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
-                    Height = lbl_report.Location.Y + lbl_report.Height + 20;
-                });
-            }
+                // Activate scrollbars if needed
+                scrollPanel.ContentPanel.Height = lbl_report.Location.Y + lbl_report.Height + 20;
+                Height = lbl_report.Location.Y + lbl_report.Height + 20;
+            });
         }
 
         private void ResetScreen() {
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    btStart.Visible = true;
-                    btReset.Visible = true;
-                    btCancel.Visible = false;
-                    progressBar.Visible = false;
-                });
-            }
+            this.SafeInvoke(page => {
+            btStart.Visible = true;
+                btReset.Visible = true;
+                btCancel.Visible = false;
+                progressBar.Visible = false;
+            });
         }
 
         private void SaveHistoric() {
