@@ -19,6 +19,7 @@
 #endregion
 using System.IO;
 using System.Text;
+using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 
@@ -42,7 +43,7 @@ namespace _3PA.MainFeatures {
                     //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
                     i++;
                 }
-                File.WriteAllText(Path.Combine(Config.FolderTemp, "lines.log"), x.ToString());
+                Utils.FileWriteAllText(Path.Combine(Config.FolderTemp, "lines.log"), x.ToString());
             }
 
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors

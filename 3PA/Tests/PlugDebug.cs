@@ -19,9 +19,13 @@
 #endregion
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text;
 using YamuiFramework.Helper;
 using _3PA.Lib;
@@ -37,19 +41,24 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
+
         public static void DebugTest1() {
 
-            UserCommunication.Notify(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), @"Tests\content.md")).MdToHtml(), MessageImg.MsgOk, "Blabla blaz zieuf fiuh zeifh zeufh", "efzefze zef zef zefz z END", null);
+            
+            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), @"Tests\content.md"), Encoding.Default)).MdToHtml(),
+                MessageImg.MsgUpdate,
+                "A new version has been installed!",
+                "Updated to version " + AssemblyInfo.Version,
+                new List<string> { "ok" },
+                false);
 
-            UserCommunication.Notify("fuck");
-            UserCommunication.Notify("fuck");
+            //UserCommunication.Notify("fuck");
+            //UserCommunication.Notify("fuck");
 
             //UserCommunication.Notify(clickedButton.ToString() + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Name
             //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).InsertPosition
             //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).IsPrivate
             //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Type);
-
-            object yop = "";
 
 //            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
 
@@ -58,6 +67,14 @@ namespace _3PA.Tests {
             //UserCommunication.Notify(firstname);
         }
 
+        public static void stack1() {
+            stack2();
+        }
+
+        public static void stack2() {
+            var x = 0;
+            var y = 1 / x;
+        }
 
         public static string RunExternalExe(string filename, string arguments = null) {
             var process = new Process();
@@ -182,6 +199,17 @@ namespace _3PA.Tests {
              * */
         }
 
+        public static void DisplayBugs() {
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.BugsGetWebWervice);
+            wb.OnRequestEnded += webServ => {
+                if (webServ.StatusCodeResponse != HttpStatusCode.OK)
+                    UserCommunication.Notify(webServ.ResponseException.ToString());
+                else
+                    UserCommunication.Notify(webServ.JsonResponse);
+            };
+            wb.Execute();
+        }
+
         public static void MeasureIt(Action toMeasure) {
             var watch = Stopwatch.StartNew();
             toMeasure();
@@ -215,7 +243,7 @@ namespace _3PA.Tests {
 
             OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
             lexer.Accept(lexerVisitor);
-            File.WriteAllText(outLocation, lexerVisitor.Output.ToString());
+            Utils.FileWriteAllText(outLocation, lexerVisitor.Output.ToString());
             File.AppendAllText(perfFile, @"LEXER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -235,7 +263,7 @@ namespace _3PA.Tests {
 
             OutputParserVisitor parserVisitor = new OutputParserVisitor();
             parser.Accept(parserVisitor);
-            File.WriteAllText(outLocation, parserVisitor.Output.ToString());
+            Utils.FileWriteAllText(outLocation, parserVisitor.Output.ToString());
             File.AppendAllText(perfFile, @"PARSER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.ParsedItemsList.Count + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -250,7 +278,7 @@ namespace _3PA.Tests {
                 lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
                 i++;
             }
-            File.WriteAllText(outLocation, lineInfo.ToString());
+            Utils.FileWriteAllText(outLocation, lineInfo.ToString());
             File.AppendAllText(perfFile, @"nb items in Line info = " + parser.LineInfo.Count + "\r\n");
 
             UserCommunication.Notify("Done :<br>" + testDir.ToHtmlLink());
@@ -643,8 +671,8 @@ namespace _3PA.Tests {
 }
 }
 
-File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
-File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
+Utils.FileWriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
+Utils.FileWriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
 }
 
 

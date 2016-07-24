@@ -133,8 +133,10 @@
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
+    <Compile Include="Lib\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
+    <Compile Include="Lib\WebServiceJson.cs" />
     <Compile Include="Lib\ZipStorer.cs" />
     <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
       <SubType>UserControl</SubType>

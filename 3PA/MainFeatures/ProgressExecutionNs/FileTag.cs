@@ -45,40 +45,37 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void Import() {
             _filesInfo.Clear();
-            try {
-                Utils.ForEachLine(Config.FileFilesInfo, new byte[0], s => {
-                    var items = s.Split('\t');
-                    if (items.Count() == 8) {
-                        var fileName = items[0].Trim();
-                        var fileInfo = new FileTagObject {
-                            CorrectionNumber = items[1],
-                            CorrectionDate = items[2],
-                            CorrectionDecription = items[3].Replace("~n", "\n"),
-                            ApplicationName = items[4],
-                            ApplicationVersion = items[5],
-                            WorkPackage = items[6],
-                            BugId = items[7]
-                        };
-                        // add to dictionnary
-                        if (_filesInfo.ContainsKey(fileName)) {
-                            _filesInfo[fileName].Add(fileInfo);
-                        } else {
-                            _filesInfo.Add(fileName, new List<FileTagObject> {
-                                fileInfo
-                            });
-                        }
+
+            Utils.ForEachLine(Config.FileFilesInfo, new byte[0], s => {
+                var items = s.Split('\t');
+                if (items.Count() == 8) {
+                    var fileName = items[0].Trim();
+                    var fileInfo = new FileTagObject {
+                        CorrectionNumber = items[1],
+                        CorrectionDate = items[2],
+                        CorrectionDecription = items[3].Replace("~n", "\n"),
+                        ApplicationName = items[4],
+                        ApplicationVersion = items[5],
+                        WorkPackage = items[6],
+                        BugId = items[7]
+                    };
+                    // add to dictionnary
+                    if (_filesInfo.ContainsKey(fileName)) {
+                        _filesInfo[fileName].Add(fileInfo);
+                    } else {
+                        _filesInfo.Add(fileName, new List<FileTagObject> {
+                            fileInfo
+                        });
                     }
-                }, 
-                Encoding.Default);
+                }
+            }, 
+            Encoding.Default);
 
-                if (!_filesInfo.ContainsKey(DefaultTag))
-                    SetFileTags(DefaultTag, "", "", "", "", "", "", "");
-                if (!_filesInfo.ContainsKey(LastTag))
-                    SetFileTags(LastTag, "", "", "", "", "", "", "");
+            if (!_filesInfo.ContainsKey(DefaultTag))
+                SetFileTags(DefaultTag, "", "", "", "", "", "", "");
+            if (!_filesInfo.ContainsKey(LastTag))
+                SetFileTags(LastTag, "", "", "", "", "", "", "");
 
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "", Config.FileFilesInfo);
-            }
         }
 
         /// <summary>

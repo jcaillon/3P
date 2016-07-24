@@ -216,8 +216,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                                 if (!Path.IsPathRooted(propath))
                                     try {
                                         propath = Path.GetFullPath(Path.Combine(basePath, propath));
-                                    } catch (Exception x) {
-                                        ErrorHandler.Log(x.Message);
+                                    } catch (Exception e) {
+                                        ErrorHandler.LogError(e);
                                     }
                                 if (Directory.Exists(propath) || File.Exists(propath))
                                     if (!uniqueDirList.Contains(propath))
@@ -301,9 +301,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                     // search in local folder, do not add the same file twice
                     output.AddRange(FindAllFiles(BaseLocalPath, fileName, extensions).Where(file => !output.Contains(file, StringComparer.CurrentCultureIgnoreCase)));
-                } catch (Exception x) {
-                    if (!(x is DirectoryNotFoundException))
-                        ErrorHandler.Log(x.Message);
+                } catch (Exception e) {
+                    if (!(e is DirectoryNotFoundException))
+                        ErrorHandler.LogError(e);
                 }
                 return output;
             }
@@ -323,9 +323,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     } else {
                         output.AddRange(extensions.Split(',').SelectMany(s => Directory.EnumerateFiles(dirPath, fileName + s, SearchOption.AllDirectories)).ToList());
                     }
-                } catch (Exception x) {
-                    if (!(x is DirectoryNotFoundException))
-                        ErrorHandler.Log(x.Message);
+                } catch (Exception e) {
+                    if (!(e is DirectoryNotFoundException))
+                        ErrorHandler.LogError(e);
                 }
                 return output;
             }

@@ -248,7 +248,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     (Npp.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) && 
                     !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
                     fileToCompile.TempInputPath = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff_") + count + (Path.GetExtension(fileToCompile.InputPath)));
-                    File.WriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
+                    Utils.FileWriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
                 } else {
                     fileToCompile.TempInputPath = fileToCompile.InputPath;
                 }
@@ -284,7 +284,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 count++;
             }
-            File.WriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
+            Utils.FileWriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
 
             // Move ini file into the execution dir
             var baseIniPath = "";
@@ -298,7 +298,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 var matches = regex.Match(fileContent);
                 if (matches.Success) 
                     fileContent = regex.Replace(fileContent, @"PROPATH=");
-                File.WriteAllText(baseIniPath, fileContent, encoding);
+                Utils.FileWriteAllText(baseIniPath, fileContent, encoding);
             }
 
             // Move pf file into the execution dir
@@ -353,7 +353,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProQuoter());
                 }
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
-                File.WriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
+                Utils.FileWriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 
             } else if (executionType == ExecutionType.DataDigger) {
                 // need to init datadigger?
@@ -389,7 +389,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             runnerProgram.AppendLine("&SCOPED-DEFINE DbConnectionMandatory " + NeedDatabaseConnection);
             runnerProgram.AppendLine("&SCOPED-DEFINE NotificationOutputPath " + NotificationOutputPath.ProQuoter());
             runnerProgram.Append(Encoding.Default.GetString(DataResources.ProgressRun));
-            File.WriteAllText(runnerPath, runnerProgram.ToString(), Encoding.Default);
+            Utils.FileWriteAllText(runnerPath, runnerProgram.ToString(), Encoding.Default);
 
             // preferably, we use the batch mode because it's faster than the client mode
             var batchMode = (executionType == ExecutionType.CheckSyntax || executionType == ExecutionType.Compile || executionType == ExecutionType.Database);
@@ -631,8 +631,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     List<string> listOfRFiles = null;
                     try {
                         listOfRFiles = Directory.EnumerateFiles(treatedFile.TempOutputDir, "*.r", SearchOption.AllDirectories).ToList();
-                    } catch (Exception x) {
-                        ErrorHandler.Log(x.ToString());
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e);
                     }
                     if (listOfRFiles != null) {
 

@@ -25,6 +25,8 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
@@ -56,6 +58,74 @@ namespace _3PA.Lib {
     internal static class Utils {
 
         #region File manipulation wrappers
+
+        /// <summary>
+        /// File write all bytes
+        /// </summary>
+        public static bool FileWriteAllBytes(string path, byte[] bytes) {
+            try {
+                File.WriteAllBytes(path, bytes);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// File write all text
+        /// </summary>
+        public static bool FileWriteAllText(string path, string text, Encoding encoding = null) {
+            try {
+                if (encoding == null)
+                    encoding = Encoding.Default;
+                File.WriteAllText(path, text, encoding);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// File write all text
+        /// </summary>
+        public static bool FileAppendAllText(string path, string text, Encoding encoding = null) {
+            try {
+                if (encoding == null)
+                    encoding = Encoding.Default;
+                File.AppendAllText(path, text, encoding);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
+        /// Apply the action toApplyOnEachLine to each line
+        /// Uses encoding as the Encoding to read the file or convert the byte array to a string
+        /// Uses the char # as a comment in the file (must be the first char of a line)
+        public static void ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding = null) {
+            try {
+                Exception ex = new Exception("Undetermined");
+                if (!Utilities.ForEachLine(filePath, dataResources, toApplyOnEachLine, encoding ?? TextEncodingDetect.GetFileEncoding(filePath), exception => ex = exception)) {
+                    ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
+            }
+        }
+
+        /// <summary>
+        /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
+        /// </summary>
+        public static string ReadAllText(string path, Encoding encoding = null) {
+            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
+                return textReader.ReadToEnd();
+            }
+        }
 
         /// <summary>
         /// Allows to hide a directory
@@ -100,8 +170,8 @@ namespace _3PA.Lib {
                 if (!Directory.Exists(path))
                     return true;
                 Directory.Delete(path, true);
-            } catch (Exception) {
-                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
+            } catch (Exception e) {
+                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink() + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
                 return false;
             }
             return true;
@@ -115,25 +185,11 @@ namespace _3PA.Lib {
                 if (!File.Exists(path))
                     return true;
                 File.Delete(path);
-            } catch (Exception) {
-                UserCommunication.Notify("Failed to delete the following file :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete file", "Can't delete a file!");
+            } catch (Exception e) {
+                UserCommunication.Notify("Failed to delete the following file :<br>" + path.ToHtmlLink() + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgHighImportance, "Delete file", "Can't delete a file!");
                 return false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// File write all bytes
-        /// </summary>
-        public static bool FileWriteAllBytes(string path, byte[] bytes) {
-            try {
-                File.WriteAllBytes(path, bytes);
-                return true;
-            } catch (Exception e) {
-                ErrorHandler.Log(e.Message);
-                UserCommunication.Notify("Unable to create the following file :<br>" + Config.FileStartProlint + "<br>Please check the rights of this folder", MessageImg.MsgError, "Creation file failed", "Prolint interface program");
-            }
-            return false;
         }
 
         /// <summary>
@@ -145,8 +201,8 @@ namespace _3PA.Lib {
                     return true;
                 var dirInfo = Directory.CreateDirectory(path);
                 dirInfo.Attributes |= attributes;
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
                 return false;
             }
             return true;
@@ -167,9 +223,9 @@ namespace _3PA.Lib {
                     return true;
                 File.Delete(targetFile);
                 File.Move(sourceFile, targetFile);
-            } catch (Exception) {
+            } catch (Exception e) {
                 if (!silent)
-                    UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                    UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Move file", "Couldn't write target file");
                 return false;
             }
             return true;
@@ -189,8 +245,8 @@ namespace _3PA.Lib {
                 }
                 File.Delete(targetFile);
                 File.Copy(sourceFile, targetFile);
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
                 return false;
             }
             return true;
@@ -214,8 +270,8 @@ namespace _3PA.Lib {
                 //Copy all the files & Replaces any files with the same name
                 foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.TopDirectoryOnly))
                     File.Copy(newPath, newPath.Replace(sourceFolder, targetFolder), true);
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
                 return false;
             }
             return true;
@@ -340,7 +396,7 @@ namespace _3PA.Lib {
 
             } catch (Exception e) {
                 if (!(e is Win32Exception))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             return true;
         }
@@ -421,6 +477,34 @@ namespace _3PA.Lib {
         #endregion
 
         #region Misc
+
+        /// <summary>
+        /// Allows to download the given file asynchronously
+        /// </summary>
+        public static void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
+            using (WebClient wc = new WebClient()) {
+                wc.Proxy = Config.Instance.GetWebClientProxy();
+                wc.Headers.Add("user-agent", Config.GetUserAgent);
+                if (setWebClient != null)
+                    setWebClient(wc);
+                wc.DownloadFileCompleted += handler;
+                wc.DownloadFileAsync(new Uri(url), downloadPath);
+            }
+        }
+
+        /// <summary>
+        /// Computes the MD5 hash of the given string
+        /// </summary>
+        public static string CalculateMd5Hash(string input) {
+            MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+            byte[] hash = md5.ComputeHash(inputBytes);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++) {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
 
         private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
 
@@ -525,35 +609,6 @@ namespace _3PA.Lib {
             }
 
             return result;
-        }
-
-        #endregion
-
-        #region File read/write
-
-        /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
-        /// Apply the action toApplyOnEachLine to each line
-        /// Uses encoding as the Encoding to read the file or convert the byte array to a string
-        /// Uses the char # as a comment in the file (must be the first char of a line)
-        public static void ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding = null) {
-            try {
-                Exception ex = new Exception("Undetermined");
-                if (!Utilities.ForEachLine(filePath, dataResources, toApplyOnEachLine, encoding ?? TextEncodingDetect.GetFileEncoding(filePath), exception => ex = exception)) {
-                    ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
-                }
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
-            }
-        }
-        
-        /// <summary>
-        /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
-        /// </summary>
-        public static string ReadAllText(string path, Encoding encoding = null) {
-            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-                using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
-                    return textReader.ReadToEnd();
-                }
         }
 
         #endregion

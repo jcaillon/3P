@@ -69,8 +69,6 @@ namespace YamuiFramework.Helper {
                     do {
                         calcWidth -= detla;
                         calcWidth = calcWidth.Clamp(minWidth, maxWidth);
-                        if (calcWidth == maxWidth || calcWidth == minWidth)
-                            break;
 
                         sizef = HtmlRender.Measure(g, content, calcWidth, YamuiThemeManager.CurrentThemeCss, null, (sender, args) => YamuiThemeManager.GetHtmlImages(args));
 
@@ -78,6 +76,10 @@ namespace YamuiFramework.Helper {
                             calcWidth += detla;
                             detla /= 2;
                         }
+
+                        if (calcWidth == maxWidth || calcWidth == minWidth)
+                            break;
+
                         j++;
                     } while (j < 6);
                 }

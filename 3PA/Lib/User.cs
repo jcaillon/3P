@@ -21,11 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
 using System.Linq;
 using System.Management;
 using System.Net;
-using System.Web.Script.Serialization;
+using Microsoft.Win32;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -36,8 +35,7 @@ namespace _3PA.Lib {
 
         /// <summary>
         /// This method pings a webservice deployed for 3P, it simply allows to do
-        /// statistics on the number of users of the software. A 'unique' id made of the 
-        /// mac address + machine name allows to count a user only once
+        /// statistics on the number of users of the software
         /// </summary>
         public static void Ping() {
             try {
@@ -46,84 +44,84 @@ namespace _3PA.Lib {
                     lastPing = DateTime.MinValue;
                 }
                 // ping once every hour
-                if (DateTime.Now.Subtract(lastPing).TotalMinutes > 58) {
-                    Config.Instance.TechnicalLastPing = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
-
-                    HttpWebRequest req = WebRequest.Create(new Uri(Config.PingWebWervice)) as HttpWebRequest;
-                    if (req != null) {
-                        req.Proxy = Config.Instance.GetWebClientProxy();
-                        req.Method = "POST";
-                        req.ContentType = "application/json";
-                        req.UserAgent = Config.GetUserAgent;
-                        req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
-                        StreamWriter writer = new StreamWriter(req.GetRequestStream());
-                        JavaScriptSerializer serializer = new JavaScriptSerializer();
-                        writer.Write("{" +
-                                     "\"computerId\": " + serializer.Serialize(GetWindowsUniqueId()) + "," +
-                                     "\"userName\": " + serializer.Serialize(Environment.UserName) + "," +
-                                     "\"3pVersion\": " + serializer.Serialize(AssemblyInfo.Version) + "," +
-                                     "\"NppVersion\": " + serializer.Serialize(Npp.GetNppVersion) + "," +
-                                     "\"lang\": " + serializer.Serialize(CultureInfo.InstalledUICulture.EnglishName) + "," +
-                                     "\"timeZone\": " + serializer.Serialize(TimeZone.CurrentTimeZone.GetUtcOffset(DateTime.Now).ToString()) +
-                                     "}");
-                        writer.Close();
-                        string result = null;
-                        using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
-                            if (resp != null && resp.GetResponseStream() != null) {
-                                var respStream = resp.GetResponseStream();
-                                if (respStream != null) {
-                                    StreamReader reader = new StreamReader(respStream);
-                                    result = reader.ReadToEnd();
-                                    reader.Close();
-                                }
-                            }
+                if (DateTime.Now.Subtract(lastPing).TotalMinutes > 59) {
+                    var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
+                    webServiceJson.AddToReq("UUID", UniqueId);
+                    webServiceJson.AddToReq("userName", Name);
+                    webServiceJson.AddToReq("version", AssemblyInfo.Version);
+                    webServiceJson.OnRequestEnded += req => {
+                        if (req.StatusCodeResponse == HttpStatusCode.OK) {
+                            Config.Instance.TechnicalLastPing = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
                         }
-                    }
+                    };
+                    webServiceJson.Execute();
                 }
             } catch (Exception) {
-                // we don't care if it goes wrong
+                //ignored
             }
         }
-
+        
         #endregion
 
-        #region GetUniqueId
+        #region User info
 
         /// <summary>
-        /// Returns an identifier that is supposed to be unique for each computer
+        /// Returns a formatted name for the user
         /// </summary>
-        public static string GetWindowsUniqueId() {
-            try {
-                var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-                var proc = new Process {StartInfo = procStartInfo};
-                proc.Start();
-                return proc.StandardOutput.ReadToEnd().Replace("UUID", String.Empty).Trim().ToUpper();
-            } catch (Exception e) {
-                if (!(e is ArgumentNullException)) {
-                    ErrorHandler.Log(e.Message);
-                }
+        public static string Name {
+            get {
+                return Environment.UserName +
+                   (!string.IsNullOrEmpty(Config.Instance.UserName) ? " aka " + Config.Instance.UserName : string.Empty) +
+                   " (" + Environment.MachineName + ")";
             }
-            return Environment.MachineName + GetMacAddress();
+            
+        }
+        
+        /// <summary>
+        /// Returns a unique identifier for the current user, this ID is exactly 36 char long
+        /// </summary>
+        public static string UniqueId {
+            get {
+                // Get a unique identifier based on the windows installation
+                string id = ((string) RegistryWrapper.GetValue(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Cryptography", "MachineGuid")).ToUpper();
+                if (!string.IsNullOrEmpty(id))
+                    return id;
+
+                // doesn't work? Try to get it through the wmic command
+                try {
+                    var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+                    var proc = new Process {StartInfo = procStartInfo};
+                    proc.Start();
+                    id = proc.StandardOutput.ReadToEnd().Replace("UUID", string.Empty).Trim().ToUpper();
+                } catch (Exception) {
+                    // ignored
+                }
+                if (!string.IsNullOrEmpty(id))
+                    return id;
+
+                // everything failed, do it the old way
+                return (Environment.MachineName + MacAddress).PadLeft(36, '0').Substring(0, 36);
+            }
         }
 
         /// <summary>
         /// Returns the mac address of the computer
         /// </summary>
-        public static string GetMacAddress() {
-            try {
-                ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled=true");
-                IEnumerable<ManagementObject> objects = searcher.Get().Cast<ManagementObject>();
-                return (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
-            } catch (Exception e) {
-                if (!(e is ArgumentNullException)) {
-                    ErrorHandler.Log(e.Message);
+        private static string MacAddress {
+            get {
+                try {
+                    ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled=true");
+                    IEnumerable<ManagementObject> objects = searcher.Get().Cast<ManagementObject>();
+                    return (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
+                } catch (Exception) {
+                    //ignored
                 }
+                return String.Empty;
             }
-            return String.Empty;
         }
 
         #endregion
@@ -135,45 +133,24 @@ namespace _3PA.Lib {
         /// </summary>
         /// <param name="message"></param>
         /// <param name="url"></param>
-        public static bool SendIssue(string message, string url) {
-            try {
-                // handle spam (10s min between 2 posts)
-                if (Utils.IsSpamming("SendIssue", 10000))
-                    return false;
+        public static bool SendComment(string message, string url) {
 
-                HttpWebRequest req = WebRequest.Create(new Uri(url)) as HttpWebRequest;
-                if (req == null)
-                    return false;
-                req.Proxy = Config.Instance.GetWebClientProxy();
-                req.Method = "POST";
-                req.ContentType = "application/json";
-                req.UserAgent = Config.GetUserAgent;
-                req.Headers.Add("Authorization", "Basic M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz");
-                StreamWriter writer = new StreamWriter(req.GetRequestStream());
-                JavaScriptSerializer serializer = new JavaScriptSerializer();
-                writer.Write("{\"body\": " + serializer.Serialize(
-                    "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
-                    "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
-                    message
-                    ) + "}");
-                writer.Close();
-                string result = null;
-                using (HttpWebResponse resp = req.GetResponse() as HttpWebResponse) {
-                    if (resp != null && resp.GetResponseStream() != null) {
-                        var respStream = resp.GetResponseStream();
-                        if (respStream != null) {
-                            StreamReader reader = new StreamReader(respStream);
-                            result = reader.ReadToEnd();
-                            reader.Close();
-                        }
-                    }
-                }
-                if (result != null) {
-                    return true;
-                }
-            } catch (Exception ex) {
-                ErrorHandler.Log(ex.ToString());
-            }
+            // https://api.github.com/repos/jcaillon/3p/issues/1/comments
+
+            // handle spam (10s min between 2 posts)
+            if (Utils.IsSpamming("SendComment", 10000))
+                return false;
+
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, url);
+
+            // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
+            wb.OnInitHttpWebRequest += request => request.Headers.Add("Authorization", "Basic " + Config._3PUserCredentials);
+            wb.AddToReq("body", "### " + Environment.UserName + " (" + Environment.MachineName + ") ###\r\n" +
+                "#### 3P version : " + AssemblyInfo.Version + ", Notepad++ version : " + Npp.GetNppVersion + " ####\r\n" +
+                message
+                );
+            wb.Execute();
+
             return false;
         }
 

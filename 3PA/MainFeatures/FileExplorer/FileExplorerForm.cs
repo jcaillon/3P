@@ -174,8 +174,6 @@ namespace _3PA.MainFeatures.FileExplorer {
 
             lbStatus.BackColor = ThemeManager.Current.FormBack;
 
-            FilesInfoOnUpdatedErrors(new UpdatedErrorsEventArgs(ErrorLevel.NoErrors, 0));
-
             #endregion
 
             #region File list
@@ -660,7 +658,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 curPos = new Point(fastOLV.SelectedIndex, fastOLV.TopItemIndex);
             } catch (Exception e) {
                 if (!(e is ArgumentOutOfRangeException))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
 
             // apply filter to each item in the list then set the list
@@ -668,7 +666,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             } catch (Exception e) {
                 if (!(e is NullReferenceException))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             if (string.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);
@@ -717,8 +715,8 @@ namespace _3PA.MainFeatures.FileExplorer {
             try {
                 if (fastOLV.SelectedItem != null)
                     return (FileListItem) fastOLV.SelectedItem.RowObject;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
             return null;
         }

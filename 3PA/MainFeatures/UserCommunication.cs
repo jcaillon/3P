@@ -143,12 +143,10 @@ namespace _3PA.MainFeatures {
 
                             toastNotification.Show();
                         });
-                        return;
                     }
 
-                    ErrorHandler.Log(htmlContent);
                 } catch (Exception e) {
-                    ErrorHandler.Log(e.Message);
+                    ErrorHandler.LogError(e);
 
                     // if we are here, display the error message the old way
                     MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);

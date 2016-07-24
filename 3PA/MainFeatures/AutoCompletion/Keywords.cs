@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using _3PA.Data;
@@ -129,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             foreach (var kpv in _keywordList) {
                 strBuilder.AppendLine(kpv.Key + "\t" + kpv.Value.Ranking);
             }
-            File.WriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
+            Utils.FileWriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
         }
 
         #endregion

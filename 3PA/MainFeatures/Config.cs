@@ -172,12 +172,6 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
 
-            [Display(Name = "Do not automatically post .log file",
-                Description = "Check this option to prevent 3P from sending your error.log file automatically on github<br><b>Doing this slows the debugging process for 3P's developpers as bugs are not detected if you don't create an issue!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
-            public bool GlobalDontAutoPostLog = false;
-
             [Display(Name = "Do not install syntax highlighting on update",
                 Description = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
                 GroupName = "Updates",
@@ -547,17 +541,12 @@ namespace _3PA.MainFeatures {
         public static string GetUserAgent { get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; } }
 
         /// <summary>
-        /// Url to request to get info on the latest releases
+        /// Url for the github webservices
         /// </summary>
         public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
-        //public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/battle-code/releases"; } }
-        
-        /// <summary>
-        /// Url to post logs
-        /// </summary>
-        public static string SendLogApi { get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; } }
-
         public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
+        // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
+        public static string _3PUserCredentials { get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; } }
 
         // HELP URL
         public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
@@ -567,11 +556,16 @@ namespace _3PA.MainFeatures {
         
 
         /// <summary>
-        /// Url for the ping webservice
+        /// Url for the webservices
         /// </summary>
-        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.4.1/?action=ping"; } }
+        public static string PingPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=ping&softName=3p"; } }
+        public static string BugsPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=bugs&softName=3p"; } }
+        public static string PingGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; } }
+        public static string BugsGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; } }
 
-        public static bool IsDevelopper { get { return File.Exists(Path.Combine(Npp.GetConfigDir(), "debug")); } }
+
+        public static bool IsDevelopper { get { return File.Exists(FileDebug); } }
+        public static string FileDebug { get { return Path.Combine(Npp.GetConfigDir(), "debug"); } }
 
         /// <summary>
         /// Path to important files / folders

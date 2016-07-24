@@ -245,10 +245,10 @@ namespace _3PA.Lib {
                 try {
                     Reset();
                     return PrivateCharPositionFromLine(index);
-                } catch (Exception) {
-                    // ignored
+                } catch (Exception x) {
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines");
                 }
-                ErrorHandler.Log(e + "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
+                ErrorHandler.LogError(e, "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
                 return 0;
             }
         }

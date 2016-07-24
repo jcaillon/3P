@@ -356,9 +356,9 @@ namespace _3PA.MainFeatures.AutoCompletion {
         public CompletionItem GetCurrentSuggestion() {
             try {
                 return (CompletionItem) this.SafeInvoke(form => fastOLV.SelectedItem.RowObject);
-            } catch (Exception x) {
-                if (!(x is NullReferenceException))
-                    ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                if (!(e is NullReferenceException))
+                    ErrorHandler.LogError(e);
             }
             return null;
         }
@@ -506,7 +506,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             } catch (Exception e) {
                 if (!(e is NullReferenceException))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             if (String.IsNullOrEmpty(_filterByText)) {
                 fastOLV.SetObjects(_initialObjectsList);

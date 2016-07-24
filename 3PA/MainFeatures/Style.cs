@@ -128,7 +128,7 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
             try {
-                File.WriteAllText(Config.FileNppUdlXml, fileContent, encoding);
+                Utils.FileWriteAllText(Config.FileNppUdlXml, fileContent, encoding);
             } catch (Exception e) {
                 if (e is UnauthorizedAccessException)
                     UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");

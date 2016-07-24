@@ -90,7 +90,7 @@ namespace _3PA.Lib._3pUpdater {
 
             } catch (Exception e) {
                 if (!(e is Win32Exception))
-                    ErrorHandler.Log("OnNotepadExit\r\n" + e);
+                    ErrorHandler.LogError(e);
             }
         }
 

@@ -560,8 +560,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _openedForCompletion = false;
                 _currentCompletionList = null;
                 GoToDefinitionFile = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
@@ -581,8 +581,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 if (_form != null)
                     _form.ForceClose();
                 _form = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 

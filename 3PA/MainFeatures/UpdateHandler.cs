@@ -20,11 +20,12 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using _3PA.Lib;
 using _3PA.Lib._3pUpdater;
@@ -43,24 +44,8 @@ namespace _3PA.MainFeatures {
         /// </summary>
         private static ReleaseInfo _latestReleaseInfo;
         private static bool _warnedUserAboutUpdateAvail;
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private static volatile bool _checking;
         private static ReccurentAction _checkEveryHourAction;
-
-        #endregion
-
-        #region constants to read the JSON
-
-        /// <summary>
-        /// name of the fields in the GITHUB json
-        /// </summary>
-        private const string ReleaseVersionName = "tag_name";
-
-        private const string BoolIsBetaName = "prerelease";
-        private const string ReleaseName = "name";
-        private const string ReleaseUrlName = "html_url";
-        private const string BoolIsDraftName = "draft";
-        private const string ReleaseDateName = "updated_at";
-        private const string ReleaseDownloadUrlName = "browser_download_url";
 
         #endregion
 
@@ -118,7 +103,7 @@ namespace _3PA.MainFeatures {
             _checkEveryHourAction = new ReccurentAction(() => {
                 // Check for new updates
                 if (!Config.Instance.GlobalDontCheckUpdates)
-                        CheckForUpdate(false);
+                    CheckForUpdate(false);
             }, 1000 * 60 * 120);
         }
 
@@ -146,146 +131,122 @@ namespace _3PA.MainFeatures {
                 return;
             }
 
-            if (!_lock.TryEnterWriteLock(100))
+            if (_checking)
                 return;
+
             try {
-                // try to update from GitHub
-                using (WebClient wc = new WebClient()) {
-                    wc.Proxy = Config.Instance.GetWebClientProxy();
-                    wc.Headers.Add("user-agent", Config.GetUserAgent);
-                    //wc.Proxy = null;
+                var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi);
+                wb.OnRequestEnded += json => WbOnOnRequestEnded(json, alwaysGetFeedBack);
+                wb.Execute();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error when checking for updates");
+            }
+        }
 
-                    // Download release list from GITHUB API 
-                    string json = "";
-                    try {
-                        json = wc.DownloadString(Config.ReleasesApi);
-                        Config.Instance.LastCheckUpdateOk = true;
-                    } catch (WebException e) {
-                        if (alwaysGetFeedBack || Config.Instance.LastCheckUpdateOk) {
-                            UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed", null);
-                            Config.Instance.LastCheckUpdateOk = false;
-                        }
-                        ErrorHandler.Log(e.ToString(), true);
-                    }
+        /// <summary>
+        /// Called when the gitub api for releases responses
+        /// </summary>
+        private static void WbOnOnRequestEnded(WebServiceJson webServiceJson, bool alwaysGetFeedBack) {
 
-                    // Parse the .json
-                    var parser = new JsonParser(json);
-                    parser.Tokenize();
-                    var releasesList = parser.GetList();
+            try {
+                if (webServiceJson.StatusCodeResponse == HttpStatusCode.OK && webServiceJson.ResponseException == null) {
+                    Config.Instance.LastCheckUpdateOk = true;
 
-                    // Releases list empty?
-                    if (releasesList == null) {
+                    // get the releases
+                    var releases = webServiceJson.DeserializeArray<ReleaseInfo>();
+                    if (releases != null && releases.Count > 0) {
 
-                        // check if there is an update available in the Shared config folder
-                        if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
-                            var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
-
-                            // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
-                            if (File.Exists(potentialUpdate) &&
-                                Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
-                                (Config.Instance.UserGetsPreReleases || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
-
-                                // copy to local update folder and warn the user 
-                                if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
-
-                                    _latestReleaseInfo = new ReleaseInfo() {
-                                        Name = "Updated from shared directory",
-                                        Version = Utils.GetDllVersion(Config.FileDownloadedPlugin),
-                                        IsBeta = Utils.GetDllVersion(Config.FileDownloadedPlugin).EndsWith(".1"),
-                                        ReleaseDate = "???",
-                                        ReleaseUrl = Config.UrlCheckReleases
-                                    };
-
-                                    // write the version log
-                                    File.WriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
-
-                                    // set up the update so the .dll file downloaded replaces the current .dll
-                                    _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
-
-                                    NotifyUpdateAvailable();
-                                }
-                            }
-                        }
-
-                    } else {
-
-                        // check for a online update
+                        // sort by descring order
+                        releases.Sort((o, o2) => o.tag_name.IsHigherVersionThan(o2.tag_name) ? -1 : 1);
+                    
                         var localVersion = AssemblyInfo.Version;
                         var outputBody = new StringBuilder();
-                        var highestVersion = localVersion;
-                        var highestVersionInt = -1;
-                        var iCount = -1;
+                        foreach (var release in releases) {
 
-                        // for each release in the list...
-                        foreach (var release in releasesList) {
-                            iCount++;
+                            if (string.IsNullOrEmpty(release.tag_name)) continue;
 
-                            var releaseVersionTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseVersionName));
-                            var prereleaseTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(BoolIsBetaName));
-                            var releaseNameTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseName));
-                            var isDraftTuple = release.FirstOrDefault(tuple => tuple.Item1.Equals(BoolIsDraftName));
+                            // For each version higher than the local one, append to the release body
+                            // Will be used to display the version log to the user
+                            if (release.tag_name.IsHigherVersionThan(localVersion) && 
+                                (Config.Instance.UserGetsPreReleases || !release.prerelease) &&
+                                release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(@"3P.zip"))) {
 
-                            // don't care about draft release
-                            if (isDraftTuple != null && isDraftTuple.Item2.EqualsCi("true"))
-                                continue;
-                            
-                            if (releaseVersionTuple != null && prereleaseTuple != null) {
+                                if (string.IsNullOrEmpty(release.tag_name)) release.tag_name = "vX.X.X.X";
+                                if (string.IsNullOrEmpty(release.name)) release.name = "unknown";
+                                if (string.IsNullOrEmpty(release.body)) release.body = "...";
+                                if (string.IsNullOrEmpty(release.published_at)) release.published_at = DateTime.Now.ToString(CultureInfo.CurrentCulture);
 
-                                var releaseVersion = releaseVersionTuple.Item2;
+                                // h1
+                                outputBody.AppendLine("## " + release.tag_name + " : " + release.name + " ##\n\n");
+                                // body
+                                outputBody.AppendLine(release.body + "\n\n");
 
-                                // is it the highest version ? for prereleases or full releases depending on the user config
-                                if (releaseVersion.IsHigherVersionThan(highestVersion) && (Config.Instance.UserGetsPreReleases || prereleaseTuple.Item2.EqualsCi("false"))) {
-                                    highestVersion = releaseVersion;
-                                    highestVersionInt = iCount;
-                                }
-
-                                // For each version higher than the local one, append to the release body
-                                // Will be used to display the version log to the user
-                                if (releaseVersion.IsHigherVersionThan(localVersion)) {
-                                    // h1
-                                    outputBody.AppendLine("\n\n## " + releaseVersion + ((releaseNameTuple != null) ? " : " + releaseNameTuple.Item2 : "") + " ##\n\n");
-                                    // body
-                                    var locBody = release.FirstOrDefault(tuple => tuple.Item1.Equals("body"));
-                                    if (locBody != null)
-                                        outputBody.AppendLine(locBody.Item2);
-                                }
+                                // the first higher release encountered is the latest
+                                if (_latestReleaseInfo == null)
+                                    _latestReleaseInfo = release;
                             }
                         }
 
                         // There is a distant version higher than the local one
-                        if (highestVersionInt > -1) {
+                        if (_latestReleaseInfo != null) {
+                            
+                            // to display all the release notes
+                            _latestReleaseInfo.body = outputBody.ToString();
 
                             // delete existing dir
                             Utils.DeleteDirectory(Config.FolderUpdate, true);
 
-                            // latest release info
-                            _latestReleaseInfo = new ReleaseInfo() {
-                                Name = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseName)).Item2,
-                                Version = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseVersionName)).Item2,
-                                IsBeta = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(BoolIsBetaName)).Item2.EqualsCi("true"),
-                                ReleaseDate = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseDateName)).Item2.Substring(0, 10),
-                                ReleaseUrl = releasesList[highestVersionInt].First(tuple => tuple.Item1.Equals(ReleaseUrlName)).Item2,
-                                Body = outputBody.ToString().Replace("\\r\\n", "\n").Replace("\\n", "\n")
-                            };
-
-                            // Hookup DownloadFileCompleted Event, download the release .zip
-                            var downloadUriTuple = releasesList[highestVersionInt].FirstOrDefault(tuple => tuple.Item1.Equals(ReleaseDownloadUrlName));
-                            if (downloadUriTuple != null) {
-                                _latestReleaseInfo.DownloadUrl = downloadUriTuple.Item2;
-                                wc.DownloadFileCompleted += OnDownloadFileCompleted;
-                                wc.DownloadFileAsync(new Uri(_latestReleaseInfo.DownloadUrl), Config.FileLatestReleaseZip);
-                            }
+                            Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(@"3P.zip")).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
 
                         } else if (alwaysGetFeedBack) {
                             UserCommunication.Notify("Congratulations! You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version);
                         }
                     }
+
+                } else {
+
+                    // failed to retrieve the list
+                    if (alwaysGetFeedBack || Config.Instance.LastCheckUpdateOk)
+                        UserCommunication.NotifyUnique("ReleaseListDown", "For your information, I couldn't manage to retrieve the latest published version on github.<br><br>A request has been sent to :<br>" + Config.ReleasesApi.ToHtmlLink() + "<br>but was unsuccessul, you might have to check for a new version manually if this happens again.", MessageImg.MsgHighImportance, "Couldn't reach github", "Connection failed", null);
+                    Config.Instance.LastCheckUpdateOk = false;
+
+                    // check if there is an update available in the Shared config folder
+                    if (!string.IsNullOrEmpty(Config.Instance.SharedConfFolder) && Directory.Exists(Config.Instance.SharedConfFolder)) {
+
+                        var potentialUpdate = Path.Combine(Config.Instance.SharedConfFolder, AssemblyInfo.AssemblyName);
+
+                        // if the .dll exists, is higher version and (the user get beta releases or it's a stable release)
+                        if (File.Exists(potentialUpdate) &&
+                            Utils.GetDllVersion(potentialUpdate).IsHigherVersionThan(AssemblyInfo.Version) &&
+                            (Config.Instance.UserGetsPreReleases || Utils.GetDllVersion(potentialUpdate).EndsWith(".0"))) {
+
+                            // copy to local update folder and warn the user 
+                            if (Utils.CopyFile(potentialUpdate, Config.FileDownloadedPlugin)) {
+
+                                _latestReleaseInfo = new ReleaseInfo {
+                                    name = "Updated from shared directory",
+                                    tag_name = Utils.GetDllVersion(Config.FileDownloadedPlugin),
+                                    prerelease = Utils.GetDllVersion(Config.FileDownloadedPlugin).EndsWith(".1"),
+                                    published_at = "???",
+                                    html_url = Config.UrlCheckReleases
+                                };
+
+                                // write the version log
+                                Utils.FileWriteAllText(Config.FileVersionLog, @"This version has been updated from the shared directory" + Environment.NewLine + Environment.NewLine + @"Find more information on this release [here](" + Config.UrlCheckReleases + @")", Encoding.Default);
+
+                                // set up the update so the .dll file downloaded replaces the current .dll
+                                _3PUpdater.Instance.AddFileToMove(Config.FileDownloadedPlugin, AssemblyInfo.Location);
+
+                                NotifyUpdateAvailable();
+                            }
+                        }
+                    }
                 }
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "GetLatestReleaseInfo");
-            } finally {
-                _lock.ExitWriteLock();
+                ErrorHandler.ShowErrors(e, "Error when checking the latest release ");
             }
+
+            _checking = false;
         }
 
         #endregion
@@ -314,7 +275,7 @@ namespace _3PA.MainFeatures {
                         }
 
                         // write the version log
-                        File.WriteAllText(Config.FileVersionLog, _latestReleaseInfo.Body, Encoding.Default);
+                        Utils.FileWriteAllText(Config.FileVersionLog, _latestReleaseInfo.body, Encoding.Default);
                         
                         NotifyUpdateAvailable();
                     
@@ -336,14 +297,15 @@ namespace _3PA.MainFeatures {
 
                 UserCommunication.NotifyUnique("UpdateAvailable", @"Dear user, <br>
                     <br>
-                    A new version of 3P has been downloaded and will be automatically installed the next time you restart Notepad++<br>
+                    A new version of 3P has been downloaded!<br>
+                    It will be automatically installed the next time you restart Notepad++<br>
                     <br>
                     Your version: <b>" + AssemblyInfo.Version + @"</b><br>
-                    Distant version: <b>" + _latestReleaseInfo.Version + @"</b><br>
-                    Release name: <b>" + _latestReleaseInfo.Name + @"</b><br>
-                    Available since: <b>" + _latestReleaseInfo.ReleaseDate + @"</b><br>" +
-                    "Release URL: <b>" + _latestReleaseInfo.ReleaseUrl.ToHtmlLink()+ @"</b><br>" +
-                    (_latestReleaseInfo.IsBeta ? "This distant release is not flagged as a stable version<br>" : "") +
+                    Distant version: <b>" + _latestReleaseInfo.tag_name + @"</b><br>
+                    Release name: <b>" + _latestReleaseInfo.name + @"</b><br>
+                    Available since: <b>" + _latestReleaseInfo.published_at + @"</b><br>" +
+                    "Release URL: <b>" + _latestReleaseInfo.html_url.ToHtmlLink()+ @"</b><br>" +
+                    (_latestReleaseInfo.prerelease ? "<i>This distant release is a beta version</i><br>" : "") +
                     (_3PUpdater.Instance.IsAdminRightsNeeded ? "<br><span class='SubTextColor'><i><b>3pUpdater.exe</b> will need admin rights to replace your current 3P.dll file by the new release,<br>please click yes when you are asked to execute it</i></span>" : ""), MessageImg.MsgUpdate, "Update check", "An update is available", null);
 
                 _warnedUserAboutUpdateAvail = true;
@@ -357,17 +319,45 @@ namespace _3PA.MainFeatures {
 
         #region ReleaseInfo
 
-        /// <summary>
-        /// Contains info about the latest release
-        /// </summary>
-        private class ReleaseInfo {
-            public string Version { get; set; }
-            public string Name { get; set; }
-            public bool IsBeta { get; set; }
-            public string ReleaseUrl { get; set; }
-            public string Body { get; set; }
-            public string ReleaseDate { get; set; }
-            public string DownloadUrl { get; set; }
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public class Asset {
+            public string name { get; set; }
+            public object label { get; set; }
+            public string content_type { get; set; }
+            public string state { get; set; }
+            public int download_count { get; set; }
+            public string created_at { get; set; }
+            public string updated_at { get; set; }
+            public string browser_download_url { get; set; }
+        }
+
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
+        public class ReleaseInfo {
+            public string html_url { get; set; }
+
+            /// <summary>
+            /// Release version
+            /// </summary>
+            public string tag_name { get; set; }
+
+            /// <summary>
+            /// Targeted branch
+            /// </summary>
+            public string target_commitish { get; set; }
+
+            /// <summary>
+            /// Release name
+            /// </summary>
+            public string name { get; set; }
+            public bool prerelease { get; set; }
+            public string published_at { get; set; }
+            public List<Asset> assets { get; set; }
+
+            /// <summary>
+            /// content of the release text
+            /// </summary>
+            public string body { get; set; }
         }
 
         #endregion

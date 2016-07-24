@@ -578,7 +578,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             } catch (Exception e) {
                 if (!(e is NullReferenceException))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             if (!_isFiltering) {
                 fastOLV.SetObjects(_initialObjectsList);
@@ -640,8 +640,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
             try {
                 if (fastOLV.SelectedItem != null)
                     return (CodeExplorerItem)fastOLV.SelectedItem.RowObject;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
             return null;
         }

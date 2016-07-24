@@ -20,12 +20,14 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 
 // ReSharper disable LocalizableElement
@@ -39,29 +41,30 @@ namespace _3PA.MainFeatures {
         /// </summary>
         private static HashSet<string> _catchedErrors = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
+        private static volatile int _nbErrors;
+
         /// <summary>
         /// Shows a Messagebox informing the user that something went wrong with a file,
         /// renames said file with the suffix "_errors"
         /// </summary>
-        /// <param name="e"></param>
-        /// <param name="message"></param>
-        /// <param name="fileName"></param>
         public static void ShowErrors(Exception e, string message, string fileName) {
-            Log(e.ToString());
-            if (UserCommunication.Ready)
-                UserCommunication.Notify("An error has occurred while loading the following file :<div>" + fileName.ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.<br><br>Uou might want to check out the error log below: " + (File.Exists(Config.FileErrorLog) ? " < br > " + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no.log found!"),
-                        MessageImg.MsgPoison, "File load error", message,
-                        args => {
-                            if (args.Link.EndsWith(".log")) {
-                                Npp.Goto(args.Link);
-                                args.Handled = true;
-                            }
-                        });
-            else 
+
+            if (UserCommunication.Ready) {
+                UserCommunication.Notify("An error has occurred while loading the following file :<div>" + (fileName + "_errors").ToHtmlLink() + "</div><br>The file has been suffixed with '_errors' to avoid further problems.",
+                    MessageImg.MsgPoison, "File load error", message,
+                    args => {
+                        if (args.Link.EndsWith(".log")) {
+                            Npp.Goto(args.Link);
+                            args.Handled = true;
+                        }
+                    });
+            } else
                 MessageBox.Show("An error has occurred while loading the following file :" + "\n\n" + fileName + "\n\n" + "The file has been suffixed with '_errors' to avoid further problems.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            if (File.Exists(fileName + "_errors"))
-                File.Delete(fileName + "_errors");
-            File.Move(fileName, fileName + "_errors");
+
+            Utils.DeleteFile(fileName + "_errors");
+            Utils.MoveFile(fileName, fileName + "_errors");
+
+            ShowErrors(e, message);
         }
 
         /// <summary>
@@ -69,19 +72,20 @@ namespace _3PA.MainFeatures {
         /// </summary>
         /// <param name="e"></param>
         /// <param name="message"></param>
-        public static void ShowErrors(Exception e, string message) {
-            // log the error into a file
-            if (Log(message + "\r\n" + e)) {
+        public static void ShowErrors(Exception e, string message = null) {
+
+            if (LogError(e, message)) {
                 if (UserCommunication.Ready) {
                     // show it to the user
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br><b>As a last resort, try restart Notepad++ and see if things are better!</b>",
-                        MessageImg.MsgPoison, "Unexpected error", message,
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                        MessageImg.MsgPoison, "An error has occured", message,
                         args => {
                             if (args.Link.EndsWith(".log")) {
                                 Npp.Goto(args.Link);
                                 args.Handled = true;
                             }
                         });
+
                 } else {
                     // show an old school message
                     MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nThis very likely happened during the plugin loading; hence there is a hugh probability that it will cause the plugin to not operate normally.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -93,68 +97,105 @@ namespace _3PA.MainFeatures {
         /// Log a piece of information
         /// returns false if the error already occured during the session, true otherwise
         /// </summary>
-        public static bool Log(string message, bool offlineLogOnly = false) {
-
-            // don't show/store the same error twice in a session
-            if (_catchedErrors.Contains(message))
+        public static bool LogError(Exception e, string message = null) {
+            if (e == null)
                 return false;
-            _catchedErrors.Add(message);
-
-            var toAppend = new StringBuilder("***************************\r\n");
 
             try {
-                StackFrame frame = new StackFrame(1);
-                var method = frame.GetMethod();
-                var callingClass = method.DeclaringType;
-                var callingMethod = method.Name;
+                var info = GetExceptionInfo(e);
 
-                toAppend.AppendLine("**" + DateTime.Now.ToString("yy-MM-dd HH:mm:ss") + "**");
-                if (method.DeclaringType != null && !method.DeclaringType.Name.Equals("ErrorHandler"))
-                    toAppend.AppendLine("*From " + callingClass + "." + callingMethod + "()*");
-                toAppend.AppendLine("```");
-                toAppend.AppendLine(message);
-                toAppend.AppendLine("```\r\n");
+                // don't show the same error twice in a session
+                var excepUniqueId = info.originMethod + info.originLine;
+                if (!_catchedErrors.Contains(excepUniqueId))
+                    _catchedErrors.Add(excepUniqueId);
+                else
+                    return false;
 
-                File.AppendAllText(Config.FileErrorLog, toAppend.ToString());
-            } catch (Exception) {
-                // nothing to do
-            }
-
-            if (!offlineLogOnly) {
-                try {
-                    File.AppendAllText(Config.FileErrorToSend, toAppend.ToString());
-
-                    // send to github
-                    Task.Factory.StartNew(() => {
-                        if (Config.Instance.GlobalDontAutoPostLog || User.SendIssue(Utils.ReadAllText(Config.FileErrorToSend, Encoding.Default), Config.SendLogApi)) {
-                            Utils.DeleteFile(Config.FileErrorToSend);
-                        }
-                    });
-                } catch (Exception) {
-                    // nothing to do
+                // in debug mode, show it
+                if (Config.IsDevelopper) {
+                    ShowErrors(e, message);
                 }
+
+                if (message != null)
+                    info.message = message + " : " + info.message;
+
+                // write in the log
+                var toAppend = new StringBuilder();
+                toAppend.AppendLine("============================================================");
+                toAppend.AppendLine("WHAT : " + info.message);
+                toAppend.AppendLine("WHEN : " + DateTime.Now.ToString(CultureInfo.CurrentCulture));
+                toAppend.AppendLine("WHERE : " + info.originMethod + ", line " + info.originLine);
+                toAppend.AppendLine("DETAILS : ");
+                foreach (var line in info.fullException.Split('\n')) {
+                    toAppend.AppendLine("    " + line.Trim());
+                }
+                toAppend.AppendLine("");
+                toAppend.AppendLine("");
+                Utils.FileAppendAllText(Config.FileErrorLog, toAppend.ToString());
+
+                // send the report
+                SendBugReport(info);
+
+            } catch (Exception x) {
+                if (Config.IsDevelopper)
+                    ShowErrors(x, message);
             }
 
             return true;
         }
 
         /// <summary>
-        /// Log a piece of information
-        /// returns false if the error already occured during the session, true otherwise
+        /// Sends the given report to the web service of 3P
         /// </summary>
-        public static bool LogError(Exception e) {
+        private static void SendBugReport(ExceptionInfo bugReport) {
 
-            return true;
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.BugsPostWebWervice);
+            wb.Serialize(bugReport);
+
+            // save the request in a file
+            var fileName = Path.Combine(Config.FolderLog, "unreported_" + DateTime.Now.ToString("yy.MM.dd_HH-mm-ss_") + _nbErrors++ + ".json");
+            Utils.FileWriteAllText(fileName, wb.JsonRequest.ToString());
+
+            wb.OnRequestEnded += webServ => {
+                // request ok -> delete the json
+                if (webServ.StatusCodeResponse == HttpStatusCode.OK)
+                    Utils.DeleteFile(fileName);
+            };
+            wb.Execute();
         }
 
-        public static string GetHtmlLogLink {
-            get {
-                return Config.Instance.UserGetsPreReleases ? "<br>More details can be found in log file below :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") : "";
+        /// <summary>
+        /// Returns info on an exception 
+        /// </summary>
+        private static ExceptionInfo GetExceptionInfo(Exception e) {
+            ExceptionInfo output = null;
+            var frame = new StackTrace(e, true).GetFrame(0);
+            if (frame != null) {
+                var method = frame.GetMethod();
+                output = new ExceptionInfo {
+                    originMethod = (method != null ? (method.DeclaringType != null ? method.DeclaringType.ToString() : "?") + "." + method.Name : "?") + "()",
+                    originLine = frame.GetFileLineNumber(),
+                    originVersion = AssemblyInfo.Version,
+                    UUID = User.UniqueId,
+                    message = e.Message,
+                    fullException = e.ToString()
+                };
             }
-        } 
+            if (output == null)
+                output = new ExceptionInfo {
+                    originMethod = Utils.CalculateMd5Hash(e.Message),
+                    originVersion = AssemblyInfo.Version,
+                    UUID = User.UniqueId,
+                    message = e.Message,
+                    fullException = e.ToString()
+                };
+            return output;
+        }
+        
+        #region global error handler callbacks
 
-        public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs args) {
-            ShowErrors((Exception)args.ExceptionObject, "Unhandled error");
+        public static void UnhandledErrorHandler(object sender, UnhandledExceptionEventArgs e) {
+            ShowErrors((Exception)e.ExceptionObject, "Unhandled error");
         }
 
         public static void ThreadErrorHandler(object sender, ThreadExceptionEventArgs e) {
@@ -164,5 +205,28 @@ namespace _3PA.MainFeatures {
         public static void UnobservedErrorHandler(object sender, UnobservedTaskExceptionEventArgs e) {
             ShowErrors(e.Exception, "Unobserved task error");
         }
+
+        #endregion
+
     }
+
+    #region ExceptionInfo
+
+    /// <summary>
+    /// Corresponds to the 3P webservice
+    /// </summary>
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
+    internal class ExceptionInfo {
+        public string originVersion { get; set; }
+        public string originMethod { get; set; }
+        public int originLine { get; set; }
+        public string receptionTime { get; set; }
+        public string nbReceived { get; set; }
+        public string UUID { get; set; }
+        public string message { get; set; }
+        public string fullException { get; set; }
+    }
+
+    #endregion
+
 }

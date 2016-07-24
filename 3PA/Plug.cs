@@ -522,6 +522,8 @@ namespace _3PA {
 
                 // set general styles (useful for the file explorer > current status)
                 Style.SetGeneralStyles();
+                if (initiating)
+                    FilesInfo.UpdateFileStatus();
 
                 // Need to compute the propath again, because we take into account relative path
                 ProEnvironment.Current.ReComputeProPath();
@@ -907,7 +909,7 @@ namespace _3PA {
                 Npp.SetSelectionColor(true, GetColorInStylers(xElements, "Selected text colour", "bgColor"), Color.Transparent);
                 Npp.CaretLineBackColor = GetColorInStylers(xElements, "Current line background colour", "bgColor");
             } catch (Exception e) {
-                ErrorHandler.Log(e.ToString());
+                ErrorHandler.LogError(e);
                 if (!_warnedAboutFailStylers) {
                     _warnedAboutFailStylers = true;
                     UserCommunication.Notify("Error while reading one of Notepad++ file :<div>" + Config.FileNppStylersXml.ToHtmlLink() + "</div>", MessageImg.MsgError, "Error reading stylers.xml", "Xml read error");

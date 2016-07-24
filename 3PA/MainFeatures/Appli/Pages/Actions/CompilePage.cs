@@ -393,7 +393,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             regex1 = new Regex("<a href=\"(.*?)[|\"]", RegexOptions.Compiled);
             html = regex1.Replace(html, "<a href=\"file:///$1\"");
 
-            File.WriteAllText(_reportExportPath, html, Encoding.Default);
+            Utils.FileWriteAllText(_reportExportPath, html, Encoding.Default);
 
             // open it
             Utils.OpenAnyLink(_reportExportPath);

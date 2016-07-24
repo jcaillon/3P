@@ -109,8 +109,8 @@ namespace _3PA.MainFeatures.Appli {
                 if (_form != null)
                     _form.ForceClose();
                 _form = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 

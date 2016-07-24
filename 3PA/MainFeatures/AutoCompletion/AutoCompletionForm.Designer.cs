@@ -33,8 +33,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 fastOLV.MouseLeave -= CustomOnMouseLeave;
                 fastOLV.DoubleClick -= FastOlvOnDoubleClick;
 
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
