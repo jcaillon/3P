@@ -207,12 +207,25 @@ namespace _3PA.MainFeatures {
             #region database tools
 
             _databaseTools = new List<MenuItem> {
+                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProUtils.OpenProDesktop, "Pro_desktop", "") {
+                    Generic = true
+                },
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, ProUtils.OpenDbAdmin, "Data_admin", "") {
+                    Generic = true
+                },
                 new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProUtils.OpenDictionary, "Data_dictionary", "") {
                     Generic = true
                 },
-                new MenuItem(this, "Explore your data (data digger!)", ImageResources.DataDigger, ProUtils.OpenDataDigger, "Data_digger", "") {
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, ProUtils.OpenDataDigger, "Data_digger", "") {
                     Generic = true
                 },
+                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, ProUtils.OpenDataReader, "Data_reader", "") {
+                    Generic = true
+                },
+
+
             };
 
             #endregion

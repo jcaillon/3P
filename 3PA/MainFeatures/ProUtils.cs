@@ -134,7 +134,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void Open4GlHelp() {
             // get path
-            if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
+            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
                 if (File.Exists(ProEnvironment.Current.ProwinPath)) {
                     // Try to find the help file from the prowin32.exe location
                     var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
@@ -145,13 +145,12 @@ namespace _3PA.MainFeatures {
                 }
             }
 
-            if (String.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
                 UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
                 return;
             }
 
-            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, 
-                (Math.Abs(Npp.SelectionEnd - Npp.SelectionStart) < 15) ? Npp.SelectedText : "");
+            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, Npp.GetAblWordAtPosition(Npp.CurrentPosition));
         }
 
         #endregion
@@ -240,7 +239,7 @@ namespace _3PA.MainFeatures {
 
         #endregion
 
-        #region Open appbuilder / dictionary / Datadigger
+        #region Open appbuilder / dictionary / Datadigger etc...
 
         /// <summary>
         /// Opens the current file in the appbuilder
@@ -262,12 +261,24 @@ namespace _3PA.MainFeatures {
             }.Do(ExecutionType.Appbuilder);
         }
 
+        public static void OpenProDesktop() {
+            new ProExecution().Do(ExecutionType.ProDesktop);
+        }
+
         public static void OpenDictionary() {
             new ProExecution().Do(ExecutionType.Dictionary);
         }
 
+        public static void OpenDbAdmin() {
+            new ProExecution().Do(ExecutionType.DbAdmin);
+        }
+
         public static void OpenDataDigger() {
             new ProExecution().Do(ExecutionType.DataDigger);
+        }
+
+        public static void OpenDataReader() {
+            new ProExecution().Do(ExecutionType.DataReader);
         }
 
         #endregion

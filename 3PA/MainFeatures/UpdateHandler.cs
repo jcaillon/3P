@@ -169,8 +169,9 @@ namespace _3PA.MainFeatures {
                             // Will be used to display the version log to the user
                             if (release.tag_name.IsHigherVersionThan(localVersion) && 
                                 (Config.Instance.UserGetsPreReleases || !release.prerelease) &&
-                                release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(@"3P.zip"))) {
+                                release.assets != null && release.assets.Count > 0 && release.assets.Exists(asset => asset.name.EqualsCi(Config.FileGitHubAssetName))) {
 
+                                // in case something is undefined (but shouldn't happen)
                                 if (string.IsNullOrEmpty(release.tag_name)) release.tag_name = "vX.X.X.X";
                                 if (string.IsNullOrEmpty(release.name)) release.name = "unknown";
                                 if (string.IsNullOrEmpty(release.body)) release.body = "...";
@@ -196,10 +197,10 @@ namespace _3PA.MainFeatures {
                             // delete existing dir
                             Utils.DeleteDirectory(Config.FolderUpdate, true);
 
-                            Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(@"3P.zip")).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
+                            Utils.DownloadFile(_latestReleaseInfo.assets.First(asset => asset.name.EqualsCi(Config.FileGitHubAssetName)).browser_download_url, Config.FileLatestReleaseZip, OnDownloadFileCompleted);
 
                         } else if (alwaysGetFeedBack) {
-                            UserCommunication.Notify("Congratulations! You already possess the latest version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version);
+                            UserCommunication.NotifyUnique("UpdateChecked", "Congratulations! You already possess the latest <b>" + (!Config.Instance.UserGetsPreReleases && !AssemblyInfo.IsPreRelease ? "stable" : "beta") + "</b> version of 3P!", MessageImg.MsgOk, "Update check", "You own the version " + AssemblyInfo.Version, null);
                         }
                     }
 

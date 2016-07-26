@@ -355,7 +355,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
                 Utils.FileWriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 
-            } else if (executionType == ExecutionType.DataDigger) {
+            } else if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader) {
                 // need to init datadigger?
                 if (!File.Exists(Path.Combine(Config.FolderDataDigger, "DataDigger.p"))) {
                     if (!Utils.FileWriteAllBytes(Path.Combine(Config.FolderDataDigger, "DataDigger.zip"), DataResources.DataDigger))
@@ -403,8 +403,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // Parameters
             StringBuilder Params = new StringBuilder();
 
-            if (executionType == ExecutionType.DataDigger)
-                Params.Append(" -s 1000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8");
+            if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader)
+                Params.Append(" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8");
             if (executionType != ExecutionType.Run)
                 Params.Append(" -T " + TempDir.Trim('\\').ProQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
@@ -782,7 +782,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         Database = 10,
         Appbuilder = 11,
         Dictionary = 12,
-        DataDigger = 13
+        DataDigger = 13,
+        DataReader = 14,
+        DbAdmin = 15,
+        ProDesktop = 16,
     }
 
     internal class FileToCompile {

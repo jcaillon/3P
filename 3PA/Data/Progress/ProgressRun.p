@@ -138,12 +138,16 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
                 DELETE ALIAS "DICTDB".
             END.
         END.
-        WHEN "DATADIGGER" THEN DO:
+        WHEN "DATADIGGER" THEN
             RUN DataDigger.p.
-        END.
-        WHEN "DICTIONARY" THEN DO:
+        WHEN "DATAREADER" THEN
+            RUN DataReader.p.
+        WHEN "DICTIONARY" THEN
             RUN _dict.p.
-        END.
+        WHEN "DBADMIN" THEN
+            RUN _admin.p.
+        WHEN "PRODESKTOP" THEN
+            RUN _desk.p.
         WHEN "APPBUILDER" THEN DO:
             RUN adeuib/_uibmain.p (INPUT {&ToExecute}) NO-ERROR.
             IF fi_output_last_error() THEN DO:
@@ -344,15 +348,18 @@ FUNCTION fi_get_message_description RETURNS CHARACTER (INPUT ipi_messNumber AS I
     DEFINE VARIABLE cCategoryIndex AS INTEGER   NO-UNDO.
 
     ASSIGN
-    cCategoryArray[1] = "Compiler"
-    cCategoryArray[2] = "Database"
-    cCategoryArray[3] = "Index"
-    cCategoryArray[4] = "Miscellaneous"
-    cCategoryArray[5] = "Operating System"
-    cCategoryArray[6] = "Program/Execution"
-    cCategoryArray[7] = "Syntax"
-    iPosition = (ipi_messNumber MODULO 50) WHEN (ipi_messNumber MODULO 50) > 0
-    cMsgFile = SEARCH("prohelp/msgdata/msg" + STRING(TRUNCATE((ipi_messNumber - 1) / 50, 0) + 1)).
+	cCategoryArray[1] = "Compiler"
+	cCategoryArray[2] = "Database"
+	cCategoryArray[3] = "Index"
+	cCategoryArray[4] = "Miscellaneous"
+	cCategoryArray[5] = "Operating System"
+	cCategoryArray[6] = "Program/Execution"
+	cCategoryArray[7] = "Syntax"
+	iPosition = (ipi_messNumber MODULO 50) WHEN (ipi_messNumber MODULO 50) > 0.
+
+	ASSIGN
+	cMsgFile = SEARCH("prohelp/msgdata/msg" + STRING(TRUNCATE((ipi_messNumber - 1) / 50, 0) + 1))
+	NO-ERROR.
 
     IF cMsgFile = ? THEN
         RETURN "".
