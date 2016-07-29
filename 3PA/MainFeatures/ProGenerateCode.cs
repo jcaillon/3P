@@ -250,18 +250,23 @@ namespace _3PA.MainFeatures {
                         return true;
                     return false;
                 }).ToList();
-                if (protoPreProcBlock.Count == 0) {
 
-                    // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
-                    var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
-                    protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
-                        var blockItem = item as ParsedPreProcBlock;
-                        if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
-                            return true;
-                        return false;
-                    }).ToList();
+                // if we found a block that actually surrounds our parsedScopeItem then that's it
+                foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
+                    if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
+                        return item;
                 }
 
+                // try to find a _FUNCTION-FORWARD block with the name, as it surrounds the prototype if it exists
+                var protoRegex = new Regex(@"\s*_UIB-CODE-BLOCK\s+" + typeStr + @"\s+" + parsedScopeItem.Name + @"\s", RegexOptions.IgnoreCase);
+                protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
+                    var blockItem = item as ParsedPreProcBlock;
+                    if (blockItem != null && protoRegex.Match(blockItem.BlockDescription).Success)
+                        return true;
+                    return false;
+                }).ToList();
+
+                // if we found a block that actually surrounds our parsedScopeItem then that's it
                 foreach (var item in protoPreProcBlock.Select(item => (ParsedPreProcBlock)item)) {
                     if (item.Position < parsedScopeItem.Position && parsedScopeItem.Position < item.EndBlockPosition)
                         return item;

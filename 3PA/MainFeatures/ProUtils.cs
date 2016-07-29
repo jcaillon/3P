@@ -38,9 +38,10 @@ namespace _3PA.MainFeatures {
         /// caret. At last, it tries to find a file in the propath
         /// </summary>
         public static void GoToDefinition(bool fromMouseClick) {
+
             // if a tooltip is opened, try to execute the "go to definition" of the tooltip first
             if (InfoToolTip.InfoToolTip.IsVisible) {
-                if (!String.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
+                if (!string.IsNullOrEmpty(InfoToolTip.InfoToolTip.GoToDefinitionFile)) {
                     Npp.Goto(InfoToolTip.InfoToolTip.GoToDefinitionFile, InfoToolTip.InfoToolTip.GoToDefinitionPoint.X, InfoToolTip.InfoToolTip.GoToDefinitionPoint.Y);
                     InfoToolTip.InfoToolTip.Close();
                     return;
@@ -150,7 +151,12 @@ namespace _3PA.MainFeatures {
                 return;
             }
 
-            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, Npp.GetAblWordAtPosition(Npp.CurrentPosition));
+            // if a tooltip is opened, we search for the displayed word, otherwise take the word at caret
+            string searchWord = null;
+            if (InfoToolTip.InfoToolTip.IsVisible && !string.IsNullOrEmpty(InfoToolTip.InfoToolTip.CurrentWord))
+                searchWord = InfoToolTip.InfoToolTip.CurrentWord;
+
+            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, searchWord ?? Npp.GetAblWordAtPosition(Npp.CurrentPosition));
         }
 
         #endregion

@@ -206,6 +206,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <param name="resetSelectorButtons"></param>
         public void SetItems(List<CompletionItem> objectsList, bool resetSelectorButtons = true) {
             this.SafeInvoke(form => {
+
                 objectsList.Sort(new CompletionDataSortingClass());
                 _initialObjectsList = objectsList;
 
@@ -635,7 +636,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public int Compare(CompletionItem x, CompletionItem y) {
 
-            Debug.Assert(x != null && y != null);
+            if (x == null || y == null)
+                return 0;
 
             // compare first by CompletionType
             int compare = GetPriorityList[(int)x.Type].CompareTo(GetPriorityList[(int)y.Type]);
@@ -664,7 +666,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             }
 
             // sort by display text in last resort
-            return String.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+            return string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
         }
     }
     #endregion

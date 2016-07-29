@@ -58,6 +58,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         public static string GoToDefinitionFile;
 
         /// <summary>
+        /// the current word that the tooltip displays
+        /// </summary>
+        public static string CurrentWord;
+
+        /// <summary>
         /// Index of the tooltip to show in case where a word corresponds to several items in the
         /// CompletionItem list
         /// </summary>
@@ -226,10 +231,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
             var toDisplay = new StringBuilder();
 
             GoToDefinitionFile = null;
-
+            
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
             if (data == null) return;
+
+            CurrentWord = data.DisplayText;
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
@@ -398,6 +405,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         }
                         if (keyToFind == null)
                             keyToFind = string.Join(" ", keyword, data.SubString);
+
                         var dataHelp = Keywords.GetKeywordHelp(keyToFind);
                         if (dataHelp != null) {
                             toDisplay.Append(FormatSubtitle("DESCRIPTION"));
@@ -422,6 +430,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             else
                                 toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");
                         }
+
+                        CurrentWord = keyToFind;
                         break;
                     case CompletionType.Label:
                         break;

@@ -503,6 +503,16 @@ namespace _3PA.Images {
         /// <summary>
         ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap EditCode {
+            get {
+                object obj = ResourceManager.GetObject("EditCode", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Env {
             get {
                 object obj = ResourceManager.GetObject("Env", resourceCulture);
@@ -1106,6 +1116,16 @@ namespace _3PA.Images {
         internal static System.Drawing.Bitmap Mandatory {
             get {
                 object obj = ResourceManager.GetObject("Mandatory", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Recherche une ressource localisée de type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Miscellaneous {
+            get {
+                object obj = ResourceManager.GetObject("Miscellaneous", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
