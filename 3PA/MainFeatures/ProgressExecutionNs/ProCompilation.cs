@@ -192,6 +192,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 compilationProcess.ProExecutionObject = new ProExecution {
                     ListToCompile = compilationProcess.FilesToCompile,
                     NeedDatabaseConnection = true,
+                    NoBatch = true,
                     OnExecutionEnd = OnExecutionEnd,
                     OnExecutionOk = OnExecutionOk,
                     OnExecutionFailed = OnExecutionFailed

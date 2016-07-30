@@ -69,7 +69,7 @@ namespace _3PA.Lib {
 
         #region private fields
 
-        private int _timeOut = 1000;
+        private int _timeOut = 1500;
 
         private JavaScriptSerializer _jsSerializer;
 

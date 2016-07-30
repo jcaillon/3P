@@ -184,19 +184,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.TabIndex = 0;
             // 
             // btDbView
             // 
             this.btDbView.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbView.BackGrndImage = null;
-            this.btDbView.Location = new System.Drawing.Point(632, 145);
+            this.btDbView.Location = new System.Drawing.Point(762, 145);
             this.btDbView.Name = "btDbView";
             this.btDbView.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDbView.Size = new System.Drawing.Size(59, 24);
@@ -208,7 +208,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDbDeleteDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbDeleteDownload.BackGrndImage = null;
-            this.btDbDeleteDownload.Location = new System.Drawing.Point(557, 145);
+            this.btDbDeleteDownload.Location = new System.Drawing.Point(687, 145);
             this.btDbDeleteDownload.Name = "btDbDeleteDownload";
             this.btDbDeleteDownload.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDbDeleteDownload.Size = new System.Drawing.Size(69, 24);
@@ -220,7 +220,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDbDownload.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDbDownload.BackGrndImage = null;
-            this.btDbDownload.Location = new System.Drawing.Point(499, 145);
+            this.btDbDownload.Location = new System.Drawing.Point(629, 145);
             this.btDbDownload.Name = "btDbDownload";
             this.btDbDownload.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDbDownload.Size = new System.Drawing.Size(52, 24);
@@ -276,7 +276,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flLabel.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flLabel.Location = new System.Drawing.Point(312, 27);
             this.flLabel.Name = "flLabel";
-            this.flLabel.Size = new System.Drawing.Size(386, 21);
+            this.flLabel.Size = new System.Drawing.Size(516, 21);
             this.flLabel.TabIndex = 134;
             this.flLabel.WaterMark = "Label for this environment";
             // 
@@ -365,7 +365,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox1.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox1.Location = new System.Drawing.Point(193, 122);
             this.textbox1.Name = "textbox1";
-            this.textbox1.Size = new System.Drawing.Size(498, 20);
+            this.textbox1.Size = new System.Drawing.Size(628, 20);
             this.textbox1.TabIndex = 132;
             this.textbox1.Tag = "pf file (*.pf)|*.pf";
             this.textbox1.WaterMark = "Path to your .pf file (containing database connection info)";
@@ -375,7 +375,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright1.BackColor = System.Drawing.Color.Transparent;
             this.btright1.BackGrndImage = null;
-            this.btright1.Location = new System.Drawing.Point(694, 122);
+            this.btright1.Location = new System.Drawing.Point(824, 122);
             this.btright1.Margin = new System.Windows.Forms.Padding(0);
             this.btright1.Name = "btright1";
             this.btright1.SetImgSize = new System.Drawing.Size(0, 0);
@@ -389,7 +389,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.yamuiLabel3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiLabel3.AutoSize = true;
             this.yamuiLabel3.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel3.Location = new System.Drawing.Point(430, 151);
+            this.yamuiLabel3.Location = new System.Drawing.Point(560, 151);
             this.yamuiLabel3.Margin = new System.Windows.Forms.Padding(3);
             this.yamuiLabel3.Name = "yamuiLabel3";
             this.yamuiLabel3.Size = new System.Drawing.Size(64, 12);
@@ -426,7 +426,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraPf.Margin = new System.Windows.Forms.Padding(1);
             this.flExtraPf.MultiLines = true;
             this.flExtraPf.Name = "flExtraPf";
-            this.flExtraPf.Size = new System.Drawing.Size(498, 60);
+            this.flExtraPf.Size = new System.Drawing.Size(628, 60);
             this.flExtraPf.TabIndex = 131;
             this.flExtraPf.WaterMark = "Extra connection info";
             // 
@@ -463,7 +463,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright2.BackColor = System.Drawing.Color.Transparent;
             this.btright2.BackGrndImage = null;
-            this.btright2.Location = new System.Drawing.Point(694, 238);
+            this.btright2.Location = new System.Drawing.Point(824, 238);
             this.btright2.Margin = new System.Windows.Forms.Padding(0);
             this.btright2.Name = "btright2";
             this.btright2.SetImgSize = new System.Drawing.Size(0, 0);
@@ -484,7 +484,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox2.Location = new System.Drawing.Point(193, 239);
             this.textbox2.Name = "textbox2";
-            this.textbox2.Size = new System.Drawing.Size(498, 20);
+            this.textbox2.Size = new System.Drawing.Size(628, 20);
             this.textbox2.TabIndex = 130;
             this.textbox2.Tag = "ini file (*.ini)|*.ini";
             this.textbox2.WaterMark = null;
@@ -502,7 +502,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flExtraProPath.Location = new System.Drawing.Point(193, 265);
             this.flExtraProPath.MultiLines = true;
             this.flExtraProPath.Name = "flExtraProPath";
-            this.flExtraProPath.Size = new System.Drawing.Size(498, 50);
+            this.flExtraProPath.Size = new System.Drawing.Size(628, 50);
             this.flExtraProPath.TabIndex = 129;
             this.flExtraProPath.WaterMark = "Appended to the .ini PROPATH (comma separated list)";
             // 
@@ -545,7 +545,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox3.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox3.Location = new System.Drawing.Point(193, 321);
             this.textbox3.Name = "textbox3";
-            this.textbox3.Size = new System.Drawing.Size(498, 20);
+            this.textbox3.Size = new System.Drawing.Size(628, 20);
             this.textbox3.TabIndex = 128;
             this.textbox3.Tag = "true";
             this.textbox3.WaterMark = null;
@@ -555,7 +555,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright3.BackColor = System.Drawing.Color.Transparent;
             this.btright3.BackGrndImage = null;
-            this.btright3.Location = new System.Drawing.Point(694, 321);
+            this.btright3.Location = new System.Drawing.Point(824, 321);
             this.btright3.Margin = new System.Windows.Forms.Padding(0);
             this.btright3.Name = "btright3";
             this.btright3.SetImgSize = new System.Drawing.Size(0, 0);
@@ -574,10 +574,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.IsSelectionEnabled = false;
             this.htmlLabel4.Location = new System.Drawing.Point(30, 347);
             this.htmlLabel4.Name = "htmlLabel4";
-            this.htmlLabel4.Size = new System.Drawing.Size(137, 45);
+            this.htmlLabel4.Size = new System.Drawing.Size(137, 30);
             this.htmlLabel4.TabIndex = 113;
             this.htmlLabel4.TabStop = false;
-            this.htmlLabel4.Text = "<b>Compilation base directory</b> <br>and compilation options ";
+            this.htmlLabel4.Text = "<b>Deployement directory</b> <br>and compilation options ";
             // 
             // btleft4
             // 
@@ -604,7 +604,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox4.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox4.Location = new System.Drawing.Point(193, 347);
             this.textbox4.Name = "textbox4";
-            this.textbox4.Size = new System.Drawing.Size(498, 20);
+            this.textbox4.Size = new System.Drawing.Size(628, 20);
             this.textbox4.TabIndex = 127;
             this.textbox4.Tag = "true";
             this.textbox4.WaterMark = null;
@@ -614,7 +614,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright4.BackColor = System.Drawing.Color.Transparent;
             this.btright4.BackGrndImage = null;
-            this.btright4.Location = new System.Drawing.Point(694, 347);
+            this.btright4.Location = new System.Drawing.Point(824, 347);
             this.btright4.Margin = new System.Windows.Forms.Padding(0);
             this.btright4.Name = "btright4";
             this.btright4.SetImgSize = new System.Drawing.Size(0, 0);
@@ -743,7 +743,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox5.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox5.Location = new System.Drawing.Point(193, 402);
             this.textbox5.Name = "textbox5";
-            this.textbox5.Size = new System.Drawing.Size(498, 20);
+            this.textbox5.Size = new System.Drawing.Size(628, 20);
             this.textbox5.TabIndex = 126;
             this.textbox5.Tag = "prowin32 (*.exe)|*.exe";
             this.textbox5.WaterMark = null;
@@ -753,7 +753,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright5.BackColor = System.Drawing.Color.Transparent;
             this.btright5.BackGrndImage = null;
-            this.btright5.Location = new System.Drawing.Point(694, 402);
+            this.btright5.Location = new System.Drawing.Point(824, 402);
             this.btright5.Margin = new System.Windows.Forms.Padding(0);
             this.btright5.Name = "btright5";
             this.btright5.SetImgSize = new System.Drawing.Size(0, 0);
@@ -788,7 +788,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.flCmdLine.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.flCmdLine.Location = new System.Drawing.Point(193, 428);
             this.flCmdLine.Name = "flCmdLine";
-            this.flCmdLine.Size = new System.Drawing.Size(498, 20);
+            this.flCmdLine.Size = new System.Drawing.Size(628, 20);
             this.flCmdLine.TabIndex = 125;
             this.flCmdLine.WaterMark = "Appended to the prowin command line when running or compiling";
             // 
@@ -831,7 +831,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.textbox6.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.textbox6.Location = new System.Drawing.Point(193, 454);
             this.textbox6.Name = "textbox6";
-            this.textbox6.Size = new System.Drawing.Size(498, 20);
+            this.textbox6.Size = new System.Drawing.Size(628, 20);
             this.textbox6.TabIndex = 124;
             this.textbox6.Tag = "log file (*.log)|*.log";
             this.textbox6.WaterMark = null;
@@ -841,7 +841,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btright6.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btright6.BackColor = System.Drawing.Color.Transparent;
             this.btright6.BackGrndImage = null;
-            this.btright6.Location = new System.Drawing.Point(694, 454);
+            this.btright6.Location = new System.Drawing.Point(824, 454);
             this.btright6.Margin = new System.Windows.Forms.Padding(0);
             this.btright6.Name = "btright6";
             this.btright6.SetImgSize = new System.Drawing.Size(0, 0);
@@ -854,7 +854,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btDelete.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btDelete.BackGrndImage = null;
-            this.btDelete.Location = new System.Drawing.Point(394, 480);
+            this.btDelete.Location = new System.Drawing.Point(394, 485);
             this.btDelete.Name = "btDelete";
             this.btDelete.SetImgSize = new System.Drawing.Size(20, 20);
             this.btDelete.Size = new System.Drawing.Size(70, 24);
@@ -880,7 +880,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btEdit.BackGrndImage = null;
-            this.btEdit.Location = new System.Drawing.Point(193, 480);
+            this.btEdit.Location = new System.Drawing.Point(193, 485);
             this.btEdit.Name = "btEdit";
             this.btEdit.SetImgSize = new System.Drawing.Size(20, 20);
             this.btEdit.Size = new System.Drawing.Size(57, 24);
@@ -892,7 +892,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btAdd.BackGrndImage = null;
-            this.btAdd.Location = new System.Drawing.Point(256, 480);
+            this.btAdd.Location = new System.Drawing.Point(256, 485);
             this.btAdd.Name = "btAdd";
             this.btAdd.SetImgSize = new System.Drawing.Size(20, 20);
             this.btAdd.Size = new System.Drawing.Size(59, 24);
@@ -904,7 +904,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btCopy.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btCopy.BackGrndImage = null;
-            this.btCopy.Location = new System.Drawing.Point(321, 480);
+            this.btCopy.Location = new System.Drawing.Point(321, 485);
             this.btCopy.Name = "btCopy";
             this.btCopy.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCopy.Size = new System.Drawing.Size(67, 24);
@@ -949,7 +949,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btSave.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btSave.BackGrndImage = null;
-            this.btSave.Location = new System.Drawing.Point(193, 480);
+            this.btSave.Location = new System.Drawing.Point(193, 485);
             this.btSave.Name = "btSave";
             this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
             this.btSave.Size = new System.Drawing.Size(62, 24);
@@ -961,7 +961,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.btCancel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btCancel.BackGrndImage = null;
-            this.btCancel.Location = new System.Drawing.Point(261, 480);
+            this.btCancel.Location = new System.Drawing.Point(261, 485);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
             this.btCancel.Size = new System.Drawing.Size(71, 24);
@@ -996,7 +996,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaDb.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.areaDb.BackColor = System.Drawing.Color.Lime;
             this.areaDb.Enabled = false;
-            this.areaDb.Location = new System.Drawing.Point(421, 144);
+            this.areaDb.Location = new System.Drawing.Point(551, 144);
             this.areaDb.Name = "areaDb";
             this.areaDb.Size = new System.Drawing.Size(277, 24);
             this.areaDb.TabIndex = 167;
@@ -1036,7 +1036,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaEnv.Enabled = false;
             this.areaEnv.Location = new System.Drawing.Point(3, 171);
             this.areaEnv.Name = "areaEnv";
-            this.areaEnv.Size = new System.Drawing.Size(717, 298);
+            this.areaEnv.Size = new System.Drawing.Size(847, 298);
             this.areaEnv.TabIndex = 165;
             this.areaEnv.Visible = false;
             // 
@@ -1048,7 +1048,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaPf.Enabled = false;
             this.areaPf.Location = new System.Drawing.Point(2, 95);
             this.areaPf.Name = "areaPf";
-            this.areaPf.Size = new System.Drawing.Size(718, 43);
+            this.areaPf.Size = new System.Drawing.Size(848, 43);
             this.areaPf.TabIndex = 166;
             this.areaPf.Visible = false;
             // 
@@ -1058,7 +1058,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetEnvironment";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

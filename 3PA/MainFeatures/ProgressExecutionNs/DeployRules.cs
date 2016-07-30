@@ -25,7 +25,7 @@ using _3PA.Lib;
 
 namespace _3PA.MainFeatures.ProgressExecutionNs {
 
-    internal class CompilationPath {
+    internal class DeployRules {
 
         #region OBJECT
 
@@ -66,7 +66,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public enum TransferType {
             Copy,
             Ftp,
-            Library,
+            Pl,
             Move
         }
 
@@ -75,15 +75,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         #region public event
 
         /// <summary>
-        /// Called when the list of CompilationPath is updated
+        /// Called when the list of DeployTransfers is updated
         /// </summary>
-        public static event Action OnCompilationPathUpdate;
+        public static event Action OnDeployConfigurationUpdate;
 
         #endregion
 
         #region private fields
 
-        private static List<CompilationPath> _compilationPathList;
+        private static List<DeployRules> _deployRulesList;
 
         #endregion
 
@@ -95,8 +95,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         public static void Import() {
             var i = 0;
-            _compilationPathList = new List<CompilationPath>();
-            Utils.ForEachLine(Config.FileCompilPath, new byte[0], s => {
+            _deployRulesList = new List<DeployRules>();
+            Utils.ForEachLine(Config.FileDeployement, new byte[0], s => {
                 var items = s.Split('\t');
                 if (items.Count() == 5) {
                     // find the TransferType from items[3]
@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     if (!Enum.TryParse(items[3].ToTitleCase(), true, out type))
                         type = TransferType.Move;
 
-                    var obj = new CompilationPath {
+                    var obj = new DeployRules {
                         ApplicationFilter = items[0].Trim(),
                         EnvLetterFilter = items[1].Trim(),
                         InputPathPattern = items[2].Trim().Replace('/', '\\'),
@@ -117,13 +117,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                             obj.ApplicationFilter = "";
                         if (obj.EnvLetterFilter.Equals("*"))
                             obj.EnvLetterFilter = "";
-                        _compilationPathList.Add(obj);
+                        _deployRulesList.Add(obj);
                     }
                 }
             }, 
             Encoding.Default);
 
-            _compilationPathList.Sort((item1, item2) => {
+            _deployRulesList.Sort((item1, item2) => {
                 int compare = string.IsNullOrWhiteSpace(item1.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(item2.ApplicationFilter));
                 if (compare != 0) return compare;
                 compare = string.IsNullOrWhiteSpace(item1.EnvLetterFilter).CompareTo(string.IsNullOrWhiteSpace(item2.EnvLetterFilter));
@@ -133,18 +133,18 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return item1.Line.CompareTo(item2.Line);
             });
 
-            if (OnCompilationPathUpdate != null)
-                OnCompilationPathUpdate();
+            if (OnDeployConfigurationUpdate != null)
+                OnDeployConfigurationUpdate();
         }
 
         /// <summary>
         /// Get the compilation path list
         /// </summary>
-        public static List<CompilationPath> GetCompilationPathList {
+        public static List<DeployRules> GetDeployRulesList {
             get {
-                if (_compilationPathList == null)
+                if (_deployRulesList == null)
                     Import();
-                return _compilationPathList;
+                return _deployRulesList;
             }
         }
 
@@ -154,11 +154,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public static string BuildHtmlTable() {
             var strBuilder = new StringBuilder();
 
-            if (GetCompilationPathList.Any()) {
+            if (GetDeployRulesList.Any()) {
 
                 strBuilder.Append("<table width='100%;'>");
                 strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='40%'>Input path pattern</td><td class='CompPathHead' align='center'>Transfer type</td><td class='CompPathHead' width='40%'>Append to output path</td></tr>");
-                foreach (var compLine in GetCompilationPathList) {
+                foreach (var compLine in GetDeployRulesList) {
                     strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.ApplicationFilter) ? "*" : compLine.ApplicationFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.EnvLetterFilter) ? "*" : compLine.EnvLetterFilter) + "</td><td>" + (compLine.InputPathPattern.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.InputPathPattern.Length - 40) : compLine.InputPathPattern) + "</td><td align='center'>" + compLine.Type + "</td><td>" + (compLine.OutputPathAppend.Length > 40 ? "..." + compLine.InputPathPattern.Substring(compLine.OutputPathAppend.Length - 40) : compLine.OutputPathAppend) + "</td></tr>");
                 }
                 strBuilder.Append("</table>");

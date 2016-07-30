@@ -3,7 +3,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    partial class SetCompilationPath {
+    partial class SetDeployement {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -27,7 +27,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetCompilationPath));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetDeployement));
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
             this.bt_import = new YamuiFramework.Controls.YamuiButton();
             this.bt_modify = new YamuiFramework.Controls.YamuiButton();
@@ -40,10 +40,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // dockedPanel
+            // scrollPanel
             // 
             // 
-            // dockedPanel.ContentPanel
+            // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_import);
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_modify);
@@ -54,26 +54,30 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
-            this.scrollPanel.Name = "scrollPage";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Name = "scrollPanel";
+            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.TabIndex = 0;
             // 
             // bt_import
             // 
-            this.bt_import.Location = new System.Drawing.Point(111, 102);
+            this.bt_import.BackGrndImage = null;
+            this.bt_import.Location = new System.Drawing.Point(111, 95);
             this.bt_import.Name = "bt_import";
+            this.bt_import.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_import.Size = new System.Drawing.Size(101, 23);
             this.bt_import.TabIndex = 56;
             this.bt_import.Text = "Read changes";
             // 
             // bt_modify
             // 
-            this.bt_modify.Location = new System.Drawing.Point(30, 102);
+            this.bt_modify.BackGrndImage = null;
+            this.bt_modify.Location = new System.Drawing.Point(30, 95);
             this.bt_modify.Name = "bt_modify";
+            this.bt_modify.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_modify.Size = new System.Drawing.Size(75, 23);
             this.bt_modify.TabIndex = 55;
             this.bt_modify.Text = "Modify";
@@ -84,7 +88,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.html_list.AutoSizeHeightOnly = true;
             this.html_list.BackColor = System.Drawing.Color.Transparent;
             this.html_list.BaseStylesheet = null;
-            this.html_list.Location = new System.Drawing.Point(30, 179);
+            this.html_list.Location = new System.Drawing.Point(30, 172);
             this.html_list.Name = "html_list";
             this.html_list.Size = new System.Drawing.Size(682, 15);
             this.html_list.TabIndex = 54;
@@ -95,12 +99,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.yamuiLabel2.AutoSize = true;
             this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel2.Location = new System.Drawing.Point(0, 146);
+            this.yamuiLabel2.Location = new System.Drawing.Point(0, 139);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(298, 19);
+            this.yamuiLabel2.Size = new System.Drawing.Size(153, 19);
             this.yamuiLabel2.TabIndex = 53;
-            this.yamuiLabel2.Text = "CURRENT COMPILATION PATH REROUTING";
+            this.yamuiLabel2.Text = "DEPLOYEMENT RULES";
             // 
             // lbl_about
             // 
@@ -110,7 +114,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lbl_about.BaseStylesheet = null;
             this.lbl_about.Location = new System.Drawing.Point(30, 29);
             this.lbl_about.Name = "lbl_about";
-            this.lbl_about.Size = new System.Drawing.Size(653, 60);
+            this.lbl_about.Size = new System.Drawing.Size(817, 60);
             this.lbl_about.TabIndex = 52;
             this.lbl_about.TabStop = false;
             this.lbl_about.Text = resources.GetString("lbl_about.Text");
@@ -136,13 +140,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
             // 
-            // SetCompilationPath
+            // SetDeployement
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
-            this.Name = "SetCompilationPath";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Name = "SetDeployement";
+            this.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

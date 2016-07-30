@@ -25,7 +25,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.ProgressExecutionNs;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    internal partial class SetCompilationPath : YamuiPage {
+    internal partial class SetDeployement : YamuiPage {
 
         #region fields
 
@@ -33,7 +33,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region constructor
 
-        public SetCompilationPath() {
+        public SetDeployement() {
             InitializeComponent();
 
             // tooltips
@@ -62,7 +62,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateList() {
             // build the html
-            html_list.Text = CompilationPath.BuildHtmlTable();
+            html_list.Text = DeployRules.BuildHtmlTable();
 
             scrollPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
             scrollPanel.OnResizedContentPanel();
@@ -73,14 +73,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #region private event
 
         private void BtModifyOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (!File.Exists(Config.FileCompilPath))
-                Utils.FileWriteAllBytes(Config.FileCompilPath, DataResources.CompilationPath);
+            if (!File.Exists(Config.FileDeployement))
+                Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.Deployement);
 
-            Npp.OpenFile(Config.FileCompilPath);
+            Npp.OpenFile(Config.FileDeployement);
         }
 
         private void BtImportOnButtonPressed(object sender, EventArgs eventArgs) {
-            CompilationPath.Import();
+            DeployRules.Import();
             UpdateList();
         }
 

@@ -136,6 +136,7 @@ namespace _3PA.MainFeatures {
 
             try {
                 var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.ReleasesApi);
+                wb.TimeOut = 3000;
                 wb.OnRequestEnded += json => WbOnOnRequestEnded(json, alwaysGetFeedBack);
                 wb.Execute();
             } catch (Exception e) {

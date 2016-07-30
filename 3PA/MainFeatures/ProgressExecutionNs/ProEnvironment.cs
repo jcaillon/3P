@@ -58,6 +58,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             /// </summary>
             public string BaseLocalPath = "";
 
+            /// <summary>
+            /// Deployement directory
+            /// </summary>
             public string BaseCompilationPath = "";
 
             public string ProwinPath = "";
@@ -90,7 +93,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             private List<string> _currentProPathDirList;
 
-            private List<CompilationPath> _compilationPathList;
+            private List<DeployRules> _deployRulesList;
 
             #endregion
 
@@ -101,7 +104,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 OnEnvironmentChange += ReComputeProPath;
 
                 // we need to filter/sort the list of computation path when it changes
-                CompilationPath.OnCompilationPathUpdate += () => _compilationPathList = null;
+                DeployRules.OnDeployConfigurationUpdate += () => _deployRulesList = null;
             }
 
             /// <summary>
@@ -136,7 +139,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 FtpTimeOut = toCopy.FtpTimeOut;
 
                 _currentProPathDirList = toCopy._currentProPathDirList;
-                _compilationPathList = toCopy._compilationPathList;
+                _deployRulesList = toCopy._deployRulesList;
             }
 
             #endregion
@@ -356,37 +359,37 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             #region CompilationPath
 
             /// <summary>
-            /// List of compilation path read from the file and filtered for this env
+            /// List of deploy rules read from the file and filtered for this env
             /// </summary>
-            private List<CompilationPath> GetCompilationPathList {
+            private List<DeployRules> GetDeployRulesList {
                 get {
-                    if (_compilationPathList == null) {
+                    if (_deployRulesList == null) {
 
                         // where (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
-                        _compilationPathList = CompilationPath.GetCompilationPathList.Where(
+                        _deployRulesList = DeployRules.GetDeployRulesList.Where(
                             item => string.IsNullOrWhiteSpace(item.ApplicationFilter) || (item.ApplicationFilter.EqualsCi(Name) && (item.EnvLetterFilter.EqualsCi(Suffix) || string.IsNullOrWhiteSpace(item.EnvLetterFilter)))
                         ).ToList();
 
                     }
-                    return _compilationPathList;
+                    return _deployRulesList;
                 }
             }
 
             /// <summary>
-            /// This method returns the compilation directories for the given source path, for each :
+            /// This method returns the transfer directories for the given source path, for each :
             /// If CompileLocally, returns the directory of the source
             /// If the base compilation is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
-            public Dictionary<string, CompilationPath.TransferType> GetTransfersNeeded(string sourcePath) {
+            public Dictionary<string, DeployRules.TransferType> GetTransfersNeeded(string sourcePath) {
 
                 // local compilation?
                 if (CompileLocally)
-                    return new Dictionary<string, CompilationPath.TransferType> { { Path.GetDirectoryName(sourcePath), CompilationPath.TransferType.Move } };
+                    return new Dictionary<string, DeployRules.TransferType> { { Path.GetDirectoryName(sourcePath), DeployRules.TransferType.Move } };
 
-                var outList = new Dictionary<string, CompilationPath.TransferType>();
+                var outList = new Dictionary<string, DeployRules.TransferType>();
 
                 // try to find the items that match the input pattern
-                foreach (var matchedPath in GetCompilationPathList.Where(path => sourcePath.RegexMatch(path.InputPathPattern.WildCardToRegex()))) {
+                foreach (var matchedPath in GetDeployRulesList.Where(path => sourcePath.RegexMatch(path.InputPathPattern.WildCardToRegex()))) {
                     string outPath;
                     if (Path.IsPathRooted(matchedPath.OutputPathAppend)) {
                         outPath = matchedPath.OutputPathAppend;
@@ -397,13 +400,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         outList.Add(outPath, matchedPath.Type);
 
                     // stop at first Move
-                    if (matchedPath.Type == CompilationPath.TransferType.Move)
+                    if (matchedPath.Type == DeployRules.TransferType.Move)
                         break;
                 }
 
                 // nothing matched? move to compilation path
                 if (outList.Count == 0)
-                    outList.Add(BaseCompilationPath, CompilationPath.TransferType.Move);
+                    outList.Add(BaseCompilationPath, DeployRules.TransferType.Move);
 
                 return outList;
             }

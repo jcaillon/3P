@@ -21,9 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
-using System.Threading.Tasks;
 using _3PA.Data;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
@@ -61,16 +59,16 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "Compilation path rerouting",
-                            HandledItem = Config.FileCompilPath,
-                            OnImport = line => CompilationPath.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileCompilPath, DataResources.CompilationPath),
+                            Label = "R-code deployement configuration",
+                            HandledItem = Config.FileDeployement,
+                            OnImport = line => DeployRules.Import(),
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.Deployement),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
                         },
                         new ConfLine {
-                            Label = "Start prolint procedure",
+                            Label = "Prolint startup procedure",
                             HandledItem = Config.FileStartProlint,
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint),
                             OnDelete = DoDelete,

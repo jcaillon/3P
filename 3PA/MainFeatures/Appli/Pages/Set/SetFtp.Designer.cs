@@ -55,10 +55,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
             // 
-            // scrollPage
+            // scrollPanel
             // 
             // 
-            // scrollPage.ContentPanel
+            // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton1);
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_reset);
@@ -84,26 +84,30 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.TabIndex = 0;
             // 
             // yamuiButton1
             // 
+            this.yamuiButton1.BackGrndImage = null;
             this.yamuiButton1.Location = new System.Drawing.Point(305, 350);
             this.yamuiButton1.Name = "yamuiButton1";
+            this.yamuiButton1.SetImgSize = new System.Drawing.Size(0, 0);
             this.yamuiButton1.Size = new System.Drawing.Size(60, 23);
             this.yamuiButton1.TabIndex = 112;
             this.yamuiButton1.Text = "&Save";
             // 
             // bt_reset
             // 
+            this.bt_reset.BackGrndImage = null;
             this.bt_reset.Location = new System.Drawing.Point(371, 350);
             this.bt_reset.Name = "bt_reset";
+            this.bt_reset.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_reset.Size = new System.Drawing.Size(58, 23);
             this.bt_reset.TabIndex = 111;
             this.bt_reset.Text = "&Reset";
@@ -179,6 +183,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.btleft1.Location = new System.Drawing.Point(170, 223);
             this.btleft1.Margin = new System.Windows.Forms.Padding(0);
             this.btleft1.Name = "btleft1";
+            this.btleft1.SetImgSize = new System.Drawing.Size(0, 0);
             this.btleft1.Size = new System.Drawing.Size(20, 20);
             this.btleft1.TabIndex = 105;
             this.btleft1.TabStop = false;
@@ -209,7 +214,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_remoteDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_remoteDir.Location = new System.Drawing.Point(193, 223);
             this.fl_remoteDir.Name = "fl_remoteDir";
-            this.fl_remoteDir.Size = new System.Drawing.Size(524, 20);
+            this.fl_remoteDir.Size = new System.Drawing.Size(654, 20);
             this.fl_remoteDir.TabIndex = 76;
             this.fl_remoteDir.WaterMark = null;
             // 
@@ -343,9 +348,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // bt_test
             // 
+            this.bt_test.BackGrndImage = null;
             this.bt_test.Location = new System.Drawing.Point(193, 350);
             this.bt_test.Margin = new System.Windows.Forms.Padding(3, 15, 3, 3);
             this.bt_test.Name = "bt_test";
+            this.bt_test.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_test.Size = new System.Drawing.Size(106, 23);
             this.bt_test.TabIndex = 42;
             this.bt_test.Text = "&Test connection";
@@ -366,7 +373,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetFtp";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

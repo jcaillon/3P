@@ -82,12 +82,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             var yPos = btRefresh.Location.Y + 35;
             foreach (var confLine in ShareExportConf.List) {
 
+                var xPos = btDownloadAll.Location.X - 25;
+
                 // label
                 var label = new HtmlLabel {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Left,
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
                     Location = new Point(30, yPos + 2),
-                    Size = new Size(185, 10),
+                    Size = new Size(topAuto.Location.X - 30, 10),
                     IsSelectionEnabled = false,
                     Text = confLine.Label
                 };
@@ -96,8 +99,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // switch, auto update?
                 var toggleControl = new YamuiCheckBox {
-                    Location = new Point(215, yPos + 2),
-                    Size = new Size(26, 15),
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                    Location = new Point(xPos, yPos + 2),
+                    Size = new Size(15, 15),
                     Text = @" ",
                     Checked = confLine.AutoUpdate,
                     Tag = confLine
@@ -105,12 +109,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 toggleControl.CheckedChanged += ToggleControlOnCheckedChanged;
                 scrollPanel.ContentPanel.Controls.Add(toggleControl);
                 tooltip.SetToolTip(toggleControl, "Check this option to automatically fetch the most recent version of the file<br>This update occurs on notepad++ startup and each time you refresh the local/distant file status");
+                xPos += 25;
 
                 // do we have an update available?
                 var strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.OutDated,
                     Size = new Size(20, 20),
-                    Location = new Point(240, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Name = "btm_" + iNbLine,
@@ -119,24 +125,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "The distant version is more recent than the local one<br>Press this button to <b>fetch</b> the distant version");
+                xPos += 30;
 
                 // local date
                 var date = new HtmlLabel {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
-                    Location = new Point(270, yPos + 2),
+                    Location = new Point(xPos, yPos + 2),
                     Size = new Size(130, 10),
                     IsSelectionEnabled = false,
                     Text = @"???",
                     Name = "datel_" + iNbLine
                 };
                 scrollPanel.ContentPanel.Controls.Add(date);
+                xPos += 140;
 
                 // local open
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.OpenInExplorer,
                     Size = new Size(20, 20),
-                    Location = new Point(410, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Enabled = false,
@@ -146,12 +156,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.MouseDown += OpenFileOnMouseDown;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
+                xPos += 20;
 
                 // local import
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.Import,
                     Size = new Size(20, 20),
-                    Location = new Point(430, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Enabled = false,
@@ -160,12 +172,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>import</b> this file<br>It reads its content and use it in this session of 3P");
+                xPos += 20;
 
                 // local export
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.Export,
                     Size = new Size(20, 20),
-                    Location = new Point(450, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Name = "bte_" + iNbLine,
@@ -174,12 +188,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>export</b> this file to a local version,<br>you will use the exported file instead of the embedded file in 3P");
+                xPos += 20;
 
                 // local delete
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.Delete,
                     Size = new Size(20, 20),
-                    Location = new Point(470, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Name = "btd_" + iNbLine,
@@ -188,24 +204,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>delete</b> the local version of your file,<br>you will use the embedded (default) file of 3P instead");
+                xPos += 40;
 
                 // distant date
                 date = new HtmlLabel {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     AutoSizeHeightOnly = true,
                     BackColor = Color.Transparent,
-                    Location = new Point(510, yPos + 2),
+                    Location = new Point(xPos, yPos + 2),
                     Size = new Size(130, 10),
                     IsSelectionEnabled = false,
                     Text = @"???",
                     Name = "dated_" + iNbLine
                 };
                 scrollPanel.ContentPanel.Controls.Add(date);
+                xPos += 140;
 
                 // distant open
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.OpenInExplorer,
                     Size = new Size(20, 20),
-                    Location = new Point(650, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Enabled = false,
@@ -215,12 +235,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.MouseDown += OpenFileOnMouseDown;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Left click to <b>open</b> this file in notepad++<br>Right click to <b>open</b> this file / folder in the explorer");
+                xPos += 20;
 
                 // distant fetch
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.Fetch,
                     Size = new Size(20, 20),
-                    Location = new Point(670, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Name = "btf_" + iNbLine,
@@ -229,12 +251,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 strButton.ButtonPressed += StrButtonOnButtonPressed;
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>fetch</b> this file from the shared directory,<br>replacing the local one");
+                xPos += 20;
 
                 // distant push
                 strButton = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Top | AnchorStyles.Right,
                     BackGrndImage = ImageResources.Push,
                     Size = new Size(20, 20),
-                    Location = new Point(690, yPos),
+                    Location = new Point(xPos, yPos),
                     Tag = confLine,
                     TabStop = false,
                     Name = "btp_" + iNbLine,
@@ -244,23 +268,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 scrollPanel.ContentPanel.Controls.Add(strButton);
                 tooltip.SetToolTip(strButton, "Click to <b>push</b> the local file to the shared directory,<br>replacing any existing file");
 
-
                 yPos += label.Height + 15;
                 iNbLine++;
             }
 
             // Activate scrollbars
-            yPos += 15;
-            if (yPos > Height) {
-                scrollPanel.ContentPanel.Controls.Add(new YamuiLabel {
-                    AutoSize = true,
-                    Location = new Point(0, yPos),
-                    Text = @" "
-                });
-                yPos += 10;
-                scrollPanel.ContentPanel.Height = yPos;
-            }
-            Height = yPos;
+            scrollPanel.ContentPanel.Height = yPos + 50;
         }
 
         #endregion

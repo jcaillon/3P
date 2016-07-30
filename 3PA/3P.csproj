@@ -132,6 +132,7 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
     <Compile Include="Lib\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
@@ -162,11 +163,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployement.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.Designer.cs">
-      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployement.Designer.cs">
+      <DependentUpon>SetDeployement.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.cs">
       <SubType>UserControl</SubType>
@@ -260,7 +261,7 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
+    <Compile Include="MainFeatures\ProgressExecutionNs\DeployRules.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
@@ -367,8 +368,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.resx">
-      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeployement.resx">
+      <DependentUpon>SetDeployement.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
@@ -419,7 +420,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\CompilationPath" />
+    <None Include="Data\Deployement" />
     <None Include="Data\DataDigger\DataDigger.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
