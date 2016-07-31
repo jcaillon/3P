@@ -231,7 +231,7 @@ namespace _3PA.Lib {
         /// good website : https://regex101.com/
         /// </summary>
         public static bool RegexMatch(this string source, string regex, RegexOptions options = RegexOptions.IgnoreCase) {
-            var reg = new Regex(regex);
+            var reg = new Regex(regex, options);
             return reg.Match(source).Success;
         }
 
@@ -270,6 +270,8 @@ namespace _3PA.Lib {
         /// <param name="pattern"></param>
         /// <returns></returns>
         public static string WildCardToRegex(this string pattern) {
+            if (string.IsNullOrEmpty(pattern))
+                return ".*";
             var startStar = pattern[0].Equals('*');
             var endStar = pattern[pattern.Length - 1].Equals('*');
             return (!startStar ? (endStar ? "^" : "") : "") + Regex.Escape(pattern).Replace(@"\*", ".*").Replace(@"\?", ".") + (!endStar ? (startStar ? "$" : "") : "");

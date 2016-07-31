@@ -51,7 +51,7 @@ namespace _3PA.MainFeatures.Pro {
         public static void Import() {
             var i = 0;
             _deployRulesList = new List<DeployRule>();
-            Utils.ForEachLine(Config.FileDeployement, new byte[0], s => {
+            Utils.ForEachLine(Config.FileDeployment, new byte[0], s => {
                 var items = s.Split('\t');
                 if (items.Length == 5) {
                     // find the TransferType from items[3]
@@ -60,20 +60,15 @@ namespace _3PA.MainFeatures.Pro {
                         type = DeployType.Move;
 
                     var obj = new DeployRule {
-                        ApplicationFilter = items[0].Trim(),
-                        EnvLetterFilter = items[1].Trim(),
+                        NameFilter = items[0].Trim(),
+                        SuffixFilter = items[1].Trim(),
                         SourcePattern = items[2].Trim().Replace('/', '\\'),
                         Type = type,
                         DeployTarget = items[4].Trim().Replace('/', '\\'),
                         Line = i++
                     };
-                    if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget)) {
-                        if (obj.ApplicationFilter.Equals("*"))
-                            obj.ApplicationFilter = "";
-                        if (obj.EnvLetterFilter.Equals("*"))
-                            obj.EnvLetterFilter = "";
+                    if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _deployRulesList.Add(obj);
-                    }
                 }
             },
             Encoding.Default);
@@ -98,7 +93,7 @@ namespace _3PA.MainFeatures.Pro {
                 .Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First())
                 .ToList();
 
-            // check that every target dir exist (for copy/move deployements)
+            // check that every target dir exist (for copy/move deployments)
             deployToDo
                 .Where(deploy => deploy.DeployType == DeployType.Copy || deploy.DeployType == DeployType.Move)
                 .GroupBy(deploy => Path.GetDirectoryName(deploy.To))
@@ -107,17 +102,17 @@ namespace _3PA.MainFeatures.Pro {
                 .ForEach(deploy => Utils.CreateDirectory(Path.GetDirectoryName(deploy.To)));
 
 
-            #region for .pl deployements, we treat them before anything else
+            #region for .pl deployments, we treat them before anything else
 
             // for PL, we need to MOVE each file into a temporary folder with the internal structure of the .pl file,
             // then move it back where it was for further deploys...
 
-            var plDeployements = deployToDo
-                .Where(deploy => deploy.DeployType == DeployType.Pl)
+            var plDeployments = deployToDo
+                .Where(deploy => deploy.DeployType == DeployType.Prolib)
                 .ToNonNullList();
 
-            // first, determine the .pl path for each deployement
-            plDeployements
+            // first, determine the .pl path for each deployment
+            plDeployments
                 .ForEach(deploy => {
                     var pos = deploy.To.LastIndexOf(".pl", StringComparison.CurrentCultureIgnoreCase);
                     if (pos >= 0)
@@ -126,7 +121,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // then we create a unique temporary folder for each .pl
             var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-            foreach (var fileToDeploy in plDeployements
+            foreach (var fileToDeploy in plDeployments
                 .GroupBy(deploy => deploy.PlPath)
                 .Select(deploys => deploys.First())
                 .ToNonNullList()) {
@@ -148,16 +143,16 @@ namespace _3PA.MainFeatures.Pro {
             // for each .pl that needs to be created...
             foreach (var pl in dicPlToTempFolder) {
 
-                var onePlDeployements = plDeployements
+                var onePlDeployments = plDeployments
                     .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath) && deploy.PlPath.Equals(pl.Key))
                     .ToNonNullList();
-                if (onePlDeployements.Count == 0)
+                if (onePlDeployments.Count == 0)
                     continue;
 
                 //  we set the temporary folder on which each file will be copied..
                 // Tuple : <(base) temp directory, relative path in pl, path to .pl>
                 var dicTempFolderToPl = new Dictionary<string, Tuple<string, string, string>>(StringComparer.CurrentCultureIgnoreCase);
-                foreach (var fileToDeploy in onePlDeployements) {
+                foreach (var fileToDeploy in onePlDeployments) {
                     if (string.IsNullOrEmpty(fileToDeploy.PlPath))
                         continue;
 
@@ -186,49 +181,37 @@ namespace _3PA.MainFeatures.Pro {
                 // for each subfolder in the .pl
                 foreach (var plSubFolder in dicTempFolderToPl) {
 
-                    var onePlSubFolderDeployements = onePlDeployements
+                    var onePlSubFolderDeployments = onePlDeployments
                         .Where(deploy => plSubFolder.Key.Equals(Path.GetDirectoryName(deploy.ToTemp)))
                         .ToNonNullList();
-                    if (onePlSubFolderDeployements.Count == 0)
+                    if (onePlSubFolderDeployments.Count == 0)
                         continue;
 
-                    //// move the files into the temp .pl folder
-                    //foreach (var deploy in onePlSubFolderDeployements) {
-                    //    if (File.Exists(deploy.From))
-                    //        deploy.IsOk = !string.IsNullOrEmpty(deploy.ToTemp) && Utils.MoveFile(deploy.From, deploy.ToTemp);
-                    //}
-                    Parallel.ForEach(onePlSubFolderDeployements, deploy => {
+                    Parallel.ForEach(onePlSubFolderDeployments, deploy => {
                         if (File.Exists(deploy.From))
                             deploy.IsOk = !string.IsNullOrEmpty(deploy.ToTemp) && Utils.MoveFile(deploy.From, deploy.ToTemp);
                     });
 
                     // now we just need to add the content of temp folders into the .pl
-                    foreach (var kpv in dicTempFolderToPl) {
-                        prolibExe.StartInfo.WorkingDirectory = kpv.Value.Item1; // base temp dir
-                        prolibExe.Arguments = kpv.Value.Item3.ProQuoter() + " -create -nowarn -add " + Path.Combine(kpv.Value.Item2, "*.r").ProQuoter();
-                        if (!prolibExe.TryDoWait(true))
-                            prolibMessage.Append(prolibExe.ErrorOutput);
-                    }
+                    prolibExe.StartInfo.WorkingDirectory = plSubFolder.Value.Item1; // base temp dir
+                    prolibExe.Arguments = plSubFolder.Value.Item3.ProQuoter() + " -create -nowarn -add " + Path.Combine(plSubFolder.Value.Item2, "*.r").ProQuoter();
+                    if (!prolibExe.TryDoWait(true))
+                        prolibMessage.Append(prolibExe.ErrorOutput);
 
-                    // move the files from the temp .pl folder back to their origin so they can be used normally
-                    //foreach (var deploy in onePlSubFolderDeployements) {
-                    //    deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
-                    //}
-                    Parallel.ForEach(onePlSubFolderDeployements, deploy => {
+                    Parallel.ForEach(onePlSubFolderDeployments, deploy => {
                         deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
                     });
                     
                 }
 
-                // delete temp folders, compress .pl
-                foreach (var kpv in dicPlToTempFolder) {
-                    prolibExe.StartInfo.WorkingDirectory = Path.GetDirectoryName(kpv.Key);
-                    prolibExe.Arguments = kpv.Key.ProQuoter() + " -compress -nowarn";
-                    if (!prolibExe.TryDoWait(true))
-                        prolibMessage.Append(prolibExe.ErrorOutput);
+                // compress .pl
+                prolibExe.StartInfo.WorkingDirectory = Path.GetDirectoryName(pl.Key);
+                prolibExe.Arguments = pl.Key.ProQuoter() + " -compress -nowarn";
+                if (!prolibExe.TryDoWait(true))
+                    prolibMessage.Append(prolibExe.ErrorOutput);
 
-                    Utils.DeleteDirectory(kpv.Value, true);
-                }
+                // delete temp folders
+                Utils.DeleteDirectory(pl.Value, true);
             }
 
             if (prolibMessage.Length > 0)
@@ -237,7 +220,7 @@ namespace _3PA.MainFeatures.Pro {
             #endregion
 
 
-            // do a deployement action for each file
+            // do a deployment action for each file
             int[] nbFilesDone = { 0 };
             Parallel.ForEach(deployToDo, file => {
                 DeploySingleFile(file);
@@ -283,12 +266,12 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// This compilation path applies to a given application (can be empty)
         /// </summary>
-        public string ApplicationFilter { get; set; }
+        public string NameFilter { get; set; }
 
         /// <summary>
         /// This compilation path applies to a given Env letter (can be empty)
         /// </summary>
-        public string EnvLetterFilter { get; set; }
+        public string SuffixFilter { get; set; }
 
         /// <summary>
         /// Pattern to match in the source path
@@ -317,7 +300,7 @@ namespace _3PA.MainFeatures.Pro {
     #region DeployType
 
     public enum DeployType {
-        Pl,
+        Prolib,
         Copy,
         Ftp,
         Move

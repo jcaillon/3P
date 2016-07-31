@@ -163,11 +163,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployement.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployment.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployement.Designer.cs">
-      <DependentUpon>SetDeployement.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployment.Designer.cs">
+      <DependentUpon>SetDeployment.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.cs">
       <SubType>UserControl</SubType>
@@ -368,8 +368,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeployement.resx">
-      <DependentUpon>SetDeployement.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeployment.resx">
+      <DependentUpon>SetDeployment.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
@@ -420,7 +420,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\DeployementRules" />
+    <None Include="Data\DeploymentRules" />
     <None Include="Data\DataDigger\DataDigger.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />

@@ -57,10 +57,10 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "R-code deployement configuration",
-                            HandledItem = Config.FileDeployement,
+                            Label = "R-code deployment configuration",
+                            HandledItem = Config.FileDeployment,
                             OnImport = line => Deployer.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.DeployementRules),
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush

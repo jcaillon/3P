@@ -3,7 +3,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    partial class SetDeployement {
+    partial class SetDeployment {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -27,14 +27,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent() {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetDeployement));
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.bt_import = new YamuiFramework.Controls.YamuiButton();
             this.bt_modify = new YamuiFramework.Controls.YamuiButton();
             this.html_list = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
-            this.lbl_about = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
@@ -45,12 +43,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_import);
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_modify);
             this.scrollPanel.ContentPanel.Controls.Add(this.html_list);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_about);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
@@ -62,10 +59,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.TabIndex = 0;
             // 
+            // linkurl
+            // 
+            this.linkurl.BackColor = System.Drawing.Color.Transparent;
+            this.linkurl.BaseStylesheet = null;
+            this.linkurl.Location = new System.Drawing.Point(198, 0);
+            this.linkurl.Name = "linkurl";
+            this.linkurl.Size = new System.Drawing.Size(161, 15);
+            this.linkurl.TabIndex = 147;
+            this.linkurl.TabStop = false;
+            this.linkurl.Text = "Learn more about this feature?";
+            // 
             // bt_import
             // 
             this.bt_import.BackGrndImage = null;
-            this.bt_import.Location = new System.Drawing.Point(111, 95);
+            this.bt_import.Location = new System.Drawing.Point(111, 31);
             this.bt_import.Name = "bt_import";
             this.bt_import.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_import.Size = new System.Drawing.Size(101, 23);
@@ -75,7 +83,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_modify
             // 
             this.bt_modify.BackGrndImage = null;
-            this.bt_modify.Location = new System.Drawing.Point(30, 95);
+            this.bt_modify.Location = new System.Drawing.Point(30, 31);
             this.bt_modify.Name = "bt_modify";
             this.bt_modify.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_modify.Size = new System.Drawing.Size(75, 23);
@@ -88,7 +96,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.html_list.AutoSizeHeightOnly = true;
             this.html_list.BackColor = System.Drawing.Color.Transparent;
             this.html_list.BaseStylesheet = null;
-            this.html_list.Location = new System.Drawing.Point(30, 172);
+            this.html_list.Location = new System.Drawing.Point(30, 71);
             this.html_list.Name = "html_list";
             this.html_list.Size = new System.Drawing.Size(682, 15);
             this.html_list.TabIndex = 54;
@@ -99,36 +107,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             this.yamuiLabel2.AutoSize = true;
             this.yamuiLabel2.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel2.Location = new System.Drawing.Point(0, 139);
+            this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
             this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(153, 19);
+            this.yamuiLabel2.Size = new System.Drawing.Size(146, 19);
             this.yamuiLabel2.TabIndex = 53;
-            this.yamuiLabel2.Text = "DEPLOYEMENT RULES";
-            // 
-            // lbl_about
-            // 
-            this.lbl_about.AutoSize = false;
-            this.lbl_about.AutoSizeHeightOnly = true;
-            this.lbl_about.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_about.BaseStylesheet = null;
-            this.lbl_about.Location = new System.Drawing.Point(30, 29);
-            this.lbl_about.Name = "lbl_about";
-            this.lbl_about.Size = new System.Drawing.Size(817, 60);
-            this.lbl_about.TabIndex = 52;
-            this.lbl_about.TabStop = false;
-            this.lbl_about.Text = resources.GetString("lbl_about.Text");
-            // 
-            // yamuiLabel1
-            // 
-            this.yamuiLabel1.AutoSize = true;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Heading;
-            this.yamuiLabel1.Location = new System.Drawing.Point(0, 0);
-            this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(5, 18, 5, 3);
-            this.yamuiLabel1.Name = "yamuiLabel1";
-            this.yamuiLabel1.Size = new System.Drawing.Size(154, 19);
-            this.yamuiLabel1.TabIndex = 51;
-            this.yamuiLabel1.Text = "ABOUT THIS FEATURE";
+            this.yamuiLabel2.Text = "DEPLOYMENT RULES";
             // 
             // toolTip
             // 
@@ -140,12 +124,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
             // 
-            // SetDeployement
+            // SetDeployment
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
-            this.Name = "SetDeployement";
+            this.Name = "SetDeployment";
             this.Size = new System.Drawing.Size(850, 575);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
@@ -157,12 +141,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #endregion
 
         private YamuiScrollPanel scrollPanel;
-        private YamuiLabel yamuiLabel1;
         private HtmlToolTip toolTip;
-        private HtmlLabel lbl_about;
         private YamuiLabel yamuiLabel2;
         private YamuiButton bt_modify;
         private HtmlLabel html_list;
         private YamuiButton bt_import;
+        private HtmlLabel linkurl;
     }
 }

@@ -117,9 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="lbl_about.Text" xml:space="preserve">
-    <value>When compiling a program, the .r file can either be copied to the source directory or it can be deployed to any directory / progress library.&lt;br&gt;This feature allows you to deploy an R-code depending on the path of the source file. If the source path matches the &lt;b&gt;input path pattern&lt;/b&gt;, the deployement directory (see set environment) is appended with the corresponding &lt;b&gt;append to output path&lt;/b&gt; string. You can even put an absolute output path to overwrite the destination.</value>
-  </data>
   <metadata name="toolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
   </metadata>

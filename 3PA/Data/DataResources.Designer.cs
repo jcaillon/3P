@@ -93,9 +93,9 @@ namespace _3PA.Data {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] DeployementRules {
+        internal static byte[] DeploymentRules {
             get {
-                object obj = ResourceManager.GetObject("DeployementRules", resourceCulture);
+                object obj = ResourceManager.GetObject("DeploymentRules", resourceCulture);
                 return ((byte[])(obj));
             }
         }

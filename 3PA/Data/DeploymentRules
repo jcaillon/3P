@@ -1,0 +1,29 @@
+# ========================================================================
+# Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+# This file is part of 3P.
+#
+# 3P is a free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# 3P is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with 3P. If not, see <http://www.gnu.org/licenses/>.
+# ========================================================================
+# Modify this file freely, it allows you to build a set of rules to deploy a file (r-code or any file)
+#
+# Each line contains 1 rule, a rule is made of 5 info separated by tabulations :
+# application_name	application_suffix	source_path_to_match	transfer_type	path_to_append_to_deployment_dir
+#
+# The types of deployments available are :
+# - Move
+# - Copy
+# - Prolib
+#
+# ========================================================================
+# application_name	application_suffix	source_path_to_match	deploy_type	path_to_append_to_deployment_dir

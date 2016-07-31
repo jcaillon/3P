@@ -27,7 +27,7 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    internal partial class SetDeployement : YamuiPage {
+    internal partial class SetDeployment : YamuiPage {
 
         #region fields
 
@@ -35,7 +35,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         #region constructor
 
-        public SetDeployement() {
+        public SetDeployment() {
             InitializeComponent();
 
             // tooltips
@@ -44,6 +44,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             bt_import.ButtonPressed += BtImportOnButtonPressed;
             bt_modify.ButtonPressed += BtModifyOnButtonPressed;
+
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
@@ -79,9 +81,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (Deployer.GetDeployRulesList.Any()) {
 
                 strBuilder.Append("<table width='100%;'>");
-                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='40%'>Source path pattern</td><td class='CompPathHead' align='center'>Transfer type</td><td class='CompPathHead' width='40%'>Deployement target</td></tr>");
+                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='30%'>Source path pattern</td><td class='CompPathHead' align='center'>Type</td><td class='CompPathHead' width='30%' align='right'>Deployment target</td></tr>");
                 foreach (var compLine in Deployer.GetDeployRulesList) {
-                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.ApplicationFilter) ? "*" : compLine.ApplicationFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.EnvLetterFilter) ? "*" : compLine.EnvLetterFilter) + "</td><td>" + (compLine.SourcePattern.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.SourcePattern.Length - 40) : compLine.SourcePattern) + "</td><td align='center'>" + compLine.Type + "</td><td>" + (compLine.DeployTarget.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.DeployTarget.Length - 40) : compLine.DeployTarget) + "</td></tr>");
+                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.NameFilter) ? "*" : compLine.NameFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.SuffixFilter) ? "*" : compLine.SuffixFilter) + "</td><td>" + (compLine.SourcePattern.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.SourcePattern.Length - 40) : compLine.SourcePattern) + "</td><td align='center'>" + compLine.Type + "</td><td align='right'>" + (compLine.DeployTarget.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.DeployTarget.Length - 40) : compLine.DeployTarget) + "</td></tr>");
                 }
                 strBuilder.Append("</table>");
 
@@ -97,10 +99,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         #region private event
 
         private void BtModifyOnButtonPressed(object sender, EventArgs eventArgs) {
-            if (!File.Exists(Config.FileDeployement))
-                Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.DeployementRules);
+            if (!File.Exists(Config.FileDeployment))
+                Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules);
 
-            Npp.OpenFile(Config.FileDeployement);
+            Npp.OpenFile(Config.FileDeployment);
         }
 
         private void BtImportOnButtonPressed(object sender, EventArgs eventArgs) {

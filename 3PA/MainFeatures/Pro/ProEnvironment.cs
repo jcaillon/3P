@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Pro {
             public string BaseLocalPath = "";
 
             /// <summary>
-            /// Deployement directory
+            /// Deployment directory
             /// </summary>
             public string BaseCompilationPath = "";
 
@@ -357,7 +357,7 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            #region Deployement
+            #region Deployment
 
             /// <summary>
             /// List of deploy rules read from the file and filtered for this env
@@ -366,15 +366,17 @@ namespace _3PA.MainFeatures.Pro {
                 get {
                     if (_deployRulesList == null) {
 
-                        // where (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
+                        // Need to match the application name / suffix filter with the current env
                         _deployRulesList = Deployer.GetDeployRulesList.Where(
-                            item => string.IsNullOrWhiteSpace(item.ApplicationFilter) || (item.ApplicationFilter.EqualsCi(Name) && (item.EnvLetterFilter.EqualsCi(Suffix) || string.IsNullOrWhiteSpace(item.EnvLetterFilter)))
+                            item => Name.RegexMatch(item.NameFilter.WildCardToRegex()) && 
+                                Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())
                         ).ToList();
 
+                        // 
                         _deployRulesList.Sort((item1, item2) => {
-                            int compare = string.IsNullOrWhiteSpace(item1.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(item2.ApplicationFilter));
+                            int compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
                             if (compare != 0) return compare;
-                            compare = string.IsNullOrWhiteSpace(item1.EnvLetterFilter).CompareTo(string.IsNullOrWhiteSpace(item2.EnvLetterFilter));
+                            compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
                             if (compare != 0) return compare;
                             compare = item1.Type.CompareTo(item2.Type);
                             if (compare != 0) return compare;
@@ -389,7 +391,7 @@ namespace _3PA.MainFeatures.Pro {
             /// <summary>
             /// This method returns the transfer directories for the given source path, for each :
             /// If CompileLocally, returns the directory of the source
-            /// If the deployement dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
+            /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
             public Dictionary<string, DeployType> GetTransfersNeeded(string sourcePath, bool ensureNotEmpty = true) {
 
@@ -415,7 +417,7 @@ namespace _3PA.MainFeatures.Pro {
                         break;
                 }
 
-                // nothing matched? move to deployement directory
+                // nothing matched? move to deployment directory
                 if (ensureNotEmpty && outList.Count == 0)
                     outList.Add(BaseCompilationPath, DeployType.Move);
 
