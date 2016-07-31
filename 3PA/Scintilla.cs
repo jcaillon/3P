@@ -27,6 +27,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA {
+
     /// <summary>
     /// This class should be used to control the instances of scintilla in notepad++<br />
     /// - Npp uses 2 instances of scintilla, a main and a secondary (one for each view)<br />

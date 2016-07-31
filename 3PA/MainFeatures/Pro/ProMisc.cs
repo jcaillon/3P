@@ -17,18 +17,17 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecutionNs;
 
-namespace _3PA.MainFeatures {
-    internal static class ProUtils {
+namespace _3PA.MainFeatures.Pro {
+    internal static class ProMisc {
 
         #region Go to definition
 
@@ -157,90 +156,6 @@ namespace _3PA.MainFeatures {
                 searchWord = InfoToolTip.InfoToolTip.CurrentWord;
 
             HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, searchWord ?? Npp.GetAblWordAtPosition(Npp.CurrentPosition));
-        }
-
-        #endregion
-
-        #region Compilation, Check syntax, Run, Prolint
-        
-        /// <summary>
-        /// Called to run/compile/check/prolint the current program
-        /// </summary>
-        public static void StartProgressExec(ExecutionType executionType) {
-            CurrentOperation currentOperation;
-            if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
-                currentOperation = CurrentOperation.Run;
-
-            // process already running?
-            if (Plug.CurrentFileObject.CurrentOperation > CurrentOperation.Prolint) {
-                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
-                    KillCurrentProcess();
-                    StartProgressExec(executionType);
-                    args.Handled = true;
-                }, 5);
-                return;
-            }
-            if (!Abl.IsCurrentProgressFile) {
-                UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
-                return;
-            }
-            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
-                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
-                return;
-            }
-            if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
-                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
-                return;
-            }
-
-            // update function prototypes
-            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
-
-            // prolint? check that the StartProlint.p program is created, or do it
-            if (executionType == ExecutionType.Prolint) {
-                if (!File.Exists(Config.FileStartProlint))
-                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
-                        return;
-            }
-
-            // launch the compile process for the current file
-            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
-                ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Plug.CurrentFilePath)
-                },
-                OnExecutionEnd = ProCompilation.OnSingleExecutionEnd,
-                OnExecutionOk = ProCompilation.OnSingleExecutionOk
-            };
-            if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
-                return;
-
-            // change file object current operation, set flag
-            Plug.CurrentFileObject.CurrentOperation |= currentOperation;
-            FilesInfo.UpdateFileStatus();
-
-            // clear current errors (updates the current file info)
-            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
-
-            /*
-            // clear error on include files as well
-            var explorerItemsList = ParserHandler.CodeExplorerItemsList();
-            if (explorerItemsList != null) {
-                foreach (var codeExplorerItem in explorerItemsList.Where(codeExplorerItem => codeExplorerItem.Branch == CodeExplorerBranch.Include && !codeExplorerItem.Flag.HasFlag(CodeExplorerFlag.NotFound))) {
-                    FilesInfo.ClearAllErrors(ProEnvironment.Current.FindFirstFileInPropath(codeExplorerItem.DisplayText), false);
-                }
-            }
-             * */
-        }
-
-        /// <summary>
-        /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
-        /// </summary>
-        public static void KillCurrentProcess() {
-            if (Plug.CurrentFileObject.ProgressExecution != null) {
-                Plug.CurrentFileObject.ProgressExecution.KillProcess();
-                UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                ProCompilation.OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
-            }
         }
 
         #endregion

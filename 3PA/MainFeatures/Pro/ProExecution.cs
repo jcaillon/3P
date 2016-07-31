@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -25,7 +26,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using YamuiFramework.Helper;
 using _3PA.Data;
 using _3PA.Interop;
@@ -34,7 +34,7 @@ using _3PA.MainFeatures.Appli;
 
 // ReSharper disable LocalizableElement
 
-namespace _3PA.MainFeatures.ProgressExecutionNs {
+namespace _3PA.MainFeatures.Pro {
 
     internal class ProExecution {
 
@@ -58,7 +58,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// <summary>
         /// Full path to the directory containing all the files needed for the execution
         /// </summary>
-        public string TempDir { get; private set; }
+        public string LocalTempDir { get; private set; }
+        
+        /// <summary>
+        /// Full path to a temporary dir created in the deployement directory that host the
+        /// TempDir of each execution
+        /// </summary>
+        public string DistantRootTempDir { get; private set; }
+
+        public string DistantTempDir { get; private set; }
 
         /// <summary>
         /// Full path to the directory used as the working directory to start the prowin process
@@ -151,6 +159,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// </summary>
         private static int _proExecutionCounter;
 
+        private static int _proExecutionOpenedNumber;
+
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
         private static bool _dontWarnAboutRCode;
@@ -167,7 +177,19 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 if (Process != null)
                     Process.Close();
                 
-                Utils.DeleteDirectory(TempDir, true);
+                // delete temp dir
+                Utils.DeleteDirectory(LocalTempDir, true);
+                Utils.DeleteDirectory(DistantTempDir, true);
+
+                // delete distant temporary root dir (if it wont disturb other execution)
+                if (_lock.TryEnterWriteLock(-1)) {
+                    _proExecutionOpenedNumber--;
+                    if (_proExecutionOpenedNumber == 0)
+                        Utils.DeleteDirectory(DistantRootTempDir, true);
+                    _lock.ExitWriteLock();
+                } else {
+                    throw new Exception("Couln't decrease the opened counter...");
+                }
 
                 // restore splashscreen
                 if (!string.IsNullOrEmpty(ProgressWin32))
@@ -182,8 +204,11 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // create a copy of the current environment
             ProEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
 
+            DistantRootTempDir = Path.Combine(ProEnv.BaseCompilationPath, "~3pTempDirectory");
+
             if (_lock.TryEnterWriteLock(-1)) {
                 _proExecutionCounter++;
+                _proExecutionOpenedNumber++;
                 _lock.ExitWriteLock();
             } else {
                 throw new Exception("Couln't increase the execution counter...");
@@ -192,7 +217,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-        #region public methods
+        #region Do execution
 
         /// <summary>
         /// allows to prepare the execution environnement by creating a unique temp folder
@@ -227,13 +252,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 return false;
             }
 
-            // create unique temporary folder
-            TempDir = Path.Combine(Config.FolderTemp, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
-            if (!Utils.CreateDirectory(TempDir))
+            // create a unique temporary folder
+            LocalTempDir = Path.Combine(Config.FolderTemp, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+            if (!Utils.CreateDirectory(LocalTempDir))
                 return false;
             
-            // for each file of the list (there can be none)
-            var filesListPath = Path.Combine(TempDir, "files.list");
+            // for each file of the list
+            var filesListPath = Path.Combine(LocalTempDir, "files.list");
             StringBuilder filesListcontent = new StringBuilder();
             var count = 1;
             foreach (var fileToCompile in ListToCompile) {
@@ -243,60 +268,86 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     return false;
                 }
 
-                // create target directory
-                if (executionType == ExecutionType.Compile) {
-                    fileToCompile.OutputDir = ProEnv.GetTransfersNeeded(fileToCompile.InputPath).Last().Key;
-                    if (!Utils.CreateDirectory(fileToCompile.OutputDir))
-                        return false;
+                // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
+                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) &&
+                    (Npp.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) &&
+                    !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
+                    fileToCompile.CompInputPath = Path.Combine(LocalTempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff_") + count + Path.GetExtension(fileToCompile.InputPath));
+                    Utils.FileWriteAllText(fileToCompile.CompInputPath, Npp.Text, Encoding.Default);
+                } else {
+                    fileToCompile.CompInputPath = fileToCompile.InputPath;
                 }
 
-                // if current file and the file has unsaved modif, we copy the content to a temp file, otherwise we just use the input path (also use the input path for .cls files!)
-                if (fileToCompile.InputPath.Equals(Plug.CurrentFilePath) && 
-                    (Npp.GetModify || (fileToCompile.BaseFileName ?? "").StartsWith("_")) && 
-                    !Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
-                    fileToCompile.TempInputPath = Path.Combine(TempDir, "tmp_" + DateTime.Now.ToString("yyMMdd_HHmmssfff_") + count + (Path.GetExtension(fileToCompile.InputPath)));
-                    Utils.FileWriteAllText(fileToCompile.TempInputPath, Npp.Text, Encoding.Default);
-                } else {
-                    fileToCompile.TempInputPath = fileToCompile.InputPath;
-                }
+                if (executionType != ExecutionType.Compile)
+                    continue;
 
                 // we set where the *.lst and *.r files will be generated by the COMPILE command
-                var baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.TempInputPath);
-                if (executionType != ExecutionType.Compile || Config.Instance.CompileForceUseOfTemp || Path.GetExtension(fileToCompile.InputPath).Equals(".cls")) {
-                    // for *.cls files, as many *.r files are generated, we need to compile in the temp directory
-                    // we need to know which *.r files were generated for each input file
-                    // so each file gets his own sub tempDir
-                    var subTempDir = Path.Combine(TempDir, count.ToString());
+                var baseFileName = Path.GetFileNameWithoutExtension(fileToCompile.CompInputPath);
+                var lastDeployement = ProEnv.GetTransfersNeeded(fileToCompile.InputPath).Last();
+
+                // for *.cls files, as many *.r files are generated, we need to compile in a temp directory
+                // we need to know which *.r files were generated for each input file
+                // so each file gets his own sub tempDir
+                if (lastDeployement.Value != DeployType.Move ||
+                    Config.Instance.CompileForceUseOfTemp ||
+                    Path.GetExtension(fileToCompile.InputPath).Equals(".cls")
+                    ) {
+
+                    var subTempDir = Path.Combine(LocalTempDir, count.ToString());
+
+                    // if the deployement dir is not on the same disk as the temp folder, we create a temp dir
+                    // as close to the final deployement as possible (= in the deployement base dir!)
+                    if (!string.IsNullOrEmpty(DistantRootTempDir) && DistantRootTempDir.Length > 2 && !DistantRootTempDir.Substring(0, 2).EqualsCi(LocalTempDir.Substring(0, 2))) {
+
+                        if (Utils.CreateDirectory(DistantRootTempDir, FileAttributes.Hidden))
+                            DistantTempDir = Path.Combine(DistantRootTempDir, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));
+                        else
+                            DistantTempDir = LocalTempDir;
+                            
+                        subTempDir = Path.Combine(DistantTempDir, count.ToString());
+                    }
+
                     if (!Utils.CreateDirectory(subTempDir))
                         return false;
-                    fileToCompile.TempOutputDir = subTempDir;
-                    fileToCompile.TempOutputLst = Path.Combine(subTempDir, baseFileName + ".lst");
-                    fileToCompile.TempOutputR = Path.Combine(subTempDir, baseFileName + ".r");
+                        
+                    fileToCompile.CompOutputDir = subTempDir;
+                    fileToCompile.CompOutputLst = Path.Combine(subTempDir, baseFileName + ".lst");
+                    fileToCompile.CompOutputR = Path.Combine(subTempDir, baseFileName + ".r");
+
                 } else {
-                    // for anything but *.cls files, we generated where we want to compile, it's the fastest way...
-                    fileToCompile.TempOutputDir = fileToCompile.OutputDir;
-                    fileToCompile.TempOutputLst = Path.Combine(fileToCompile.OutputDir, baseFileName + ".lst");
-                    fileToCompile.TempOutputR = Path.Combine(fileToCompile.OutputDir, baseFileName + ".r");
+
+                    // if we want to move the r-code somewhere during the deployement, then we will compile the r-code
+                    // directly there, because it's faster than generating it in a temp folder and moving it afterward
+                    fileToCompile.CompOutputDir = lastDeployement.Key;
+                    if (!Utils.CreateDirectory(fileToCompile.CompOutputDir))
+                        return false;
+
+                    fileToCompile.CompOutputLst = Path.Combine(fileToCompile.CompOutputDir, baseFileName + ".lst");
+                    fileToCompile.CompOutputR = Path.Combine(fileToCompile.CompOutputDir, baseFileName + ".r");
                 }
 
                 // feed files list
-                filesListcontent.AppendLine(fileToCompile.TempInputPath.ProQuoter() + " " + fileToCompile.TempOutputDir.ProQuoter() + " " + fileToCompile.TempOutputLst.ProQuoter());
+                filesListcontent.AppendLine(fileToCompile.CompInputPath.ProQuoter() + " " + fileToCompile.CompOutputDir.ProQuoter() + " " + fileToCompile.CompOutputLst.ProQuoter());
 
                 // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
                 if (executionType == ExecutionType.Run && !_dontWarnAboutRCode) {
-                    if (File.Exists(Path.Combine(Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.TempOutputDir, baseFileName + ".r"))) {
-                        UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Execution warning", "An Rcode hides the program", args => { _dontWarnAboutRCode = true; UserCommunication.CloseUniqueNotif("rcodehide"); }, 5);
+                    if (File.Exists(Path.Combine(Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.CompOutputDir, baseFileName + ".r"))) {
+                        UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Execution warning", "An Rcode hides the program", args => {
+                            _dontWarnAboutRCode = true;
+                            UserCommunication.CloseUniqueNotif("rcodehide");
+                        }, 5);
                     }
                 }
 
                 count++;
             }
             Utils.FileWriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
+            
 
             // Move ini file into the execution dir
             var baseIniPath = "";
             if (File.Exists(ProEnv.IniPath)) {
-                baseIniPath = Path.Combine(TempDir, "base.ini");
+                baseIniPath = Path.Combine(LocalTempDir, "base.ini");
                 // we need to copy the .ini but we must delete the PROPATH= part, as stupid as it sounds, if we leave a huge PROPATH 
                 // in this file, it increases the compilation time by a stupid amount... unbelievable i know, but trust me, it does...
                 var encoding = TextEncodingDetect.GetFileEncoding(ProEnv.IniPath);
@@ -311,20 +362,20 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             // Move pf file into the execution dir
             var basePfPath = "";
             if (File.Exists(ProEnv.GetPfPath())) {
-                basePfPath = Path.Combine(TempDir, "base.pf");
+                basePfPath = Path.Combine(LocalTempDir, "base.pf");
                 File.Copy(ProEnv.GetPfPath(), basePfPath);
             }
 
             // set common info on the execution
-            LogPath = Path.Combine(TempDir, "run.log");
-            ProcessStartDir = executionType == ExecutionType.Run ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? TempDir : TempDir;
+            LogPath = Path.Combine(LocalTempDir, "run.log");
+            ProcessStartDir = executionType == ExecutionType.Run ? Path.GetDirectoryName(ListToCompile.First().InputPath) ?? LocalTempDir : LocalTempDir;
             ProgressWin32 = ProEnv.ProwinPath;
             if (executionType == ExecutionType.Database)
-                ExtractDbOutputPath = Path.Combine(TempDir, ExtractDbOutputPath);
-            ProgressionFilePath = Path.Combine(TempDir, "compile.progression");
-            DatabaseConnectionLog = Path.Combine(TempDir, "db.ko");
-            NotificationOutputPath = Path.Combine(TempDir, "postExecution.notif");
-            var propathToUse = (TempDir + "," + string.Join(",", ProEnv.GetProPathDirList));
+                ExtractDbOutputPath = Path.Combine(LocalTempDir, ExtractDbOutputPath);
+            ProgressionFilePath = Path.Combine(LocalTempDir, "compile.progression");
+            DatabaseConnectionLog = Path.Combine(LocalTempDir, "db.ko");
+            NotificationOutputPath = Path.Combine(LocalTempDir, "postExecution.notif");
+            var propathToUse = string.Join(",", ProEnv.GetProPathDirList);
             string fileToExecute = "";
 
 
@@ -335,16 +386,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
                 // for database extraction, we need to copy the DumpDatabase program
                 fileToExecute = "db_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
-                if (!Utils.FileWriteAllBytes(Path.Combine(TempDir, fileToExecute), DataResources.DumpDatabase))
+                if (!Utils.FileWriteAllBytes(Path.Combine(LocalTempDir, fileToExecute), DataResources.DumpDatabase))
                     return false;
 
             } else if (executionType == ExecutionType.Prolint) {
 
                 // prolint, we need to copy the StartProlint program
                 fileToExecute = "prolint_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
-                ProlintOutputPath = Path.Combine(TempDir, "prolint.log");
+                ProlintOutputPath = Path.Combine(LocalTempDir, "prolint.log");
                 StringBuilder prolintProgram = new StringBuilder();
-                prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + ListToCompile.First().TempInputPath.ProQuoter());
+                prolintProgram.AppendLine("&SCOPED-DEFINE PathFileToProlint " + ListToCompile.First().CompInputPath.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE PathProlintOutputFile " + ProlintOutputPath.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE PathToStartProlintProgram " + Config.FileStartProlint.ProQuoter());
                 prolintProgram.AppendLine("&SCOPED-DEFINE UserName " + Config.Instance.UserName.ProQuoter());
@@ -360,7 +411,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     prolintProgram.AppendLine("&SCOPED-DEFINE FileDate " + fileInfo.CorrectionDate.ProQuoter());
                 }
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
-                Utils.FileWriteAllText(Path.Combine(TempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
+                Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
 
             } else if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader) {
                 // need to init datadigger?
@@ -376,17 +427,17 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             } else {
 
                 if (ListToCompile.Count == 1)
-                    fileToExecute = ListToCompile.First().TempInputPath;
+                    fileToExecute = ListToCompile.First().CompInputPath;
             }
 
             // prepare the .p runner
-            var runnerPath = Path.Combine(TempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
+            var runnerPath = Path.Combine(LocalTempDir, "run_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p");
             StringBuilder runnerProgram = new StringBuilder();
             runnerProgram.AppendLine("&SCOPED-DEFINE ExecutionType " + executionType.ToString().ToUpper().ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE ToExecute " + fileToExecute.ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE LogFile " + LogPath.ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE ExtractDbOutputPath " + ExtractDbOutputPath.ProQuoter());
-            runnerProgram.AppendLine("&SCOPED-DEFINE propathToUse " + propathToUse.ProQuoter());
+            runnerProgram.AppendLine("&SCOPED-DEFINE propathToUse " + (LocalTempDir + "," + propathToUse).ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE ExtraPf " + ProEnv.ExtraPf.Trim().ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE BasePfPath " + basePfPath.Trim().ProQuoter());
             runnerProgram.AppendLine("&SCOPED-DEFINE CompileWithLst " + ProEnv.CompileWithListing);
@@ -413,7 +464,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader)
                 Params.Append(" -s 10000 -d dmy -E -rereadnolock -h 255 -Bt 4000 -tmpbsize 8");
             if (executionType != ExecutionType.Run)
-                Params.Append(" -T " + TempDir.Trim('\\').ProQuoter());
+                Params.Append(" -T " + LocalTempDir.Trim('\\').ProQuoter());
             if (!string.IsNullOrEmpty(baseIniPath))
                 Params.Append(" -ini " + baseIniPath.ProQuoter());
             if (batchMode)
@@ -457,6 +508,10 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             return true;
         }
 
+        #endregion
+
+        #region public methods
+
         /// <summary>
         /// Allows to kill the process of this execution (be careful, the OnExecutionEnd, Ok, Fail events are not executed in that case!) 
         /// </summary>
@@ -482,6 +537,42 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             }
         }
 
+        /// <summary>
+        /// Read the compilation/prolint errors of a given execution through its .log file
+        /// update the FilesInfo accordingly so the user can see the errors in npp
+        /// </summary>
+        public Dictionary<string, List<FileError>> LoadErrorLog() {
+
+            // we need to correct the files path in the log if needed
+            var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+            foreach (var treatedFile in ListToCompile.Where(treatedFile => !treatedFile.CompInputPath.Equals(treatedFile.InputPath))) {
+                if (!changePaths.ContainsKey(treatedFile.CompInputPath))
+                    changePaths.Add(treatedFile.CompInputPath, treatedFile.InputPath);
+            }
+
+            // read the log file
+            Dictionary<string, List<FileError>> errorsList;
+            if (ExecutionType == ExecutionType.Prolint) {
+                var treatedFile = ListToCompile.First();
+                if (!changePaths.ContainsKey(treatedFile.CompInputPath))
+                    changePaths.Add(treatedFile.CompInputPath, treatedFile.InputPath);
+                errorsList = FilesInfo.ReadErrorsFromFile(ProlintOutputPath, true, changePaths);
+            } else
+                errorsList = FilesInfo.ReadErrorsFromFile(LogPath, false, changePaths);
+
+            // clear errors on each compiled file
+            foreach (var fileToCompile in ListToCompile) {
+                FilesInfo.ClearAllErrors(fileToCompile.InputPath, true);
+            }
+
+            // update the errors
+            foreach (var keyValue in errorsList) {
+                FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
+            }
+
+            return errorsList;
+        }
+
         #endregion
 
         #region private methods
@@ -498,7 +589,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             // if log not found then something is messed up!
             if (string.IsNullOrEmpty(LogPath) || !File.Exists(LogPath)) {
-                UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProgressWin32 + " " + ExeParameters + "</div><b>Temporary directory :</b><br>" + TempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Critical error", "Action failed", args => {
+                UserCommunication.NotifyUnique("ExecutionFailed", "Something went terribly wrong while using progress!<br><div>Below is the <b>command line</b> that was executed:</div><div class='ToolTipcodeSnippet'>" + ProgressWin32 + " " + ExeParameters + "</div><b>Temporary directory :</b><br>" + LocalTempDir.ToHtmlLink() + "<br><br><i>Did you messed up the prowin32.exe command line parameters in the <a href='go'>set environment page</a> page?</i>", MessageImg.MsgError, "Critical error", "Action failed", args => {
                     if (args.Link.Equals("go")) {
                         Appli.Appli.GoToPage(PageNames.SetEnvironment);
                         UserCommunication.CloseUniqueNotif("ExecutionFailed");
@@ -580,52 +671,16 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-        #region public
+        #region CreateListOfFilesToDeploy
 
         /// <summary>
-        /// Read the compilation/prolint errors of a given execution through its .log file
-        /// update the FilesInfo accordingly so the user can see the errors in npp
-        /// </summary>
-        public Dictionary<string, List<FileError>> LoadErrorLog() {
-
-            // we need to correct the files path in the log if needed
-            var changePaths = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-            foreach (var treatedFile in ListToCompile.Where(treatedFile => !treatedFile.TempInputPath.Equals(treatedFile.InputPath))) {
-                if (!changePaths.ContainsKey(treatedFile.TempInputPath))
-                    changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
-            }
-
-            // read the log file
-            Dictionary<string, List<FileError>> errorsList;
-            if (ExecutionType == ExecutionType.Prolint) {
-                var treatedFile = ListToCompile.First();
-                if (!changePaths.ContainsKey(treatedFile.TempInputPath))
-                    changePaths.Add(treatedFile.TempInputPath, treatedFile.InputPath);
-                errorsList = FilesInfo.ReadErrorsFromFile(ProlintOutputPath, true, changePaths);
-            } else
-                errorsList = FilesInfo.ReadErrorsFromFile(LogPath, false, changePaths);
-
-            // clear errors on each compiled file
-            foreach (var fileToCompile in ListToCompile) {
-                FilesInfo.ClearAllErrors(fileToCompile.InputPath, true);
-            }
-
-            // update the errors
-            foreach (var keyValue in errorsList) {
-                FilesInfo.UpdateFileErrors(keyValue.Key, keyValue.Value);
-            }
-
-            return errorsList;
-        }
-
-        /// <summary>
-        /// Creates a list of files to transfer after a compilation,
+        /// Creates a list of files to deploy after a compilation,
         /// for each Origin file will correspond one (or more if it's a .cls) .r file,
         /// and one .lst if the option has been checked
         /// </summary>
-        public List<FileToTransfer> CreateListOfFilesToTransfer() {
+        public List<FileToDeploy> CreateListOfFilesToDeploy() {
 
-            var outputList = new List<FileToTransfer>();
+            var outputList = new List<FileToDeploy>();
             var clsNotFound = new StringBuilder();
 
             foreach (var treatedFile in ListToCompile) {
@@ -637,7 +692,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
                     List<string> listOfRFiles = null;
                     try {
-                        listOfRFiles = Directory.EnumerateFiles(treatedFile.TempOutputDir, "*.r", SearchOption.AllDirectories).ToList();
+                        listOfRFiles = Directory.EnumerateFiles(treatedFile.CompOutputDir, "*.r", SearchOption.AllDirectories).ToList();
                     } catch (Exception e) {
                         ErrorHandler.LogError(e);
                     }
@@ -646,26 +701,28 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         // for each *.r file
                         foreach (var file in listOfRFiles) {
 
-                            var relativePath = file.Replace(treatedFile.TempOutputDir, "").TrimStart('\\');
+                            var relativePath = file.Replace(treatedFile.CompOutputDir, "").TrimStart('\\');
                             var sourcePath = ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
 
                             if (string.IsNullOrEmpty(sourcePath)) {
                                 clsNotFound.Append("<div>" + relativePath + "</div>");
                             } else {
-                                foreach (KeyValuePair<string, DeployRules.TransferType> pair in ProEnv.GetTransfersNeeded(sourcePath)) {
+                                foreach (KeyValuePair<string, DeployType> pair in ProEnv.GetTransfersNeeded(sourcePath)) {
                                     string outputRPath;
-                                    if (!ProEnv.CompileLocally) {
-                                        // transfer the *.r file in the compilation directory (create the needed subdirectories...)
-                                        outputRPath = Path.Combine(pair.Key, relativePath);
-                                    } else {
-                                        // transfer the *.r file next to his source
+
+                                    if (ProEnv.CompileLocally) {
+                                        // deploy the *.r file next to his source
                                         outputRPath = Path.Combine(pair.Key, Path.GetFileName(file));
+                                    } else {
+                                        // deploy the *.r file in the compilation directory (create the needed subdirectories...)
+                                        outputRPath = Path.Combine(pair.Key, relativePath);
                                     }
 
                                     // add .r and .lst (if needed) to the list of files to move
-                                    outputList.Add(new FileToTransfer(treatedFile.InputPath, file, outputRPath, pair.Value));
+                                    outputList.Add(new FileToDeploy(treatedFile.InputPath, file, outputRPath, pair.Value));
+
                                     if (ProEnv.CompileWithListing && Path.GetFileNameWithoutExtension(relativePath).Equals(Path.GetFileNameWithoutExtension(treatedFile.InputPath))) {
-                                        outputList.Add(new FileToTransfer(treatedFile.InputPath, treatedFile.TempOutputLst, Path.ChangeExtension(outputRPath, ".lst"), pair.Value));
+                                        outputList.Add(new FileToDeploy(treatedFile.InputPath, treatedFile.CompOutputLst, Path.ChangeExtension(outputRPath, ".lst"), pair.Value));
                                     }
                                 }
                             }
@@ -673,12 +730,13 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     }
 
                 } else {
-                    foreach (KeyValuePair<string, DeployRules.TransferType> pair in ProEnv.GetTransfersNeeded(treatedFile.InputPath)) {
-                        // add .r and .lst (if needed) to the list of files to transfer
-                        outputList.Add(new FileToTransfer(treatedFile.InputPath, treatedFile.TempOutputR, Path.Combine(pair.Key, treatedFile.BaseFileName + ".r"), pair.Value));
+                    foreach (KeyValuePair<string, DeployType> pair in ProEnv.GetTransfersNeeded(treatedFile.InputPath)) {
+                        // add .r and .lst (if needed) to the list of files to deploy
+                        outputList.Add(new FileToDeploy(treatedFile.InputPath, treatedFile.CompOutputR, Path.Combine(pair.Key, treatedFile.BaseFileName + ".r"), pair.Value));
+
                         if (ProEnv.CompileWithListing) {
-                            outputList.Add(new FileToTransfer(treatedFile.InputPath, treatedFile.TempOutputLst, Path.Combine(pair.Key, treatedFile.BaseFileName + ".lst"), pair.Value
-                            ));
+                            outputList.Add(new FileToDeploy(treatedFile.InputPath, treatedFile.CompOutputLst, Path.Combine(pair.Key, treatedFile.BaseFileName + ".lst"), pair.Value
+                                ));
                         }
                     }
                 }
@@ -689,94 +747,9 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             return outputList;
         }
-
-        /// <summary>
-        /// Transfer a given list of files (can reduce the list if there are duplicated items so it returns it)
-        /// </summary>
-        public static List<FileToTransfer> TransferFiles(List<FileToTransfer> transfersNeeded, Action<int> onOneFileDone = null) {
-
-            // make sure to transfer a given file only once at the same place
-            transfersNeeded = transfersNeeded.GroupBy(trans => trans.To).Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First()).ToList();
-
-            // check that every target dir exist
-            transfersNeeded.GroupBy(transfer => Path.GetDirectoryName(transfer.To)).Select(group => group.First()).ToNonNullList().ForEach(transfer => Utils.CreateDirectory(Path.GetDirectoryName(transfer.To)));
-
-            int[] nbFilesDone = { 0 };
-            try {
-                Parallel.ForEach(transfersNeeded, file => {
-                    TransferFile(file);
-                    nbFilesDone[0]++;
-                    if (onOneFileDone != null)
-                        onOneFileDone(nbFilesDone[0]);
-                });
-            } catch (Exception) {
-                nbFilesDone[0] = 0;
-                foreach (var file in transfersNeeded) {
-                    TransferFile(file);
-                    nbFilesDone[0]++;
-                    if (onOneFileDone != null)
-                        onOneFileDone(nbFilesDone[0]);
-                }
-            }
-
-            return transfersNeeded;
-        }
-
-        /// <summary>
-        /// Transfer a single file
-        /// </summary>
-        private static void TransferFile(FileToTransfer file) {
-            if (!file.IsOk) {
-                if (File.Exists(file.From)) {
-                    switch (file.TransferType) {
-                        case DeployRules.TransferType.Copy:
-                            file.IsOk = Utils.CopyFile(file.From, file.To);
-                            break;
-                        case DeployRules.TransferType.Ftp:
-
-                            break;
-                        case DeployRules.TransferType.Pl:
-
-                            break;
-                        default: // move
-                            file.IsOk = Utils.MoveFile(file.From, file.To, true);
-                            break;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Allows to format a small text to explain the errors found in a file and the generated files...
-        /// </summary>
-        public static string FormatCompilationResult(FileToCompile fileToCompile, List<FileError> listErrorFiles, List<FileToTransfer> listTransferFiles) {
-
-            var line = new StringBuilder();
-            var nbErrors = 0;
-
-            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileToCompile.InputPath, Path.GetFileName(fileToCompile.InputPath)) + "</b> in " + Path.GetDirectoryName(fileToCompile.InputPath).ToHtmlLink() + "</div>");
-
-            foreach (var fileError in listErrorFiles) {
-                nbErrors += fileError.Level > ErrorLevel.StrongWarning ? 1 : 0;
-                line.Append("<div style='padding-left: 10px'>" + "<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>" + (!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? "in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileError.SourcePath, Path.GetFileName(fileError.SourcePath)) + ", " : "") + (fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message + "</div>");
-            }
-
-            foreach (var file in listTransferFiles) {
-                var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
-                var transferMsg = file.TransferType == DeployRules.TransferType.Move ? "" : "(" + file.TransferType + ") ";
-                if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
-                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
-                } else if (nbErrors == 0) {
-                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + Path.GetDirectoryName(file.To).ToHtmlLink(file.To) + "</div>");
-                }
-
-            }
-
-            return line.ToString();
-        }
-
+        
         #endregion
-
+        
     }
 
     internal enum ExecutionType {
@@ -797,13 +770,12 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
     internal class FileToCompile {
         // stores the path
         public string InputPath { get; set; }
-        public string OutputDir { get; set; }
         
-        // stores temporary path used during the execution
-        public string TempInputPath { get; set; }
-        public string TempOutputDir { get; set; }
-        public string TempOutputR { get; set; }
-        public string TempOutputLst { get; set; }
+        // stores temporary path used during the compilation
+        public string CompInputPath { get; set; }
+        public string CompOutputDir { get; set; }
+        public string CompOutputR { get; set; }
+        public string CompOutputLst { get; set; }
 
         public string BaseFileName { get; private set; }
 
@@ -813,34 +785,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         public FileToCompile(string inputPath) {
             InputPath = inputPath;
             BaseFileName = Path.GetFileNameWithoutExtension(inputPath);
-        }
-    }
-
-    internal class FileToTransfer {
-
-        /// <summary>
-        /// The path of input file that was originally compiled to trigger this move
-        /// </summary>
-        public string Origin { get; set; }
-        public string From { get; set; }
-        public string To { get; set; }
-
-        /// <summary>
-        /// true if the transfer went fine
-        /// </summary>
-        public bool IsOk { get; set; }
-
-        /// <summary>
-        /// Type de transfer
-        /// </summary>
-        public DeployRules.TransferType TransferType { get; set; }
-
-        public FileToTransfer(string origin, string @from, string to, DeployRules.TransferType transferType) {
-            Origin = origin;
-            From = @from;
-            To = to;
-            TransferType = transferType;
-
         }
     }
 

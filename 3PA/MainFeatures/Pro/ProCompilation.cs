@@ -17,15 +17,18 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
+using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
 
-namespace _3PA.MainFeatures.ProgressExecutionNs {
+namespace _3PA.MainFeatures.Pro {
 
     /// <summary>
     /// Class used for the mass compiler
@@ -64,7 +67,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
         /// After the compilation, each file is moved to its destination folder (distant or source folder)
         /// This list keeps tracks of the moved files and the success of the move command
         /// </summary>
-        public List<FileToTransfer> TransferedFiles { get; private set; }
+        public List<FileToDeploy> TransferedFiles { get; private set; }
 
         /// <summary>
         /// After the compilation, stores each compilation errors found here
@@ -182,7 +185,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             _processesRunning = _listOfCompilationProcesses.Count;
             NumberOfProcesses = _listOfCompilationProcesses.Count;
             NumberOfProcessesEndedOk = 0;
-            TransferedFiles = new List<FileToTransfer>();
+            TransferedFiles = new List<FileToDeploy>();
             ErrorsList = new List<FileError>();
 
             // lets start the compilation on each process
@@ -248,7 +251,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 compilationProcess.ProExecutionObject.KillProcess();
             }
             _processesRunning = 0;
-            EndOfCompilation();
+            EndOfCompilation(_listOfCompilationProcesses.First().ProExecutionObject);
             _hasBeenKilled = true;
         }
 
@@ -289,9 +292,203 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             return _listOfCompilationProcesses.Any(compilationProcess => compilationProcess.ProExecutionObject.ConnectionFailed && Utils.ReadAllText(compilationProcess.ProExecutionObject.DatabaseConnectionLog).Contains("(748)"));
         }
 
+
+        /// <summary>
+        /// Allows to format a small text to explain the errors found in a file and the generated files...
+        /// </summary>
+        public static string FormatCompilationResult(FileToCompile fileToCompile, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
+
+            var line = new StringBuilder();
+            var nbErrors = 0;
+
+            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileToCompile.InputPath, Path.GetFileName(fileToCompile.InputPath)) + "</b> in " + Path.GetDirectoryName(fileToCompile.InputPath).ToHtmlLink() + "</div>");
+
+            foreach (var fileError in listErrorFiles) {
+                nbErrors += fileError.Level > ErrorLevel.StrongWarning ? 1 : 0;
+                line.Append("<div style='padding-left: 10px'>" + "<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>" + (!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? "in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileError.SourcePath, Path.GetFileName(fileError.SourcePath)) + ", " : "") + (fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message + "</div>");
+            }
+
+            foreach (var file in listDeployedFiles) {
+                var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
+                var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
+                if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
+                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
+                } else if (nbErrors == 0) {
+                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + Path.GetDirectoryName(file.To).ToHtmlLink(file.To) + "</div>");
+                }
+
+            }
+
+            return line.ToString();
+        }
+
+        #endregion
+
+        #region private methods
+
+        /// <summary>
+        /// This method is executed when the overall compilation is over and allows to do more treatments
+        /// </summary>
+        private void EndOfCompilation(ProExecution obj) {
+
+            // only do stuff we have reached the last running process
+            if (_processesRunning > 0 || _hasBeenKilled)
+                return;
+
+            // everything ended ok, we do postprocess actions
+            if (NumberOfProcesses == NumberOfProcessesEndedOk) {
+
+                // we need to transfer all the files... (keep only distinct target files)
+                foreach (var compilationProcess in _listOfCompilationProcesses) {
+                    TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToDeploy());
+                }
+                TransferedFiles = Deployer.DeployFiles(TransferedFiles, obj.ProEnv.ProlibPath, i => _nbFilesTransfered = i);
+
+                // Read all the log files stores the errors
+                foreach (var compilationProcess in _listOfCompilationProcesses) {
+                    var errorList = compilationProcess.ProExecutionObject.LoadErrorLog();
+                    foreach (var keyValue in errorList) {
+                        ErrorsList.AddRange(keyValue.Value);
+                    }
+                }
+
+            }
+
+            ExecutionTime = GetElapsedTime();
+
+            if (OnCompilationEnd != null)
+                OnCompilationEnd();
+        }
+
+        /// <summary>
+        /// Called when a process has finished
+        /// </summary>
+        private void OnExecutionEnd(ProExecution lastExecution) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    _processesRunning--;
+                } finally {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a process has finished successfully
+        /// </summary>
+        private void OnExecutionOk(ProExecution obj) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    NumberOfProcessesEndedOk++;
+                    EndOfCompilation(obj);
+                } finally {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Called when a process has finished UNsuccessfully
+        /// </summary>
+        private void OnExecutionFailed(ProExecution obj) {
+            if (_lock.TryEnterWriteLock(500)) {
+                try {
+                    // we kill all the processes we don't want to do anything more...
+                    KillProcesses();
+                } finally {
+                    _lock.ExitWriteLock();
+                }
+            }
+        }
+
+        #endregion
+
+        #region internal class
+
+        private struct ProCompilationFile {
+            public string Path { get; set; }
+            public long Size { get; set; }
+        }
+
+        internal class CompilationProcess {
+            public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
+            public ProExecution ProExecutionObject;
+        }
+
         #endregion
 
         #region Single : Compilation, Check syntax, Run, Prolint
+
+        /// <summary>
+        /// Called to run/compile/check/prolint the current program
+        /// </summary>
+        public static void StartProgressExec(ExecutionType executionType) {
+            CurrentOperation currentOperation;
+            if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
+                currentOperation = CurrentOperation.Run;
+
+            // process already running?
+            if (Plug.CurrentFileObject.CurrentOperation > CurrentOperation.Prolint) {
+                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
+                    KillCurrentProcess();
+                    StartProgressExec(executionType);
+                    args.Handled = true;
+                }, 5);
+                return;
+            }
+            if (!Abl.IsCurrentProgressFile) {
+                UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
+                return;
+            }
+            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
+                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
+                return;
+            }
+            if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+                return;
+            }
+
+            // update function prototypes
+            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+
+            // prolint? check that the StartProlint.p program is created, or do it
+            if (executionType == ExecutionType.Prolint) {
+                if (!File.Exists(Config.FileStartProlint))
+                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
+                        return;
+            }
+
+            // launch the compile process for the current file
+            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
+                ListToCompile = new List<FileToCompile> {
+                    new FileToCompile(Plug.CurrentFilePath)
+                },
+                OnExecutionEnd = OnSingleExecutionEnd,
+                OnExecutionOk = OnSingleExecutionOk
+            };
+            if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
+                return;
+
+            // change file object current operation, set flag
+            Plug.CurrentFileObject.CurrentOperation |= currentOperation;
+            FilesInfo.UpdateFileStatus();
+
+            // clear current errors (updates the current file info)
+            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
+
+        }
+
+        /// <summary>
+        /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
+        /// </summary>
+        public static void KillCurrentProcess() {
+            if (Plug.CurrentFileObject.ProgressExecution != null) {
+                Plug.CurrentFileObject.ProgressExecution.KillProcess();
+                UserCommunication.CloseUniqueNotif("KillExistingProcess");
+                OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+            }
+        }
 
         /// <summary>
         /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
@@ -370,15 +567,15 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 }
 
                 // when compiling, transfering .r/.lst to compilation dir
-                var listTransferFiles = new List<FileToTransfer>();
+                var listTransferFiles = new List<FileToDeploy>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
-                    listTransferFiles = lastExec.CreateListOfFilesToTransfer();
-                    listTransferFiles = ProExecution.TransferFiles(listTransferFiles);
+                    listTransferFiles = lastExec.CreateListOfFilesToDeploy();
+                    listTransferFiles = Deployer.DeployFiles(listTransferFiles, lastExec.ProEnv.ProlibPath);
                 }
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProExecution.FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
@@ -387,98 +584,6 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
         #endregion
 
-        #region private methods
-
-        /// <summary>
-        /// This method is executed when the overall compilation is over and allows to do more treatments
-        /// </summary>
-        private void EndOfCompilation() {
-
-            // only do stuff we have reached the last running process
-            if (_processesRunning > 0 || _hasBeenKilled)
-                return;
-
-            // everything ended ok, we do postprocess actions
-            if (NumberOfProcesses == NumberOfProcessesEndedOk) {
-
-                // we need to transfer all the files... (keep only distinct target files)
-                foreach (var compilationProcess in _listOfCompilationProcesses) {
-                    TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToTransfer());
-                }
-                TransferedFiles = ProExecution.TransferFiles(TransferedFiles, i => _nbFilesTransfered = i);
-
-                // Read all the log files stores the errors
-                foreach (var compilationProcess in _listOfCompilationProcesses) {
-                    var errorList = compilationProcess.ProExecutionObject.LoadErrorLog();
-                    foreach (var keyValue in errorList) {
-                        ErrorsList.AddRange(keyValue.Value);
-                    }
-                }
-
-            }
-
-            ExecutionTime = GetElapsedTime();
-
-            if (OnCompilationEnd != null)
-                OnCompilationEnd();
-        }
-
-        /// <summary>
-        /// Called when a process has finished
-        /// </summary>
-        private void OnExecutionEnd(ProExecution lastExecution) {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    _processesRunning--;
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called when a process has finished successfully
-        /// </summary>
-        private void OnExecutionOk(ProExecution obj) {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    NumberOfProcessesEndedOk++;
-                    EndOfCompilation();
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called when a process has finished UNsuccessfully
-        /// </summary>
-        private void OnExecutionFailed(ProExecution obj) {
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    // we kill all the processes we don't want to do anything more...
-                    KillProcesses();
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-
-        #endregion
-
-        #region internal class
-
-        private struct ProCompilationFile {
-            public string Path { get; set; }
-            public long Size { get; set; }
-        }
-
-        internal class CompilationProcess {
-            public List<FileToCompile> FilesToCompile = new List<FileToCompile>();
-            public ProExecution ProExecutionObject;
-        }
-
-        #endregion
 
     }
 }

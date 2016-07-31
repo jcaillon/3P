@@ -37,7 +37,7 @@ using _3PA.MainFeatures.CodeExplorer;
 using _3PA.MainFeatures.FileExplorer;
 using _3PA.MainFeatures.InfoToolTip;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 using MenuItem = _3PA.MainFeatures.MenuItem;
 
 namespace _3PA {
@@ -300,7 +300,7 @@ namespace _3PA {
                         if (KeyboardMonitor.GetModifiers.IsCtrl) {
                             Npp.GoBackFromDefinition();
                         } else {
-                            ProUtils.GoToDefinition(true);
+                            ProMisc.GoToDefinition(true);
                         }
                         return true;
                     }

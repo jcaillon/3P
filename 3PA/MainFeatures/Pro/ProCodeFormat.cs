@@ -17,13 +17,14 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System.IO;
 using System.Text;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
 
-namespace _3PA.MainFeatures {
+namespace _3PA.MainFeatures.Pro {
 
     internal static class ProCodeFormat {
 

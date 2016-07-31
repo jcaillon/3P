@@ -167,7 +167,7 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool DeleteDirectory(string path, bool recursive) {
             try {
-                if (!Directory.Exists(path))
+                if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                     return true;
                 Directory.Delete(path, true);
             } catch (Exception e) {
@@ -182,7 +182,7 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool DeleteFile(string path) {
             try {
-                if (!File.Exists(path))
+                if (string.IsNullOrEmpty(path) || !File.Exists(path))
                     return true;
                 File.Delete(path);
             } catch (Exception e) {

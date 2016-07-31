@@ -31,7 +31,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
@@ -161,7 +161,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     line.Append("<tr><td style='width: 50px; padding-bottom: 15px;'><img src='" + (moveFail || hasError ? "MsgError" : (hasWarning ? "MsgWarning" : "MsgOk")) + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 10px;'>");
 
-                    line.Append(ProExecution.FormatCompilationResult(fileToCompile, errorsOfTheFile, _currentCompil.TransferedFiles.Where(move => move.Origin.Equals(toCompile.InputPath)).ToList()));
+                    line.Append(ProCompilation.FormatCompilationResult(fileToCompile, errorsOfTheFile, _currentCompil.TransferedFiles.Where(move => move.Origin.Equals(toCompile.InputPath)).ToList()));
 
                     line.Append("</td></tr>");
 

@@ -42,36 +42,17 @@ namespace _3PA.Tests {
 
         public static void DebugTest1() {
 
-            
+            UserCommunication.Notify(Path.Combine(Path.GetDirectoryName("zefef.r"), "*.r"));
+            UserCommunication.Notify(Path.Combine(Path.GetDirectoryName(@"ezfzeffz\zefzef\zefef.r"), "*.r"));
+
+            /*
             UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), @"Tests\content.md"), Encoding.Default)).MdToHtml(),
                 MessageImg.MsgUpdate,
                 "A new version has been installed!",
                 "Updated to version " + AssemblyInfo.Version,
                 new List<string> { "ok" },
                 false);
-
-            //UserCommunication.Notify("fuck");
-            //UserCommunication.Notify("fuck");
-
-            //UserCommunication.Notify(clickedButton.ToString() + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Name
-            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).InsertPosition
-            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).IsPrivate
-            //    + "<br>" + ((ProGenerateCode.ProNewFunction)newFunc).Type);
-
-//            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "in.p")));
-
-            //var stylersXml = XDocument.Load(Config.FileNppStylersXml);
-            //var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
-            //UserCommunication.Notify(firstname);
-        }
-
-        public static void stack1() {
-            stack2();
-        }
-
-        public static void stack2() {
-            var x = 0;
-            var y = 1 / x;
+            */
         }
 
         public static void DebugTest2() {
@@ -93,9 +74,17 @@ namespace _3PA.Tests {
                     Arguments = @"E:\Cnaf\_exe\Nouveau dossier\_fuck.pl".ProQuoter() + " -create -nowarn -add " + (@"E:\Cnaf\_exe\Nouveau dossier\*.r").ProQuoter() + " -compress"
                 };
                 if (!prolib.TryDoWait(true))
-                    message = prolib.ErrorOutput.ToString();
+                    message += prolib.ErrorOutput.ToString();
                 else
-                    message = prolib.StandardOutput.ToString();
+                    message += prolib.StandardOutput.ToString();
+
+                prolib.Arguments = @"E:\Cnaf\_exe\Nouveau dossier\_fuck2.pl".ProQuoter() + " -create -nowarn -add " + (@"E:\Cnaf\_exe\Nouveau dossier\*.r").ProQuoter() + " -compress";
+                if (!prolib.TryDoWait(true))
+                    message += prolib.ErrorOutput.ToString();
+                else
+                    message += prolib.StandardOutput.ToString();
+
+                prolib.Close();
             /*
                 // -replace -add -create -compress?
                 for (int i = 0; i < 100; i++) {

@@ -28,7 +28,7 @@ using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 using _3PA.Tests;
 
 namespace _3PA.MainFeatures {
@@ -226,11 +226,11 @@ namespace _3PA.MainFeatures {
             #region database tools
 
             _databaseTools = new List<MenuItem> {
-                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, ProUtils.OpenDbAdmin, "Data_admin", "") { Generic = true },
-                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProUtils.OpenDictionary, "Data_dictionary", "") { Generic = true },
+                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, ProMisc.OpenDbAdmin, "Data_admin", "") { Generic = true },
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProMisc.OpenDictionary, "Data_dictionary", "") { Generic = true },
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, ProUtils.OpenDataDigger, "Data_digger", "") { Generic = true },
-                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, ProUtils.OpenDataReader, "Data_reader", "") { Generic = true },
+                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, ProMisc.OpenDataDigger, "Data_digger", "") { Generic = true },
+                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, ProMisc.OpenDataReader, "Data_reader", "") { Generic = true },
 
 
             };
@@ -239,7 +239,7 @@ namespace _3PA.MainFeatures {
             
             #region Main menu
 
-            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
+            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProMisc.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
             var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
                 Generic = true
@@ -250,14 +250,14 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") { Generic = true },
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space"),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProUtils.Open4GlHelp, "Open_4GL_help", "F1") { Generic = true },
-                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
-                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
-                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
-                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProMisc.Open4GlHelp, "Open_4GL_help", "F1") { Generic = true },
+                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProCompilation.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProCompilation.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProCompilation.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
+                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProCompilation.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
                 new MenuItem(true), // --------------------------
-                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProUtils.OpenProDesktop, "Pro_desktop", "") { Generic = true },
-                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
+                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProMisc.OpenProDesktop, "Pro_desktop", "") { Generic = true },
+                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProMisc.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Start searching files", ImageResources.Search, FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q") { Generic = true },
                 goToDefItem,

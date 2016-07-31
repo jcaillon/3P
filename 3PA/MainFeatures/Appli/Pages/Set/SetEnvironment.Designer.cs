@@ -574,10 +574,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.IsSelectionEnabled = false;
             this.htmlLabel4.Location = new System.Drawing.Point(30, 347);
             this.htmlLabel4.Name = "htmlLabel4";
-            this.htmlLabel4.Size = new System.Drawing.Size(137, 30);
+            this.htmlLabel4.Size = new System.Drawing.Size(137, 45);
             this.htmlLabel4.TabIndex = 113;
             this.htmlLabel4.TabStop = false;
-            this.htmlLabel4.Text = "<b>Deployement directory</b> <br>and compilation options ";
+            this.htmlLabel4.Text = "<b>Deployement base directory</b> <br>and compilation options ";
             // 
             // btleft4
             // 

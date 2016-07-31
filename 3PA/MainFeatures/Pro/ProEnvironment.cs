@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -24,7 +25,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using _3PA.Lib;
 
-namespace _3PA.MainFeatures.ProgressExecutionNs {
+namespace _3PA.MainFeatures.Pro {
 
     internal class ProEnvironment {
 
@@ -93,7 +94,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             private List<string> _currentProPathDirList;
 
-            private List<DeployRules> _deployRulesList;
+            private List<DeployRule> _deployRulesList;
 
             #endregion
 
@@ -104,7 +105,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                 OnEnvironmentChange += ReComputeProPath;
 
                 // we need to filter/sort the list of computation path when it changes
-                DeployRules.OnDeployConfigurationUpdate += () => _deployRulesList = null;
+                Deployer.OnDeployConfigurationUpdate += () => _deployRulesList = null;
             }
 
             /// <summary>
@@ -356,19 +357,29 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             #endregion
 
-            #region CompilationPath
+            #region Deployement
 
             /// <summary>
             /// List of deploy rules read from the file and filtered for this env
             /// </summary>
-            private List<DeployRules> GetDeployRulesList {
+            private List<DeployRule> GetDeployRulesList {
                 get {
                     if (_deployRulesList == null) {
 
                         // where (appli is "" or (appli is currentAppli and (envletter is currentEnvletter or envletter = "")))
-                        _deployRulesList = DeployRules.GetDeployRulesList.Where(
+                        _deployRulesList = Deployer.GetDeployRulesList.Where(
                             item => string.IsNullOrWhiteSpace(item.ApplicationFilter) || (item.ApplicationFilter.EqualsCi(Name) && (item.EnvLetterFilter.EqualsCi(Suffix) || string.IsNullOrWhiteSpace(item.EnvLetterFilter)))
                         ).ToList();
+
+                        _deployRulesList.Sort((item1, item2) => {
+                            int compare = string.IsNullOrWhiteSpace(item1.ApplicationFilter).CompareTo(string.IsNullOrWhiteSpace(item2.ApplicationFilter));
+                            if (compare != 0) return compare;
+                            compare = string.IsNullOrWhiteSpace(item1.EnvLetterFilter).CompareTo(string.IsNullOrWhiteSpace(item2.EnvLetterFilter));
+                            if (compare != 0) return compare;
+                            compare = item1.Type.CompareTo(item2.Type);
+                            if (compare != 0) return compare;
+                            return item1.Line.CompareTo(item2.Line);
+                        });
 
                     }
                     return _deployRulesList;
@@ -378,37 +389,45 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             /// <summary>
             /// This method returns the transfer directories for the given source path, for each :
             /// If CompileLocally, returns the directory of the source
-            /// If the base compilation is empty and we didn't match an absolute compilation path, returns the source directoy as well
+            /// If the deployement dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
-            public Dictionary<string, DeployRules.TransferType> GetTransfersNeeded(string sourcePath) {
+            public Dictionary<string, DeployType> GetTransfersNeeded(string sourcePath, bool ensureNotEmpty = true) {
 
-                // local compilation?
+                // local compilation? return only one path, MOVE next to the source
                 if (CompileLocally)
-                    return new Dictionary<string, DeployRules.TransferType> { { Path.GetDirectoryName(sourcePath), DeployRules.TransferType.Move } };
+                    return new Dictionary<string, DeployType> { { Path.GetDirectoryName(sourcePath), DeployType.Move } };
 
-                var outList = new Dictionary<string, DeployRules.TransferType>();
+                var outList = new Dictionary<string, DeployType>();
 
                 // try to find the items that match the input pattern
-                foreach (var matchedPath in GetDeployRulesList.Where(path => sourcePath.RegexMatch(path.InputPathPattern.WildCardToRegex()))) {
+                foreach (var rule in GetDeployRulesList.Where(path => sourcePath.RegexMatch(path.SourcePattern.WildCardToRegex()))) {
                     string outPath;
-                    if (Path.IsPathRooted(matchedPath.OutputPathAppend)) {
-                        outPath = matchedPath.OutputPathAppend;
+                    if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
+                        outPath = rule.DeployTarget;
                     } else {
-                        outPath = Path.Combine(BaseCompilationPath, matchedPath.OutputPathAppend);
+                        outPath = Path.Combine(BaseCompilationPath, rule.DeployTarget);
                     }
                     if (!outList.ContainsKey(outPath))
-                        outList.Add(outPath, matchedPath.Type);
+                        outList.Add(outPath, rule.Type);
 
                     // stop at first Move
-                    if (matchedPath.Type == DeployRules.TransferType.Move)
+                    if (rule.Type == DeployType.Move)
                         break;
                 }
 
-                // nothing matched? move to compilation path
-                if (outList.Count == 0)
-                    outList.Add(BaseCompilationPath, DeployRules.TransferType.Move);
+                // nothing matched? move to deployement directory
+                if (ensureNotEmpty && outList.Count == 0)
+                    outList.Add(BaseCompilationPath, DeployType.Move);
 
                 return outList;
+            }
+
+            #endregion
+
+            #region Misc
+
+            public string ProlibPath {
+                get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
 
             #endregion

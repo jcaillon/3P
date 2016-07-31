@@ -203,8 +203,9 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\ProGenerateCode.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
+    <Compile Include="MainFeatures\Pro\Deployer.cs" />
+    <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
+    <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
@@ -236,15 +237,15 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.Designer.cs">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProCodeFormat.cs" />
+    <Compile Include="MainFeatures\Pro\ProCodeFormat.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
       <DependentUpon>EmptyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecutionNs\FilesInfo.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProExecution.cs" />
+    <Compile Include="MainFeatures\Pro\FilesInfo.cs" />
+    <Compile Include="MainFeatures\Pro\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
@@ -261,7 +262,6 @@
     <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\DeployRules.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
@@ -269,15 +269,15 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecutionNs\FileTag.cs" />
+    <Compile Include="MainFeatures\Pro\FileTag.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
-    <Compile Include="MainFeatures\ProUtils.cs" />
+    <Compile Include="MainFeatures\Pro\ProMisc.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProEnvironment.cs" />
+    <Compile Include="MainFeatures\Pro\ProEnvironment.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -420,7 +420,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\Deployement" />
+    <None Include="Data\DeployementRules" />
     <None Include="Data\DataDigger\DataDigger.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />

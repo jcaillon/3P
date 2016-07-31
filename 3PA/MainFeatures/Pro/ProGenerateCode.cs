@@ -31,9 +31,8 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
 
-namespace _3PA.MainFeatures {
+namespace _3PA.MainFeatures.Pro {
     internal class ProGenerateCode {
 
         #region Update/delete/add function prototype

@@ -35,7 +35,7 @@ using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.FilteredLists;
 using _3PA.MainFeatures.NppInterfaceForm;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.FileExplorer {
 
@@ -896,7 +896,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtStopExecutionOnButtonPressed(object sender, EventArgs eventArgs) {
-            ProUtils.KillCurrentProcess();
+            ProCompilation.KillCurrentProcess();
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {

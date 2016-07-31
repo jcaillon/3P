@@ -17,6 +17,7 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -29,7 +30,7 @@ using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.SyntaxHighlighting;
 
-namespace _3PA.MainFeatures.ProgressExecutionNs {
+namespace _3PA.MainFeatures.Pro {
 
     /// <summary>
     /// Keeps info on the files currently opened in notepad++
@@ -184,8 +185,8 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
             if (marginError.Mask != EveryMarkersMask)
                 marginError.Mask = EveryMarkersMask;
 
-            
-            
+
+
 
             StylerHelper stylerHelper = new StylerHelper();
             int lastLine = -2;
@@ -262,19 +263,19 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     _sessionInfo[filePath].NeedToCleanScintilla = true;
             }
 
-            if (clearForCompil) { 
-            // for each file info that has an error generated when compiling the "filePath"
-            foreach (var kpv in _sessionInfo.Where(pair => pair.Value.FileErrors != null && pair.Value.FileErrors.Exists(error => error.CompiledFilePath.EqualsCi(filePath)))) {
-                kpv.Value.FileErrors.Clear();
-                jobDone = true;
+            if (clearForCompil) {
+                // for each file info that has an error generated when compiling the "filePath"
+                foreach (var kpv in _sessionInfo.Where(pair => pair.Value.FileErrors != null && pair.Value.FileErrors.Exists(error => error.CompiledFilePath.EqualsCi(filePath)))) {
+                    kpv.Value.FileErrors.Clear();
+                    jobDone = true;
 
-                if (kpv.Key.Equals(Plug.CurrentFilePath)) {
-                    ClearAnnotationsAndMarkers();
-                    UpdateFileStatus();
-                } else
-                    kpv.Value.NeedToCleanScintilla = true;
+                    if (kpv.Key.Equals(Plug.CurrentFilePath)) {
+                        ClearAnnotationsAndMarkers();
+                        UpdateFileStatus();
+                    } else
+                        kpv.Value.NeedToCleanScintilla = true;
+                }
             }
-}
 
             return jobDone;
         }
@@ -414,7 +415,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
 
             Utils.ForEachLine(fullPath, null, line => {
 
-                var fields =  line.Split('\t').ToList();
+                var fields = line.Split('\t').ToList();
                 if (fields.Count == 8) {
 
                     // new file
@@ -423,7 +424,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                     var filePath = (permutePaths.ContainsKey(compilerFailPath) ? permutePaths[compilerFailPath] : compilerFailPath);
                     if (!output.ContainsKey(filePath)) {
                         output.Add(filePath, new List<FileError>());
-                        lastLineNbCouple = new[] {-10, -10};
+                        lastLineNbCouple = new[] { -10, -10 };
                     }
 
                     ErrorLevel errorLevel;
@@ -451,7 +452,7 @@ namespace _3PA.MainFeatures.ProgressExecutionNs {
                         SourcePath = filePath,
                         Level = errorLevel,
                         Line = Math.Max(0, lastLineNbCouple[0] - 1),
-                        Column = Math.Max(0, (int) fields[4].ConvertFromStr(typeof (int)) - 1),
+                        Column = Math.Max(0, (int)fields[4].ConvertFromStr(typeof(int)) - 1),
                         ErrorNumber = lastLineNbCouple[1],
                         Message = fields[6].Replace("<br>", "\n").Replace(compilerFailPath, baseFileName).Replace(filePath, baseFileName).Trim(),
                         Help = fields[7].Replace("<br>", "\n").Trim(),

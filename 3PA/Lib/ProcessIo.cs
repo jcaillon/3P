@@ -8,13 +8,13 @@ namespace _3PA.Lib {
 
         #region public fields
 
-        public Process Process { get; private set; }
-
         public string Arguments { get; set; }
 
         public StringBuilder StandardOutput { get; private set; }
 
         public StringBuilder ErrorOutput { get; private set; }
+
+        public int ExitCode { get; private set; }
 
         public ProcessStartInfo StartInfo { get; set; }
 
@@ -22,13 +22,19 @@ namespace _3PA.Lib {
 
         #region private fields
 
+        private Process _process;
+
         private int _nbExecution;
 
         #endregion
 
         #region Life and death
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ProcessIo(string executable) {
+
             StandardOutput = new StringBuilder();
             ErrorOutput = new StringBuilder();
 
@@ -38,18 +44,16 @@ namespace _3PA.Lib {
                 RedirectStandardError = true,
                 RedirectStandardOutput = true,
             };
-
-            Process = new Process {
-                StartInfo = StartInfo
-            };
-            Process.OutputDataReceived += (sender, args) => StandardOutput.AppendLine(args.Data);
-            Process.ErrorDataReceived += (sender, args) => ErrorOutput.AppendLine(args.Data);
         }
 
+        /// <summary>
+        /// Desctructor
+        /// </summary>
         ~ProcessIo() {
             Kill();
+            Close();
             try {
-                Process.Dispose();
+                _process.Dispose();
             } catch (Exception) {
                 // ignored
             }
@@ -59,22 +63,26 @@ namespace _3PA.Lib {
 
         #region public methods
 
-        public bool TryDoWait(bool silent = false) {
+        /// <summary>
+        /// Start the process synchronously, catch the exceptions
+        /// </summary>
+        public bool TryDoWait(bool hidden = false) {
             try {
-                return DoWait(silent);
+                return DoWait(hidden);
             } catch (Exception e) {
                 ErrorOutput.AppendLine(e.Message);
                 return false;
             }
         }
 
-        public bool DoWait(bool silent = false) {
+        /// <summary>
+        /// Start the process synchronously
+        /// </summary>
+        public bool DoWait(bool hidden = false) {
 
-            if (_nbExecution == 0) {
-                if (silent) {
-                    StartInfo.CreateNoWindow = true;
-                    StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                }
+            if (hidden) {
+                StartInfo.CreateNoWindow = true;
+                StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             }
 
             if (!string.IsNullOrEmpty(Arguments))
@@ -84,23 +92,37 @@ namespace _3PA.Lib {
                 Kill(); 
 
             _nbExecution++;
-            Process.Start();
-            Process.WaitForExit();
 
-            return Process.ExitCode == 0;
+            if (_process == null) {
+                _process = new Process {
+                    StartInfo = StartInfo
+                };
+                _process.OutputDataReceived += (sender, args) => StandardOutput.AppendLine(args.Data);
+                _process.ErrorDataReceived += (sender, args) => ErrorOutput.AppendLine(args.Data);
+            }
+
+            _process.Start();
+            _process.WaitForExit();
+
+            ExitCode = _process.ExitCode;
+
+            return ExitCode == 0;
         }
 
         public void Kill() {
             try {
-                Process.Kill();
+                _process.Kill();
             } catch (Exception) {
-                try {
-                    Process.Close();
-                } catch (Exception) {
-                    //ignored
-                }
+                //ignored
             }
+        }
 
+        public void Close() {
+            try {
+                _process.Close();
+            } catch (Exception) {
+                //ignored
+            }
         }
 
         #endregion

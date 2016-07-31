@@ -29,7 +29,7 @@ using YamuiFramework.Controls;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetEnvironment : YamuiPage {

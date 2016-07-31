@@ -23,7 +23,7 @@ using System.IO;
 using System.Linq;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.AutoCompletion {
     internal static class DataBase {

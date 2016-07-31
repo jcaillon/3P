@@ -26,11 +26,9 @@ using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures {
-
-
     internal static class ShareExportConf {
 
         #region fields
@@ -61,8 +59,8 @@ namespace _3PA.MainFeatures {
                         new ConfLine {
                             Label = "R-code deployement configuration",
                             HandledItem = Config.FileDeployement,
-                            OnImport = line => DeployRules.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.Deployement),
+                            OnImport = line => Deployer.Import(),
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployement, DataResources.DeployementRules),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush

@@ -596,7 +596,7 @@ namespace _3PA.MainFeatures {
         public static string FileKeywordsList { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsList.conf"); } }
         public static string FileKeywordsHelp { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsHelp.conf"); } }
         public static string FileAbbrev { get { return Path.Combine(Npp.GetConfigDir(), "_Abbreviations.conf"); } }
-        public static string FileDeployement { get { return Path.Combine(Npp.GetConfigDir(), "_CompilationPath.conf"); } }
+        public static string FileDeployement { get { return Path.Combine(Npp.GetConfigDir(), "_DeployementRules.conf"); } }
         public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
