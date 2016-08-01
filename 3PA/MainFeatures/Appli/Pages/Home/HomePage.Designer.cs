@@ -42,12 +42,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.yamuiScrollPage1.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.yamuiScrollPage1.ContentPanel.Name = "ContentPanel";
             this.yamuiScrollPage1.ContentPanel.OwnerPanel = this.yamuiScrollPage1;
-            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(750, 600);
+            this.yamuiScrollPage1.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.yamuiScrollPage1.ContentPanel.TabIndex = 0;
             this.yamuiScrollPage1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.yamuiScrollPage1.Location = new System.Drawing.Point(0, 0);
             this.yamuiScrollPage1.Name = "yamuiScrollPage1";
-            this.yamuiScrollPage1.Size = new System.Drawing.Size(750, 600);
+            this.yamuiScrollPage1.Size = new System.Drawing.Size(900, 650);
             this.yamuiScrollPage1.TabIndex = 0;
             // 
             // html
@@ -61,7 +61,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.html.IsSelectionEnabled = false;
             this.html.Location = new System.Drawing.Point(0, 0);
             this.html.Name = "html";
-            this.html.Size = new System.Drawing.Size(744, 15);
+            this.html.Size = new System.Drawing.Size(894, 15);
             this.html.TabIndex = 3;
             this.html.TabStop = false;
             this.html.Text = "home HTML";
@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Home {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.yamuiScrollPage1);
             this.Name = "HomePage";
-            this.Size = new System.Drawing.Size(750, 600);
+            this.Size = new System.Drawing.Size(900, 650);
             this.yamuiScrollPage1.ContentPanel.ResumeLayout(false);
             this.yamuiScrollPage1.ResumeLayout(false);
             this.ResumeLayout(false);

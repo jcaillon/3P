@@ -99,12 +99,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // lbl_about
@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lbl_about.BaseStylesheet = null;
             this.lbl_about.Location = new System.Drawing.Point(30, 29);
             this.lbl_about.Name = "lbl_about";
-            this.lbl_about.Size = new System.Drawing.Size(812, 30);
+            this.lbl_about.Size = new System.Drawing.Size(862, 30);
             this.lbl_about.TabIndex = 74;
             this.lbl_about.TabStop = false;
             this.lbl_about.Text = resources.GetString("lbl_about.Text");
@@ -472,7 +472,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetFileInfo";
-            this.Size = new System.Drawing.Size(850, 575);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

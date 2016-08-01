@@ -103,12 +103,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // linkurl
@@ -136,7 +136,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btBrowse
             // 
             this.btBrowse.BackGrndImage = null;
-            this.btBrowse.HideFocusedIndicator = false;
             this.btBrowse.Location = new System.Drawing.Point(225, 29);
             this.btBrowse.Margin = new System.Windows.Forms.Padding(0);
             this.btBrowse.Name = "btBrowse";
@@ -148,7 +147,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btUndo
             // 
             this.btUndo.BackGrndImage = null;
-            this.btUndo.HideFocusedIndicator = false;
             this.btUndo.Location = new System.Drawing.Point(245, 29);
             this.btUndo.Margin = new System.Windows.Forms.Padding(0);
             this.btUndo.Name = "btUndo";
@@ -169,7 +167,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_directory.Location = new System.Drawing.Point(268, 29);
             this.fl_directory.Name = "fl_directory";
-            this.fl_directory.Size = new System.Drawing.Size(400, 20);
+            this.fl_directory.Size = new System.Drawing.Size(580, 20);
             this.fl_directory.TabIndex = 4;
             this.fl_directory.WaterMark = "Path to the directory to compile";
             // 
@@ -177,8 +175,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btOpen.BackGrndImage = null;
-            this.btOpen.HideFocusedIndicator = false;
-            this.btOpen.Location = new System.Drawing.Point(671, 29);
+            this.btOpen.Location = new System.Drawing.Point(851, 29);
             this.btOpen.Margin = new System.Windows.Forms.Padding(0);
             this.btOpen.Name = "btOpen";
             this.btOpen.SetImgSize = new System.Drawing.Size(0, 0);
@@ -190,8 +187,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             this.btHistoric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btHistoric.BackGrndImage = null;
-            this.btHistoric.HideFocusedIndicator = false;
-            this.btHistoric.Location = new System.Drawing.Point(691, 29);
+            this.btHistoric.Location = new System.Drawing.Point(871, 29);
             this.btHistoric.Margin = new System.Windows.Forms.Padding(0);
             this.btHistoric.Name = "btHistoric";
             this.btHistoric.SetImgSize = new System.Drawing.Size(0, 0);
@@ -235,6 +231,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.toggleRecurs.SetImgSize = new System.Drawing.Size(0, 0);
             this.toggleRecurs.Size = new System.Drawing.Size(40, 16);
             this.toggleRecurs.TabIndex = 121;
+            this.toggleRecurs.ToggleSize = 30;
             // 
             // htmlLabel1
             // 
@@ -258,6 +255,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.toggleMono.SetImgSize = new System.Drawing.Size(0, 0);
             this.toggleMono.Size = new System.Drawing.Size(40, 16);
             this.toggleMono.TabIndex = 124;
+            this.toggleMono.ToggleSize = 30;
             // 
             // htmlLabel4
             // 
@@ -313,7 +311,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_include.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_include.Location = new System.Drawing.Point(268, 133);
             this.fl_include.Name = "fl_include";
-            this.fl_include.Size = new System.Drawing.Size(400, 20);
+            this.fl_include.Size = new System.Drawing.Size(580, 20);
             this.fl_include.TabIndex = 127;
             this.fl_include.WaterMark = "No filter";
             // 
@@ -343,7 +341,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_exclude.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_exclude.Location = new System.Drawing.Point(268, 159);
             this.fl_exclude.Name = "fl_exclude";
-            this.fl_exclude.Size = new System.Drawing.Size(400, 20);
+            this.fl_exclude.Size = new System.Drawing.Size(580, 20);
             this.fl_exclude.TabIndex = 128;
             this.fl_exclude.WaterMark = "No filter";
             // 
@@ -376,7 +374,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.progressBar.MarqueeWidth = 50;
             this.progressBar.Name = "progressBar";
             this.progressBar.Progress = 0F;
-            this.progressBar.Size = new System.Drawing.Size(602, 23);
+            this.progressBar.Size = new System.Drawing.Size(782, 23);
             this.progressBar.TabIndex = 114;
             // 
             // btReset
@@ -409,7 +407,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.lbl_report.BaseStylesheet = null;
             this.lbl_report.Location = new System.Drawing.Point(30, 223);
             this.lbl_report.Name = "lbl_report";
-            this.lbl_report.Size = new System.Drawing.Size(681, 45);
+            this.lbl_report.Size = new System.Drawing.Size(861, 45);
             this.lbl_report.TabIndex = 117;
             this.lbl_report.TabStop = false;
             this.lbl_report.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
@@ -421,7 +419,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.scrollPanel);
             this.Name = "CompilePage";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

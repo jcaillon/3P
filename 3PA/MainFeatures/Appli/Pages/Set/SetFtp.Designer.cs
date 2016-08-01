@@ -84,12 +84,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // yamuiButton1
@@ -214,7 +214,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_remoteDir.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_remoteDir.Location = new System.Drawing.Point(193, 223);
             this.fl_remoteDir.Name = "fl_remoteDir";
-            this.fl_remoteDir.Size = new System.Drawing.Size(654, 20);
+            this.fl_remoteDir.Size = new System.Drawing.Size(704, 20);
             this.fl_remoteDir.TabIndex = 76;
             this.fl_remoteDir.WaterMark = null;
             // 
@@ -373,7 +373,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetFtp";
-            this.Size = new System.Drawing.Size(850, 575);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

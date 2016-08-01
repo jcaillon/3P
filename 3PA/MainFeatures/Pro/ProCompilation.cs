@@ -310,7 +310,7 @@ namespace _3PA.MainFeatures.Pro {
 
             foreach (var file in listDeployedFiles) {
                 var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
-                var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
+                var transferMsg = file.DeployType == DeployType.Copy && file.FinalDeploy ? "" : "(" + file.DeployType + ") ";
                 if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
                     line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
                 } else if (nbErrors == 0) {

@@ -51,12 +51,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // linkurl
@@ -92,13 +92,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // 
             // html_list
             // 
+            this.html_list.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.html_list.AutoSize = false;
             this.html_list.AutoSizeHeightOnly = true;
             this.html_list.BackColor = System.Drawing.Color.Transparent;
             this.html_list.BaseStylesheet = null;
             this.html_list.Location = new System.Drawing.Point(30, 71);
             this.html_list.Name = "html_list";
-            this.html_list.Size = new System.Drawing.Size(682, 15);
+            this.html_list.Size = new System.Drawing.Size(852, 15);
             this.html_list.TabIndex = 54;
             this.html_list.TabStop = false;
             this.html_list.Text = " ?";
@@ -130,7 +132,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetDeployment";
-            this.Size = new System.Drawing.Size(850, 575);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

@@ -418,7 +418,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 } else if (progressBar.Style != ProgressStyle.Normal)
                     progressBar.Style = ProgressStyle.Normal;
 
-                progressBar.Text = (Math.Abs(progression) < 0.01 ? "Initialization" : (!_currentCompil.CompilationDone ? "Compiling... " : "Moving files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                progressBar.Text = (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
                 progressBar.Progress = progression;
             });
         }

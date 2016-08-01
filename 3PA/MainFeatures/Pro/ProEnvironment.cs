@@ -393,33 +393,37 @@ namespace _3PA.MainFeatures.Pro {
             /// If CompileLocally, returns the directory of the source
             /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
-            public Dictionary<string, DeployType> GetTransfersNeeded(string sourcePath, bool ensureNotEmpty = true) {
+            public List<DeployNeeded> GetDeployNeeded(string sourcePath, bool forCompilation = true) {
 
                 // local compilation? return only one path, MOVE next to the source
                 if (CompileLocally)
-                    return new Dictionary<string, DeployType> { { Path.GetDirectoryName(sourcePath), DeployType.Move } };
+                    return new List<DeployNeeded> {new DeployNeeded(Path.GetDirectoryName(sourcePath), DeployType.Copy, true) };
 
-                var outList = new Dictionary<string, DeployType>();
+                var outList = new List<DeployNeeded>();
 
-                // try to find the items that match the input pattern
+                // for each rule that match the source pattern
                 foreach (var rule in GetDeployRulesList.Where(path => sourcePath.RegexMatch(path.SourcePattern.WildCardToRegex()))) {
                     string outPath;
+
                     if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
                         outPath = rule.DeployTarget;
                     } else {
                         outPath = Path.Combine(BaseCompilationPath, rule.DeployTarget);
                     }
-                    if (!outList.ContainsKey(outPath))
-                        outList.Add(outPath, rule.Type);
 
-                    // stop at first Move
-                    if (rule.Type == DeployType.Move)
+                    if (!outList.Exists(needed => needed.TargetDir.EqualsCi(outPath)))
+                        outList.Add(new DeployNeeded(outPath, rule.Type, !rule.ContinueAfterThisRule));
+
+                    // stop ?
+                    if (!rule.ContinueAfterThisRule)
                         break;
                 }
 
                 // nothing matched? move to deployment directory
-                if (ensureNotEmpty && outList.Count == 0)
-                    outList.Add(BaseCompilationPath, DeployType.Move);
+                if (forCompilation && outList.Count == 0)
+                    outList.Add(new DeployNeeded(BaseCompilationPath, DeployType.Copy, true));
+                else
+                    outList.Last().FinalDeploy = true;
 
                 return outList;
             }

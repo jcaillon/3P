@@ -9,9 +9,7 @@ using _3PA.Lib;
 namespace _3PA.MainFeatures.Pro {
 
     public static class Deployer {
-
-
-
+        
         #region public static event
 
         /// <summary>
@@ -53,20 +51,27 @@ namespace _3PA.MainFeatures.Pro {
             _deployRulesList = new List<DeployRule>();
             Utils.ForEachLine(Config.FileDeployment, new byte[0], s => {
                 var items = s.Split('\t');
-                if (items.Length == 5) {
-                    // find the TransferType from items[3]
-                    DeployType type;
-                    if (!Enum.TryParse(items[3].ToTitleCase(), true, out type))
-                        type = DeployType.Move;
+                if (items.Length == 7) {
 
+                    RuleType rtype;
+                    if (!Enum.TryParse(items[0], true, out rtype))
+                        rtype = RuleType.ForRcode;
+
+                    DeployType type;
+                    if (!Enum.TryParse(items[3], true, out type))
+                        type = DeployType.Copy;
+                    
                     var obj = new DeployRule {
-                        NameFilter = items[0].Trim(),
-                        SuffixFilter = items[1].Trim(),
-                        SourcePattern = items[2].Trim().Replace('/', '\\'),
+                        RuleType = rtype,
+                        NameFilter = items[1].Trim(),
+                        SuffixFilter = items[2].Trim(),
                         Type = type,
-                        DeployTarget = items[4].Trim().Replace('/', '\\'),
+                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"),
+                        SourcePattern = items[5].Trim().Replace('/', '\\'),
+                        DeployTarget = items[6].Trim().Replace('/', '\\'),
                         Line = i++
                     };
+
                     if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _deployRulesList.Add(obj);
                 }
@@ -86,6 +91,8 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public static List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, string prolibPath, Action<int> onOneFileDone = null) {
 
+            int[] nbFilesDone = { 0 };
+
             // make sure to transfer a given file only once at the same place (happens with .cls file since a source
             // can have several .r files generated if it is used in another classes)
             deployToDo = deployToDo
@@ -95,7 +102,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // check that every target dir exist (for copy/move deployments)
             deployToDo
-                .Where(deploy => deploy.DeployType == DeployType.Copy || deploy.DeployType == DeployType.Move)
+                .Where(deploy => deploy.DeployType == DeployType.Copy)
                 .GroupBy(deploy => Path.GetDirectoryName(deploy.To))
                 .Select(group => group.First())
                 .ToNonNullList()
@@ -190,6 +197,10 @@ namespace _3PA.MainFeatures.Pro {
                     Parallel.ForEach(onePlSubFolderDeployments, deploy => {
                         if (File.Exists(deploy.From))
                             deploy.IsOk = !string.IsNullOrEmpty(deploy.ToTemp) && Utils.MoveFile(deploy.From, deploy.ToTemp);
+                        if (deploy.IsOk)
+                            nbFilesDone[0]++;
+                        if (onOneFileDone != null)
+                            onOneFileDone(nbFilesDone[0]);
                     });
 
                     // now we just need to add the content of temp folders into the .pl
@@ -199,7 +210,8 @@ namespace _3PA.MainFeatures.Pro {
                         prolibMessage.Append(prolibExe.ErrorOutput);
 
                     Parallel.ForEach(onePlSubFolderDeployments, deploy => {
-                        deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
+                        if (!deploy.FinalDeploy)
+                            deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
                     });
                     
                 }
@@ -221,10 +233,9 @@ namespace _3PA.MainFeatures.Pro {
 
 
             // do a deployment action for each file
-            int[] nbFilesDone = { 0 };
             Parallel.ForEach(deployToDo, file => {
-                DeploySingleFile(file);
-                nbFilesDone[0]++;
+                if (DeploySingleFile(file))
+                    nbFilesDone[0]++;
                 if (onOneFileDone != null)
                     onOneFileDone(nbFilesDone[0]);
             });
@@ -235,24 +246,23 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Transfer a single file
         /// </summary>
-        private static void DeploySingleFile(FileToDeploy file) {
+        private static bool DeploySingleFile(FileToDeploy file) {
             if (!file.IsOk) {
                 if (File.Exists(file.From)) {
                     switch (file.DeployType) {
 
                         case DeployType.Copy:
-                            file.IsOk = Utils.CopyFile(file.From, file.To);
+                            file.IsOk = file.FinalDeploy ? Utils.MoveFile(file.From, file.To, true) : Utils.CopyFile(file.From, file.To);
                             break;
 
                         case DeployType.Ftp:
                             break;
 
-                        case DeployType.Move:
-                            file.IsOk = Utils.MoveFile(file.From, file.To, true);
-                            break;
                     }
                 }
+                return true;
             }
+            return false;
         }
 
         #endregion
@@ -289,6 +299,16 @@ namespace _3PA.MainFeatures.Pro {
         public DeployType Type { get; set; }
 
         /// <summary>
+        /// The type of rule
+        /// </summary>
+        public RuleType RuleType { get; set; }
+
+        /// <summary>
+        /// if true, this should be the last rule applied to this file
+        /// </summary>
+        public bool ContinueAfterThisRule { get; set; }
+
+        /// <summary>
         /// The line from which we read this info, allows to sort by line
         /// </summary>
         public int Line { get; set; }
@@ -297,13 +317,51 @@ namespace _3PA.MainFeatures.Pro {
 
     #endregion
 
+    #region RuleType
+
+    public enum RuleType {
+        ForRcode,
+        ForOthers,
+        ForAll,
+    }
+
+    #endregion
+
     #region DeployType
 
     public enum DeployType {
         Prolib,
-        Copy,
         Ftp,
-        Move
+        // Copy should always be last
+        Copy,
+    }
+
+    #endregion
+
+    #region DeployNeeded
+
+    public class DeployNeeded {
+
+        /// <summary>
+        /// target directory for the deployment
+        /// </summary>
+        public string TargetDir { get; set; }
+
+        /// <summary>
+        /// Type de transfer
+        /// </summary>
+        public DeployType DeployType { get; set; }
+
+        /// <summary>
+        /// true if this is the last deploy action for the file
+        /// </summary>
+        public bool FinalDeploy { get; set; }
+
+        public DeployNeeded(string targetDir, DeployType deployType, bool finalDeploy) {
+            TargetDir = targetDir;
+            DeployType = deployType;
+            FinalDeploy = finalDeploy;
+        }
     }
 
     #endregion
@@ -330,6 +388,11 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public DeployType DeployType { get; set; }
 
+        /// <summary>
+        /// true if this is the last deploy action for the file
+        /// </summary>
+        public bool FinalDeploy { get; set; }
+
         #region for .pl deploy type
 
         /// <summary>
@@ -344,12 +407,12 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        public FileToDeploy(string origin, string @from, string to, DeployType deployType) {
+        public FileToDeploy(string origin, string @from, string to, DeployNeeded deployNeeded) {
             Origin = origin;
             From = @from;
             To = to;
-            DeployType = deployType;
-
+            DeployType = deployNeeded.DeployType;
+            FinalDeploy = deployNeeded.FinalDeploy;
         }
     }
 

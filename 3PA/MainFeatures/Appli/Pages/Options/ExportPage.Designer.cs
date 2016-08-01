@@ -81,12 +81,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // topAuto
@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.topAuto.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.topAuto.BackColor = System.Drawing.Color.Transparent;
             this.topAuto.BaseStylesheet = null;
-            this.topAuto.Location = new System.Drawing.Point(309, 191);
+            this.topAuto.Location = new System.Drawing.Point(359, 191);
             this.topAuto.Name = "topAuto";
             this.topAuto.Size = new System.Drawing.Size(32, 15);
             this.topAuto.TabIndex = 118;
@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.btDownloadAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btDownloadAll.BackGrndImage = null;
-            this.btDownloadAll.Location = new System.Drawing.Point(351, 188);
+            this.btDownloadAll.Location = new System.Drawing.Point(401, 188);
             this.btDownloadAll.Margin = new System.Windows.Forms.Padding(0);
             this.btDownloadAll.Name = "btDownloadAll";
             this.btDownloadAll.SetImgSize = new System.Drawing.Size(0, 0);
@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.btRefresh.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btRefresh.BackGrndImage = null;
-            this.btRefresh.Location = new System.Drawing.Point(802, 191);
+            this.btRefresh.Location = new System.Drawing.Point(852, 191);
             this.btRefresh.Margin = new System.Windows.Forms.Padding(0);
             this.btRefresh.Name = "btRefresh";
             this.btRefresh.SetImgSize = new System.Drawing.Size(0, 0);
@@ -130,7 +130,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.topDistant.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.topDistant.BackColor = System.Drawing.Color.Transparent;
             this.topDistant.BaseStylesheet = null;
-            this.topDistant.Location = new System.Drawing.Point(621, 191);
+            this.topDistant.Location = new System.Drawing.Point(671, 191);
             this.topDistant.Name = "topDistant";
             this.topDistant.Size = new System.Drawing.Size(89, 15);
             this.topDistant.TabIndex = 115;
@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.topLocDate.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.topLocDate.BackColor = System.Drawing.Color.Transparent;
             this.topLocDate.BaseStylesheet = null;
-            this.topLocDate.Location = new System.Drawing.Point(381, 191);
+            this.topLocDate.Location = new System.Drawing.Point(431, 191);
             this.topLocDate.Name = "topLocDate";
             this.topLocDate.Size = new System.Drawing.Size(77, 15);
             this.topLocDate.TabIndex = 114;
@@ -167,7 +167,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.btHistoric.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btHistoric.BackGrndImage = null;
-            this.btHistoric.Location = new System.Drawing.Point(802, 153);
+            this.btHistoric.Location = new System.Drawing.Point(852, 153);
             this.btHistoric.Margin = new System.Windows.Forms.Padding(0);
             this.btHistoric.Name = "btHistoric";
             this.btHistoric.SetImgSize = new System.Drawing.Size(0, 0);
@@ -179,7 +179,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.btOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btOpen.BackGrndImage = null;
-            this.btOpen.Location = new System.Drawing.Point(782, 153);
+            this.btOpen.Location = new System.Drawing.Point(832, 153);
             this.btOpen.Margin = new System.Windows.Forms.Padding(0);
             this.btOpen.Name = "btOpen";
             this.btOpen.SetImgSize = new System.Drawing.Size(0, 0);
@@ -199,7 +199,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_directory.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_directory.Location = new System.Drawing.Point(240, 153);
             this.fl_directory.Name = "fl_directory";
-            this.fl_directory.Size = new System.Drawing.Size(516, 20);
+            this.fl_directory.Size = new System.Drawing.Size(566, 20);
             this.fl_directory.TabIndex = 4;
             this.fl_directory.WaterMark = "Path to the shared directory";
             // 
@@ -256,7 +256,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.scrollPanel);
             this.Name = "ExportPage";
-            this.Size = new System.Drawing.Size(850, 575);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

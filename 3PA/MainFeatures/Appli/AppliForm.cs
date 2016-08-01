@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.Appli {
                 }),
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", PageNames.SetEnvironment.ToString(), new SetEnvironment()),
-                    new YamuiSecMenu("DEPLOYMENT", PageNames.Deployment.ToString(), new SetDeployment()),
+                    new YamuiSecMenu("DEPLOYMENT RULES", PageNames.Deployment.ToString(), new SetDeployment()),
                     new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),

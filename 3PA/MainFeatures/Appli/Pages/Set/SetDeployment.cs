@@ -81,9 +81,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (Deployer.GetDeployRulesList.Any()) {
 
                 strBuilder.Append("<table width='100%;'>");
-                strBuilder.Append("<tr><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Application</td><td class='CompPathHead' align='center' style='padding-right: 15px; padding-right: 15px;'>Suffix</td><td class='CompPathHead' width='30%'>Source path pattern</td><td class='CompPathHead' align='center'>Type</td><td class='CompPathHead' width='30%' align='right'>Deployment target</td></tr>");
+                strBuilder.Append("<tr class='CompPathHead'><td align='center' width='8%'>Rule type</td><td align='center' width='8%'>Application</td><td align='center' width='8%'>Suffix</td><td align='center' width='5%'>Type</td><td align='center' width='5%'>Next?</td><td width='33%'>Source path pattern</td><td width='33%' align='right'>Deployment target</td></tr>");
                 foreach (var compLine in Deployer.GetDeployRulesList) {
-                    strBuilder.Append("<tr><td align='center'>" + (string.IsNullOrEmpty(compLine.NameFilter) ? "*" : compLine.NameFilter) + "</td><td align='center'>" + (string.IsNullOrEmpty(compLine.SuffixFilter) ? "*" : compLine.SuffixFilter) + "</td><td>" + (compLine.SourcePattern.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.SourcePattern.Length - 40) : compLine.SourcePattern) + "</td><td align='center'>" + compLine.Type + "</td><td align='right'>" + (compLine.DeployTarget.Length > 40 ? "..." + compLine.SourcePattern.Substring(compLine.DeployTarget.Length - 40) : compLine.DeployTarget) + "</td></tr>");
+                    strBuilder.Append("<tr><td align='center'>" +
+                        compLine.RuleType + "</td><td align='center'>" +
+                        (string.IsNullOrEmpty(compLine.NameFilter) ? "*" : compLine.NameFilter) + "</td><td align='center'>" + 
+                        (string.IsNullOrEmpty(compLine.SuffixFilter) ? "*" : compLine.SuffixFilter) + "</td><td align='center'>" + 
+                        compLine.Type + "</td><td align='center'>" +
+                        (compLine.ContinueAfterThisRule ? "Yes" : "No") + "</td><td>" +
+                        (compLine.SourcePattern.Length > 45 ? "..." + compLine.SourcePattern.Substring(compLine.SourcePattern.Length - 45) : compLine.SourcePattern) + "</td><td align='right'>" + 
+                        (compLine.DeployTarget.Length > 45 ? "..." + compLine.SourcePattern.Substring(compLine.DeployTarget.Length - 45) : compLine.DeployTarget) + "</td></tr>");
                 }
                 strBuilder.Append("</table>");
 

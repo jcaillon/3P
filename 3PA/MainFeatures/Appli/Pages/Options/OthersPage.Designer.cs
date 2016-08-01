@@ -71,12 +71,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(850, 575);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // htmlLabel4
@@ -145,7 +145,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagtitle3.Location = new System.Drawing.Point(179, 218);
             this.fl_tagtitle3.MultiLines = true;
             this.fl_tagtitle3.Name = "fl_tagtitle3";
-            this.fl_tagtitle3.Size = new System.Drawing.Size(663, 50);
+            this.fl_tagtitle3.Size = new System.Drawing.Size(713, 50);
             this.fl_tagtitle3.TabIndex = 69;
             this.fl_tagtitle3.WaterMark = null;
             // 
@@ -161,7 +161,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagtitle2.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagtitle2.Location = new System.Drawing.Point(179, 182);
             this.fl_tagtitle2.Name = "fl_tagtitle2";
-            this.fl_tagtitle2.Size = new System.Drawing.Size(663, 20);
+            this.fl_tagtitle2.Size = new System.Drawing.Size(713, 20);
             this.fl_tagtitle2.TabIndex = 68;
             this.fl_tagtitle2.WaterMark = null;
             // 
@@ -227,7 +227,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagopen.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagopen.Location = new System.Drawing.Point(179, 46);
             this.fl_tagopen.Name = "fl_tagopen";
-            this.fl_tagopen.Size = new System.Drawing.Size(663, 20);
+            this.fl_tagopen.Size = new System.Drawing.Size(713, 20);
             this.fl_tagopen.TabIndex = 59;
             this.fl_tagopen.WaterMark = null;
             // 
@@ -243,7 +243,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagclose.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_tagclose.Location = new System.Drawing.Point(179, 72);
             this.fl_tagclose.Name = "fl_tagclose";
-            this.fl_tagclose.Size = new System.Drawing.Size(663, 20);
+            this.fl_tagclose.Size = new System.Drawing.Size(713, 20);
             this.fl_tagclose.TabIndex = 62;
             this.fl_tagclose.WaterMark = null;
             // 
@@ -260,7 +260,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagtitle1.Location = new System.Drawing.Point(179, 126);
             this.fl_tagtitle1.MultiLines = true;
             this.fl_tagtitle1.Name = "fl_tagtitle1";
-            this.fl_tagtitle1.Size = new System.Drawing.Size(663, 50);
+            this.fl_tagtitle1.Size = new System.Drawing.Size(713, 50);
             this.fl_tagtitle1.TabIndex = 63;
             this.fl_tagtitle1.WaterMark = null;
             // 
@@ -300,7 +300,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "OthersPage";
-            this.Size = new System.Drawing.Size(850, 575);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);
