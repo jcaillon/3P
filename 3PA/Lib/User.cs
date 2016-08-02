@@ -18,13 +18,9 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Management;
+using System.IO;
 using System.Net;
-using Microsoft.Win32;
 using _3PA.MainFeatures;
 
 namespace _3PA.Lib {
@@ -56,8 +52,9 @@ namespace _3PA.Lib {
                     };
                     webServiceJson.Execute();
                 }
-            } catch (Exception) {
-                //ignored
+            } catch (Exception e) {
+                if (Config.IsDevelopper)
+                    ErrorHandler.ShowErrors(e);
             }
         }
         
@@ -82,45 +79,19 @@ namespace _3PA.Lib {
         /// </summary>
         public static string UniqueId {
             get {
-                // Get a unique identifier based on the windows installation
-                string id = ((string) RegistryWrapper.GetValue(RegistryHive.LocalMachine, @"SOFTWARE\Microsoft\Cryptography", "MachineGuid")).ToUpper();
-                if (!string.IsNullOrEmpty(id))
-                    return id;
-
-                // doesn't work? Try to get it through the wmic command
                 try {
-                    var procStartInfo = new ProcessStartInfo("cmd", "/c " + "wmic csproduct get UUID") {
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true
-                    };
-                    var proc = new Process {StartInfo = procStartInfo};
-                    proc.Start();
-                    id = proc.StandardOutput.ReadToEnd().Replace("UUID", string.Empty).Trim().ToUpper();
-                } catch (Exception) {
-                    // ignored
+                    string checkIdPath = Path.Combine(Path.GetTempPath(), "x" + Environment.Version + ".tmp");
+                    if (File.Exists(checkIdPath)) {
+                        var content = File.ReadAllText(checkIdPath);
+                        if (content.Length == 36 && !Config.Instance.MyUuid.Equals(content))
+                            Config.Instance.MyUuid = content;
+                    } else
+                        Utils.FileWriteAllText(checkIdPath, Config.Instance.MyUuid);
+                } catch (Exception e) {
+                    if (Config.IsDevelopper)
+                        ErrorHandler.ShowErrors(e);
                 }
-                if (!string.IsNullOrEmpty(id))
-                    return id;
-
-                // everything failed, do it the old way
-                return (Environment.MachineName + MacAddress).PadLeft(36, '0').Substring(0, 36);
-            }
-        }
-
-        /// <summary>
-        /// Returns the mac address of the computer
-        /// </summary>
-        private static string MacAddress {
-            get {
-                try {
-                    ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT * FROM Win32_NetworkAdapterConfiguration where IPEnabled=true");
-                    IEnumerable<ManagementObject> objects = searcher.Get().Cast<ManagementObject>();
-                    return (from o in objects orderby o["IPConnectionMetric"] select o["MACAddress"].ToString()).FirstOrDefault();
-                } catch (Exception) {
-                    //ignored
-                }
-                return String.Empty;
+                return Config.Instance.MyUuid;
             }
         }
 

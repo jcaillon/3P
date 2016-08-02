@@ -53,10 +53,6 @@ namespace _3PA.Lib {
 
         private string _tortoiseProcPath;
 
-        private string _mergeToolPath;
-
-        private string _tortoiseDirectoryPath;
-
         #endregion
 
         #region Life and death
@@ -64,9 +60,9 @@ namespace _3PA.Lib {
         public TortoiseWrapper(TortoiseType type) {
             _type = type;
             var nodeName = @"SOFTWARE\Tortoise" + (_type == TortoiseType.Svn ? "SVN" : "Git");
-            _tortoiseProcPath = (string)RegistryWrapper.GetValue(RegistryHive.LocalMachine, nodeName, @"ProcPath");
-            _mergeToolPath = (string)RegistryWrapper.GetValue(RegistryHive.LocalMachine, nodeName, @"TMergePath");
-            _tortoiseDirectoryPath = (string)RegistryWrapper.GetValue(RegistryHive.LocalMachine, nodeName, @"Directory");
+            _tortoiseProcPath = "";
+            //_mergeToolPath = "";
+            //_tortoiseDirectoryPath = "";
         }
 
         #endregion

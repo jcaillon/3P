@@ -807,6 +807,11 @@ namespace _3PA {
                     }
                 }
             }
+
+            // for debug purposes, check if the document can be parsed
+            if (Config.IsDevelopper && ParserHandler.AblParser.ParserErrors.Count > 0) {
+                UserCommunication.Notify("The parser found erros on this file:<br>" + ProCodeFormat.GetParserErrorDescription(), MessageImg.MsgInfo, "Parser message", "Errors found", 3);
+            }
         }
 
         #endregion

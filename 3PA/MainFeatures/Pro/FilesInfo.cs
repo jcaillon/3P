@@ -85,6 +85,9 @@ namespace _3PA.MainFeatures.Pro {
             _sessionInfo[fullPath].FileErrors = errorsList.ToList();
             _sessionInfo[fullPath].FileErrors.Sort(new FileErrorSortingClass());
 
+            // signals that we will need to display the errors on this document
+            _sessionInfo[fullPath].HasErrorsNotDisplayed = true;
+
             // Update info on the current file
             if (fullPath.EqualsCi(Plug.CurrentFilePath))
                 UpdateErrorsInScintilla();
@@ -172,10 +175,10 @@ namespace _3PA.MainFeatures.Pro {
                 // reset annotation to default
                 Npp.AnnotationVisible = Plug.AnnotationMode;
                 return;
-            } else {
-                // activate annotation if needed
-                Plug.AnnotationMode = Annotation.Indented;
             }
+
+            // activate annotation (if not already done)
+            Plug.AnnotationMode = Annotation.Indented;
 
             // show margin
             if (marginError.Sensitive == false)
@@ -185,53 +188,56 @@ namespace _3PA.MainFeatures.Pro {
             if (marginError.Mask != EveryMarkersMask)
                 marginError.Mask = EveryMarkersMask;
 
+            // only show the new errors
+            if (_sessionInfo[currentFilePath].HasErrorsNotDisplayed) {
 
+                _sessionInfo[currentFilePath].HasErrorsNotDisplayed = false;
 
+                StylerHelper stylerHelper = new StylerHelper();
+                int lastLine = -2;
+                StringBuilder lastMessage = new StringBuilder();
+                foreach (var fileError in _sessionInfo[currentFilePath].FileErrors) {
 
-            StylerHelper stylerHelper = new StylerHelper();
-            int lastLine = -2;
-            StringBuilder lastMessage = new StringBuilder();
-            foreach (var fileError in _sessionInfo[currentFilePath].FileErrors) {
+                    // new line
+                    if (lastLine != fileError.Line) {
+                        stylerHelper.Clear();
+                        lastMessage.Clear();
+                        // set marker style now (the first error encountered for a given line is the highest anyway)
+                        if (!((int) Npp.GetLine(fileError.Line).MarkerGet()).IsBitSet((int) fileError.Level))
+                            Npp.GetLine(fileError.Line).MarkerAdd((int) fileError.Level);
+                    } else {
+                        // append to existing annotation
+                        stylerHelper.Style("\n", (byte) fileError.Level);
+                        lastMessage.Append("\n");
+                    }
 
-                // new line
-                if (lastLine != fileError.Line) {
-                    stylerHelper.Clear();
-                    lastMessage.Clear();
-                    // set marker style now (the first error encountered for a given line is the highest anyway)
-                    if (!((int)Npp.GetLine(fileError.Line).MarkerGet()).IsBitSet((int)fileError.Level))
-                        Npp.GetLine(fileError.Line).MarkerAdd((int)fileError.Level);
-                } else {
-                    // append to existing annotation
-                    stylerHelper.Style("\n", (byte)fileError.Level);
-                    lastMessage.Append("\n");
-                }
+                    lastLine = fileError.Line;
 
-                lastLine = fileError.Line;
-
-                var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : ("Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber);
-                mess += fileError.FromProlint ? "): " : ", col " + fileError.Column + "): ";
-                stylerHelper.Style(mess, (byte)(Style.ErrorAnnotBoldStyleOffset + fileError.Level));
-                lastMessage.Append(mess);
-
-                mess = fileError.Message.BreakText(140);
-                stylerHelper.Style(mess, (byte)(Style.ErrorAnnotStandardStyleOffset + fileError.Level));
-                lastMessage.Append(mess);
-
-                if (Config.Instance.GlobalShowDetailedHelpForErrors && !string.IsNullOrEmpty(fileError.Help)) {
-                    mess = "\nDetailed help: " + fileError.Help.BreakText(140);
-                    stylerHelper.Style(mess, (byte)(Style.ErrorAnnotItalicStyleOffset + fileError.Level));
+                    var mess = fileError.FromProlint ? "Prolint (level " + fileError.ErrorNumber : ("Compilation " + (fileError.Level == ErrorLevel.Critical ? "error" : "warning") + " (n°" + fileError.ErrorNumber);
+                    mess += fileError.FromProlint ? "): " : ", col " + fileError.Column + "): ";
+                    stylerHelper.Style(mess, (byte) (Style.ErrorAnnotBoldStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
-                }
 
-                if (fileError.Times > 0) {
-                    mess = "\nThis message above appeared " + fileError.Times + " times in the compiler log";
-                    stylerHelper.Style(mess, (byte)(Style.ErrorAnnotBoldStyleOffset + fileError.Level));
+                    mess = fileError.Message.BreakText(140);
+                    stylerHelper.Style(mess, (byte) (Style.ErrorAnnotStandardStyleOffset + fileError.Level));
                     lastMessage.Append(mess);
-                }
 
-                // set annotation
-                Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
-                Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
+                    if (Config.Instance.GlobalShowDetailedHelpForErrors && !string.IsNullOrEmpty(fileError.Help)) {
+                        mess = "\nDetailed help: " + fileError.Help.BreakText(140);
+                        stylerHelper.Style(mess, (byte) (Style.ErrorAnnotItalicStyleOffset + fileError.Level));
+                        lastMessage.Append(mess);
+                    }
+
+                    if (fileError.Times > 0) {
+                        mess = "\nThis message above appeared " + fileError.Times + " times in the compiler log";
+                        stylerHelper.Style(mess, (byte) (Style.ErrorAnnotBoldStyleOffset + fileError.Level));
+                        lastMessage.Append(mess);
+                    }
+
+                    // set annotation
+                    Npp.GetLine(lastLine).AnnotationText = lastMessage.ToString();
+                    Npp.GetLine(lastLine).AnnotationStyles = stylerHelper.GetStyleArray();
+                }
             }
 
             marginError.Width = ErrorMarginWidth + 1;
@@ -517,7 +523,10 @@ namespace _3PA.MainFeatures.Pro {
         public ProExecution ProgressExecution { get; set; }
         public bool SavedSinceLastCompilation { get; set; }
         public string FileFullPath { get; set; }
+
         public bool NeedToCleanScintilla { get; set; }
+
+        public bool HasErrorsNotDisplayed { get; set; }
     }
 
     /// <summary>

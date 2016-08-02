@@ -117,7 +117,7 @@ namespace _3PA.MainFeatures.Pro {
                     if (nbNotCreated == 0)
                         UserCommunication.Notify("There was nothing to be done :<br>All the prototypes match their implementation", MessageImg.MsgInfo, "Function prototypes", "Everything is synchronized", 5);
                     else
-                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing!</i><br><br>Please create one manually, then they will all be updated correctly", MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
+                        UserCommunication.Notify("Failed to find the prototype for " + nbNotCreated + " function implementations<br>Your document is not correctly formatted for 3P to automatically create them :<br><i>The block _UIB-PREPROCESSOR-BLOCK is missing or the procedure can't be opened in the appbuilder!</i><br><br>Please correct your document manually, then they will all be updated correctly" + ProCodeFormat.GetParserErrorDescription(), MessageImg.MsgHighImportance, "Function prototypes", "Failed to create prototypes");
                 }
             } else {
                 outputMessage.Append("<i>");
@@ -194,8 +194,8 @@ namespace _3PA.MainFeatures.Pro {
 
             var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
 
-            // we take caution here... ensure that the implementation syntax is correct
-            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) {
+            // we take caution here... ensure that the implementation syntax is correct + ensure that the file was correctly parsed
+            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1 && ParserHandler.AblParser.ParserErrors.Count == 0) {
 
                 // get the best position to insert the prototype
                 bool insertBefore;
@@ -239,7 +239,7 @@ namespace _3PA.MainFeatures.Pro {
         private static ParsedPreProcBlock GetPreProcBlock<T>(T parsedScopeItem, string typeStr) where T : ParsedScopeItem {
 
             // if we parsed the UIB (appbuilder) blocks correctly
-            if (ParserHandler.AblParser.ParsedUibBlockOk) {
+            if (ParserHandler.AblParser.ParserErrors.Count == 0) {
 
                 // try to find a &IF DEFINED(EXCLUDE- block that surrounds the prototype
                 var protoPreProcBlock = ParserHandler.AblParser.ParsedItemsList.Where(item => {
@@ -369,6 +369,12 @@ namespace _3PA.MainFeatures.Pro {
             IProCode codeCode;
             string insertText;
             string blockDescription;
+
+            // in case of an incorrect document, warn the user
+            if (ParserHandler.AblParser.ParserErrors.Count > 0) {
+                if (UserCommunication.Message("The internal parser of 3P has found inconsistencies in your document :<br>" + ProCodeFormat.GetParserErrorDescription() + "<br>You can still insert a new piece of code but the insertion position might not be calculated correctly; take caution of what is generated if you decide to go through with it.", MessageImg.MsgQuestion, "Generate code", "Problems spotted", new List<string> { "Continue", "Abort"}) != 0)
+                    return;
+            }
 
             if (typeof(ParsedImplementation) == typeof(T)) {
                 object input = new ProCodeFunction();

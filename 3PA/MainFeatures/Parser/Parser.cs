@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using _3PA.Lib;
@@ -96,6 +97,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private Dictionary<string, ParsedFunction> _functionPrototype = new Dictionary<string, ParsedFunction>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// list of errors found by the parser
+        /// </summary>
+        private List<ParserError> _parserErrors = new List<ParserError>();
+
         #endregion
 
         #region public accessors
@@ -108,21 +114,11 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// If true the parsing went ok, if false, it means that we matched too much starting block compared to 
-        /// ending block statements (or the opposite), in short, was the parsing OK or not?
-        /// Allows to decide if we can reindent the code or not
+        /// Returns the list of errors found by the parser
         /// </summary>
-        public bool ParsedBlockOk { get; private set; }
-
-        /// <summary>
-        /// same as ParsedBlockOk but for the UIB block (appbuilder blocks)
-        /// </summary>
-        public bool ParsedUibBlockOk { get; private set; }
-
-        /// <summary>
-        /// check that we match an ENDIF for each IF
-        /// </summary>
-        public bool ParsedIfEndIfBlockOk { get; private set; }
+        public List<ParserError> ParserErrors {
+            get { return _parserErrors; }
+        }
 
         /// <summary>
         /// returns the list of the parsed items
@@ -158,15 +154,11 @@ namespace _3PA.MainFeatures.Parser {
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
 
-            // assume the file is correct
-            ParsedBlockOk = true;
-            ParsedUibBlockOk = true;
-            ParsedIfEndIfBlockOk = true;
-
             // init context
             _context = new ParseContext {
                 BlockStack = new Stack<BlockInfo>(),
-                PreProcIfStack = new Stack<ParsedPreProcBlock>()
+                PreProcIfStack = new Stack<ParsedPreProcBlock>(),
+                UibBlockStack = new Stack<ParsedPreProcBlock>()
             };
 
             // create root item
@@ -193,12 +185,13 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // check that we match an &ENDIF for each &IF
-            if (_context.PreProcIfStack.Count == 0)
-                ParsedIfEndIfBlockOk = false;
+            if (_context.PreProcIfStack.Count > 0)
+                _parserErrors.Add(new ParserError(ParserErrorType.MismatchNumberOfIfEndIf, PeekAt(0), _context.PreProcIfStack.Count));
 
             // dispose
             _context.BlockStack.Clear();
             _context.PreProcIfStack.Clear();
+            _context.UibBlockStack.Clear();
             _context = null;
             _lexer = null;
         }
@@ -304,7 +297,8 @@ namespace _3PA.MainFeatures.Parser {
                         case "function":
                             // parse a function definition
                             if (CreateParsedFunction(token)) {
-                                if (_context.BlockStack.Count != 0) ParsedBlockOk = false;
+                                if (_context.BlockStack.Count != 0)
+                                    _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockStart, token, _context.BlockStack.Count));
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(IndentType.DoEnd, token.Line);
                             }
@@ -313,7 +307,8 @@ namespace _3PA.MainFeatures.Parser {
                         case "proce":
                             // parse a procedure definition
                             if (CreateParsedProcedure(token)) {
-                                if (_context.BlockStack.Count != 0) ParsedBlockOk = false;
+                                if (_context.BlockStack.Count != 0)
+                                    _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockStart, token, _context.BlockStack.Count));
                                 _context.BlockStack.Clear();
                                 PushBlockInfoToStack(IndentType.DoEnd, token.Line);
                             }
@@ -357,7 +352,7 @@ namespace _3PA.MainFeatures.Parser {
                                     popped.LineTriggerWord == _context.BlockStack.Peek().LineTriggerWord)
                                     _context.BlockStack.Pop();
                             } else
-                                ParsedBlockOk = false;
+                                _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedBlockEnd, token, 0));
                             break;
                         case "else":
                             // add a one time indent after a then or else
@@ -379,7 +374,7 @@ namespace _3PA.MainFeatures.Parser {
                                 prevIf.EndBlockLine = token.Line;
                                 prevIf.EndBlockPosition = token.EndPosition;
                             } else
-                                ParsedIfEndIfBlockOk = false;
+                                _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedIfEndIfBlockEnd, token, 0));
                             break;
                         default:
                             // it's a potential label
@@ -1078,15 +1073,16 @@ namespace _3PA.MainFeatures.Parser {
                     break;
 
                 case "&ANALYZE-SUSPEND":
-                    // it marks the beggining of an appbuilder block, it can only be at a root/File level, otherwise flag mismatch
+                    // it marks the beggining of an appbuilder block, it can only be at a root/File level, otherwise flag error
                     if (!(_context.Scope is ParsedFile)) {
-                        ParsedUibBlockOk = false;
+                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockStart, token, 0));
                         _context.Scope = _rootScope;
                     }
 
-                    // we match a new block start but we didn't match the previous block end, flag mismatch
-                    if (_context.CurrentAppbuilderPreProcBlock != null && _context.CurrentAppbuilderPreProcBlock.EndBlockPosition == -1) {
-                        ParsedUibBlockOk = false;
+                    // we match a new block start but we didn't match the previous block end, flag error
+                    if (_context.UibBlockStack.Count > 0) {
+                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockStart, token, _context.UibBlockStack.Count));
+                        _context.UibBlockStack.Clear();
                     }
 
                     // matching different intersting blocks
@@ -1117,30 +1113,32 @@ namespace _3PA.MainFeatures.Parser {
                         type = ParsedPreProcBlockType.RunTimeAttributes;
                         blockName = "Runtime attributes";
                     }
-                    _context.CurrentAppbuilderPreProcBlock = new ParsedPreProcBlock(blockName, token) {
+                    _context.UibBlockStack.Push(new ParsedPreProcBlock(blockName, token) {
                         Type = type,
                         BlockDescription = toParse.Substring(pos2, toParse.Length - pos2),
-                    };
+                    });
 
                     // save the block description
-                    AddParsedItem(_context.CurrentAppbuilderPreProcBlock);
+                    AddParsedItem(_context.UibBlockStack.Peek());
                     break;
 
                 case "&ANALYZE-RESUME":
                     // it marks the end of an appbuilder block, it can only be at a root/File level
                     if (!(_context.Scope is ParsedFile)) {
-                        ParsedUibBlockOk = false;
+                        _parserErrors.Add(new ParserError(ParserErrorType.NotAllowedUibBlockEnd, token, 0));
                         _context.Scope = _rootScope;
                     }
-
-                    // end position of the current appbuilder block
-                    if (_context.CurrentAppbuilderPreProcBlock != null && _context.CurrentAppbuilderPreProcBlock.EndBlockPosition == -1) {
-                        _context.CurrentAppbuilderPreProcBlock.EndBlockLine = token.Line;
-                        _context.CurrentAppbuilderPreProcBlock.EndBlockPosition = token.EndPosition;
-                    } else {
+                    
+                    if (_context.UibBlockStack.Count == 0) {
                         // we match an end w/o beggining, flag a mismatch
-                        ParsedUibBlockOk = false;
+                        _parserErrors.Add(new ParserError(ParserErrorType.UnexpectedUibBlockEnd, token, 0));
+                    } else {
+                        // end position of the current appbuilder block
+                        var currentBlock = _context.UibBlockStack.Pop();
+                        currentBlock.EndBlockLine = token.Line;
+                        currentBlock.EndBlockPosition = token.EndPosition;
                     }
+
                     break;
 
                 case "&UNDEFINE":
@@ -1523,11 +1521,6 @@ namespace _3PA.MainFeatures.Parser {
             public ParsedScopeItem Scope { get; set; }
 
             /// <summary>
-            /// Keep info on the current appbuidler block in which we are (ANALYSE-SUSPEND to ANALYSE-RESUME)
-            /// </summary>
-            public ParsedPreProcBlock CurrentAppbuilderPreProcBlock { get; set; }
-
-            /// <summary>
             /// Number of words count in the current statement
             /// </summary>
             public int StatementWordCount { get; set; }
@@ -1551,6 +1544,11 @@ namespace _3PA.MainFeatures.Parser {
             /// Keep tracks on blocks through a stack (a block == an indent)
             /// </summary>
             public Stack<BlockInfo> BlockStack { get; set; }
+
+            /// <summary>
+            /// Stack of ANALYSE-SUSPEND/RESUME blocks
+            /// </summary>
+            public Stack<ParsedPreProcBlock> UibBlockStack { get; set; }
 
             /// <summary>
             /// To know the current depth for IF ENDIF pre-processed statement, allows us
@@ -1631,5 +1629,59 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     #endregion
+
+    #region ParserError
+
+    internal class ParserError {
+
+        /// <summary>
+        /// Type of the error
+        /// </summary>
+        public ParserErrorType Type { get; set; }
+
+        /// <summary>
+        /// Line at which the error happened
+        /// </summary>
+        public int TriggerLine { get; set; }
+
+        /// <summary>
+        /// Position at which the error happened
+        /// </summary>
+        public int TriggerPosition { get; set; }
+
+        /// <summary>
+        /// Stack count at the moment of the error (the type of stack will depend on the error)
+        /// </summary>
+        public int StackCount { get; set; }
+
+        public ParserError(ParserErrorType type, Token triggerToken, int stackCount) {
+            Type = type;
+            TriggerLine = triggerToken.Line;
+            TriggerPosition = triggerToken.StartPosition;
+            StackCount = stackCount;
+        }
+    }
+
+    internal enum ParserErrorType {
+        [Description("Unexpected block start, this type of block should be created at root level")]
+        UnexpectedBlockStart,
+        [Description("Unexpected block end, the start of this block has not been found")]
+        UnexpectedBlockEnd,
+        [Description("Unexpected Appbuilder block start, two consecutive ANALYSE-SUSPEND found (no ANALYSE-RESUME)")]
+        UnexpectedUibBlockStart,
+        [Description("Unexpected Appbuilder block end, can not match ANALYSE-SUSPEND for this ANALYSE-RESUME")]
+        UnexpectedUibBlockEnd,
+        [Description("Unexpected Appbuilder block start, ANALYSE-SUSPEND should be created at root level")]
+        NotAllowedUibBlockStart,
+        [Description("Unexpected Appbuilder block end, ANALYSE-RESUME should be created at root level")]
+        NotAllowedUibBlockEnd,
+        [Description("&IF pre-processed statement missing an &ENDIF")]
+        MismatchNumberOfIfEndIf,
+        [Description("&ENDIF pre-processed statement matched without the corresponding &IF")]
+        UnexpectedIfEndIfBlockEnd,
+    }
+
+    #endregion
+
 
 }

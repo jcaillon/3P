@@ -69,7 +69,7 @@ namespace _3PA.Lib {
 
         #region private fields
 
-        private int _timeOut = 1500;
+        private int _timeOut = 2000;
 
         private JavaScriptSerializer _jsSerializer;
 
@@ -116,41 +116,50 @@ namespace _3PA.Lib {
         /// </summary>
         public void Execute() {
             Task.Factory.StartNew(() => {
-                if (JsonRequest != null && !JsonRequest.EndsWith("}"))
-                    JsonRequest.Append("}");
+                try {
+                    if (JsonRequest != null && !JsonRequest.EndsWith("}"))
+                        JsonRequest.Append("}");
 
-                // init request
-                _httpRequest = WebRequest.Create(Url) as HttpWebRequest;
-                if (_httpRequest != null) {
-                    _httpRequest.Proxy = Config.Instance.GetWebClientProxy();
-                    _httpRequest.Method = Method.ToString().ToUpper();
-                    _httpRequest.ContentType = "application/json";
-                    _httpRequest.UserAgent = Config.GetUserAgent;
-                    _httpRequest.ReadWriteTimeout = TimeOut;
-                    _httpRequest.Timeout = TimeOut;
-                }
-                if (OnInitHttpWebRequest != null)
-                    OnInitHttpWebRequest(_httpRequest);
+                    // init request
+                    _httpRequest = WebRequest.Create(Url) as HttpWebRequest;
+                    if (_httpRequest != null) {
+                        _httpRequest.Proxy = Config.Instance.GetWebClientProxy();
+                        _httpRequest.Method = Method.ToString().ToUpper();
+                        _httpRequest.ContentType = "application/json";
+                        _httpRequest.UserAgent = Config.GetUserAgent;
+                        _httpRequest.ReadWriteTimeout = TimeOut;
+                        _httpRequest.Timeout = TimeOut;
+                    }
+                    if (OnInitHttpWebRequest != null)
+                        OnInitHttpWebRequest(_httpRequest);
 
-                if (Method == WebRequestMethod.Post) {
-                    if (JsonRequest == null) {
-                        ResponseException = new Exception("No request set!");
-                    } else {
-                        // start posting
-                        if (PostRequest()) {
+                    if (Method == WebRequestMethod.Post) {
+                        if (JsonRequest == null) {
+                            ResponseException = new Exception("No request set!");
+                        } else {
+                            // start posting
+                            if (PostRequest()) {
 
-                            // get the response
-                            GetResponse();
+                                // get the response
+                                GetResponse();
+                            }
                         }
+
+                    } else if (Method == WebRequestMethod.Get) {
+                        // get the response
+                        GetResponse();
                     }
 
-                } else if (Method == WebRequestMethod.Get) {
-                    // get the response
-                    GetResponse();
-                }
+                    if (OnRequestEnded != null)
+                        OnRequestEnded(this);
 
-                if (OnRequestEnded != null)
-                    OnRequestEnded(this);
+                } catch (WebException e) {
+                    ResponseException = e;
+                    HandleWebException(e);
+                } catch (Exception e) {
+                    ResponseException = e;
+                    StatusCodeResponse = HttpStatusCode.BadRequest;
+                }
             });
         }
 

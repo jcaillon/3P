@@ -121,11 +121,13 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         public static List<CompletionItem> FindProcedureParameters(CompletionItem procedureItem) {
             var parserVisitor = ParserVisitor.GetParserVisitor(procedureItem.ParsedItem.FilePath);
-            return parserVisitor.ParsedCompletionItemsList.Where(data =>
-                data.FromParser &&
-                data.ParsedItem.Scope.Name.EqualsCi(procedureItem.DisplayText) &&
-                ((ParsedDefine)data.ParsedItem).Type == ParseDefineType.Parameter &&
-                (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget)).ToList();
+            return parserVisitor.ParsedCompletionItemsList.Where(data => {
+                if (data.FromParser && data.ParsedItem.Scope.Name.EqualsCi(procedureItem.DisplayText)) {
+                    var item = data.ParsedItem as ParsedDefine;
+                    return (item != null && item.Type == ParseDefineType.Parameter && (data.Type == CompletionType.VariablePrimitive || data.Type == CompletionType.VariableComplex || data.Type == CompletionType.Widget));
+                }
+                return false;
+            }).ToList();
         }
 
         /// <summary>

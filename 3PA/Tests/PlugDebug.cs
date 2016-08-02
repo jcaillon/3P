@@ -19,12 +19,12 @@
 #endregion
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using Microsoft.Win32;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
@@ -41,18 +41,7 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-
-            UserCommunication.Notify(Path.Combine(Path.GetDirectoryName("zefef.r"), "*.r"));
-            UserCommunication.Notify(Path.Combine(Path.GetDirectoryName(@"ezfzeffz\zefzef\zefef.r"), "*.r"));
-
-            /*
-            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), @"Tests\content.md"), Encoding.Default)).MdToHtml(),
-                MessageImg.MsgUpdate,
-                "A new version has been installed!",
-                "Updated to version " + AssemblyInfo.Version,
-                new List<string> { "ok" },
-                false);
-            */
+            
         }
 
         public static void DebugTest2() {

@@ -29,11 +29,26 @@ namespace _3PA.MainFeatures.Pro {
     internal static class ProCodeFormat {
 
         /// <summary>
+        /// Returns a string that describes the errors found by the parser (relative to block start/end)
+        /// </summary>
+        public static string GetParserErrorDescription() {
+            if (ParserHandler.AblParser.ParserErrors.Count == 0)
+                return string.Empty;
+            var error = new StringBuilder();
+            foreach (var parserError in ParserHandler.AblParser.ParserErrors) {
+                error.AppendLine("<div>");
+                error.AppendLine("- Line " + (parserError.TriggerLine + 1) + ", " + parserError.Type.GetDescription());
+                error.AppendLine("</div>");
+            }
+            return error.ToString();
+        }
+
+        /// <summary>
         /// Tries to re-indent the code of the whole document
         /// </summary>
         public static void CorrectCodeIndentation() {
 
-            var canIndent = ParserHandler.AblParser.ParsedBlockOk;
+            var canIndent = ParserHandler.AblParser.ParserErrors.Count == 0;
             UserCommunication.Notify(canIndent ? "This document can be reindented!" : "Oups can't reindent the code...<br>Log : <a href='" + Path.Combine(Config.FolderTemp, "lines.log") + "'>" + Path.Combine(Config.FolderTemp, "lines.log") + "</a>", canIndent ? MessageImg.MsgOk : MessageImg.MsgError, "Parser state", "Can indent?", 20);
             if (!canIndent) {
                 StringBuilder x = new StringBuilder();
@@ -48,7 +63,7 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             // Can we indent? We can't if we didn't parse the code correctly or if there are grammar errors
-            if (ParserHandler.AblParser.ParsedBlockOk) {
+            if (canIndent) {
                 
             } else {
                 UserCommunication.NotifyUnique("FormatDocumentFail", "This action can't be executed right now because it seems that your document contains grammatical errors.<br><br><i>If the code compiles sucessfully then i failed to parse your document correctly, please make sure to create an issue on the project's github and (if possible) include the incriminating code so i can fix this problem : <br><a href='#about'>Open the about window to get the github url</a>", MessageImg.MsgRip, "Format document", "Incorrect grammar", args => {

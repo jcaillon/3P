@@ -432,6 +432,9 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Misc
 
+            /// <summary>
+            /// Returns the path to prolib.exe considering the path to prowin.exe
+            /// </summary>
             public string ProlibPath {
                 get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }

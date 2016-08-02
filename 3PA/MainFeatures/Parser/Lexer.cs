@@ -138,7 +138,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         public Token PeekAtToken(int x) {
-            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", 0, 0, 0, 0) : _tokenList[_tokenPos + x];
+            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", _startLine, _startCol, _startPos, _pos) : _tokenList[_tokenPos + x];
         }
 
         #endregion

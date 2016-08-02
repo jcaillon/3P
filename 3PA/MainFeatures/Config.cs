@@ -436,6 +436,7 @@ namespace _3PA.MainFeatures {
 
             // last ping time
             public string TechnicalLastPing = "";
+            public string MyUuid = Guid.NewGuid().ToString();
 
             // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
@@ -564,7 +565,9 @@ namespace _3PA.MainFeatures {
         public static string PingGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; } }
         public static string BugsGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; } }
 
-
+        /// <summary>
+        /// Is developper = the file debug exists
+        /// </summary>
         public static bool IsDevelopper { get { return File.Exists(FileDebug); } }
         public static string FileDebug { get { return Path.Combine(Npp.GetConfigDir(), "debug"); } }
 

@@ -170,7 +170,9 @@ namespace _3PA.MainFeatures.Parser {
         ProcedureSettings,
         CreateWindow,
         RunTimeAttributes,
-        IfEndIf
+
+        // before that, this is an ANALYSE-SUSPEND block, below are the other pre-processed block
+        IfEndIf,
     }
 
     /// <summary>
