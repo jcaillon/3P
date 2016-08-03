@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "Deployment rules configuration",
+                            Label = "DeploymentRules rules configuration",
                             HandledItem = Config.FileDeployment,
                             OnImport = line => Deployer.Import(),
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),

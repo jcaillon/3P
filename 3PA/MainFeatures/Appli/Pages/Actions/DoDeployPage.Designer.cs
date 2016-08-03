@@ -4,7 +4,7 @@ using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.MainFeatures.Appli.Pages.Options;
 
 namespace _3PA.MainFeatures.Appli.Pages.Actions {
-    partial class CompilePage {
+    partial class DoDeployPage {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -30,6 +30,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void InitializeComponent() {
             this.tooltip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.btRules = new YamuiFramework.Controls.YamuiButton();
+            this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.toggleCompOnly = new YamuiFramework.Controls.YamuiButtonToggle();
+            this.lbl_rules = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lbl_linkrules = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.linkurl = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.btBrowse = new YamuiFramework.Controls.YamuiButtonImage();
@@ -50,10 +56,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_exclude = new YamuiFramework.Controls.YamuiTextBox();
             this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.btStart = new YamuiFramework.Controls.YamuiButton();
-            this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
             this.btReset = new YamuiFramework.Controls.YamuiButton();
             this.bt_export = new YamuiFramework.Controls.YamuiButton();
-            this.lbl_report = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.progressBar = new YamuiFramework.Controls.YamuiProgressBar();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -76,6 +81,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.btRules);
+            this.scrollPanel.ContentPanel.Controls.Add(this.htmlLabel7);
+            this.scrollPanel.ContentPanel.Controls.Add(this.toggleCompOnly);
+            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_rules);
+            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_linkrules);
+            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_report);
             this.scrollPanel.ContentPanel.Controls.Add(this.linkurl);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
             this.scrollPanel.ContentPanel.Controls.Add(this.btBrowse);
@@ -96,10 +107,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.scrollPanel.ContentPanel.Controls.Add(this.fl_exclude);
             this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
             this.scrollPanel.ContentPanel.Controls.Add(this.btStart);
-            this.scrollPanel.ContentPanel.Controls.Add(this.progressBar);
             this.scrollPanel.ContentPanel.Controls.Add(this.btReset);
             this.scrollPanel.ContentPanel.Controls.Add(this.bt_export);
-            this.scrollPanel.ContentPanel.Controls.Add(this.lbl_report);
+            this.scrollPanel.ContentPanel.Controls.Add(this.progressBar);
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
@@ -111,11 +121,89 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
+            // btRules
+            // 
+            this.btRules.BackGrndImage = null;
+            this.btRules.Location = new System.Drawing.Point(268, 314);
+            this.btRules.Name = "btRules";
+            this.btRules.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btRules.Size = new System.Drawing.Size(238, 24);
+            this.btRules.TabIndex = 152;
+            this.btRules.Text = "View and modify deployment rules";
+            // 
+            // htmlLabel7
+            // 
+            this.htmlLabel7.AutoSize = false;
+            this.htmlLabel7.AutoSizeHeightOnly = true;
+            this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
+            this.htmlLabel7.Location = new System.Drawing.Point(30, 255);
+            this.htmlLabel7.Name = "htmlLabel7";
+            this.htmlLabel7.Size = new System.Drawing.Size(161, 15);
+            this.htmlLabel7.TabIndex = 150;
+            this.htmlLabel7.TabStop = false;
+            this.htmlLabel7.Text = "Deploy compiled files only?";
+            // 
+            // toggleCompOnly
+            // 
+            this.toggleCompOnly.BackGrndImage = null;
+            this.toggleCompOnly.Location = new System.Drawing.Point(268, 255);
+            this.toggleCompOnly.Name = "toggleCompOnly";
+            this.toggleCompOnly.SetImgSize = new System.Drawing.Size(0, 0);
+            this.toggleCompOnly.Size = new System.Drawing.Size(40, 16);
+            this.toggleCompOnly.TabIndex = 151;
+            this.toggleCompOnly.ToggleSize = 30;
+            // 
+            // lbl_rules
+            // 
+            this.lbl_rules.AutoSize = false;
+            this.lbl_rules.AutoSizeHeightOnly = true;
+            this.lbl_rules.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_rules.BaseStylesheet = null;
+            this.lbl_rules.IsSelectionEnabled = false;
+            this.lbl_rules.Location = new System.Drawing.Point(268, 277);
+            this.lbl_rules.Name = "lbl_rules";
+            this.lbl_rules.Size = new System.Drawing.Size(415, 30);
+            this.lbl_rules.TabIndex = 149;
+            this.lbl_rules.TabStop = false;
+            this.lbl_rules.Text = "-<b>0</b> deployment rules defined for the compilation <br>-<b>0</b> rules for th" +
+    "e files deployment";
+            // 
+            // lbl_linkrules
+            // 
+            this.lbl_linkrules.AutoSize = false;
+            this.lbl_linkrules.AutoSizeHeightOnly = true;
+            this.lbl_linkrules.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_linkrules.BaseStylesheet = null;
+            this.lbl_linkrules.IsSelectionEnabled = false;
+            this.lbl_linkrules.Location = new System.Drawing.Point(30, 277);
+            this.lbl_linkrules.Name = "lbl_linkrules";
+            this.lbl_linkrules.Size = new System.Drawing.Size(207, 15);
+            this.lbl_linkrules.TabIndex = 148;
+            this.lbl_linkrules.TabStop = false;
+            this.lbl_linkrules.Text = "Current environment rules";
+            // 
+            // lbl_report
+            // 
+            this.lbl_report.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbl_report.AutoSize = false;
+            this.lbl_report.AutoSizeHeightOnly = true;
+            this.lbl_report.BackColor = System.Drawing.Color.Transparent;
+            this.lbl_report.BaseStylesheet = null;
+            this.lbl_report.Location = new System.Drawing.Point(30, 374);
+            this.lbl_report.Name = "lbl_report";
+            this.lbl_report.Size = new System.Drawing.Size(861, 15);
+            this.lbl_report.TabIndex = 147;
+            this.lbl_report.TabStop = false;
+            this.lbl_report.Text = "lbl_report";
+            // 
             // linkurl
             // 
             this.linkurl.BackColor = System.Drawing.Color.Transparent;
             this.linkurl.BaseStylesheet = null;
-            this.linkurl.Location = new System.Drawing.Point(257, 2);
+            this.linkurl.Location = new System.Drawing.Point(245, 0);
             this.linkurl.Name = "linkurl";
             this.linkurl.Size = new System.Drawing.Size(161, 15);
             this.linkurl.TabIndex = 146;
@@ -129,9 +217,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.yamuiLabel2.Location = new System.Drawing.Point(0, 0);
             this.yamuiLabel2.Margin = new System.Windows.Forms.Padding(5, 18, 5, 7);
             this.yamuiLabel2.Name = "yamuiLabel2";
-            this.yamuiLabel2.Size = new System.Drawing.Size(209, 19);
+            this.yamuiLabel2.Size = new System.Drawing.Size(198, 19);
             this.yamuiLabel2.TabIndex = 2;
-            this.yamuiLabel2.Text = "COMPILE ENTIRE DIRECTORIES";
+            this.yamuiLabel2.Text = "COMPILE AND DEPLOY FILES";
             // 
             // btBrowse
             // 
@@ -207,7 +295,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.htmlLabel3.Size = new System.Drawing.Size(161, 15);
             this.htmlLabel3.TabIndex = 113;
             this.htmlLabel3.TabStop = false;
-            this.htmlLabel3.Text = "Select a directory to compile";
+            this.htmlLabel3.Text = "Select your source directory";
             // 
             // htmlLabel2
             // 
@@ -221,7 +309,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.htmlLabel2.Size = new System.Drawing.Size(161, 15);
             this.htmlLabel2.TabIndex = 120;
             this.htmlLabel2.TabStop = false;
-            this.htmlLabel2.Text = "Explore files recursively?";
+            this.htmlLabel2.Text = "Explore folders recursively?";
             // 
             // toggleRecurs
             // 
@@ -294,10 +382,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.htmlLabel5.IsSelectionEnabled = false;
             this.htmlLabel5.Location = new System.Drawing.Point(30, 133);
             this.htmlLabel5.Name = "htmlLabel5";
-            this.htmlLabel5.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel5.Size = new System.Drawing.Size(215, 30);
             this.htmlLabel5.TabIndex = 129;
             this.htmlLabel5.TabStop = false;
-            this.htmlLabel5.Text = "Filter for files to <b>include</b>";
+            this.htmlLabel5.Text = "Filter for files to <b>include</b> in the compilation";
             // 
             // fl_include
             // 
@@ -310,10 +398,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_include.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.fl_include.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
             this.fl_include.Location = new System.Drawing.Point(268, 133);
+            this.fl_include.MultiLines = true;
             this.fl_include.Name = "fl_include";
-            this.fl_include.Size = new System.Drawing.Size(580, 20);
+            this.fl_include.Size = new System.Drawing.Size(580, 55);
             this.fl_include.TabIndex = 127;
-            this.fl_include.WaterMark = "No filter";
+            this.fl_include.WaterMark = "No filter, every file is considered";
             // 
             // htmlLabel6
             // 
@@ -322,12 +411,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
             this.htmlLabel6.IsSelectionEnabled = false;
-            this.htmlLabel6.Location = new System.Drawing.Point(30, 159);
+            this.htmlLabel6.Location = new System.Drawing.Point(30, 194);
             this.htmlLabel6.Name = "htmlLabel6";
-            this.htmlLabel6.Size = new System.Drawing.Size(207, 15);
+            this.htmlLabel6.Size = new System.Drawing.Size(207, 30);
             this.htmlLabel6.TabIndex = 130;
             this.htmlLabel6.TabStop = false;
-            this.htmlLabel6.Text = "Filter for files to <b>exclude</b>";
+            this.htmlLabel6.Text = "Filter for files to <b>exclude</b> from the compilation";
             // 
             // fl_exclude
             // 
@@ -339,16 +428,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.fl_exclude.CustomForeColor = System.Drawing.Color.Empty;
             this.fl_exclude.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.fl_exclude.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.fl_exclude.Location = new System.Drawing.Point(268, 159);
+            this.fl_exclude.Location = new System.Drawing.Point(268, 194);
+            this.fl_exclude.MultiLines = true;
             this.fl_exclude.Name = "fl_exclude";
-            this.fl_exclude.Size = new System.Drawing.Size(580, 20);
+            this.fl_exclude.Size = new System.Drawing.Size(580, 55);
             this.fl_exclude.TabIndex = 128;
-            this.fl_exclude.WaterMark = "No filter";
+            this.fl_exclude.WaterMark = "No filter, no files will be excluded";
             // 
             // btCancel
             // 
             this.btCancel.BackGrndImage = null;
-            this.btCancel.Location = new System.Drawing.Point(30, 189);
+            this.btCancel.Location = new System.Drawing.Point(30, 344);
             this.btCancel.Name = "btCancel";
             this.btCancel.SetImgSize = new System.Drawing.Size(0, 0);
             this.btCancel.Size = new System.Drawing.Size(73, 23);
@@ -358,29 +448,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // btStart
             // 
             this.btStart.BackGrndImage = null;
-            this.btStart.Location = new System.Drawing.Point(30, 189);
+            this.btStart.Location = new System.Drawing.Point(30, 344);
             this.btStart.Name = "btStart";
             this.btStart.SetImgSize = new System.Drawing.Size(0, 0);
-            this.btStart.Size = new System.Drawing.Size(139, 23);
+            this.btStart.Size = new System.Drawing.Size(117, 23);
             this.btStart.TabIndex = 116;
-            this.btStart.Text = "Start the compilation";
-            // 
-            // progressBar
-            // 
-            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.progressBar.GradientIntensity = 5;
-            this.progressBar.Location = new System.Drawing.Point(109, 189);
-            this.progressBar.MarqueeWidth = 50;
-            this.progressBar.Name = "progressBar";
-            this.progressBar.Progress = 0F;
-            this.progressBar.Size = new System.Drawing.Size(782, 23);
-            this.progressBar.TabIndex = 114;
+            this.btStart.Text = "Start deploying";
             // 
             // btReset
             // 
             this.btReset.BackGrndImage = null;
-            this.btReset.Location = new System.Drawing.Point(175, 189);
+            this.btReset.Location = new System.Drawing.Point(153, 344);
             this.btReset.Name = "btReset";
             this.btReset.SetImgSize = new System.Drawing.Size(0, 0);
             this.btReset.Size = new System.Drawing.Size(100, 23);
@@ -390,35 +468,32 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // bt_export
             // 
             this.bt_export.BackGrndImage = null;
-            this.bt_export.Location = new System.Drawing.Point(281, 189);
+            this.bt_export.Location = new System.Drawing.Point(259, 344);
             this.bt_export.Name = "bt_export";
             this.bt_export.SetImgSize = new System.Drawing.Size(0, 0);
             this.bt_export.Size = new System.Drawing.Size(148, 23);
             this.bt_export.TabIndex = 132;
             this.bt_export.Text = "Export report to html";
             // 
-            // lbl_report
+            // progressBar
             // 
-            this.lbl_report.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            this.progressBar.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.lbl_report.AutoSize = false;
-            this.lbl_report.AutoSizeHeightOnly = true;
-            this.lbl_report.BackColor = System.Drawing.Color.Transparent;
-            this.lbl_report.BaseStylesheet = null;
-            this.lbl_report.Location = new System.Drawing.Point(30, 223);
-            this.lbl_report.Name = "lbl_report";
-            this.lbl_report.Size = new System.Drawing.Size(861, 45);
-            this.lbl_report.TabIndex = 117;
-            this.lbl_report.TabStop = false;
-            this.lbl_report.Text = "<b>Last compilation report</b><br>Files compiled : <br>Using 16 processes";
+            this.progressBar.GradientIntensity = 5;
+            this.progressBar.Location = new System.Drawing.Point(109, 344);
+            this.progressBar.MarqueeWidth = 50;
+            this.progressBar.Name = "progressBar";
+            this.progressBar.Progress = 0F;
+            this.progressBar.Size = new System.Drawing.Size(782, 23);
+            this.progressBar.TabIndex = 114;
             // 
-            // CompilePage
+            // DoDeployPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.scrollPanel);
-            this.Name = "CompilePage";
+            this.Name = "DoDeployPage";
             this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
@@ -439,7 +514,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private HtmlLabel htmlLabel3;
         private YamuiProgressBar progressBar;
         private YamuiButton btStart;
-        private HtmlLabel lbl_report;
         private YamuiButtonImage btUndo;
         private HtmlLabel htmlLabel2;
         private YamuiButtonToggle toggleRecurs;
@@ -455,5 +529,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private YamuiButton btReset;
         private YamuiButton bt_export;
         private HtmlLabel linkurl;
+        private HtmlLabel lbl_report;
+        private HtmlLabel lbl_rules;
+        private HtmlLabel lbl_linkrules;
+        private HtmlLabel htmlLabel7;
+        private YamuiButtonToggle toggleCompOnly;
+        private YamuiButton btRules;
     }
 }

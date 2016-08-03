@@ -62,12 +62,6 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string UserName = GetTrigramFromPa();
 
-            [Display(Name = "Use simple right click for the main menu",
-                Description = "Toggle this option on to replace the default right of Notepad++ by 3P's main menu<br>You then can access the default Notepad++ context menu with CTRL + Right click",
-                GroupName = "General",
-                AutoGenerateField = false)]
-            public bool AppliSimpleRightClickForMenu = false;
-
             [Display(Name = "Progress 4GL files extension list",
                 Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
                 GroupName = "General",
@@ -141,7 +135,6 @@ namespace _3PA.MainFeatures {
                 Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-
             public bool CompileForceUseOfTemp = false;
 
             public int NbOfProcessesByCore = 3;
@@ -155,6 +148,8 @@ namespace _3PA.MainFeatures {
             public string CompileIncludeList = "";
 
             public string CompileExcludeList = "";
+
+            public bool DeployCompiledOnly = false;
 
             #endregion
 

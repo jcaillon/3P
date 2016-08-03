@@ -139,11 +139,11 @@
     <Compile Include="Lib\TortoiseWrapper.cs" />
     <Compile Include="Lib\WebServiceJson.cs" />
     <Compile Include="Lib\ZipStorer.cs" />
-    <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.Designer.cs">
-      <DependentUpon>CompilePage.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.Designer.cs">
+      <DependentUpon>DoDeployPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Options\ShortCutsPage.cs">
       <SubType>UserControl</SubType>
@@ -347,8 +347,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\AppliForm.resx">
       <DependentUpon>AppliForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Actions\CompilePage.resx">
-      <DependentUpon>CompilePage.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.resx">
+      <DependentUpon>DoDeployPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Home\HomePage.resx">
       <DependentUpon>HomePage.cs</DependentUpon>
@@ -461,6 +461,7 @@
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\Push.png" />
     <Content Include="Images\Appli\Report.png" />
+    <Content Include="Images\Appli\Rules.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\Appli\Time.png" />

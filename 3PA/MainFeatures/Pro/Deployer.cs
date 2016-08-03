@@ -55,7 +55,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     RuleType rtype;
                     if (!Enum.TryParse(items[0], true, out rtype))
-                        rtype = RuleType.ForRcode;
+                        rtype = RuleType.ForCompil;
 
                     DeployType type;
                     if (!Enum.TryParse(items[3], true, out type))
@@ -320,8 +320,8 @@ namespace _3PA.MainFeatures.Pro {
     #region RuleType
 
     public enum RuleType {
-        ForRcode,
-        ForOthers,
+        ForCompil,
+        ForFiles,
         ForAll,
     }
 

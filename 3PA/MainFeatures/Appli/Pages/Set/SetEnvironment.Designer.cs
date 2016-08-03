@@ -577,7 +577,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.Size = new System.Drawing.Size(137, 45);
             this.htmlLabel4.TabIndex = 113;
             this.htmlLabel4.TabStop = false;
-            this.htmlLabel4.Text = "<b>Deployment base directory</b> <br>and compilation options ";
+            this.htmlLabel4.Text = "<b>DeploymentRules base directory</b> <br>and compilation options ";
             // 
             // btleft4
             // 

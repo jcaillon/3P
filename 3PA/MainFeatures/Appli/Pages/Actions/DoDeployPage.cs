@@ -38,7 +38,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
     /// <summary>
     /// This page is built programatically
     /// </summary>
-    internal partial class CompilePage : YamuiPage {
+    internal partial class DoDeployPage : YamuiPage {
 
         #region fields
 
@@ -53,7 +53,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
 
         #region constructor
-        public CompilePage() {
+        public DoDeployPage() {
 
             InitializeComponent();
 
@@ -85,11 +85,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             fl_exclude.Text = Config.Instance.CompileExcludeList;
 
             // compilation
-            tooltip.SetToolTip(btStart, "Click to <b>start</b> the compilation of all executable progress files<br>for the selected folder");
+            tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application :<br>First step, compile all the progress files<br>Second step, deploy r-code following the deployment rules for compilation<br>Third step, deploy any file following the deployment rules for files");
             btStart.ButtonPressed += BtStartOnButtonPressed;
 
             // cancel
-            tooltip.SetToolTip(btCancel, "Click to <b>cancel</b> the current compilation");
+            tooltip.SetToolTip(btCancel, "Click to <b>cancel</b> the current deployement");
             btCancel.ButtonPressed += BtCancelOnButtonPressed;
             btCancel.Visible = false;
 
@@ -105,17 +105,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             lbl_report.LinkClicked += Utils.OpenPathClickHandler;
 
 
-            tooltip.SetToolTip(toggleRecurs, "Toggle this option on to compile all the files contained in the selected folder<br>and in its subfolders (recursive search)<br>Toggle off and you will only compile the files directly under the selected folder");
+            tooltip.SetToolTip(toggleRecurs, "Toggle this option on to explore recursively the selected folder<br>Toggle off and you will only compile/deploy the files directly under the selected folder");
             tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
             tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
-            tooltip.SetToolTip(fl_include, "A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
-            tooltip.SetToolTip(fl_exclude, "A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>excluded</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,\\*my_sub_directory\\*,*proc_???.p</div>");
+            tooltip.SetToolTip(fl_include, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
+            tooltip.SetToolTip(fl_exclude, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>excluded</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,\\*my_sub_directory\\*,*proc_???.p</div>");
+            tooltip.SetToolTip(toggleCompOnly, "Toggle on to only deploy the Progress files that will be compilated<br>Otherwise, the deployment for all the files will be trigger after the mass compilation");
 
             // reset
             tooltip.SetToolTip(btReset, "Click to reset the options to their default values");
             btReset.ButtonPressed += BtResetOnButtonPressed;
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
+
+            btRules.ButtonPressed += (sender, args) => Appli.GoToPage(PageNames.DeploymentRules);
+            btRules.BackGrndImage = ImageResources.Rules;
 
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += UpdateMassCompilerBaseDirectory;
@@ -125,6 +129,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         #endregion
+
+        #region on show
+
+        public override void OnShow() {
+            // update the rules for the current env
+            lbl_rules.Text = string.Format("<b>{0}</b> deployment rules defined for the compilation<br><b>{1}</b> rules for the files deployment", ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.RuleType == RuleType.ForCompil || rule.RuleType == RuleType.ForAll), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.RuleType == RuleType.ForFiles || rule.RuleType == RuleType.ForAll));
+        }
+
+        public override void OnHide() {
+            RememberOptions();
+        }
+
+        #endregion
+
 
         #region Build the report
 
@@ -226,20 +244,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         /// <summary>
-        /// Start the compilation!
+        /// Start the deployment!
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
 
-            // remember options
-            Config.Instance.CompileExploreDirRecursiv = toggleRecurs.Checked;
-            Config.Instance.CompileForceMonoProcess = toggleMono.Checked;
-            int nbProc;
-            if (int.TryParse(fl_nbProcess.Text, out nbProc)) {
-                Config.Instance.NbOfProcessesByCore = Math.Min(15, nbProc);
-            }
-            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
-            Config.Instance.CompileIncludeList = fl_include.Text;
-            Config.Instance.CompileExcludeList = fl_exclude.Text;
+            RememberOptions();
 
             // init screen
             btStart.Visible = false;
@@ -252,7 +261,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             _reportExportPath = null;
             Application.DoEvents();
 
-            // start the compilation
+            // start the deployment
             Task.Factory.StartNew(() => {
 
                 // new mass compilation
@@ -289,6 +298,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // called when the compilation ended
         private void OnCompilationEnd() {
             this.SafeInvoke(page => {
+                
+                // TODO: if it went ok, move on to deploying files
+                if (_currentCompil.DeploymentDone) {
+                    
+                }
+
                 // Update the progress bar
                 progressBar.Progress = 100;
                 progressBar.Text = @"Generating the report, please wait...";
@@ -307,7 +322,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 // notify the user
                 if (!_currentCompil.HasBeenCancelled)
-                    UserCommunication.NotifyUnique("ReportAvailable", "The requested compilation is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Mass compiler", "Report available", args => {
+                    UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
                         Appli.GoToPage(PageNames.MassCompiler);
                         UserCommunication.CloseUniqueNotif("ReportAvailable");
                     }, Appli.IsFocused() ? 10 : 0);
@@ -418,7 +433,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 } else if (progressBar.Style != ProgressStyle.Normal)
                     progressBar.Style = ProgressStyle.Normal;
 
-                progressBar.Text = (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                progressBar.Text = (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " :  "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
                 progressBar.Progress = progression;
             });
         }
@@ -483,10 +498,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             }
         }
 
+        private void RememberOptions() {
+            // remember options
+            Config.Instance.CompileExploreDirRecursiv = toggleRecurs.Checked;
+            Config.Instance.DeployCompiledOnly = toggleCompOnly.Checked;
+            Config.Instance.CompileForceMonoProcess = toggleMono.Checked;
+            int nbProc;
+            if (int.TryParse(fl_nbProcess.Text, out nbProc)) {
+                Config.Instance.NbOfProcessesByCore = Math.Min(15, nbProc);
+            }
+            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
+            Config.Instance.CompileIncludeList = fl_include.Text;
+            Config.Instance.CompileExcludeList = fl_exclude.Text;
+        }
+
         private void BtResetOnButtonPressed(object sender, EventArgs eventArgs) {
             var def = new Config.ConfigObject();
             toggleRecurs.Checked = def.CompileExploreDirRecursiv;
             toggleMono.Checked = def.CompileForceMonoProcess;
+            toggleCompOnly.Checked = def.DeployCompiledOnly;
             fl_nbProcess.Text = def.NbOfProcessesByCore.ToString();
             fl_include.Text = def.CompileIncludeList;
             fl_exclude.Text = def.CompileExcludeList;

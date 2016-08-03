@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Pro {
             public string BaseLocalPath = "";
 
             /// <summary>
-            /// Deployment directory
+            /// DeploymentRules directory
             /// </summary>
             public string BaseCompilationPath = "";
 
@@ -357,12 +357,12 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            #region Deployment
+            #region DeploymentRules
 
             /// <summary>
             /// List of deploy rules read from the file and filtered for this env
             /// </summary>
-            private List<DeployRule> GetDeployRulesList {
+            public List<DeployRule> GetDeployRulesList {
                 get {
                     if (_deployRulesList == null) {
 

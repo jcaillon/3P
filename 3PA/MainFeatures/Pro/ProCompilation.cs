@@ -81,6 +81,8 @@ namespace _3PA.MainFeatures.Pro {
             get { return _processesRunning == 0; }
         }
 
+        public bool DeploymentDone;
+
         // remember the time when the compilation started
         public DateTime StartingTime { get; private set; }
 
@@ -213,7 +215,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // if the compilation is over, we need to dipslay the progression of the files being moved...
             if (CompilationDone)
-                return (float)_nbFilesTransfered / TransferedFiles.Count * 100;
+                return TransferedFiles.Count > 0 ? (float)_nbFilesTransfered / TransferedFiles.Count * 100 : 0;
 
             // else we find the total of files that have already been compiled by ready the size of compilation.progress files...
             long nbFilesDone = 0;
@@ -352,6 +354,7 @@ namespace _3PA.MainFeatures.Pro {
                     }
                 }
 
+                DeploymentDone = true;
             }
 
             ExecutionTime = GetElapsedTime();
@@ -428,7 +431,7 @@ namespace _3PA.MainFeatures.Pro {
                 currentOperation = CurrentOperation.Run;
 
             // process already running?
-            if (Plug.CurrentFileObject.CurrentOperation > CurrentOperation.Prolint) {
+            if (Plug.CurrentFileObject.CurrentOperation >= CurrentOperation.Prolint) {
                 UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
                     KillCurrentProcess();
                     StartProgressExec(executionType);

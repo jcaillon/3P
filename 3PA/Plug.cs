@@ -294,24 +294,19 @@ namespace _3PA {
             switch (message) {
                 // middle click : go to definition
                 case WinApi.WindowsMessageMouse.WM_MBUTTONDOWN:
-                    Rectangle scintillaRectangle = Rectangle.Empty;
-                    WinApi.GetWindowRect(Npp.HandleScintilla, ref scintillaRectangle);
-                    if (scintillaRectangle.Contains(Cursor.Position)) {
-                        if (KeyboardMonitor.GetModifiers.IsCtrl) {
-                            Npp.GoBackFromDefinition();
-                        } else {
-                            ProMisc.GoToDefinition(true);
-                        }
-                        return true;
+                    //if (Npp.GetScintillaRectangle().Contains(Cursor.Position)) {
+                    if (KeyboardMonitor.GetModifiers.IsCtrl) {
+                        Npp.GoBackFromDefinition();
+                    } else {
+                        ProMisc.GoToDefinition(true);
                     }
-                    break;
+                    return true;
+                    //break;
                 // (CTRL + ) Right click : show main menu
                 case WinApi.WindowsMessageMouse.WM_RBUTTONUP:
-                    if (Config.Instance.AppliSimpleRightClickForMenu && !KeyboardMonitor.GetModifiers.IsCtrl ||
-                        !Config.Instance.AppliSimpleRightClickForMenu && KeyboardMonitor.GetModifiers.IsCtrl) {
+                    if (KeyboardMonitor.GetModifiers.IsCtrl) {
                         // we need the cursor to be in scintilla but not on the application or the auto-completion!
-                        if (Npp.GetScintillaRectangle().Contains(Cursor.Position) &&
-                            (!Appli.IsVisible || !Appli.IsMouseIn()) &&
+                        if ((!Appli.IsVisible || !Appli.IsMouseIn()) &&
                             (!InfoToolTip.IsVisible || !InfoToolTip.IsMouseIn()) &&
                             (!AutoComplete.IsVisible || !AutoComplete.IsMouseIn())) {
                             AppliMenu.ShowMainMenuAtCursor();

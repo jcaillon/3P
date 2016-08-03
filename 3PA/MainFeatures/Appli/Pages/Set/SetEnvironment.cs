@@ -104,7 +104,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(textbox3, textTool);
             toolTip.SetToolTip(htmlLabel3, textTool);
 
-            textTool = "Path to the directory where you want your .r and .lst files to be moved after a successful compilation<br>You can define complex rules for a custom deployment in the SET Deployment interface";
+            textTool = "Path to the directory where you want your .r and .lst files to be moved after a successful compilation<br>You can define complex rules for a custom deployment in the SET DeploymentRules interface";
             toolTip.SetToolTip(textbox4, textTool);
             toolTip.SetToolTip(htmlLabel4, textTool);
 

@@ -81,7 +81,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             if (Deployer.GetDeployRulesList.Any()) {
 
                 strBuilder.Append("<table width='100%;'>");
-                strBuilder.Append("<tr class='CompPathHead'><td align='center' width='8%'>Rule type</td><td align='center' width='8%'>Application</td><td align='center' width='8%'>Suffix</td><td align='center' width='5%'>Type</td><td align='center' width='5%'>Next?</td><td width='33%'>Source path pattern</td><td width='33%' align='right'>Deployment target</td></tr>");
+                strBuilder.Append("<tr class='CompPathHead'><td align='center' width='8%'>Rule type</td><td align='center' width='8%'>Application</td><td align='center' width='8%'>Suffix</td><td align='center' width='5%'>Type</td><td align='center' width='5%'>Next?</td><td width='33%'>Source path pattern</td><td width='33%' align='right'>DeploymentRules target</td></tr>");
                 foreach (var compLine in Deployer.GetDeployRulesList) {
                     strBuilder.Append("<tr><td align='center'>" +
                         compLine.RuleType + "</td><td align='center'>" +
