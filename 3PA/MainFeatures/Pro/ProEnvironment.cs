@@ -36,7 +36,7 @@ namespace _3PA.MainFeatures.Pro {
 
             #region Exported fields
             /// <summary>
-            /// IF YOU HAD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
+            /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
             /// </summary>
 
             // primary key
@@ -377,6 +377,8 @@ namespace _3PA.MainFeatures.Pro {
                             int compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
                             if (compare != 0) return compare;
                             compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
+                            if (compare != 0) return compare;
+                            compare = item2.ContinueAfterThisRule.CompareTo(item1.ContinueAfterThisRule);
                             if (compare != 0) return compare;
                             compare = item1.Type.CompareTo(item2.Type);
                             if (compare != 0) return compare;

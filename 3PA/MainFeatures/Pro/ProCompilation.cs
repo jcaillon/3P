@@ -43,9 +43,25 @@ namespace _3PA.MainFeatures.Pro {
         public bool MonoProcess { get; set; }
 
         /// <summary>
+        /// Set the nmber of process to be used for each core
+        /// </summary>
+        public int NumberOfProcessesPerCore { get; set; }
+
+        /// <summary>
         /// Set to true if you want to explore the folders recursively to find all the compilable files
         /// </summary>
-        public bool RecursInDirectories { private get; set; }
+        public bool RecursInDirectories { get; set; }
+
+        /// <summary>
+        /// Filter list of files to exclusively include in the compilation process
+        /// </summary>
+        public string CompileIncludeList { get; set; }
+
+        /// <summary>
+        /// Filter list of files to exclude from the compilation process
+        /// </summary>
+        public string CompileExcludeList { get; set; }
+
 
         // total number of files being compiled
         public long NbFilesToCompile { get; private set; }
@@ -124,9 +140,9 @@ namespace _3PA.MainFeatures.Pro {
                             bool toAdd = true;
 
                             // test include filters
-                            if (!string.IsNullOrEmpty(Config.Instance.CompileIncludeList)) {
+                            if (!string.IsNullOrEmpty(CompileIncludeList)) {
                                 var hasMatch = false;
-                                foreach (var pattern in Config.Instance.CompileIncludeList.Split(',')) {
+                                foreach (var pattern in CompileIncludeList.Split(',')) {
                                     if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasMatch = true;
                                 }
@@ -134,9 +150,9 @@ namespace _3PA.MainFeatures.Pro {
                             }
 
                             // test exclude filters
-                            if (!string.IsNullOrEmpty(Config.Instance.CompileExcludeList)) {
+                            if (!string.IsNullOrEmpty(CompileExcludeList)) {
                                 var hasNoMatch = true;
-                                foreach (var pattern in Config.Instance.CompileExcludeList.Split(',')) {
+                                foreach (var pattern in CompileExcludeList.Split(',')) {
                                     if (filePath.RegexMatch(pattern.WildCardToRegex()))
                                         hasNoMatch = false;
                                 }
@@ -155,16 +171,21 @@ namespace _3PA.MainFeatures.Pro {
                 return false;
             }
 
+            return CompileFiles(filesToCompile);
+        }
+
+        public bool CompileFiles(HashSet<string> filesToCompile) {
+
             // now we do a list of those files, sorted from the biggest (in size) to the smallest file
             var sizeFileList = new List<ProCompilationFile>();
             foreach (var filePath in filesToCompile) {
                 var fileInfo = new FileInfo(filePath);
-                sizeFileList.Add(new ProCompilationFile {Path = filePath, Size = fileInfo.Length});
+                sizeFileList.Add(new ProCompilationFile { Path = filePath, Size = fileInfo.Length });
             }
             sizeFileList.Sort((file1, file2) => file2.Size.CompareTo(file1.Size));
 
             // we want to dispatch all thoses files in a fair way among the Prowin processes we will create...
-            NumberOfProcesses = MonoProcess ? 1 : Config.Instance.NbOfProcessesByCore * Environment.ProcessorCount;
+            NumberOfProcesses = MonoProcess ? 1 : NumberOfProcessesPerCore * Environment.ProcessorCount;
             _listOfCompilationProcesses.Clear();
             var currentProcess = 0;
             foreach (var file in sizeFileList) {
@@ -207,6 +228,7 @@ namespace _3PA.MainFeatures.Pro {
             }
             return true;
         }
+
 
         /// <summary>
         /// Use this method to get the overall progression of the compilation (from 0 to 100)

@@ -53,16 +53,16 @@ namespace _3PA.MainFeatures.Pro {
                 var items = s.Split('\t');
                 if (items.Length == 7) {
 
-                    RuleType rtype;
-                    if (!Enum.TryParse(items[0], true, out rtype))
-                        rtype = RuleType.ForCompil;
+                    int step;
+                    if (!int.TryParse(items[0], out step))
+                        step = 0;
 
                     DeployType type;
                     if (!Enum.TryParse(items[3], true, out type))
                         type = DeployType.Copy;
                     
                     var obj = new DeployRule {
-                        RuleType = rtype,
+                        Step = step,
                         NameFilter = items[1].Trim(),
                         SuffixFilter = items[2].Trim(),
                         Type = type,
@@ -172,10 +172,13 @@ namespace _3PA.MainFeatures.Pro {
                         // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
                         var tempSubFolder = Path.GetDirectoryName(fileToDeploy.ToTemp);
                         if (!string.IsNullOrEmpty(tempSubFolder) && !dicTempFolderToPl.ContainsKey(tempSubFolder)) {
-                            dicTempFolderToPl.Add(tempSubFolder, new Tuple<string, string, string>(
-                                dicPlToTempFolder[fileToDeploy.PlPath], // path of the temp dir
-                                Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')), // relative path in .pl
-                                fileToDeploy.PlPath)); // path to the .pl file
+                            dicTempFolderToPl.Add(
+                                tempSubFolder, 
+                                new Tuple<string, string, string>(
+                                    dicPlToTempFolder[fileToDeploy.PlPath], // path of the temp dir
+                                    Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')), // relative path in .pl
+                                    fileToDeploy.PlPath) // path to the .pl file
+                                );
 
                             // also, create the folder
                             Utils.CreateDirectory(tempSubFolder);
@@ -210,8 +213,7 @@ namespace _3PA.MainFeatures.Pro {
                         prolibMessage.Append(prolibExe.ErrorOutput);
 
                     Parallel.ForEach(onePlSubFolderDeployments, deploy => {
-                        if (!deploy.FinalDeploy)
-                            deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
+                        deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
                     });
                     
                 }
@@ -274,6 +276,11 @@ namespace _3PA.MainFeatures.Pro {
     public class DeployRule {
 
         /// <summary>
+        /// Step to which the rule applies : 0 = compilation, 1 = deployment of all files, 2+ = extra
+        /// </summary>
+        public int Step { get; set; }
+
+        /// <summary>
         /// This compilation path applies to a given application (can be empty)
         /// </summary>
         public string NameFilter { get; set; }
@@ -282,6 +289,16 @@ namespace _3PA.MainFeatures.Pro {
         /// This compilation path applies to a given Env letter (can be empty)
         /// </summary>
         public string SuffixFilter { get; set; }
+
+        /// <summary>
+        /// The type of transfer that should occur for this compilation path
+        /// </summary>
+        public DeployType Type { get; set; }
+
+        /// <summary>
+        /// if true, this should be the last rule applied to this file
+        /// </summary>
+        public bool ContinueAfterThisRule { get; set; }
 
         /// <summary>
         /// Pattern to match in the source path
@@ -294,35 +311,10 @@ namespace _3PA.MainFeatures.Pro {
         public string DeployTarget { get; set; }
 
         /// <summary>
-        /// The type of transfer that should occur for this compilation path
-        /// </summary>
-        public DeployType Type { get; set; }
-
-        /// <summary>
-        /// The type of rule
-        /// </summary>
-        public RuleType RuleType { get; set; }
-
-        /// <summary>
-        /// if true, this should be the last rule applied to this file
-        /// </summary>
-        public bool ContinueAfterThisRule { get; set; }
-
-        /// <summary>
         /// The line from which we read this info, allows to sort by line
         /// </summary>
         public int Line { get; set; }
 
-    }
-
-    #endregion
-
-    #region RuleType
-
-    public enum RuleType {
-        ForCompil,
-        ForFiles,
-        ForAll,
     }
 
     #endregion

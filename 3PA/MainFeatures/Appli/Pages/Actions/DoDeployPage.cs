@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
@@ -49,6 +50,41 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private ProCompilation _currentCompil;
 
         private string _reportExportPath;
+
+        private List<DeployProfile> ListProfiles {
+            get {
+                if (_listConfig == null) {
+                    if (File.Exists(Config.FileDeployProfiles)) {
+                        _listConfig = new List<DeployProfile>();
+                        try {
+                            Object2Xml<DeployProfile>.LoadFromFile(_listConfig, Config.FileDeployProfiles);
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error when loading settings", Config.FileDeployProfiles);
+                        }
+                    }
+                    if (_listConfig == null || _listConfig.Count == 0)
+                        _listConfig = new List<DeployProfile> { new DeployProfile() };
+                }
+                return _listConfig;
+            }
+            set { _listConfig = value; }
+        }
+
+        public DeployProfile CurrentProfile {
+            get {
+                if (_currentProfile == null) {
+                    _currentProfile = ListProfiles.FirstOrDefault(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile));
+                    if (_currentProfile == null)
+                        _currentProfile = ListProfiles.First();
+                }
+                return _currentProfile;
+            }
+            set { _currentProfile = value; }
+        }
+
+        private List<DeployProfile> _listConfig;
+
+        private DeployProfile _currentProfile;
 
         #endregion
 
@@ -76,14 +112,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btUndo.ButtonPressed += BtUndoOnButtonPressed;
             tooltip.SetToolTip(btUndo, "Click to <b>select</b> the base local path (your source directory)<br>for the current environment");
 
-            // default values
-            fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
-            toggleRecurs.Checked = Config.Instance.CompileExploreDirRecursiv;
-            toggleMono.Checked = Config.Instance.CompileForceMonoProcess;
-            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
-            fl_include.Text = Config.Instance.CompileIncludeList;
-            fl_exclude.Text = Config.Instance.CompileExcludeList;
-
             // compilation
             tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application :<br>First step, compile all the progress files<br>Second step, deploy r-code following the deployment rules for compilation<br>Third step, deploy any file following the deployment rules for files");
             btStart.ButtonPressed += BtStartOnButtonPressed;
@@ -110,13 +138,58 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
             tooltip.SetToolTip(fl_include, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
             tooltip.SetToolTip(fl_exclude, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>excluded</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,\\*my_sub_directory\\*,*proc_???.p</div>");
-            tooltip.SetToolTip(toggleCompOnly, "Toggle on to only deploy the Progress files that will be compilated<br>Otherwise, the deployment for all the files will be trigger after the mass compilation");
 
             // reset
             tooltip.SetToolTip(btReset, "Click to reset the options to their default values");
-            btReset.ButtonPressed += BtResetOnButtonPressed;
+            btReset.ButtonPressed += (sender, args) => { ResetFields(); };
 
+            // help kink
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
+
+            // save
+            btSave.BackGrndImage = ImageResources.Save;
+            btSave.ButtonPressed += (sender, args) => {
+                if (string.IsNullOrEmpty(CurrentProfile.Name) && !ChooseName())
+                    return;
+                SetDataFromFields();
+                SaveProfilesList();
+            };
+
+            // save as...
+            btSaveAs.BackGrndImage = ImageResources.Save;
+            btSaveAs.ButtonPressed += (sender, args) => {
+                var _cur = CurrentProfile;
+                ListProfiles.Add(new DeployProfile());
+                CurrentProfile = ListProfiles.Last();
+                if (ChooseName()) {
+                    SetDataFromFields();
+                    SaveProfilesList();
+                } else {
+                    ListProfiles.RemoveAt(ListProfiles.Count - 1);
+                    CurrentProfile = _cur;
+                }
+            };
+
+            // delete
+            btDelete.BackGrndImage = ImageResources.Delete;
+            btDelete.ButtonPressed += (sender, args) => {
+                if (UserCommunication.Message("Do you really want to delete this profile?", MessageImg.MsgQuestion, "Delete", "Deployment profile", new List<string> {"Yes", "Cancel"}) == 0) {
+                    if (ListProfiles.Count == 1)
+                        ResetFields();
+                    else {
+                        if (ListProfiles.Count > 1)
+                            ListProfiles.Remove(CurrentProfile);
+                        else
+                            ListProfiles = new List<DeployProfile> { new DeployProfile() };
+                        CurrentProfile = null;
+                        SaveProfilesList();
+                        SetFieldsFromData();
+                    }
+                }
+            };
+
+            // cb
+            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
 
             btRules.ButtonPressed += (sender, args) => Appli.GoToPage(PageNames.DeploymentRules);
             btRules.BackGrndImage = ImageResources.Rules;
@@ -133,12 +206,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #region on show
 
         public override void OnShow() {
+
+            // cur env
+            lblCurEnv.Text = string.Format("{0}, <a href=''>(switch)</a>", ProEnvironment.Current.Name);
+
             // update the rules for the current env
-            lbl_rules.Text = string.Format("<b>{0}</b> deployment rules defined for the compilation<br><b>{1}</b> rules for the files deployment", ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.RuleType == RuleType.ForCompil || rule.RuleType == RuleType.ForAll), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.RuleType == RuleType.ForFiles || rule.RuleType == RuleType.ForAll));
+            lbl_rules.Text = string.Format("<b>{0}</b> rules for step 1, <b>{1}</b> rules for step, <b>{2}</b> rules for further steps", ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 0), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 1), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step > 1));
+
+            // update combo and fields
+            if (_currentProfile == null) {
+                UpdateCombo();
+                SetFieldsFromData();
+            }
         }
 
         public override void OnHide() {
-            RememberOptions();
         }
 
         #endregion
@@ -185,7 +267,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     listLines.Add(new Tuple<int, string>((moveFail || hasError ? 3 : (hasWarning ? 2 : 1)), line.ToString()));
 
-                    if (moveFail || hasError) 
+                    if (moveFail || hasError)
                         nbFailed++;
                     else if (hasWarning)
                         nbWarning++;
@@ -248,8 +330,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
 
-            RememberOptions();
-
             // init screen
             btStart.Visible = false;
             btReset.Visible = false;
@@ -268,8 +348,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 _currentCompil = new ProCompilation {
                     // check if we need to force the compiler to only use 1 process 
                     // (either because the user want to, or because we have a single user mode database)
-                    MonoProcess = Config.Instance.CompileForceMonoProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
-                    RecursInDirectories = Config.Instance.CompileExploreDirRecursiv
+                    MonoProcess = CurrentProfile.ForceSingleProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
+                    RecursInDirectories = CurrentProfile.ExploreRecursively,
+                    NumberOfProcessesPerCore = CurrentProfile.NumberProcessPerCore,
+                    CompileIncludeList = CurrentProfile.FilterInclude,
+                    CompileExcludeList = CurrentProfile.FilterExclude,
                 };
                 _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
@@ -287,7 +370,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         _progressTimer.Tick += (o, args) => UpdateProgressBar();
                         _progressTimer.Start();
                     });
-                    
+
                 } else {
                     // nothing started
                     ResetScreen();
@@ -298,10 +381,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // called when the compilation ended
         private void OnCompilationEnd() {
             this.SafeInvoke(page => {
-                
+
                 // TODO: if it went ok, move on to deploying files
                 if (_currentCompil.DeploymentDone) {
-                    
+
                 }
 
                 // Update the progress bar
@@ -338,14 +421,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             List<YamuiMenuItem> itemList = new List<YamuiMenuItem>();
             foreach (var path in Config.Instance.CompileDirectoriesHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
-                    itemList.Add(new YamuiMenuItem {ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
-                        if (IsHandleCreated) {
-                            BeginInvoke((Action) delegate {
-                                fl_directory.Text = path;
-                                SaveHistoric();
-                            });
+                    itemList.Add(new YamuiMenuItem {
+                        ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
+                            if (IsHandleCreated) {
+                                BeginInvoke((Action)delegate {
+                                    fl_directory.Text = path;
+                                    SaveHistoric();
+                                });
+                            }
                         }
-                    }});
+                    });
                 }
             }
             if (itemList.Count > 0) {
@@ -415,6 +500,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         }
 
+        private void CbNameOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
+            CurrentProfile = ListProfiles[cbName.SelectedIndex];
+            Config.Instance.CurrentDeployProfile = CurrentProfile.Name;
+            SetFieldsFromData();
+        }
+
         #endregion
 
         #region private methods
@@ -433,7 +524,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 } else if (progressBar.Style != ProgressStyle.Normal)
                     progressBar.Style = ProgressStyle.Normal;
 
-                progressBar.Text = (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " :  "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                progressBar.Text = (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
                 progressBar.Progress = progression;
             });
         }
@@ -477,7 +568,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         private void ResetScreen() {
             this.SafeInvoke(page => {
-            btStart.Visible = true;
+                btStart.Visible = true;
                 btReset.Visible = true;
                 btCancel.Visible = false;
                 progressBar.Visible = false;
@@ -498,28 +589,61 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             }
         }
 
-        private void RememberOptions() {
-            // remember options
-            Config.Instance.CompileExploreDirRecursiv = toggleRecurs.Checked;
-            Config.Instance.DeployCompiledOnly = toggleCompOnly.Checked;
-            Config.Instance.CompileForceMonoProcess = toggleMono.Checked;
-            int nbProc;
-            if (int.TryParse(fl_nbProcess.Text, out nbProc)) {
-                Config.Instance.NbOfProcessesByCore = Math.Min(15, nbProc);
-            }
-            fl_nbProcess.Text = Config.Instance.NbOfProcessesByCore.ToString();
-            Config.Instance.CompileIncludeList = fl_include.Text;
-            Config.Instance.CompileExcludeList = fl_exclude.Text;
+        private bool ChooseName() {
+            object name = string.Empty;
+            if (UserCommunication.Input(ref name, "", MessageImg.MsgQuestion, "Save profile as...", "Enter a name for this profile") == 1 ||
+                string.IsNullOrEmpty((string)name))
+                return false;
+            CurrentProfile.Name = (string)name;
+            return true;
         }
 
-        private void BtResetOnButtonPressed(object sender, EventArgs eventArgs) {
-            var def = new Config.ConfigObject();
-            toggleRecurs.Checked = def.CompileExploreDirRecursiv;
-            toggleMono.Checked = def.CompileForceMonoProcess;
-            toggleCompOnly.Checked = def.DeployCompiledOnly;
-            fl_nbProcess.Text = def.NbOfProcessesByCore.ToString();
-            fl_include.Text = def.CompileIncludeList;
-            fl_exclude.Text = def.CompileExcludeList;
+        private void SaveProfilesList() {
+            try {
+                Object2Xml<DeployProfile>.SaveToFile(ListProfiles, Config.FileDeployProfiles);
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while saving the deployment profiles");
+            }
+            Config.Instance.CurrentDeployProfile = CurrentProfile.Name;
+            UpdateCombo();
+        }
+
+        private void SetFieldsFromData() {
+            fl_directory.Text = CurrentProfile.SourceDirectory;
+            toggleRecurs.Checked = CurrentProfile.ExploreRecursively;
+            toggleMono.Checked = CurrentProfile.ForceSingleProcess;
+            toggleOnlyGenerateRcode.Checked = CurrentProfile.OnlyGenerateRcode;
+            fl_nbProcess.Text = CurrentProfile.NumberProcessPerCore.ToString();
+            fl_include.Text = CurrentProfile.FilterInclude;
+            fl_exclude.Text = CurrentProfile.FilterExclude;
+        }
+
+        private void SetDataFromFields() {
+            CurrentProfile.SourceDirectory = fl_directory.Text;
+            CurrentProfile.ExploreRecursively = toggleRecurs.Checked;
+            CurrentProfile.ForceSingleProcess = toggleMono.Checked;
+            CurrentProfile.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
+            if (!int.TryParse(fl_nbProcess.Text, out CurrentProfile.NumberProcessPerCore))
+                CurrentProfile.NumberProcessPerCore = 1;
+            CurrentProfile.NumberProcessPerCore.Clamp(1, 15);
+            CurrentProfile.FilterInclude = fl_include.Text;
+            CurrentProfile.FilterExclude = fl_exclude.Text;
+        }
+
+        private void UpdateCombo() {
+            cbName.SelectedIndexChanged -= CbNameOnSelectedIndexChanged;
+            cbName.DataSource = ListProfiles.Select(profile => profile.Name).ToList();
+            if (ListProfiles.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
+                cbName.SelectedItem = Config.Instance.CurrentDeployProfile;
+            else
+                cbName.SelectedIndex = 0;
+            cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
+        }
+
+        private void ResetFields() {
+            CurrentProfile = new DeployProfile();
+            SetFieldsFromData();
+            CurrentProfile = null;
         }
 
         /// <summary>
@@ -533,5 +657,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #endregion
     }
 
+    internal class DeployProfile {
+        public string Name = "";
+        public string SourceDirectory = "";
+        public bool ExploreRecursively = true;
+        public bool ForceSingleProcess = false;
+        public bool OnlyGenerateRcode = true;
+        public int NumberProcessPerCore = 3;
+        public string FilterInclude = "";
+        public string FilterExclude = "";
+    }
 
 }

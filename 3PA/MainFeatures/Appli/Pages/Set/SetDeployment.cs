@@ -84,7 +84,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 strBuilder.Append("<tr class='CompPathHead'><td align='center' width='8%'>Rule type</td><td align='center' width='8%'>Application</td><td align='center' width='8%'>Suffix</td><td align='center' width='5%'>Type</td><td align='center' width='5%'>Next?</td><td width='33%'>Source path pattern</td><td width='33%' align='right'>DeploymentRules target</td></tr>");
                 foreach (var compLine in Deployer.GetDeployRulesList) {
                     strBuilder.Append("<tr><td align='center'>" +
-                        compLine.RuleType + "</td><td align='center'>" +
+                        compLine.Step + "</td><td align='center'>" +
                         (string.IsNullOrEmpty(compLine.NameFilter) ? "*" : compLine.NameFilter) + "</td><td align='center'>" + 
                         (string.IsNullOrEmpty(compLine.SuffixFilter) ? "*" : compLine.SuffixFilter) + "</td><td align='center'>" + 
                         compLine.Type + "</td><td align='center'>" +

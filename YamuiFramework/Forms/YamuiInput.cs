@@ -36,7 +36,12 @@ namespace YamuiFramework.Forms {
 
         #region Fields
 
-        private object _dataObj;
+        public object DataObject;
+
+        /// <summary>
+        /// Out object bind?
+        /// </summary>
+        public bool Bound;
 
         private List<MemberInfo> _items = new List<MemberInfo>();
 
@@ -44,7 +49,7 @@ namespace YamuiFramework.Forms {
         /// True if the form contains data that need user's input
         /// </summary>
         private bool HasData {
-            get { return _dataObj != null; }
+            get { return DataObject != null; }
         }
 
         /// <summary>
@@ -86,7 +91,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Constructor, you should the method ShwDlg instead
         /// </summary>
-        private YamuiInput(string htmlTitle, string htmlMessage, List<string> buttonsList, ref object dataObj, int formMaxWidth, int formMaxHeight, int formMinWidth, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked) {
+        private YamuiInput(string htmlTitle, string htmlMessage, List<string> buttonsList, object dataObject, int formMaxWidth, int formMaxHeight, int formMinWidth, EventHandler<HtmlLinkClickedEventArgs> onLinkClicked) {
 
             InitializeComponent();
 
@@ -94,14 +99,14 @@ namespace YamuiFramework.Forms {
             contentPanel.NoBackgroundImage = true;
 
             // if there was an object data passed on, need to check the max width needed to draw the inputs
-            _dataObj = dataObj;
+            DataObject = dataObject;
             if (HasData) {
 
                 // we make a list MemberInfo for each field in the data passed
-                if (_dataObj.GetType().IsSimpleType())
+                if (DataObject.GetType().IsSimpleType())
                     _items.Add(null);
                 else {
-                    foreach (var mi in _dataObj.GetType().GetMembers(BindingFlags.Instance | BindingFlags.Public)) {
+                    foreach (var mi in DataObject.GetType().GetMembers(BindingFlags.Instance | BindingFlags.Public)) {
                         if (GetAttr(mi) != null && GetAttr(mi).Hidden)
                             continue;
                         var fi = mi as FieldInfo;
@@ -267,11 +272,11 @@ namespace YamuiFramework.Forms {
             // Get default text value
             object val;
             if (item == null)
-                val = _dataObj;
+                val = DataObject;
             else if (item is PropertyInfo)
-                val = ((PropertyInfo)item).GetValue(_dataObj, null);
+                val = ((PropertyInfo)item).GetValue(DataObject, null);
             else
-                val = ((FieldInfo)item).GetValue(_dataObj);
+                val = ((FieldInfo)item).GetValue(DataObject);
 
             string strValue = val.ConvertToStr();
             var inputWidth = contentPanel.ContentPanel.Width - _dataLabelWidth - InputPadding * 3;
@@ -373,14 +378,15 @@ namespace YamuiFramework.Forms {
                 else
                     val = c.Text.ConvertFromStr(itemType);
 
-                // Apply value to dataObj
+                // Apply value to dataObject
                 if (item == null)
-                    _dataObj = val;
+                    DataObject = val;
                 else if (item is PropertyInfo)
-                    ((PropertyInfo)item).SetValue(_dataObj, val, null);
+                    ((PropertyInfo)item).SetValue(DataObject, val, null);
                 else
-                    ((FieldInfo)item).SetValue(_dataObj, val);
+                    ((FieldInfo)item).SetValue(DataObject, val);
             }
+            Bound = true;
         }
 
         private bool IsTextInvalid(YamuiTextBox tb, Type itemType) {
@@ -400,7 +406,7 @@ namespace YamuiFramework.Forms {
         }
 
         private Type GetItemType(MemberInfo mi) {
-            return mi == null ? _dataObj.GetType() : (mi is PropertyInfo ? ((PropertyInfo)mi).PropertyType : ((FieldInfo)mi).FieldType);
+            return mi == null ? DataObject.GetType() : (mi is PropertyInfo ? ((PropertyInfo)mi).PropertyType : ((FieldInfo)mi).FieldType);
         }
 
         #endregion
@@ -438,7 +444,7 @@ namespace YamuiFramework.Forms {
                 waitResponse = true;
 
             // new message box
-            msgBox = new YamuiInput(htmlTitle, htmlMessage, buttonsList, ref data, maxFormWidth, maxFormHeight, minFormWidth, onLinkClicked) {
+            msgBox = new YamuiInput(htmlTitle, htmlMessage, buttonsList, data, maxFormWidth, maxFormHeight, minFormWidth, onLinkClicked) {
                 ShowInTaskbar = !waitResponse,
                 TopMost = true,
                 Text = caption
@@ -457,6 +463,9 @@ namespace YamuiFramework.Forms {
                     yamuiForm.HasModalOpened = true;
 
                 msgBox.ShowDialog(new WindowWrapper(ownerHandle));
+
+                if (msgBox.Bound)
+                    data = msgBox.DataObject;
 
                 if (yamuiForm != null)
                     yamuiForm.HasModalOpened = false;

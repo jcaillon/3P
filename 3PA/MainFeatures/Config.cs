@@ -137,19 +137,9 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CompileForceUseOfTemp = false;
 
-            public int NbOfProcessesByCore = 3;
-
-            public bool CompileForceMonoProcess = false;
-
             public string CompileDirectoriesHistoric = "";
 
-            public bool CompileExploreDirRecursiv = true;
-
-            public string CompileIncludeList = "";
-
-            public string CompileExcludeList = "";
-
-            public bool DeployCompiledOnly = false;
+            public string CurrentDeployProfile = "";
 
             #endregion
 
@@ -600,6 +590,7 @@ namespace _3PA.MainFeatures {
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
+        public static string FileDeployProfiles { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentProfiles.conf"); } }
 
         // Npp files
         public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
