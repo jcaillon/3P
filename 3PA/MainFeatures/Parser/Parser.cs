@@ -1310,8 +1310,8 @@ namespace _3PA.MainFeatures.Parser {
                 return false;
             } 
 
-            // otherwise it needs to ends with :
-            if (!(token is TokenEos) || !token.Value.Equals(":"))
+            // otherwise it needs to ends with : or .
+            if (!(token is TokenEos))
                 return false;
 
             // New function

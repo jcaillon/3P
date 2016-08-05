@@ -109,6 +109,8 @@ namespace _3PA {
 
         #endregion
 
+        private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase); 
+
         #region Called with no conditions
 
         #region Start
@@ -470,12 +472,66 @@ namespace _3PA {
 
         #region Called when PluginIsReady
 
+        #region OnNppFileBeforeClose
+
+        /// <summary>
+        /// Called when a file is about to be closed in notepad++
+        /// </summary>
+        private static void OnNppFileBeforeClose() {
+
+            // remove the file from the opened files list
+            if (_openedFileList.Contains(CurrentFilePath)) {
+                _openedFileList.Remove(CurrentFilePath);
+            }
+        }
+
+        #endregion
+
+        #region OnNppFileOpened
+
+        /// <summary>
+        /// Called when a new file is opened in notepad++
+        /// </summary>
+        private static void OnNppFileOpened() {
+        }
+
+        #endregion
+
         #region On document switch
 
         /// <summary>
         /// Called when the user switches tab document, 
         /// no matter if the document is a Progress file or not
         /// </summary>
+        public static void DoNppBufferActivated() {
+            
+            // if the file has just been opened
+            var currentFile = Npp.GetCurrentFilePath();
+            if (!_openedFileList.Contains(currentFile)) {
+                _openedFileList.Add(currentFile);
+
+                // need to auto change encoding?
+                if (Config.Instance.AutoSwitchEncodingTo != NppEncodingFormat._Automatic_default && !string.IsNullOrEmpty(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
+                    if (Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.AutoSwitchEncodingForFilePatterns)) {
+                        NppMenuCmd cmd;
+                        if (Enum.TryParse(((int)Config.Instance.AutoSwitchEncodingTo).ToString(), true, out cmd))
+                            Npp.RunCommand(cmd);
+                    }
+                }
+            }
+
+            // deactivate show space for conf files
+            if (ShareExportConf.IsFileExportedConf(CurrentFilePath))
+                if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
+                    Npp.ViewWhitespace = _whitespaceMode;
+
+            DoNppDocumentSwitched();
+
+            // activate show space for conf files
+            if (ShareExportConf.IsFileExportedConf(CurrentFilePath))
+                Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
+        }
+
         public static void DoNppDocumentSwitched(bool initiating = false) {
 
             // update current file info
@@ -551,6 +607,9 @@ namespace _3PA {
             // update function prototypes
             if (IsCurrentFileProgress)
                 ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+
+            // if it's a conf file, import it
+            ShareExportConf.TryToImportFile(CurrentFilePath);
         }
 
         #endregion
@@ -883,7 +942,8 @@ namespace _3PA {
             // we block on a scintilla level (pretty bad solution because it slows down npp on big documents)
             Npp.AutoCStops(@"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_");
             // and we also block it in Npp (pull request on going for v6.9.?)
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
+            if (Config.IsDevelopper)
+                WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 1);
         }
 
         internal static void ApplyDefaultOptionsForScintilla() {
@@ -895,6 +955,7 @@ namespace _3PA {
             Npp.TabWidth = _tabWidth;
             Npp.UseTabs = _indentWithTabs;
             Npp.AnnotationVisible = AnnotationMode;
+
             if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                 Npp.ViewWhitespace = _whitespaceMode;
 
@@ -918,7 +979,8 @@ namespace _3PA {
             
             // we wanted the default auto-completion to not show, but no more
             Npp.AutoCStops("");
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
+            if (Config.IsDevelopper)
+                WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED, 0, 0);
         }
 
         private static Color GetColorInStylers(IEnumerable<XElement> widgetStyle, string attributeName, string attributeToGet) {

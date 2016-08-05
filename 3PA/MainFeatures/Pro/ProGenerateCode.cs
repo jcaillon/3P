@@ -46,7 +46,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <remarks>This method is costly because we parse everything potentially X times, but it's much simpler this way...</remarks>
         public static void UpdateFunctionPrototypesIfNeeded(bool silent = false) {
 
-            if (_ignoredFiles.Contains(Plug.CurrentFilePath)) {
+            if (_ignoredFiles.Contains(Plug.CurrentFilePath) || Config.Instance.DisablePrototypeAutoUpdate) {
                 if (silent)
                     return;
                 _ignoredFiles.Remove(Plug.CurrentFilePath);
@@ -177,15 +177,11 @@ namespace _3PA.MainFeatures.Pro {
 
             var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
 
-            // we take caution here... ensure that the implementation syntax is correct
-            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1) {
+            // replace the end ":" or "." by a " FOWARD."
+            protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
+            Npp.SetTextByRange(function.PrototypePosition, function.PrototypeEndPosition, protoStr);
 
-                // replace the end ":" by a " FOWARD."
-                protoStr = protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.";
-                Npp.SetTextByRange(function.PrototypePosition, function.PrototypeEndPosition, protoStr);
-
-                outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + (function.PrototypePosition) + "'>" + function.Name + "</a>");
-            }
+            outputMessage.Append("<br> - <a href='" + function.FilePath + "#" + (function.PrototypePosition) + "'>" + function.Name + "</a>");
 
             return true;
         }

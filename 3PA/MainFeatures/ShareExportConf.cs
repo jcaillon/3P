@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
@@ -57,7 +58,16 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "DeploymentRules rules configuration",
+                            Label = "Deployment profiles",
+                            HandledItem = Config.FileDeployProfiles,
+                            OnImport = line => Deployer.Import(),
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
+                        new ConfLine {
+                            Label = "Deployment rules",
                             HandledItem = Config.FileDeployment,
                             OnImport = line => Deployer.Import(),
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),
@@ -132,6 +142,27 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        /// <summary>
+        /// Returns true if the file is a configuration file listed here
+        /// </summary>
+        public static bool IsFileExportedConf(string filePath) {
+            return List.Exists(line => line.HandledItem.Equals(filePath));
+        }
+
+        /// <summary>
+        /// Try to import the given configuration file
+        /// </summary>
+        public static bool TryToImportFile(string filePath) {
+            if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath)) {
+                var item = List.FirstOrDefault(line => line.HandledItem.Equals(filePath));
+                if (item != null) {
+                    item.OnImport(item);
+                    UserCommunication.NotifyUnique("Importedconf", "The latest changes to <b>" + item.Label + "</b> have been imported!", MessageImg.MsgInfo, "Configuration imported", item.Label, null, 5);
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /// <summary>
         /// ASYNC - Call this method to start checking for updates every xx min, also check once immediatly

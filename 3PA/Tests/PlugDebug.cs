@@ -24,11 +24,12 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
-using Microsoft.Win32;
 using YamuiFramework.Helper;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
 
@@ -41,55 +42,10 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            
+
         }
 
         public static void DebugTest2() {
-            string message = "";
-
-            StringBuilder str = new StringBuilder();
-            StringBuilder str2 = new StringBuilder();
-            
-            /*
-            try {
-                message = prolib.RunExternalExe(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe", @"E:\Cnaf\_exe\Nouveau dossier\derp.pl".ProQuoter() + " -create");
-            } catch (Exception e) {
-                message = e.Message;
-            }
-            UserCommunication.Notify(message);
-            */
-            MeasureIt(() => {
-                var prolib = new ProcessIo(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe") {
-                    Arguments = @"E:\Cnaf\_exe\Nouveau dossier\_fuck.pl".ProQuoter() + " -create -nowarn -add " + (@"E:\Cnaf\_exe\Nouveau dossier\*.r").ProQuoter() + " -compress"
-                };
-                if (!prolib.TryDoWait(true))
-                    message += prolib.ErrorOutput.ToString();
-                else
-                    message += prolib.StandardOutput.ToString();
-
-                prolib.Arguments = @"E:\Cnaf\_exe\Nouveau dossier\_fuck2.pl".ProQuoter() + " -create -nowarn -add " + (@"E:\Cnaf\_exe\Nouveau dossier\*.r").ProQuoter() + " -compress";
-                if (!prolib.TryDoWait(true))
-                    message += prolib.ErrorOutput.ToString();
-                else
-                    message += prolib.StandardOutput.ToString();
-
-                prolib.Close();
-            /*
-                // -replace -add -create -compress?
-                for (int i = 0; i < 100; i++) {
-                    for (int j = 0; j < 5; j++) {
-                        str2.AppendLine(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe".ProQuoter() + " " + @"V:\appli\progress\_others\derp.pl".ProQuoter() + " -a " + (@"V:\appli\progress\_others\fuck\compil-" + j + ".r").ProQuoter());
-                        try {
-                            str.Append(RunExternalExe(@"C:\Progress\client\v1160_dv\dlc\bin\prolib.exe", @"V:\appli\progress\_others\derp.pl".ProQuoter() + " -a " + (@"V:\appli\progress\_others\fuck\compil-" + j + ".r").ProQuoter()));
-                        } catch (Exception e) {
-                            str.Append(e.Message);
-                        }
-                    }
-                }
-                 * */
-            });
-
-            UserCommunication.Notify(message);
 
         }
 

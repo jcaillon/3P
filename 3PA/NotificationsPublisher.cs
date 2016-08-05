@@ -99,7 +99,7 @@ namespace _3PA {
                 switch (code) {
                     // the user changed the current document
                     case (uint) NppNotif.NPPN_BUFFERACTIVATED:
-                        DoNppDocumentSwitched();
+                        DoNppBufferActivated();
                         return;
 
                     case (uint)NppNotif.NPPN_FILESAVED:
@@ -110,6 +110,16 @@ namespace _3PA {
                         // fire when a file is opened (the event NPPN_FILEBEFOREOPEN is fired after SciNotif.SCN_MODIFIED
                         // and just before NppNotif.NPPN_BUFFERACTIVATED so it's not very useful...)
                         DoNppFileBeforeLoad();
+                        return;
+
+                    case (uint)NppNotif.NPPN_FILEOPENED:
+                        // on file opened
+                        OnNppFileOpened();
+                        return;
+
+                    case (uint)NppNotif.NPPN_FILEBEFORECLOSE:
+                        // on file closed
+                        OnNppFileBeforeClose();
                         return;
                 }
 

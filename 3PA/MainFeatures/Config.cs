@@ -24,6 +24,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.CodeExplorer;
 
@@ -307,7 +308,12 @@ namespace _3PA.MainFeatures {
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
             public bool CodeShowSpaces = true;
-            
+
+            [Display(Name = "Disable auto update of function prototypes",
+                Description = "Toggle on to prevent 3P from automatically updating your functions prototypes according to their implementation<br>You are still able to manually trigger the update through the menu",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            public bool DisablePrototypeAutoUpdate = false;
 
             #endregion
 
@@ -387,6 +393,15 @@ namespace _3PA.MainFeatures {
             public double ToolTipOpacity = 0.92;
 
             #endregion
+
+            #region MISC
+
+            public string AutoSwitchEncodingForFilePatterns = "";
+
+            public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
+
+            #endregion
+
 
             // Current folder mode for the file explorer : local/compilation/propath/everywhere
             public int FileExplorerViewMode = 3;

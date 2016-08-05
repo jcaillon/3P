@@ -218,13 +218,21 @@ namespace _3PA.Lib {
         public static bool IsFlagSet(this Enum input, Enum matchTo) {
             return (Convert.ToUInt32(input) & Convert.ToUInt32(matchTo)) != 0;
         }
-        
+
         //flags |= flag;// SetFlag
         //flags &= ~flag; // ClearFlag 
 
         #endregion
 
         #region string extensions
+
+        /// <summary>
+        /// Allows to test if a string matches one of the listOfPattern (wildcards) in the list of patterns,
+        /// Ex : "file.xml".TestAgainstListOfPatterns("*.xls,*.com,*.xml") return true
+        /// </summary>
+        public static bool TestAgainstListOfPatterns(this string source, string listOfPattern) {
+            return listOfPattern.Split(',').ToList().Exists(s => source.RegexMatch(s.WildCardToRegex()));
+        }
 
         /// <summary>
         /// Allows to test a string with a regular expression, uses the IgnoreCase option by default
@@ -265,7 +273,7 @@ namespace _3PA.Lib {
         /// Allows to tranform a matching string using * and ? (wildcards) into a valid regex expression
         /// it escapes regex special char so it will work as you expect!
         /// Ex: foo*.xls? will become ^foo.*\.xls.$
-        /// if the pattern doesn't start with a * and doesn't end with a *, it adds both
+        /// if the listOfPattern doesn't start with a * and doesn't end with a *, it adds both
         /// </summary>
         /// <param name="pattern"></param>
         /// <returns></returns>

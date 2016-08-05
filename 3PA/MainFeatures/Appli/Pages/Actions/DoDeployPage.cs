@@ -134,6 +134,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
 
             tooltip.SetToolTip(toggleRecurs, "Toggle this option on to explore recursively the selected folder<br>Toggle off and you will only compile/deploy the files directly under the selected folder");
+            tooltip.SetToolTip(title, "Automatically update the source directory for the deployement from the environment source directory");
             tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
             tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
             tooltip.SetToolTip(fl_include, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
@@ -145,6 +146,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // help kink
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
+
+            // switch link
+            lblCurEnv.LinkClicked += (sender, args) => {
+                AppliMenu.ShowEnvMenuAtCursor();
+            };
 
             // save
             btSave.BackGrndImage = ImageResources.Save;
@@ -191,8 +197,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // cb
             cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
 
-            btRules.ButtonPressed += (sender, args) => Appli.GoToPage(PageNames.DeploymentRules);
+            // modify rules
             btRules.BackGrndImage = ImageResources.Rules;
+            btRules.ButtonPressed += (sender, args) => Appli.GoToPage(PageNames.DeploymentRules);
+            
+            // view rules
+            btSeeRules.BackGrndImage = ImageResources.ViewFile;
 
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += UpdateMassCompilerBaseDirectory;
@@ -208,7 +218,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         public override void OnShow() {
 
             // cur env
-            lblCurEnv.Text = string.Format("{0}, <a href=''>(switch)</a>", ProEnvironment.Current.Name);
+            lblCurEnv.Text = string.Format("{0} <a href='#'>(switch)</a>", ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : ""));
 
             // update the rules for the current env
             lbl_rules.Text = string.Format("<b>{0}</b> rules for step 1, <b>{1}</b> rules for step, <b>{2}</b> rules for further steps", ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 0), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 1), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step > 1));
@@ -224,8 +234,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         #endregion
-
-
+        
         #region Build the report
 
         private void BuildReport() {
@@ -329,6 +338,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         /// Start the deployment!
         /// </summary>
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
+
+            SetDataFromFields();
+
+            if (string.IsNullOrEmpty(CurrentProfile.SourceDirectory) || !Directory.Exists(CurrentProfile.SourceDirectory)) {
+                BlinkTextBox(fl_directory, ThemeManager.Current.GenericErrorColor);
+                return;
+            }
 
             // init screen
             btStart.Visible = false;
@@ -459,7 +475,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void UpdateMassCompilerBaseDirectory() {
-            fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
+            if (CurrentProfile.AutoUpdateSourceDir)
+                fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 
         private void BtExportOnButtonPressed(object sender, EventArgs eventArgs) {
@@ -611,6 +628,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void SetFieldsFromData() {
             fl_directory.Text = CurrentProfile.SourceDirectory;
             toggleRecurs.Checked = CurrentProfile.ExploreRecursively;
+            toggleAutoUpdateSourceDir.Checked = CurrentProfile.AutoUpdateSourceDir;
             toggleMono.Checked = CurrentProfile.ForceSingleProcess;
             toggleOnlyGenerateRcode.Checked = CurrentProfile.OnlyGenerateRcode;
             fl_nbProcess.Text = CurrentProfile.NumberProcessPerCore.ToString();
@@ -621,6 +639,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void SetDataFromFields() {
             CurrentProfile.SourceDirectory = fl_directory.Text;
             CurrentProfile.ExploreRecursively = toggleRecurs.Checked;
+            CurrentProfile.AutoUpdateSourceDir = toggleAutoUpdateSourceDir.Checked;
             CurrentProfile.ForceSingleProcess = toggleMono.Checked;
             CurrentProfile.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
             if (!int.TryParse(fl_nbProcess.Text, out CurrentProfile.NumberProcessPerCore))
@@ -661,6 +680,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         public string Name = "";
         public string SourceDirectory = "";
         public bool ExploreRecursively = true;
+        public bool AutoUpdateSourceDir = true;
         public bool ForceSingleProcess = false;
         public bool OnlyGenerateRcode = true;
         public int NumberProcessPerCore = 3;
