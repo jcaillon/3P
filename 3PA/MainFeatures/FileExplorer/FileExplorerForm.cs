@@ -855,10 +855,8 @@ namespace _3PA.MainFeatures.FileExplorer {
                 UpdateErrorButtons(updatedErrorsEventArgs.NbErrors > 0);
 
                 // colors
-                if (Style.BgErrorLevelColors != null && Style.BgErrorLevelColors.Count > 0) {
-                    t.add(lbNbErrors, "BackColor", Style.BgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
-                    t.add(lbNbErrors, "ForeColor", Style.FgErrorLevelColors[(int) updatedErrorsEventArgs.ErrorLevel]);
-                }
+                t.add(lbNbErrors, "BackColor", Style.Current.GetErrorBg((int) updatedErrorsEventArgs.ErrorLevel));
+                t.add(lbNbErrors, "ForeColor", Style.Current.GetErrorFg((int) updatedErrorsEventArgs.ErrorLevel));
 
                 // text
                 t.add(lbNbErrors, "Text", updatedErrorsEventArgs.NbErrors.ToString());
@@ -896,7 +894,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private void BtStopExecutionOnButtonPressed(object sender, EventArgs eventArgs) {
-            ProCompilation.KillCurrentProcess();
+            ProMisc.KillCurrentProcess();
         }
 
         private void BtBringProcessToFrontOnButtonPressed(object sender, EventArgs eventArgs) {

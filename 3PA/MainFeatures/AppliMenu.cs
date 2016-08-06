@@ -251,10 +251,10 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space"),
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProMisc.Open4GlHelp, "Open_4GL_help", "F1") { Generic = true },
-                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProCompilation.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
-                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProCompilation.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
-                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProCompilation.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
-                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProCompilation.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
+                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProMisc.OpenProDesktop, "Pro_desktop", "") { Generic = true },
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProMisc.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),

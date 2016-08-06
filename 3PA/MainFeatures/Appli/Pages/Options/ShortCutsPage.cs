@@ -89,19 +89,22 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // keys
                 var button = new YamuiButton {
-                    Location = new Point(static_keys.Location.X, yPos - 1),
-                    Size = new Size(220, 23),
+                    Anchor = AnchorStyles.Right | AnchorStyles.Top,
+                    Location = new Point(static_keys.Location.X + static_keys.Width - 270, yPos - 1),
+                    Size = new Size(220, 24),
                     Tag = item.ItemId,
                     Text = item.ItemSpec ?? "",
                     Name = "bt" + item.ItemId,
-                    TabStop = true
+                    TabStop = true,
+                    BackGrndImage = item.ItemImage,
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;
-                tooltip.SetToolTip(button, "Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
+                tooltip.SetToolTip(button, "<b>" + item.ItemName + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
                 button = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Right | AnchorStyles.Top,
                     BackGrndImage = ImageResources.UndoUserAction,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width + 10, yPos),
@@ -114,6 +117,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // reset
                 button = new YamuiButtonImage {
+                    Anchor = AnchorStyles.Right | AnchorStyles.Top,
                     BackGrndImage = ImageResources.Delete,
                     Size = new Size(20, 20),
                     Location = new Point(button.Location.X + button.Width, yPos),

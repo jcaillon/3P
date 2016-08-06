@@ -29,6 +29,7 @@ using _3PA.Data;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
+using Utils = _3PA.Lib.Utils;
 
 namespace _3PA.MainFeatures {
 
@@ -143,48 +144,16 @@ namespace _3PA.MainFeatures {
 
         #region set styles
 
-        public static List<Color> BgErrorLevelColors;
-        public static List<Color> FgErrorLevelColors;
-
-        public static void SetGeneralStyles() {
-
-            var curTheme = Current;
-
-            // Setting styles for errors 
-            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
-            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
-
-            BgErrorLevelColors = new List<Color> {
-                curTheme.NoError.BackColor,
-                curTheme.Error0.BackColor,
-                curTheme.Error1.BackColor,
-                curTheme.Error2.BackColor,
-                curTheme.Error3.BackColor,
-                curTheme.Error4.BackColor
-            };
-            FgErrorLevelColors = new List<Color> {
-                curTheme.NoError.ForeColor,
-                curTheme.Error0.ForeColor,
-                curTheme.Error1.ForeColor,
-                curTheme.Error2.ForeColor,
-                curTheme.Error3.ForeColor,
-                curTheme.Error4.ForeColor
-            };
-        }
-
         /// <summary>
         /// Call this method to set the back/fore color and font type of each type used in 3P according to the 
         /// styles defined in the SyntaxHighlighting file
         /// </summary>
         public static void SetSyntaxStyles() {
 
+            var curTheme = Current;
+
             if (Config.Instance.UseSyntaxHighlightTheme) {
-
-                var curTheme = Current;
-
+                
                 // Default
                 SetFontStyle((byte) SciMsg.STYLE_DEFAULT, curTheme.Default);
                 SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
@@ -213,6 +182,13 @@ namespace _3PA.MainFeatures {
                 SetFontStyle((byte) UdlStyles.Delimiter7, curTheme.SingleLineComment);
                 SetFontStyle((byte) UdlStyles.Delimiter8, curTheme.NestedComment);
             }
+
+            // Setting styles for errors 
+            SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
+            SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
         }
 
         private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
@@ -413,6 +389,32 @@ namespace _3PA.MainFeatures {
                 }
                 return value;
             }
+        }
+
+        private StyleThemeItem GetErrorItem(int errorLevel) {
+            switch (errorLevel) {
+                case 0:
+                    return NoError;
+                case 1:
+                    return Error0;
+                case 2:
+                    return Error1;
+                case 3:
+                    return Error2;
+                case 4:
+                    return Error3;
+                case 5:
+                    return Error4;
+            }
+            return new StyleThemeItem { BackColor = Color.Beige, ForeColor = Color.Black };
+        }
+
+        public Color GetErrorBg(int errorLevel) {
+            return GetErrorItem(errorLevel).BackColor;
+        }
+
+        public Color GetErrorFg(int errorLevel) {
+            return GetErrorItem(errorLevel).ForeColor;
         }
 
     }

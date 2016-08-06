@@ -231,6 +231,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.lbl_about.AutoSizeHeightOnly = true;
             this.lbl_about.BackColor = System.Drawing.Color.Transparent;
             this.lbl_about.BaseStylesheet = null;
+            this.lbl_about.IsSelectionEnabled = false;
             this.lbl_about.Location = new System.Drawing.Point(30, 29);
             this.lbl_about.Name = "lbl_about";
             this.lbl_about.Size = new System.Drawing.Size(792, 74);

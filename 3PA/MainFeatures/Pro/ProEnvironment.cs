@@ -60,7 +60,7 @@ namespace _3PA.MainFeatures.Pro {
             public string BaseLocalPath = "";
 
             /// <summary>
-            /// DeploymentRules directory
+            /// Deployment directory
             /// </summary>
             public string BaseCompilationPath = "";
 
@@ -70,16 +70,6 @@ namespace _3PA.MainFeatures.Pro {
 
             public bool CompileLocally = true;
             public bool CompileWithListing = true;
-            public bool CompilePushToFtp;
-
-            // FTP options
-            public string FtpHostName = "";
-            public string FtpHostPort = "";
-            public string FtpUserName = "";
-            public string FtpUserPassword = "";
-            public string FtpRemoteDir = "";
-            public string FtpSslSupportMode = "";
-            public string FtpTimeOut = "";
 
             #endregion
 
@@ -129,15 +119,6 @@ namespace _3PA.MainFeatures.Pro {
 
                 CompileLocally = toCopy.CompileLocally;
                 CompileWithListing = toCopy.CompileWithListing;
-                CompilePushToFtp = toCopy.CompilePushToFtp;
-
-                FtpHostName = toCopy.FtpHostName;
-                FtpHostPort = toCopy.FtpHostPort;
-                FtpUserName = toCopy.FtpUserName;
-                FtpUserPassword = toCopy.FtpUserPassword;
-                FtpRemoteDir = toCopy.FtpRemoteDir;
-                FtpSslSupportMode = toCopy.FtpSslSupportMode;
-                FtpTimeOut = toCopy.FtpTimeOut;
 
                 _currentProPathDirList = toCopy._currentProPathDirList;
                 _deployRulesList = toCopy._deployRulesList;
@@ -362,7 +343,7 @@ namespace _3PA.MainFeatures.Pro {
             /// <summary>
             /// List of deploy rules read from the file and filtered for this env
             /// </summary>
-            public List<DeployRule> GetDeployRulesList {
+            public List<DeployRule> DeployRulesList {
                 get {
                     if (_deployRulesList == null) {
 
@@ -372,17 +353,48 @@ namespace _3PA.MainFeatures.Pro {
                                 Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())
                         ).ToList();
 
-                        // 
+                        // sort the rules
                         _deployRulesList.Sort((item1, item2) => {
-                            int compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
+                            
+                            // exact name match first
+                            int compare = item2.NameFilter.EqualsCi(Name).CompareTo(item1.NameFilter.EqualsCi(Name));
                             if (compare != 0) return compare;
+
+                            // longer name filter first
+                            compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
+                            if (compare != 0) return compare;
+
+                            // exact suffix match first
+                            compare = item2.SuffixFilter.EqualsCi(Suffix).CompareTo(item1.SuffixFilter.EqualsCi(Suffix));
+                            if (compare != 0) return compare;
+
+                            // longer suffix filter first
                             compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
                             if (compare != 0) return compare;
-                            compare = item2.ContinueAfterThisRule.CompareTo(item1.ContinueAfterThisRule);
+
+                            // lower step first
+                            compare = item1.Step.CompareTo(item2.Step);
                             if (compare != 0) return compare;
-                            compare = item1.Type.CompareTo(item2.Type);
-                            if (compare != 0) return compare;
-                            return item1.Line.CompareTo(item2.Line);
+
+                            var itemTransfer1 = item1 as DeployTransferRule;
+                            var itemTransfer2 = item2 as DeployTransferRule;
+
+                            if (itemTransfer1 != null && itemTransfer2 != null) {
+
+                                // continue first
+                                compare = itemTransfer2.ContinueAfterThisRule.CompareTo(itemTransfer1.ContinueAfterThisRule);
+                                if (compare != 0) return compare;
+
+                                // copy last
+                                compare = itemTransfer1.Type.CompareTo(itemTransfer2.Type);
+                                if (compare != 0) return compare;
+
+                                // first line in first in
+                                return itemTransfer1.Line.CompareTo(itemTransfer2.Line);
+                            }
+
+                            // filter before transfer
+                            return itemTransfer1 == null ? 1 : -1;
                         });
 
                     }
@@ -395,7 +407,7 @@ namespace _3PA.MainFeatures.Pro {
             /// If CompileLocally, returns the directory of the source
             /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
             /// </summary>
-            public List<DeployNeeded> GetDeployNeeded(string sourcePath, bool forCompilation = true) {
+            public List<DeployNeeded> GetDeployNeeded(string sourcePath, int step = 0) {
 
                 // local compilation? return only one path, MOVE next to the source
                 if (CompileLocally)
@@ -403,8 +415,14 @@ namespace _3PA.MainFeatures.Pro {
 
                 var outList = new List<DeployNeeded>();
 
-                // for each rule that match the source pattern
-                foreach (var rule in GetDeployRulesList.Where(path => sourcePath.RegexMatch(path.SourcePattern.WildCardToRegex()))) {
+                // for each transfer rule that match the source pattern
+                foreach (var rule in DeployRulesList.Where(rule => {
+                        var transferRule = rule as DeployTransferRule;
+                        return transferRule != null && 
+                            sourcePath.RegexMatch(transferRule.SourcePattern.WildCardToRegex()) &&
+                            transferRule.Step == step;
+                    }).Select(rule => (DeployTransferRule) rule)) {
+
                     string outPath;
 
                     if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
@@ -422,7 +440,7 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 // nothing matched? move to deployment directory
-                if (forCompilation && outList.Count == 0)
+                if (step == 0 && outList.Count == 0)
                     outList.Add(new DeployNeeded(BaseCompilationPath, DeployType.Copy, true));
                 else
                     outList.Last().FinalDeploy = true;

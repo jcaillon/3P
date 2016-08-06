@@ -37,6 +37,8 @@ namespace _3PA.MainFeatures.Pro {
 
         #region public fields
 
+        #region options
+
         /// <summary>
         /// Is the compilation mono process?
         /// </summary>
@@ -48,20 +50,11 @@ namespace _3PA.MainFeatures.Pro {
         public int NumberOfProcessesPerCore { get; set; }
 
         /// <summary>
-        /// Set to true if you want to explore the folders recursively to find all the compilable files
+        /// true to only generate r code during the compilation
         /// </summary>
-        public bool RecursInDirectories { get; set; }
+        public bool RFilesOnly { get; set; }
 
-        /// <summary>
-        /// Filter list of files to exclusively include in the compilation process
-        /// </summary>
-        public string CompileIncludeList { get; set; }
-
-        /// <summary>
-        /// Filter list of files to exclude from the compilation process
-        /// </summary>
-        public string CompileExcludeList { get; set; }
-
+        #endregion
 
         // total number of files being compiled
         public long NbFilesToCompile { get; private set; }
@@ -123,57 +116,8 @@ namespace _3PA.MainFeatures.Pro {
         #region public methods
 
         /// <summary>
-        /// This method starts a compilation of all the compilable files in the given folders,
-        /// it expects a list of path of the folders to compile
+        /// Compiles the list of files given
         /// </summary>
-        /// <param name="listOfFolderPath"></param>
-        public bool CompileFolders(List<string> listOfFolderPath) {
-
-            var searchOptions = RecursInDirectories ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
-
-            // constructs the list of all the files (unique) accross the different folders
-            var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-            foreach (var folderPath in listOfFolderPath) {
-                if (Directory.Exists(folderPath)) {
-                    foreach (var filePath in Config.Instance.CompileKnownExtension.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions)).ToList()) {
-                        if (!filesToCompile.Contains(filePath)) {
-                            bool toAdd = true;
-
-                            // test include filters
-                            if (!string.IsNullOrEmpty(CompileIncludeList)) {
-                                var hasMatch = false;
-                                foreach (var pattern in CompileIncludeList.Split(',')) {
-                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
-                                        hasMatch = true;
-                                }
-                                toAdd = hasMatch;
-                            }
-
-                            // test exclude filters
-                            if (!string.IsNullOrEmpty(CompileExcludeList)) {
-                                var hasNoMatch = true;
-                                foreach (var pattern in CompileExcludeList.Split(',')) {
-                                    if (filePath.RegexMatch(pattern.WildCardToRegex()))
-                                        hasNoMatch = false;
-                                }
-                                toAdd = toAdd && hasNoMatch;
-                            }
-
-                            if (toAdd)
-                                filesToCompile.Add(filePath);
-                        }
-                    }
-                }
-            }
-
-            if (filesToCompile.Count == 0) {
-                UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompileKnownExtension, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
-                return false;
-            }
-
-            return CompileFiles(filesToCompile);
-        }
-
         public bool CompileFiles(HashSet<string> filesToCompile) {
 
             // now we do a list of those files, sorted from the biggest (in size) to the smallest file
@@ -223,6 +167,8 @@ namespace _3PA.MainFeatures.Pro {
                     OnExecutionOk = OnExecutionOk,
                     OnExecutionFailed = OnExecutionFailed
                 };
+                if (RFilesOnly)
+                    compilationProcess.ProExecutionObject.ProEnv.CompileWithListing = false;
                 if (!compilationProcess.ProExecutionObject.Do(ExecutionType.Compile))
                     return false;
             }
@@ -441,174 +387,6 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
-
-        #region Single : Compilation, Check syntax, Run, Prolint
-
-        /// <summary>
-        /// Called to run/compile/check/prolint the current program
-        /// </summary>
-        public static void StartProgressExec(ExecutionType executionType) {
-            CurrentOperation currentOperation;
-            if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
-                currentOperation = CurrentOperation.Run;
-
-            // process already running?
-            if (Plug.CurrentFileObject.CurrentOperation >= CurrentOperation.Prolint) {
-                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
-                    KillCurrentProcess();
-                    StartProgressExec(executionType);
-                    args.Handled = true;
-                }, 5);
-                return;
-            }
-            if (!Abl.IsCurrentProgressFile) {
-                UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
-                return;
-            }
-            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
-                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
-                return;
-            }
-            if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
-                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
-                return;
-            }
-
-            // update function prototypes
-            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
-
-            // prolint? check that the StartProlint.p program is created, or do it
-            if (executionType == ExecutionType.Prolint) {
-                if (!File.Exists(Config.FileStartProlint))
-                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
-                        return;
-            }
-
-            // launch the compile process for the current file
-            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
-                ListToCompile = new List<FileToCompile> {
-                    new FileToCompile(Plug.CurrentFilePath)
-                },
-                OnExecutionEnd = OnSingleExecutionEnd,
-                OnExecutionOk = OnSingleExecutionOk
-            };
-            if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
-                return;
-
-            // change file object current operation, set flag
-            Plug.CurrentFileObject.CurrentOperation |= currentOperation;
-            FilesInfo.UpdateFileStatus();
-
-            // clear current errors (updates the current file info)
-            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
-
-        }
-
-        /// <summary>
-        /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
-        /// </summary>
-        public static void KillCurrentProcess() {
-            if (Plug.CurrentFileObject.ProgressExecution != null) {
-                Plug.CurrentFileObject.ProgressExecution.KillProcess();
-                UserCommunication.CloseUniqueNotif("KillExistingProcess");
-                OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
-            }
-        }
-
-        /// <summary>
-        /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
-        /// </summary>
-        public static void OnSingleExecutionEnd(ProExecution lastExec) {
-            try {
-                var treatedFile = lastExec.ListToCompile.First();
-                CurrentOperation currentOperation;
-                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
-                    currentOperation = CurrentOperation.Run;
-
-                // Clear flag or we can't do any other actions on this file
-                FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
-                if (isCurrentFile)
-                    FilesInfo.UpdateFileStatus();
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
-            }
-        }
-
-        /// <summary>
-        /// Called after the execution of run/compile/check/prolint
-        /// </summary>
-        public static void OnSingleExecutionOk(ProExecution lastExec) {
-            try {
-                var treatedFile = lastExec.ListToCompile.First();
-                CurrentOperation currentOperation;
-                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
-                    currentOperation = CurrentOperation.Run;
-
-                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
-                var otherFilesInError = false;
-                int nbWarnings = 0;
-                int nbErrors = 0;
-
-                // Read log info
-                var errorList = lastExec.LoadErrorLog();
-
-                if (!errorList.Any()) {
-                    // the compiler messages are empty
-                    var fileInfo = new FileInfo(lastExec.LogPath);
-                    if (fileInfo.Length > 0) {
-                        // the .log is not empty, maybe something went wrong in the runner, display errors
-                        UserCommunication.Notify(
-                            "Something went wrong while " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
-                            Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
-                            "Critical error", "Action failed");
-                        return;
-                    }
-                } else {
-                    // count number of warnings/errors, loop through files > loop through errors in each file
-                    foreach (var keyValue in errorList) {
-                        foreach (var fileError in keyValue.Value) {
-                            if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
-                            else nbErrors++;
-                        }
-                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
-                    }
-                }
-
-                // Prepare the notification content
-                var notifTitle = currentOperation.GetAttribute<CurrentOperationAttr>().Name;
-                var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
-                var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
-                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
-                    (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
-                        ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
-                            "Syntax correct");
-
-                // build the error list
-                var errorsList = new List<FileError>();
-                foreach (var keyValue in errorList) {
-                    errorsList.AddRange(keyValue.Value);
-                }
-
-                // when compiling, transfering .r/.lst to compilation dir
-                var listTransferFiles = new List<FileToDeploy>();
-                if (lastExec.ExecutionType == ExecutionType.Compile) {
-                    listTransferFiles = lastExec.CreateListOfFilesToDeploy();
-                    listTransferFiles = Deployer.DeployFiles(listTransferFiles, lastExec.ProEnv.ProlibPath);
-                }
-
-                // Notify the user, or not
-                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
-
-            } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
-            }
-        }
-
-        #endregion
-
 
     }
 }

@@ -58,6 +58,7 @@ namespace _3PA.MainFeatures.Pro {
 
             StringBuilder outputMessage = new StringBuilder();
 
+            var nbLoop = 0;
             var nbNotCreated = 0;
             var nbThingsDone = 0;
             var nbToDo = GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
@@ -70,14 +71,15 @@ namespace _3PA.MainFeatures.Pro {
                 // Add proto
                 if (listOfSoloImplementation.Count > 0) {
                     var tempMes = new StringBuilder("The following function prototypes have been created :");
-                    
-                    while (listOfSoloImplementation.Count > nbNotCreated) {
+
+                    while (listOfSoloImplementation.Count > nbNotCreated && nbLoop <= nbToDo) {
                         if (AddPrototypes(ref tempMes, listOfSoloImplementation[nbNotCreated]))
                             nbThingsDone++;
                         else
                             nbNotCreated++;
 
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                        nbLoop++;
                     }
                     tempMes.Append("<br><br>");
                     if (nbThingsDone > 0)
@@ -87,23 +89,25 @@ namespace _3PA.MainFeatures.Pro {
                 // delete proto
                 if (listOfUselessProto.Count > 0) {
                     outputMessage.Append("The following prototypes have been deleted :");
-                    while (listOfUselessProto.Count > 0) {
+                    while (listOfUselessProto.Count > 0 && nbLoop <= nbToDo) {
                         if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
                             nbThingsDone++;
 
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                        nbLoop++;
                     }
                     outputMessage.Append("<br><br>");
                 }
 
                 // update proto
-                if (listOfOutDatedProto.Count > 0) {
+                if (listOfOutDatedProto.Count > 0 && nbLoop <= nbToDo) {
                     outputMessage.Append("The following functions have had their prototype synchronized :");
                     while (listOfOutDatedProto.Count > 0) {
                         if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
                             nbThingsDone++;
 
                         GetPrototypesLists(out listOfOutDatedProto, out listOfSoloImplementation, out listOfUselessProto);
+                        nbLoop++;
                     }
                     outputMessage.Append("<br><br>");
                 }
@@ -190,8 +194,8 @@ namespace _3PA.MainFeatures.Pro {
 
             var protoStr = Npp.GetTextByRange(function.Position, function.EndPosition);
 
-            // we take caution here... ensure that the implementation syntax is correct + ensure that the file was correctly parsed
-            if (protoStr.EndsWith(":") && protoStr.CountOccurences(":") == 1 && ParserHandler.AblParser.ParserErrors.Count == 0) {
+            // ensure that the file was correctly parsed
+            if (ParserHandler.AblParser.ParserErrors.Count == 0) {
 
                 // get the best position to insert the prototype
                 bool insertBefore;
@@ -200,7 +204,7 @@ namespace _3PA.MainFeatures.Pro {
                 // if we didn't find a good position, then let's assume the user doesn't need one
                 if (insertPos > 0) {
 
-                    // replace the end ":" by a " FOWARD."
+                    // replace the end ":" or "." by a " FOWARD."
                     protoStr = FormatInsertion(protoStr.Substring(0, protoStr.Length - 1).TrimEnd(' ') + " FORWARD.", "_FUNCTION-FORWARD " + function.Name + " Procedure", insertBefore);
 
                     Npp.SetTextByRange(insertPos, insertPos, protoStr);

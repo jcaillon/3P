@@ -121,8 +121,7 @@ namespace _3PA {
         public static void RefreshApplicationWithTheme(Theme theme) {
             Current = theme;
             Config.Instance.AccentColor = theme.AccentColor;
-            Style.SetGeneralStyles();
-
+            
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
             CodeExplorer.ApplyColorSettings();

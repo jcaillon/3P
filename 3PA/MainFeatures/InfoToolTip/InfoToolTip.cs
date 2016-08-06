@@ -359,7 +359,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             toDisplay.Append("None");
                         break;
                     case CompletionType.Function:
-                        var funcItem = (ParsedImplementation) data.ParsedItem;
+                        var funcItem = (ParsedFunction) data.ParsedItem;
                         toDisplay.Append(FormatSubtitle("RETURN TYPE"));
                         toDisplay.Append(FormatRowParam("output", "Returns " + FormatSubString(funcItem.ReturnType.ToString())));
 
@@ -373,11 +373,17 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         else
                             toDisplay.Append("None");
 
-                        toDisplay.Append(FormatSubtitle("PROTOTYPE"));
-                        if (funcItem.HasPrototype)
-                            toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>"));
-                        else
-                            toDisplay.Append("Has none");
+                        var funcImplem =  data.ParsedItem as ParsedImplementation;
+                        if (funcImplem != null) {
+                            toDisplay.Append(FormatSubtitle("PROTOTYPE"));
+                            if (funcImplem.HasPrototype)
+                                toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcImplem.PrototypeLine + "#" + funcImplem.PrototypeColumn + "'>Go to prototype</a>"));
+                            else
+                                toDisplay.Append("Has none");
+                        } else {
+                            toDisplay.Append(FormatSubtitle("DEFINED IN"));
+                            toDisplay.Append("Function defined in an external procedure or is a web service operation");
+                        }
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:

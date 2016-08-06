@@ -446,7 +446,6 @@ namespace YamuiFramework.Forms {
             // new message box
             msgBox = new YamuiInput(htmlTitle, htmlMessage, buttonsList, data, maxFormWidth, maxFormHeight, minFormWidth, onLinkClicked) {
                 ShowInTaskbar = !waitResponse,
-                TopMost = true,
                 Text = caption
             };
 

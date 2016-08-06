@@ -51,40 +51,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         private string _reportExportPath;
 
-        private List<DeployProfile> ListProfiles {
-            get {
-                if (_listConfig == null) {
-                    if (File.Exists(Config.FileDeployProfiles)) {
-                        _listConfig = new List<DeployProfile>();
-                        try {
-                            Object2Xml<DeployProfile>.LoadFromFile(_listConfig, Config.FileDeployProfiles);
-                        } catch (Exception e) {
-                            ErrorHandler.ShowErrors(e, "Error when loading settings", Config.FileDeployProfiles);
-                        }
-                    }
-                    if (_listConfig == null || _listConfig.Count == 0)
-                        _listConfig = new List<DeployProfile> { new DeployProfile() };
-                }
-                return _listConfig;
-            }
-            set { _listConfig = value; }
-        }
-
-        public DeployProfile CurrentProfile {
-            get {
-                if (_currentProfile == null) {
-                    _currentProfile = ListProfiles.FirstOrDefault(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile));
-                    if (_currentProfile == null)
-                        _currentProfile = ListProfiles.First();
-                }
-                return _currentProfile;
-            }
-            set { _currentProfile = value; }
-        }
-
-        private List<DeployProfile> _listConfig;
-
-        private DeployProfile _currentProfile;
+        private bool _shownOnce;
 
         #endregion
 
@@ -98,25 +65,36 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btBrowse.ButtonPressed += BtBrowseOnButtonPressed;
             tooltip.SetToolTip(btBrowse, "Click to <b>select</b> a folder");
 
+            // open
             btOpen.BackGrndImage = ImageResources.OpenInExplorer;
             btOpen.ButtonPressed += BtOpenOnButtonPressed;
             tooltip.SetToolTip(btOpen, "Click to <b>open</b> this folder in the explorer");
 
+            // historic
             btHistoric.BackGrndImage = ImageResources.Historic;
             btHistoric.ButtonPressed += BtHistoricOnButtonPressed;
             tooltip.SetToolTip(btHistoric, "Click to <b>browse</b> the previous folders");
             if (string.IsNullOrEmpty(Config.Instance.CompileDirectoriesHistoric))
                 btHistoric.Visible = false;
+            
+            tooltip.SetToolTip(toggleRecurs, "Toggle this option on to explore recursively the selected folder<br>Toggle off and you will only compile/deploy the files directly under the selected folder");
+            tooltip.SetToolTip(toggleAutoUpdateSourceDir, "Automatically update the source directory for the deployement from the environment source directory");
+            tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling during the deployment<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
+            tooltip.SetToolTip(toggleOnlyGenerateRcode, "Override the environment settings and only generated R-code during the deployement<br>(i.e. dont deploy debug-list or xref)");
+            tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
 
+            // diretory from env
             btUndo.BackGrndImage = ImageResources.UndoUserAction;
             btUndo.ButtonPressed += BtUndoOnButtonPressed;
             tooltip.SetToolTip(btUndo, "Click to <b>select</b> the base local path (your source directory)<br>for the current environment");
 
-            // compilation
+            // start
+            btStart.BackGrndImage = ImageResources.Deploy;
             tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application :<br>First step, compile all the progress files<br>Second step, deploy r-code following the deployment rules for compilation<br>Third step, deploy any file following the deployment rules for files");
             btStart.ButtonPressed += BtStartOnButtonPressed;
 
             // cancel
+            btCancel.BackGrndImage = ImageResources.Cancel;
             tooltip.SetToolTip(btCancel, "Click to <b>cancel</b> the current deployement");
             btCancel.ButtonPressed += BtCancelOnButtonPressed;
             btCancel.Visible = false;
@@ -127,20 +105,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             progressBar.Visible = false;
 
             // report
-            bt_export.Visible = false;
-            bt_export.ButtonPressed += BtExportOnButtonPressed;
+            btReport.BackGrndImage = ImageResources.Report;
+            btReport.Visible = false;
+            btReport.ButtonPressed += BtReportOnButtonPressed;
             lbl_report.Visible = false;
             lbl_report.LinkClicked += Utils.OpenPathClickHandler;
 
-
-            tooltip.SetToolTip(toggleRecurs, "Toggle this option on to explore recursively the selected folder<br>Toggle off and you will only compile/deploy the files directly under the selected folder");
-            tooltip.SetToolTip(title, "Automatically update the source directory for the deployement from the environment source directory");
-            tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling multiple files through the mass compiler page<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
-            tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
-            tooltip.SetToolTip(fl_include, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>kept</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,*\\my_sub_directory\\*,*proc_???.p</div>");
-            tooltip.SetToolTip(fl_exclude, "<i>Leave empty to not apply this filter</i><br>A comma (,) separated list of filters to apply on each <u>full path</u> of the<br>files found in the selected folder<br>If the path matches one of the filter, the file is <b>excluded</b> for the compilation, otherwise it is not<br><br>You can use the wildcards * and ? for your filters!<br>* matches any character 0 or more times<br>? matches any character 1 time exactly<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*foo*.cls,\\*my_sub_directory\\*,*proc_???.p</div>");
-
             // reset
+            btReset.BackGrndImage = ImageResources.Default;
             tooltip.SetToolTip(btReset, "Click to reset the options to their default values");
             btReset.ButtonPressed += (sender, args) => { ResetFields(); };
 
@@ -153,56 +125,70 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             };
 
             // save
+            tooltip.SetToolTip(btSave, "Save the settings for the currently selected profile");
             btSave.BackGrndImage = ImageResources.Save;
             btSave.ButtonPressed += (sender, args) => {
-                if (string.IsNullOrEmpty(CurrentProfile.Name) && !ChooseName())
+                if (string.IsNullOrEmpty(DeployProfile.Current.Name) && !ChooseName())
                     return;
                 SetDataFromFields();
                 SaveProfilesList();
             };
 
             // save as...
+            tooltip.SetToolTip(btSaveAs, "Save the settings in a new profile that you will name");
             btSaveAs.BackGrndImage = ImageResources.Save;
             btSaveAs.ButtonPressed += (sender, args) => {
-                var _cur = CurrentProfile;
-                ListProfiles.Add(new DeployProfile());
-                CurrentProfile = ListProfiles.Last();
+                var _cur = DeployProfile.Current;
+                DeployProfile.List.Add(new DeployProfile());
+                DeployProfile.Current = DeployProfile.List.Last();
                 if (ChooseName()) {
                     SetDataFromFields();
                     SaveProfilesList();
                 } else {
-                    ListProfiles.RemoveAt(ListProfiles.Count - 1);
-                    CurrentProfile = _cur;
+                    DeployProfile.List.RemoveAt(DeployProfile.List.Count - 1);
+                    DeployProfile.Current = _cur;
                 }
+                btDelete.Visible = DeployProfile.List.Count > 1;
             };
 
             // delete
+            tooltip.SetToolTip(btDelete, "Delete the current profile");
             btDelete.BackGrndImage = ImageResources.Delete;
             btDelete.ButtonPressed += (sender, args) => {
                 if (UserCommunication.Message("Do you really want to delete this profile?", MessageImg.MsgQuestion, "Delete", "Deployment profile", new List<string> {"Yes", "Cancel"}) == 0) {
-                    if (ListProfiles.Count == 1)
-                        ResetFields();
-                    else {
-                        if (ListProfiles.Count > 1)
-                            ListProfiles.Remove(CurrentProfile);
-                        else
-                            ListProfiles = new List<DeployProfile> { new DeployProfile() };
-                        CurrentProfile = null;
-                        SaveProfilesList();
-                        SetFieldsFromData();
-                    }
+                    DeployProfile.List.Remove(DeployProfile.Current);
+                    DeployProfile.Current = null;
+                    SaveProfilesList();
+                    SetFieldsFromData();
+                    if (DeployProfile.List.Count == 1)
+                        btDelete.Hide();
                 }
             };
 
             // cb
+            tooltip.SetToolTip(cbName, "Browse and select the available profiles, each profile hold deployment settings");
             cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;
 
             // modify rules
+            tooltip.SetToolTip(btRules, "Click to modify the rules");
             btRules.BackGrndImage = ImageResources.Rules;
-            btRules.ButtonPressed += (sender, args) => Appli.GoToPage(PageNames.DeploymentRules);
+            btRules.ButtonPressed += (sender, args) => {
+                Deployer.Export();
+                Npp.OpenFile(Config.FileDeployment);
+            };
             
             // view rules
+            tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
+            btSeeRules.ButtonPressed += (sender, args) => {
+                UserCommunication.Message(Deployer.BuildHtmlTable(ProEnvironment.Current.DeployRulesList), MessageImg.MsgInfo, "List of deployment rules", "For the current environment");
+            };
+
+            DeployProfile.OnDeployProfilesUpdate += () => {
+                UpdateCombo();
+                SetFieldsFromData();
+                btDelete.Visible = DeployProfile.List.Count > 1;
+            };
 
             // subscribe to env update
             ProEnvironment.OnEnvironmentChange += UpdateMassCompilerBaseDirectory;
@@ -217,16 +203,20 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         public override void OnShow() {
 
+            // hide delete if needed
+            btDelete.Visible = DeployProfile.List.Count > 1;
+
             // cur env
             lblCurEnv.Text = string.Format("{0} <a href='#'>(switch)</a>", ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : ""));
 
             // update the rules for the current env
-            lbl_rules.Text = string.Format("<b>{0}</b> rules for step 1, <b>{1}</b> rules for step, <b>{2}</b> rules for further steps", ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 0), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step == 1), ProEnvironment.Current.GetDeployRulesList.Count(rule => rule.Step > 1));
+            lbl_rules.Text = string.Format("<b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1 and <b>{2}</b> rules for further steps", ProEnvironment.Current.DeployRulesList.Count(rule => rule.Step == 0), ProEnvironment.Current.DeployRulesList.Count(rule => rule.Step == 1), ProEnvironment.Current.DeployRulesList.Count(rule => rule.Step > 1));
 
             // update combo and fields
-            if (_currentProfile == null) {
+            if (!_shownOnce) {
                 UpdateCombo();
                 SetFieldsFromData();
+                _shownOnce = true;
             }
         }
 
@@ -268,7 +258,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                     line.Clear();
 
-                    line.Append("<tr><td style='width: 50px; padding-bottom: 15px;'><img src='" + (moveFail || hasError ? "MsgError" : (hasWarning ? "MsgWarning" : "MsgOk")) + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 10px;'>");
+                    line.Append("<tr><td style='width: 50px; padding-bottom: 10px;'><img src='" + (moveFail || hasError ? "MsgError" : (hasWarning ? "MsgWarning" : "MsgOk")) + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
 
                     line.Append(ProCompilation.FormatCompilationResult(fileToCompile, errorsOfTheFile, _currentCompil.TransferedFiles.Where(move => move.Origin.Equals(toCompile.InputPath)).ToList()));
 
@@ -340,8 +330,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void BtStartOnButtonPressed(object sender, EventArgs eventArgs) {
 
             SetDataFromFields();
+            SaveProfilesList();
 
-            if (string.IsNullOrEmpty(CurrentProfile.SourceDirectory) || !Directory.Exists(CurrentProfile.SourceDirectory)) {
+            if (string.IsNullOrEmpty(DeployProfile.Current.SourceDirectory) || !Directory.Exists(DeployProfile.Current.SourceDirectory)) {
                 BlinkTextBox(fl_directory, ThemeManager.Current.GenericErrorColor);
                 return;
             }
@@ -352,7 +343,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             progressBar.Visible = true;
             progressBar.Progress = 0;
             progressBar.Text = @"Please wait, the compilation is starting...";
-            bt_export.Visible = false;
+            btReport.Visible = false;
             lbl_report.Visible = false;
             _reportExportPath = null;
             Application.DoEvents();
@@ -364,15 +355,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 _currentCompil = new ProCompilation {
                     // check if we need to force the compiler to only use 1 process 
                     // (either because the user want to, or because we have a single user mode database)
-                    MonoProcess = CurrentProfile.ForceSingleProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
-                    RecursInDirectories = CurrentProfile.ExploreRecursively,
-                    NumberOfProcessesPerCore = CurrentProfile.NumberProcessPerCore,
-                    CompileIncludeList = CurrentProfile.FilterInclude,
-                    CompileExcludeList = CurrentProfile.FilterExclude,
+                    MonoProcess = DeployProfile.Current.ForceSingleProcess || ProEnvironment.Current.IsDatabaseSingleUser(),
+                    NumberOfProcessesPerCore = DeployProfile.Current.NumberProcessPerCore,
+                    RFilesOnly = DeployProfile.Current.OnlyGenerateRcode
                 };
                 _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
-                if (_currentCompil.CompileFolders(new List<string> { fl_directory.Text })) {
+                var filesToCompile = Deployer.GetDeployFilesList(new List<string> {fl_directory.Text}, DeployProfile.Current.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, ProEnvironment.Current.DeployRulesList, 0);
+
+                if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
 
                     UpdateReport("");
                     UpdateProgressBar();
@@ -388,6 +379,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     });
 
                 } else {
+                    if (filesToCompile.Count == 0) {
+                        UserCommunication.Notify("No compilable files found in the input directories,<br>the valid extensions for compilable Progress files are : " + Config.Instance.CompileKnownExtension, MessageImg.MsgInfo, "Multiple compilation", "No files found", 10);
+                    }
+
                     // nothing started
                     ResetScreen();
                 }
@@ -426,7 +421,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         UserCommunication.CloseUniqueNotif("ReportAvailable");
                     }, Appli.IsFocused() ? 10 : 0);
 
-                bt_export.Visible = true;
+                btReport.Visible = true;
             });
         }
 
@@ -475,11 +470,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void UpdateMassCompilerBaseDirectory() {
-            if (CurrentProfile.AutoUpdateSourceDir)
+            if (DeployProfile.Current.AutoUpdateSourceDir)
                 fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
         }
 
-        private void BtExportOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void BtReportOnButtonPressed(object sender, EventArgs eventArgs) {
 
             // report already generated
             if (!string.IsNullOrEmpty(_reportExportPath)) {
@@ -518,8 +513,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void CbNameOnSelectedIndexChanged(object sender, EventArgs eventArgs) {
-            CurrentProfile = ListProfiles[cbName.SelectedIndex];
-            Config.Instance.CurrentDeployProfile = CurrentProfile.Name;
+            DeployProfile.Current = DeployProfile.List[cbName.SelectedIndex];
+            Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
             SetFieldsFromData();
         }
 
@@ -556,11 +551,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     <div class='NormalBackColor'>
                         <table class='ToolTipName' style='margin-bottom: 0px; width: 100%'>
                             <tr>
-                                <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report' width='64' height='64' /></td>
-                                <td class='NotificationTitle'>Compilation report</td>
+                                <td rowspan='2' style='width: 95px; padding-left: 10px'><img src='Report_64x64' width='64' height='64' /></td>
+                                <td class='NotificationTitle'>Deployment report</td>
                             </tr>
                             <tr>
-                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Compilation done" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
+                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Done!" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
                             </tr>
                         </table>                
                         <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px; padding-top: 10px;'>
@@ -611,48 +606,44 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             if (UserCommunication.Input(ref name, "", MessageImg.MsgQuestion, "Save profile as...", "Enter a name for this profile") == 1 ||
                 string.IsNullOrEmpty((string)name))
                 return false;
-            CurrentProfile.Name = (string)name;
+            DeployProfile.Current.Name = (string)name;
             return true;
         }
 
         private void SaveProfilesList() {
             try {
-                Object2Xml<DeployProfile>.SaveToFile(ListProfiles, Config.FileDeployProfiles);
+                Object2Xml<DeployProfile>.SaveToFile(DeployProfile.List, Config.FileDeployProfiles);
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while saving the deployment profiles");
             }
-            Config.Instance.CurrentDeployProfile = CurrentProfile.Name;
+            Config.Instance.CurrentDeployProfile = DeployProfile.Current.Name;
             UpdateCombo();
         }
 
         private void SetFieldsFromData() {
-            fl_directory.Text = CurrentProfile.SourceDirectory;
-            toggleRecurs.Checked = CurrentProfile.ExploreRecursively;
-            toggleAutoUpdateSourceDir.Checked = CurrentProfile.AutoUpdateSourceDir;
-            toggleMono.Checked = CurrentProfile.ForceSingleProcess;
-            toggleOnlyGenerateRcode.Checked = CurrentProfile.OnlyGenerateRcode;
-            fl_nbProcess.Text = CurrentProfile.NumberProcessPerCore.ToString();
-            fl_include.Text = CurrentProfile.FilterInclude;
-            fl_exclude.Text = CurrentProfile.FilterExclude;
+            fl_directory.Text = DeployProfile.Current.SourceDirectory;
+            toggleRecurs.Checked = DeployProfile.Current.ExploreRecursively;
+            toggleAutoUpdateSourceDir.Checked = DeployProfile.Current.AutoUpdateSourceDir;
+            toggleMono.Checked = DeployProfile.Current.ForceSingleProcess;
+            toggleOnlyGenerateRcode.Checked = DeployProfile.Current.OnlyGenerateRcode;
+            fl_nbProcess.Text = DeployProfile.Current.NumberProcessPerCore.ToString();
         }
 
         private void SetDataFromFields() {
-            CurrentProfile.SourceDirectory = fl_directory.Text;
-            CurrentProfile.ExploreRecursively = toggleRecurs.Checked;
-            CurrentProfile.AutoUpdateSourceDir = toggleAutoUpdateSourceDir.Checked;
-            CurrentProfile.ForceSingleProcess = toggleMono.Checked;
-            CurrentProfile.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
-            if (!int.TryParse(fl_nbProcess.Text, out CurrentProfile.NumberProcessPerCore))
-                CurrentProfile.NumberProcessPerCore = 1;
-            CurrentProfile.NumberProcessPerCore.Clamp(1, 15);
-            CurrentProfile.FilterInclude = fl_include.Text;
-            CurrentProfile.FilterExclude = fl_exclude.Text;
+            DeployProfile.Current.SourceDirectory = fl_directory.Text;
+            DeployProfile.Current.ExploreRecursively = toggleRecurs.Checked;
+            DeployProfile.Current.AutoUpdateSourceDir = toggleAutoUpdateSourceDir.Checked;
+            DeployProfile.Current.ForceSingleProcess = toggleMono.Checked;
+            DeployProfile.Current.OnlyGenerateRcode = toggleOnlyGenerateRcode.Checked;
+            if (!int.TryParse(fl_nbProcess.Text, out DeployProfile.Current.NumberProcessPerCore))
+                DeployProfile.Current.NumberProcessPerCore = 1;
+            DeployProfile.Current.NumberProcessPerCore.Clamp(1, 15);
         }
 
         private void UpdateCombo() {
             cbName.SelectedIndexChanged -= CbNameOnSelectedIndexChanged;
-            cbName.DataSource = ListProfiles.Select(profile => profile.Name).ToList();
-            if (ListProfiles.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
+            cbName.DataSource = DeployProfile.List.Select(profile => profile.Name).ToList();
+            if (DeployProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
                 cbName.SelectedItem = Config.Instance.CurrentDeployProfile;
             else
                 cbName.SelectedIndex = 0;
@@ -660,9 +651,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         private void ResetFields() {
-            CurrentProfile = new DeployProfile();
+            DeployProfile.Current = new DeployProfile();
             SetFieldsFromData();
-            CurrentProfile = null;
+            DeployProfile.Current = null;
         }
 
         /// <summary>
@@ -674,18 +665,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         }
 
         #endregion
-    }
-
-    internal class DeployProfile {
-        public string Name = "";
-        public string SourceDirectory = "";
-        public bool ExploreRecursively = true;
-        public bool AutoUpdateSourceDir = true;
-        public bool ForceSingleProcess = false;
-        public bool OnlyGenerateRcode = true;
-        public int NumberProcessPerCore = 3;
-        public string FilterInclude = "";
-        public string FilterExclude = "";
     }
 
 }

@@ -240,7 +240,7 @@ namespace _3PA {
 
             // Simulates a OnDocumentSwitched when we start this dll
             IsCurrentFileProgress = Abl.IsCurrentProgressFile; // to correctly init isPreviousProgress
-            DoNppDocumentSwitched(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
+            DoNppBufferActivated(true); // triggers OnEnvironmentChange via ProEnvironment.Current.ReComputeProPath();
 
             // Make sure to give the focus to scintilla on startup
             WinApi.SetForegroundWindow(Npp.HandleNpp);
@@ -503,7 +503,7 @@ namespace _3PA {
         /// Called when the user switches tab document, 
         /// no matter if the document is a Progress file or not
         /// </summary>
-        public static void DoNppBufferActivated() {
+        public static void DoNppBufferActivated(bool initiating = false) {
             
             // if the file has just been opened
             var currentFile = Npp.GetCurrentFilePath();
@@ -525,7 +525,7 @@ namespace _3PA {
                 if (Npp.ViewWhitespace != WhitespaceMode.Invisible && !Npp.ViewEol)
                     Npp.ViewWhitespace = _whitespaceMode;
 
-            DoNppDocumentSwitched();
+            DoNppDocumentSwitched(initiating);
 
             // activate show space for conf files
             if (ShareExportConf.IsFileExportedConf(CurrentFilePath))
@@ -565,17 +565,16 @@ namespace _3PA {
                 if (Config.Instance.FileExplorerAutoHideOnNonProgressFile) {
                     FileExplorer.Toggle(IsCurrentFileProgress);
                 }
+            } else {
+                // make sure to use the ProEnvironment and colorize the error counter
+                FilesInfo.UpdateFileStatus();
+                ProEnvironment.Current.ReComputeProPath();
             }
 
             if (IsCurrentFileProgress) {
                 // Syntax Style
                 Style.SetSyntaxStyles();
-
-                // set general styles (useful for the file explorer > current status)
-                Style.SetGeneralStyles();
-                if (initiating)
-                    FilesInfo.UpdateFileStatus();
-
+                
                 // Need to compute the propath again, because we take into account relative path
                 ProEnvironment.Current.ReComputeProPath();
 

@@ -60,8 +60,7 @@ namespace _3PA.MainFeatures {
                         new ConfLine {
                             Label = "Deployment profiles",
                             HandledItem = Config.FileDeployProfiles,
-                            OnImport = line => Deployer.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),
+                            OnImport = line => DeployProfile.Import(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
@@ -70,7 +69,7 @@ namespace _3PA.MainFeatures {
                             Label = "Deployment rules",
                             HandledItem = Config.FileDeployment,
                             OnImport = line => Deployer.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules),
+                            OnExport = line => Deployer.Export(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
@@ -156,7 +155,8 @@ namespace _3PA.MainFeatures {
             if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath)) {
                 var item = List.FirstOrDefault(line => line.HandledItem.Equals(filePath));
                 if (item != null) {
-                    item.OnImport(item);
+                    if (item.OnImport != null)
+                        item.OnImport(item);
                     UserCommunication.NotifyUnique("Importedconf", "The latest changes to <b>" + item.Label + "</b> have been imported!", MessageImg.MsgInfo, "Configuration imported", item.Label, null, 5);
                     return true;
                 }
@@ -285,6 +285,8 @@ namespace _3PA.MainFeatures {
             var answ = UserCommunication.Message("Do you really want to delete this file?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
             if (answ == 0) {
                 Utils.DeleteFile(conf.LocalPath);
+                if (conf.OnImport != null)
+                    conf.OnImport(conf);
             }
         }
 

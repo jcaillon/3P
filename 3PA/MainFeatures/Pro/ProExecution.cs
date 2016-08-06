@@ -148,7 +148,7 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// The pro environment used at the moment the execution was created
         /// </summary>
-        public ProEnvironment.ProEnvironmentObject ProEnv { get; private set; }
+        public ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
 
         #endregion
 

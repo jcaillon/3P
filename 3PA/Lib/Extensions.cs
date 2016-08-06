@@ -28,7 +28,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using MarkdownDeep;
-using YamuiFramework.Helper;
 
 namespace _3PA.Lib {
 

@@ -3,7 +3,7 @@ using YamuiFramework.Controls;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
-    partial class SetDeployment {
+    partial class SetDeploymentRules {
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -73,10 +73,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_import
             // 
             this.bt_import.BackGrndImage = null;
-            this.bt_import.Location = new System.Drawing.Point(111, 31);
+            this.bt_import.Location = new System.Drawing.Point(214, 31);
             this.bt_import.Name = "bt_import";
-            this.bt_import.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_import.Size = new System.Drawing.Size(101, 23);
+            this.bt_import.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_import.Size = new System.Drawing.Size(122, 24);
             this.bt_import.TabIndex = 56;
             this.bt_import.Text = "Read changes";
             // 
@@ -85,10 +85,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_modify.BackGrndImage = null;
             this.bt_modify.Location = new System.Drawing.Point(30, 31);
             this.bt_modify.Name = "bt_modify";
-            this.bt_modify.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_modify.Size = new System.Drawing.Size(75, 23);
+            this.bt_modify.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_modify.Size = new System.Drawing.Size(178, 24);
             this.bt_modify.TabIndex = 55;
-            this.bt_modify.Text = "Modify";
+            this.bt_modify.Text = "Modify deployment rules";
             // 
             // html_list
             // 
@@ -98,7 +98,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.html_list.AutoSizeHeightOnly = true;
             this.html_list.BackColor = System.Drawing.Color.Transparent;
             this.html_list.BaseStylesheet = null;
-            this.html_list.Location = new System.Drawing.Point(30, 71);
+            this.html_list.Location = new System.Drawing.Point(30, 64);
             this.html_list.Name = "html_list";
             this.html_list.Size = new System.Drawing.Size(852, 15);
             this.html_list.TabIndex = 54;
@@ -126,12 +126,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
             // 
-            // SetDeployment
+            // SetDeploymentRules
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
-            this.Name = "SetDeployment";
+            this.Name = "SetDeploymentRules";
             this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();

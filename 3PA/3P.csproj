@@ -163,11 +163,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployment.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeployment.Designer.cs">
-      <DependentUpon>SetDeployment.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.Designer.cs">
+      <DependentUpon>SetDeploymentRules.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.cs">
       <SubType>UserControl</SubType>
@@ -204,6 +204,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\Pro\Deployer.cs" />
+    <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
     <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
     <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
@@ -368,8 +369,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeployment.resx">
-      <DependentUpon>SetDeployment.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.resx">
+      <DependentUpon>SetDeploymentRules.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
@@ -441,11 +442,14 @@
     <Content Include="Html\Pages\home.html" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\Appli\Add.png" />
+    <Content Include="Images\Appli\Calendar.png" />
     <Content Include="Images\Appli\Cancel.png" />
     <Content Include="Images\Appli\Configuration.png" />
     <Content Include="Images\Appli\Copy.png" />
+    <Content Include="Images\Appli\Default.png" />
     <Content Include="Images\Appli\Del.png" />
     <Content Include="Images\Appli\Delete.png" />
+    <Content Include="Images\Appli\Deploy.png" />
     <Content Include="Images\Appli\DownloadAll.png" />
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
@@ -461,11 +465,13 @@
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\Push.png" />
     <Content Include="Images\Appli\Report.png" />
+    <Content Include="Images\Appli\Report_64x64.png" />
     <Content Include="Images\Appli\Rules.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\Appli\Time.png" />
     <Content Include="Images\Appli\UndoUserAction.png" />
+    <Content Include="Images\Appli\Update.png" />
     <Content Include="Images\Appli\ViewFile.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />

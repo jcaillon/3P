@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
@@ -133,29 +134,38 @@ namespace _3PA.MainFeatures.Pro {
         /// Opens the lgrfeng.chm file if it can find it in the config
         /// </summary>
         public static void Open4GlHelp() {
-            // get path
+
+            var helpPath = Config.Instance.GlobalHelpFilePath;
+
+            // Try to find the help file from the prowin32.exe location
+            if (File.Exists(ProEnvironment.Current.ProwinPath)) {
+                var versionHelpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
+                if (File.Exists(versionHelpPath))
+                    helpPath = versionHelpPath;
+            }
+
+            // set path in config
             if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath)) {
-                if (File.Exists(ProEnvironment.Current.ProwinPath)) {
-                    // Try to find the help file from the prowin32.exe location
-                    var helpPath = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(ProEnvironment.Current.ProwinPath) ?? "", "..", "prohelp", "lgrfeng.chm"));
-                    if (File.Exists(helpPath)) {
-                        Config.Instance.GlobalHelpFilePath = helpPath;
-                        UserCommunication.Notify("I've found an help file here :<br>" + helpPath.ToHtmlLink() + "<br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
-                    }
+                if (!string.IsNullOrEmpty(helpPath)) {
+                    Config.Instance.GlobalHelpFilePath = helpPath;
+                    UserCommunication.Notify("I've found an help file here :<br>" + helpPath.ToHtmlLink() + "<br>If you think this is incorrect, you can change the help file path in the settings", MessageImg.MsgInfo, "Opening 4GL help", "Found help file", 10);
                 }
             }
 
-            if (string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath) || !File.Exists(Config.Instance.GlobalHelpFilePath) || !Path.GetExtension(Config.Instance.GlobalHelpFilePath).EqualsCi(".chm")) {
+            if (string.IsNullOrEmpty(helpPath) || !File.Exists(helpPath) || !Path.GetExtension(helpPath).EqualsCi(".chm")) {
                 UserCommunication.Notify("Could not access the help file, please be sure to provide a valid path the the file <b>lgrfeng.chm</b> in the settings window", MessageImg.MsgInfo, "Opening help file", "File not found", 10);
                 return;
             }
+
+            if (!helpPath.Equals(Config.Instance.GlobalHelpFilePath) && !string.IsNullOrEmpty(Config.Instance.GlobalHelpFilePath))
+                UserCommunication.Notify("Found a different help file for you version of prowin.exe, the following file will be used :<br>" + helpPath.ToHtmlLink(), MessageImg.MsgInfo, "Help file", "New file used", 5);
 
             // if a tooltip is opened, we search for the displayed word, otherwise take the word at caret
             string searchWord = null;
             if (InfoToolTip.InfoToolTip.IsVisible && !string.IsNullOrEmpty(InfoToolTip.InfoToolTip.CurrentWord))
                 searchWord = InfoToolTip.InfoToolTip.CurrentWord;
 
-            HtmlHelpInterop.DisplayIndex(0, Config.Instance.GlobalHelpFilePath, searchWord ?? Npp.GetAblWordAtPosition(Npp.CurrentPosition));
+            HtmlHelpInterop.DisplayIndex(0, helpPath, searchWord ?? Npp.GetAblWordAtPosition(Npp.CurrentPosition));
         }
 
         #endregion
@@ -200,6 +210,173 @@ namespace _3PA.MainFeatures.Pro {
 
         public static void OpenDataReader() {
             new ProExecution().Do(ExecutionType.DataReader);
+        }
+
+        #endregion
+
+        #region Single : Compilation, Check syntax, Run, Prolint
+
+        /// <summary>
+        /// Called to run/compile/check/prolint the current program
+        /// </summary>
+        public static void StartProgressExec(ExecutionType executionType) {
+            CurrentOperation currentOperation;
+            if (!Enum.TryParse(executionType.ToString(), true, out currentOperation))
+                currentOperation = CurrentOperation.Run;
+
+            // process already running?
+            if (Plug.CurrentFileObject.CurrentOperation >= CurrentOperation.Prolint) {
+                UserCommunication.NotifyUnique("KillExistingProcess", "This file is already being compiled, run or lint-ed.<br>Please wait the end of the previous action,<br>or click the link below to interrupt the previous action :<br><a href='#'>Click to kill the associated prowin process</a>", MessageImg.MsgRip, currentOperation.GetAttribute<CurrentOperationAttr>().Name, "Already being compiled/run", args => {
+                    KillCurrentProcess();
+                    StartProgressExec(executionType);
+                    args.Handled = true;
+                }, 5);
+                return;
+            }
+            if (!Abl.IsCurrentProgressFile) {
+                UserCommunication.Notify("Can only compile and run progress files!", MessageImg.MsgWarning, "Invalid file type", "Progress files only", 10);
+                return;
+            }
+            if (string.IsNullOrEmpty(Plug.CurrentFilePath) || !File.Exists(Plug.CurrentFilePath)) {
+                UserCommunication.Notify("Couldn't find the following file :<br>" + Plug.CurrentFilePath, MessageImg.MsgError, "Execution error", "File not found", 10);
+                return;
+            }
+            if (!Config.Instance.CompileKnownExtension.Split(',').Contains(Path.GetExtension(Plug.CurrentFilePath))) {
+                UserCommunication.Notify("Sorry, the file extension " + Path.GetExtension(Plug.CurrentFilePath).ProQuoter() + " isn't a valid extension for this action!<br><i>You can change the list of valid extensions in the settings window</i>", MessageImg.MsgWarning, "Invalid file extension", "Not an executable", 10);
+                return;
+            }
+
+            // update function prototypes
+            ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
+
+            // prolint? check that the StartProlint.p program is created, or do it
+            if (executionType == ExecutionType.Prolint) {
+                if (!File.Exists(Config.FileStartProlint))
+                    if (!Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint))
+                        return;
+            }
+
+            // launch the compile process for the current file
+            Plug.CurrentFileObject.ProgressExecution = new ProExecution {
+                ListToCompile = new List<FileToCompile> {
+                    new FileToCompile(Plug.CurrentFilePath)
+                },
+                OnExecutionEnd = OnSingleExecutionEnd,
+                OnExecutionOk = OnSingleExecutionOk
+            };
+            if (!Plug.CurrentFileObject.ProgressExecution.Do(executionType))
+                return;
+
+            // change file object current operation, set flag
+            Plug.CurrentFileObject.CurrentOperation |= currentOperation;
+            FilesInfo.UpdateFileStatus();
+
+            // clear current errors (updates the current file info)
+            FilesInfo.ClearAllErrors(Plug.CurrentFilePath, true);
+
+        }
+
+        /// <summary>
+        /// Allows to kill the process of the currently running Progress.exe (if any, for the current file)
+        /// </summary>
+        public static void KillCurrentProcess() {
+            if (Plug.CurrentFileObject.ProgressExecution != null) {
+                Plug.CurrentFileObject.ProgressExecution.KillProcess();
+                UserCommunication.CloseUniqueNotif("KillExistingProcess");
+                OnSingleExecutionEnd(Plug.CurrentFileObject.ProgressExecution);
+            }
+        }
+
+        /// <summary>
+        /// Called after the execution of run/compile/check/prolint, clear the current operation from the file
+        /// </summary>
+        public static void OnSingleExecutionEnd(ProExecution lastExec) {
+            try {
+                var treatedFile = lastExec.ListToCompile.First();
+                CurrentOperation currentOperation;
+                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                    currentOperation = CurrentOperation.Run;
+
+                // Clear flag or we can't do any other actions on this file
+                FilesInfo.GetFileInfo(treatedFile.InputPath).CurrentOperation &= ~currentOperation;
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                if (isCurrentFile)
+                    FilesInfo.UpdateFileStatus();
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionEnd");
+            }
+        }
+
+        /// <summary>
+        /// Called after the execution of run/compile/check/prolint
+        /// </summary>
+        public static void OnSingleExecutionOk(ProExecution lastExec) {
+            try {
+                var treatedFile = lastExec.ListToCompile.First();
+                CurrentOperation currentOperation;
+                if (!Enum.TryParse(lastExec.ExecutionType.ToString(), true, out currentOperation))
+                    currentOperation = CurrentOperation.Run;
+
+                var isCurrentFile = treatedFile.InputPath.EqualsCi(Plug.CurrentFilePath);
+                var otherFilesInError = false;
+                int nbWarnings = 0;
+                int nbErrors = 0;
+
+                // Read log info
+                var errorList = lastExec.LoadErrorLog();
+
+                if (!errorList.Any()) {
+                    // the compiler messages are empty
+                    var fileInfo = new FileInfo(lastExec.LogPath);
+                    if (fileInfo.Length > 0) {
+                        // the .log is not empty, maybe something went wrong in the runner, display errors
+                        UserCommunication.Notify(
+                            "Something went wrong while " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " the following file:<br>" + treatedFile.InputPath.ToHtmlLink() + "<br>The progress compiler didn't return any errors but the log isn't empty, here is the content :" +
+                            Utils.ReadAndFormatLogToHtml(lastExec.LogPath), MessageImg.MsgError,
+                            "Critical error", "Action failed");
+                        return;
+                    }
+                } else {
+                    // count number of warnings/errors, loop through files > loop through errors in each file
+                    foreach (var keyValue in errorList) {
+                        foreach (var fileError in keyValue.Value) {
+                            if (fileError.Level <= ErrorLevel.StrongWarning) nbWarnings++;
+                            else nbErrors++;
+                        }
+                        otherFilesInError = otherFilesInError || !treatedFile.InputPath.EqualsCi(keyValue.Key);
+                    }
+                }
+
+                // Prepare the notification content
+                var notifTitle = currentOperation.GetAttribute<CurrentOperationAttr>().Name;
+                var notifImg = (nbErrors > 0) ? MessageImg.MsgError : ((nbWarnings > 0) ? MessageImg.MsgWarning : MessageImg.MsgOk);
+                var notifTimeOut = (nbErrors > 0) ? 0 : ((nbWarnings > 0) ? 10 : 5);
+                var notifSubtitle = lastExec.ExecutionType == ExecutionType.Prolint ? (nbErrors + nbWarnings) + " problem" + ((nbErrors + nbWarnings) > 1 ? "s" : "") + " detected" :
+                    (nbErrors > 0) ? nbErrors + " error" + (nbErrors > 1 ? "s" : "") + " found" :
+                        ((nbWarnings > 0) ? nbWarnings + " warning" + (nbWarnings > 1 ? "s" : "") + " found" :
+                            "Syntax correct");
+
+                // build the error list
+                var errorsList = new List<FileError>();
+                foreach (var keyValue in errorList) {
+                    errorsList.AddRange(keyValue.Value);
+                }
+
+                // when compiling, transfering .r/.lst to compilation dir
+                var listTransferFiles = new List<FileToDeploy>();
+                if (lastExec.ExecutionType == ExecutionType.Compile) {
+                    listTransferFiles = lastExec.CreateListOfFilesToDeploy();
+                    listTransferFiles = Deployer.DeployFiles(listTransferFiles, lastExec.ProEnv.ProlibPath);
+                }
+
+                // Notify the user, or not
+                if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProCompilation.FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");
+            }
         }
 
         #endregion

@@ -20,6 +20,7 @@
 using System;
 using System.Linq;
 using YamuiFramework.Controls;
+using _3PA.Images;
 using _3PA.Interop;
 using _3PA.Lib;
 
@@ -46,10 +47,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             toolTip.SetToolTip(cbEncoding, "Choose the encoding to apply to the files when they are opened<br><i>The default option is 'Automatic', to let Notepad++ select the encoding</i>");
             toolTip.SetToolTip(fl_encodingfilter, "<i>Leave empty to disable this feature (default)</i><br>A comma (,) separated list of filters :<br>when a file is opened, if it matches one of the filter, the selected encoding is applied<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*.p,\\*my_sub_directory\\*,*.r</div>");
 
-            bttagcancel.ButtonPressed += BttagcancelOnButtonPressed;
-            bttagsave.ButtonPressed += BttagsaveOnButtonPressed;
+            btCancel.BackGrndImage = ImageResources.UndoUserAction;
+            btCancel.ButtonPressed += BtCancelOnButtonPressed;
+
+            btSave.BackGrndImage = ImageResources.Save;
+            btSave.ButtonPressed += BtSaveOnButtonPressed;
 
             cbEncoding.DataSource = Enum.GetNames(typeof (NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
+
+
 
             UpdateView();
 
@@ -60,7 +66,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         public override void OnShow() {
-            ActiveControl = bttagsave;
+            ActiveControl = btSave;
             base.OnShow();
         }
 
@@ -88,11 +94,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 Config.Instance.AutoSwitchEncodingTo = format;
         }
 
-        private void BttagsaveOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void BtSaveOnButtonPressed(object sender, EventArgs eventArgs) {
             UpdateModel();
         }
 
-        private void BttagcancelOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void BtCancelOnButtonPressed(object sender, EventArgs eventArgs) {
             UpdateView();
         }
 

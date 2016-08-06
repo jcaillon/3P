@@ -72,6 +72,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             this.static_name.BackColor = System.Drawing.Color.Transparent;
             this.static_name.BaseStylesheet = null;
+            this.static_name.IsSelectionEnabled = false;
             this.static_name.Location = new System.Drawing.Point(60, 29);
             this.static_name.Name = "static_name";
             this.static_name.Size = new System.Drawing.Size(33, 15);
@@ -81,9 +82,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // static_keys
             // 
+            this.static_keys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.static_keys.BackColor = System.Drawing.Color.Transparent;
             this.static_keys.BaseStylesheet = null;
-            this.static_keys.Location = new System.Drawing.Point(420, 29);
+            this.static_keys.IsSelectionEnabled = false;
+            this.static_keys.Location = new System.Drawing.Point(775, 29);
             this.static_keys.Name = "static_keys";
             this.static_keys.Size = new System.Drawing.Size(103, 15);
             this.static_keys.TabIndex = 114;

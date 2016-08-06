@@ -47,8 +47,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagopen = new YamuiFramework.Controls.YamuiTextBox();
             this.fl_tagclose = new YamuiFramework.Controls.YamuiTextBox();
             this.fl_tagtitle1 = new YamuiFramework.Controls.YamuiTextBox();
-            this.bttagsave = new YamuiFramework.Controls.YamuiButton();
-            this.bttagcancel = new YamuiFramework.Controls.YamuiButton();
+            this.btSave = new YamuiFramework.Controls.YamuiButton();
+            this.btCancel = new YamuiFramework.Controls.YamuiButton();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
@@ -78,8 +78,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Controls.Add(this.fl_tagopen);
             this.scrollPanel.ContentPanel.Controls.Add(this.fl_tagclose);
             this.scrollPanel.ContentPanel.Controls.Add(this.fl_tagtitle1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bttagsave);
-            this.scrollPanel.ContentPanel.Controls.Add(this.bttagcancel);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btSave);
+            this.scrollPanel.ContentPanel.Controls.Add(this.btCancel);
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
@@ -113,6 +113,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel5.AutoSizeHeightOnly = true;
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
+            this.htmlLabel5.IsSelectionEnabled = false;
             this.htmlLabel5.Location = new System.Drawing.Point(25, 363);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(148, 15);
@@ -126,6 +127,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel9.AutoSizeHeightOnly = true;
             this.htmlLabel9.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel9.BaseStylesheet = null;
+            this.htmlLabel9.IsSelectionEnabled = false;
             this.htmlLabel9.Location = new System.Drawing.Point(25, 314);
             this.htmlLabel9.Name = "htmlLabel9";
             this.htmlLabel9.Size = new System.Drawing.Size(367, 15);
@@ -139,6 +141,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel6.AutoSizeHeightOnly = true;
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
+            this.htmlLabel6.IsSelectionEnabled = false;
             this.htmlLabel6.Location = new System.Drawing.Point(25, 335);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(148, 15);
@@ -171,6 +174,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel4.AutoSizeHeightOnly = true;
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
+            this.htmlLabel4.IsSelectionEnabled = false;
             this.htmlLabel4.Location = new System.Drawing.Point(25, 105);
             this.htmlLabel4.Margin = new System.Windows.Forms.Padding(3, 15, 3, 3);
             this.htmlLabel4.Name = "htmlLabel4";
@@ -185,6 +189,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel3.AutoSizeHeightOnly = true;
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
+            this.htmlLabel3.IsSelectionEnabled = false;
             this.htmlLabel3.Location = new System.Drawing.Point(25, 25);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(148, 15);
@@ -198,6 +203,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel2.AutoSizeHeightOnly = true;
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
+            this.htmlLabel2.IsSelectionEnabled = false;
             this.htmlLabel2.Location = new System.Drawing.Point(25, 218);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(121, 15);
@@ -211,6 +217,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel1.AutoSizeHeightOnly = true;
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
             this.htmlLabel1.Location = new System.Drawing.Point(25, 182);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(121, 30);
@@ -257,6 +264,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel10.AutoSizeHeightOnly = true;
             this.htmlLabel10.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel10.BaseStylesheet = null;
+            this.htmlLabel10.IsSelectionEnabled = false;
             this.htmlLabel10.Location = new System.Drawing.Point(25, 126);
             this.htmlLabel10.Name = "htmlLabel10";
             this.htmlLabel10.Size = new System.Drawing.Size(148, 15);
@@ -270,6 +278,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel8.AutoSizeHeightOnly = true;
             this.htmlLabel8.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel8.BaseStylesheet = null;
+            this.htmlLabel8.IsSelectionEnabled = false;
             this.htmlLabel8.Location = new System.Drawing.Point(25, 72);
             this.htmlLabel8.Name = "htmlLabel8";
             this.htmlLabel8.Size = new System.Drawing.Size(148, 15);
@@ -283,6 +292,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel7.AutoSizeHeightOnly = true;
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
             this.htmlLabel7.Location = new System.Drawing.Point(25, 46);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(148, 15);
@@ -350,25 +360,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.fl_tagtitle1.TabIndex = 63;
             this.fl_tagtitle1.WaterMark = null;
             // 
-            // bttagsave
+            // btSave
             // 
-            this.bttagsave.BackGrndImage = null;
-            this.bttagsave.Location = new System.Drawing.Point(25, 429);
-            this.bttagsave.Name = "bttagsave";
-            this.bttagsave.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bttagsave.Size = new System.Drawing.Size(60, 23);
-            this.bttagsave.TabIndex = 64;
-            this.bttagsave.Text = "Save all";
+            this.btSave.BackGrndImage = null;
+            this.btSave.Location = new System.Drawing.Point(25, 429);
+            this.btSave.Name = "btSave";
+            this.btSave.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btSave.Size = new System.Drawing.Size(80, 24);
+            this.btSave.TabIndex = 64;
+            this.btSave.Text = "Save all";
             // 
-            // bttagcancel
+            // btCancel
             // 
-            this.bttagcancel.BackGrndImage = null;
-            this.bttagcancel.Location = new System.Drawing.Point(91, 429);
-            this.bttagcancel.Name = "bttagcancel";
-            this.bttagcancel.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bttagcancel.Size = new System.Drawing.Size(82, 23);
-            this.bttagcancel.TabIndex = 65;
-            this.bttagcancel.Text = "Cancel  all";
+            this.btCancel.BackGrndImage = null;
+            this.btCancel.Location = new System.Drawing.Point(111, 429);
+            this.btCancel.Name = "btCancel";
+            this.btCancel.SetImgSize = new System.Drawing.Size(20, 20);
+            this.btCancel.Size = new System.Drawing.Size(98, 24);
+            this.btCancel.TabIndex = 65;
+            this.btCancel.Text = "Cancel  all";
             // 
             // toolTip
             // 
@@ -403,8 +413,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiTextBox fl_tagclose;
         private HtmlLabel htmlLabel8;
         private YamuiTextBox fl_tagtitle1;
-        private YamuiButton bttagcancel;
-        private YamuiButton bttagsave;
+        private YamuiButton btCancel;
+        private YamuiButton btSave;
         private HtmlLabel htmlLabel10;
         private HtmlToolTip toolTip;
         private YamuiTextBox fl_tagtitle3;

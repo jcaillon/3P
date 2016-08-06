@@ -415,7 +415,7 @@ namespace _3PA.MainFeatures.Parser {
             _parsedExplorerItemsList.Add(new CodeExplorerItem {
                 DisplayText = pars.Name,
                 Branch = CodeExplorerBranch.Function,
-                Flag = AddExternalFlag(pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0),
+                Flag = AddExternalFlag((pars.IsPrivate ? CodeExplorerFlag.Private : 0) | (pars.TooLongForAppbuilder ? CodeExplorerFlag.IsTooLong : 0)),
                 DocumentOwner = pars.FilePath,
                 GoToLine = pars.Line,
                 GoToColumn = pars.Column,
@@ -436,13 +436,37 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         public void Visit(ParsedPrototype pars) {
-            // there are no prototypes to visit
+            // only visit IN prototypes
+            if (pars.SimpleForward)
+                return;
+
+            // to code explorer
+            _parsedExplorerItemsList.Add(new CodeExplorerItem {
+                DisplayText = pars.Name,
+                Branch = CodeExplorerBranch.Function,
+                Flag = AddExternalFlag(pars.IsPrivate ? CodeExplorerFlag.Private : 0),
+                DocumentOwner = pars.FilePath,
+                GoToLine = pars.Line,
+                GoToColumn = pars.Column,
+                SubString = SetExternalInclude(null)
+            });
+
+            // to completion data
+            pars.ReturnType = ConvertStringToParsedPrimitiveType(pars.ParsedReturnType, false);
+            _parsedCompletionItemsList.Add(new CompletionItem {
+                DisplayText = pars.Name,
+                Type = CompletionType.Function,
+                SubString = pars.ReturnType.ToString(),
+                Flag = AddExternalFlag((pars.IsPrivate ? ParseFlag.Private : 0) | (pars.IsExtended ? ParseFlag.Extent : 0)),
+                Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
+                ParsedItem = pars,
+                FromParser = true
+            });
         }
 
         /// <summary>
         /// Procedures
         /// </summary>
-        /// <param name="pars"></param>
         public void Visit(ParsedProcedure pars) {
             // check lenght of block
             pars.TooLongForAppbuilder = HasTooMuchChar(pars.Line, pars.EndBlockLine);

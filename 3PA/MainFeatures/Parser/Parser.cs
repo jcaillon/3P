@@ -1292,13 +1292,19 @@ namespace _3PA.MainFeatures.Parser {
             if (name == null || returnType == null) 
                 return false;
 
-            // New proptotype, we matched a forward
+            // otherwise it needs to ends with : or .
+            if (!(token is TokenEos))
+                return false;
+
+            // New prototype, we matched a forward or a IN
             if (state >= 99) {
+
                 ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, returnType) {
                     Scope = _context.Scope,
                     FilePath = _filePathBeingParsed,
                     SimpleForward = state == 99, // allows us to know if we expect an implementation in this .p or not
                     EndPosition = token.EndPosition,
+                    EndBlockLine = token.Line,
                     EndBlockPosition = token.EndPosition,
                     IsPrivate = isPrivate,
                     IsExtended = isExtent,
@@ -1307,12 +1313,29 @@ namespace _3PA.MainFeatures.Parser {
                 };
                 if (!_functionPrototype.ContainsKey(name))
                     _functionPrototype.Add(name, createdProto);
-                return false;
-            } 
 
-            // otherwise it needs to ends with : or .
-            if (!(token is TokenEos))
+                // case of a IN, we add it to the list of item
+                if (!createdProto.SimpleForward) {
+                    
+                    AddParsedItem(createdProto);
+
+                    // modify context
+                    _context.Scope = createdProto;
+
+                    // add the parameters to the list
+                    if (parametersList.Count > 0) {
+                        foreach (var parsedItem in parametersList) {
+                            AddParsedItem(parsedItem);
+                        }
+                    }
+
+                    // reset context
+                    _context.Scope = _rootScope;
+                }
+                    
                 return false;
+
+            }
 
             // New function
             ParsedImplementation createdImp = new ParsedImplementation(name, functionToken, returnType) {
@@ -1346,11 +1369,12 @@ namespace _3PA.MainFeatures.Parser {
             } else {
                 _functionPrototype.Add(name, createdImp);
             }
+
             AddParsedItem(createdImp);
 
             // modify context
             _context.Scope = createdImp;
-
+            
             // add the parameters to the list
             if (parametersList.Count > 0) {
                 foreach (var parsedItem in parametersList) {

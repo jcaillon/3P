@@ -96,6 +96,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel1.AutoSizeHeightOnly = true;
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
             this.htmlLabel1.Location = new System.Drawing.Point(25, 29);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(157, 15);
@@ -109,6 +110,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel7.AutoSizeHeightOnly = true;
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
             this.htmlLabel7.Location = new System.Drawing.Point(25, 86);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(157, 15);
