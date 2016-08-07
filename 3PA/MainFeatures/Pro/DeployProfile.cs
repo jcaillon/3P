@@ -18,6 +18,9 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Fields
+        /// <summary>
+        /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
+        /// </summary>
 
         public string Name = "";
         public string SourceDirectory = "";
@@ -28,6 +31,26 @@ namespace _3PA.MainFeatures.Pro {
         public int NumberProcessPerCore = 3;
 
         #endregion
+
+        #region Life and death
+
+        public DeployProfile() {}
+
+        /// <summary>
+        /// Allows to do a hard copy
+        /// </summary>
+        public DeployProfile(DeployProfile profile) {
+            Name = profile.Name;
+            SourceDirectory = profile.SourceDirectory;
+            ExploreRecursively = profile.ExploreRecursively;
+            AutoUpdateSourceDir = profile.AutoUpdateSourceDir;
+            ForceSingleProcess = profile.ForceSingleProcess;
+            OnlyGenerateRcode = profile.OnlyGenerateRcode;
+            NumberProcessPerCore = profile.NumberProcessPerCore;
+        }
+
+        #endregion
+
 
         #region private static fields
 

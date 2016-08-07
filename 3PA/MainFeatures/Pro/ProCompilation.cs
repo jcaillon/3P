@@ -24,7 +24,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using _3PA.Data;
 using _3PA.Lib;
 using _3PA.MainFeatures.FileExplorer;
 
@@ -107,7 +106,7 @@ namespace _3PA.MainFeatures.Pro {
 
         private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
 
-        private long _nbFilesTransfered;
+        private float _deployPercentage;
 
         private bool _hasBeenKilled;
 
@@ -183,7 +182,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // if the compilation is over, we need to dipslay the progression of the files being moved...
             if (CompilationDone)
-                return TransferedFiles.Count > 0 ? (float)_nbFilesTransfered / TransferedFiles.Count * 100 : 0;
+                return _deployPercentage;
 
             // else we find the total of files that have already been compiled by ready the size of compilation.progress files...
             long nbFilesDone = 0;
@@ -198,14 +197,7 @@ namespace _3PA.MainFeatures.Pro {
         /// Get the time elapsed since the beggining of the compilation in a human readable format
         /// </summary>
         public string GetElapsedTime() {
-            TimeSpan t = TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds);
-            if (t.Hours > 0)
-                return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
-            if (t.Minutes > 0)
-                return string.Format("{0:D2}m:{1:D2}s", t.Minutes, t.Seconds);
-            if (t.Seconds > 0)
-                return string.Format("{0:D2}s", t.Seconds);
-            return string.Format("{0:D3}ms", t.Milliseconds);
+            return Utils.ConvertToHumanTime(TimeSpan.FromMilliseconds(DateTime.Now.Subtract(StartingTime).TotalMilliseconds));
         }
 
         /// <summary>
@@ -233,26 +225,6 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
-        /// Allows to know how many files of each file type there is
-        /// </summary>
-        public Dictionary<FileType, int> GetNbFilesPerType() {
-
-            Dictionary<FileType, int> output = new Dictionary<FileType, int>();
-
-            foreach (var fileToCompile in GetListOfFileToCompile) {
-                FileType fileType;
-                if (!Enum.TryParse((Path.GetExtension(fileToCompile.InputPath) ?? "").Replace(".", ""), true, out fileType))
-                    fileType = FileType.Unknow;
-                if (output.ContainsKey(fileType))
-                    output[fileType]++;
-                else
-                    output.Add(fileType, 1);
-            }
-
-            return output;
-        }
-
-        /// <summary>
         /// Returns true if at least one process failed because of a failed database connection
         /// and one of the error was the error number 748 (lack of ressources) 
         /// this error is caused by too much connection on the same database (too much processes started!)
@@ -266,28 +238,29 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Allows to format a small text to explain the errors found in a file and the generated files...
         /// </summary>
-        public static string FormatCompilationResult(FileToCompile fileToCompile, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
+        public static string FormatCompilationResult(string sourceFilePath, List<FileError> listErrorFiles, List<FileToDeploy> listDeployedFiles) {
 
             var line = new StringBuilder();
             var nbErrors = 0;
 
-            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileToCompile.InputPath, Path.GetFileName(fileToCompile.InputPath)) + "</b> in " + Path.GetDirectoryName(fileToCompile.InputPath).ToHtmlLink() + "</div>");
+            line.Append("<div style='padding-bottom: 5px;'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", sourceFilePath, Path.GetFileName(sourceFilePath)) + "</b> in " + Path.GetDirectoryName(sourceFilePath).ToHtmlLink() + "</div>");
 
-            foreach (var fileError in listErrorFiles) {
-                nbErrors += fileError.Level > ErrorLevel.StrongWarning ? 1 : 0;
-                line.Append("<div style='padding-left: 10px'>" + "<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>" + (!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? "in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileError.SourcePath, Path.GetFileName(fileError.SourcePath)) + ", " : "") + (fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message + "</div>");
-            }
-
-            foreach (var file in listDeployedFiles) {
-                var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
-                var transferMsg = file.DeployType == DeployType.Copy && file.FinalDeploy ? "" : "(" + file.DeployType + ") ";
-                if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
-                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + ext.ToTitleCase() + "Type' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
-                } else if (nbErrors == 0) {
-                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + Path.GetDirectoryName(file.To).ToHtmlLink(file.To) + "</div>");
+            if (listErrorFiles != null)
+                foreach (var fileError in listErrorFiles) {
+                    nbErrors += fileError.Level > ErrorLevel.StrongWarning ? 1 : 0;
+                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + (fileError.Level > ErrorLevel.StrongWarning ? "MsgError" : "MsgWarning") + "' height='15px'>" + (!fileError.CompiledFilePath.Equals(fileError.SourcePath) ? "in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", fileError.SourcePath, Path.GetFileName(fileError.SourcePath)) + ", " : "") + (fileError.SourcePath + "|" + fileError.Line).ToHtmlLink("line " + (fileError.Line + 1)) + " (n°" + fileError.ErrorNumber + ") " + (fileError.Times > 0 ? "(x" + fileError.Times + ") " : "") + fileError.Message + "</div>");
                 }
 
-            }
+            if (listDeployedFiles != null)
+                foreach (var file in listDeployedFiles) {
+                    var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
+                    var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
+                    if (file.IsOk && (nbErrors == 0 || !ext.Equals("r"))) {
+                        line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
+                    } else if (nbErrors == 0) {
+                        line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + Path.GetDirectoryName(file.To).ToHtmlLink(file.To) + "</div>");
+                    }
+                }
 
             return line.ToString();
         }
@@ -312,7 +285,7 @@ namespace _3PA.MainFeatures.Pro {
                 foreach (var compilationProcess in _listOfCompilationProcesses) {
                     TransferedFiles.AddRange(compilationProcess.ProExecutionObject.CreateListOfFilesToDeploy());
                 }
-                TransferedFiles = Deployer.DeployFiles(TransferedFiles, obj.ProEnv.ProlibPath, i => _nbFilesTransfered = i);
+                TransferedFiles = obj.ProEnv.Deployer.DeployFiles(TransferedFiles, f => _deployPercentage = f);
 
                 // Read all the log files stores the errors
                 foreach (var compilationProcess in _listOfCompilationProcesses) {

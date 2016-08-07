@@ -514,6 +514,8 @@
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\FileExplorer\BringToFront.png" />
     <Content Include="Images\FileExplorer\Stop.png" />
+    <Content Include="Images\FileExplorer\XmlType.png" />
+    <Content Include="Images\FileExplorer\XrefType.png" />
     <Content Include="Images\Menu\EditCode.png" />
     <Content Include="Images\Menu\DataAdmin.png" />
     <Content Include="Images\Menu\DatabaseTools.png" />

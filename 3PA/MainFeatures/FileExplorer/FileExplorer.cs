@@ -275,7 +275,9 @@ namespace _3PA.MainFeatures.FileExplorer {
         P,
         R,
         T,
-        W
+        W,
+        Xml,
+        Xref
     }
 
     /// <summary>

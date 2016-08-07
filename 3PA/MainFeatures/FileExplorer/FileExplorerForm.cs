@@ -260,17 +260,6 @@ namespace _3PA.MainFeatures.FileExplorer {
         #region cell formatting and style ovl
 
         /// <summary>
-        /// Return the image that needs to be display on the left of an item
-        /// representing its type
-        /// </summary>
-        /// <param name="typeStr"></param>
-        /// <returns></returns>
-        private static Image GetImageFromStr(string typeStr) {
-            Image tryImg = (Image)ImageResources.ResourceManager.GetObject(typeStr);
-            return tryImg ?? ImageResources.Error;
-        }
-
-        /// <summary>
         /// Image getter for object rows
         /// </summary>
         /// <param name="rowObject"></param>
@@ -278,7 +267,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         private static object ImageGetter(object rowObject) {
             var obj = (FileListItem)rowObject;
             if (obj == null) return ImageResources.Error;
-            return GetImageFromStr(obj.Type + "Type");
+            return Utils.GetImageFromStr(Utils.GetExtensionImage(obj.Type.ToString(), true));
         }
 
         /// <summary>
@@ -442,7 +431,7 @@ namespace _3PA.MainFeatures.FileExplorer {
                 _displayedTypes = new Dictionary<FileType, SelectorButton<FileType>>();
                 foreach (var type in _initialObjectsList.Select(x => x.Type).Distinct()) {
                     var but = new SelectorButton<FileType> {
-                        BackGrndImage = GetImageFromStr(type + "Type"),
+                        BackGrndImage = Utils.GetImageFromStr(Utils.GetExtensionImage(type.ToString(), true)),
                         Activated = true,
                         Size = new Size(24, 24),
                         TabStop = false,

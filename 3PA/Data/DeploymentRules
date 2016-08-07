@@ -17,13 +17,5 @@
 # ========================================================================
 # Modify this file freely, it allows you to build a set of rules to deploy a file (r-code or any file)
 #
-# Each line contains 1 rule, a rule is made of 5 info separated by tabulations :
-# application_name	application_suffix	source_path_to_match	transfer_type	path_to_append_to_deployment_dir
-#
-# The types of deployments available are :
-# - Move
-# - Copy
-# - Prolib
-#
+# Help to be done in v1.6.5
 # ========================================================================
-# application_name	application_suffix	source_path_to_match	deploy_type	path_to_append_to_deployment_dir

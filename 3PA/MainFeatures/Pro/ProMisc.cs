@@ -367,12 +367,12 @@ namespace _3PA.MainFeatures.Pro {
                 var listTransferFiles = new List<FileToDeploy>();
                 if (lastExec.ExecutionType == ExecutionType.Compile) {
                     listTransferFiles = lastExec.CreateListOfFilesToDeploy();
-                    listTransferFiles = Deployer.DeployFiles(listTransferFiles, lastExec.ProEnv.ProlibPath);
+                    listTransferFiles = lastExec.ProEnv.Deployer.DeployFiles(listTransferFiles);
                 }
 
                 // Notify the user, or not
                 if (Config.Instance.CompileAlwaysShowNotification || !isCurrentFile || !Npp.GetFocus() || otherFilesInError)
-                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProCompilation.FormatCompilationResult(treatedFile, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
+                    UserCommunication.NotifyUnique(treatedFile.InputPath, "Was " + currentOperation.GetAttribute<CurrentOperationAttr>().ActionText + " :<br>" + ProCompilation.FormatCompilationResult(treatedFile.InputPath, errorsList, listTransferFiles), notifImg, notifTitle, notifSubtitle, null, notifTimeOut);
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in OnExecutionOk");

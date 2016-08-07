@@ -86,7 +86,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.static_keys.BackColor = System.Drawing.Color.Transparent;
             this.static_keys.BaseStylesheet = null;
             this.static_keys.IsSelectionEnabled = false;
-            this.static_keys.Location = new System.Drawing.Point(775, 29);
+            this.static_keys.Location = new System.Drawing.Point(716, 29);
             this.static_keys.Name = "static_keys";
             this.static_keys.Size = new System.Drawing.Size(103, 15);
             this.static_keys.TabIndex = 114;

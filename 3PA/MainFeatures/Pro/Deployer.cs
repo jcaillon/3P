@@ -6,11 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.Appli.Pages.Actions;
 
 namespace _3PA.MainFeatures.Pro {
 
-    public static class Deployer {
+    internal class Deployer {
 
         #region public static event
 
@@ -42,7 +41,7 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        #region public static methods
+        #region Import/export static
 
         public static void Export() {
             if (!File.Exists(Config.FileDeployment))
@@ -105,66 +104,14 @@ namespace _3PA.MainFeatures.Pro {
                 OnDeployConfigurationUpdate();
         }
 
-        /// <summary>
-        /// List of the files in the given directories that 
-        /// </summary>
-        public static HashSet<string> GetDeployFilesList(List<string> listOfFolderPath, SearchOption searchOptions, List<DeployRule> rules, int step) {
+        #endregion
 
-            // constructs the list of all the files (unique) accross the different folders
-            var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
-
-            // case of step 0 (compilation) we list only compilable files
-            var fileExtensionFilter = step == 0 ? Config.Instance.CompileKnownExtension : "";
-
-            // construct the filters list
-            var filtersList = rules.Where(rule => rule.Step == step && rule is DeployFilterRule).Select(rule => (DeployFilterRule)rule).ToList();
-            var includeFiltersList = filtersList.Where(rule => rule.Include).ToList();
-            var excludeFiltersList = filtersList.Where(rule => !rule.Include).ToList();
-
-            foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
-                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions)).ToList()) {
-                    if (!filesToCompile.Contains(filePath)) {
-
-                        bool toAdd = true;
-
-                        // test include filters
-                        if (includeFiltersList.Count > 0) {
-                            var hasMatch = false;
-                            foreach (var rule in includeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasMatch = true;
-                                    break;
-                                }
-                            }
-                            toAdd = hasMatch;
-                        }
-
-                        // test exclude filters
-                        if (excludeFiltersList.Count > 0) {
-                            var hasNoMatch = true;
-                            foreach (var rule in excludeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasNoMatch = false;
-                                    break;
-                                }
-                            }
-                            toAdd = toAdd && hasNoMatch;
-                        }
-
-                        if (toAdd)
-                            filesToCompile.Add(filePath);
-                    }
-                }
-
-            }
-
-            return filesToCompile;
-        }
+        #region BuildHtmlTableForRules static
 
         /// <summary>
         /// returns a string containing an html representation of the compilation path table
         /// </summary>
-        public static string BuildHtmlTable(List<DeployRule> rules) {
+        public static string BuildHtmlTableForRules(List<DeployRule> rules) {
             var strBuilder = new StringBuilder();
 
             if (rules.Any()) {
@@ -218,17 +165,176 @@ namespace _3PA.MainFeatures.Pro {
             return strBuilder.ToString();
         }
 
+        #endregion
+
+        #region Object
+
+        #region Fields
+
+        /// <summary>
+        /// The deployer works for a specific environment
+        /// </summary>
+        private ProEnvironment.ProEnvironmentObject _proEnv;
 
         #endregion
 
-        #region Deploy
+        #region Life and death
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public Deployer(ProEnvironment.ProEnvironmentObject proEnv) {
+            _proEnv = proEnv;
+        }
+
+        #endregion
+
+        #region public methods
+
+        /// <summary>
+        /// Returns a list of files in the given folders (recursively or not depending on the option),
+        /// this list is filtered thanks to the rules given (also, for step == 0, only progress files are listed)
+        /// </summary>
+        public HashSet<string> GetFilesList(List<string> listOfFolderPath, SearchOption searchOptions, int step) {
+
+            // constructs the list of all the files (unique) accross the different folders
+            var filesToCompile = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+
+            // case of step 0 (compilation) we list only compilable files
+            var fileExtensionFilter = step == 0 ? Config.Instance.CompileKnownExtension : "";
+
+            // construct the filters list
+            var includeFiltersList = _proEnv.DeployFilterRules.Where(rule => rule.Step == step && rule.Include).ToList();
+            var excludeFiltersList = _proEnv.DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
+
+            foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
+                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions)).ToList()) {
+                    if (!filesToCompile.Contains(filePath)) {
+
+                        bool toAdd = true;
+
+                        // test include filters
+                        if (includeFiltersList.Count > 0) {
+                            var hasMatch = false;
+                            foreach (var rule in includeFiltersList) {
+                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
+                                    hasMatch = true;
+                                    break;
+                                }
+                            }
+                            toAdd = hasMatch;
+                        }
+
+                        // test exclude filters
+                        if (excludeFiltersList.Count > 0) {
+                            var hasNoMatch = true;
+                            foreach (var rule in excludeFiltersList) {
+                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
+                                    hasNoMatch = false;
+                                    break;
+                                }
+                            }
+                            toAdd = toAdd && hasNoMatch;
+                        }
+
+                        if (toAdd)
+                            filesToCompile.Add(filePath);
+                    }
+                }
+
+            }
+
+            return filesToCompile;
+        }
+
+        /// <summary>
+        /// This method returns the transfer directories for the given source path, for each :
+        /// If CompileLocally, returns the directory of the source
+        /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
+        /// </summary>
+        public List<FileToDeploy> GetTransfersNeededForFile(string sourcePath, int step) {
+
+            // local compilation? return only one path, MOVE next to the source
+            if (step == 0 && _proEnv.CompileLocally)
+                return new List<FileToDeploy> {new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true)};
+
+            var outList = new List<FileToDeploy>();
+
+            // for each transfer rule that match the source pattern
+            foreach (var rule in _proEnv.DeployTransferRules.Where(
+                rule => sourcePath.RegexMatch(rule.SourcePattern.WildCardToRegex()) && rule.Step == step)
+                ) {
+
+                string outPath;
+
+                if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
+                    outPath = rule.DeployTarget;
+                } else {
+                    outPath = Path.Combine(_proEnv.BaseCompilationPath, rule.DeployTarget);
+                }
+
+                if (!outList.Exists(needed => needed.TargetDir.EqualsCi(outPath)))
+                    outList.Add(new FileToDeploy(outPath, rule.Type, !rule.ContinueAfterThisRule));
+
+                // stop ?
+                if (!rule.ContinueAfterThisRule)
+                    break;
+            }
+
+            // nothing matched?
+            if (outList.Count == 0) {
+
+                // for the compilation, move to deployment directory
+                if (step == 0)
+                    outList.Add(new FileToDeploy(_proEnv.BaseCompilationPath, DeployType.Move, true));
+            } else {
+                var lastDeploy = outList.LastOrDefault();
+                if (lastDeploy != null) {
+                    // flag last deploy
+                    lastDeploy.FinalDeploy = true;
+
+                    // for the compilation step, if the last deploy is a copy, make it a move
+                    if (step == 0 && lastDeploy.DeployType == DeployType.Copy)
+                        lastDeploy.DeployType = DeployType.Move;
+                }
+            }
+
+            return outList;
+        }
+
+        #endregion
+
+        #region Deploy Files
+
+        /// <summary>
+        /// Creates a list of files to deploy after a compilation,
+        /// for each Origin file will correspond one (or more if it's a .cls) .r file,
+        /// and one .lst if the option has been checked
+        /// </summary>
+        public List<FileToDeploy> DeployFilesForStep(int step, List<string> listOfSourceDir, SearchOption searchOptions, Action<float> updateDeploymentPercentage = null) {
+
+            var outputList = new List<FileToDeploy>();
+
+            // list the files to deploy
+            foreach (var file in GetFilesList(listOfSourceDir, searchOptions, step)) {
+                foreach (var deployNeeded in _proEnv.Deployer.GetTransfersNeededForFile(file, step)) {
+                    var fileName = Path.GetFileName(file);
+                    if (fileName != null)
+                        outputList.Add(deployNeeded.Set(file, file, Path.Combine(deployNeeded.TargetDir, fileName)));
+                }
+            }
+
+            // do deploy
+            return DeployFiles(outputList, updateDeploymentPercentage);
+        }
 
         /// <summary>
         /// Deploy a given list of files (can reduce the list if there are duplicated items so it returns it)
         /// </summary>
-        public static List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, string prolibPath, Action<int> onOneFileDone = null) {
+        public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage = null) {
 
-            int[] nbFilesDone = { 0 };
+            int[] totalFile = {0};
+            int[] nbFilesDone = {0};
 
             // make sure to transfer a given file only once at the same place (happens with .cls file since a source
             // can have several .r files generated if it is used in another classes)
@@ -237,9 +343,11 @@ namespace _3PA.MainFeatures.Pro {
                 .Select(group => group.FirstOrDefault(move => Path.GetFileNameWithoutExtension(move.From ?? "").Equals(Path.GetFileNameWithoutExtension(move.Origin))) ?? group.First())
                 .ToList();
 
+            totalFile[0] = deployToDo.Count;
+
             // check that every target dir exist (for copy/move deployments)
             deployToDo
-                .Where(deploy => deploy.DeployType == DeployType.Copy)
+                .Where(deploy => deploy.DeployType == DeployType.Copy || deploy.DeployType == DeployType.Move)
                 .GroupBy(deploy => Path.GetDirectoryName(deploy.To))
                 .Select(group => group.First())
                 .ToNonNullList()
@@ -255,118 +363,125 @@ namespace _3PA.MainFeatures.Pro {
                 .Where(deploy => deploy.DeployType == DeployType.Prolib)
                 .ToNonNullList();
 
-            // first, determine the .pl path for each deployment
-            plDeployments
-                .ForEach(deploy => {
-                    var pos = deploy.To.LastIndexOf(".pl", StringComparison.CurrentCultureIgnoreCase);
-                    if (pos >= 0)
-                        deploy.PlPath = deploy.To.Substring(0, pos + 3);
-                });
+            if (plDeployments.Count > 0) {
 
-            // then we create a unique temporary folder for each .pl
-            var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
-            foreach (var fileToDeploy in plDeployments
-                .GroupBy(deploy => deploy.PlPath)
-                .Select(deploys => deploys.First())
-                .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath))
-                .ToNonNullList()) {
+                // first, determine the .pl path for each deployment
+                plDeployments
+                    .ForEach(deploy => {
+                        var pos = deploy.To.LastIndexOf(".pl", StringComparison.CurrentCultureIgnoreCase);
+                        if (pos >= 0)
+                            deploy.PlPath = deploy.To.Substring(0, pos + 3);
+                    });
 
-                // ensure that the folder to the .pl file exists
-                Utils.CreateDirectory(Path.GetDirectoryName(fileToDeploy.PlPath));
+                // then we create a unique temporary folder for each .pl
+                var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
+                foreach (var fileToDeploy in plDeployments
+                    .GroupBy(deploy => deploy.PlPath)
+                    .Select(deploys => deploys.First())
+                    .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath))
+                    .ToNonNullList()) {
 
-                // create a unique temp folder for this .pl
-                if (!dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
-                    var uniqueTempFolder = Path.Combine(Path.GetDirectoryName(fileToDeploy.PlPath), Path.GetFileName(fileToDeploy.PlPath) + "~" + Path.GetRandomFileName());
-                    dicPlToTempFolder.Add(fileToDeploy.PlPath, uniqueTempFolder);
-                    Utils.CreateDirectory(uniqueTempFolder, FileAttributes.Hidden);
-                }
-            }
+                    // ensure that the folder to the .pl file exists
+                    Utils.CreateDirectory(Path.GetDirectoryName(fileToDeploy.PlPath));
 
-            var prolibMessage = new StringBuilder();
-
-            // for each .pl that needs to be created...
-            foreach (var pl in dicPlToTempFolder) {
-
-                var onePlDeployments = plDeployments
-                    .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath) && deploy.PlPath.Equals(pl.Key))
-                    .ToNonNullList();
-                if (onePlDeployments.Count == 0)
-                    continue;
-
-                //  we set the temporary folder on which each file will be copied..
-                // Tuple : <(base) temp directory, relative path in pl, path to .pl>
-                var dicTempFolderToPl = new Dictionary<string, Tuple<string, string, string>>(StringComparer.CurrentCultureIgnoreCase);
-                foreach (var fileToDeploy in onePlDeployments) {
-                    if (string.IsNullOrEmpty(fileToDeploy.PlPath))
-                        continue;
-
-                    if (dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
-                        fileToDeploy.ToTemp = Path.Combine(
-                            dicPlToTempFolder[fileToDeploy.PlPath],
-                            fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')
-                            );
-
-                        // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
-                        var tempSubFolder = Path.GetDirectoryName(fileToDeploy.ToTemp);
-                        if (!string.IsNullOrEmpty(tempSubFolder) && !dicTempFolderToPl.ContainsKey(tempSubFolder)) {
-                            dicTempFolderToPl.Add(
-                                tempSubFolder,
-                                new Tuple<string, string, string>(
-                                    dicPlToTempFolder[fileToDeploy.PlPath], // path of the temp dir
-                                    Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')), // relative path in .pl
-                                    fileToDeploy.PlPath) // path to the .pl file
-                                );
-
-                            // also, create the folder
-                            Utils.CreateDirectory(tempSubFolder);
+                    // create a unique temp folder for this .pl
+                    if (!dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
+                        var plDirPath = Path.GetDirectoryName(fileToDeploy.PlPath);
+                        if (plDirPath != null) {
+                            var uniqueTempFolder = Path.Combine(plDirPath, Path.GetFileName(fileToDeploy.PlPath) + "~" + Path.GetRandomFileName());
+                            dicPlToTempFolder.Add(fileToDeploy.PlPath, uniqueTempFolder);
+                            Utils.CreateDirectory(uniqueTempFolder, FileAttributes.Hidden);
                         }
                     }
                 }
 
-                var prolibExe = new ProcessIo(prolibPath);
+                var prolibMessage = new StringBuilder();
 
-                // for each subfolder in the .pl
-                foreach (var plSubFolder in dicTempFolderToPl) {
+                // for each .pl that needs to be created...
+                foreach (var pl in dicPlToTempFolder) {
 
-                    var onePlSubFolderDeployments = onePlDeployments
-                        .Where(deploy => plSubFolder.Key.Equals(Path.GetDirectoryName(deploy.ToTemp)))
+                    var pl1 = pl;
+                    var onePlDeployments = plDeployments
+                        .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath) && deploy.PlPath.Equals(pl1.Key))
                         .ToNonNullList();
-                    if (onePlSubFolderDeployments.Count == 0)
+                    if (onePlDeployments.Count == 0)
                         continue;
 
-                    Parallel.ForEach(onePlSubFolderDeployments, deploy => {
-                        if (File.Exists(deploy.From))
-                            deploy.IsOk = !string.IsNullOrEmpty(deploy.ToTemp) && Utils.MoveFile(deploy.From, deploy.ToTemp);
-                        if (deploy.IsOk)
-                            nbFilesDone[0]++;
-                        if (onOneFileDone != null)
-                            onOneFileDone(nbFilesDone[0]);
-                    });
+                    //  we set the temporary folder on which each file will be copied..
+                    // Tuple : <(base) temp directory, relative path in pl, path to .pl>
+                    var dicTempFolderToPl = new Dictionary<string, Tuple<string, string, string>>(StringComparer.CurrentCultureIgnoreCase);
+                    foreach (var fileToDeploy in onePlDeployments) {
+                        if (string.IsNullOrEmpty(fileToDeploy.PlPath))
+                            continue;
 
-                    // now we just need to add the content of temp folders into the .pl
-                    prolibExe.StartInfo.WorkingDirectory = plSubFolder.Value.Item1; // base temp dir
-                    prolibExe.Arguments = plSubFolder.Value.Item3.ProQuoter() + " -create -nowarn -add " + Path.Combine(plSubFolder.Value.Item2, "*.r").ProQuoter();
+                        if (dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
+                            fileToDeploy.ToTemp = Path.Combine(
+                                dicPlToTempFolder[fileToDeploy.PlPath],
+                                fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')
+                                );
+
+                            // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
+                            var tempSubFolder = Path.GetDirectoryName(fileToDeploy.ToTemp);
+                            if (!string.IsNullOrEmpty(tempSubFolder) && !dicTempFolderToPl.ContainsKey(tempSubFolder)) {
+                                dicTempFolderToPl.Add(
+                                    tempSubFolder,
+                                    new Tuple<string, string, string>(
+                                        dicPlToTempFolder[fileToDeploy.PlPath], // path of the temp dir
+                                        Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')), // relative path in .pl
+                                        fileToDeploy.PlPath) // path to the .pl file
+                                    );
+
+                                // also, create the folder
+                                Utils.CreateDirectory(tempSubFolder);
+                            }
+                        }
+                    }
+
+                    var prolibExe = new ProcessIo(_proEnv.ProlibPath);
+
+                    // for each subfolder in the .pl
+                    foreach (var plSubFolder in dicTempFolderToPl) {
+
+                        var onePlSubFolderDeployments = onePlDeployments
+                            .Where(deploy => plSubFolder.Key.Equals(Path.GetDirectoryName(deploy.ToTemp)))
+                            .ToNonNullList();
+                        if (onePlSubFolderDeployments.Count == 0)
+                            continue;
+
+                        Parallel.ForEach(onePlSubFolderDeployments, deploy => {
+                            if (File.Exists(deploy.From))
+                                deploy.IsOk = !string.IsNullOrEmpty(deploy.ToTemp) && Utils.MoveFile(deploy.From, deploy.ToTemp);
+                            if (deploy.IsOk)
+                                nbFilesDone[0]++;
+                            if (updateDeploymentPercentage != null)
+                                updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                        });
+
+                        // now we just need to add the content of temp folders into the .pl
+                        prolibExe.StartInfo.WorkingDirectory = plSubFolder.Value.Item1; // base temp dir
+                        prolibExe.Arguments = plSubFolder.Value.Item3.ProQuoter() + " -create -nowarn -add " + Path.Combine(plSubFolder.Value.Item2, "*").ProQuoter();
+                        if (!prolibExe.TryDoWait(true))
+                            prolibMessage.Append(prolibExe.ErrorOutput);
+
+                        Parallel.ForEach(onePlSubFolderDeployments, deploy => {
+                            deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
+                        });
+
+                    }
+
+                    // compress .pl
+                    prolibExe.StartInfo.WorkingDirectory = Path.GetDirectoryName(pl.Key) ?? "";
+                    prolibExe.Arguments = pl.Key.ProQuoter() + " -compress -nowarn";
                     if (!prolibExe.TryDoWait(true))
                         prolibMessage.Append(prolibExe.ErrorOutput);
 
-                    Parallel.ForEach(onePlSubFolderDeployments, deploy => {
-                        deploy.IsOk = deploy.IsOk && Utils.MoveFile(deploy.ToTemp, deploy.From);
-                    });
-
+                    // delete temp folders
+                    Utils.DeleteDirectory(pl.Value, true);
                 }
 
-                // compress .pl
-                prolibExe.StartInfo.WorkingDirectory = Path.GetDirectoryName(pl.Key);
-                prolibExe.Arguments = pl.Key.ProQuoter() + " -compress -nowarn";
-                if (!prolibExe.TryDoWait(true))
-                    prolibMessage.Append(prolibExe.ErrorOutput);
-
-                // delete temp folders
-                Utils.DeleteDirectory(pl.Value, true);
+                if (prolibMessage.Length > 0)
+                    UserCommunication.Notify("Errors occured when trying to create/add files to the .pl file :<br>" + prolibMessage, MessageImg.MsgError, "Prolib output", "Errors");
             }
-
-            if (prolibMessage.Length > 0)
-                UserCommunication.Notify("Errors occured when trying to create/add files to the .pl file :<br>" + prolibMessage, MessageImg.MsgError, "Prolib output", "Errors");
 
             #endregion
 
@@ -375,8 +490,8 @@ namespace _3PA.MainFeatures.Pro {
             Parallel.ForEach(deployToDo, file => {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
-                if (onOneFileDone != null)
-                    onOneFileDone(nbFilesDone[0]);
+                if (updateDeploymentPercentage != null)
+                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
             });
 
             return deployToDo;
@@ -385,13 +500,17 @@ namespace _3PA.MainFeatures.Pro {
         /// <summary>
         /// Transfer a single file
         /// </summary>
-        private static bool DeploySingleFile(FileToDeploy file) {
+        private bool DeploySingleFile(FileToDeploy file) {
             if (!file.IsOk) {
                 if (File.Exists(file.From)) {
                     switch (file.DeployType) {
 
                         case DeployType.Copy:
-                            file.IsOk = file.FinalDeploy ? Utils.MoveFile(file.From, file.To, true) : Utils.CopyFile(file.From, file.To);
+                            file.IsOk = Utils.CopyFile(file.From, file.To);
+                            break;
+
+                        case DeployType.Move:
+                            file.IsOk = Utils.MoveFile(file.From, file.To, true);
                             break;
 
                         case DeployType.Ftp:
@@ -403,6 +522,8 @@ namespace _3PA.MainFeatures.Pro {
             }
             return false;
         }
+
+        #endregion
 
         #endregion
 
@@ -478,15 +599,16 @@ namespace _3PA.MainFeatures.Pro {
     public enum DeployType {
         Prolib,
         Ftp,
-        // Copy should always be last
+        // Copy / move should always be last
         Copy,
+        Move
     }
 
     #endregion
 
-    #region DeployNeeded
+    #region TransferNeeded
 
-    public class DeployNeeded {
+    public class TransferNeeded {
 
         /// <summary>
         /// target directory for the deployment
@@ -503,7 +625,7 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public bool FinalDeploy { get; set; }
 
-        public DeployNeeded(string targetDir, DeployType deployType, bool finalDeploy) {
+        public TransferNeeded(string targetDir, DeployType deployType, bool finalDeploy) {
             TargetDir = targetDir;
             DeployType = deployType;
             FinalDeploy = finalDeploy;
@@ -530,6 +652,11 @@ namespace _3PA.MainFeatures.Pro {
         public bool IsOk { get; set; }
 
         /// <summary>
+        /// target directory for the deployment
+        /// </summary>
+        public string TargetDir { get; set; }
+
+        /// <summary>
         /// Type de transfer
         /// </summary>
         public DeployType DeployType { get; set; }
@@ -553,12 +680,28 @@ namespace _3PA.MainFeatures.Pro {
 
         #endregion
 
-        public FileToDeploy(string origin, string @from, string to, DeployNeeded deployNeeded) {
+        public FileToDeploy(string targetDir, DeployType deployType, bool finalDeploy) {
+            TargetDir = targetDir;
+            DeployType = deployType;
+            FinalDeploy = finalDeploy;
+        }
+
+        public FileToDeploy Set(string origin, string @from, string to) {
             Origin = origin;
             From = @from;
             To = to;
-            DeployType = deployNeeded.DeployType;
-            FinalDeploy = deployNeeded.FinalDeploy;
+            return this;
+        }
+
+        /// <summary>
+        /// Returns a copy if this object, setting properties in the meantime
+        /// </summary>
+        public FileToDeploy Copy(string origin, string @from, string to) {
+            return new FileToDeploy(TargetDir, DeployType, FinalDeploy) {
+                Origin = origin,
+                From = @from,
+                To = to,
+            };
         }
     }
 

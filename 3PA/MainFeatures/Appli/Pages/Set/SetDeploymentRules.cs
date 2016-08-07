@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
         private void UpdateList() {
             // build the html
-            html_list.Text = Deployer.BuildHtmlTable(Deployer.GetDeployRulesList);
+            html_list.Text = Deployer.BuildHtmlTableForRules(Deployer.GetDeployRulesList);
 
             scrollPanel.ContentPanel.Height = html_list.Location.Y + html_list.Height;
             scrollPanel.OnResizedContentPanel();

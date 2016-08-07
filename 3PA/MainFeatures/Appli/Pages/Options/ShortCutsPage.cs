@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 // keys
                 var button = new YamuiButton {
                     Anchor = AnchorStyles.Right | AnchorStyles.Top,
-                    Location = new Point(static_keys.Location.X + static_keys.Width - 270, yPos - 1),
+                    Location = new Point(static_keys.Location.X + static_keys.Width - 220, yPos - 1),
                     Size = new Size(220, 24),
                     Tag = item.ItemId,
                     Text = item.ItemSpec ?? "",

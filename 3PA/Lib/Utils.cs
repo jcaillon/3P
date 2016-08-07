@@ -32,9 +32,11 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
+using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli;
+using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA.Lib {
 
@@ -479,6 +481,39 @@ namespace _3PA.Lib {
         #region Misc
 
         /// <summary>
+        /// Allows to know how many files of each file type there is
+        /// </summary>
+        public static Dictionary<FileType, int> GetNbFilesPerType(List<string> files) {
+
+            Dictionary<FileType, int> output = new Dictionary<FileType, int>();
+
+            foreach (var file in files) {
+                FileType fileType;
+                if (!Enum.TryParse((Path.GetExtension(file) ?? "").Replace(".", ""), true, out fileType))
+                    fileType = FileType.Unknow;
+                if (output.ContainsKey(fileType))
+                    output[fileType]++;
+                else
+                    output.Add(fileType, 1);
+            }
+
+            return output;
+        }
+
+        /// <summary>
+        /// Get the time elapsed in a human readable format
+        /// </summary>
+        public static string ConvertToHumanTime(TimeSpan t) {
+            if (t.Hours > 0)
+                return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
+            if (t.Minutes > 0)
+                return string.Format("{0:D2}m:{1:D2}s", t.Minutes, t.Seconds);
+            if (t.Seconds > 0)
+                return string.Format("{0:D2}s", t.Seconds);
+            return string.Format("{0:D3}ms", t.Milliseconds);
+        }
+
+        /// <summary>
         /// Allows to download the given file asynchronously
         /// </summary>
         public static void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
@@ -572,6 +607,26 @@ namespace _3PA.Lib {
             } catch(Exception) {
                 return string.Empty;
             }
+        }
+
+        /// <summary>
+        /// Returns the name of the image to use for a particular extension
+        /// </summary>
+        public static string GetExtensionImage(string ext, bool exist = false) {
+            if (exist)
+                return ext + "Type";
+            FileType fileType;
+            if (!Enum.TryParse(ext, true, out fileType))
+                fileType = FileType.Unknow;
+            return fileType + "Type";
+        }
+
+        /// <summary>
+        /// Returns the image from the resources
+        /// </summary>
+        public static Image GetImageFromStr(string typeStr) {
+            Image tryImg = (Image) ImageResources.ResourceManager.GetObject(typeStr);
+            return tryImg ?? ImageResources.Error;
         }
 
         #endregion

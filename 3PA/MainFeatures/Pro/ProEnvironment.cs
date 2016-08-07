@@ -23,6 +23,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Serialization;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Pro {
@@ -62,6 +63,7 @@ namespace _3PA.MainFeatures.Pro {
             /// <summary>
             /// Deployment directory
             /// </summary>
+            [XmlElement(ElementName = "BaseCompilationPath")]
             public string BaseCompilationPath = "";
 
             public string ProwinPath = "";
@@ -85,6 +87,8 @@ namespace _3PA.MainFeatures.Pro {
             private List<string> _currentProPathDirList;
 
             private List<DeployRule> _deployRulesList;
+
+            private Deployer _deployer;
 
             #endregion
 
@@ -338,20 +342,31 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            #region DeploymentRules
+            #region Deploy
 
             /// <summary>
-            /// List of deploy rules read from the file and filtered for this env
+            /// The deployer for this environment
             /// </summary>
-            public List<DeployRule> DeployRulesList {
+            public Deployer Deployer {
+                get {
+                    if (_deployer == null)
+                        _deployer = new Deployer(this);
+                    return _deployer;
+                }
+            }
+
+            /// <summary>
+            /// List of deployment rules filtered + sorted for this env
+            /// </summary>
+            public List<DeployRule> DeployRules {
                 get {
                     if (_deployRulesList == null) {
 
                         // Need to match the application name / suffix filter with the current env
                         _deployRulesList = Deployer.GetDeployRulesList.Where(
                             item => Name.RegexMatch(item.NameFilter.WildCardToRegex()) && 
-                                Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())
-                        ).ToList();
+                            Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())
+                        ).ToNonNullList();
 
                         // sort the rules
                         _deployRulesList.Sort((item1, item2) => {
@@ -403,49 +418,17 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             /// <summary>
-            /// This method returns the transfer directories for the given source path, for each :
-            /// If CompileLocally, returns the directory of the source
-            /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
+            /// List of deployment rules filtered + sorted for this env
             /// </summary>
-            public List<DeployNeeded> GetDeployNeeded(string sourcePath, int step = 0) {
+            public List<DeployTransferRule> DeployTransferRules {
+                get { return DeployRules.OfType<DeployTransferRule>().ToNonNullList(); }
+            }
 
-                // local compilation? return only one path, MOVE next to the source
-                if (CompileLocally)
-                    return new List<DeployNeeded> {new DeployNeeded(Path.GetDirectoryName(sourcePath), DeployType.Copy, true) };
-
-                var outList = new List<DeployNeeded>();
-
-                // for each transfer rule that match the source pattern
-                foreach (var rule in DeployRulesList.Where(rule => {
-                        var transferRule = rule as DeployTransferRule;
-                        return transferRule != null && 
-                            sourcePath.RegexMatch(transferRule.SourcePattern.WildCardToRegex()) &&
-                            transferRule.Step == step;
-                    }).Select(rule => (DeployTransferRule) rule)) {
-
-                    string outPath;
-
-                    if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
-                        outPath = rule.DeployTarget;
-                    } else {
-                        outPath = Path.Combine(BaseCompilationPath, rule.DeployTarget);
-                    }
-
-                    if (!outList.Exists(needed => needed.TargetDir.EqualsCi(outPath)))
-                        outList.Add(new DeployNeeded(outPath, rule.Type, !rule.ContinueAfterThisRule));
-
-                    // stop ?
-                    if (!rule.ContinueAfterThisRule)
-                        break;
-                }
-
-                // nothing matched? move to deployment directory
-                if (step == 0 && outList.Count == 0)
-                    outList.Add(new DeployNeeded(BaseCompilationPath, DeployType.Copy, true));
-                else
-                    outList.Last().FinalDeploy = true;
-
-                return outList;
+            /// <summary>
+            /// List of deployment rules filtered + sorted for this env
+            /// </summary>
+            public List<DeployFilterRule> DeployFilterRules {
+                get { return DeployRules.OfType<DeployFilterRule>().ToNonNullList(); }
             }
 
             #endregion

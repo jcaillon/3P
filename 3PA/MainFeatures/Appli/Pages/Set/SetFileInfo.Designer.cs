@@ -34,6 +34,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_delete = new YamuiFramework.Controls.YamuiButton();
             this.htmlLabel7 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.lb_FileName = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.bt_SaveState = new YamuiFramework.Controls.YamuiPictureBox();
             this.lb_SaveState = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel6 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
@@ -57,7 +58,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_default = new YamuiFramework.Controls.YamuiButton();
             this.bt_clear = new YamuiFramework.Controls.YamuiButton();
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.bt_SaveState = new YamuiFramework.Controls.YamuiPictureBox();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.bt_SaveState)).BeginInit();
@@ -172,6 +172,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lb_FileName.TabIndex = 70;
             this.lb_FileName.TabStop = false;
             this.lb_FileName.Text = "<b>Filename</b>";
+            // 
+            // bt_SaveState
+            // 
+            this.bt_SaveState.BackGrndImage = null;
+            this.bt_SaveState.Location = new System.Drawing.Point(193, 203);
+            this.bt_SaveState.Name = "bt_SaveState";
+            this.bt_SaveState.Size = new System.Drawing.Size(20, 20);
+            this.bt_SaveState.TabIndex = 69;
+            this.bt_SaveState.TabStop = false;
+            this.bt_SaveState.Text = "yamuiImageButton1";
             // 
             // lb_SaveState
             // 
@@ -416,7 +426,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_cancel
             // 
             this.bt_cancel.BackGrndImage = null;
-            this.bt_cancel.Location = new System.Drawing.Point(321, 483);
+            this.bt_cancel.Location = new System.Drawing.Point(312, 483);
             this.bt_cancel.Name = "bt_cancel";
             this.bt_cancel.SetImgSize = new System.Drawing.Size(20, 20);
             this.bt_cancel.Size = new System.Drawing.Size(124, 23);
@@ -465,16 +475,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
-            // 
-            // bt_SaveState
-            // 
-            this.bt_SaveState.BackGrndImage = null;
-            this.bt_SaveState.Location = new System.Drawing.Point(193, 203);
-            this.bt_SaveState.Name = "bt_SaveState";
-            this.bt_SaveState.Size = new System.Drawing.Size(20, 20);
-            this.bt_SaveState.TabIndex = 69;
-            this.bt_SaveState.TabStop = false;
-            this.bt_SaveState.Text = "yamuiImageButton1";
             // 
             // SetFileInfo
             // 
