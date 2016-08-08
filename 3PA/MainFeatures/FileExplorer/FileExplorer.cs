@@ -273,11 +273,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         I,
         Lst,
         P,
+        Pl,
         R,
         T,
         W,
         Xml,
-        Xref
+        Xref,
+        Zip
     }
 
     /// <summary>

@@ -105,7 +105,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // start
             btStart.BackGrndImage = ImageResources.Deploy;
-            tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application :<br>First step, compile all the progress files<br>Second step, deploy r-code following the deployment rules for compilation<br>Third step, deploy any file following the deployment rules for files");
+            tooltip.SetToolTip(btStart, "Click to <b>start</b> deploying your application");
             btStart.ButtonPressed += BtStartOnButtonPressed;
 
             // cancel
@@ -255,20 +255,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // the execution ended successfully
             if (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk) {
 
-                var totalDeployedFiles = 0;
-                foreach (var kpv in _filesToDeployPerStep) {
-                    totalDeployedFiles += kpv.Value.Count;
-                }
-
-                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>All the processes ended correctly</div>");
-                // compilation time
-                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
-
                 var listLinesByStep = new Dictionary<int, List<Tuple<int, string>>> {
                     {0, new List<Tuple<int, string>>()}
                 };
+                var listLinesCompilation = new List<Tuple<int, string>>();
                 StringBuilder line = new StringBuilder();
 
+                var totalDeployedFiles = 0;
                 var nbDeploymentError = 0;
                 var nbCompilationError = 0;
                 var nbCompilationWarning = 0;
@@ -277,52 +270,83 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 foreach (var fileToCompile in _currentCompil.GetListOfFileToCompile.OrderBy(compile => Path.GetFileName(compile.InputPath))) {
 
                     var toCompile = fileToCompile;
-
-                    var fileTransferList = _filesToDeployPerStep[0].Where(move => move.Origin.Equals(toCompile.InputPath)).ToList();
-                    bool deployFailed = fileTransferList.Exists(deploy => !deploy.IsOk);
-
                     var errorsOfTheFile = _currentCompil.ErrorsList.Where(error => error.CompiledFilePath.Equals(toCompile.InputPath)).ToList();
                     bool hasError = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level > ErrorLevel.StrongWarning);
                     bool hasWarning = errorsOfTheFile.Count > 0 && errorsOfTheFile.Exists(error => error.Level <= ErrorLevel.StrongWarning);
 
-                    line.Clear();
-                    line.Append("<tr><td style='width: 50px;'><img src='" + (deployFailed || hasError ? "MsgError" : (hasWarning ? "MsgWarning" : "MsgOk")) + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
-                    line.Append(ProCompilation.FormatCompilationResult(fileToCompile.InputPath, errorsOfTheFile, fileTransferList));
-                    line.Append("</td></tr>");
+                    if (hasError || hasWarning) {
+                        // only add compilation errors
+                        line.Clear();
+                        line.Append("<tr><td style='width: 50px;'><img src='" + (hasError ? "MsgError" : "MsgWarning") + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
+                        line.Append(ProCompilation.FormatCompilationResult(fileToCompile.InputPath, errorsOfTheFile, null));
+                        line.Append("</td></tr>");
+                        listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
+                    }
 
-                    listLinesByStep[0].Add(new Tuple<int, string>(deployFailed || hasError ? 3 : (hasWarning ? 2 : 1), line.ToString()));
-
-                    if (hasError)
+                    if (hasError) {
                         nbCompilationError++;
-                    else if (deployFailed)
-                        nbDeploymentError++;
-                    if (hasWarning)
+                        // if compilation errors, delete all transfer records for this file since they obviously didn't happen
+                        _filesToDeployPerStep[0].RemoveAll(move => move.Origin.Equals(toCompile.InputPath));
+                    } else if (hasWarning)
                         nbCompilationWarning++;
                 }
 
                 // for each deploy step
-                foreach (var kpv in _filesToDeployPerStep.Where(pair => pair.Key > 0)) {
+                foreach (var kpv in _filesToDeployPerStep) {
 
-                    foreach (var leader in kpv.Value.GroupBy(deploy => deploy.Origin).Select(deploys => deploys.First()).OrderBy(deploy => deploy.To)) {
+                    // group by transfer type
+                    foreach (var groupType in kpv.Value.GroupBy(deploy => deploy.DeployType).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().DeployType)) {
 
-                        var group = kpv.Value.Where(deploy => deploy.Origin.Equals(leader.Origin)).ToNonNullList();
+                        // group either by directory name or by archive name
+                        var groupDirectory = groupType.First().DeployType <= DeployType.Zip ? 
+                            groupType.GroupBy(deploy => deploy.ArchivePath).Select(deploys => deploys.ToList()).ToList().OrderBy(list => list.First().ArchivePath) : 
+                            groupType.GroupBy(deploy => Path.GetDirectoryName(deploy.To)).Select(deploys => deploys.ToList()).ToList().OrderBy(list => Path.GetDirectoryName(list.First().To));
 
-                        bool deployFailed = group.Exists(deploy => !deploy.IsOk);
+                        foreach (var group in groupDirectory) {
 
-                        line.Clear();
-                        line.Append("<tr><td style='width: 50px;'><img src='" + (deployFailed ? "MsgError" : "MsgOk") + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
-                        line.Append(ProCompilation.FormatCompilationResult(leader.Origin, null, group));
-                        line.Append("</td></tr>");
+                            var deployFailed = group.Exists(deploy => !deploy.IsOk);
+                            var first = group.First();
 
-                        if (!listLinesByStep.ContainsKey(kpv.Key))
-                            listLinesByStep.Add(kpv.Key, new List<Tuple<int, string>>());
+                            line.Clear();
+                            line.Append("<tr><td style='width: 50px;'><img src='" + (deployFailed ? "MsgError" : "MsgOk") + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
 
-                        listLinesByStep[kpv.Key].Add(new Tuple<int, string>(deployFailed ? 3 : 1, line.ToString()));
+                            if (first.DeployType <= DeployType.Zip) {
+                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", first.ArchivePath, Path.GetFileName(first.ArchivePath)) + "</b> in " + Path.GetDirectoryName(first.ArchivePath).ToHtmlLink() + "</div>");
+                            } else {
+                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + Path.GetDirectoryName(first.To).ToHtmlLink() + "</div>");
+                            }
 
-                        if (deployFailed)
-                            nbDeploymentError++;
+                            foreach (var file in group.OrderBy(deploy => deploy.To)) {
+                                var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
+                                var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
+                                if (file.IsOk) {
+                                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
+                                } else {
+                                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + file.To + "</div>");
+                                }
+                            }
+
+                            line.Append("</td></tr>");
+
+                            if (!listLinesByStep.ContainsKey(kpv.Key))
+                                listLinesByStep.Add(kpv.Key, new List<Tuple<int, string>>());
+
+                            listLinesByStep[kpv.Key].Add(new Tuple<int, string>(deployFailed ? 3 : 1, line.ToString()));
+
+                            if (deployFailed)
+                                nbDeploymentError += group.Count(deploy => !deploy.IsOk);
+                            else
+                                totalDeployedFiles += group.Count;
+
+                        }
                     }
                 }
+
+                // compilation
+                currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Compiling <b>" + _currentCompil.NbFilesToCompile + "</b> files : <b>" + Utils.GetNbFilesPerType(_currentCompil.GetListOfFileToCompile.Select(compile => compile.InputPath).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
+
+                // compilation time
+                currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
 
                 if (nbCompilationError > 0)
                     currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
@@ -331,7 +355,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning > 0)
                     currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
 
-                // total time
+                // deploy
+                currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Deploying <b>" + totalDeployedFiles + "</b> files : <b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
+
+                // deployment time
                 currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the deployment : <b>" + _currentCompil.GetElapsedTime() + @"</b></div>");
 
                 if (nbDeploymentError > 0)
@@ -339,14 +366,27 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 if (totalDeployedFiles - nbDeploymentError > 0)
                     currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
 
-                foreach (var listLinesKpv in listLinesByStep) {
-                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Step " + listLinesKpv.Key + " summary :</h3>");
-
+                // compilation
+                if (listLinesCompilation.Count > 0) {
+                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Compilation error details :</h3>");
                     currentReport.Append("<table style='margin-bottom: 0px; width: 100%'>");
                     var boolAlternate = false;
-                    foreach (var listLine in listLinesKpv.Value.OrderByDescending(tuple => tuple.Item1)) {
+                    foreach (var listLine in listLinesCompilation.OrderByDescending(tuple => tuple.Item1)) {
                         currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
                         boolAlternate = !boolAlternate;
+                    }
+                    currentReport.Append("</table>");
+                }
+
+                // deployment steps
+                foreach (var listLinesKpv in listLinesByStep) {
+                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " :</h3>");
+
+                    currentReport.Append("<table style='margin-bottom: 0px; width: 100%'>");
+                    var boolAlternate2 = false;
+                    foreach (var listLine in listLinesKpv.Value.OrderByDescending(tuple => tuple.Item1)) {
+                        currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate2 ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
+                        boolAlternate2 = !boolAlternate2;
                     }
                     currentReport.Append("</table>");
                 }
@@ -418,7 +458,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 
                 _deploymentPercentage = 0;
                 _currentStep = 0;
-                _totalSteps = _proEnv.DeployTransferRules.Max(rule => rule.Step);
+                _totalSteps = _proEnv.DeployTransferRules.Count > 0 ? _proEnv.DeployTransferRules.Max(rule => rule.Step) : 0;
                 _filesToDeployPerStep.Clear();
 
                 if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
@@ -667,15 +707,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
                                 <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (_proEnv.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
                                 <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + Utils.GetNbFilesPerType(_currentCompil.GetListOfFileToCompile.Select(compile => compile.InputPath).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>" +
-                                (_filesToDeployPerStep.Count > 0 ?
-                                @"
-                                <tr><td style='width: 40%; padding-right: 20px'>Total number of files being deployed :</td><td><b>" + totalDeployedFiles + @" files</b></td></tr>
-                                <tr><td style='padding-right: 20px'>Type of files compiled :</td><td><b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + @"</b></td></tr>
-                                " : "") + @"
-                            </table>
-                            " + htmlContent + @"                    
+                                <tr><td style='width: 40%; padding-right: 20px'>Source directory :</td><td><b>" + _deployProfile.SourceDirectory.ToHtmlLink() + @"</b></td></tr>
+                                <tr><td style='width: 40%; padding-right: 20px'>Target deployment directory :</td><td><b>" + _proEnv.BaseCompilationPath.ToHtmlLink() + @"</b></td></tr>
+                            </table>           
                         </div>
+                        " + htmlContent + @"
                     </div>";
 
                 // Activate scrollbars if needed

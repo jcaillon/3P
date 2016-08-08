@@ -370,26 +370,26 @@ namespace _3PA.MainFeatures.Pro {
                     .ForEach(deploy => {
                         var pos = deploy.To.LastIndexOf(".pl", StringComparison.CurrentCultureIgnoreCase);
                         if (pos >= 0)
-                            deploy.PlPath = deploy.To.Substring(0, pos + 3);
+                            deploy.ArchivePath = deploy.To.Substring(0, pos + 3);
                     });
 
                 // then we create a unique temporary folder for each .pl
                 var dicPlToTempFolder = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
                 foreach (var fileToDeploy in plDeployments
-                    .GroupBy(deploy => deploy.PlPath)
+                    .GroupBy(deploy => deploy.ArchivePath)
                     .Select(deploys => deploys.First())
-                    .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath))
+                    .Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath))
                     .ToNonNullList()) {
 
                     // ensure that the folder to the .pl file exists
-                    Utils.CreateDirectory(Path.GetDirectoryName(fileToDeploy.PlPath));
+                    Utils.CreateDirectory(Path.GetDirectoryName(fileToDeploy.ArchivePath));
 
                     // create a unique temp folder for this .pl
-                    if (!dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
-                        var plDirPath = Path.GetDirectoryName(fileToDeploy.PlPath);
+                    if (!dicPlToTempFolder.ContainsKey(fileToDeploy.ArchivePath)) {
+                        var plDirPath = Path.GetDirectoryName(fileToDeploy.ArchivePath);
                         if (plDirPath != null) {
-                            var uniqueTempFolder = Path.Combine(plDirPath, Path.GetFileName(fileToDeploy.PlPath) + "~" + Path.GetRandomFileName());
-                            dicPlToTempFolder.Add(fileToDeploy.PlPath, uniqueTempFolder);
+                            var uniqueTempFolder = Path.Combine(plDirPath, Path.GetFileName(fileToDeploy.ArchivePath) + "~" + Path.GetRandomFileName());
+                            dicPlToTempFolder.Add(fileToDeploy.ArchivePath, uniqueTempFolder);
                             Utils.CreateDirectory(uniqueTempFolder, FileAttributes.Hidden);
                         }
                     }
@@ -402,7 +402,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var pl1 = pl;
                     var onePlDeployments = plDeployments
-                        .Where(deploy => !string.IsNullOrEmpty(deploy.PlPath) && deploy.PlPath.Equals(pl1.Key))
+                        .Where(deploy => !string.IsNullOrEmpty(deploy.ArchivePath) && deploy.ArchivePath.Equals(pl1.Key))
                         .ToNonNullList();
                     if (onePlDeployments.Count == 0)
                         continue;
@@ -411,13 +411,13 @@ namespace _3PA.MainFeatures.Pro {
                     // Tuple : <(base) temp directory, relative path in pl, path to .pl>
                     var dicTempFolderToPl = new Dictionary<string, Tuple<string, string, string>>(StringComparer.CurrentCultureIgnoreCase);
                     foreach (var fileToDeploy in onePlDeployments) {
-                        if (string.IsNullOrEmpty(fileToDeploy.PlPath))
+                        if (string.IsNullOrEmpty(fileToDeploy.ArchivePath))
                             continue;
 
-                        if (dicPlToTempFolder.ContainsKey(fileToDeploy.PlPath)) {
+                        if (dicPlToTempFolder.ContainsKey(fileToDeploy.ArchivePath)) {
                             fileToDeploy.ToTemp = Path.Combine(
-                                dicPlToTempFolder[fileToDeploy.PlPath],
-                                fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')
+                                dicPlToTempFolder[fileToDeploy.ArchivePath],
+                                fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')
                                 );
 
                             // If not already done, remember that the *.r code in this temp folder must be integrated to this .pl file
@@ -426,9 +426,9 @@ namespace _3PA.MainFeatures.Pro {
                                 dicTempFolderToPl.Add(
                                     tempSubFolder,
                                     new Tuple<string, string, string>(
-                                        dicPlToTempFolder[fileToDeploy.PlPath], // path of the temp dir
-                                        Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.PlPath, "").TrimStart('\\')), // relative path in .pl
-                                        fileToDeploy.PlPath) // path to the .pl file
+                                        dicPlToTempFolder[fileToDeploy.ArchivePath], // path of the temp dir
+                                        Path.GetDirectoryName(fileToDeploy.To.Replace(fileToDeploy.ArchivePath, "").TrimStart('\\')), // relative path in .pl
+                                        fileToDeploy.ArchivePath) // path to the .pl file
                                     );
 
                                 // also, create the folder
@@ -598,6 +598,8 @@ namespace _3PA.MainFeatures.Pro {
 
     public enum DeployType {
         Prolib,
+        Zip,
+        // <= zip, has ArchivePath set after the deployment
         Ftp,
         // Copy / move should always be last
         Copy,
@@ -674,9 +676,9 @@ namespace _3PA.MainFeatures.Pro {
         public string ToTemp { get; set; }
 
         /// <summary>
-        /// Path to the .pl file in which we need to include this file
+        /// Path to the .pl or .zip file in which we need to include this file
         /// </summary>
-        public string PlPath { get; set; }
+        public string ArchivePath { get; set; }
 
         #endregion
 

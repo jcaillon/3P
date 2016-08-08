@@ -2,17 +2,17 @@
 // ========================================================================
 // Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ProgressRun.p) is part of 3P.
-// 
+//
 // 3P is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // 3P is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
@@ -21,7 +21,7 @@
 /* When executed from 3P, the preprocessed variables below are set to real values */
 
 /* if ExecutionType not already defined */
-&IF DEFINED(ExecutionType) = 0 &THEN 
+&IF DEFINED(ExecutionType) = 0 &THEN
     &SCOPED-DEFINE ExecutionType "DICTIONNARY"
     &SCOPED-DEFINE ToExecute ""
     &SCOPED-DEFINE LogFile "execution.log"
@@ -78,7 +78,7 @@ IF {&BasePfPath} > "" THEN DO:
     REPEAT:
         IMPORT STREAM str_reader UNFORMATTED gc_line.
         ASSIGN gc_line = TRIM(gc_line).
-        IF gc_line BEGINS "#" THEN 
+        IF gc_line BEGINS "#" THEN
             NEXT.
         IF INDEX(gc_line, "#") > 0 THEN
             gc_line = TRIM(SUBSTRING(gc_line, 1, INDEX(gc_line, "#") - 1)).
@@ -182,12 +182,11 @@ QUIT.
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
-        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO. 
+        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
         DEFINE VARIABLE li_i AS INTEGER NO-UNDO.
 
         IF COMPILER:NUM-MESSAGES > 0 THEN DO:
-            ASSIGN li_i = 1.
-            DO WHILE li_i <= COMPILER:NUM-MESSAGES:
+            DO li_i = 1 TO COMPILER:NUM-MESSAGES:
                 PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
                 lc_from,
                 COMPILER:GET-FILE-NAME(li_i),
@@ -198,9 +197,25 @@ QUIT.
                 TRIM(REPLACE(REPLACE(COMPILER:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(COMPILER:GET-NUMBER(li_i)) + ")", "")),
                 fi_get_message_description(INTEGER(COMPILER:GET-NUMBER(li_i)))
                 ) SKIP.
-                ASSIGN li_i = li_i + 1.
             END.
         END.
+
+        IF ERROR-STATUS:ERROR THEN DO:
+            DO li_i = 1 TO ERROR-STATUS:NUM-MESSAGES:
+                PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+                lc_from,
+                lc_from,
+                "Critical",
+                0,
+                0,
+                ERROR-STATUS:GET-NUMBER(li_i),
+                TRIM(REPLACE(REPLACE(ERROR-STATUS:GET-MESSAGE(li_i), "** ", ""), " (" + STRING(ERROR-STATUS:GET-NUMBER(li_i)) + ")", "")),
+                ""
+                ) SKIP.
+            END.
+        END.
+
+        ERROR-STATUS:ERROR = NO.
 
         RETURN "".
 
@@ -212,10 +227,10 @@ QUIT.
       Parameters:  <none>
     ------------------------------------------------------------------------------*/
 
-        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO. 
+        DEFINE INPUT PARAMETER lc_from AS CHARACTER NO-UNDO.
         DEFINE VARIABLE lc_msg AS CHARACTER NO-UNDO.
 
-        IF COMPILER:ERROR OR COMPILER:WARNING THEN DO:
+        IF COMPILER:ERROR OR COMPILER:WARNING OR ERROR-STATUS:ERROR THEN DO:
             IF RETURN-VALUE > "" THEN
                 lc_msg = RETURN-VALUE + "~n".
             IF ERROR-STATUS:NUM-MESSAGES > 0 THEN DO:
@@ -224,7 +239,6 @@ QUIT.
                     lc_msg = lc_msg + "(" + STRING(li_) + "): " + ERROR-STATUS:GET-MESSAGE(li_) + "~n".
                 END.
             END.
-        
             lc_msg = SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
                 lc_from,
                 COMPILER:FILE-NAME,
@@ -237,6 +251,8 @@ QUIT.
                 ).
             PUT STREAM str_logout UNFORMATTED lc_msg SKIP.
         END.
+
+        ERROR-STATUS:ERROR = NO.
 
         RETURN "".
 
@@ -271,7 +287,7 @@ PROCEDURE pi_compileList:
             fi_output_last_error().
             RUN pi_handleCompilErrors (INPUT lc_from) NO-ERROR.
             fi_output_last_error().
-            
+
             /* the following stream / file is used to inform the C# side of the progression of the compilation */
             OUTPUT STREAM str_writer TO VALUE({&CompileProgressionFile}) APPEND BINARY.
             PUT STREAM str_writer UNFORMATTED "x".
@@ -279,7 +295,7 @@ PROCEDURE pi_compileList:
         END.
     END.
     INPUT STREAM str_reader2 CLOSE.
-    
+
     RETURN "".
 
 END PROCEDURE.
@@ -288,13 +304,13 @@ PROCEDURE pi_feedNotification:
 /*------------------------------------------------------------------------------
   Purpose: called when the associated event is published, allows to display a
     custom notification to the user after executing this program
-  Parameters:  
+  Parameters:
     ipc_message = my message content, <b>HTML</b> format! You can also set a <a href='location'>link</a> or whatever you want
     ipi_type = from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance"
     ipc_title = My notification title
     ipc_subtitle = My notification subtitle
     ipi_duration = duration of the notification in seconds (0 for infinite time)
-    ipc_uniqueTag = unique name for the notification, if it it set, the notif will close on a click on a link and 
+    ipc_uniqueTag = unique name for the notification, if it it set, the notif will close on a click on a link and
                     will automatically be closed if another notification with the same name pops up
 ------------------------------------------------------------------------------*/
 
@@ -304,9 +320,9 @@ PROCEDURE pi_feedNotification:
     DEFINE INPUT PARAMETER ipc_subtitle AS CHARACTER NO-UNDO.
     DEFINE INPUT PARAMETER ipi_duration AS INTEGER NO-UNDO.
     DEFINE INPUT PARAMETER ipc_uniqueTag AS CHARACTER NO-UNDO.
-    
+
     DEFINE VARIABLE lc_messageType AS CHARACTER NO-UNDO.
-    
+
     CASE ipi_type :
         WHEN 0 THEN lc_messageType = "MsgOk".
         WHEN 1 THEN lc_messageType = "MsgError".
@@ -314,7 +330,7 @@ PROCEDURE pi_feedNotification:
         WHEN 3 THEN lc_messageType = "MsgInfo".
         WHEN 4 THEN lc_messageType = "MsgHighImportance".
     END CASE.
-    
+
     OUTPUT STREAM str_writer TO VALUE({&NotificationOutputPath}) APPEND BINARY.
     PUT STREAM str_writer UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6",
         ipc_message,
@@ -325,7 +341,7 @@ PROCEDURE pi_feedNotification:
         ipc_uniqueTag
         ) SKIP.
     OUTPUT STREAM str_writer CLOSE.
-    
+
 END.
 
 /* ************************  Function Implementations ***************** */
@@ -452,13 +468,13 @@ FUNCTION fi_add_connec_try RETURNS CHARACTER ( INPUT ipc_conn AS CHARACTER) :
 
     DEFINE VARIABLE lc_conn AS CHARACTER NO-UNDO.
     DEFINE VARIABLE lc_toAdd AS CHARACTER NO-UNDO INITIAL "-ct 1".
-    
-    ASSIGN 
+
+    ASSIGN
         lc_conn = REPLACE(ipc_conn, "  ", " ")
         lc_conn = REPLACE(lc_conn, "-db", lc_toAdd + " -db")
         lc_conn = IF lc_conn BEGINS (" " + lc_toAdd) THEN SUBSTRING(lc_conn, 7) ELSE lc_conn
         lc_conn = lc_conn + " " + lc_toAdd.
-        
+
     RETURN lc_conn.
 
 END FUNCTION.

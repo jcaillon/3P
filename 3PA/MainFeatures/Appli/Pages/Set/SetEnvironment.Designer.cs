@@ -29,6 +29,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         private void InitializeComponent() {
             this.toolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.htmlLabel10 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
+            this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.htmlLabel1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.btDbView = new YamuiFramework.Controls.YamuiButton();
             this.btDbDeleteDownload = new YamuiFramework.Controls.YamuiButton();
@@ -93,8 +95,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaLeftButtons = new YamuiFramework.Controls.YamuiArea();
             this.areaEnv = new YamuiFramework.Controls.YamuiArea();
             this.areaPf = new YamuiFramework.Controls.YamuiArea();
-            this.htmlLabel9 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
-            this.htmlLabel10 = new YamuiFramework.HtmlRenderer.WinForms.HtmlLabel();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -191,6 +191,34 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.Name = "scrollPanel";
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
+            // 
+            // htmlLabel10
+            // 
+            this.htmlLabel10.AutoSize = false;
+            this.htmlLabel10.AutoSizeHeightOnly = true;
+            this.htmlLabel10.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel10.BaseStylesheet = null;
+            this.htmlLabel10.IsSelectionEnabled = false;
+            this.htmlLabel10.Location = new System.Drawing.Point(173, 29);
+            this.htmlLabel10.Name = "htmlLabel10";
+            this.htmlLabel10.Size = new System.Drawing.Size(122, 15);
+            this.htmlLabel10.TabIndex = 171;
+            this.htmlLabel10.TabStop = false;
+            this.htmlLabel10.Text = "<b>Application suffix</b>";
+            // 
+            // htmlLabel9
+            // 
+            this.htmlLabel9.AutoSize = false;
+            this.htmlLabel9.AutoSizeHeightOnly = true;
+            this.htmlLabel9.BackColor = System.Drawing.Color.Transparent;
+            this.htmlLabel9.BaseStylesheet = null;
+            this.htmlLabel9.IsSelectionEnabled = false;
+            this.htmlLabel9.Location = new System.Drawing.Point(30, 29);
+            this.htmlLabel9.Name = "htmlLabel9";
+            this.htmlLabel9.Size = new System.Drawing.Size(122, 15);
+            this.htmlLabel9.TabIndex = 170;
+            this.htmlLabel9.TabStop = false;
+            this.htmlLabel9.Text = "<b>Application name</b>";
             // 
             // htmlLabel1
             // 
@@ -532,7 +560,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.Size = new System.Drawing.Size(122, 15);
             this.htmlLabel3.TabIndex = 112;
             this.htmlLabel3.TabStop = false;
-            this.htmlLabel3.Text = "<b>Project local directory</b>";
+            this.htmlLabel3.Text = "<b>Source directory</b>";
             // 
             // btleft3
             // 
@@ -1029,34 +1057,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.areaPf.Size = new System.Drawing.Size(898, 43);
             this.areaPf.TabIndex = 166;
             this.areaPf.Visible = false;
-            // 
-            // htmlLabel9
-            // 
-            this.htmlLabel9.AutoSize = false;
-            this.htmlLabel9.AutoSizeHeightOnly = true;
-            this.htmlLabel9.BackColor = System.Drawing.Color.Transparent;
-            this.htmlLabel9.BaseStylesheet = null;
-            this.htmlLabel9.IsSelectionEnabled = false;
-            this.htmlLabel9.Location = new System.Drawing.Point(30, 29);
-            this.htmlLabel9.Name = "htmlLabel9";
-            this.htmlLabel9.Size = new System.Drawing.Size(122, 15);
-            this.htmlLabel9.TabIndex = 170;
-            this.htmlLabel9.TabStop = false;
-            this.htmlLabel9.Text = "<b>Application name</b>";
-            // 
-            // htmlLabel10
-            // 
-            this.htmlLabel10.AutoSize = false;
-            this.htmlLabel10.AutoSizeHeightOnly = true;
-            this.htmlLabel10.BackColor = System.Drawing.Color.Transparent;
-            this.htmlLabel10.BaseStylesheet = null;
-            this.htmlLabel10.IsSelectionEnabled = false;
-            this.htmlLabel10.Location = new System.Drawing.Point(173, 29);
-            this.htmlLabel10.Name = "htmlLabel10";
-            this.htmlLabel10.Size = new System.Drawing.Size(122, 15);
-            this.htmlLabel10.TabIndex = 171;
-            this.htmlLabel10.TabStop = false;
-            this.htmlLabel10.Text = "<b>Application suffix</b>";
             // 
             // SetEnvironment
             // 
