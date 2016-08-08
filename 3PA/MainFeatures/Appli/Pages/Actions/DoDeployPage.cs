@@ -277,9 +277,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     if (hasError || hasWarning) {
                         // only add compilation errors
                         line.Clear();
-                        line.Append("<tr><td style='width: 50px;'><img src='" + (hasError ? "MsgError" : "MsgWarning") + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
+                        line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (hasError ? "Error30x30" : "Warning30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
                         line.Append(ProCompilation.FormatCompilationResult(fileToCompile.InputPath, errorsOfTheFile, null));
-                        line.Append("</td></tr>");
+                        line.Append("</div>");
                         listLinesCompilation.Add(new Tuple<int, string>(hasError ? 3 : 2, line.ToString()));
                     }
 
@@ -308,8 +308,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                             var first = group.First();
 
                             line.Clear();
-                            line.Append("<tr><td style='width: 50px;'><img src='" + (deployFailed ? "MsgError" : "MsgOk") + "' width='30' height='30' /></td><td %ALTERNATE%style='padding-bottom: 5px;'>");
-
+                            line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
+                
                             if (first.DeployType <= DeployType.Zip) {
                                 line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", first.ArchivePath, Path.GetFileName(first.ArchivePath)) + "</b> in " + Path.GetDirectoryName(first.ArchivePath).ToHtmlLink() + "</div>");
                             } else {
@@ -322,11 +322,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 if (file.IsOk) {
                                     line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
                                 } else {
-                                    line.Append("<div style='padding-left: 10px'>" + "<img src='MsgError' height='15px'>Transfer error " + transferMsg + file.To + "</div>");
+                                    line.Append("<div style='padding-left: 10px'>" + "<img src='Error30x30' height='15px'>Transfer error " + transferMsg + file.To + "</div>");
                                 }
                             }
 
-                            line.Append("</td></tr>");
+                            line.Append("</div>");
 
                             if (!listLinesByStep.ContainsKey(kpv.Key))
                                 listLinesByStep.Add(kpv.Key, new List<Tuple<int, string>>());
@@ -349,11 +349,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the compilation : <b>" + _currentCompil.ExecutionTime + @"</b></div>");
 
                 if (nbCompilationError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>" + nbCompilationError + " files with compilation error(s)</div>");
                 if (nbCompilationWarning > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>" + nbCompilationWarning + " files with compilation warning(s)</div>");
                 if (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (_currentCompil.NbFilesToCompile - nbCompilationError - nbCompilationWarning) + " files compiled correctly</div>");
 
                 // deploy
                 currentReport.Append(@"<div style='padding-top: 7px; padding-bottom: 7px;'>Deploying <b>" + totalDeployedFiles + "</b> files : <b>" + Utils.GetNbFilesPerType(_filesToDeployPerStep.SelectMany(pair => pair.Value).Select(deploy => deploy.To).ToList()).Aggregate("", (current, kpv) => current + (@"<img style='padding-right: 5px;' src='" + Utils.GetExtensionImage(kpv.Key.ToString(), true) + "' height='15px'><span style='padding-right: 12px;'>x" + kpv.Value + "</span>")) + "</b></div>");
@@ -362,43 +362,39 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Time' height='15px'>Total elapsed time for the deployment : <b>" + _currentCompil.GetElapsedTime() + @"</b></div>");
 
                 if (nbDeploymentError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>" + nbDeploymentError + " files not deployed</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>" + nbDeploymentError + " files not deployed</div>");
                 if (totalDeployedFiles - nbDeploymentError > 0)
-                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgOk' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
+                    currentReport.Append("<div><img style='padding-right: 20px; padding-left: 5px;' src='Ok30x30' height='15px'>" + (totalDeployedFiles - nbDeploymentError) + " files deployed correctly</div>");
 
                 // compilation
                 if (listLinesCompilation.Count > 0) {
                     currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Compilation error details :</h3>");
-                    currentReport.Append("<table style='margin-bottom: 0px; width: 100%'>");
                     var boolAlternate = false;
                     foreach (var listLine in listLinesCompilation.OrderByDescending(tuple => tuple.Item1)) {
                         currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
                         boolAlternate = !boolAlternate;
                     }
-                    currentReport.Append("</table>");
                 }
 
                 // deployment steps
                 foreach (var listLinesKpv in listLinesByStep) {
                     currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment step " + listLinesKpv.Key + " :</h3>");
 
-                    currentReport.Append("<table style='margin-bottom: 0px; width: 100%'>");
                     var boolAlternate2 = false;
                     foreach (var listLine in listLinesKpv.Value.OrderByDescending(tuple => tuple.Item1)) {
                         currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate2 ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
                         boolAlternate2 = !boolAlternate2;
                     }
-                    currentReport.Append("</table>");
                 }
 
             } else {
 
                 if (_currentCompil.HasBeenCancelled) {
                     // the process has been cancelled
-                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgWarning' height='15px'>The compilation has been cancelled by the user</div>");
+                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Warning30x30' height='15px'>The compilation has been cancelled by the user</div>");
                 } else {
                     // provide info on the possible error!
-                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='MsgError' height='15px'>At least one process has ended in error, the compilation has been cancelled</div>");
+                    currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Error30x30' height='15px'>At least one process has ended in error, the compilation has been cancelled</div>");
 
                     if (_currentCompil.CompilationFailedOnMaxUser()) {
                         currentReport.Append(@"<div><img style='padding-right: 20px; padding-left: 5px;' src='Help' height='15px'>One or more processes started for this compilation tried to connect to the database and failed because the maximum number of connection has been reached (error 748). To correct this problem, you can either :<br><li>reduce the number of processes to use for each core of your computer</li><li>or increase the maximum of connections for your database (-n parameter in the proserve command)</li></div>");
@@ -489,7 +485,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // called when the compilation ended
         private void OnCompilationEnd() {
-            this.SafeInvoke(page => {
+            Task.Factory.StartNew(() => {
 
                 _filesToDeployPerStep.Add(0, _currentCompil.TransferedFiles);
 
@@ -510,30 +506,33 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     }
                 }
 
-                // Update the progress bar
-                progressBar.Progress = 100;
-                progressBar.Text = @"Generating the report, please wait...";
+                this.SafeInvoke(page => {
 
-                // get rid of the timer
-                if (_progressTimer != null) {
-                    _progressTimer.Stop();
-                    _progressTimer.Dispose();
-                    _progressTimer = null;
-                }
+                    // Update the progress bar
+                    progressBar.Progress = 100;
+                    progressBar.Text = @"Generating the report, please wait...";
 
-                // create the report and display it
-                BuildReport();
+                    // get rid of the timer
+                    if (_progressTimer != null) {
+                        _progressTimer.Stop();
+                        _progressTimer.Dispose();
+                        _progressTimer = null;
+                    }
 
-                ResetScreen();
+                    // create the report and display it
+                    BuildReport();
 
-                // notify the user
-                if (!_currentCompil.HasBeenCancelled)
-                    UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
-                        Appli.GoToPage(PageNames.MassCompiler);
-                        UserCommunication.CloseUniqueNotif("ReportAvailable");
-                    }, Appli.IsFocused() ? 10 : 0);
+                    ResetScreen();
 
-                btReport.Visible = true;
+                    // notify the user
+                    if (!_currentCompil.HasBeenCancelled)
+                        UserCommunication.NotifyUnique("ReportAvailable", "The requested deployment is over,<br>please check the generated report to see the result :<br><br><a href= '#'>Cick here to see the report</a>", MessageImg.MsgInfo, "Deploy your application", "Report available", args => {
+                            Appli.GoToPage(PageNames.MassCompiler);
+                            UserCommunication.CloseUniqueNotif("ReportAvailable");
+                        }, Appli.IsFocused() ? 10 : 0);
+
+                    btReport.Visible = true;
+                });
             });
         }
         
@@ -665,11 +664,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     var neededStyle = _currentStep%2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
 
                     if (progressBar.Style != neededStyle) {
-                        btCancel.Visible = false;
                         progressBar.Style = neededStyle;
                     }
 
-                    progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                    progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + (_deploymentPercentage > 0.01 ? @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" : "Enumerating files to deploy...") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
                     progressBar.Progress = _deploymentPercentage;
                     
                 }
@@ -696,7 +694,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 <td class='NotificationTitle'>Deployment report</td>
                             </tr>
                             <tr>
-                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='MsgWarning' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='MsgOk' height='25px'>Done!" : "<img style='padding-right: 2px;' src='MsgError' height='25px'>An error has occured..."))) + @"</td>
+                                <td class='NotificationSubTitle'>" + (_currentCompil.HasBeenCancelled ? "<img style='padding-right: 2px;' src='Warning30x30' height='25px'>Canceled by the user" : (string.IsNullOrEmpty(_currentCompil.ExecutionTime) ? "<img style='padding-right: 2px;' src='MsgInfo' height='25px'>Compilation on going..." : (_currentCompil.NumberOfProcesses == _currentCompil.NumberOfProcessesEndedOk ? "<img style='padding-right: 2px;' src='Ok30x30' height='25px'>Done!" : "<img style='padding-right: 2px;' src='Error30x30' height='25px'>An error has occured..."))) + @"</td>
                             </tr>
                         </table>         
                         <h2 style='margin-top: 8px; margin-bottom: 8px;'>Parameters :</h2>       

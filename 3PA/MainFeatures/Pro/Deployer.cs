@@ -208,7 +208,7 @@ namespace _3PA.MainFeatures.Pro {
             var excludeFiltersList = _proEnv.DeployFilterRules.Where(rule => rule.Step == step && !rule.Include).ToList();
 
             foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
-                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions)).ToList()) {
+                foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions))) {
                     if (!filesToCompile.Contains(filePath)) {
 
                         bool toAdd = true;
@@ -256,7 +256,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && _proEnv.CompileLocally)
-                return new List<FileToDeploy> {new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true)};
+                return new List<FileToDeploy> { new FileToDeploy(Path.GetDirectoryName(sourcePath), DeployType.Move, true) };
 
             var outList = new List<FileToDeploy>();
 
@@ -333,8 +333,8 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public List<FileToDeploy> DeployFiles(List<FileToDeploy> deployToDo, Action<float> updateDeploymentPercentage = null) {
 
-            int[] totalFile = {0};
-            int[] nbFilesDone = {0};
+            int[] totalFile = { 0 };
+            int[] nbFilesDone = { 0 };
 
             // make sure to transfer a given file only once at the same place (happens with .cls file since a source
             // can have several .r files generated if it is used in another classes)
@@ -454,7 +454,7 @@ namespace _3PA.MainFeatures.Pro {
                             if (deploy.IsOk)
                                 nbFilesDone[0]++;
                             if (updateDeploymentPercentage != null)
-                                updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                                updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
                         });
 
                         // now we just need to add the content of temp folders into the .pl
@@ -491,7 +491,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
+                    updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
             });
 
             return deployToDo;

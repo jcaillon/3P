@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private static DateTime _startTime;
-        
+
         /// <summary>
         /// Add each files/folders of a given path to the output List of FileObject,
         /// can be set to be recursive,

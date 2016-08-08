@@ -690,16 +690,9 @@ namespace _3PA.MainFeatures.Pro {
 
                     // if the file we compiled inherits from another class or if another class inherits of our file, 
                     // there is more than 1 *.r file generated. Moreover, they are generated in their package folders
-                    List<string> listOfRFiles = null;
                     try {
-                        listOfRFiles = Directory.EnumerateFiles(treatedFile.CompOutputDir, "*.r", SearchOption.AllDirectories).ToList();
-                    } catch (Exception e) {
-                        ErrorHandler.LogError(e);
-                    }
-                    if (listOfRFiles != null) {
-
                         // for each *.r file
-                        foreach (var file in listOfRFiles) {
+                        foreach (var file in Directory.EnumerateFiles(treatedFile.CompOutputDir, "*.r", SearchOption.AllDirectories)) {
 
                             var relativePath = file.Replace(treatedFile.CompOutputDir, "").TrimStart('\\');
                             var sourcePath = ProEnv.FindFirstFileInPropath(Path.ChangeExtension(relativePath, ".cls"));
@@ -727,8 +720,9 @@ namespace _3PA.MainFeatures.Pro {
                                 }
                             }
                         }
+                    } catch (Exception e) {
+                        ErrorHandler.LogError(e);
                     }
-
                 } else {
                     foreach (var deployNeeded in ProEnv.Deployer.GetTransfersNeededForFile(treatedFile.InputPath, 0)) {
                         // add .r and .lst (if needed) to the list of files to deploy

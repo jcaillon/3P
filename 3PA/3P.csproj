@@ -454,6 +454,7 @@
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
     <Content Include="Images\Appli\Edit.png" />
+    <Content Include="Images\Appli\Error30x30.png" />
     <Content Include="Images\Appli\Export.png" />
     <Content Include="Images\Appli\Fetch.png" />
     <Content Include="Images\Appli\Help.png" />
@@ -461,6 +462,7 @@
     <Content Include="Images\Appli\Import.png" />
     <Content Include="Images\Appli\NotSaved.png" />
     <Content Include="Images\Appli\Ok.png" />
+    <Content Include="Images\Appli\Ok30x30.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\Push.png" />
@@ -473,6 +475,7 @@
     <Content Include="Images\Appli\UndoUserAction.png" />
     <Content Include="Images\Appli\Update.png" />
     <Content Include="Images\Appli\ViewFile.png" />
+    <Content Include="Images\Appli\Warning30x30.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
