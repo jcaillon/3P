@@ -181,8 +181,29 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            Utils.ZipFile(@"D:\Profiles\jcaillon\Downloads\out.zip", @"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", @"subfolder\yolo.txt", ZipStorer.Compression.Store);
-            Utils.ZipFolder(@"D:\Profiles\jcaillon\Downloads\out2.zip", @"D:\Profiles\jcaillon\Downloads\bootwatch", ZipStorer.Compression.Store);
+
+            // launch the compile process for the current file
+            if (File.Exists(Config.FileDeploymentHook)) {
+                var hookExec = new ProExecution {
+                    DeploymentStep = 1,
+                    DeploymentSourcePath = "blabla"
+                };
+                if (hookExec.Do(ExecutionType.DeploymentHook)) {
+                    hookExec.Process.WaitForExit();
+
+                    var fileInfo = new FileInfo(hookExec.LogPath);
+                    if (fileInfo.Length > 0) {
+                        // the .log is not empty, maybe something went wrong in the runner, display errors
+                        UserCommunication.Notify(
+                            "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
+                            Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
+                            "Deployment hook procedure", "Execution failed");
+                    }
+                }
+            }
+
+            //Utils.ZipFile(@"D:\Profiles\jcaillon\Downloads\out.zip", @"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", @"subfolder\yolo.txt", ZipStorer.Compression.Store);
+            //Utils.ZipFolder(@"D:\Profiles\jcaillon\Downloads\out2.zip", @"D:\Profiles\jcaillon\Downloads\bootwatch", ZipStorer.Compression.Store);
         }
 
         public static void DebugTest2() {

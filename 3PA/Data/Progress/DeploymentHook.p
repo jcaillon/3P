@@ -6,6 +6,7 @@
     Purpose   :
                 This program is called by 3P when after each step of a deployment,
                 you can modify freely and execute whatever is needed depending on the input received
+                The procedure pi_main() should be the entry point for you modifications !
                 
     Author(s)   : Julien Caillon (julien.caillon@gmail.com)
     Created     : 09/08/2016
@@ -16,11 +17,6 @@
 
 /* ***************************  Definitions  ************************** */
 
-DEFINE INPUT PARAMETER ipc_applicationName AS CHARACTER NO-UNDO.
-DEFINE INPUT PARAMETER ipc_applicationSuffix AS CHARACTER NO-UNDO.
-DEFINE INPUT PARAMETER ipi_stepNumber AS INTEGER NO-UNDO.
-DEFINE INPUT PARAMETER ipc_sourceDirectory AS CHARACTER NO-UNDO.
-DEFINE INPUT PARAMETER ipc_deploymentDirectory AS CHARACTER NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -32,6 +28,21 @@ DEFINE INPUT PARAMETER ipc_deploymentDirectory AS CHARACTER NO-UNDO.
 
 &Scoped-define PROCEDURE-TYPE Procedure
 &Scoped-define DB-AWARE no
+
+/* Do not modify the lines below, values coming from 3P are set here,
+    you can use the pre-processed variables defined below if you find them useful! */
+/*<inserted_3P_values>*/
+
+&IF DEFINED(ApplicationName) = 0 &THEN
+    /* this block is only present for debug/tests purposes, the values below are
+       overwritten when this file is run from 3P,
+       you can set those values manually for your tests */
+    &SCOPED-DEFINE ApplicationName ""
+    &SCOPED-DEFINE ApplicationSuffix ""
+    &SCOPED-DEFINE StepNumber 0
+    &SCOPED-DEFINE SourceDirectory ""
+    &SCOPED-DEFINE DeploymentDirectory ""
+&ENDIF
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
@@ -69,16 +80,13 @@ DEFINE INPUT PARAMETER ipc_deploymentDirectory AS CHARACTER NO-UNDO.
 
 /* ***************************  Main Block  *************************** */
 
-
-/* use the PUBLISH below to display a notification in 3P after the end of this program */
-PUBLISH "eventToPublishToNotifyTheUserAfterExecution" (
-    INPUT "my message content, <b>HTML</b> format! You can also set a <a href='http://jcaillon.github.io/3P/'>link</a> or whatever you want",
-    INPUT 0, /* from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance" */
-    INPUT "My notification title",
-    INPUT "My notification subtitle",
-    INPUT 0, /* duration of the notification in seconds (0 for infinite time) */
-    INPUT "uniquename" /* unique name for the notification, if it it set, the notif will close on a click on a link and 
-                will automatically be closed if another notification with the same name pops up */
+/* don't handle error, let it crash so 3P knows when something is wrong */
+RUN pi_main (
+    INPUT {&ApplicationName},
+    INPUT {&ApplicationSuffix},
+    INPUT {&StepNumber},
+    INPUT {&SourceDirectory},
+    INPUT {&DeploymentDirectory}    
     ).
 
 RETURN "".
@@ -89,6 +97,43 @@ RETURN "".
 
 /* **********************  Internal Procedures  *********************** */
 
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE pi_main Procedure
+PROCEDURE pi_main:
+/*------------------------------------------------------------------------------
+  Summary    :  Do the treatments needed here depending on the step, application and so on...   
+  Parameters : <none>
+  Returns    : 
+  Remarks    :     
+------------------------------------------------------------------------------*/
+
+    DEFINE INPUT PARAMETER ipc_applicationName AS CHARACTER NO-UNDO. /* name of the application as it appears in the environment page of 3P */
+    DEFINE INPUT PARAMETER ipc_applicationSuffix AS CHARACTER NO-UNDO. /* suffix of the application as it appears in the environment page of 3P */
+    DEFINE INPUT PARAMETER ipi_stepNumber AS INTEGER NO-UNDO. /* step number of the deployment, this procedure is called for each step! */
+    DEFINE INPUT PARAMETER ipc_sourceDirectory AS CHARACTER NO-UNDO. /* full path to the source directory */
+    DEFINE INPUT PARAMETER ipc_deploymentDirectory AS CHARACTER NO-UNDO. /* full path to the deployment directory */
+
+    /* use the PUBLISH below to display a notification in 3P after the end of this program */
+    PUBLISH "eventToPublishToNotifyTheUserAfterExecution" (
+        INPUT "Deployment for the application " + QUOTER(ipc_applicationName) + "<br>" +
+              "suffix" + QUOTER(ipc_applicationSuffix) + "<br>" +
+              "Deployment step " + QUOTER(ipi_stepNumber) + "<br>" +
+              "Source directory :<br>" + QUOTER(ipc_sourceDirectory) + "<br>" +
+              "Deployment directory :<br>" + QUOTER(ipc_deploymentDirectory) + "<br>",
+        INPUT 0, /* from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance" */
+        INPUT "Deployment title",
+        INPUT "Deployment subtitle",
+        INPUT 0, /* duration of the notification in seconds (0 for infinite time) */
+        INPUT "deployNotif" /* unique name for the notification, if it it set, the notif will close on a click on a link and 
+                    will automatically be closed if another notification with the same name pops up */
+        ).
+    
+    RETURN "".
+
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
 
 
 /* ************************  Function Implementations ***************** */

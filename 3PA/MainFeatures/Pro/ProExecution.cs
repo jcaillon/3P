@@ -150,6 +150,16 @@ namespace _3PA.MainFeatures.Pro {
         /// </summary>
         public ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
 
+        /// <summary>
+        /// Used for the deployment hook proc
+        /// </summary>
+        public int DeploymentStep { get; set; }
+
+        /// <summary>
+        /// Used for the deployment hook proc, path to the source dir of the deployment
+        /// </summary>
+        public string DeploymentSourcePath { get; set; }
+
         #endregion
 
         #region static
@@ -412,6 +422,18 @@ namespace _3PA.MainFeatures.Pro {
                 }
                 var encoding = TextEncodingDetect.GetFileEncoding(Config.FileStartProlint);
                 Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileStartProlint, encoding).Replace(@"/*<inserted_3P_values>*/", prolintProgram.ToString()), encoding);
+
+            } else if (executionType == ExecutionType.DeploymentHook) {
+
+                fileToExecute = "hook_" + DateTime.Now.ToString("yyMMdd_HHmmssfff") + ".p";
+                StringBuilder hookProc = new StringBuilder();
+                hookProc.AppendLine("&SCOPED-DEFINE ApplicationName " + ProEnv.Name.ProQuoter());
+                hookProc.AppendLine("&SCOPED-DEFINE ApplicationSuffix " + ProEnv.Suffix.ProQuoter());
+                hookProc.AppendLine("&SCOPED-DEFINE StepNumber " + DeploymentStep);
+                hookProc.AppendLine("&SCOPED-DEFINE SourceDirectory " + DeploymentSourcePath.ProQuoter());
+                hookProc.AppendLine("&SCOPED-DEFINE DeploymentDirectory " + ProEnv.BaseCompilationPath.ProQuoter());
+                var encoding = TextEncodingDetect.GetFileEncoding(Config.FileDeploymentHook);
+                Utils.FileWriteAllText(Path.Combine(LocalTempDir, fileToExecute), Utils.ReadAllText(Config.FileDeploymentHook, encoding).Replace(@"/*<inserted_3P_values>*/", hookProc.ToString()), encoding);
 
             } else if (executionType == ExecutionType.DataDigger || executionType == ExecutionType.DataReader) {
                 // need to init datadigger?
@@ -758,6 +780,7 @@ namespace _3PA.MainFeatures.Pro {
         DataReader = 14,
         DbAdmin = 15,
         ProDesktop = 16,
+        DeploymentHook = 17
     }
 
     internal class FileToCompile {

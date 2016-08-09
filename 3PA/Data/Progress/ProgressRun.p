@@ -110,6 +110,7 @@ IF NOT {&DbConnectionMandatory} OR NOT gl_dbKo THEN DO:
             RUN pi_handleCompilErrors (INPUT {&ToExecute}) NO-ERROR.
             fi_output_last_error().
         END.
+        WHEN "DEPLOYMENTHOOK" OR
         WHEN "PROLINT" OR
         WHEN "RUN" THEN DO:
             DO  ON STOP   UNDO, LEAVE

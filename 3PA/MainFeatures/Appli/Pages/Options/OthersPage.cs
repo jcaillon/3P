@@ -27,10 +27,6 @@ using _3PA.Lib;
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {
 
-        #region fields
-
-        #endregion
-
         #region constructor
 
         public OthersPage() {
@@ -54,9 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             btSave.ButtonPressed += BtSaveOnButtonPressed;
 
             cbEncoding.DataSource = Enum.GetNames(typeof (NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
-
-
-
+            
             UpdateView();
 
             // dynamically reorder the controls for a correct tab order on notepad++
@@ -79,7 +73,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             fl_tagtitle2.Lines = Config.Instance.TagTitleBlock2.Split('\n');
             fl_tagtitle3.Lines = Config.Instance.TagTitleBlock3.Split('\n');
             fl_encodingfilter.Text = Config.Instance.AutoSwitchEncodingForFilePatterns;
-            cbEncoding.SelectedItem = Config.Instance.AutoSwitchEncodingTo.ToString();
+            cbEncoding.SelectedIndex = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).IndexOf(Config.Instance.AutoSwitchEncodingTo.ToString());
         }
 
         private void UpdateModel() {
@@ -90,7 +84,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Instance.TagTitleBlock3 = fl_tagtitle3.Text;
             Config.Instance.AutoSwitchEncodingForFilePatterns = fl_encodingfilter.Text;
             NppEncodingFormat format;
-            if (Enum.TryParse(cbEncoding.SelectedItem.ToString(), true, out format))
+            if (Enum.TryParse(Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).ToList()[cbEncoding.SelectedIndex], true, out format))
                 Config.Instance.AutoSwitchEncodingTo = format;
         }
 
