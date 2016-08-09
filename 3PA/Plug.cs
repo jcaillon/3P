@@ -572,9 +572,7 @@ namespace _3PA {
             }
 
             if (IsCurrentFileProgress) {
-                // Syntax Style
-                Style.SetSyntaxStyles();
-                
+               
                 // Need to compute the propath again, because we take into account relative path
                 ProEnvironment.Current.ReComputeProPath();
 
@@ -931,11 +929,15 @@ namespace _3PA {
                 Npp.ViewWhitespace = WhitespaceMode.VisibleAlways;
 
             // apply style
+            Style.SetSyntaxStyles();
             var currentStyle = Style.Current;
-            Npp.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
             Npp.SetIndentGuideColor(currentStyle.WhiteSpace.BackColor, currentStyle.WhiteSpace.ForeColor);
+            Npp.SetWhiteSpaceColor(true, Color.Transparent, currentStyle.WhiteSpace.ForeColor);
             Npp.SetSelectionColor(true, currentStyle.Selection.BackColor, Color.Transparent);
             Npp.CaretLineBackColor = currentStyle.CaretLine.BackColor;
+            Npp.CaretColor = currentStyle.CaretColor.ForeColor;
+            Npp.SetFoldMarginColors(true, currentStyle.FoldMargin.BackColor, currentStyle.FoldMargin.BackColor);
+            Npp.SetFoldMarginMarkersColor(currentStyle.FoldMargin.ForeColor, currentStyle.FoldMargin.BackColor, currentStyle.FoldActiveMarker.ForeColor);
 
             // we want the default auto-completion to not show
             // we block on a scintilla level (pretty bad solution because it slows down npp on big documents)
@@ -964,10 +966,14 @@ namespace _3PA {
                 var widgetStyle = XDocument.Load(Config.FileNppStylersXml).Descendants("WidgetStyle");
                 var xElements = widgetStyle as XElement[] ?? widgetStyle.ToArray();
                 var wsFore = GetColorInStylers(xElements, "White space symbol", "fgColor");
-                Npp.SetWhiteSpaceColor(true, Color.Transparent, wsFore);
                 Npp.SetIndentGuideColor(GetColorInStylers(xElements, "Indent guideline style", "bgColor"), GetColorInStylers(xElements, "Indent guideline style", "fgColor"));
+                Npp.SetWhiteSpaceColor(true, Color.Transparent, wsFore);
                 Npp.SetSelectionColor(true, GetColorInStylers(xElements, "Selected text colour", "bgColor"), Color.Transparent);
                 Npp.CaretLineBackColor = GetColorInStylers(xElements, "Current line background colour", "bgColor");
+                Npp.CaretColor = GetColorInStylers(xElements, "Caret colour", "fgColor");
+                Npp.SetFoldMarginColors(true, GetColorInStylers(xElements, "Fold margin", "bgColor"), GetColorInStylers(xElements, "Fold margin", "fgColor"));
+                Npp.SetFoldMarginMarkersColor(GetColorInStylers(xElements, "Fold", "fgColor"), GetColorInStylers(xElements, "Fold", "bgColor"), GetColorInStylers(xElements, "Fold active", "fgColor"));
+
             } catch (Exception e) {
                 ErrorHandler.LogError(e);
                 if (!_warnedAboutFailStylers) {

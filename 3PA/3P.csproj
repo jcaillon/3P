@@ -427,6 +427,7 @@
     <None Include="Data\KeywordsHelp" />
     <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
     <None Include="Data\ProgressTemplates\InternalProcedure.p" />
+    <None Include="Data\Progress\DeploymentHook.p" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\Progress\StartProlint.p" />

@@ -1851,9 +1851,6 @@ namespace _3PA {
         /// <summary>
         /// Sets a global override to the selection background + foreground color.
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="bg">r</param>
-        /// <param name="fg"></param>
         public static void SetSelectionColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETSELBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETSELFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
@@ -1870,9 +1867,6 @@ namespace _3PA {
         /// <summary>
         /// Sets a global override to the additional selections background + foreground color.
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="bg">r</param>
-        /// <param name="fg"></param>
         public static void SetAdditionalSelectionColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETADDITIONALSELBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETADDITIONALSELFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
@@ -1881,9 +1875,6 @@ namespace _3PA {
         /// <summary>
         /// sets the fore/background color of the whitespaces, overriding the lexer's
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="bg"></param>
-        /// <param name="fg"></param>
         public static void SetWhiteSpaceColor(bool use, Color bg, Color fg) {
             Sci.Send(SciMsg.SCI_SETWHITESPACEBACK, (use && bg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
             Sci.Send(SciMsg.SCI_SETWHITESPACEFORE, (use && fg != Color.Transparent).ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
@@ -1892,9 +1883,6 @@ namespace _3PA {
         /// <summary>
         /// sets the fore/background color of the IndentGuide, overriding the lexer's
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="bg"></param>
-        /// <param name="fg"></param>
         public static void SetIndentGuideColor(Color bg, Color fg) {
             // we also set the indent line color here
             new Style(Style.IndentGuide) {
@@ -1934,14 +1922,30 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Set the caret color
+        /// </summary>
+        public static Color CaretColor {
+            set { Sci.Send(SciMsg.SCI_SETCARETFORE, new IntPtr(ColorTranslator.ToWin32(value.IsEmpty ? Color.Black : value))); }
+        }
+        
+        /// <summary>
         /// allow changing the colour of the fold margin and fold margin highlight
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="color"></param>
-        /// <param name="highColor"></param>
-        public static void SetFoldMarginColor(bool use, Color color, Color highColor) {
-            Sci.Send(SciMsg.SCI_SETFOLDMARGINCOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(color)));
-            Sci.Send(SciMsg.SCI_SETFOLDMARGINHICOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(highColor)));
+        public static void SetFoldMarginColors(bool use, Color bgColor, Color fgColor) {
+            Sci.Send(SciMsg.SCI_SETFOLDMARGINHICOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fgColor)));
+            Sci.Send(SciMsg.SCI_SETFOLDMARGINCOLOUR, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bgColor)));
+        }
+
+        /// <summary>
+        /// allow changing the colour of the fold margin and fold margin highlight
+        /// </summary>
+        public static void SetFoldMarginMarkersColor(Color bgColor, Color fgColor, Color activeColor) {
+            for (int i = 0; i < 7; i++) {
+                var marker = GetMarker(i + (int)SciMsg.SC_MARKNUM_FOLDEREND);
+                marker.SetBackColor(bgColor);
+                marker.SetForeColor(fgColor);
+                marker.SetBackSelectedColor(activeColor);
+            }
         }
 
         /// <summary>
@@ -1964,9 +1968,6 @@ namespace _3PA {
         /// <summary>
         /// While the cursor hovers over text in a style with the hotspot attribute set, the default colouring can be modified
         /// </summary>
-        /// <param name="use"></param>
-        /// <param name="fg"></param>
-        /// <param name="bg"></param>
         public static void SetHotSpotActiveColor(bool use, Color fg, Color bg) {
             Sci.Send(SciMsg.SCI_SETHOTSPOTACTIVEFORE, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(fg)));
             Sci.Send(SciMsg.SCI_SETHOTSPOTACTIVEBACK, use.ToPointer(), new IntPtr(ColorTranslator.ToWin32(bg)));
@@ -2841,6 +2842,14 @@ namespace _3PA {
             public void SetBackColor(Color color) {
                 var colour = ColorTranslator.ToWin32(color);
                 Sci.Send(SciMsg.SCI_MARKERSETBACK, new IntPtr(Index), new IntPtr(colour));
+            }
+
+            /// <summary>
+            /// This message sets the highlight background colour of a marker number when its folding block is selected. The default colour is #FF0000
+            /// </summary>
+            public void SetBackSelectedColor(Color color) {
+                var colour = ColorTranslator.ToWin32(color);
+                Sci.Send(SciMsg.SCI_MARKERSETBACKSELECTED, new IntPtr(Index), new IntPtr(colour));
             }
 
             /// <summary>

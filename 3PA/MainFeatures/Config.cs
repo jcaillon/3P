@@ -550,6 +550,7 @@ namespace _3PA.MainFeatures {
         public static string _3PUserCredentials { get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; } }
 
         // HELP URL
+        public static string UrlWebSite { get { return @"http://jcaillon.github.io/3P/"; } }
         public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
         public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
         public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
@@ -605,6 +606,7 @@ namespace _3PA.MainFeatures {
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
+        public static string FileDeploymentHook { get { return Path.Combine(Npp.GetConfigDir(), "DeploymentHookProc.p"); } }
         public static string FileDeployProfiles { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentProfiles.conf"); } }
 
         // Npp files

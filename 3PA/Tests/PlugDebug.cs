@@ -34,6 +34,7 @@ using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Pro;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
@@ -180,19 +181,21 @@ namespace _3PA.Tests {
 
 
         public static void DebugTest1() {
-            Task.Factory.StartNew(() => {
-                MeasureIt(() => {
-                    var list = RecurseDirectory(@"E:\Applis", -1);
-                    UserCommunication.Notify(list.Count.ToString());
-                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
-                });
-            });
+            Utils.ZipFile(@"D:\Profiles\jcaillon\Downloads\out.zip", @"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", @"subfolder\yolo.txt", ZipStorer.Compression.Store);
+            Utils.ZipFolder(@"D:\Profiles\jcaillon\Downloads\out2.zip", @"D:\Profiles\jcaillon\Downloads\bootwatch", ZipStorer.Compression.Store);
         }
 
         public static void DebugTest2() {
             Task.Factory.StartNew(() => {
                 MeasureIt(() => {
-                    var list = Directory.EnumerateFiles(@"E:\Applis", "*", SearchOption.AllDirectories).ToList();
+                    var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
+                    UserCommunication.Notify(list.Count.ToString());
+                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
+                });
+            });
+            Task.Factory.StartNew(() => {
+                MeasureIt(() => {
+                    var list = RecurseDirectory(ProEnvironment.Current.BaseLocalPath, -1);
                     UserCommunication.Notify(list.Count.ToString());
                     File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
                 });

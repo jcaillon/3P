@@ -90,7 +90,7 @@ namespace _3PA.MainFeatures.Pro {
                         Step = step,
                         NameFilter = items[1].Trim(),
                         SuffixFilter = items[2].Trim(),
-                        Include = items[3].Trim().EqualsCi("+"),
+                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"),
                         SourcePattern = items[4].Trim().Replace('/', '\\'),
                     };
 

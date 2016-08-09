@@ -156,6 +156,7 @@ namespace _3PA.MainFeatures {
                 
                 // Default
                 SetFontStyle((byte) SciMsg.STYLE_DEFAULT, curTheme.Default);
+                // Npp.StyleClearAll(); // to apply the default style to all styles
                 SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
                 SetFontStyle((byte) UdlStyles.Idk, curTheme.Default);
                 SetFontStyle((byte) UdlStyles.Default, curTheme.Default);
@@ -181,6 +182,19 @@ namespace _3PA.MainFeatures {
                 SetFontStyle((byte) UdlStyles.Delimiter5, curTheme.SimpleQuote);
                 SetFontStyle((byte) UdlStyles.Delimiter7, curTheme.SingleLineComment);
                 SetFontStyle((byte) UdlStyles.Delimiter8, curTheme.NestedComment);
+
+                // line numbers
+                SetFontStyle((byte) SciMsg.STYLE_LINENUMBER, curTheme.LineNumberMargin);
+
+                // set url as strings
+                SetFontStyle(80, curTheme.SimpleQuote);
+
+                // brace highlighting
+                SetFontStyle((byte)SciMsg.STYLE_BRACELIGHT, curTheme.BraceHighLight);
+                SetFontStyle((byte)SciMsg.STYLE_BRACEBAD, curTheme.BadBraceHighLight);
+
+                // smart highlighting in npp
+                Npp.GetIndicator(29).ForeColor = curTheme.SmartHighLighting.ForeColor;
             }
 
             // Setting styles for errors 
@@ -191,14 +205,22 @@ namespace _3PA.MainFeatures {
             SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
         }
 
-        private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
+        public static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
             var nppStyle = Npp.GetStyle(styleNumber);
+
             if (styleItem.BackColor != Color.Transparent)
                 nppStyle.BackColor = styleItem.BackColor;
+
             if (styleItem.ForeColor != Color.Transparent)
                 nppStyle.ForeColor = styleItem.ForeColor;
-            nppStyle.Bold = styleItem.FontType.IsBitSet(1);
-            nppStyle.Italic = styleItem.FontType.IsBitSet(2);
+
+            if (styleItem.FontType > 0) {
+                nppStyle.Bold = styleItem.FontType.IsBitSet(1);
+                nppStyle.Italic = styleItem.FontType.IsBitSet(2);
+            }
+
+            if (!string.IsNullOrEmpty(styleItem.FontName))
+                nppStyle.Font = styleItem.FontName;
         }
 
         /// <summary>
@@ -339,6 +361,13 @@ namespace _3PA.MainFeatures {
         public StyleThemeItem Error2 = new StyleThemeItem();
         public StyleThemeItem Error3 = new StyleThemeItem();
         public StyleThemeItem Error4 = new StyleThemeItem();
+        public StyleThemeItem CaretColor = new StyleThemeItem();
+        public StyleThemeItem LineNumberMargin = new StyleThemeItem();
+        public StyleThemeItem FoldMargin = new StyleThemeItem();
+        public StyleThemeItem FoldActiveMarker = new StyleThemeItem();
+        public StyleThemeItem SmartHighLighting = new StyleThemeItem();
+        public StyleThemeItem BraceHighLight = new StyleThemeItem();
+        public StyleThemeItem BadBraceHighLight = new StyleThemeItem();
 
         /// <summary>
         /// Set the values of this instance, using a dictionnary of key -> values, override for this class
@@ -352,14 +381,15 @@ namespace _3PA.MainFeatures {
                 try {
                     var value = SavedStringValues[fieldInfo.Name];
                     var items = value.Split('\t');
-                    int fontType;
-                    if (!int.TryParse(items[2].Trim(), out fontType))
-                        fontType = 0;
-                    if (items.Length == 3) {
+                    if (items.Length >= 3) {
+                        int fontType;
+                        if (!int.TryParse(items[2].Trim(), out fontType))
+                            fontType = 0;
                         fieldInfo.SetValue(this, new StyleThemeItem {
                             ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim(), 0)),
                             BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim(), 1)),
-                            FontType = fontType
+                            FontType = fontType,
+                            FontName = items.Length >= 4 ? items[3].Trim() : string.Empty
                         });
                     }
                 } catch (Exception e) {
@@ -423,6 +453,7 @@ namespace _3PA.MainFeatures {
         public Color BackColor = Color.Transparent;
         public Color ForeColor = Color.Transparent;
         public int FontType;
+        public string FontName;
     }
 
     #endregion

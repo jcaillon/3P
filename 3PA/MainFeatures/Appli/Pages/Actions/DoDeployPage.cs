@@ -30,6 +30,7 @@ using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
+using _3PA.Data;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Pro;
@@ -97,6 +98,14 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(toggleMono, "Toggle on to only use a single process when compiling during the deployment<br>Obviously, this will slow down the process by a lot!<br>The only reason to use this option is if you want to limit the number of connections made to your database during compilation...");
             tooltip.SetToolTip(toggleOnlyGenerateRcode, "Override the environment settings and only generated R-code during the deployement<br>(i.e. dont deploy debug-list or xref)");
             tooltip.SetToolTip(fl_nbProcess, "This parameter is used when compiling multiple files, it determines how many<br>Prowin processes can be started to handle compilation<br>The total number of processes started is actually multiplied by your number of cores<br><br>Be aware that as you increase the number or processes for the compilation, you<br>decrease the potential time of compilation but you also increase the number of connection<br>needed to your database (if you have one defined!)<br>You might have an error on certain processes that can't connect to the database<br>if you try to increase this number too much<br><br><i>This value can't be superior to 15</i>");
+
+            // Open hook
+            btOpenHook.BackGrndImage = ImageResources.Edit;
+            btOpenHook.ButtonPressed += (sender, args) => {
+                if (!File.Exists(Config.FileDeploymentHook))
+                    Utils.FileWriteAllBytes(Config.FileDeploymentHook, DataResources.DeploymentHook);
+                Npp.OpenFile(Config.FileDeploymentHook);
+            };
 
             // diretory from env
             btUndo.BackGrndImage = ImageResources.UndoUserAction;
@@ -196,7 +205,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
             btSeeRules.ButtonPressed += (sender, args) => {
-                UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "For the current environment");
+                UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment");
             };
 
             DeployProfile.OnDeployProfilesUpdate += () => {
@@ -227,9 +236,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // cur env
             lblCurEnv.Text = string.Format("{0} <a href='#'>(switch)</a>", ProEnvironment.Current.Name + (!string.IsNullOrEmpty(ProEnvironment.Current.Suffix) ? " - " + ProEnvironment.Current.Suffix : ""));
+            lbl_deployDir.Text = string.Format("The deployment directory is <a href='{0}'>{0}</a>", ProEnvironment.Current.BaseCompilationPath);
 
             // update the rules for the current env
-            lbl_rules.Text = string.Format("<b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1 and <b>{2}</b> rules for further steps", ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.DeployRules.Count(rule => rule.Step > 1));
+            lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 2), ProEnvironment.Current.DeployRules.Count(rule => rule.Step >= 3));
 
             // update combo and fields
             if (!_shownOnce) {

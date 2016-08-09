@@ -75,6 +75,14 @@ namespace _3PA.MainFeatures {
                             OnPush = DoPush
                         },
                         new ConfLine {
+                            Label = "Deployment hook procedure",
+                            HandledItem = Config.FileDeploymentHook,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeploymentHook, DataResources.DeploymentHook),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
+                        new ConfLine {
                             Label = "Prolint startup procedure",
                             HandledItem = Config.FileStartProlint,
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint),
@@ -157,7 +165,7 @@ namespace _3PA.MainFeatures {
                 if (item != null) {
                     if (item.OnImport != null)
                         item.OnImport(item);
-                    UserCommunication.NotifyUnique("Importedconf", "The latest changes to <b>" + item.Label + "</b> have been imported!", MessageImg.MsgInfo, "Configuration imported", item.Label, null, 5);
+                    UserCommunication.NotifyUnique("Importedconf", "The latest changes to <b>" + item.Label + "</b> have been saved and taken into account!", MessageImg.MsgInfo, "Configuration imported", item.Label, null, 5);
                     return true;
                 }
             }

@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Diagnostics;
 using System.Text;
 using _3PA.Interop;
 using _3PA.MainFeatures;
@@ -242,14 +243,16 @@ namespace _3PA.Lib {
             try {
                 return PrivateCharPositionFromLine(index);
             } catch (Exception e) {
+                if (Config.IsDevelopper)
+                    Debug.Assert(false);
+                ErrorHandler.LogError(e, "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
                 try {
                     Reset();
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
                     ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines");
                 }
-                ErrorHandler.LogError(e, "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
-                return 0;
+                return SciPositionFromLine(index);
             }
         }
 

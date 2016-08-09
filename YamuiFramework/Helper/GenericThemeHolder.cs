@@ -43,7 +43,7 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// a property -> value dictionnary
         /// </summary>
-        public Dictionary<string, string> SavedStringValues = new Dictionary<string, string>();
+        public Dictionary<string, string> SavedStringValues = new Dictionary<string, string>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
