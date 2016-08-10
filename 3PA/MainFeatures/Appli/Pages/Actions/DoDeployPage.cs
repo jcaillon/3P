@@ -205,7 +205,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;
             btSeeRules.ButtonPressed += (sender, args) => {
-                UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment");
+                UserCommunication.Message(Deployer.BuildHtmlTableForRules(ProEnvironment.Current.Deployer.DeployRules), MessageImg.MsgInfo, "List of deployment rules", "Sorted and filtered for the current environment");
             };
 
             DeployProfile.OnDeployProfilesUpdate += () => {
@@ -228,8 +228,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         public override void OnShow() {
 
-            if (DeployProfile.Current.AutoUpdateSourceDir)
-                fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
+            // update combo and fields
+            if (!_shownOnce) {
+                UpdateCombo();
+                SetFieldsFromData();
+                _shownOnce = true;
+            }
 
             // hide delete if needed
             btDelete.Visible = DeployProfile.List.Count > 1;
@@ -239,17 +243,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             lbl_deployDir.Text = string.Format("The deployment directory is <a href='{0}'>{0}</a>", ProEnvironment.Current.BaseCompilationPath);
 
             // update the rules for the current env
-            lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.DeployRules.Count(rule => rule.Step == 2), ProEnvironment.Current.DeployRules.Count(rule => rule.Step >= 3));
+            lbl_rules.Text = string.Format("There are <b>{0}</b> rules for the compilation (step 0), <b>{1}</b> rules for step 1, <b>{2}</b> rules for step 2 and <b>{3}</b> rules beyond", ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 0), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 1), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step == 2), ProEnvironment.Current.Deployer.DeployRules.Count(rule => rule.Step >= 3));
+            
+            if (DeployProfile.Current.AutoUpdateSourceDir)
+                fl_directory.Text = ProEnvironment.Current.BaseLocalPath;
 
-            // update combo and fields
-            if (!_shownOnce) {
-                UpdateCombo();
-                SetFieldsFromData();
-                _shownOnce = true;
-            }
-        }
-
-        public override void OnHide() {
         }
 
         #endregion
@@ -464,7 +462,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                 
                 _deploymentPercentage = 0;
                 _currentStep = 0;
-                _totalSteps = _proEnv.DeployTransferRules.Count > 0 ? _proEnv.DeployTransferRules.Max(rule => rule.Step) : 0;
+                _totalSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
                 _filesToDeployPerStep.Clear();
 
                 if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
@@ -501,16 +499,23 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                 // if it went ok, move on to deploying files
                 if (_currentCompil.DeploymentDone) {
+
+                    // hook
+                    ExecuteDeploymentHook();
+
                     _currentStep++; // move on to step 1
 
                     // Update the progress bar
                     UpdateProgressBar();
 
                     // transfer rules found for this step?
-                    while (_proEnv.DeployTransferRules.Exists(rule => rule.Step == _currentStep)) {
+                    while (_proEnv.Deployer.DeployTransferRules.Exists(rule => rule.Step == _currentStep)) {
 
                         _filesToDeployPerStep.Add(_currentStep,
                             _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> { _currentStep == 1 ? _deployProfile.SourceDirectory : _proEnv.BaseCompilationPath }, _deployProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
+
+                        // hook
+                        ExecuteDeploymentHook();
 
                         _currentStep++;
                     }
@@ -649,6 +654,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         #region private methods
 
+        private void ExecuteDeploymentHook() {
+            // launch the compile process for the current file
+            if (File.Exists(Config.FileDeploymentHook)) {
+                var hookExec = new ProExecution {
+                    DeploymentStep = _currentStep,
+                    DeploymentSourcePath = _deployProfile.SourceDirectory
+                };
+                if (hookExec.Do(ExecutionType.DeploymentHook)) {
+                    hookExec.Process.WaitForExit();
+
+                    var fileInfo = new FileInfo(hookExec.LogPath);
+                    if (fileInfo.Length > 0) {
+                        // the .log is not empty, maybe something went wrong in the runner, display errors
+                        UserCommunication.Notify(
+                            "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
+                            Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
+                            "Deployment hook procedure", "Execution failed");
+                    }
+                }
+            }
+        }
+
         // allows to update the progression bar
         private void UpdateProgressBar() {
             this.SafeInvoke(page => {
@@ -690,11 +717,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             this.SafeInvoke(page => {
                 // ensure it's visible 
                 lbl_report.Visible = true;
-
-                var totalDeployedFiles = 0;
-                foreach (var kpv in _filesToDeployPerStep) {
-                    totalDeployedFiles += kpv.Value.Count;
-                }
 
                 lbl_report.Text = @"
                     <div class='NormalBackColor'>

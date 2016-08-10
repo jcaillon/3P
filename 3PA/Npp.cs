@@ -161,9 +161,9 @@ namespace _3PA {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
             }
-            if (saveHistoric)
+            if (saveHistoric && Plug.IsCurrentFileProgress)
                 _goToHistory.Push(new Tuple<string, int, Point>(GetCurrentFilePath(), FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
-            if (!String.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
+            if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
                 else
@@ -205,7 +205,6 @@ namespace _3PA {
             }
         }
 
-
         /// <summary>
         /// Helper to add a clickable icon in the toolbar
         /// </summary>
@@ -218,7 +217,6 @@ namespace _3PA {
             WinApi.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
-
 
         /// <summary>
         /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu

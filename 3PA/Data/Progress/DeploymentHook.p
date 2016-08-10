@@ -115,16 +115,16 @@ PROCEDURE pi_main:
 
     /* use the PUBLISH below to display a notification in 3P after the end of this program */
     PUBLISH "eventToPublishToNotifyTheUserAfterExecution" (
-        INPUT "Deployment for the application " + QUOTER(ipc_applicationName) + "<br>" +
-              "suffix" + QUOTER(ipc_applicationSuffix) + "<br>" +
-              "Deployment step " + QUOTER(ipi_stepNumber) + "<br>" +
-              "Source directory :<br>" + QUOTER(ipc_sourceDirectory) + "<br>" +
-              "Deployment directory :<br>" + QUOTER(ipc_deploymentDirectory) + "<br>",
+        INPUT "Deployment for the application : <b>" + QUOTER(ipc_applicationName) + "</b><br>" +
+              "The application suffix : <b>" + QUOTER(ipc_applicationSuffix) + "</b><br>" +
+              "The deployment step <b>n°" + STRING(ipi_stepNumber) + "</b><br>" +
+              "Source directory : <br><b>" + QUOTER(ipc_sourceDirectory) + "</b><br>" +
+              "Deployment directory : <br><b>" + QUOTER(ipc_deploymentDirectory) + "</b><br>",
         INPUT 0, /* from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance" */
         INPUT "Deployment title",
         INPUT "Deployment subtitle",
         INPUT 0, /* duration of the notification in seconds (0 for infinite time) */
-        INPUT "deployNotif" /* unique name for the notification, if it it set, the notif will close on a click on a link and 
+        INPUT "" /* unique name for the notification, if it it set, the notif will close on a click on a link and 
                     will automatically be closed if another notification with the same name pops up */
         ).
     

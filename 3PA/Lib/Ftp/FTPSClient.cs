@@ -31,6 +31,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using _3PA.MainFeatures;
 
 namespace _3PA.Lib.Ftp {
     /*
@@ -271,6 +272,8 @@ namespace _3PA.Lib.Ftp {
         volatile bool _keepAlive = true;
         int _keepAliveTimeout = 20000; // ms
 
+        private bool _connected;
+
         #endregion
 
         #region Public Properties
@@ -357,6 +360,14 @@ namespace _3PA.Lib.Ftp {
             get {
                 return _keepAliveThread != null;
             }
+        }
+
+        /// <summary>
+        /// Is the ftp connected?
+        /// </summary>
+        public bool Connected {
+            get { return _connected; }
+            set { _connected = value; }
         }
 
         #endregion
@@ -1014,9 +1025,36 @@ namespace _3PA.Lib.Ftp {
         /// <summary>
         /// Creates the given remote directory.
         /// </summary>
-        /// <param name="remoteDirName"></param>
-        public void MakeDir(string remoteDirName) {
-            MkdCmd(remoteDirName);
+        public void MakeDir(string remoteDirName, bool recursive = false) {
+            if (!recursive)
+                MkdCmd(remoteDirName);
+            else {
+                remoteDirName = remoteDirName.TrimEnd('/');
+                var endPos = remoteDirName.Length;
+                string curDir;
+                do {
+                    curDir = remoteDirName.Substring(0, endPos);
+                    try {
+                        CwdCmd(curDir);
+                        break;
+                    } catch (FtpCommandException) {
+                        // ignored, it means the folder doesn't exist
+                    }
+                    endPos = curDir.LastIndexOf("/", StringComparison.CurrentCultureIgnoreCase);
+                }
+                while (endPos > -1);
+                if (!curDir.Equals(remoteDirName)) {
+                    do {
+                        endPos = remoteDirName.IndexOf("/", endPos + 1, StringComparison.CurrentCultureIgnoreCase);
+                        if (endPos > -1) {
+                            curDir = remoteDirName.Substring(0, endPos);
+                            MkdCmd(curDir);
+                        }
+                    }
+                    while (endPos > -1);
+                    MkdCmd(remoteDirName);
+                }
+            }
         }
 
         /// <summary>

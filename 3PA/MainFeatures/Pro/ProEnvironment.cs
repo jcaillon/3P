@@ -86,8 +86,6 @@ namespace _3PA.MainFeatures.Pro {
 
             private List<string> _currentProPathDirList;
 
-            private List<DeployRule> _deployRulesList;
-
             private Deployer _deployer;
 
             #endregion
@@ -97,9 +95,6 @@ namespace _3PA.MainFeatures.Pro {
             public ProEnvironmentObject() {
                 // need to erase the stored ProPath (and re-compute when needed) when the current environment is modified
                 OnEnvironmentChange += ReComputeProPath;
-
-                // we need to filter/sort the list of computation path when it changes
-                Deployer.OnDeployConfigurationUpdate += () => _deployRulesList = null;
             }
 
             /// <summary>
@@ -125,7 +120,9 @@ namespace _3PA.MainFeatures.Pro {
                 CompileWithListing = toCopy.CompileWithListing;
 
                 _currentProPathDirList = toCopy._currentProPathDirList;
-                _deployRulesList = toCopy._deployRulesList;
+
+                // deployer copy
+                _deployer = new Deployer(this, toCopy.Deployer);
             }
 
             #endregion
@@ -204,6 +201,8 @@ namespace _3PA.MainFeatures.Pro {
                                 // need to take into account relative paths
                                 if (!Path.IsPathRooted(propath))
                                     try {
+                                        if (propath.Contains("%"))
+                                            propath = Environment.ExpandEnvironmentVariables(propath);
                                         propath = Path.GetFullPath(Path.Combine(basePath, propath));
                                     } catch (Exception e) {
                                         ErrorHandler.LogError(e);
@@ -319,6 +318,32 @@ namespace _3PA.MainFeatures.Pro {
                 return output;
             }
 
+            #endregion
+
+            #region Deploy
+
+            /// <summary>
+            /// The deployer for this environment
+            /// </summary>
+            public Deployer Deployer {
+                get {
+                    if (_deployer == null)
+                        _deployer = new Deployer(this);
+                    return _deployer;
+                }
+            }
+
+            #endregion
+
+            #region Misc
+
+            /// <summary>
+            /// Returns the path to prolib.exe considering the path to prowin.exe
+            /// </summary>
+            public string ProlibPath {
+                get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
+            }
+            
             /// <summary>
             /// Use this method to know if the CONNECT define for the current environment connects the database in
             /// single user mode (returns false if not or if no database connection is set)
@@ -338,108 +363,6 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 return singleUserMode;
-            }
-
-            #endregion
-
-            #region Deploy
-
-            /// <summary>
-            /// The deployer for this environment
-            /// </summary>
-            public Deployer Deployer {
-                get {
-                    if (_deployer == null)
-                        _deployer = new Deployer(this);
-                    return _deployer;
-                }
-            }
-
-            /// <summary>
-            /// List of deployment rules filtered + sorted for this env
-            /// </summary>
-            public List<DeployRule> DeployRules {
-                get {
-                    if (_deployRulesList == null) {
-
-                        // Need to match the application name / suffix filter with the current env
-                        _deployRulesList = Deployer.GetDeployRulesList.Where(
-                            item => Name.RegexMatch(item.NameFilter.WildCardToRegex()) && 
-                            Suffix.RegexMatch(item.SuffixFilter.WildCardToRegex())
-                        ).ToNonNullList();
-
-                        // sort the rules
-                        _deployRulesList.Sort((item1, item2) => {
-                            
-                            // exact name match first
-                            int compare = item2.NameFilter.EqualsCi(Name).CompareTo(item1.NameFilter.EqualsCi(Name));
-                            if (compare != 0) return compare;
-
-                            // longer name filter first
-                            compare = item2.NameFilter.Length.CompareTo(item1.NameFilter.Length);
-                            if (compare != 0) return compare;
-
-                            // exact suffix match first
-                            compare = item2.SuffixFilter.EqualsCi(Suffix).CompareTo(item1.SuffixFilter.EqualsCi(Suffix));
-                            if (compare != 0) return compare;
-
-                            // longer suffix filter first
-                            compare = item2.SuffixFilter.Length.CompareTo(item1.SuffixFilter.Length);
-                            if (compare != 0) return compare;
-
-                            // lower step first
-                            compare = item1.Step.CompareTo(item2.Step);
-                            if (compare != 0) return compare;
-
-                            var itemTransfer1 = item1 as DeployTransferRule;
-                            var itemTransfer2 = item2 as DeployTransferRule;
-
-                            if (itemTransfer1 != null && itemTransfer2 != null) {
-
-                                // continue first
-                                compare = itemTransfer2.ContinueAfterThisRule.CompareTo(itemTransfer1.ContinueAfterThisRule);
-                                if (compare != 0) return compare;
-
-                                // copy last
-                                compare = itemTransfer1.Type.CompareTo(itemTransfer2.Type);
-                                if (compare != 0) return compare;
-
-                                // first line in first in
-                                return itemTransfer1.Line.CompareTo(itemTransfer2.Line);
-                            }
-
-                            // filter before transfer
-                            return itemTransfer1 == null ? 1 : -1;
-                        });
-
-                    }
-                    return _deployRulesList;
-                }
-            }
-
-            /// <summary>
-            /// List of deployment rules filtered + sorted for this env
-            /// </summary>
-            public List<DeployTransferRule> DeployTransferRules {
-                get { return DeployRules.OfType<DeployTransferRule>().ToNonNullList(); }
-            }
-
-            /// <summary>
-            /// List of deployment rules filtered + sorted for this env
-            /// </summary>
-            public List<DeployFilterRule> DeployFilterRules {
-                get { return DeployRules.OfType<DeployFilterRule>().ToNonNullList(); }
-            }
-
-            #endregion
-
-            #region Misc
-
-            /// <summary>
-            /// Returns the path to prolib.exe considering the path to prowin.exe
-            /// </summary>
-            public string ProlibPath {
-                get { return string.IsNullOrEmpty(ProwinPath) ? "" : Path.Combine(Path.GetDirectoryName(ProwinPath) ?? "", @"prolib.exe"); }
             }
 
             #endregion

@@ -339,20 +339,19 @@ namespace _3PA.MainFeatures.Pro {
                 // feed files list
                 filesListcontent.AppendLine(fileToCompile.CompInputPath.ProQuoter() + " " + fileToCompile.CompOutputDir.ProQuoter() + " " + fileToCompile.CompOutputLst.ProQuoter());
 
-                // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
-                if (executionType == ExecutionType.Run && !_dontWarnAboutRCode) {
-                    if (File.Exists(Path.Combine(Path.GetDirectoryName(fileToCompile.InputPath) ?? fileToCompile.CompOutputDir, baseFileName + ".r"))) {
-                        UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Execution warning", "An Rcode hides the program", args => {
-                            _dontWarnAboutRCode = true;
-                            UserCommunication.CloseUniqueNotif("rcodehide");
-                        }, 5);
-                    }
-                }
-
                 count++;
             }
             Utils.FileWriteAllText(filesListPath, filesListcontent.ToString(), Encoding.Default);
-            
+
+            // when running a procedure, check that a .r is not hiding the program, if that's the case we warn the user
+            if (executionType == ExecutionType.Run && !_dontWarnAboutRCode && ListToCompile.Count >= 1) {
+                if (File.Exists(Path.ChangeExtension(ListToCompile.First().InputPath, ".r"))) {
+                    UserCommunication.NotifyUnique("rcodehide", "Friendly warning, an <b>r-code</b> <i>(i.e. *.r file)</i> is hiding the current program<br>If you modified it since the last compilation you might not have the expected behavior...<br><br><i>" + "stop".ToHtmlLink("Click here to not show this message again for this session") + "</i>", MessageImg.MsgWarning, "Execution warning", "An Rcode hides the program", args => {
+                        _dontWarnAboutRCode = true;
+                        UserCommunication.CloseUniqueNotif("rcodehide");
+                    }, 5);
+                }
+            }
 
             // Move ini file into the execution dir
             var baseIniPath = "";

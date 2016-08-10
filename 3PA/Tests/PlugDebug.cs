@@ -32,6 +32,7 @@ using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using YamuiFramework.Helper;
 using _3PA.Lib;
+using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
@@ -179,31 +180,11 @@ namespace _3PA.Tests {
             return outList;
         }
 
-
         public static void DebugTest1() {
-
-            // launch the compile process for the current file
-            if (File.Exists(Config.FileDeploymentHook)) {
-                var hookExec = new ProExecution {
-                    DeploymentStep = 1,
-                    DeploymentSourcePath = "blabla"
-                };
-                if (hookExec.Do(ExecutionType.DeploymentHook)) {
-                    hookExec.Process.WaitForExit();
-
-                    var fileInfo = new FileInfo(hookExec.LogPath);
-                    if (fileInfo.Length > 0) {
-                        // the .log is not empty, maybe something went wrong in the runner, display errors
-                        UserCommunication.Notify(
-                            "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
-                            Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
-                            "Deployment hook procedure", "Execution failed");
-                    }
-                }
-            }
-
-            //Utils.ZipFile(@"D:\Profiles\jcaillon\Downloads\out.zip", @"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", @"subfolder\yolo.txt", ZipStorer.Compression.Store);
-            //Utils.ZipFolder(@"D:\Profiles\jcaillon\Downloads\out2.zip", @"D:\Profiles\jcaillon\Downloads\bootwatch", ZipStorer.Compression.Store);
+            Task.Factory.StartNew(() => {
+                Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
+                //Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://fuck.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
+            });
         }
 
         public static void DebugTest2() {
@@ -238,26 +219,6 @@ namespace _3PA.Tests {
                     true);
              */
             /*
-            Task.Factory.StartNew(() => {
-
-                var ftp = new FtpsClient();
-                bool connected = false;
-                foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
-                    try {
-                        ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
-                        connected = true;
-                        UserCommunication.Notify(mode.GetDescription());
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-
-                if (connected) {
-                    //ftp.PutFiles();
-                }
-
-                ftp.Close();
-            });
              * */
         }
 
@@ -272,11 +233,11 @@ namespace _3PA.Tests {
             wb.Execute();
         }
 
-        public static void MeasureIt(Action toMeasure) {
+        public static void MeasureIt(Action toMeasure, string id = null) {
             var watch = Stopwatch.StartNew();
             toMeasure();
             watch.Stop();
-            UserCommunication.Notify(watch.ElapsedMilliseconds + "ms");
+            UserCommunication.Notify((id ?? "") + watch.ElapsedMilliseconds + "ms");
         }
 
         public static void RunParserTests(string content) {
@@ -524,7 +485,7 @@ namespace _3PA.Tests {
 
             Output.Append("\r\n");
         }
-        
+
         public void Visit(ParsedFile pars) {
             AppendEverything(pars);
         }
