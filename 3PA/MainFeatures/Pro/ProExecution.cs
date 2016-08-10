@@ -307,7 +307,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     // if the deployment dir is not on the same disk as the temp folder, we create a temp dir
                     // as close to the final deployment as possible (= in the deployment base dir!)
-                    if (!string.IsNullOrEmpty(DistantRootTempDir) && DistantRootTempDir.Length > 2 && !DistantRootTempDir.Substring(0, 2).EqualsCi(LocalTempDir.Substring(0, 2))) {
+                    if (lastDeployment.DeployType != DeployType.Ftp && !string.IsNullOrEmpty(DistantRootTempDir) && DistantRootTempDir.Length > 2 && !DistantRootTempDir.Substring(0, 2).EqualsCi(LocalTempDir.Substring(0, 2))) {
 
                         if (Utils.CreateDirectory(DistantRootTempDir, FileAttributes.Hidden))
                             DistantTempDir = Path.Combine(DistantRootTempDir, _proExecutionCounter + "-" + DateTime.Now.ToString("yyMMdd_HHmmssfff"));

@@ -198,7 +198,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btRules.BackGrndImage = ImageResources.Rules;
             btRules.ButtonPressed += (sender, args) => {
                 Deployer.Export();
-                Npp.OpenFile(Config.FileDeployment);
+                Npp.OpenFile(Config.FileDeploymentRules);
             };
             
             // view rules
@@ -227,7 +227,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         #region on show
 
         public override void OnShow() {
-
+            
             // update combo and fields
             if (!_shownOnce) {
                 UpdateCombo();

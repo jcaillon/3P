@@ -27,6 +27,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -753,7 +754,7 @@ namespace _3PA.Lib {
             try {
                 // parse our uri
                 var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
-                var match = regex.Match(ftpUri);
+                var match = regex.Match(ftpUri.Replace("\\", "/"));
                 if (!match.Success)
                     return false;
 
@@ -779,35 +780,11 @@ namespace _3PA.Lib {
                 if (!_ftpClients.ContainsKey(serverUri))
                     _ftpClients.Add(serverUri, new FtpsClient());
                 ftp = _ftpClients[serverUri];
-
+                
                 // try to connect!
                 if (!ftp.Connected) {
-                    NetworkCredential credential = null;
-                    if (!string.IsNullOrEmpty(userName))
-                        credential = new NetworkCredential(userName, passWord);
-                    foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
-                        try {
-                            var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
-                            ftp.Connect(server, curPort, credential, mode, 1800);
-                            ftp.Connected = true;
-                            break;
-                        } catch (Exception) {
-                            //ignored
-                        }
-                    }
-
-                    // failed?
-                    if (!ftp.Connected) {
-                        if (!IsSpamming(serverUri, 2000, true)) {
-                            UserCommunication.Notify(string.Format(@"Failed to connect to the FTP server!<br><br>The connexion used was:
-                            <br>- Username : {0}
-                            <br>- Password : {1}
-                            <br>- Host : {2}
-                            <br>- Port : {3}
-                            ", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port), MessageImg.MsgError, "Ftp connexion", "Failed");
-                        }
+                    if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
                         return false;
-                    }
                 }
 
                 // dispose of the ftp on shutdown
@@ -816,8 +793,15 @@ namespace _3PA.Lib {
                 try {
                     ftp.PutFile(localFilePath, distantPath);
                 } catch (Exception) {
+                    // might be disconnected??
                     try {
-                        // try to create the directory and push the file again
+                        ftp.GetCurrentDirectory();
+                    } catch (Exception) {
+                        if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
+                            return false;
+                    }
+                    try {
+                        // try to create the directory and then push the file again
                         ftp.MakeDir((Path.GetDirectoryName(distantPath) ?? "").Replace('\\', '/'), true);
                         ftp.PutFile(localFilePath, distantPath);
                     } catch (Exception e) {
@@ -830,6 +814,36 @@ namespace _3PA.Lib {
                 ErrorHandler.ShowErrors(e, "Error sending a file to FTP");
             }
 
+            return true;
+        }
+
+        private static bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port, string serverUri) {
+            NetworkCredential credential = null;
+            if (!string.IsNullOrEmpty(userName))
+                credential = new NetworkCredential(userName, passWord);
+            foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                try {
+                    var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
+                    ftp.Connect(server, curPort, credential, mode, 1800);
+                    ftp.Connected = true;
+                    break;
+                } catch (Exception) {
+                    //ignored
+                }
+            }
+
+            // failed?
+            if (!ftp.Connected) {
+                if (!IsSpamming(serverUri, 2000, true)) {
+                    UserCommunication.Notify(string.Format(@"Failed to connect to the FTP server!<br><br>The connexion used was:
+                            <br>- Username : {0}
+                            <br>- Password : {1}
+                            <br>- Host : {2}
+                            <br>- Port : {3}
+                            ", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port), MessageImg.MsgError, "Ftp connexion", "Failed");
+                }
+                return false;
+            }
             return true;
         }
 

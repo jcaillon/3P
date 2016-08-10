@@ -226,6 +226,20 @@ namespace _3PA.Lib {
         #region string extensions
 
         /// <summary>
+        /// Returns true if the http uri is valid
+        /// </summary>
+        public static bool IsValidHtmlAdress(this string http) {
+            return new Regex(@"^(ht|f)tp(s?)\:\/\/[0-9a-zA-Z]([-.\w]*[0-9a-zA-Z])*(:(0-9)*)*(\/?)([a-zA-Z0-9\-\.\?\,\'\/\\\+&amp;%\$#_]*)?$").Match(http).Success;
+        }
+
+        /// <summary>
+        /// Returns true if the ftp uri is valid
+        /// </summary>
+        public static bool IsValidFtpAdress(this string ftpUri) {
+            return new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$").Match(ftpUri.Replace("\\", "/")).Success;
+        }
+
+        /// <summary>
         /// Allows to test if a string matches one of the listOfPattern (wildcards) in the list of patterns,
         /// Ex : "file.xml".TestAgainstListOfPatterns("*.xls,*.com,*.xml") return true
         /// </summary>

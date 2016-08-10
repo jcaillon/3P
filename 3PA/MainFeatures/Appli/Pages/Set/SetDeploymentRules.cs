@@ -50,7 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             };
             bt_modify.ButtonPressed += (sender, args) => {
                 Deployer.Export();
-                Npp.OpenFile(Config.FileDeployment);
+                Npp.OpenFile(Config.FileDeploymentRules);
             };
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";

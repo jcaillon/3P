@@ -32,7 +32,6 @@ using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
 using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;

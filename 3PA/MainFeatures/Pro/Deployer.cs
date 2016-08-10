@@ -46,8 +46,8 @@ namespace _3PA.MainFeatures.Pro {
         #region Import/export
 
         public static void Export() {
-            if (!File.Exists(Config.FileDeployment))
-                Utils.FileWriteAllBytes(Config.FileDeployment, DataResources.DeploymentRules);
+            if (!File.Exists(Config.FileDeploymentRules))
+                Utils.FileWriteAllBytes(Config.FileDeploymentRules, DataResources.DeploymentRules);
         }
 
         /// <summary>
@@ -55,9 +55,12 @@ namespace _3PA.MainFeatures.Pro {
         /// if the file is present in the Config dir, use it
         /// </summary>
         public static void Import() {
+
+            var outputMessage = new StringBuilder();
+
             var i = 0;
             _fullDeployRulesList = new List<DeployRule>();
-            Utils.ForEachLine(Config.FileDeployment, new byte[0], s => {
+            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], s => {
                 var items = s.Split('\t');
 
                 int step = 0;
@@ -71,7 +74,31 @@ namespace _3PA.MainFeatures.Pro {
                     if (!Enum.TryParse(items[3], true, out type))
                         type = DeployType.Copy;
 
-                    var obj = new DeployTransferRule {Step = step, NameFilter = items[1].Trim(), SuffixFilter = items[2].Trim(), Type = type, ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), SourcePattern = items[5].Trim().Replace('/', '\\'), DeployTarget = items[6].Trim().Replace('/', '\\'), Line = i++};
+                    var obj = new DeployTransferRule {
+                        Step = step, 
+                        NameFilter = items[1].Trim(), 
+                        SuffixFilter = items[2].Trim(), 
+                        Type = type, 
+                        ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), 
+                        SourcePattern = items[5].Trim().Replace('/', '\\'), 
+                        DeployTarget = items[6].Trim().Replace('/', '\\'), 
+                        Line = i++
+                    };
+
+                    if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
+                        outputMessage.Append("- The FTP rule n°" + i + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
+                        return;
+                    }
+
+                    if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
+                        outputMessage.Append("- The ZIP rule n°" + i + " has an incorrect deployment target, a .zip should be found<br>");
+                        return;
+                    }
+
+                    if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
+                        outputMessage.Append("- The Prolib rule n°" + i + " has an incorrect deployment target, a .pl should be found<br>");
+                        return;
+                    }
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern) && !string.IsNullOrEmpty(obj.DeployTarget))
                         _fullDeployRulesList.Add(obj);
@@ -85,6 +112,14 @@ namespace _3PA.MainFeatures.Pro {
                         _fullDeployRulesList.Add(obj);
                 }
             }, Encoding.Default);
+
+            if (outputMessage.Length > 0)
+                UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect:<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Errors reading rules file", "Rules incorrect", args => {
+                    Npp.OpenFile(args.Link);
+                    args.Handled = true;
+                });
+            else
+                UserCommunication.CloseUniqueNotif("deployRulesErrors");
 
             if (OnDeployConfigurationUpdate != null)
                 OnDeployConfigurationUpdate();
@@ -587,12 +622,20 @@ namespace _3PA.MainFeatures.Pro {
             #endregion
 
             // do a deployment action for each file
-            Parallel.ForEach(deployToDo, file => {
+            Parallel.ForEach(deployToDo.Where(deploy => deploy.DeployType >= DeployType.Copy), file => {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
                     updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
             });
+
+            // for archives, do it one by one to avoid bad screwing the zip file
+            foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
+                if (DeploySingleFile(file))
+                    nbFilesDone[0]++;
+                if (updateDeploymentPercentage != null)
+                    updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
+            }
             
             // for .zip, need to dispose of the object/stream here
             foreach (var zipStorer in _openedZip)
@@ -619,6 +662,7 @@ namespace _3PA.MainFeatures.Pro {
                             break;
 
                         case DeployType.Ftp:
+                            file.IsOk = Utils.SendFileToFtp(file.From, file.To);
                             break;
 
                         case DeployType.Zip:
