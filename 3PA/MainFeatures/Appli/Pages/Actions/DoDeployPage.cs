@@ -216,8 +216,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
             // subscribe
             ProEnvironment.OnEnvironmentChange += OnShow;
+            Deployer.OnDeployConfigurationUpdate += () => ProEnvironment.Current.Deployer.DeployRules = null;
             Deployer.OnDeployConfigurationUpdate += OnShow;
-
+            
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
