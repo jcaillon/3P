@@ -48,10 +48,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                 Deployer.Import();
                 UpdateList();
             };
-            bt_modify.ButtonPressed += (sender, args) => {
-                Deployer.Export();
-                Npp.OpenFile(Config.FileDeploymentRules);
-            };
+            bt_modify.ButtonPressed += (sender, args) => Deployer.EditRules();
 
             linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 

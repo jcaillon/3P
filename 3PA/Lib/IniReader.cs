@@ -43,7 +43,7 @@ namespace _3PA.Lib {
             var currentSection = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
             if (!File.Exists(file)) return;
             _ini[""] = currentSection;
-            Utils.ForEachLine(file, null, line => {
+            Utils.ForEachLine(file, null, (i, line) => {
                 line = line.Trim();
                 if (line.StartsWith(";"))
                     return;

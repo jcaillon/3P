@@ -196,11 +196,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             // modify rules
             tooltip.SetToolTip(btRules, "Click to modify the rules");
             btRules.BackGrndImage = ImageResources.Rules;
-            btRules.ButtonPressed += (sender, args) => {
-                Deployer.Export();
-                Npp.OpenFile(Config.FileDeploymentRules);
-            };
-            
+            btRules.ButtonPressed += (sender, args) => Deployer.EditRules();
+
             // view rules
             tooltip.SetToolTip(btRules, "Click to view the rules filtered for the current environment<br><i>The rules are also sorted!</i>");
             btSeeRules.BackGrndImage = ImageResources.ViewFile;

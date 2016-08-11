@@ -177,7 +177,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             ParsedDataBase currentDb = null;
             ParsedTable currentTable = null;
 
-            Utils.ForEachLine(filePath, null, items => {
+            Utils.ForEachLine(filePath, null, (i, items) => {
                 var splitted = items.Split('\t');
                 switch (items[0]) {
                     case 'H':

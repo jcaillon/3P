@@ -255,6 +255,7 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
                 new MenuItem(this, "Run program", ImageResources.RunCode, () => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
                 new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(this, "Deploy current file", ImageResources.Deploy, ProMisc.DeployCurrentFile, "Deploy", "Ctrl+Alt+Prior") { Generic = true },
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProMisc.OpenProDesktop, "Pro_desktop", "") { Generic = true },
                 new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProMisc.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),

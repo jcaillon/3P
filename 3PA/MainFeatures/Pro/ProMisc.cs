@@ -380,5 +380,17 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         #endregion
+        
+        #region DeployCurrentFile
+
+        /// <summary>
+        /// Deploy the current file, if it's a progress file then compile it, otherwise follow the transer rules of step 1
+        /// </summary>
+        public static void DeployCurrentFile() {
+            UserCommunication.Notify("DEPLOY : " + Npp.GetCurrentFilePath());
+        }
+
+        #endregion
+
     }
 }

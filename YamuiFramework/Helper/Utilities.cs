@@ -269,7 +269,7 @@ namespace YamuiFramework.Helper {
         /// Uses encoding as the Encoding to read the file or convert the byte array to a string
         /// Uses the char # as a comment in the file
         /// </summary>
-        public static bool ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding, Action<Exception> onException) {
+        public static bool ForEachLine(string filePath, byte[] dataResources, Action<int, string> toApplyOnEachLine, Encoding encoding, Action<Exception> onException) {
             bool wentOk = true;
             try {
                 SubForEachLine(filePath, dataResources, toApplyOnEachLine, encoding);
@@ -284,15 +284,19 @@ namespace YamuiFramework.Helper {
             return wentOk;
         }
 
-        private static void SubForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding) {
+        private static void SubForEachLine(string filePath, byte[] dataResources, Action<int, string> toApplyOnEachLine, Encoding encoding) {
+
             string line;
             // to apply on each line
             Action<TextReader> action = reader => {
+                int i = 0;
                 while ((line = reader.ReadLine()) != null) {
                     if (line.Length > 0 && line[0] != '#')
-                        toApplyOnEachLine(line);
+                        toApplyOnEachLine(i, line);
+                    i++;
                 }
             };
+
             // either read from the file or from the byte array
             if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {

@@ -45,6 +45,11 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Import/export
 
+        public static void EditRules() {
+            Export();
+            Npp.OpenFile(Config.FileDeploymentRules);
+        }
+
         public static void Export() {
             if (!File.Exists(Config.FileDeploymentRules))
                 Utils.FileWriteAllBytes(Config.FileDeploymentRules, DataResources.DeploymentRules);
@@ -58,10 +63,9 @@ namespace _3PA.MainFeatures.Pro {
 
             var outputMessage = new StringBuilder();
 
-            var i = 0;
             _fullDeployRulesList = new List<DeployRule>();
-            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], s => {
-                var items = s.Split('\t');
+            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], (lineNb, lineString) => {
+                var items = lineString.Split('\t');
 
                 int step = 0;
                 if (items.Length > 1 && !int.TryParse(items[0], out step))
@@ -82,21 +86,21 @@ namespace _3PA.MainFeatures.Pro {
                         ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), 
                         SourcePattern = items[5].Trim().Replace('/', '\\'), 
                         DeployTarget = items[6].Trim().Replace('/', '\\'), 
-                        Line = i++
+                        Line = (lineNb + 1)
                     };
 
                     if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
-                        outputMessage.Append("- The FTP rule n°" + i + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
+                        outputMessage.Append("- The FTP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
-                        outputMessage.Append("- The ZIP rule n°" + i + " has an incorrect deployment target, a .zip should be found<br>");
+                        outputMessage.Append("- The ZIP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .zip should be found<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
-                        outputMessage.Append("- The Prolib rule n°" + i + " has an incorrect deployment target, a .pl should be found<br>");
+                        outputMessage.Append("- The Prolib rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .pl should be found<br>");
                         return;
                     }
 
@@ -115,7 +119,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (outputMessage.Length > 0)
                 UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect:<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Errors reading rules file", "Rules incorrect", args => {
-                    Npp.OpenFile(args.Link);
+                    EditRules();
                     args.Handled = true;
                 });
             else
@@ -315,7 +319,7 @@ namespace _3PA.MainFeatures.Pro {
         /// If CompileLocally, returns the directory of the source
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
         /// </summary>
-        public List<FileToDeploy> GetTransfersNeededForFile(string sourcePath, int step) {
+        public List<FileToDeploy> GetTargetDirsNeededForFile(string sourcePath, int step) {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && ProEnv.CompileLocally)
@@ -363,6 +367,16 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             return outList;
+        }
+
+        /// <summary>
+        /// returns the list of transfers needed for a given file
+        /// </summary>
+        public List<FileToDeploy> GetTransfersNeededForFile(string file, int step) {
+            var fileName = Path.GetFileName(file);
+            if (fileName != null)
+                return ProEnv.Deployer.GetTargetDirsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
+            return new List<FileToDeploy>();
         }
 
         /// <summary>
@@ -436,11 +450,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // list the files to deploy
             foreach (var file in GetFilesList(listOfSourceDir, searchOptions, step)) {
-                foreach (var deployNeeded in ProEnv.Deployer.GetTransfersNeededForFile(file, step)) {
-                    var fileName = Path.GetFileName(file);
-                    if (fileName != null)
-                        outputList.Add(deployNeeded.Set(file, file, Path.Combine(deployNeeded.TargetDir, fileName)));
-                }
+                outputList.AddRange(GetTransfersNeededForFile(file, step));
             }
 
             // do deploy

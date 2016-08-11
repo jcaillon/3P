@@ -75,7 +75,7 @@ namespace _3PA.MainFeatures {
             var buffer = new StringBuilder();
             var currentTag = "";
 
-            Utils.ForEachLine(file, null, line => {
+            Utils.ForEachLine(file, null, (i, line) => {
                 if (line.EndsWith("=>") && !line.StartsWith(" ")) {
                     if (currentTag != "") {
                         Map.Add(currentTag, buffer.ToString().Remove(buffer.ToString().LastIndexOf("\r\n", StringComparison.Ordinal)));
