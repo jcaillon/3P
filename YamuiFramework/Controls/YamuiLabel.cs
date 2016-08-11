@@ -77,6 +77,11 @@ namespace YamuiFramework.Controls {
             get { return _wrapToLine; }
             set { _wrapToLine = value; Refresh(); }
         }
+
+        protected override Padding DefaultPadding {
+            get { return new Padding(0); }
+        }
+
         #endregion
 
         #region Constructor
@@ -114,23 +119,20 @@ namespace YamuiFramework.Controls {
 
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
-        protected void CustomOnPaintBackground(PaintEventArgs e) {
+        protected override void OnPaint(PaintEventArgs e) {
             Color backColor = YamuiThemeManager.Current.LabelsBg(BackColor, UseCustomBackColor);
             if (backColor != Color.Transparent) {
                 e.Graphics.Clear(backColor);
             } else
                 PaintTransparentBackground(e.Graphics, DisplayRectangle);
-        }
 
-        protected override void OnPaint(PaintEventArgs e) {
-            CustomOnPaintBackground(e);
-            OnPaintForeground(e);
-        }
-
-        protected virtual void OnPaintForeground(PaintEventArgs e) {
             Color foreColor = YamuiThemeManager.Current.LabelsFg(ForeColor, UseCustomForeColor, false, false, false, !FakeDisabled);
 
-            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), ClientRectangle, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));
+            var textRect = ClientRectangle;
+            textRect.Offset(Padding.Left, Padding.Top);
+            textRect.Inflate(-Padding.Left - Padding.Right, -Padding.Top - Padding.Bottom);
+
+            TextRenderer.DrawText(e.Graphics, Text, FontManager.GetFont(Function), textRect, foreColor, FontManager.GetTextFormatFlags(TextAlign, _wrapToLine));
         }
 
         #endregion
@@ -161,7 +163,6 @@ namespace YamuiFramework.Controls {
 
         protected override void PreFilterProperties(IDictionary properties) {
             properties.Remove("ImeMode");
-            properties.Remove("Padding");
             properties.Remove("FlatAppearance");
             properties.Remove("FlatStyle");
             properties.Remove("AutoEllipsis");
@@ -178,6 +179,7 @@ namespace YamuiFramework.Controls {
 
             properties.Remove("Font");
             properties.Remove("RightToLeft");
+            properties.Remove("BorderStyle");
 
             base.PreFilterProperties(properties);
         }

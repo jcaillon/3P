@@ -121,8 +121,7 @@ namespace _3PA {
         public static void RefreshApplicationWithTheme(Theme theme) {
             Current = theme;
             Config.Instance.AccentColor = theme.AccentColor;
-            Style.SetGeneralStyles();
-
+            
             // force the autocomplete to redraw
             AutoComplete.ForceClose();
             CodeExplorer.ApplyColorSettings();
@@ -132,30 +131,31 @@ namespace _3PA {
         }
 
         /// <summary>
+        /// Returns a formmatted html content
+        /// </summary>
+        public static string FormatContent(string content) {
+            if (string.IsNullOrEmpty(content))
+                return null;
+            return @"
+                <div style='margin-left: 10px; margin-right: 10px; margin-bottom: 4px;'>
+                    " + content + @"
+                </div>";
+        }
+
+        /// <summary>
         /// Returns a formmatted html message with a title, subtitle and icon
         /// </summary>
-        /// <param name="content"></param>
-        /// <param name="image"></param>
-        /// <param name="title"></param>
-        /// <param name="subtitle"></param>
-        /// <param name="forMessageBox"></param>
-        /// <returns></returns>
-        public static string FormatMessage(string content, MessageImg image, string title, string subtitle, bool forMessageBox = false) {
+        public static string FormatTitle(MessageImg image, string title, string subtitle, bool forMessageBox = false) {
             return @"
-            <div style='margin-bottom: 1px;'>
-                <table style='margin-bottom: " + (forMessageBox ? "15px" : "5px") + @"; width: 100%'>
-                    <tr>
-                        <td rowspan='2' style='" + (forMessageBox ? "width: 95px; padding-left: 15px" : "width: 80px") + @"'><img src='" + image + @"' width='64' height='64' /></td>
-                        <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
-                    </tr>
-                    <tr>
-                        <td class='NotificationSubTitle'>" + subtitle + @"</td>
-                    </tr>
-                </table>
-                <div style='margin-left: 8px; margin-right: 8px; margin-top: 0px;'>
-                    " + content + @"
-                </div>
-            </div>";
+            <table style='width: 100%'>
+                <tr>
+                    <td rowspan='2' style='width: 70px'><img src='" + image + @"' width='64' height='64' /></td>
+                    <td class='NotificationTitle'><img src='" + GetLogo + @"' style='padding-right: 10px;'>" + title + @"</td>
+                </tr>
+                <tr>
+                    <td class='NotificationSubTitle'>" + subtitle + @"</td>
+                </tr>
+            </table>";
         }
 
         /// <summary>

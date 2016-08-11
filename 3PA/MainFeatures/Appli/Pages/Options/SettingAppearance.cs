@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Lib;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class SettingAppearance : YamuiPage {
@@ -140,6 +141,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             if (Plug.IsCurrentFileProgress) {
                 Style.SetSyntaxStyles();
                 Plug.ApplyOptionsForScintilla();
+                FilesInfo.UpdateFileStatus();
             }
         }
 

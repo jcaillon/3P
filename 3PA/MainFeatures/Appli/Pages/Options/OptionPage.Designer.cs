@@ -42,7 +42,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tooltip.MaximumSize = new System.Drawing.Size(0, 0);
             this.tooltip.OwnerDraw = true;
             this.tooltip.ReshowDelay = 10;
-            this.tooltip.TooltipCssClass = "htmltooltip";
             this.tooltip.UseAnimation = false;
             this.tooltip.UseFading = false;
             // 
@@ -54,12 +53,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // OptionPage
@@ -69,7 +68,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.scrollPanel);
             this.Name = "OptionPage";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 

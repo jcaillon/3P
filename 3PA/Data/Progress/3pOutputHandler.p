@@ -104,7 +104,8 @@ PROCEDURE Prolint_AddResult :
 
 
     OUTPUT STREAM str_logout TO VALUE(gc_outputFilePath) APPEND BINARY.
-    PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7",
+    PUT STREAM str_logout UNFORMATTED SUBSTITUTE("&1~t&2~t&3~t&4~t&5~t&6~t&7~t&8",
+        pCompilationUnit,
         pSourcefile,
         fi_severity_label(pSeverity),
         pLineNumber,

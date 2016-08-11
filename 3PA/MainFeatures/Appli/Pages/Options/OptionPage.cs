@@ -190,17 +190,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             yPos += 15;
             _btSave = new YamuiButton {
                 Location = new Point(30, yPos),
-                Size = new Size(100, 23),
-                Text = @"Save everything"
+                Size = new Size(120, 24),
+                Text = @"Save everything",
+                BackGrndImage = ImageResources.Save
             };
             _btSave.ButtonPressed += SaveAllButtonOnButtonPressed;
             tooltip.SetToolTip(_btSave, "Click to <b>save</b> all the options<br><i>This as the same effect than clicking save for each option</i>");
             scrollPanel.ContentPanel.Controls.Add(_btSave);
 
             var defaultButton = new YamuiButton {
-                Location = new Point(135, yPos),
-                Size = new Size(100, 23),
-                Text = @"Reset to default"
+                Location = new Point(155, yPos),
+                Size = new Size(120, 24),
+                Text = @"Reset to default",
+                BackGrndImage = ImageResources.UndoUserAction
             };
             defaultButton.ButtonPressed += DefaultButtonOnButtonPressed;
             tooltip.SetToolTip(defaultButton, "Click to <b>reset</b> all the options to default");
@@ -209,9 +211,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // add a button for the updates
             if (_allowedGroups.Contains("Updates")) {
                 var updateButton = new YamuiButton {
-                    Location = new Point(240, yPos),
-                    Size = new Size(130, 23),
-                    Text = @"Check for updates"
+                    Location = new Point(280, yPos),
+                    Size = new Size(150, 24),
+                    Text = @"Check for updates",
+                    BackGrndImage = ImageResources.Update
                 };
                 updateButton.ButtonPressed += (sender, args) => UpdateHandler.CheckForUpdate();
                 tooltip.SetToolTip(updateButton, "Click to <b>check for updates</b>");

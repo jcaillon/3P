@@ -19,7 +19,6 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -29,7 +28,7 @@ using YamuiFramework.Controls;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetEnvironment : YamuiPage {
@@ -104,7 +103,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(textbox3, textTool);
             toolTip.SetToolTip(htmlLabel3, textTool);
 
-            textTool = "Path to the directory where you want your .r and .lst files to be<br>moved after a successful compilation";
+            textTool = "Set the base directory to which you want to deploy your files for this environment<br>Your r-code can be automatically moved to this location after a successful compilation<br><br><i>See the deployment screen for more information</i>";
             toolTip.SetToolTip(textbox4, textTool);
             toolTip.SetToolTip(htmlLabel4, textTool);
 
@@ -116,9 +115,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             toolTip.SetToolTip(flCmdLine, @"This field can be used if you have special needs when you compile or run a progress program<br>For instance, you can activate the logs when you run a program by setting those parameters :<br><div class='ToolTipcodeSnippet'>-clientlog ""client.log"" - logginglevel ""3"" - logentrytypes ""4GLMessages,4GLTrace,FileID""</div>");
             toolTip.SetToolTip(textbox6, "Path to your server.log file, for a quick access");
 
-            toolTip.SetToolTip(tgCompLocally, "Toggle to <b>move .r and .lst files to the source folder</b> after the compilation<br>Or toggle off to move .r and .lst files to the above distant folder after the compilation");
-            toolTip.SetToolTip(tgCompWithLst, "Toggle on to <b>compile your code with the listing option</b>, generating a .lst file<br>see the DEBUG-LIST option of the Progress compiler for more info");
-            toolTip.SetToolTip(tgCompToFtp, "Toggle on to automatically send your compiled files to a distant FTP server<br><br><i>The option on the FTP connection will be available once this option is toggle on</i>");
+            toolTip.SetToolTip(tgCompLocally, "By default (toggle on), your files will be compiled next to the source code<br>You can also chose to automatically deploy your r-code/.lst automatically when they are compiled (toggle off)<br><br><i>Check the deployment screen to learn how to configure your deployment!</i>");
+            toolTip.SetToolTip(tgCompWithLst, "Toggle on to <b>compile your code with the debug-list option</b>, generating a .lst file<br><br><i>See the DEBUG-LIST option of the Progress compiler for more info</i>");
 
             toolTip.SetToolTip(btEdit, "Click to <b>modify</b> the information for the current environment");
             toolTip.SetToolTip(btAdd, "Click to <b>add a new</b> environment<br>");
@@ -130,7 +128,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // buttons
             btDbDeleteDownload.BackGrndImage = ImageResources.Delete;
             btDbView.BackGrndImage = ImageResources.ViewFile;
-            btConfFtp.BackGrndImage = ImageResources.Configuration;
             
             btAdd.BackGrndImage = ImageResources.Add;
             btCancel.BackGrndImage = ImageResources.Cancel;
@@ -165,8 +162,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
             tgCompLocally.ButtonPressed += TgCompLocallyOnCheckedChanged;
             tgCompWithLst.ButtonPressed += TgCompWithLstOnButtonPressed;
-            tgCompToFtp.ButtonPressed += TgCompToFtpOnButtonPressed;
-            btConfFtp.ButtonPressed += BtConfFtpOnButtonPressed;
 
             cbName.SelectedIndexChanged += cbName_SelectedIndexChanged;
             cbSuffix.SelectedIndexChanged += cbSuffix_SelectedIndexChanged;
@@ -234,8 +229,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         CmdLineParameters = flCmdLine.Text,
                         DbConnectionInfo = _currentMode == ViewMode.Add ? new Dictionary<string, string>() : ProEnvironment.Current.DbConnectionInfo,
                         CompileLocally = tgCompLocally.Checked,
-                        CompileWithListing = tgCompWithLst.Checked,
-                        CompilePushToFtp = tgCompToFtp.Checked
+                        CompileWithListing = tgCompWithLst.Checked
                     };
 
                     if (_currentMode != ViewMode.Edit && (ProEnvironment.GetList.Exists(env => env.Name.EqualsCi(newEnv.Name) && env.Suffix.EqualsCi(newEnv.Suffix)))) {
@@ -363,7 +357,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                         btDelete.Enabled = ProEnvironment.GetList.Count > 1;
 
                         // Compilation toggle
-                        tgCompWithLst.Enabled = tgCompLocally.Enabled = tgCompToFtp.Enabled = btConfFtp.Enabled = isSelect;
+                        tgCompWithLst.Enabled = tgCompLocally.Enabled = isSelect;
 
                         if (mode == ViewMode.Add) {
                             // reset fields when adding a new env
@@ -375,7 +369,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             var defaultEnv = new ProEnvironment.ProEnvironmentObject();
                             tgCompLocally.Checked = defaultEnv.CompileLocally;
                             tgCompWithLst.Checked = defaultEnv.CompileWithListing;
-                            tgCompToFtp.Checked = defaultEnv.CompilePushToFtp;
 
                         } else if (mode == ViewMode.DbAdd) {
                             // reset fields when adding a new pf
@@ -400,8 +393,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
 
                             tgCompLocally.Checked = ProEnvironment.Current.CompileLocally;
                             tgCompWithLst.Checked = ProEnvironment.Current.CompileWithListing;
-                            tgCompToFtp.Checked = ProEnvironment.Current.CompilePushToFtp;
-                            btConfFtp.Visible = tgCompToFtp.Checked;
                         }
 
                         // blink when changing mode
@@ -417,11 +408,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
                             }
                         } else if (mode != _currentMode && mode == ViewMode.Select)
                             ActiveControl = _currentMode == ViewMode.Edit ? btEdit : btDbEdit;
-
-                        // 1.5.5
-                        tgCompToFtp.Visible = false;
-                        btConfFtp.Visible = false;
-                        lblFtp.Visible = false;
 
                         // save current mode
                         _currentMode = mode;
@@ -476,15 +462,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             ProEnvironment.Current.CompileWithListing = tgCompWithLst.Checked;
             ProEnvironment.SaveList();
         }
-        private void TgCompToFtpOnButtonPressed(object sender, EventArgs eventArgs) {
-            btConfFtp.Visible = tgCompToFtp.Checked;
-            ProEnvironment.Current.CompilePushToFtp = tgCompToFtp.Checked;
-            ProEnvironment.SaveList();
-        }
-
-        private void BtConfFtpOnButtonPressed(object sender, EventArgs eventArgs) {
-            UserCommunication.Notify("to be done");
-        }
 
         #endregion
 
@@ -513,7 +490,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current environment?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"}, true);
+            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current environment?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> {"Yes I do", "Yes don't ask again", "No, Cancel"});
             if (answ == 0 || answ == 1) {
                 if (answ == 1)
                     _unsafeDelete = true;
@@ -537,7 +514,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
         }
 
         private void BtDbDeleteOnButtonPressed(object sender, EventArgs buttonPressedEventArgs) {
-            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" }, true);
+            var answ = _unsafeDelete ? 0 : UserCommunication.Message("Do you really want to delete the current database info?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "Yes don't ask again", "No, Cancel" });
             if (answ == 0 || answ == 1) {
                 if (answ == 1)
                     _unsafeDelete = true;

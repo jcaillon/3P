@@ -24,7 +24,9 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using _3PA.Interop;
 using _3PA.Lib;
+using _3PA.MainFeatures.CodeExplorer;
 
 // ReSharper disable LocalizableElement
 
@@ -60,12 +62,6 @@ namespace _3PA.MainFeatures {
                 GroupName = "General",
                 AutoGenerateField = false)]
             public string UserName = GetTrigramFromPa();
-
-            [Display(Name = "Use simple right click for the main menu",
-                Description = "Toggle this option on to replace the default right of Notepad++ by 3P's main menu<br>You then can access the default Notepad++ context menu with CTRL + Right click",
-                GroupName = "General",
-                AutoGenerateField = false)]
-            public bool AppliSimpleRightClickForMenu = false;
 
             [Display(Name = "Progress 4GL files extension list",
                 Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
@@ -140,20 +136,11 @@ namespace _3PA.MainFeatures {
                 Description = "Toggle on to compile your code locally, in your %temp% folder and <b>then</b> move it to its destination<br>This option allows you to not immediatly replace your existing *.r / *.lst files as they are only<br>copied to their destination if the compilation went ok<br><br>This option can be used with no impact if your compilation folder is in a local disk,<br>but if you compile your files on a distant windows server, it will probably slow down the compilation",
                 GroupName = "Compilation",
                 AutoGenerateField = false)]
-
             public bool CompileForceUseOfTemp = false;
-
-            public int NbOfProcessesByCore = 3;
-
-            public bool CompileForceMonoProcess = false;
 
             public string CompileDirectoriesHistoric = "";
 
-            public bool CompileExploreDirRecursiv = true;
-
-            public string CompileIncludeList = "";
-
-            public string CompileExcludeList = "";
+            public string CurrentDeployProfile = "";
 
             #endregion
 
@@ -170,12 +157,6 @@ namespace _3PA.MainFeatures {
                 GroupName = "Updates",
                 AutoGenerateField = false)]
             public bool UserGetsPreReleases = AssemblyInfo.IsPreRelease;
-
-            [Display(Name = "Do not automatically post .log file",
-                Description = "Check this option to prevent 3P from sending your error.log file automatically on github<br><b>Doing this slows the debugging process for 3P's developpers as bugs are not detected if you don't create an issue!</b>",
-                GroupName = "Updates",
-                AutoGenerateField = false)]
-            public bool GlobalDontAutoPostLog = false;
 
             [Display(Name = "Do not install syntax highlighting on update",
                 Description = "Check this option to prevent 3P from installing the latest syntax highlighting on soft update<br><b>Please let this option unckecked if you are not sure what it does or you will miss on new features!</b>",
@@ -327,7 +308,12 @@ namespace _3PA.MainFeatures {
                 GroupName = "Code edition",
                 AutoGenerateField = false)]
             public bool CodeShowSpaces = true;
-            
+
+            [Display(Name = "Disable auto update of function prototypes",
+                Description = "Toggle on to prevent 3P from automatically updating your functions prototypes according to their implementation<br>You are still able to manually trigger the update through the menu",
+                GroupName = "Code edition",
+                AutoGenerateField = false)]
+            public bool DisablePrototypeAutoUpdate = false;
 
             #endregion
 
@@ -376,6 +362,8 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public bool CodeExplorerAutoHideOnNonProgressFile = false;
 
+            public CodeExplorerForm.SortingType CodeExplorerSortingType;
+
             #endregion
 
             #region TOOLTIP
@@ -405,6 +393,15 @@ namespace _3PA.MainFeatures {
             public double ToolTipOpacity = 0.92;
 
             #endregion
+
+            #region MISC
+
+            public string AutoSwitchEncodingForFilePatterns = "";
+
+            public NppEncodingFormat AutoSwitchEncodingTo = NppEncodingFormat._Automatic_default;
+
+            #endregion
+
 
             // Current folder mode for the file explorer : local/compilation/propath/everywhere
             public int FileExplorerViewMode = 3;
@@ -439,6 +436,7 @@ namespace _3PA.MainFeatures {
 
             // last ping time
             public string TechnicalLastPing = "";
+            public string MyUuid = Guid.NewGuid().ToString();
 
             // did the last update check went ok?
             public bool LastCheckUpdateOk = true;
@@ -544,31 +542,35 @@ namespace _3PA.MainFeatures {
         public static string GetUserAgent { get { return "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)"; } }
 
         /// <summary>
-        /// Url to request to get info on the latest releases
+        /// Url for the github webservices
         /// </summary>
         public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/3P/releases"; } }
-        //public static string ReleasesApi { get { return @"https://api.github.com/repos/jcaillon/battle-code/releases"; } }
-        
-        /// <summary>
-        /// Url to post logs
-        /// </summary>
-        public static string SendLogApi { get { return @"https://api.github.com/repos/jcaillon/3p/issues/2/comments"; } }
-
         public static string IssueUrl { get { return @"https://github.com/jcaillon/3P/issues"; } }
+        // Convert.ToBase64String(Encoding.ASCII.GetBytes("user:mdp"));
+        public static string _3PUserCredentials { get { return @"M3BVc2VyOnJhbmRvbXBhc3N3b3JkMTIz"; } }
 
         // HELP URL
+        public static string UrlWebSite { get { return @"http://jcaillon.github.io/3P/"; } }
         public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
         public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
         public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
         public static string UrlHelpMassCompiler { get { return @"http://jcaillon.github.io/3P/#/mass_compiler"; } }
+        public static string UrlHelpDeploy { get { return @"http://jcaillon.github.io/3P/#/deployment"; } }
         
 
         /// <summary>
-        /// Url for the ping webservice
+        /// Url for the webservices
         /// </summary>
-        public static string PingWebWervice { get { return @"http://noyac.fr/3pWebService/v1.4.1/?action=ping"; } }
+        public static string PingPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=ping&softName=3p"; } }
+        public static string BugsPostWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=bugs&softName=3p"; } }
+        public static string PingGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getPing&softName=3p"; } }
+        public static string BugsGetWebWervice { get { return @"http://noyac.fr/3pWebService/v1.6.4/?action=getBugs&softName=3p"; } }
 
-        public static bool IsDevelopper { get { return File.Exists(Path.Combine(Npp.GetConfigDir(), "debug")); } }
+        /// <summary>
+        /// Is developper = the file debug exists
+        /// </summary>
+        public static bool IsDevelopper { get { return File.Exists(FileDebug); } }
+        public static string FileDebug { get { return Path.Combine(Npp.GetConfigDir(), "debug"); } }
 
         /// <summary>
         /// Path to important files / folders
@@ -581,6 +583,7 @@ namespace _3PA.MainFeatures {
         public static string FolderTemplates { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Templates")); } }
         public static string FolderThemes { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "Themes")); } }
         public static string FolderTemp { get { return CreateDirectory(Path.Combine(Path.GetTempPath(), AssemblyInfo.AssemblyProduct)); } }
+        public static string FolderDataDigger { get { return CreateDirectory(Path.Combine(Npp.GetConfigDir(), "DataDigger")); } }
 
         // themes
         public static string FileSyntaxThemes { get { return Path.Combine(FolderThemes, "_ThemesForSyntax.conf"); } }
@@ -598,11 +601,13 @@ namespace _3PA.MainFeatures {
         public static string FileKeywordsList { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsList.conf"); } }
         public static string FileKeywordsHelp { get { return Path.Combine(Npp.GetConfigDir(), "_KeywordsHelp.conf"); } }
         public static string FileAbbrev { get { return Path.Combine(Npp.GetConfigDir(), "_Abbreviations.conf"); } }
-        public static string FileCompilPath { get { return Path.Combine(Npp.GetConfigDir(), "_CompilationPath.conf"); } }
+        public static string FileDeploymentRules { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentRules.conf"); } }
         public static string FileProEnv { get { return Path.Combine(Npp.GetConfigDir(), "_ProgressEnvironnement.xml"); } }
         public static string FileSnippets { get { return Path.Combine(Npp.GetConfigDir(), "_SnippetList.conf"); } }
         public static string FileSettings { get { return Path.Combine(Npp.GetConfigDir(), "settings.xml"); } }
         public static string FileStartProlint { get { return Path.Combine(Npp.GetConfigDir(), "StartProlint.p"); } }
+        public static string FileDeploymentHook { get { return Path.Combine(Npp.GetConfigDir(), "DeploymentHookProc.p"); } }
+        public static string FileDeployProfiles { get { return Path.Combine(Npp.GetConfigDir(), "_DeploymentProfiles.conf"); } }
 
         // Npp files
         public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
@@ -612,11 +617,11 @@ namespace _3PA.MainFeatures {
         // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }
         public static string FileDownloadedPlugin { get { return Path.Combine(FolderUpdate, "3P.dll"); } }
-        public static string FileZipExe { get { return Path.Combine(FolderUpdate, "7z.exe"); } }
-        public static string FileZipDll { get { return Path.Combine(FolderUpdate, "7z.dll"); } }
+        public static string FileDownloadedPdb { get { return Path.Combine(FolderUpdate, "3P.pdb"); } }
         public static string FileUpdaterExe { get { return Path.Combine(FolderUpdate, "3pUpdater.exe"); } }
         public static string FileUpdaterLst { get { return Path.Combine(FolderUpdate, "3pUpdater.lst"); } }
         public static string FileLatestReleaseZip { get { return Path.Combine(FolderUpdate, "3P_latestRelease.zip"); } }
+        public const string FileGitHubAssetName = @"3P.zip"; // name of the zip file containing the release in the assets of the release
 
         #endregion
 

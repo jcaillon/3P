@@ -28,7 +28,8 @@ using YamuiFramework.Helper;
 using _3PA.Data;
 using _3PA.Interop;
 using _3PA.Lib;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
+using Utils = _3PA.Lib.Utils;
 
 namespace _3PA.MainFeatures {
 
@@ -82,7 +83,7 @@ namespace _3PA.MainFeatures {
         public static void ImportList() {
             _listOfThemes.Clear();
             _currentTheme = null;
-            Plug.OnDocumentSwitched();
+            Plug.DoNppDocumentSwitched();
         }
 
         #endregion
@@ -107,7 +108,8 @@ namespace _3PA.MainFeatures {
         /// Can also only check and not install it by setting onlyCheckInstall to true
         /// </summary>
         public static bool InstallUdl(bool onlyCheckInstall = false) {
-            var fileContent = File.Exists(Config.FileNppUdlXml) ? File.ReadAllText(Config.FileNppUdlXml, Encoding.Default) : @"<NotepadPlus />";
+            var encoding = TextEncodingDetect.GetFileEncoding(Config.FileNppUdlXml);
+            var fileContent = File.Exists(Config.FileNppUdlXml) ? Utils.ReadAllText(Config.FileNppUdlXml, encoding) : @"<NotepadPlus />";
             var regex = new Regex("<UserLang name=\"OpenEdgeABL\".*?</UserLang>", RegexOptions.Singleline | RegexOptions.IgnoreCase);
             var matches = regex.Match(fileContent);
             if (matches.Success) {
@@ -127,7 +129,7 @@ namespace _3PA.MainFeatures {
                 fileContent = fileContent.Replace(@"<NotepadPlus>", "<NotepadPlus>\r\n" + DataResources.UDL);
             // write to userDefinedLang.xml
             try {
-                File.WriteAllText(Config.FileNppUdlXml, fileContent, Encoding.Default);
+                Utils.FileWriteAllText(Config.FileNppUdlXml, fileContent, encoding);
             } catch (Exception e) {
                 if (e is UnauthorizedAccessException)
                     UserCommunication.Notify("<b>Couldn't access the file :</b><br>" + Config.FileNppUdlXml + "<br><br>This means i couldn't correctly applied the syntax highlighting feature!<br><br><i>Please make sure to allow write access to this file (Right click on file > Security > Check what's needed to allow total control to current user)</i>", MessageImg.MsgError, "Syntax highlighting", "Can't access userDefineLang.xml");
@@ -148,12 +150,13 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public static void SetSyntaxStyles() {
 
+            var curTheme = Current;
+
             if (Config.Instance.UseSyntaxHighlightTheme) {
-
-                var curTheme = Current;
-
+                
                 // Default
                 SetFontStyle((byte) SciMsg.STYLE_DEFAULT, curTheme.Default);
+                // Npp.StyleClearAll(); // to apply the default style to all styles
                 SetFontStyle((byte) SciMsg.STYLE_CONTROLCHAR, curTheme.Default);
                 SetFontStyle((byte) UdlStyles.Idk, curTheme.Default);
                 SetFontStyle((byte) UdlStyles.Default, curTheme.Default);
@@ -179,49 +182,45 @@ namespace _3PA.MainFeatures {
                 SetFontStyle((byte) UdlStyles.Delimiter5, curTheme.SimpleQuote);
                 SetFontStyle((byte) UdlStyles.Delimiter7, curTheme.SingleLineComment);
                 SetFontStyle((byte) UdlStyles.Delimiter8, curTheme.NestedComment);
+
+                // line numbers
+                SetFontStyle((byte) SciMsg.STYLE_LINENUMBER, curTheme.LineNumberMargin);
+
+                // set url as strings
+                SetFontStyle(80, curTheme.SimpleQuote);
+
+                // brace highlighting
+                SetFontStyle((byte)SciMsg.STYLE_BRACELIGHT, curTheme.BraceHighLight);
+                SetFontStyle((byte)SciMsg.STYLE_BRACEBAD, curTheme.BadBraceHighLight);
+
+                // smart highlighting in npp
+                Npp.GetIndicator(29).ForeColor = curTheme.SmartHighLighting.ForeColor;
             }
-        }
 
-        private static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
-            var nppStyle = Npp.GetStyle(styleNumber);
-            if (styleItem.BackColor != Color.Transparent)
-                nppStyle.BackColor = styleItem.BackColor;
-            if (styleItem.ForeColor != Color.Transparent)
-                nppStyle.ForeColor = styleItem.ForeColor;
-            nppStyle.Bold = styleItem.FontType.IsBitSet(1);
-            nppStyle.Italic = styleItem.FontType.IsBitSet(2);
-        }
-
-        public static List<Color> BgErrorLevelColors;
-        public static List<Color> FgErrorLevelColors;
-
-        public static void SetGeneralStyles() {
-
-            var curTheme = Current;
-            
             // Setting styles for errors 
             SetErrorStyles((byte)ErrorLevel.Information, curTheme.Error0.BackColor, curTheme.Error0.ForeColor);
             SetErrorStyles((byte)ErrorLevel.Warning, curTheme.Error1.BackColor, curTheme.Error1.ForeColor);
             SetErrorStyles((byte)ErrorLevel.StrongWarning, curTheme.Error2.BackColor, curTheme.Error2.ForeColor);
             SetErrorStyles((byte)ErrorLevel.Error, curTheme.Error3.BackColor, curTheme.Error3.ForeColor);
             SetErrorStyles((byte)ErrorLevel.Critical, curTheme.Error4.BackColor, curTheme.Error4.ForeColor);
+        }
 
-            BgErrorLevelColors = new List<Color> {
-                curTheme.NoError.BackColor,
-                curTheme.Error0.BackColor,
-                curTheme.Error1.BackColor,
-                curTheme.Error2.BackColor,
-                curTheme.Error3.BackColor,
-                curTheme.Error4.BackColor
-            };
-            FgErrorLevelColors = new List<Color> {
-                curTheme.NoError.ForeColor,
-                curTheme.Error0.ForeColor,
-                curTheme.Error1.ForeColor,
-                curTheme.Error2.ForeColor,
-                curTheme.Error3.ForeColor,
-                curTheme.Error4.ForeColor
-            };
+        public static void SetFontStyle(byte styleNumber, StyleThemeItem styleItem) {
+            var nppStyle = Npp.GetStyle(styleNumber);
+
+            if (styleItem.BackColor != Color.Transparent)
+                nppStyle.BackColor = styleItem.BackColor;
+
+            if (styleItem.ForeColor != Color.Transparent)
+                nppStyle.ForeColor = styleItem.ForeColor;
+
+            if (styleItem.FontType > 0) {
+                nppStyle.Bold = styleItem.FontType.IsBitSet(1);
+                nppStyle.Italic = styleItem.FontType.IsBitSet(2);
+            }
+
+            if (!string.IsNullOrEmpty(styleItem.FontName))
+                nppStyle.Font = styleItem.FontName;
         }
 
         /// <summary>
@@ -362,6 +361,13 @@ namespace _3PA.MainFeatures {
         public StyleThemeItem Error2 = new StyleThemeItem();
         public StyleThemeItem Error3 = new StyleThemeItem();
         public StyleThemeItem Error4 = new StyleThemeItem();
+        public StyleThemeItem CaretColor = new StyleThemeItem();
+        public StyleThemeItem LineNumberMargin = new StyleThemeItem();
+        public StyleThemeItem FoldMargin = new StyleThemeItem();
+        public StyleThemeItem FoldActiveMarker = new StyleThemeItem();
+        public StyleThemeItem SmartHighLighting = new StyleThemeItem();
+        public StyleThemeItem BraceHighLight = new StyleThemeItem();
+        public StyleThemeItem BadBraceHighLight = new StyleThemeItem();
 
         /// <summary>
         /// Set the values of this instance, using a dictionnary of key -> values, override for this class
@@ -375,14 +381,15 @@ namespace _3PA.MainFeatures {
                 try {
                     var value = SavedStringValues[fieldInfo.Name];
                     var items = value.Split('\t');
-                    int fontType;
-                    if (!int.TryParse(items[2].Trim(), out fontType))
-                        fontType = 0;
-                    if (items.Length == 3) {
+                    if (items.Length >= 3) {
+                        int fontType;
+                        if (!int.TryParse(items[2].Trim(), out fontType))
+                            fontType = 0;
                         fieldInfo.SetValue(this, new StyleThemeItem {
                             ForeColor = ColorTranslator.FromHtml(GetHtmlColor(items[0].Trim(), 0)),
                             BackColor = ColorTranslator.FromHtml(GetHtmlColor(items[1].Trim(), 1)),
-                            FontType = fontType
+                            FontType = fontType,
+                            FontName = items.Length >= 4 ? items[3].Trim() : string.Empty
                         });
                     }
                 } catch (Exception e) {
@@ -414,12 +421,39 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        private StyleThemeItem GetErrorItem(int errorLevel) {
+            switch (errorLevel) {
+                case 0:
+                    return NoError;
+                case 1:
+                    return Error0;
+                case 2:
+                    return Error1;
+                case 3:
+                    return Error2;
+                case 4:
+                    return Error3;
+                case 5:
+                    return Error4;
+            }
+            return new StyleThemeItem { BackColor = Color.Beige, ForeColor = Color.Black };
+        }
+
+        public Color GetErrorBg(int errorLevel) {
+            return GetErrorItem(errorLevel).BackColor;
+        }
+
+        public Color GetErrorFg(int errorLevel) {
+            return GetErrorItem(errorLevel).ForeColor;
+        }
+
     }
 
     public class StyleThemeItem {
         public Color BackColor = Color.Transparent;
         public Color ForeColor = Color.Transparent;
         public int FontType;
+        public string FontName;
     }
 
     #endregion

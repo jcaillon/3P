@@ -31,10 +31,10 @@
                 your "Set environment" screen and so on....
 
                 The format of the prolint output file expected by 3P is :
-                filepath \t ErrorLevel \t line \t column \t error number \t error message \t help for the message
+                original filepath \t currently prolinted file path \t ErrorLevel \t line \t column \t error number \t error message \t help for the message
                 errorLevel can be one of the following values : Information, Warning, StrongWarning, Error, Critical
                 for instance :
-                c:\work\tmp.p	Critical	28	1	247	The expression afer "derp" is not understandable.	(Syntax) PROGRESS only understood a part of a statement. Look carefully at your procedure and at "derp".  The problem should be in the next word or special character after "derp" ends.  Check the previous statement for a missing terminator (period or colon).  Check for misplaced keywords or constants that are missing quotes.
+                c:\work\tmp.p	c:\work\tmp.p	Critical	28	1	247	The expression afer "derp" is not understandable.	(Syntax) PROGRESS only understood a part of a statement. Look carefully at your procedure and at "derp".  The problem should be in the next word or special character after "derp" ends.  Check the previous statement for a missing terminator (period or colon).  Check for misplaced keywords or constants that are missing quotes.
 
                 You can check out an example of output handler for 3P here :
                 https://github.com/jcaillon/3P/blob/master/3PA/Data/Progress/3pOutputHandler.p
@@ -48,6 +48,17 @@
 /*----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK
+
+/* ********************  Preprocessor Definitions  ******************** */
+
+&Scoped-define PROCEDURE-TYPE Procedure
+&Scoped-define DB-AWARE no
 
 /* =================================== */
 /* ==== USER CONFIGURATION HERE ! ==== */
@@ -79,20 +90,7 @@
     &SCOPED-DEFINE FileBugID ""
     &SCOPED-DEFINE FileCorrectionNumber ""
     &SCOPED-DEFINE FileDate ""
-    &SCOPED-DEFINE FileCorrectionDescription ""
 &ENDIF
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ANALYZE-SUSPEND _UIB-PREPROCESSOR-BLOCK
-
-/* ********************  Preprocessor Definitions  ******************** */
-
-&Scoped-define PROCEDURE-TYPE Procedure
-&Scoped-define DB-AWARE no
-
 
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
@@ -165,12 +163,22 @@ IF NOT SESSION:BATCH-MODE THEN
         "~{~&FileBugID~} = " + {&FileBugID} SKIP
         "~{~&FileCorrectionNumber~} = " + {&FileCorrectionNumber} SKIP
         "~{~&FileDate~} = " + {&FileDate} SKIP
-        "~{~&FileCorrectionDescription~} = " + {&FileCorrectionDescription} SKIP
         VIEW-AS ALERT-BOX INFORMATION
         BUTTONS OK
         TITLE "Prolint not configured".
 
 /* ========================================== */
+
+/* use the PUBLISH below to display a notification in 3P after the end of this program */
+PUBLISH "eventToPublishToNotifyTheUserAfterExecution" (
+    INPUT "my message content, <b>HTML</b> format! You can also set a <a href='http://jcaillon.github.io/3P/'>link</a> or whatever you want",
+    INPUT 0, /* from 0 to 4, to have an icon corresponding to : "MsgOk", "MsgError", "MsgWarning", "MsgInfo", "MsgHighImportance" */
+    INPUT "My notification title",
+    INPUT "My notification subtitle",
+    INPUT 0, /* duration of the notification in seconds (0 for infinite time) */
+    INPUT "uniquename" /* unique name for the notification, if it it set, the notif will close on a click on a link and 
+                will automatically be closed if another notification with the same name pops up */
+    ).
 
 RETURN "".
 

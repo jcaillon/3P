@@ -47,10 +47,10 @@ namespace _3PA.MainFeatures.Appli {
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(950, 700);
+            this.ClientSize = new System.Drawing.Size(990, 775);
             this.Controls.Add(this.labelTitle);
             this.MinimizeBox = false;
-            this.MinimumSize = new System.Drawing.Size(950, 700);
+            this.MinimumSize = new System.Drawing.Size(990, 775);
             this.Name = "AppliForm";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;

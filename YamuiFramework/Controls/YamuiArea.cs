@@ -62,6 +62,8 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        protected override void OnPaintBackground(PaintEventArgs e) { }
+
         protected override void OnPaint(PaintEventArgs e) {
 
             // background

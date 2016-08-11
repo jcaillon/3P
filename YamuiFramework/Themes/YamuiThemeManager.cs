@@ -107,6 +107,20 @@ namespace YamuiFramework.Themes {
         internal static Image CurrentThemeImage { private set; get; }
 
         /// <summary>
+        /// Allows to add something to the Text property of every label
+        /// </summary>
+        internal static string WrapLabelText(string text) {
+            return string.Format("<html>{0}</html>", text);
+        }
+
+        /// <summary>
+        /// Allows to add something to the Text property of every label
+        /// </summary>
+        internal static string WrapToolTipText(string text) {
+            return string.Format("<html><div class=\"yamui-tooltip\">{0}</div></html>", text);
+        }
+
+        /// <summary>
         /// Feeds the images to the html renderer
         /// </summary>
         internal static void GetHtmlImages(HtmlImageLoadEventArgs e) {

@@ -23,14 +23,12 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
-using YamuiFramework.Fonts;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 using _3PA.MainFeatures.Parser;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.InfoToolTip {
 
@@ -41,7 +39,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         private static InfoToolTipForm _form;
 
         // we save the conditions with which we showed the tooltip to be able to update it as is
-        private static List<CompletionData> _currentCompletionList;
+        private static List<CompletionItem> _currentCompletionList;
 
         /// <summary>
         /// Was the form opened because the user left his mouse too long on a word?
@@ -60,8 +58,13 @@ namespace _3PA.MainFeatures.InfoToolTip {
         public static string GoToDefinitionFile;
 
         /// <summary>
+        /// the current word that the tooltip displays
+        /// </summary>
+        public static string CurrentWord;
+
+        /// <summary>
         /// Index of the tooltip to show in case where a word corresponds to several items in the
-        /// CompletionData list
+        /// CompletionItem list
         /// </summary>
         public static int IndexToShow;
 
@@ -74,10 +77,10 @@ namespace _3PA.MainFeatures.InfoToolTip {
         #region public misc
 
         /// <summary>
-        /// Returns the current CompletionData used in the tooltip
+        /// Returns the current CompletionItem used in the tooltip
         /// </summary>
         /// <returns></returns>
-        public static CompletionData GetCurrentlyDisplayedCompletionData() {
+        public static CompletionItem GetCurrentlyDisplayedCompletionData() {
             if (_currentCompletionList == null) return null;
             if (IndexToShow < 0) IndexToShow = _currentCompletionList.Count - 1;
             if (IndexToShow >= _currentCompletionList.Count) IndexToShow = 0;
@@ -104,12 +107,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 return;
 
             // sets the tooltip content
-            var data = AutoComplete.FindInCompletionData(Npp.GetWordAtPosition(position), position);
+            var data = AutoComplete.FindInCompletionData(Npp.GetAblWordAtPosition(position), position);
             if (data != null && data.Count > 0)
                 _currentCompletionList = data;
             else
                 return;
- 
+
             // in strings, only functions trigger the tooltip
             if ((curContext == UdlStyles.Delimiter1 || curContext == UdlStyles.Delimiter2 || curContext == UdlStyles.Delimiter4 || curContext == UdlStyles.Delimiter5) && _currentCompletionList.First().Type != CompletionType.Function)
                 return;
@@ -147,7 +150,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// <summary>
         /// Method called when the tooltip is opened to help the user during autocompletion
         /// </summary>
-        public static void ShowToolTipFromAutocomplete(CompletionData data, Rectangle completionRectangle, bool reversedForm) {
+        public static void ShowToolTipFromAutocomplete(CompletionItem item, Rectangle completionRectangle, bool reversedForm) {
             if (Config.Instance.ToolTipDeactivate) return;
             
             bool lockTaken = false;
@@ -158,7 +161,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 InitIfneeded();
 
                 // sets the tooltip content
-                _currentCompletionList = new List<CompletionData> { data };
+                _currentCompletionList = new List<CompletionItem> { item };
                 SetToolTip();
 
                 // update position
@@ -203,7 +206,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     }
                 break;
                 case "gotodefinition":
-                    ProCodeUtils.GoToDefinition();
+                    ProMisc.GoToDefinition();
                     break;
                 case "nexttooltip":
                     IndexToShow++;
@@ -223,18 +226,17 @@ namespace _3PA.MainFeatures.InfoToolTip {
         /// Sets the content of the tooltip (when we want to descibe something present in the completionData list)
         /// </summary>
         private static void SetToolTip() {
-            
+
+            var popupMinWidth = 250;
             var toDisplay = new StringBuilder();
 
             GoToDefinitionFile = null;
-
+            
             // only select one item from the list
             var data = GetCurrentlyDisplayedCompletionData();
             if (data == null) return;
 
-            // Measure the max size of the title (ensure that the title isn't cropped
-            var size = TextRenderer.MeasureText(data.DisplayText, FontManager.GetFont(FontStyle.Bold, 13));
-            var size2 = TextRenderer.MeasureText(data.Type.ToString(), FontManager.GetFont(FontStyle.Bold, 13));
+            CurrentWord = data.DisplayText;
 
             // general stuff
             toDisplay.Append("<div class='InfoToolTip' id='ToolTip'>");
@@ -267,11 +269,12 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     </tr>
                 </table>");
 
-            // the rest depends on the data type
+            // the rest depends on the item type
             try {
                 switch (data.Type) {
                     case CompletionType.TempTable:
                     case CompletionType.Table:
+                        popupMinWidth = Math.Min(500, Npp.NppScreen.WorkingArea.Width / 2);
                         // buffer
                         if (data.FromParser) {
                             if (data.ParsedItem is ParsedDefine) {
@@ -292,7 +295,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                                 toDisplay.Append(FormatSubtitle("FIELDS [x" + tbItem.Fields.Count + "]"));
                                 toDisplay.Append("<table width='100%;'>");
                                 foreach (var parsedField in tbItem.Fields) {
-                                    toDisplay.Append("<tr><td><img src='" + (parsedField.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProgressQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
+                                    toDisplay.Append("<tr><td><img src='" + (parsedField.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk.ToString() : CompletionType.Field.ToString()) + "'></td><td style='padding-right: 4px'>" + (parsedField.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? "<img src='Mandatory'>" : "") + "</td><td style='padding-right: 8px'>" + parsedField.Name + "</td><td style='padding-right: 8px'>" + parsedField.Type + "</td><td style='padding-right: 8px'> = " + (parsedField.Type == ParsedPrimitiveType.Character ? parsedField.InitialValue.ProQuoter() : parsedField.InitialValue) + "</td><td style='padding-right: 8px'>" + parsedField.Description + "</td></tr>");
                                 }
                                 toDisplay.Append("</table>");
                             }
@@ -370,11 +373,17 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         else
                             toDisplay.Append("None");
 
-                        toDisplay.Append(FormatSubtitle("PROTOTYPE"));
-                        if (funcItem.PrototypeLine > 0)
-                            toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcItem.PrototypeLine + "#" + funcItem.PrototypeColumn + "'>Go to prototype</a>"));
-                        else
-                            toDisplay.Append("Has none");
+                        var funcImplem =  data.ParsedItem as ParsedImplementation;
+                        if (funcImplem != null) {
+                            toDisplay.Append(FormatSubtitle("PROTOTYPE"));
+                            if (funcImplem.HasPrototype)
+                                toDisplay.Append(FormatRowWithImg("Prototype", "<a class='ToolGotoDefinition' href='proto#" + funcItem.FilePath + "#" + funcImplem.PrototypeLine + "#" + funcImplem.PrototypeColumn + "'>Go to prototype</a>"));
+                            else
+                                toDisplay.Append("Has none");
+                        } else {
+                            toDisplay.Append(FormatSubtitle("DEFINED IN"));
+                            toDisplay.Append("Function defined in an external procedure or is a web service operation");
+                        }
                         break;
                     case CompletionType.Keyword:
                     case CompletionType.KeywordObject:
@@ -402,6 +411,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                         }
                         if (keyToFind == null)
                             keyToFind = string.Join(" ", keyword, data.SubString);
+
                         var dataHelp = Keywords.GetKeywordHelp(keyToFind);
                         if (dataHelp != null) {
                             toDisplay.Append(FormatSubtitle("DESCRIPTION"));
@@ -426,6 +436,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             else
                                 toDisplay.Append("<i><b>Sorry, this keyword doesn't have any help associated</b><br>Please refer to the 4GL help</i>");
                         }
+
+                        CurrentWord = keyToFind;
                         break;
                     case CompletionType.Label:
                         break;
@@ -470,7 +482,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
             // parsed item?
             if (data.FromParser) {
                 toDisplay.Append(FormatSubtitle("ORIGINS"));
-                toDisplay.Append(FormatRow("Scope name", data.ParsedItem.OwnerName));
+                toDisplay.Append(FormatRow("Scope name", data.ParsedItem.Scope.Name));
                 if (!Plug.CurrentFilePath.Equals(data.ParsedItem.FilePath))
                     toDisplay.Append(FormatRow("Owner file", "<a class='ToolGotoDefinition' href='gotoownerfile#" + data.ParsedItem.FilePath + "'>" + data.ParsedItem.FilePath + "</a>"));
             }
@@ -500,7 +512,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
 
             toDisplay.Append("</div>");
 
-            _form.SetText(toDisplay.ToString(), (Math.Max(size.Width, size2.Width) + 10 + 70));
+            _form.SetText(toDisplay.ToString(), popupMinWidth);
 
         }
 
@@ -515,11 +527,11 @@ namespace _3PA.MainFeatures.InfoToolTip {
         }
 
         private static string FormatRowParam(string paramType, string text) {
-            var image = "Output";
+            var image = "Input";
             if (paramType.ContainsFast("input-output"))
                 image = "InputOutput";
-            else if (paramType.ContainsFast("input"))
-                image = "Input";
+            else if (paramType.ContainsFast("output"))
+                image = "Output";
             return "<div class='ToolTipRowWithImg'><img style='padding-right: 2px; padding-left: 5px;' src='" + image + "' height='15px'>" + text + "</div>";
         }
 
@@ -564,8 +576,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 _openedForCompletion = false;
                 _currentCompletionList = null;
                 GoToDefinitionFile = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
@@ -585,8 +597,8 @@ namespace _3PA.MainFeatures.InfoToolTip {
                 if (_form != null)
                     _form.ForceClose();
                 _form = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 

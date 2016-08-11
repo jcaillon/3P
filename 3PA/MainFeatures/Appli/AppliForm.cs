@@ -57,13 +57,13 @@ namespace _3PA.MainFeatures.Appli {
                 }),
                 new YamuiMainMenu("Set", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("ENVIRONMENT", PageNames.SetEnvironment.ToString(), new SetEnvironment()),
-                    new YamuiSecMenu("COMPILATION PATH", null, new SetCompilationPath()),
+                    new YamuiSecMenu("DEPLOYMENT RULES", PageNames.DeploymentRules.ToString(), new SetDeploymentRules()),
                     new YamuiSecMenu("FILE INFORMATION", PageNames.FileInfo.ToString(), new SetFileInfo()),
                     //new YamuiSecMenu("PERSISTENT PROCEDURES", null, new template())
                 }),
                 new YamuiMainMenu("Actions", null, false, new List<YamuiSecMenu> {
                 //    new YamuiSecMenu("CUSTOM SCRIPTS", null, new template()),
-                    new YamuiSecMenu("MASS COMPILER", PageNames.MassCompiler.ToString(), new CompilePage()),
+                    new YamuiSecMenu("DEPLOY YOUR APPLICATION", PageNames.MassCompiler.ToString(), new DoDeployPage()),
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
@@ -230,6 +230,7 @@ namespace _3PA.MainFeatures.Appli {
         OptionsMisc,
         ExportShareConf,
         SetEnvironment,
-        MassCompiler
+        MassCompiler,
+        DeploymentRules
     }
 }

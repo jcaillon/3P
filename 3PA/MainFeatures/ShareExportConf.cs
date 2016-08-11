@@ -20,18 +20,16 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using _3PA.Data;
-using YamuiFramework.Themes;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures {
-
-
     internal static class ShareExportConf {
 
         #region fields
@@ -60,16 +58,32 @@ namespace _3PA.MainFeatures {
                             OnImport = line => ProEnvironment.Import()
                         },
                         new ConfLine {
-                            Label = "Compilation path rerouting",
-                            HandledItem = Config.FileCompilPath,
-                            OnImport = line => CompilationPath.Import(),
-                            OnExport = line => Utils.FileWriteAllBytes(Config.FileCompilPath, DataResources.CompilationPath),
+                            Label = "Deployment profiles",
+                            HandledItem = Config.FileDeployProfiles,
+                            OnImport = line => DeployProfile.Import(),
                             OnDelete = DoDelete,
                             OnFetch = DoFetch,
                             OnPush = DoPush
                         },
                         new ConfLine {
-                            Label = "Start prolint procedure",
+                            Label = "Deployment rules",
+                            HandledItem = Config.FileDeploymentRules,
+                            OnImport = line => Deployer.Import(),
+                            OnExport = line => Deployer.Export(),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
+                        new ConfLine {
+                            Label = "Deployment hook procedure",
+                            HandledItem = Config.FileDeploymentHook,
+                            OnExport = line => Utils.FileWriteAllBytes(Config.FileDeploymentHook, DataResources.DeploymentHook),
+                            OnDelete = DoDelete,
+                            OnFetch = DoFetch,
+                            OnPush = DoPush
+                        },
+                        new ConfLine {
+                            Label = "Prolint startup procedure",
                             HandledItem = Config.FileStartProlint,
                             OnExport = line => Utils.FileWriteAllBytes(Config.FileStartProlint, DataResources.StartProlint),
                             OnDelete = DoDelete,
@@ -135,6 +149,28 @@ namespace _3PA.MainFeatures {
             }
         }
 
+        /// <summary>
+        /// Returns true if the file is a configuration file listed here
+        /// </summary>
+        public static bool IsFileExportedConf(string filePath) {
+            return List.Exists(line => line.HandledItem.Equals(filePath));
+        }
+
+        /// <summary>
+        /// Try to import the given configuration file
+        /// </summary>
+        public static bool TryToImportFile(string filePath) {
+            if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath)) {
+                var item = List.FirstOrDefault(line => line.HandledItem.Equals(filePath));
+                if (item != null) {
+                    if (item.OnImport != null)
+                        item.OnImport(item);
+                    UserCommunication.NotifyUnique("Importedconf", "The latest changes to <b>" + item.Label + "</b> have been saved and taken into account!", MessageImg.MsgInfo, "Configuration imported", item.Label, null, 5);
+                    return true;
+                }
+            }
+            return false;
+        }
 
         /// <summary>
         /// ASYNC - Call this method to start checking for updates every xx min, also check once immediatly
@@ -257,6 +293,8 @@ namespace _3PA.MainFeatures {
             var answ = UserCommunication.Message("Do you really want to delete this file?", MessageImg.MsgQuestion, "Delete", "Confirmation", new List<string> { "Yes I do", "No, Cancel" }, true);
             if (answ == 0) {
                 Utils.DeleteFile(conf.LocalPath);
+                if (conf.OnImport != null)
+                    conf.OnImport(conf);
             }
         }
 
@@ -299,7 +337,7 @@ namespace _3PA.MainFeatures {
             Keywords.Import();
             // Update autocompletion
             AutoComplete.RefreshStaticItems();
-            AutoComplete.ParseCurrentDocument();
+            ParserHandler.ParseCurrentDocument();
         }
 
         #endregion

@@ -116,7 +116,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public static void UpdateMenuItemChecked() {
             if (FakeForm == null) return;
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
             Config.Instance.CodeExplorerVisible = FakeForm.Visible;
         }
 

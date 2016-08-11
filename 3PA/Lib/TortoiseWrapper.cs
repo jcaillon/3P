@@ -53,29 +53,16 @@ namespace _3PA.Lib {
 
         private string _tortoiseProcPath;
 
-        private string _mergeToolPath;
-
-        private string _tortoiseDirectoryPath;
-
         #endregion
 
         #region Life and death
 
         public TortoiseWrapper(TortoiseType type) {
             _type = type;
-
-            // we get the path to the tortoise proc (wheter it's git or svn) from the registry
-            try {
-                using (RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Tortoise" + (_type == TortoiseType.Svn ? "SVN" : "Git"))) {
-                    if (registryKey != null) {
-                        _tortoiseProcPath = (string) registryKey.GetValue("ProcPath");
-                        _mergeToolPath = (string)registryKey.GetValue("TMergePath");
-                        _tortoiseDirectoryPath = (string)registryKey.GetValue("Directory");
-                    }
-                }
-            } catch (Exception) {
-                _tortoiseProcPath = null;
-            }
+            var nodeName = @"SOFTWARE\Tortoise" + (_type == TortoiseType.Svn ? "SVN" : "Git");
+            _tortoiseProcPath = "";
+            //_mergeToolPath = "";
+            //_tortoiseDirectoryPath = "";
         }
 
         #endregion

@@ -142,9 +142,6 @@
   <data name="StartProlint" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>progress\startprolint.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="CompilationPath" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>compilationpath;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </data>
   <data name="ApplicationThemes" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>applicationthemes;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -153,5 +150,20 @@
   </data>
   <data name="StyleSheet" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\html\stylesheet.css;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;utf-8</value>
+  </data>
+  <data name="FunctionImplementation" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>progresstemplates\functionimplementation.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="InternalProcedure" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>progresstemplates\internalprocedure.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="DataDigger" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>datadigger\datadigger.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="DeploymentRules" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>deploymentrules;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="DeploymentHook" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>progress\deploymenthook.p;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
 </root>

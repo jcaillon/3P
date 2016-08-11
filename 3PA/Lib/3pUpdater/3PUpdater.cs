@@ -58,11 +58,11 @@ namespace _3PA.Lib._3pUpdater {
                 return false;
 
             // configure the update
-            File.WriteAllText(Config.FileUpdaterLst, string.Join("\t", from, to), Encoding.Default);
+            File.AppendAllText(Config.FileUpdaterLst, string.Join("\t", from, to) + "\r\n", Encoding.Default);
 
             // subscribe to the Npp shutdown event if it's not already done
             if (_typeOfExeNeeded == TypeOfExeNeeded.None)
-                Plug.OnNppShutDown += ExecuteUpdateAsync;
+                Plug.OnShutDown += ExecuteUpdateAsync;
 
             // test if the destination directory is writable
             var typeOfExeNeeded = Utils.IsDirectoryWritable(Path.GetDirectoryName(to)) ? TypeOfExeNeeded.UserRights : TypeOfExeNeeded.AdminRights;
@@ -81,20 +81,16 @@ namespace _3PA.Lib._3pUpdater {
         private void ExecuteUpdateAsync() {
             try {
                 // copy the 3pUpdater.exe, one or the other version depending if we need admin rights
-                File.WriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? Resources._3pUpdater_user : Resources._3pUpdater);
+                if (Utils.FileWriteAllBytes(Config.FileUpdaterExe, _typeOfExeNeeded == TypeOfExeNeeded.UserRights ? Resources._3pUpdater_user : Resources._3pUpdater)) {
 
-                // execute it, don't wait for the end
-                var process = new Process {
-                    StartInfo = {
-                        FileName = Config.FileUpdaterExe,
-                        WindowStyle = ProcessWindowStyle.Hidden
-                    }
-                };
-                process.Start();
+                    // execute it, don't wait for the end
+                    var process = new Process {StartInfo = {FileName = Config.FileUpdaterExe, WindowStyle = ProcessWindowStyle.Hidden}};
+                    process.Start();
+                }
 
             } catch (Exception e) {
                 if (!(e is Win32Exception))
-                    ErrorHandler.Log("OnNotepadExit\r\n" + e);
+                    ErrorHandler.LogError(e);
             }
         }
 

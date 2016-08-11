@@ -18,15 +18,14 @@
 // ========================================================================
 #endregion
 using System;
+using System.Linq;
 using YamuiFramework.Controls;
+using _3PA.Images;
+using _3PA.Interop;
 using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class OthersPage : YamuiPage {
-
-        #region fields
-
-        #endregion
 
         #region constructor
 
@@ -41,9 +40,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             toolTip.SetToolTip(fl_tagtitle2, "This block should contain the {&de} (description) variable and will be repeated as many times it is needed to display the complete description.");
             toolTip.SetToolTip(fl_tagtitle3, "This block is repeated only once at the end of the title block." + usableVar);
 
-            bttagcancel.ButtonPressed += BttagcancelOnButtonPressed;
-            bttagsave.ButtonPressed += BttagsaveOnButtonPressed;
+            toolTip.SetToolTip(cbEncoding, "Choose the encoding to apply to the files when they are opened<br><i>The default option is 'Automatic', to let Notepad++ select the encoding</i>");
+            toolTip.SetToolTip(fl_encodingfilter, "<i>Leave empty to disable this feature (default)</i><br>A comma (,) separated list of filters :<br>when a file is opened, if it matches one of the filter, the selected encoding is applied<br><br>Example of filter :<div class='ToolTipcodeSnippet'>*.p,\\*my_sub_directory\\*,*.r</div>");
 
+            btCancel.BackGrndImage = ImageResources.UndoUserAction;
+            btCancel.ButtonPressed += BtCancelOnButtonPressed;
+
+            btSave.BackGrndImage = ImageResources.Save;
+            btSave.ButtonPressed += BtSaveOnButtonPressed;
+
+            cbEncoding.DataSource = Enum.GetNames(typeof (NppEncodingFormat)).OrderBy(s => s).Select(s => s.Replace("_", " ")).ToNonNullList();
+            
             UpdateView();
 
             // dynamically reorder the controls for a correct tab order on notepad++
@@ -53,7 +60,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         #endregion
 
         public override void OnShow() {
-            ActiveControl = bttagsave;
+            ActiveControl = btSave;
             base.OnShow();
         }
 
@@ -65,6 +72,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             fl_tagtitle1.Lines = Config.Instance.TagTitleBlock1.Split('\n');
             fl_tagtitle2.Lines = Config.Instance.TagTitleBlock2.Split('\n');
             fl_tagtitle3.Lines = Config.Instance.TagTitleBlock3.Split('\n');
+            fl_encodingfilter.Text = Config.Instance.AutoSwitchEncodingForFilePatterns;
+            cbEncoding.SelectedIndex = Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).IndexOf(Config.Instance.AutoSwitchEncodingTo.ToString());
         }
 
         private void UpdateModel() {
@@ -73,13 +82,17 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             Config.Instance.TagTitleBlock1 = fl_tagtitle1.Text;
             Config.Instance.TagTitleBlock2 = fl_tagtitle2.Text;
             Config.Instance.TagTitleBlock3 = fl_tagtitle3.Text;
+            Config.Instance.AutoSwitchEncodingForFilePatterns = fl_encodingfilter.Text;
+            NppEncodingFormat format;
+            if (Enum.TryParse(Enum.GetNames(typeof(NppEncodingFormat)).OrderBy(s => s).ToList()[cbEncoding.SelectedIndex], true, out format))
+                Config.Instance.AutoSwitchEncodingTo = format;
         }
 
-        private void BttagsaveOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void BtSaveOnButtonPressed(object sender, EventArgs eventArgs) {
             UpdateModel();
         }
 
-        private void BttagcancelOnButtonPressed(object sender, EventArgs eventArgs) {
+        private void BtCancelOnButtonPressed(object sender, EventArgs eventArgs) {
             UpdateView();
         }
 

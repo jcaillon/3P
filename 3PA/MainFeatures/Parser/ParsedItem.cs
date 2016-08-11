@@ -19,79 +19,69 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using _3PA.Lib;
-using _3PA.MainFeatures.CodeExplorer;
+using System.ComponentModel;
 
 namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// base abstract class for ParsedItem
     /// </summary>
     internal abstract class ParsedItem {
+
+        /// <summary>
+        /// Name of the parsed item
+        /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// full file path in which this item has been parsed
+        /// </summary>
         public string FilePath { get; set; }
+
+        /// <summary>
+        /// When including a file, each item parsed has a definition line that corresponds to the line in the file where the item was parsed,
+        /// but we also need to need to know where, in the current file parsed, this include is, so we can know filter the items correctly... 
+        /// The default value is -1 
+        /// </summary>
+        public int IncludeLine { get; set; }
+
+        /// <summary>
+        /// The starting position of the first keyword of the statement where the item is found
+        /// </summary>
+        public int Position { get; private set; }
+
         /// <summary>
         /// Line of the first keyword of the statement where the item is found
         /// <remarks>THE LINE COUNT START AT 0 NOT 1!!</remarks>
         /// </summary>
         public int Line { get; private set; }
+
         /// <summary>
         /// Column of the first keyword of the statement where the item is found
         /// </summary>
         public int Column { get; private set; }
-        public ParsedScope Scope { get; set; }
-        public string OwnerName { get; set; }
+
         /// <summary>
-        /// When including a file, each item parsed has a definition line that corresponds to the line in the file where the item was parsed,
-        /// but we also need to need to know where, in the current file parsed, this include is, so we can know filter the items correctly...
+        /// The ending position of the first keyword of the statement where the item is found
+        /// OR the ending position of the EOS of the statement (be careful to verify this 
+        /// before using this property...)
         /// </summary>
-        public int IncludeLine { get; set; }
+        public int EndPosition { get; set; }
+
+        /// <summary>
+        /// Scope in which this item has been parsed
+        /// </summary>
+        public ParsedScopeItem Scope { get; set; }
+
         public abstract void Accept(IParserVisitor visitor);
-        protected ParsedItem(string name, int line, int column) {
+
+        protected ParsedItem(string name, Token token) {
             Name = name;
-            Line = line;
-            Column = column;
+            Line = token.Line;
+            Column = token.Column;
+            Position = token.StartPosition;
+            EndPosition = token.EndPosition;
             IncludeLine = -1;
         }
-    }
-
-    internal enum ParsedScope {
-        File,
-        Procedure,
-        Function,
-        Trigger
-    }
-
-    /// <summary>
-    /// Flags applicable for every ParsedItems
-    /// </summary>
-    [Flags]
-    internal enum ParseFlag {
-        // indicates that the parsed item is not coming from the originally parsed source (= from .i)
-        External = 1,
-        // Local/File define the scope of a defined variable...
-        LocalScope = 2,
-        FileScope = 4,
-        Parameter = 8,
-        // is used for keywords
-        Reserved = 16,
-        Abbreviation = 32,
-        New = 64,
-        // Special flag for DEFINE
-        Global = 128,
-        Shared = 256,
-        Private = 512,
-        // flags for fields
-        Mandatory = 1024,
-        Extent = 2048,
-        Index = 4096,
-        // is a buffer
-        Buffer = 8192,
-        // the variable was defined with a CREATE and not a DEFINE
-        Dynamic = 16384,
-        // the procedure is EXTERNAL
-        ExternalProc = 32768,
-        // a proc or func was loaded in persistent
-        Persistent = 65536
     }
 
     /// <summary>
@@ -101,30 +91,88 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// line of the "end" keyword that ends the block
         /// </summary>
-        public int EndLine { get; set; }
+        public int EndBlockLine { get; set; }
+
+        /// <summary>
+        /// end position of the EOS that closes the block, initiated to -1 by default
+        /// </summary>
+        public int EndBlockPosition { get; set; }
 
         /// <summary>
         /// If true, the block contains too much characters and will not be openable in the
         /// appbuilder
         /// </summary>
         public bool TooLongForAppbuilder { get; set; }
-        protected ParsedScopeItem(string name, int line, int column) : base(name, line, column) {}
+
+        /// <summary>
+        /// Allows faster comparison against ParsedScopeItems
+        /// </summary>
+        public ParsedScopeType ScopeType { get; private set; }
+
+        protected ParsedScopeItem(string name, Token token, ParsedScopeType scopeType)
+            : base(name, token) {
+            ScopeType = scopeType;
+            EndBlockPosition = -1;
+        }
+    }
+
+    /// <summary>
+    /// Allows faster comparison against ParsedScopeItems
+    /// </summary>
+    internal enum ParsedScopeType {
+        File,
+        Block,
+        Procedure,
+        Function,
+        OnStatement
+    }
+
+    /// <summary>
+    /// The "root" scope of a file
+    /// </summary>
+    internal class ParsedFile : ParsedScopeItem {
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+        public ParsedFile(string name, Token token) : base(name, token, ParsedScopeType.File) { }
+
     }
 
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedBlock : ParsedScopeItem {
-        public CodeExplorerIconType IconIconType { get; set; }
-        public CodeExplorerBranch Branch { get; set; }
-        public bool IsRoot { get; set; }
+    internal class ParsedPreProcBlock : ParsedScopeItem {
 
+        /// <summary>
+        /// type of this block
+        /// </summary>
+        public ParsedPreProcBlockType Type { get; set; }
+
+        /// <summary>
+        /// Everything after ANALYZE-SUSPEND
+        /// </summary>
+        public string BlockDescription { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
-        public ParsedBlock(string name, int line, int column, CodeExplorerBranch branch) : base(name, line, column) {
-            Branch = branch;
+        public ParsedPreProcBlock(string name, Token token) : base(name, token, ParsedScopeType.Block) {
         }
+    }
+
+    internal enum ParsedPreProcBlockType {
+        Unknown,
+        FunctionForward,
+        MainBlock,
+        Definitions,
+        UibPreprocessorBlock,
+        Xftr,
+        ProcedureSettings,
+        CreateWindow,
+        RunTimeAttributes,
+
+        // before that, this is an ANALYSE-SUSPEND block, below are the other pre-processed block
+        IfEndIf,
     }
 
     /// <summary>
@@ -145,8 +193,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedProcedure(string name, int line, int column, string left, bool isExternal, bool isPrivate)
-            : base(name, line, column) {
+        public ParsedProcedure(string name, Token token, string left, bool isExternal, bool isPrivate)
+            : base(name, token, ParsedScopeType.Procedure) {
             Left = left;
             IsExternal = isExternal;
             IsPrivate = isPrivate;
@@ -157,41 +205,88 @@ namespace _3PA.MainFeatures.Parser {
     /// Function parsed item
     /// Flag : private
     /// </summary>
-    internal class ParsedFunction : ParsedScopeItem {
+    internal abstract class ParsedFunction : ParsedScopeItem {
         public ParsedPrimitiveType ReturnType { get; set; }
         /// <summary>
         /// Parsed string for the return type, use ReturnType instead!
         /// </summary>
         public string ParsedReturnType { get; private set; }
         /// <summary>
-        /// is the return-type "EXTENT [x]"
+        /// is the return-type "EXTENT [x]" (0 if not extented) / should be a string representing an integer
         /// </summary>
+        public string Extend { get; set; }
         public bool IsExtended { get; set; }
         public string Parameters { get; set; }
         public bool IsPrivate { get; set; }
-        public int PrototypeLine { get; set; }
-        public int PrototypeColumn { get; set; }
+
+        protected ParsedFunction(string name, Token token, string parsedReturnType) : base(name, token, ParsedScopeType.Function) {
+            ParsedReturnType = parsedReturnType;
+            Extend = String.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Function parsed item
+    /// </summary>
+    internal class ParsedPrototype : ParsedFunction {
+
+        /// <summary>
+        /// true if it's a simple FORWARD and the implementation is in the same proc,
+        /// false otherwise (meaning we matched a IN)
+        /// </summary>
+        public bool SimpleForward { get; set; }
+
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedFunction(string name, int line, int column, string parsedReturnType) : base(name, line, column) {
-            ParsedReturnType = parsedReturnType;
+        public ParsedPrototype(string name, Token token, string parsedReturnType) : base(name, token, parsedReturnType) {
+            Extend = String.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Function parsed item
+    /// </summary>
+    internal class ParsedImplementation : ParsedFunction {
+
+        /// <summary>
+        /// true if this function is an implementation AND has a prototype
+        /// </summary>
+        public bool HasPrototype { get; set; }
+        public int PrototypeLine { get; set; }
+        public int PrototypeColumn { get; set; }
+        public int PrototypePosition { get; set; }
+        public int PrototypeEndPosition { get; set; }
+        /// <summary>
+        /// Boolean to know if the prototype is correct compared to the implementation
+        /// </summary>
+        public bool PrototypeUpdated { get; set; }
+
+        public override void Accept(IParserVisitor visitor) {
+            visitor.Visit(this);
+        }
+
+        public ParsedImplementation(string name, Token token, string parsedReturnType)
+            : base(name, token, parsedReturnType) {
+            Extend = String.Empty;
         }
     }
 
     /// <summary>
     /// Procedure parsed item
     /// </summary>
-    internal class ParsedOnEvent : ParsedScopeItem {
-        public string On { get; private set; }
+    internal class ParsedOnStatement : ParsedScopeItem {
+        public string EventList { get; private set; }
+        public string WidgetList { get; private set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedOnEvent(string name, int line, int column, string @on)
-            : base(name, line, column) {
-            On = @on;
+        public ParsedOnStatement(string name, Token token, string eventList, string widgetList)
+            : base(name, token, ParsedScopeType.OnStatement) {
+            EventList = eventList;
+            WidgetList = widgetList;
         }
     }
 
@@ -204,8 +299,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFoundTableUse(string name, int line, int column, bool isTempTable)
-            : base(name, line, column) {
+        public ParsedFoundTableUse(string name, Token token, bool isTempTable)
+            : base(name, token) {
             IsTempTable = isTempTable;
         }
     }
@@ -220,7 +315,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedLabel(string name, int line, int column) : base(name, line, column) {
+        public ParsedLabel(string name, Token token) : base(name, token) {
         }
     }
 
@@ -237,8 +332,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedFunctionCall(string name, int line, int column, bool externalCall)
-            : base(name, line, column) {
+        public ParsedFunctionCall(string name, Token token, bool externalCall)
+            : base(name, token) {
             ExternalCall = externalCall;
         }
     }
@@ -257,7 +352,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedRun(string name, int line, int column, string left, bool isEvaluateValue, bool hasPersistent) : base(name, line, column) {
+        public ParsedRun(string name, Token token, string left, bool isEvaluateValue, bool hasPersistent) : base(name, token) {
             Left = left;
             IsEvaluateValue = isEvaluateValue;
             HasPersistent = hasPersistent;
@@ -273,7 +368,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, int line, int column) : base(name, line, column) {}
+        public ParsedIncludeFile(string name, Token token) : base(name, token) {}
     }
 
     /// <summary>
@@ -282,20 +377,19 @@ namespace _3PA.MainFeatures.Parser {
     internal class ParsedPreProc : ParsedItem {
         public string Value { get; private set; }
         public int UndefinedLine { get; set; }
-        public ParsedPreProcFlag Flag { get; set; }
+        public ParsedPreProcType Type { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedPreProc(string name, int line, int column, int undefinedLine, ParsedPreProcFlag flag, string value) : base(name, line, column) {
+        public ParsedPreProc(string name, Token token, int undefinedLine, ParsedPreProcType type, string value) : base(name, token) {
             UndefinedLine = undefinedLine;
-            Flag = flag;
+            Type = type;
             Value = value;
         }
     }
 
-    internal enum ParsedPreProcFlag {
-        None = 1,
+    internal enum ParsedPreProcType {
         Scope = 2,
         Global = 4
     }
@@ -348,8 +442,8 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedDefine(string name, int line, int column, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
-            : base(name, line, column) {
+        public ParsedDefine(string name, Token token, string lcFlagString, ParsedAsLike asLike, string left, ParseDefineType type, string tempPrimitiveType, string viewAs, string bufferFor, bool isExtended, bool isDynamic)
+            : base(name, token) {
             LcFlagString = lcFlagString;
             AsLike = asLike;
             Left = left;
@@ -368,48 +462,43 @@ namespace _3PA.MainFeatures.Parser {
         Like
     }
 
-    internal class ParseDefineTypeAttr : Extensions.EnumAttr {
-        public string Value { get; set; }
-    }
-
     /// <summary>
     /// Enumeration of DEFINE types
-    /// Retrieve the description value with ((ParseDefineTypeAttr)parseDefineType.GetAttributes()).Value
     /// </summary>
     internal enum ParseDefineType {
-        [ParseDefineTypeAttr(Value = "PARAMETER")]
+        [Description("PARAMETER")]
         Parameter,
-        [ParseDefineTypeAttr(Value = "DATA-SOURCE")]
+        [Description("DATA-SOURCE")]
         DataSource,
-        [ParseDefineTypeAttr(Value = "EVENT")]
+        [Description("EVENT")]
         Event,
-        [ParseDefineTypeAttr(Value = "BUFFER")]
+        [Description("BUFFER")]
         Buffer,
-        [ParseDefineTypeAttr(Value = "VARIABLE")]
+        [Description("VARIABLE")]
         Variable,
-        [ParseDefineTypeAttr(Value = "BROWSE")]
+        [Description("BROWSE")]
         Browse,
-        [ParseDefineTypeAttr(Value = "STREAM")]
+        [Description("STREAM")]
         Stream,
-        [ParseDefineTypeAttr(Value = "BUTTON")]
+        [Description("BUTTON")]
         Button,
-        [ParseDefineTypeAttr(Value = "DATASET")]
+        [Description("DATASET")]
         Dataset,
-        [ParseDefineTypeAttr(Value = "IMAGE")]
+        [Description("IMAGE")]
         Image,
-        [ParseDefineTypeAttr(Value = "MENU")]
+        [Description("MENU")]
         Menu,
-        [ParseDefineTypeAttr(Value = "FRAME")]
+        [Description("FRAME")]
         Frame,
-        [ParseDefineTypeAttr(Value = "QUERY")]
+        [Description("QUERY")]
         Query,
-        [ParseDefineTypeAttr(Value = "RECTANGLE")]
+        [Description("RECTANGLE")]
         Rectangle,
-        [ParseDefineTypeAttr(Value = "PROPERTY")]
+        [Description("PROPERTY")]
         Property,
-        [ParseDefineTypeAttr(Value = "SUB-MENU")]
+        [Description("SUB-MENU")]
         SubMenu,
-        [ParseDefineTypeAttr(Value = "NONE")]
+        [Description("NONE")]
         None
     }
 
@@ -504,7 +593,7 @@ namespace _3PA.MainFeatures.Parser {
             visitor.Visit(this);
         }
 
-        public ParsedTable(string name, int line, int column, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, line, column) {
+        public ParsedTable(string name, Token token, string id, string crc, string dumpName, string description, string lcLikeTable, bool isTempTable, List<ParsedField> fields, List<ParsedIndex> indexes, List<ParsedTrigger> triggers, string lcFlagString, string useIndex) : base(name, token) {
             Id = id;
             Crc = crc;
             DumpName = dumpName;

@@ -40,6 +40,7 @@
 # If you create cool themes, don't hesitate to submit them to me :)
 # 
 
+
 > cyborg2
 PageBackGroundImage	
 ThemeAccentColor	#2A9FD6
@@ -96,6 +97,8 @@ MenuHoverBack	#222
 MenuHoverFore	#fff
 MenuFocusedBack	#2D2D2D
 MenuFocusedFore	#D8D8D8
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#D398C0
 AutoCompletionHighlightBorder	#D333A0
 GenericLinkColor	#2A9FD6
@@ -159,6 +162,8 @@ MenuHoverBack	#EEEEEE
 MenuHoverFore	#555555
 MenuFocusedBack	#BEBEBE
 MenuFocusedFore	#616161
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#FF851B
 GenericLinkColor	#158CBA
 GenericErrorColor	#FF4136
@@ -220,6 +225,8 @@ MenuHoverBack	#CCCCCC
 MenuHoverFore	#3A3A3A
 MenuFocusedBack	#A5A5A5
 MenuFocusedFore	#3A3A3A
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#f0ad4e
 GenericLinkColor	#4582EC
 GenericErrorColor	#d9534f
@@ -281,6 +288,8 @@ MenuHoverBack	#EADEC9
 MenuHoverFore	#000
 MenuFocusedBack	#B0ED5A
 MenuFocusedFore	#444
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#D0EDA8
 AutoCompletionHighlightBorder	#93C54B
 GenericLinkColor	#93C54B
@@ -344,6 +353,8 @@ MenuHoverBack	#CCCCCC
 MenuHoverFore	#795548
 MenuFocusedBack	#795548
 MenuFocusedFore	#CCC
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	#F5E625
 GenericLinkColor	#000
 GenericErrorColor	#F57A00
@@ -405,6 +416,8 @@ MenuHoverBack	#5D6F81
 MenuHoverFore	#C7C7C7
 MenuFocusedBack	#697D91
 MenuFocusedFore	#C7C7C7
+MenuDisabledBack	@ButtonDisabledBack
+MenuDisabledFore	@ButtonDisabledFore
 AutoCompletionHighlightBack	darken(#FFCA28, 55%)
 AutoCompletionHighlightBorder	darken(#FFCA28, 70%)
 GenericLinkColor	#FFCA28

@@ -19,12 +19,10 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using _3PA.Data;
 using _3PA.Lib;
-using _3PA.MainFeatures.Parser;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -38,7 +36,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #region fields
 
-        private static Dictionary<string, CompletionData> _keywordList = new Dictionary<string, CompletionData>(); 
+        private static Dictionary<string, CompletionItem> _keywordList = new Dictionary<string, CompletionItem>(); 
         private static List<KeywordsAbbreviations> _abbreviations = new List<KeywordsAbbreviations>();
         private static Dictionary<string, KeywordsHelp> _help = new Dictionary<string, KeywordsHelp>(StringComparer.CurrentCultureIgnoreCase);
 
@@ -47,12 +45,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region Import / Export
 
         /// <summary>
-        /// To call in order to read all the keywords to the private List CompletionData
+        /// To call in order to read all the keywords to the private List CompletionItem
         /// </summary>
         public static void Import() {
             // reads keywords
             _keywordList.Clear();
-            Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsList, DataResources.KeywordsList, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 5) {
                     // find the KeywordType from items[1]
@@ -65,7 +63,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     if (keywordType == KeywordType.Abbreviation) flag = flag | ParseFlag.Abbreviation;
 
                     if (!_keywordList.ContainsKey(items[0])) {
-                        _keywordList.Add(items[0], new CompletionData {
+                        _keywordList.Add(items[0], new CompletionItem {
                             DisplayText = items[1],
                             Type = ((int) keywordType < 30) ? CompletionType.Keyword : CompletionType.KeywordObject,
                             Ranking = int.Parse(items[4]),
@@ -75,10 +73,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         });
                     }
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads keywords rank
-            Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsRank, new byte[0], s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2 && _keywordList.ContainsKey(items[0])) {
                     int val;
@@ -86,11 +85,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         _keywordList[items[0]].Ranking = val;
                     }
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads abbreviations
             _abbreviations.Clear();
-            Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileAbbrev, DataResources.Abbreviations, s => {
                 var items = s.Split('\t');
                 if (items.Count() == 2) {
                     _abbreviations.Add(new KeywordsAbbreviations {
@@ -98,11 +98,12 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         ShortText = items[0]
                     });
                 }
-            });
+            }, 
+            Encoding.Default);
 
             // reads keywords help
             _help.Clear();
-            Utils.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, Encoding.Default, s => {
+            Utils.ForEachLine(Config.FileKeywordsHelp, DataResources.KeywordsHelp, s => {
                 var items = s.Split('\t');
                 if (items.Count() > 2) {
                     var listSynthax = new List<string>();
@@ -114,7 +115,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         Synthax = listSynthax
                     });
                 }
-            });
+            }, 
+            Encoding.Default);
         }
 
         /// <summary>
@@ -126,7 +128,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
             foreach (var kpv in _keywordList) {
                 strBuilder.AppendLine(kpv.Key + "\t" + kpv.Value.Ranking);
             }
-            File.WriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
+            Utils.FileWriteAllText(Config.FileKeywordsRank, strBuilder.ToString());
         }
 
         #endregion
@@ -136,7 +138,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// returns the list of keywords
         /// </summary>
-        public static List<CompletionData> GetList() {
+        public static List<CompletionItem> GetList() {
             return _keywordList.Values.ToList();
         }
 

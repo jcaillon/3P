@@ -28,6 +28,7 @@ namespace YamuiFramework.Helper {
     [SuppressUnmanagedCodeSecurity]
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class WinApi {
+
         #region Structs
 
         [StructLayout(LayoutKind.Sequential)]
@@ -77,6 +78,7 @@ namespace YamuiFramework.Helper {
         #endregion
 
         #region Enums
+
         public enum ScrollBar {
             SB_HORZ = 0,
             SB_VERT = 1,
@@ -340,6 +342,7 @@ namespace YamuiFramework.Helper {
             SC_MAXIMIZE = 0xF030,
             SC_RESTORE = 0xF120
         }
+
         #endregion
 
         #region Fields
@@ -378,6 +381,7 @@ namespace YamuiFramework.Helper {
 
         // Changes the client size of a control
         public const int EM_SETRECT = 0xB3;
+
         #endregion
 
         #region API Calls
@@ -410,7 +414,6 @@ namespace YamuiFramework.Helper {
         // Changes the client size of a control
         [DllImport("User32.dll", EntryPoint = "SendMessage", CharSet = CharSet.Auto)]
         public static extern int SendMessageRefRect(IntPtr hWnd, uint msg, int wParam, ref RECT rect);
-
 
         // will be used to set a window to always stay on top
         [DllImport("user32.dll")]
@@ -457,13 +460,8 @@ namespace YamuiFramework.Helper {
         public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
 
         [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr wnd, int msg, bool param, int lparam);
-
-        [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
 
-        [DllImport("user32.dll")]
-        public static extern bool ShowScrollBar(IntPtr hWnd, int bar, int cmd);
         #endregion
     }
 }

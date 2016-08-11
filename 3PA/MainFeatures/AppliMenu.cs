@@ -27,7 +27,8 @@ using _3PA.Images;
 using _3PA.Interop;
 using _3PA.MainFeatures.Appli;
 using _3PA.MainFeatures.AutoCompletion;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Pro;
 using _3PA.Tests;
 
 namespace _3PA.MainFeatures {
@@ -59,7 +60,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Command index in the notepad++ plugin menu
         /// </summary>
-        public static int DockableCommandIndex { get; set; }
+        public static int MainMenuCommandIndex { get; set; }
 
         /// <summary>
         /// Closes the visible menu (if any)
@@ -77,7 +78,7 @@ namespace _3PA.MainFeatures {
         /// <summary>
         /// Show a given menu
         /// </summary>
-        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16", int minSize = 150) {
+        public static void ShowMenuAtCursor(List<YamuiMenuItem> menuList, string menuTitle, string menuLogo = "logo16x16", int minSize = 180) {
             try {
                 // Close any already opened menu
                 ForceCloseMenu();
@@ -97,31 +98,38 @@ namespace _3PA.MainFeatures {
 
         #region Show menus
 
-        /// <summary>
-        /// Show the appli main menu at the cursor location
-        /// </summary>
         public static void ShowMainMenuAtCursor() {
-            if (!Plug.PluginIsReady) {
-                return;
-            }
-            ShowMenuAtCursor((Abl.IsCurrentProgressFile() ? Instance._mainMenuList : Instance._mainMenuList.Where(item => item.Generic)).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._mainMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Main menu");
         }
 
-
-        /// <summary>
-        /// Show the generate code menu at the cursor location
-        /// </summary>
         public static void ShowGenerateCodeMenuAtCursor() {
-            if (Abl.IsCurrentProgressFile()) {
-                ShowMenuAtCursor(Instance._generateCodeMenuList.Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
-            }
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._generateCodeMenuList).Select(item => (YamuiMenuItem) item).ToList(), "Generate code", "GenerateCode");
+        }
+
+        public static void ShowDatabaseToolsMenuAtCursor() {
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._databaseTools).Select(item => (YamuiMenuItem)item).ToList(), "Database tools", "DatabaseTools");
+        }
+
+        public static void ShowEnvMenuAtCursor() {
+            ShowMenuAtCursor(Instance._envMenuList, "Switch environment", "Env");
+        }
+
+        public static void ShowMiscMenuAtCursor() {
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._miscMenuList).Select(item => (YamuiMenuItem)item).ToList(), "Miscellaneous", "Miscellaneous");
+        }
+
+        public static void ShowEditCodeMenuAtCursor() {
+            ShowMenuAtCursor(DisableItemIfNeeded(Instance._editCodeList).Select(item => (YamuiMenuItem)item).ToList(), "Edit code", "EditCode");
         }
 
         /// <summary>
-        /// Show the environment menu at the cursor location
+        /// Allows to disable the items in a list depending on the conditions (item must be generic or we must be on a progress file to Enable)
         /// </summary>
-        public static void ShowEnvMenuAtCursor() {
-            ShowMenuAtCursor(Instance._envMenuList, "Switch environment", "Env", 185);
+        /// <returns></returns>
+        private static List<MenuItem> DisableItemIfNeeded(List<MenuItem> list) {
+            var isCurrentFileProgressFile = Abl.IsCurrentProgressFile;
+            list.ForEach(item => item.IsDisabled = !isCurrentFileProgressFile && (!item.Generic));
+            return list;
         }
 
         #endregion
@@ -145,6 +153,12 @@ namespace _3PA.MainFeatures {
         private List<MenuItem> _mainMenuList;
 
         private List<MenuItem> _generateCodeMenuList;
+
+        private List<MenuItem> _miscMenuList;
+
+        private List<MenuItem> _editCodeList;
+
+        private List<MenuItem> _databaseTools;
 
         private List<YamuiMenuItem> _envMenuList;
 
@@ -178,15 +192,54 @@ namespace _3PA.MainFeatures {
             #region Generate code
 
             _generateCodeMenuList = new List<MenuItem> {
-                new MenuItem(this, "Insert new function", ImageResources.Function, null, null, ""),
-                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, null, null, "")
+                new MenuItem(this, "Insert new internal procedure", ImageResources.Procedure, ProGenerateCode.InsertCode<ParsedProcedure>, "Insert_new_procedure", "Alt+P"),
+                new MenuItem(this, "Insert new function", ImageResources.Function, ProGenerateCode.InsertCode<ParsedImplementation>, "Insert_new_function", "Alt+F"),
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Delete existing internal procedure", ImageResources.DeleteProcedure, ProGenerateCode.DeleteCode<ParsedProcedure>, "Delete_procedure", ""),
+                new MenuItem(this, "Delete existing function", ImageResources.DeleteFunction, ProGenerateCode.DeleteCode<ParsedImplementation>, "Delete_function", ""),
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Synchronize fonction prototypes", ImageResources.Synchronize, () => ProGenerateCode.UpdateFunctionPrototypesIfNeeded(), "Synchronize_prototypes", "Alt+S"),
             };
 
             #endregion
 
-            #region All
+            #region Edit code
 
-            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProCodeUtils.GoToDefinition, "Go_To_Definition", "Ctrl+B");
+            _editCodeList = new List<MenuItem> {
+                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, ProGenerateCode.ToggleComment, "Toggle_Comment", "Ctrl+Q"),
+                //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
+            };
+
+            #endregion
+
+            #region Misc
+
+            _miscMenuList = new List<MenuItem> {
+                new MenuItem(this, "Edit current file info", ImageResources.FileInfo, () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
+                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProGenerateCode.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
+                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProGenerateCode.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
+                //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
+            };
+
+            #endregion
+
+            #region database tools
+
+            _databaseTools = new List<MenuItem> {
+                new MenuItem(this, "Open data administration", ImageResources.DataAdmin, ProMisc.OpenDbAdmin, "Data_admin", "") { Generic = true },
+                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProMisc.OpenDictionary, "Data_dictionary", "") { Generic = true },
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Explore and modify your data", ImageResources.DataDigger, ProMisc.OpenDataDigger, "Data_digger", "") { Generic = true },
+                new MenuItem(this, "Explore (read-only) your data", ImageResources.DataReader, ProMisc.OpenDataReader, "Data_reader", "") { Generic = true },
+
+
+            };
+
+            #endregion
+            
+            #region Main menu
+
+            var goToDefItem = new MenuItem(this, "Go to definition", ImageResources.GoToDefinition, ProMisc.GoToDefinition, "Go_To_Definition", "Ctrl+B");
             goToDefItem.SubText = "Middle click  /  " + goToDefItem.SubText;
             var goToPreviousJump = new MenuItem(this, "Go to previous jump point", ImageResources.GoBackward, Npp.GoBackFromDefinition, "Go_Backwards", "Ctrl+Shift+B") {
                 Generic = true
@@ -194,58 +247,40 @@ namespace _3PA.MainFeatures {
             goToPreviousJump.SubText = "Ctrl + Middle click  /  " + goToPreviousJump.SubText;
 
             _mainMenuList = new List<MenuItem> {
-                new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") {
-                    Generic = true
-                },
+                new MenuItem(this, "Show main window", ImageResources.MainWindow, Appli.Appli.ToggleView, "Open_main_window", "Alt+Space") { Generic = true },
                 new MenuItem(this, "Show auto-completion at caret", ImageResources.Autocompletion, AutoComplete.OnShowCompleteSuggestionList, "Show_Suggestion_List", "Ctrl+Space"),
-                _envMenu,
-
-                new MenuItem(true) {Generic = true}, // --------------------------
-
-                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProCodeUtils.Open4GlHelp, "Open_4GL_help", "F1") {
-                    Generic = true
-                },
-                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProCodeUtils.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
-                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
-                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
-
-                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProCodeUtils.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
-                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProCodeUtils.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
-                new MenuItem(this, "Open progress dictionary", ImageResources.Dictionary, ProCodeUtils.OpenDictionary, "Open_dictionary", "Alt+D") {
-                    Generic = true
-                },
-
-                new MenuItem(true) {Generic = true}, // --------------------------
-
-                new MenuItem(this, "Start searching files", ImageResources.Search, FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q") {
-                    Generic = true
-                },
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Open 4GL help", ImageResources.ProgressHelp, ProMisc.Open4GlHelp, "Open_4GL_help", "F1") { Generic = true },
+                new MenuItem(this, "Check syntax", ImageResources.CheckCode, () => ProMisc.StartProgressExec(ExecutionType.CheckSyntax), "Check_syntax", "Shift+F1"),
+                new MenuItem(this, "Compile", ImageResources.CompileCode, () => ProMisc.StartProgressExec(ExecutionType.Compile), "Compile", "Alt+F1"),
+                new MenuItem(this, "Run program", ImageResources.RunCode, () => ProMisc.StartProgressExec(ExecutionType.Run), "Run_program", "Ctrl+F1"),
+                new MenuItem(this, "Prolint code", ImageResources.ProlintCode, () => ProMisc.StartProgressExec(ExecutionType.Prolint), "Prolint", "F12"),
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Progress desktop", ImageResources.ProDesktop, ProMisc.OpenProDesktop, "Pro_desktop", "") { Generic = true },
+                new MenuItem(this, "Open in the AppBuilder", ImageResources.SendToAppbuilder, ProMisc.OpenCurrentInAppbuilder, "Send_appbuilder", "Alt+O"),
+                new MenuItem(true), // --------------------------
+                new MenuItem(this, "Start searching files", ImageResources.Search, FileExplorer.FileExplorer.StartSearch, "Search_file", "Alt+Q") { Generic = true },
                 goToDefItem,
                 goToPreviousJump,
-
-                new MenuItem(true), // --------------------------
-
                 //new MenuItem(this, "New 4GL file", ImageResources.GenerateCode, ShowNewFileAtCursor, "New_file", "Ctrl+Shift+N") {
                 //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 //},
-
-                new MenuItem(this, "Toggle comment line", ImageResources.ToggleComment, ProCodeUtils.ToggleComment, "Toggle_Comment", "Ctrl+Q"),
-
-                //new MenuItem(this, "Insert mark", ImageResources.InsertMark, null, "Insert_mark", "Ctrl+T"),
-                //new MenuItem(this, "Format document", ImageResources.FormatCode, CodeBeautifier.CorrectCodeIndentation, "Format_document", "Ctrl+I"),
-                
-                //new MenuItem(this, "Generate code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
-                //    Children = GenerateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
-                //},
-
                 new MenuItem(true), // --------------------------
-
-                new MenuItem(this, "Edit current file info", ImageResources.FileInfo, () => Appli.Appli.GoToPage(PageNames.FileInfo), "Edit_file_info", "Ctrl+Shift+M"),
-                new MenuItem(this, "Insert title block", ImageResources.TitleBlock, ProCodeUtils.AddTitleBlockAtCaret, "Insert_title_block", "Ctrl+Alt+M"),
-                new MenuItem(this, "Surround with modification tags", ImageResources.ModificationTag, ProCodeUtils.SurroundSelectionWithTag, "Modif_tags", "Ctrl+M"),
-
-                new MenuItem(true) {Generic = true}, // --------------------------
-
+                _envMenu,
+                new MenuItem(this, "Database tools", ImageResources.DatabaseTools, ShowDatabaseToolsMenuAtCursor, "DatabaseTools", "Alt+D") {
+                    Generic = true,
+                    Children = _databaseTools.Select(item => (YamuiMenuItem)item).ToList(),
+                },
+                new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
+                    Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                },
+                new MenuItem(this, "Edit code", ImageResources.EditCode, ShowEditCodeMenuAtCursor, "Edit_code", "Ctrl+Insert") {
+                    Children = _editCodeList.Select(item => (YamuiMenuItem)item).ToList(),
+                },
+                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, ShowMiscMenuAtCursor, "Miscellaneous", "") {
+                    Children = _miscMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                },
+                new MenuItem(true), // --------------------------
                 new MenuItem(this, "Options", ImageResources.ShowOptions, () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
             };
 

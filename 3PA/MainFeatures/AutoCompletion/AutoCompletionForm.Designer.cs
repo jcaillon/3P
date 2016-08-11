@@ -1,7 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
+using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Controls;
+using YamuiFramework.Fonts;
 using YamuiFramework.HtmlRenderer.WinForms;
 using _3PA.MainFeatures.FilteredLists;
 
@@ -29,8 +33,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 fastOLV.MouseLeave -= CustomOnMouseLeave;
                 fastOLV.DoubleClick -= FastOlvOnDoubleClick;
 
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
@@ -42,34 +46,34 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private void InitializeComponent() {
             this.fastOLV = new FastObjectListViewWoScrolls();
-            this.Keyword = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.Type = ((BrightIdeasSoftware.OLVColumn)(new BrightIdeasSoftware.OLVColumn()));
-            this.nbitems = new YamuiFramework.Controls.YamuiLabel();
-            this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
-            this.htmlToolTip = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).BeginInit();
+            this.Keyword = ((OLVColumn)(new OLVColumn()));
+            this.Type = ((OLVColumn)(new OLVColumn()));
+            this.nbitems = new YamuiLabel();
+            this.yamuiLabel1 = new YamuiLabel();
+            this.htmlToolTip = new HtmlToolTip();
+            ((ISupportInitialize)(this.fastOLV)).BeginInit();
             this.SuspendLayout();
             // 
             // fastOLV
             // 
-            this.fastOLV.Activation = System.Windows.Forms.ItemActivation.TwoClick;
+            this.fastOLV.Activation = ItemActivation.TwoClick;
             this.fastOLV.AllColumns.Add(this.Keyword);
             this.fastOLV.AllColumns.Add(this.Type);
             this.fastOLV.AutoArrange = false;
-            this.fastOLV.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.fastOLV.BorderStyle = BorderStyle.None;
             this.fastOLV.CausesValidation = false;
-            this.fastOLV.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.fastOLV.Columns.AddRange(new ColumnHeader[] {
             this.Keyword});
             this.fastOLV.CopySelectionOnControlC = false;
             this.fastOLV.CopySelectionOnControlCUsesDragSource = false;
-            this.fastOLV.Cursor = System.Windows.Forms.Cursors.Default;
-            this.fastOLV.Dock = System.Windows.Forms.DockStyle.Top;
+            this.fastOLV.Cursor = Cursors.Default;
+            this.fastOLV.Dock = DockStyle.Top;
             this.fastOLV.FullRowSelect = true;
             this.fastOLV.HasCollapsibleGroups = false;
             this.fastOLV.HeaderMaximumHeight = 0;
-            this.fastOLV.HeaderStyle = System.Windows.Forms.ColumnHeaderStyle.Nonclickable;
+            this.fastOLV.HeaderStyle = ColumnHeaderStyle.Nonclickable;
             this.fastOLV.HideSelection = false;
-            this.fastOLV.Location = new System.Drawing.Point(2, 2);
+            this.fastOLV.Location = new Point(2, 2);
             this.fastOLV.MultiSelect = false;
             this.fastOLV.Name = "fastOLV";
             this.fastOLV.OwnerDraw = true;
@@ -77,27 +81,27 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.fastOLV.RowHeight = 20;
             this.fastOLV.SelectAllOnControlA = false;
             this.fastOLV.SelectColumnsOnRightClick = false;
-            this.fastOLV.SelectColumnsOnRightClickBehaviour = BrightIdeasSoftware.ObjectListView.ColumnSelectBehaviour.None;
+            this.fastOLV.SelectColumnsOnRightClickBehaviour = ObjectListView.ColumnSelectBehaviour.None;
             this.fastOLV.ShowFilterMenuOnRightClick = false;
             this.fastOLV.ShowGroups = false;
             this.fastOLV.ShowHeaderInAllViews = false;
             this.fastOLV.ShowSortIndicators = false;
-            this.fastOLV.Size = new System.Drawing.Size(390, 400);
+            this.fastOLV.Size = new Size(390, 400);
             this.fastOLV.TabIndex = 0;
             this.fastOLV.TriggerCellOverEventsWhenOverHeader = false;
             this.fastOLV.UpdateSpaceFillingColumnsWhenDraggingColumnDivider = false;
             this.fastOLV.UseCompatibleStateImageBehavior = false;
             this.fastOLV.UseFiltering = true;
             this.fastOLV.UseTabAsInput = false;
-            this.fastOLV.View = System.Windows.Forms.View.Details;
+            this.fastOLV.View = View.Details;
             this.fastOLV.VirtualMode = true;
             // 
             // Keyword
             // 
             this.Keyword.AspectName = "DisplayText";
             this.Keyword.AutoCompleteEditor = false;
-            this.Keyword.AutoCompleteEditorMode = System.Windows.Forms.AutoCompleteMode.None;
-            this.Keyword.CellVerticalAlignment = System.Drawing.StringAlignment.Center;
+            this.Keyword.AutoCompleteEditorMode = AutoCompleteMode.None;
+            this.Keyword.CellVerticalAlignment = StringAlignment.Center;
             this.Keyword.FillsFreeSpace = true;
             this.Keyword.Groupable = false;
             this.Keyword.HeaderCheckBoxUpdatesRowCheckBoxes = false;
@@ -114,29 +118,29 @@ namespace _3PA.MainFeatures.AutoCompletion {
             // 
             // nbitems
             // 
-            this.nbitems.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.nbitems.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
             this.nbitems.Enabled = false;
-            this.nbitems.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.nbitems.Location = new System.Drawing.Point(329, 433);
-            this.nbitems.Margin = new System.Windows.Forms.Padding(3);
+            this.nbitems.Function = FontFunction.Small;
+            this.nbitems.Location = new Point(329, 433);
+            this.nbitems.Margin = new Padding(3);
             this.nbitems.Name = "nbitems";
-            this.nbitems.Size = new System.Drawing.Size(60, 12);
+            this.nbitems.Size = new Size(60, 12);
             this.nbitems.TabIndex = 3;
             this.nbitems.Text = "yamuiLabel1";
-            this.nbitems.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.nbitems.TextAlign = ContentAlignment.MiddleRight;
             // 
             // yamuiLabel1
             // 
-            this.yamuiLabel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.yamuiLabel1.Anchor = ((AnchorStyles)((AnchorStyles.Bottom | AnchorStyles.Right)));
             this.yamuiLabel1.Enabled = false;
-            this.yamuiLabel1.Function = YamuiFramework.Fonts.FontFunction.Small;
-            this.yamuiLabel1.Location = new System.Drawing.Point(329, 420);
-            this.yamuiLabel1.Margin = new System.Windows.Forms.Padding(3);
+            this.yamuiLabel1.Function = FontFunction.Small;
+            this.yamuiLabel1.Location = new Point(329, 420);
+            this.yamuiLabel1.Margin = new Padding(3);
             this.yamuiLabel1.Name = "yamuiLabel1";
-            this.yamuiLabel1.Size = new System.Drawing.Size(60, 12);
+            this.yamuiLabel1.Size = new Size(60, 12);
             this.yamuiLabel1.TabIndex = 4;
             this.yamuiLabel1.Text = "Showing";
-            this.yamuiLabel1.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.yamuiLabel1.TextAlign = ContentAlignment.MiddleRight;
             // 
             // htmlToolTip
             // 
@@ -144,26 +148,25 @@ namespace _3PA.MainFeatures.AutoCompletion {
             this.htmlToolTip.AutoPopDelay = 90000;
             this.htmlToolTip.BaseStylesheet = null;
             this.htmlToolTip.InitialDelay = 300;
-            this.htmlToolTip.MaximumSize = new System.Drawing.Size(0, 0);
+            this.htmlToolTip.MaximumSize = new Size(0, 0);
             this.htmlToolTip.OwnerDraw = true;
             this.htmlToolTip.ReshowDelay = 100;
             this.htmlToolTip.ShowAlways = true;
-            this.htmlToolTip.TooltipCssClass = "htmltooltip";
             // 
             // AutoCompletionForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(394, 449);
+            this.AutoScaleDimensions = new SizeF(6F, 13F);
+            this.AutoScaleMode = AutoScaleMode.Font;
+            this.ClientSize = new Size(394, 449);
             this.Controls.Add(this.yamuiLabel1);
             this.Controls.Add(this.nbitems);
             this.Controls.Add(this.fastOLV);
-            this.Location = new System.Drawing.Point(0, 0);
+            this.Location = new Point(0, 0);
             this.Name = "AutoCompletionForm";
-            this.Padding = new System.Windows.Forms.Padding(2);
-            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
+            this.Padding = new Padding(2);
+            this.StartPosition = FormStartPosition.Manual;
             this.Text = "AutoCompletionForm";
-            ((System.ComponentModel.ISupportInitialize)(this.fastOLV)).EndInit();
+            ((ISupportInitialize)(this.fastOLV)).EndInit();
             this.ResumeLayout(false);
 
         }

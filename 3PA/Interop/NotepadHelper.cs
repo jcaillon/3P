@@ -453,6 +453,66 @@ namespace _3PA.Interop {
         // sets startNumber to the initial command ID if successful
         // Allocates a marker number to a plugin
         // Returns: TRUE if successful, FALSE otherwise. startNumber will also be set to 0 if unsuccessful
+
+        NPPM_GETLANGUAGENAME = (NPPMSG + 83),
+	    // INT NPPM_GETLANGUAGENAME(int langType, TCHAR *langName),
+	    // Get programing language name from the given language type (LangType),
+	    // Return value is the number of copied character / number of character to copy (\0 is not included),
+	    // You should call this function 2 times - the first time you pass langName as NULL to get the number of characters to copy.
+        // You allocate a buffer of the length of (the number of characters + 1), then call NPPM_GETLANGUAGENAME function the 2nd time
+	    // by passing allocated buffer as argument langName
+
+	    NPPM_GETLANGUAGEDESC = (NPPMSG + 84),
+	    // INT NPPM_GETLANGUAGEDESC(int langType, TCHAR *langDesc),
+	    // Get programing language short description from the given language type (LangType),
+	    // Return value is the number of copied character / number of character to copy (\0 is not included),
+	    // You should call this function 2 times - the first time you pass langDesc as NULL to get the number of characters to copy.
+        // You allocate a buffer of the length of (the number of characters + 1), then call NPPM_GETLANGUAGEDESC function the 2nd time
+	    // by passing allocated buffer as argument langDesc
+
+	    NPPM_SHOWDOCSWITCHER   = (NPPMSG + 85),
+	    // VOID NPPM_ISDOCSWITCHERSHOWN(0, BOOL toShowOrNot),
+	    // Send this message to show or hide doc switcher.
+	    // if toShowOrNot is TRUE then show doc switcher, otherwise hide it.
+
+	    NPPM_ISDOCSWITCHERSHOWN   = (NPPMSG + 86),
+	    // BOOL NPPM_ISDOCSWITCHERSHOWN(0, 0),
+	    // Check to see if doc switcher is shown.
+
+	    NPPM_GETAPPDATAPLUGINSALLOWED   = (NPPMSG + 87),
+	    // BOOL NPPM_GETAPPDATAPLUGINSALLOWED(0, 0),
+	    // Check to see if loading plugins from "%APPDATA%\Notepad++\plugins" is allowed.
+
+	    NPPM_GETCURRENTVIEW   = (NPPMSG + 88),
+	    // INT NPPM_GETCURRENTVIEW(0, 0),
+	    // Return: current edit view of Notepad++. Only 2 possible values: 0 = Main, 1 = Secondary
+
+	    NPPM_DOCSWITCHERDISABLECOLUMN   = (NPPMSG + 89),
+	    // VOID NPPM_DOCSWITCHERDISABLECOLUMN(0, BOOL disableOrNot),
+	    // Disable or enable extension column of doc switcher
+
+	    NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR   = (NPPMSG + 90),
+	    // INT NPPM_GETEDITORDEFAULTFOREGROUNDCOLOR(0, 0),
+	    // Return: current editor default foreground color. You should convert the returned value in COLORREF
+
+	    NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR   = (NPPMSG + 91),
+	    // INT NPPM_GETEDITORDEFAULTBACKGROUNDCOLOR(0, 0),
+	    // Return: current editor default background color. You should convert the returned value in COLORREF
+
+	    NPPM_SETSMOOTHFONT   = (NPPMSG + 92),
+	    // VOID NPPM_SETSMOOTHFONT(0, BOOL setSmoothFontOrNot),
+
+	    NPPM_SETEDITORBORDEREDGE   = (NPPMSG + 93),
+	    // VOID NPPM_SETEDITORBORDEREDGE(0, BOOL withEditorBorderEdgeOrNot),
+
+	    NPPM_SAVEFILE = (NPPMSG + 94),
+	    // VOID NPPM_SAVEFILE(0, const TCHAR *fileNameToSave),
+
+	    NPPM_DISABLEAUTOUPDATE = (NPPMSG + 95), // 2119 in decimal
+	    // VOID NPPM_DISABLEAUTOUPDATE(0, 0),
+
+	    NPPM_SETAUTOCOMPLETIONDISABLEDONCHARADDED = (NPPMSG + 97), 
+
         RUNCOMMAND_USER = (0x400/*WM_USER*/ + 3000),
         NPPM_GETFULLCURRENTPATH = (RUNCOMMAND_USER + FULL_CURRENT_PATH),
         NPPM_GETCURRENTDIRECTORY = (RUNCOMMAND_USER + CURRENT_DIRECTORY),
@@ -563,52 +623,6 @@ namespace _3PA.Interop {
         //scnNotification->nmhdr.code = NPPN_DOCORDERCHANGED;
         //scnNotification->nmhdr.hwndFrom = newIndex;
         //scnNotification->nmhdr.idFrom = BufferID;
-
-        NOTEPADPLUS_USER_INTERNAL = 0x0400,
-        NPPM_INTERNAL_USERCMDLIST_MODIFIED = (NOTEPADPLUS_USER_INTERNAL + 1),
-        NPPM_INTERNAL_CMDLIST_MODIFIED = (NOTEPADPLUS_USER_INTERNAL + 2),
-        NPPM_INTERNAL_MACROLIST_MODIFIED = (NOTEPADPLUS_USER_INTERNAL + 3),
-        NPPM_INTERNAL_PLUGINCMDLIST_MODIFIED = (NOTEPADPLUS_USER_INTERNAL + 4),
-        NPPM_INTERNAL_CLEARSCINTILLAKEY = (NOTEPADPLUS_USER_INTERNAL + 5),
-        NPPM_INTERNAL_BINDSCINTILLAKEY = (NOTEPADPLUS_USER_INTERNAL + 6),
-        NPPM_INTERNAL_SCINTILLAKEYMODIFIED = (NOTEPADPLUS_USER_INTERNAL + 7),
-        NPPM_INTERNAL_SCINTILLAFINFERCOLLAPSE = (NOTEPADPLUS_USER_INTERNAL + 8),
-        NPPM_INTERNAL_SCINTILLAFINFERUNCOLLAPSE = (NOTEPADPLUS_USER_INTERNAL + 9),
-        NPPM_INTERNAL_DISABLEAUTOUPDATE = (NOTEPADPLUS_USER_INTERNAL + 10),
-        NPPM_INTERNAL_SETTING_HISTORY_SIZE = (NOTEPADPLUS_USER_INTERNAL + 11),
-        NPPM_INTERNAL_ISTABBARREDUCED = (NOTEPADPLUS_USER_INTERNAL + 12),
-        NPPM_INTERNAL_ISFOCUSEDTAB = (NOTEPADPLUS_USER_INTERNAL + 13),
-        NPPM_INTERNAL_GETMENU = (NOTEPADPLUS_USER_INTERNAL + 14),
-        NPPM_INTERNAL_CLEARINDICATOR = (NOTEPADPLUS_USER_INTERNAL + 15),
-        NPPM_INTERNAL_SCINTILLAFINFERCOPY = (NOTEPADPLUS_USER_INTERNAL + 16),
-        NPPM_INTERNAL_SCINTILLAFINFERSELECTALL = (NOTEPADPLUS_USER_INTERNAL + 17),
-        NPPM_INTERNAL_SETCARETWIDTH = (NOTEPADPLUS_USER_INTERNAL + 18),
-        NPPM_INTERNAL_SETCARETBLINKRATE = (NOTEPADPLUS_USER_INTERNAL + 19),
-        NPPM_INTERNAL_CLEARINDICATORTAGMATCH = (NOTEPADPLUS_USER_INTERNAL + 20),
-        NPPM_INTERNAL_CLEARINDICATORTAGATTR = (NOTEPADPLUS_USER_INTERNAL + 21),
-        NPPM_INTERNAL_SWITCHVIEWFROMHWND = (NOTEPADPLUS_USER_INTERNAL + 22),
-        NPPM_INTERNAL_UPDATETITLEBAR = (NOTEPADPLUS_USER_INTERNAL + 23),
-        NPPM_INTERNAL_CANCEL_FIND_IN_FILES = (NOTEPADPLUS_USER_INTERNAL + 24),
-        NPPM_INTERNAL_RELOADNATIVELANG = (NOTEPADPLUS_USER_INTERNAL + 25),
-        NPPM_INTERNAL_PLUGINSHORTCUTMOTIFIED = (NOTEPADPLUS_USER_INTERNAL + 26),
-        NPPM_INTERNAL_SCINTILLAFINFERCLEARALL = (NOTEPADPLUS_USER_INTERNAL + 27),
-        NPPM_INTERNAL_SETTING_EDGE_SIZE = (NOTEPADPLUS_USER_INTERNAL + 28),
-        NPPM_INTERNAL_SETTING_TAB_REPLCESPACE = (NOTEPADPLUS_USER_INTERNAL + 29),
-        NPPM_INTERNAL_SETTING_TAB_SIZE = (NOTEPADPLUS_USER_INTERNAL + 30),
-        NPPM_INTERNAL_RELOADSTYLERS = (NOTEPADPLUS_USER_INTERNAL + 31),
-        NPPM_INTERNAL_DOCORDERCHANGED = (NOTEPADPLUS_USER_INTERNAL + 32),
-        NPPM_INTERNAL_SETMULTISELCTION = (NOTEPADPLUS_USER_INTERNAL + 33),
-        NPPM_INTERNAL_SCINTILLAFINFEROPENALL = (NOTEPADPLUS_USER_INTERNAL + 34),
-        NPPM_INTERNAL_RECENTFILELIST_UPDATE = (NOTEPADPLUS_USER_INTERNAL + 35),
-        NPPM_INTERNAL_RECENTFILELIST_SWITCH = (NOTEPADPLUS_USER_INTERNAL + 36),
-        NPPM_INTERNAL_GETSCINTEDTVIEW = (NOTEPADPLUS_USER_INTERNAL + 37),
-        NPPM_INTERNAL_ENABLESNAPSHOT = (NOTEPADPLUS_USER_INTERNAL + 38),
-        NPPM_INTERNAL_SAVECURRENTSESSION = (NOTEPADPLUS_USER_INTERNAL + 39),
-        NPPM_INTERNAL_FINDINFINDERDLG = (NOTEPADPLUS_USER_INTERNAL + 40),
-        NPPM_INTERNAL_REMOVEFINDER = (NOTEPADPLUS_USER_INTERNAL + 41),
-        NPPM_INTERNAL_RELOADSCROLLTOEND = (NOTEPADPLUS_USER_INTERNAL + 42),
-        WM_UPDATESCINTILLAS = 0x0400 + 5000 + 1,
-        WM_GETCURRENTMACROSTATUS = 0x0400 + 4000 + 1,
     }
 
     internal enum NppNotif : uint {
@@ -643,6 +657,7 @@ namespace _3PA.Interop {
         public const int ViewFold = View + 50;
         public const int ViewUnfold = View + 60;
         public const int Format = Base + 5000;
+        public const int FormatEncode = Format + 20;
         public const int Lang = Base + 6000;
         public const int About = Base + 7000;
         public const int Setting = Base + 8000;
@@ -830,6 +845,58 @@ namespace _3PA.Interop {
         FormatConvertUnicodeLittleEndian = (Idm.Format + 13),
         #endregion
 
+        #region FormatEncode
+        Arabic_ISO_8859_6 = (Idm.FormatEncode + 14),
+        Arabic_OEM_720 = (Idm.FormatEncode + 25),
+        Arabic_Windows_1256 = (Idm.FormatEncode + 6),
+        Baltic_ISO_8859_13 = (Idm.FormatEncode + 20),
+        Baltic_ISO_8859_4 = (Idm.FormatEncode + 12),
+        Baltic_OEM_775 = (Idm.FormatEncode + 27),
+        Baltic_Windows_1257 = (Idm.FormatEncode + 7),
+        Celtic_ISO_8859_14 = (Idm.FormatEncode + 21),
+        Central_European_ISO_8859_16 = (Idm.FormatEncode + 23),
+        Central_European_OEM_852 = (Idm.FormatEncode + 29),
+        Central_European_Windows_1250 = (Idm.FormatEncode + 0),
+        Chinese_Big5_Traditional = (Idm.FormatEncode + 40),
+        Chinese_GB2312_Simplified = (Idm.FormatEncode + 41),
+        Cyrillic_ISO_8859_5 = (Idm.FormatEncode + 13),
+        Cyrillic_KOI8_R = (Idm.FormatEncode + 48),
+        Cyrillic_KOI8_U = (Idm.FormatEncode + 47),
+        Cyrillic_Macintosh = (Idm.FormatEncode + 46),
+        Cyrillic_OEM_855 = (Idm.FormatEncode + 30),
+        Cyrillic_OEM_866 = (Idm.FormatEncode + 38),
+        Cyrillic_Windows_1251 = (Idm.FormatEncode + 1),
+        Eastern_European_ISO_8859_2 = (Idm.FormatEncode + 10),
+        Greek_ISO_8859_7 = (Idm.FormatEncode + 15),
+        Greek_OEM_737 = (Idm.FormatEncode + 26),
+        Greek_OEM_869 = (Idm.FormatEncode + 39),
+        Greek_Windows_1253 = (Idm.FormatEncode + 3),
+        Hebrew_ISO_8859_8 = (Idm.FormatEncode + 16),
+        Hebrew_OEM_862 = (Idm.FormatEncode + 35),
+        Hebrew_Windows_1255 = (Idm.FormatEncode + 5),
+        Japanese_Shift_JIS = (Idm.FormatEncode + 42),
+        Korean_EUC_KR = (Idm.FormatEncode + 44),
+        Korean_Windows_949 = (Idm.FormatEncode + 43),
+        North_European_OEM_861_Icelandic = (Idm.FormatEncode + 34),
+        North_European_OEM_865_Nordic = (Idm.FormatEncode + 37),
+        Thai_ISO_8859_11 = (Idm.FormatEncode + 19),
+        Thai_TIS_620 = (Idm.FormatEncode + 45),
+        Turkish_ISO_8859_3 = (Idm.FormatEncode + 11),
+        Turkish_ISO_8859_9 = (Idm.FormatEncode + 17),
+        Turkish_OEM_857 = (Idm.FormatEncode + 31),
+        Turkish_Windows_1254 = (Idm.FormatEncode + 4),
+        Western_European_ISO_8859_1 = (Idm.FormatEncode + 9),
+        Western_European_ISO_8859_10 = (Idm.FormatEncode + 18),
+        Western_European_ISO_8859_15 = (Idm.FormatEncode + 22),
+        Western_European_OEM_850 = (Idm.FormatEncode + 28),
+        Western_European_OEM_858 = (Idm.FormatEncode + 32),
+        Western_European_OEM_860_Portuguese = (Idm.FormatEncode + 33),
+        Western_European_OEM_863_French = (Idm.FormatEncode + 36),
+        Western_European_OEM_US = (Idm.FormatEncode + 24),
+        Western_European_Windows_1252 = (Idm.FormatEncode + 2),
+        Western_European_Windows_1258 = (Idm.FormatEncode + 8),
+        #endregion
+
         #region Language
         LangStyleConfigDialog = (Idm.Lang + 1),
         LangC = (Idm.Lang + 2),
@@ -918,6 +985,59 @@ namespace _3PA.Interop {
         MacroSaveCurrent = (Idm.Edit + 25),
         MacroRunMultiDialog = (Idm.Edit + 32)
         #endregion
+    }
+
+    internal enum NppEncodingFormat {
+        _Automatic_default = 0,
+        Arabic_ISO_8859_6 = (Idm.FormatEncode + 14),
+        Arabic_OEM_720 = (Idm.FormatEncode + 25),
+        Arabic_Windows_1256 = (Idm.FormatEncode + 6),
+        Baltic_ISO_8859_13 = (Idm.FormatEncode + 20),
+        Baltic_ISO_8859_4 = (Idm.FormatEncode + 12),
+        Baltic_OEM_775 = (Idm.FormatEncode + 27),
+        Baltic_Windows_1257 = (Idm.FormatEncode + 7),
+        Celtic_ISO_8859_14 = (Idm.FormatEncode + 21),
+        Central_European_ISO_8859_16 = (Idm.FormatEncode + 23),
+        Central_European_OEM_852 = (Idm.FormatEncode + 29),
+        Central_European_Windows_1250 = (Idm.FormatEncode + 0),
+        Chinese_Big5_Traditional = (Idm.FormatEncode + 40),
+        Chinese_GB2312_Simplified = (Idm.FormatEncode + 41),
+        Cyrillic_ISO_8859_5 = (Idm.FormatEncode + 13),
+        Cyrillic_KOI8_R = (Idm.FormatEncode + 48),
+        Cyrillic_KOI8_U = (Idm.FormatEncode + 47),
+        Cyrillic_Macintosh = (Idm.FormatEncode + 46),
+        Cyrillic_OEM_855 = (Idm.FormatEncode + 30),
+        Cyrillic_OEM_866 = (Idm.FormatEncode + 38),
+        Cyrillic_Windows_1251 = (Idm.FormatEncode + 1),
+        Eastern_European_ISO_8859_2 = (Idm.FormatEncode + 10),
+        Greek_ISO_8859_7 = (Idm.FormatEncode + 15),
+        Greek_OEM_737 = (Idm.FormatEncode + 26),
+        Greek_OEM_869 = (Idm.FormatEncode + 39),
+        Greek_Windows_1253 = (Idm.FormatEncode + 3),
+        Hebrew_ISO_8859_8 = (Idm.FormatEncode + 16),
+        Hebrew_OEM_862 = (Idm.FormatEncode + 35),
+        Hebrew_Windows_1255 = (Idm.FormatEncode + 5),
+        Japanese_Shift_JIS = (Idm.FormatEncode + 42),
+        Korean_EUC_KR = (Idm.FormatEncode + 44),
+        Korean_Windows_949 = (Idm.FormatEncode + 43),
+        North_European_OEM_861_Icelandic = (Idm.FormatEncode + 34),
+        North_European_OEM_865_Nordic = (Idm.FormatEncode + 37),
+        Thai_ISO_8859_11 = (Idm.FormatEncode + 19),
+        Thai_TIS_620 = (Idm.FormatEncode + 45),
+        Turkish_ISO_8859_3 = (Idm.FormatEncode + 11),
+        Turkish_ISO_8859_9 = (Idm.FormatEncode + 17),
+        Turkish_OEM_857 = (Idm.FormatEncode + 31),
+        Turkish_Windows_1254 = (Idm.FormatEncode + 4),
+        Western_European_ISO_8859_1 = (Idm.FormatEncode + 9),
+        Western_European_ISO_8859_10 = (Idm.FormatEncode + 18),
+        Western_European_ISO_8859_15 = (Idm.FormatEncode + 22),
+        Western_European_OEM_850 = (Idm.FormatEncode + 28),
+        Western_European_OEM_858 = (Idm.FormatEncode + 32),
+        Western_European_OEM_860_Portuguese = (Idm.FormatEncode + 33),
+        Western_European_OEM_863_French = (Idm.FormatEncode + 36),
+        Western_European_OEM_US = (Idm.FormatEncode + 24),
+        Western_European_Windows_1252 = (Idm.FormatEncode + 2),
+        Western_European_Windows_1258 = (Idm.FormatEncode + 8),
     }
 
     [Flags]

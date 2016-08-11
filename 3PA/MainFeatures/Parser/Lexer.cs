@@ -28,23 +28,50 @@ namespace _3PA.MainFeatures.Parser {
     /// it implements a visitor pattern
     /// </summary>
     internal class Lexer {
+
+        #region private const
+
         private const int LineStartAt = 0;
         private const int ColumnStartAt = 0;
-        private const char Eof = (char)0;
+        private const char Eof = (char) 0;
+
+        #endregion
+
+        #region private fields
+
+        private char[] _symbolChars = {'=', '+', '-', '/', ',', '.', '*', '~', '!', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', '|', '\\', '`', '’'};
+
+        private string _data;
+        private int _pos;
+        private int _line = LineStartAt;
+        private int _column = ColumnStartAt;
         private int _commentDepth;
         private int _includeDepth;
-        private int _column;
-        private string _data;
-        private int _line;
-        private int _pos;
+
         private int _startCol;
         private int _startLine;
         private int _startPos;
-        private char[] _symbolChars;
-        private int _tokenPos;
-        private List<Token> _tokenList = new List<Token>();
         private bool _forceCreateEos;
         private bool _previousTokenIsString;
+
+        private int _tokenPos = -1;
+
+        private List<Token> _tokenList = new List<Token>();
+
+        #endregion
+
+        #region public accessor
+
+        /// <summary>
+        /// returns the last line number found, must be called after Tokenize() method
+        /// </summary>
+        public int MaxLine {
+            get { return _line; }
+        }
+
+        #endregion
+
+        #region Constructor
 
         /// <summary>
         /// constructor, data is the input string to tokenize
@@ -55,8 +82,12 @@ namespace _3PA.MainFeatures.Parser {
             if (data == null)
                 throw new ArgumentNullException("data");
             _data = data;
-            _symbolChars = new[] { '=', '+', '-', '/', ',', '.', '*', '~', '!', '@', '#', '$', '%', '^', '&', '(', ')', '{', '}', '[', ']', ':', ';', '<', '>', '?', '|', '\\', '`', '’' };
-            Reset();
+
+            // create the list of tokens
+            Tokenize();
+
+            // clean
+            _data = null;
         }
 
         /// <summary>
@@ -77,22 +108,9 @@ namespace _3PA.MainFeatures.Parser {
             _includeDepth = includeDepth;
         }
 
-        /// <summary>
-        /// Call this method to actually tokenize the string
-        /// </summary>
-        public void Tokenize() {
-            Token token;
-            do {
-                token = GetNext();
-                _tokenList.Add(token);
+        #endregion
 
-                _previousTokenIsString = token is TokenString;
-
-                // in certain cases, we want to add an extra end of statement token!
-                if (_forceCreateEos)
-                    _tokenList.Add(new TokenEos(string.Empty, _startLine, _startCol, _startPos, _pos));
-            } while (!(token is TokenEof));
-        }
+        #region Visitor
 
         /// <summary>
         /// Feed this method with a visitor implementing ILexerVisitor to visit all the tokens of the input string
@@ -104,11 +122,6 @@ namespace _3PA.MainFeatures.Parser {
                 token.Accept(visitor);
             }
         }
-
-        /// <summary>
-        /// returns the last line number found, must be called after Tokenize() method
-        /// </summary>
-        public int MaxLine { get { return _line; } }
 
         /// <summary>
         /// To use this lexer as an enumerator,
@@ -125,21 +138,30 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         public Token PeekAtToken(int x) {
-            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", 0, 0, 0, 0) : _tokenList[_tokenPos + x];
+            return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", _startLine, _startCol, _startPos, _pos) : _tokenList[_tokenPos + x];
         }
 
+        #endregion
+
+        #region Tokenize
+
         /// <summary>
-        /// Resets the cursors position
+        /// Call this method to actually tokenize the string
         /// </summary>
-        public void Reset() {
-            _pos = 0;
-            _line = LineStartAt;
-            _column = ColumnStartAt;
-            _commentDepth = 0;
-            _includeDepth = 0;
-            _tokenPos = -1;
+        private void Tokenize() {
+            Token token;
+            do {
+                token = GetNext();
+                _tokenList.Add(token);
+
+                _previousTokenIsString = token is TokenString;
+
+                // in certain cases, we want to add an extra end of statement token!
+                if (_forceCreateEos)
+                    _tokenList.Add(new TokenEos(string.Empty, _startLine, _startCol, _startPos, _pos));
+            } while (!(token is TokenEof));
         }
-        
+
         /// <summary>
         /// Peek forward x chars
         /// </summary>
@@ -210,11 +232,11 @@ namespace _3PA.MainFeatures.Parser {
                     var nextChar = PeekAt(1);
                     // comment or single line comment (if previous char is a whitespace) or symbol by default
                     return nextChar == '*' ? CreateCommentToken() : ((char.IsWhiteSpace(PeekAtReverse(1)) && nextChar == '/') ? CreateSingleLineCommentToken() : CreateSymbolToken());
-               
+
                 case '{':
                     // include file or preproc variable
                     return CreateIncludeToken();
-                
+
                 case '&':
                     // pre-processed &define, &analyse-suspend, &message
                     // Read the word, try to match it with define statement
@@ -241,12 +263,12 @@ namespace _3PA.MainFeatures.Parser {
                             return CreatePreProcessedStatement();
                     }
                     return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-                
+
                 case ' ':
                 case '\t':
                     // whitespaces or tab
                     return CreateWhitespaceToken();
-                
+
                 case '-':
                     // number
                     if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
@@ -257,7 +279,7 @@ namespace _3PA.MainFeatures.Parser {
                     if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
                     Read();
                     return CreateNumberToken();
-                    
+
                 case '0':
                 case '1':
                 case '2':
@@ -270,12 +292,12 @@ namespace _3PA.MainFeatures.Parser {
                 case '9':
                     // number
                     return CreateNumberToken();
-                
+
                 case '\r':
                 case '\n':
                     // end of line
                     return CreateEolToken(ch);
-                
+
                 case '"':
                 case '\'':
                     // quoted string (read until unescaped ' or ")
@@ -379,11 +401,11 @@ namespace _3PA.MainFeatures.Parser {
                     // we finished reading
                     if (_includeDepth == 0)
                         break;
-                } 
+                }
                 // new line
                 else if (ch == '\r' || ch == '\n')
                     ReadEol(ch);
-                else 
+                else
                     Read();
             }
             return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
@@ -413,10 +435,10 @@ namespace _3PA.MainFeatures.Parser {
                     // we finished reading the comment, leave
                     if (_commentDepth == 0)
                         break;
-                // read eol
+                    // read eol
                 } else if (ch == '\r' || ch == '\n') {
                     ReadEol(ch);
-                // continue reading
+                    // continue reading
                 } else
                     Read();
             }
@@ -560,5 +582,8 @@ namespace _3PA.MainFeatures.Parser {
             }
             return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
+
+        #endregion
+
     }
 }

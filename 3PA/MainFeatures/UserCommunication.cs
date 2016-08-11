@@ -37,10 +37,12 @@ namespace _3PA.MainFeatures {
 
         private static EmptyForm _anchorForm;
 
+        private static List<YamuiInput> _openedMessage = new List<YamuiInput>();
+
         /// <summary>
         /// Allows to keep track of opened notifications (when its ID is set)
         /// </summary>
-        private static Dictionary<string, YamuiNotifications> _registeredNotif = new Dictionary<string, YamuiNotifications>(StringComparer.CurrentCultureIgnoreCase);
+        private static Dictionary<string, YamuiNotification> _registeredNotif = new Dictionary<string, YamuiNotification>(StringComparer.CurrentCultureIgnoreCase);
 
         #endregion
 
@@ -70,7 +72,14 @@ namespace _3PA.MainFeatures {
         public static void ForceClose() {
             if (_anchorForm != null)
                 _anchorForm.Close();
-            YamuiNotifications.CloseEverything();
+            YamuiNotification.CloseEverything();
+            foreach (var yamuiInput in _openedMessage) {
+                if (yamuiInput != null) {
+                    yamuiInput.Tag = true;
+                    yamuiInput.Close();
+                    yamuiInput.Dispose();
+                }
+            }
         }
 
         #endregion
@@ -98,20 +107,32 @@ namespace _3PA.MainFeatures {
         /// Displays a notification on the bottom right of the screen
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="html"></param>
+        /// <param name="htmlContent"></param>
         /// <param name="clickHandler"></param>
         /// <param name="subTitle"></param>
         /// <param name="duration"></param>
         /// <param name="width"></param>
         /// <param name="imageType"></param>
         /// <param name="title"></param>
-        public static void NotifyUnique(string id, string html, MessageImg imageType, string title, string subTitle, Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
+        public static void NotifyUnique(string id, string htmlContent, MessageImg imageType, string title, string subTitle, Action<HtmlLinkClickedEventArgs> clickHandler, int duration = 0, int width = 450) {
             Task.Factory.StartNew(() => {
 
                 try {
                     if (Ready) {
-                        _anchorForm.BeginInvoke((Action) delegate {
-                            var toastNotification = new YamuiNotifications(ThemeManager.FormatMessage(html, imageType, title, subTitle), duration, width, Npp.GetNppScreen());
+                        _anchorForm.BeginInvoke((Action)delegate {
+                            var nppScreen = Npp.NppScreen;
+                            var toastNotification = new YamuiNotification(
+                                ThemeManager.FormatTitle(imageType, title, subTitle),
+                                ThemeManager.FormatContent(htmlContent),
+                                duration,
+                                nppScreen,
+                                Math.Min(width, nppScreen.WorkingArea.Width / 3),
+                                nppScreen.WorkingArea.Width / 3,
+                                nppScreen.WorkingArea.Height / 3,
+                                (sender, args) => {
+                                    if (clickHandler != null) clickHandler(args);
+                                    else Utils.OpenPathClickHandler(sender, args);
+                                });
 
                             if (id != null) {
                                 // close existing notification with the same id
@@ -120,22 +141,15 @@ namespace _3PA.MainFeatures {
                                 _registeredNotif.Add(id, toastNotification);
                             }
 
-                            if (clickHandler != null)
-                                toastNotification.LinkClicked += (sender, args) => clickHandler(args);
-                            else
-                                toastNotification.LinkClicked += Utils.OpenPathClickHandler;
-
                             toastNotification.Show();
                         });
-                        return;
                     }
 
-                    ErrorHandler.Log(html);
                 } catch (Exception e) {
-                    ErrorHandler.Log(e.Message);
+                    ErrorHandler.LogError(e);
 
                     // if we are here, display the error message the old way
-                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProgressQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("An error has occurred and we couldn't display a notification.\n\nCheck the log at the following location to learn more about this error : " + Config.FileErrorLog.ProQuoter() + "\n\nTry to restart Notepad++, consider opening an issue on : " + Config.IssueUrl + " if the problem persists.", AssemblyInfo.AssemblyProduct + " error message", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             });
         }
@@ -157,30 +171,79 @@ namespace _3PA.MainFeatures {
         #region Message
 
         /// <summary>
-        /// Displays a messagebox like window
-        /// REMARK : DON'T WAIT FOR AN ANSWER IF YOU CALL IT FROM A THREAD!!!!!!!
-        /// new List string  { "fu", "ok" }
+        /// Displays a messagebox like window, 
+        /// REMARK : DON'T WAIT FOR AN ANSWER IF YOU CALL IT FROM A THREAD!!!!!!!, 
+        /// new List string  { "Ok", "Cancel" }, 
+        /// returns an integer (-1 if closed, or from 0 to x = buttons.count - 1),
+        /// buttonsList default to { "Ok", "Cancel" }
         /// </summary>
-        /// <returns>returns an integer (-1 if closed, or from 0 to x = buttons.count - 1)</returns>
-        public static int Message(string html, MessageImg type, string title, string subTitle, List<string> buttons, bool waitResponse, EventHandler<HtmlLinkClickedEventArgs> clickHandler = null) {
+        public static int Message(string htmlContent, MessageImg imageType, string title, string subTitle, List<string> buttonsList = null, bool waitResponse = true, Action<HtmlLinkClickedEventArgs> clickHandler = null) {
+            object nullObject = null;
+            return Message(ref nullObject, htmlContent, imageType, title, subTitle, buttonsList, waitResponse, clickHandler);
+        }
+
+        public static int Message(ref object data, string htmlContent, MessageImg imageType, string title, string subTitle, List<string> buttonsList = null, bool waitResponse = true, Action<HtmlLinkClickedEventArgs> clickHandler = null, int minWidth = 450) {
             var clickedButton = -1;
-            if (_anchorForm != null) {
-                if (clickHandler == null) {
-                    clickHandler = Utils.OpenPathClickHandler;
-                }
-                if (waitResponse) {
-                    clickedButton = YamuiMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, true, clickHandler);
-                } else {
-                    if (_anchorForm.IsHandleCreated) {
-                        _anchorForm.BeginInvoke((Action) delegate {
-                            clickedButton = YamuiMessageBox.ShwDlg(Npp.GetNppScreen(), Npp.HandleNpp, title, ThemeManager.FormatMessage(html, type, title, subTitle, true), buttons, false, clickHandler);
-                        });
-                    }
+
+            if (buttonsList == null)
+                buttonsList = new List<string> { "Ok", "Cancel" };
+
+            if (waitResponse) {
+                clickedButton = YamuiInput.ShowDialog(
+                    Npp.HandleNpp,
+                    "3P: " + title,
+                    ThemeManager.FormatTitle(imageType, title, subTitle),
+                    ThemeManager.FormatContent(htmlContent),
+                    buttonsList,
+                    ref data,
+                    Npp.NppScreen.WorkingArea.Width * 3 / 5,
+                    Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                    minWidth,
+                    (sender, args) => {
+                        if (clickHandler != null) clickHandler(args);
+                        else Utils.OpenPathClickHandler(sender, args);
+                    });
+            } else {
+                if (_anchorForm != null && _anchorForm.IsHandleCreated) {
+                    _anchorForm.BeginInvoke((Action)delegate {
+                        YamuiInput form;
+                        object nullObject = null;
+                        clickedButton = YamuiInput.Show(
+                            Npp.HandleNpp,
+                            "3P: " + title,
+                            ThemeManager.FormatTitle(imageType, title, subTitle),
+                            ThemeManager.FormatContent(htmlContent),
+                            buttonsList,
+                            ref nullObject,
+                            out form,
+                            Npp.NppScreen.WorkingArea.Width * 3 / 5,
+                            Npp.NppScreen.WorkingArea.Height * 9 / 10,
+                            minWidth,
+                            (sender, args) => {
+                                if (clickHandler != null) clickHandler(args);
+                                else Utils.OpenPathClickHandler(sender, args);
+                            });
+                        _openedMessage.Add(form);
+                    });
                 }
             }
             return clickedButton;
         }
 
         #endregion
+
+        #region Input
+
+        /// <summary>
+        /// Allows to ask information to the user,
+        /// returns an integer (-1 if closed, or from 0 to x = buttons.count - 1), 
+        /// buttonsList default to { "Ok", "Cancel" }
+        /// </summary>
+        public static int Input(ref object data, string htmlContent, MessageImg imageType, string title, string subTitle, List<string> buttonsList = null, Action<HtmlLinkClickedEventArgs> clickHandler = null) {
+            return Message(ref data, htmlContent, imageType, title, subTitle, buttonsList, true, clickHandler);
+        }
+
+        #endregion
+
     }
 }

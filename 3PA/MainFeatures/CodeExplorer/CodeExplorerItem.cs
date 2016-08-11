@@ -18,7 +18,7 @@
 // ========================================================================
 #endregion
 using System;
-using _3PA.Lib;
+using System.ComponentModel;
 using _3PA.MainFeatures.FilteredLists;
 
 namespace _3PA.MainFeatures.CodeExplorer {
@@ -90,33 +90,33 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// ((ExplorerTypeAttr)ExplorerType.GetAttributes()).DisplayText
     /// </summary>
     internal enum CodeExplorerBranch {
-        [DisplayAttr(Name = "Everything in code order")]
+        [Description("Everything in code order")]
         EverythingInCodeOrder,
-        [DisplayAttr(Name = "Root")]
+        [Description("Root")]
         Root,
-        [DisplayAttr(Name = "Appbuilder blocks")]
+        [Description("Appbuilder blocks")]
         Block,
-        [DisplayAttr(Name = "Main block")]
+        [Description("Main block")]
         MainBlock,
-        [DisplayAttr(Name = "Procedures")]
+        [Description("Procedures")]
         Procedure,
-        [DisplayAttr(Name = "Functions")]
+        [Description("Functions")]
         Function,
-        [DisplayAttr(Name = "ON events")]
+        [Description("ON events")]
         OnEvent,
-        [DisplayAttr(Name = "Includes")]
+        [Description("Includes")]
         Include,
-        [DisplayAttr(Name = "Run statements")]
+        [Description("Run statements")]
         Run,
-        [DisplayAttr(Name = "Dynamic function calls")]
+        [Description("Dynamic function calls")]
         DynamicFunctionCall,
-        [DisplayAttr(Name = "Browse definitions")]
+        [Description("Browse definitions")]
         Browse,
-        [DisplayAttr(Name = "Tables used")]
+        [Description("Tables used")]
         TableUsed,
-        [DisplayAttr(Name = "Program parameters")]
+        [Description("Program parameters")]
         ProgramParameter,
-        [DisplayAttr(Name = "Temp-tables used")]
+        [Description("Temp-tables used")]
         TempTableUsed
     }
 

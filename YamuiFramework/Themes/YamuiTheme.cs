@@ -95,6 +95,8 @@ namespace YamuiFramework.Themes {
         public Color MenuHoverFore = Color.FromArgb(0, 0, 0);
         public Color MenuFocusedBack = Color.FromArgb(154, 194, 249);
         public Color MenuFocusedFore = Color.FromArgb(0, 0, 0);
+        public Color MenuDisabledBack = Color.FromArgb(230, 230, 230);
+        public Color MenuDisabledFore = Color.FromArgb(100, 100, 100);
 
         #endregion
 
@@ -269,9 +271,11 @@ namespace YamuiFramework.Themes {
             return backColor;
         }
 
-        public Color MenuBg(bool isFocused, bool isHovered) {
+        public Color MenuBg(bool isFocused, bool isHovered, bool enabled) {
             Color backColor;
-            if (isFocused)
+            if (!enabled)
+                backColor = MenuDisabledBack;
+            else if (isFocused)
                 backColor = MenuFocusedBack;
             else if (isHovered)
                 backColor = MenuHoverBack;
@@ -280,9 +284,11 @@ namespace YamuiFramework.Themes {
             return backColor;
         }
 
-        public Color MenuFg(bool isFocused, bool isHovered) {
+        public Color MenuFg(bool isFocused, bool isHovered, bool enabled) {
             Color foreColor;
-            if (isFocused)
+            if (!enabled)
+                foreColor = MenuDisabledFore;
+            else if (isFocused)
                 foreColor = MenuFocusedFore;
             else if (isHovered)
                 foreColor = MenuHoverFore;

@@ -24,6 +24,7 @@ using System.Drawing.Text;
 using System.Windows.Forms;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
+using YamuiFramework.HtmlRenderer.Core.Core.Dom;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core.Parse;
 using YamuiFramework.HtmlRenderer.Core.Core.Utils;

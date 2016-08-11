@@ -17,21 +17,25 @@
 // along with 3P. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
+
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Xml.Linq;
-using YamuiFramework.Forms;
-using _3PA.Interop;
+using Microsoft.Win32.SafeHandles;
+using YamuiFramework.Helper;
 using _3PA.Lib;
-using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Parser;
+using _3PA.MainFeatures.Pro;
+using Lexer = _3PA.MainFeatures.Parser.Lexer;
 
 namespace _3PA.Tests {
 
@@ -42,130 +46,264 @@ namespace _3PA.Tests {
 
         #region tests and dev
 
-        public class B {
-            public enum AGender { Female, Male };
+        public const int MAX_PATH = 260;
+        public const int MAX_ALTERNATE = 14;
 
-            [YamuiInputDialogItemAttribute(Hidden = true)]
-            public bool UnshownSetting = true;
+        [StructLayout(LayoutKind.Sequential)]
+        public struct FILETIME {
+            public uint dwLowDateTime;
+            public uint dwHighDateTime;
+        };
 
-            [YamuiInputDialogItemAttribute("Full name", Order = 0)]
-            public string Name { get; set; }
-            public int Age = 25;
-            public bool Married { get; set; }
-            public AGender Gender { get; set; }
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+        public struct WIN32_FIND_DATA {
+            public FileAttributes dwFileAttributes;
+            public FILETIME ftCreationTime;
+            public FILETIME ftLastAccessTime;
+            public FILETIME ftLastWriteTime;
+            public uint nFileSizeHigh; //changed all to uint, otherwise you run into unexpected overflow
+            public uint nFileSizeLow;  //|
+            public uint dwReserved0;   //|
+            public uint dwReserved1;   //v
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_PATH)]
+            public string cFileName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = MAX_ALTERNATE)]
+            public string cAlternate;
         }
 
 
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern SafeFindHandle FindFirstFile(string lpFileName, out WIN32_FIND_DATA lpFindFileData);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern bool FindClose(SafeHandle hFindFile);
+
+        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        static extern bool FindNextFile(SafeHandle hFindFile, out WIN32_FIND_DATA lpFindFileData);
+
+        internal sealed class SafeFindHandle : SafeHandleZeroOrMinusOneIsInvalid {
+            // Methods
+            [SecurityPermission(SecurityAction.LinkDemand, UnmanagedCode = true)]
+            internal SafeFindHandle()
+                : base(true) {
+            }
+
+            public SafeFindHandle(IntPtr preExistingHandle, bool ownsHandle)
+                : base(ownsHandle) {
+                base.SetHandle(preExistingHandle);
+            }
+
+            protected override bool ReleaseHandle() {
+                if (!(IsInvalid || IsClosed)) {
+                    return FindClose(this);
+                }
+                return (IsInvalid || IsClosed);
+            }
+
+            protected override void Dispose(bool disposing) {
+                if (!(IsInvalid || IsClosed)) {
+                    FindClose(this);
+                }
+                base.Dispose(disposing);
+            }
+        }
+
+        private long RecurseDirectory(string directory, int level, out int files, out int folders) {
+            IntPtr INVALID_HANDLE_VALUE = new IntPtr(-1);
+            long size = 0;
+            files = 0;
+            folders = 0;
+            WIN32_FIND_DATA findData;
+
+            // please note that the following line won't work if you try this on a network folder, like \\Machine\C$
+            // simply remove the \\?\ part in this case or use \\?\UNC\ prefix
+            using (SafeFindHandle findHandle = FindFirstFile(@"\\?\" + directory + @"\*", out findData)) {
+                if (!findHandle.IsInvalid) {
+
+                    do {
+                        if ((findData.dwFileAttributes & FileAttributes.Directory) != 0) {
+
+                            if (findData.cFileName != "." && findData.cFileName != "..") {
+                                folders++;
+
+                                int subfiles, subfolders;
+                                string subdirectory = directory + (directory.EndsWith(@"\") ? "" : @"\") +
+                                    findData.cFileName;
+                                if (level != 0)  // allows -1 to do complete search.
+                            {
+                                    size += RecurseDirectory(subdirectory, level - 1, out subfiles, out subfolders);
+
+                                    folders += subfolders;
+                                    files += subfiles;
+                                }
+                            }
+                        } else {
+                            // File
+                            files++;
+
+                            size += (long)findData.nFileSizeLow + (long)findData.nFileSizeHigh * 4294967296;
+                        }
+                    }
+                    while (FindNextFile(findHandle, out findData));
+                }
+
+            }
+
+            return size;
+        }
+
+        public static List<string> RecurseDirectory(string directory, int level) {
+            var outList = new List<string>();
+            WIN32_FIND_DATA findData;
+
+            // please note that the following line won't work if you try this on a network folder, like \\Machine\C$
+            // simply remove the \\?\ part in this case or use \\?\UNC\ prefix
+            using (SafeFindHandle findHandle = FindFirstFile(@"\\?\" + directory + @"\*", out findData)) {
+                if (!findHandle.IsInvalid) {
+                    do {
+                        if ((findData.dwFileAttributes & FileAttributes.Directory) != 0) {
+                            if (findData.cFileName != "." && findData.cFileName != "..") {
+                                string subdirectory = directory + (directory.EndsWith(@"\") ? "" : @"\") + findData.cFileName;
+                                if (level != 0) {
+                                    outList.AddRange(RecurseDirectory(subdirectory, level - 1));
+                                }
+                            }
+                        } else {
+                            // File
+                            outList.Add(directory + (directory.EndsWith(@"\") ? "" : @"\") + findData.cFileName);
+                        }
+                    }
+                    while (FindNextFile(findHandle, out findData));
+                }
+            }
+            return outList;
+        }
+
         public static void DebugTest1() {
-            /*
-            var stylersXml = XDocument.Load(Config.FileNppStylersXml);
-            var firstname = (string)stylersXml.Descendants("WidgetStyle").First(x => x.Attribute("name").Value.Equals("Selected text colour")).Attribute("bgColor");
-            UserCommunication.Notify(firstname);
-             */
+            Task.Factory.StartNew(() => {
+                Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
+                //Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://fuck.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
+            });
         }
 
         public static void DebugTest2() {
-            /*
-            object s = "";
-            if (YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "What is your name?", "", ref s) == DialogResult.OK) {
-                // Do something with the 's' variable
-                UserCommunication.Notify((string)s);
-            }
-            object a = new B();
-            YamuiInputDialog.Show(new WindowWrapper(Npp.HandleNpp), "Please provide some basic information<br>super long text omg what is the fuck:", "Personal Info", ref a);
-            //Debug.Assert(false);
-            //UserCommunication.Notify("debug");
-             */
+            Task.Factory.StartNew(() => {
+                MeasureIt(() => {
+                    var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
+                    UserCommunication.Notify(list.Count.ToString());
+                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
+                });
+            });
+            Task.Factory.StartNew(() => {
+                MeasureIt(() => {
+                    var list = RecurseDirectory(ProEnvironment.Current.BaseLocalPath, -1);
+                    UserCommunication.Notify(list.Count.ToString());
+                    File.WriteAllLines(Path.Combine(Npp.GetConfigDir(), "Tests", "out.txt"), list.OrderBy(s => s));
+                });
+            });
         }
 
         public static void DebugTest3() {
-            //UserCommunication.Message(("# What's new in this version? #\n\n" + File.ReadAllText(@"d:\Profiles\jcaillon\Desktop\derp.md", Encoding.Default)).MdToHtml(),
-            //        MessageImg.MsgUpdate,
-            //        "A new version has been installed!",
-            //        "Updated to version " + AssemblyInfo.Version,
-            //        new List<string> { "ok", "cancel" },
-            //        true);
+
+            RunParserTests(Utils.ReadAllText(Path.Combine(Npp.GetConfigDir(), "Tests", "Parser_in.p")));
+
+            //RunParserTests(Npp.Text);
+
             /*
-            Task.Factory.StartNew(() => {
-
-                var ftp = new FtpsClient();
-                bool connected = false;
-                foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
-                    try {
-                        ftp.Connect("localhost", ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21), new NetworkCredential("test", "superpwd"), mode, 1000);
-                        connected = true;
-                        UserCommunication.Notify(mode.GetDescription());
-                    } catch (Exception) {
-                        //ignored
-                    }
-                }
-
-                if (connected) {
-                    //ftp.PutFiles();
-                }
-
-                ftp.Close();
-            });
+            UserCommunication.Message(("# What's new in this version? #\n\n" + Utils.ReadAllText(@"C:\Users\Julien\Desktop\content.md")).MdToHtml(),
+                    MessageImg.MsgUpdate,
+                    "A new version has been installed!",
+                    "Updated to version " + AssemblyInfo.Version,
+                    new List<string> { "ok", "cancel" },
+                    true);
+             */
+            /*
              * */
         }
 
-        public static void RunParserTests() {
+        public static void DisplayBugs() {
+            var wb = new WebServiceJson(WebServiceJson.WebRequestMethod.Get, Config.BugsGetWebWervice);
+            wb.OnRequestEnded += webServ => {
+                if (webServ.StatusCodeResponse != HttpStatusCode.OK)
+                    UserCommunication.Notify(webServ.ResponseException.ToString());
+                else
+                    UserCommunication.Notify(webServ.JsonResponse);
+            };
+            wb.Execute();
+        }
 
-            var inLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "in.p");
-            var outLocation = Path.Combine(Npp.GetConfigDir(), "Tests", "out.p");
+        public static void MeasureIt(Action toMeasure, string id = null) {
+            var watch = Stopwatch.StartNew();
+            toMeasure();
+            watch.Stop();
+            UserCommunication.Notify((id ?? "") + watch.ElapsedMilliseconds + "ms");
+        }
+
+        public static void RunParserTests(string content) {
+
+            // create unique temporary folder
+            var testDir = Path.Combine(Npp.GetConfigDir(), "Tests", DateTime.Now.ToString("yy.MM.dd_HH-mm-ss-fff"));
+
+            var perfFile = Path.Combine(testDir, "perfs.txt");
+            if (!Utils.CreateDirectory(testDir))
+                return;
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            // PARSER
+            // LEXER
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            var outLocation = Path.Combine(testDir, "Lexer_out.txt");
 
             //------------
             var watch = Stopwatch.StartNew();
             //------------
-            Parser tok = new Parser(File.ReadAllText(inLocation), inLocation, null, true);
 
-            OutputVis vis = new OutputVis();
-            tok.Accept(vis);
+            Lexer lexer = new Lexer(content);
+
+            //--------------
+            watch.Stop();
+            //--------------
+
+            OutputLexerVisitor lexerVisitor = new OutputLexerVisitor();
+            lexer.Accept(lexerVisitor);
+            Utils.FileWriteAllText(outLocation, lexerVisitor.Output.ToString());
+            File.AppendAllText(perfFile, @"LEXER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + lexerVisitor.NbItems + "\r\n");
+
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            // PARSER
+            //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            outLocation = Path.Combine(testDir, "Parser_out.txt");
+
+            //------------
+            watch = Stopwatch.StartNew();
+            //------------
+
+            Parser parser = new Parser(lexer, "", null, true);
 
             //--------------
             watch.Stop();
             //------------
 
-            // OUPUT OF VISITOR
-            File.WriteAllText(outLocation, vis.Output.AppendLine("\n\nDONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-
-
-            // OUTPUT INFO ON EACH LINE
-            /*
-                StringBuilder x = new StringBuilder();
-                var i = 0;
-                var dic = tok.GetLineInfo;
-                while (dic.ContainsKey(i)) {
-                    x.AppendLine((i+1) + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].CurrentScopeName);
-                    //x.AppendLine(item.Key + " > " + item.Value.BlockDepth + " , " + item.Value.Scope);
-                    i++;
-                }
-                File.WriteAllText(@"C:\Temp\out.p", x.AppendLine("DONE in " + watch.ElapsedMilliseconds + " ms").ToString());
-            */
+            OutputParserVisitor parserVisitor = new OutputParserVisitor();
+            parser.Accept(parserVisitor);
+            Utils.FileWriteAllText(outLocation, parserVisitor.Output.ToString());
+            File.AppendAllText(perfFile, @"PARSER DONE in " + watch.ElapsedMilliseconds + @" ms > nb items = " + parser.ParsedItemsList.Count + "\r\n");
 
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            // LEXER
+            // LINE INFO
             //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+            outLocation = Path.Combine(testDir, "LineInfo_out.txt");
 
-            /*
-            //------------
-            var watch2 = Stopwatch.StartNew();
-            //------------
+            StringBuilder lineInfo = new StringBuilder();
+            var i = 0;
+            var dic = parser.LineInfo;
+            while (dic.ContainsKey(i)) {
+                lineInfo.AppendLine(i + 1 + " > " + dic[i].BlockDepth + " , " + dic[i].Scope + " , " + dic[i].Scope.ScopeType + " , " + dic[i].Scope.Name);
+                i++;
+            }
+            Utils.FileWriteAllText(outLocation, lineInfo.ToString());
+            File.AppendAllText(perfFile, @"nb items in Line info = " + parser.LineInfo.Count + "\r\n");
 
-            Lexer tok2 = new Lexer(File.ReadAllText(inLocation));
-            tok2.Tokenize();
-            OutputLexer vis2 = new OutputLexer();
-            tok2.Accept(vis2);
-
-            //--------------
-            watch2.Stop();
-
-            File.WriteAllText(outLocation, vis2.Output.AppendLine("DONE in " + watch2.ElapsedMilliseconds + " ms").ToString());
-            */
+            UserCommunication.Notify("Done :<br>" + testDir.ToHtmlLink());
         }
 
         #endregion
@@ -324,111 +462,172 @@ namespace _3PA.Tests {
 
     #region Parser
 
-    internal class OutputVis : IParserVisitor {
-        public void Visit(ParsedBlock pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > BLOCK," + pars.Name + "," + pars.Branch);
+    internal class OutputParserVisitor : IParserVisitor {
+
+        public void PreVisit() {
+            Output = new StringBuilder();
+        }
+
+        public void PostVisit() {
+        }
+
+        public StringBuilder Output;
+
+        private void AppendEverything<T>(T item) {
+            // type
+            Output.Append(typeof(T).Name + "\t:");
+
+            // for each field
+            foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(item)) {
+                Output.Append("\t" + prop.Name + "=[" + prop.GetValue(item).ConvertToStr() + "]");
+            }
+
+            Output.Append("\r\n");
+        }
+
+        public void Visit(ParsedFile pars) {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedPreProcBlock pars) {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedImplementation pars) {
+            AppendEverything(pars);
+        }
+
+        public void Visit(ParsedPrototype pars) {
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedLabel pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFunctionCall pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.ExternalCall);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedFoundTableUse pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Name);
+            AppendEverything(pars);
         }
 
-        public StringBuilder Output = new StringBuilder();
-
-        public void Visit(ParsedOnEvent pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.On);
-        }
-
-        public void Visit(ParsedFunction pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > FUNCTION," + pars.Name + "," + pars.ReturnType + "," + pars.Scope + "," + pars.OwnerName + "," + pars.Parameters + "," + pars.IsPrivate + "," + pars.PrototypeLine + "," + pars.PrototypeColumn + "," + pars.IsExtended + "," + pars.EndLine);
+        public void Visit(ParsedOnStatement pars) {
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedProcedure pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.EndLine + "," + pars.Left);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedIncludeFile pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedPreProc pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Flag + "," + pars.UndefinedLine);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedDefine pars) {
-            //if (pars.PrimitiveType == ParsedPrimitiveType.Buffer || pars.Type == ParseDefineType.Buffer)
-            //if (pars.Type == ParseDefineType.Parameter)
-            //if (string.IsNullOrEmpty(pars.ViewAs))
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + ((ParseDefineTypeAttr)pars.Type.GetAttributes()).Value + "," + pars.LcFlagString + "," + pars.Name + "," + pars.AsLike + "," + pars.TempPrimitiveType + "," + pars.Scope + "," + pars.IsDynamic + "," + pars.ViewAs + "," + pars.BufferFor + "," + pars.Left + "," + pars.IsExtended + "," + pars.OwnerName);
+            AppendEverything(pars);
         }
 
         public void Visit(ParsedTable pars) {
-            Output.Append(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.LcLikeTable + "," + pars.OwnerName + "," + pars.UseIndex + ">");
+            AppendEverything(pars);
             foreach (var field in pars.Fields) {
-                Output.Append(field.Name + "|" + field.AsLike + "|" + field.Type + ",");
+                AppendEverything(field);
             }
-            Output.AppendLine("");
+            foreach (var index in pars.Indexes) {
+                AppendEverything(index);
+            }
         }
 
         public void Visit(ParsedRun pars) {
-            Output.AppendLine(pars.Line + "," + pars.Column + " > " + pars.Name + "," + pars.Left + "," + pars.HasPersistent);
+            AppendEverything(pars);
         }
     }
 
-    internal class OutputLexer : ILexerVisitor {
+    internal class OutputLexerVisitor : ILexerVisitor {
 
+        public int NbItems;
         public StringBuilder Output = new StringBuilder();
 
-        public void Visit(TokenComment tok) {
-            Output.AppendLine("C" + (tok.IsSingleLine ? "S" : "M") + " " + tok.Value);
+        private void AppendEverything<T>(T item) {
+            // type
+            Output.Append(typeof(T).Name + "\t:");
+
+            // for each field
+            foreach (PropertyDescriptor prop in TypeDescriptor.GetProperties(item)) {
+                Output.Append("\t" + prop.Name + "=[" + prop.GetValue(item).ConvertToStr() + "]");
+            }
+
+            Output.Append("\r\n");
         }
 
-        public void Visit(TokenEol tok) { }
+        public void Visit(TokenComment tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
+
+        public void Visit(TokenEol tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
 
         public void Visit(TokenEos tok) {
-            Output.AppendLine("EOS " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
         public void Visit(TokenInclude tok) {
-            //Output.AppendLine(tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
         public void Visit(TokenNumber tok) {
-            Output.AppendLine("N  " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
         public void Visit(TokenString tok) {
-            Output.AppendLine("S  " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
         public void Visit(TokenStringDescriptor tok) {
-            Output.AppendLine("D  " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
         public void Visit(TokenSymbol tok) {
-            Output.AppendLine("S  " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
-        public void Visit(TokenWhiteSpace tok) { }
+        public void Visit(TokenWhiteSpace tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
 
         public void Visit(TokenWord tok) {
-            Output.AppendLine("W  " + tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
 
-        public void Visit(TokenEof tok) { }
+        public void Visit(TokenEof tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
 
-        public void Visit(TokenUnknown tok) { }
+        public void Visit(TokenUnknown tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
 
         public void Visit(TokenPreProcStatement tok) {
-            //Output.AppendLine(tok.Value);
+            AppendEverything(tok);
+            NbItems++;
         }
     }
 
@@ -442,7 +641,7 @@ namespace _3PA.Tests {
 
             var output = new StringBuilder();
             var log = new StringBuilder();
-            var indexContent = File.ReadAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\extracted\index.hhk", Encoding.Default);
+            var indexContent = Utils.ReadAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\extracted\index.hhk", Encoding.Default);
 
             foreach (var items in File.ReadAllLines(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.data", Encoding.Default).Select(line => line.Split('\t')).Where(items => items.Count() == 4)) {
 
@@ -494,8 +693,8 @@ namespace _3PA.Tests {
 }
 }
 
-File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
-File.WriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
+Utils.FileWriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywords.log", log.ToString(), Encoding.Default);
+Utils.FileWriteAllText(@"C:\Work\3PA_side\ProgressFiles\help_tooltip\keywordsHelp.data", output.ToString(), Encoding.Default);
 }
 
 

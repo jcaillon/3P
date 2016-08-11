@@ -132,15 +132,18 @@
     <Compile Include="Lib\Ftp\FtpsClient.cs" />
     <Compile Include="Lib\Ftp\FtpStream.cs" />
     <Compile Include="Lib\Ftp\PathCheck.cs" />
+    <Compile Include="Lib\ProcessIo.cs" />
     <Compile Include="Lib\ReccurentAction.cs" />
+    <Compile Include="Lib\RegistryWrapper.cs" />
     <Compile Include="Lib\SetTabOrder.cs" />
     <Compile Include="Lib\TortoiseWrapper.cs" />
+    <Compile Include="Lib\WebServiceJson.cs" />
     <Compile Include="Lib\ZipStorer.cs" />
-    <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Actions\CompilePage.Designer.cs">
-      <DependentUpon>CompilePage.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.Designer.cs">
+      <DependentUpon>DoDeployPage.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Options\ShortCutsPage.cs">
       <SubType>UserControl</SubType>
@@ -160,11 +163,11 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\OthersPage.Designer.cs">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.cs">
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.Designer.cs">
-      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    <Compile Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.Designer.cs">
+      <DependentUpon>SetDeploymentRules.cs</DependentUpon>
     </Compile>
     <Compile Include="MainFeatures\Appli\Pages\Set\SetFtp.cs">
       <SubType>UserControl</SubType>
@@ -200,7 +203,10 @@
     <Compile Include="MainFeatures\NppInterfaceForm\NppInterfaceForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProCompilation.cs" />
+    <Compile Include="MainFeatures\Pro\Deployer.cs" />
+    <Compile Include="MainFeatures\Pro\DeployProfile.cs" />
+    <Compile Include="MainFeatures\Pro\ProGenerateCode.cs" />
+    <Compile Include="MainFeatures\Pro\ProCompilation.cs" />
     <Compile Include="MainFeatures\ShareExportConf.cs" />
     <Compile Include="NotificationsPublisher.cs" />
     <Compile Include="Tests\PlugDebug.cs" />
@@ -232,15 +238,15 @@
     <Compile Include="MainFeatures\Appli\Pages\Options\ProfilesPage.Designer.cs">
       <DependentUpon>ProfilesPage.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\CodeBeautifier.cs" />
+    <Compile Include="MainFeatures\Pro\ProCodeFormat.cs" />
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainFeatures\NppInterfaceForm\EmptyForm.Designer.cs">
       <DependentUpon>EmptyForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecutionNs\FilesInfo.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProExecution.cs" />
+    <Compile Include="MainFeatures\Pro\FilesInfo.cs" />
+    <Compile Include="MainFeatures\Pro\ProExecution.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\StylerHelper.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlight.cs" />
     <Compile Include="MainFeatures\UpdateHandler.cs" />
@@ -254,10 +260,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="MainFeatures\Parser\ParserVisitor.cs" />
-    <Compile Include="MainFeatures\AutoCompletion\CompletionData.cs" />
+    <Compile Include="MainFeatures\AutoCompletion\CompletionItem.cs" />
     <Compile Include="MainFeatures\AutoCompletion\DataBase.cs" />
     <Compile Include="MainFeatures\Parser\ParserHandler.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\CompilationPath.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorer.cs" />
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.cs">
       <SubType>Form</SubType>
@@ -265,15 +270,15 @@
     <Compile Include="MainFeatures\FileExplorer\FileExplorerForm.Designer.cs">
       <DependentUpon>FileExplorerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="MainFeatures\ProgressExecutionNs\FileTag.cs" />
+    <Compile Include="MainFeatures\Pro\FileTag.cs" />
     <Compile Include="MainFeatures\Parser\IParserVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Parser.cs" />
-    <Compile Include="MainFeatures\ProCodeUtils.cs" />
+    <Compile Include="MainFeatures\Pro\ProMisc.cs" />
     <Compile Include="MainFeatures\SyntaxHighlighting\SyntaxHighlightVisitor.cs" />
     <Compile Include="MainFeatures\Parser\ILexerVisitor.cs" />
     <Compile Include="MainFeatures\Parser\Lexer.cs" />
     <Compile Include="MainFeatures\Parser\Token.cs" />
-    <Compile Include="MainFeatures\ProgressExecutionNs\ProEnvironment.cs" />
+    <Compile Include="MainFeatures\Pro\ProEnvironment.cs" />
     <Compile Include="MainFeatures\Appli\AppliForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -306,7 +311,6 @@
     <Compile Include="Lib\Extensions.cs" />
     <Compile Include="Lib\IniReader.cs" />
     <Compile Include="Lib\LibLoader.cs" />
-    <Compile Include="Lib\SpecialDictionary.cs" />
     <Compile Include="MainFeatures\UserCommunication.cs" />
     <Compile Include="Lib\Utils.cs" />
     <Compile Include="MainFeatures\AutoCompletion\AutoComplete.cs" />
@@ -325,7 +329,6 @@
     <Compile Include="MainFeatures\Style.cs" />
     <Compile Include="MainFeatures\Snippets.cs" />
     <Compile Include="MainFeatures\InfoToolTip\InfoToolTip.cs" />
-    <Compile Include="NotificationsHandler.cs" />
     <Compile Include="Npp.cs" />
     <Compile Include="Scintilla.cs" />
     <Compile Include="Plug.cs" />
@@ -345,8 +348,8 @@
     <EmbeddedResource Include="MainFeatures\Appli\AppliForm.resx">
       <DependentUpon>AppliForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Actions\CompilePage.resx">
-      <DependentUpon>CompilePage.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Actions\DoDeployPage.resx">
+      <DependentUpon>DoDeployPage.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Home\HomePage.resx">
       <DependentUpon>HomePage.cs</DependentUpon>
@@ -366,11 +369,13 @@
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Options\OthersPage.resx">
       <DependentUpon>OthersPage.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetCompilationPath.resx">
-      <DependentUpon>SetCompilationPath.cs</DependentUpon>
+    <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetDeploymentRules.resx">
+      <DependentUpon>SetDeploymentRules.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFtp.resx">
       <DependentUpon>SetFtp.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\Appli\Pages\Set\SetFileInfo.resx">
       <DependentUpon>SetFileInfo.cs</DependentUpon>
@@ -396,9 +401,11 @@
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\AutoCompletion\AutoCompletionForm.resx">
       <DependentUpon>AutoCompletionForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\CodeExplorer\CodeExplorerForm.resx">
       <DependentUpon>CodeExplorerForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="MainFeatures\NppInterfaceForm\EmptyForm.resx">
       <DependentUpon>EmptyForm.cs</DependentUpon>
@@ -414,9 +421,13 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Data\Abbreviations" />
-    <None Include="Data\CompilationPath" />
+    <None Include="Data\DeploymentRules" />
+    <None Include="Data\DataDigger\DataDigger.zip" />
     <None Include="Data\KeywordsList" />
     <None Include="Data\KeywordsHelp" />
+    <None Include="Data\ProgressTemplates\FunctionImplementation.p" />
+    <None Include="Data\ProgressTemplates\InternalProcedure.p" />
+    <None Include="Data\Progress\DeploymentHook.p" />
     <None Include="Data\Progress\DumpDatabase.p" />
     <None Include="Data\Progress\ProgressRun.p" />
     <None Include="Data\Progress\StartProlint.p" />
@@ -432,15 +443,19 @@
     <Content Include="Html\Pages\home.html" />
     <Content Include="Html\StyleSheet.css" />
     <Content Include="Images\Appli\Add.png" />
+    <Content Include="Images\Appli\Calendar.png" />
     <Content Include="Images\Appli\Cancel.png" />
     <Content Include="Images\Appli\Configuration.png" />
     <Content Include="Images\Appli\Copy.png" />
+    <Content Include="Images\Appli\Default.png" />
     <Content Include="Images\Appli\Del.png" />
     <Content Include="Images\Appli\Delete.png" />
+    <Content Include="Images\Appli\Deploy.png" />
     <Content Include="Images\Appli\DownloadAll.png" />
     <Content Include="Images\Appli\DownloadDbNok.png" />
     <Content Include="Images\Appli\DownloadDbOk.png" />
     <Content Include="Images\Appli\Edit.png" />
+    <Content Include="Images\Appli\Error30x30.png" />
     <Content Include="Images\Appli\Export.png" />
     <Content Include="Images\Appli\Fetch.png" />
     <Content Include="Images\Appli\Help.png" />
@@ -448,15 +463,20 @@
     <Content Include="Images\Appli\Import.png" />
     <Content Include="Images\Appli\NotSaved.png" />
     <Content Include="Images\Appli\Ok.png" />
+    <Content Include="Images\Appli\Ok30x30.png" />
     <Content Include="Images\Appli\OpenInExplorer.png" />
     <Content Include="Images\Appli\OutDated.png" />
     <Content Include="Images\Appli\Push.png" />
     <Content Include="Images\Appli\Report.png" />
+    <Content Include="Images\Appli\Report_64x64.png" />
+    <Content Include="Images\Appli\Rules.png" />
     <Content Include="Images\Appli\Save.png" />
     <Content Include="Images\Appli\SelectFile.png" />
     <Content Include="Images\Appli\Time.png" />
     <Content Include="Images\Appli\UndoUserAction.png" />
+    <Content Include="Images\Appli\Update.png" />
     <Content Include="Images\Appli\ViewFile.png" />
+    <Content Include="Images\Appli\Warning30x30.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Abbreviation.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Buffer.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Dynamic.png" />
@@ -493,8 +513,25 @@
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />
     <Content Include="Images\Backgrounds\bg_oss.png" />
+    <Content Include="Images\DockableExplorer\buttons\alphabetical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
+    <Content Include="Images\FileExplorer\BringToFront.png" />
+    <Content Include="Images\FileExplorer\PlType.png" />
+    <Content Include="Images\FileExplorer\Stop.png" />
+    <Content Include="Images\FileExplorer\XmlType.png" />
+    <Content Include="Images\FileExplorer\XrefType.png" />
+    <Content Include="Images\FileExplorer\ZipType.png" />
+    <Content Include="Images\Menu\EditCode.png" />
+    <Content Include="Images\Menu\DataAdmin.png" />
+    <Content Include="Images\Menu\DatabaseTools.png" />
+    <Content Include="Images\Menu\DataDigger.png" />
+    <Content Include="Images\Menu\DataReader.png" />
+    <Content Include="Images\Menu\DeleteFunction.png" />
+    <Content Include="Images\Menu\DeleteProcedure.png" />
+    <Content Include="Images\Menu\Miscellaneous.png" />
+    <Content Include="Images\Menu\ProDesktop.png" />
+    <Content Include="Images\Menu\Synchronize.png" />
     <Content Include="Images\ToolBar\CodeExplorer16x16.png" />
     <Content Include="Images\DockableExplorer\Flag\NotFound.png" />
     <Content Include="Images\DockableExplorer\Flag\Persistent.png" />
@@ -527,7 +564,7 @@
     <Content Include="Images\DockableExplorer\buttons\eraser.png" />
     <Content Include="Images\DockableExplorer\buttons\expand.png" />
     <Content Include="Images\DockableExplorer\Type\MainBlock.png" />
-    <Content Include="Images\DockableExplorer\buttons\numerical_sorting_12.png" />
+    <Content Include="Images\DockableExplorer\buttons\numerical_sorting.png" />
     <Content Include="Images\DockableExplorer\buttons\refresh.png" />
     <Content Include="Images\DockableExplorer\Type\Root.png" />
     <Content Include="Images\DockableExplorer\Type\Run.png" />
@@ -638,7 +675,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"
+if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName).pdb"</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

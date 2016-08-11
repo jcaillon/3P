@@ -57,6 +57,13 @@ Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+CaretColor	@Default	#000000	0
+LineNumberMargin	#595959	#E4E4E4	0
+FoldMargin	#595959	#F3F3F3	0
+FoldActiveMarker	#FF0000	#000000	0
+SmartHighLighting	#09FF00	#000000	0
+BraceHighLight	#FFFFFF	#008000	0
+BadBraceHighLight	#FFFFFF	#FF42FF	0
 
 
 > Tomorrow
@@ -72,7 +79,7 @@ OtherKeywords	#2F5E9B	#FFFFFF	2
 Operators	#F5871F	#FFFFFF	2
 Abbreviations	#F5871F	#FFFFFF	2
 Includes	#4D4D4C	#FFEEAD	4
-DoubleQuote	#c82829	#FFFFFF	0
+DoubleQuote	#C82829	#FFFFFF	0
 SimpleQuote	#F60000	#FFFFFF	0
 NormedVariables	#8959a8	#FFFFFF	0
 SpecialWord	#000000	#ADFF2F	2
@@ -86,6 +93,14 @@ Error1	#333	#FFEE97	0
 Error2	#FFF	#FFB521	0
 Error3	#FFF	#F57A00	0
 Error4	#FFF	#EB6864	0
+CaretColor	@Default	#000000	0
+LineNumberMargin	#595959	#E4E4E4	0
+FoldMargin	#595959	#F3F3F3	0
+FoldActiveMarker	#FF0000	#000000	0
+SmartHighLighting	#09FF00	#000000	0
+BraceHighLight	#FFFFFF	#718C00	0
+BadBraceHighLight	#FFFFFF	#C82829	0
+
 
 > Michael Knight
 Default	#C5C8C6	#000	0
@@ -105,7 +120,7 @@ SimpleQuote	#73EC0F	@Default	0
 NormedVariables	#CC6666	@Default	0
 SpecialWord	#000000	#9EE41B	2
 Numbers	#84AFE4	@Default	0
-CaretLine	#000000	#623A1E	0
+CaretLine	#000000	#152D56	0
 Selection	#000000	#1E417D	0
 WhiteSpace	#353535	@Default	0
 NoError	#007B74	#C6EFCE	0
@@ -114,6 +129,14 @@ Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+CaretColor	@Default	#000000	0
+LineNumberMargin	#D8F5F5	#181E1E	0
+FoldMargin	#D8F5F5	#354141	0
+FoldActiveMarker	#7FFF00	#000000	0
+SmartHighLighting	#1BA1E2	#000000	0
+BraceHighLight	#FFFFFF	#73EC0F	0
+BadBraceHighLight	#FFFFFF	#FF0000	0
+
 
 > Sublime?
 Default	#F8F8F2	#272B30	0
@@ -142,6 +165,13 @@ Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+CaretColor	@Default	#000000	0
+FoldMargin	#D8F5F5	#2D3238	0
+FoldActiveMarker	@SimpleQuote	#000000	0
+LineNumberMargin	#D8F5F5	#181B1E	0
+SmartHighLighting	#FF00AE	#000000	0
+BraceHighLight	#000000	#FFEF62	0
+BadBraceHighLight	#FFFFFF	#F92672	0
 
 
 > Grey (uk) or Gray (us)?
@@ -171,6 +201,13 @@ Error1	#032AB4	#FCD54B	0
 Error2	#FFEDE4	#FF7518	0
 Error3	#FFDAC7	#FF5300	0
 Error4	#FFD0D0	#D30039	0
+CaretColor	@Default	#000000	0
+FoldMargin	@Comment	#313131	0
+FoldActiveMarker	@SimpleQuote	#000000	0
+LineNumberMargin	#D8F5F5	#2A2A2A	0
+SmartHighLighting	#FF00AE	#000000	0
+BraceHighLight	#000000	#FFEF62	0
+BadBraceHighLight	#FFFFFF	#F92672	0
 
 
 > Default alt
@@ -200,6 +237,13 @@ Error1	#9C6500	#FFEB8B	0
 Error2	#833C0C	#EBB885	0
 Error3	#C76F00	#FFC0A0	0
 Error4	#9C0006	#FFC7CE	0
+CaretColor	@Default	#000000	0
+FoldMargin	#595959	#F3F3F3	0
+FoldActiveMarker	@SimpleQuote	#000000	0
+LineNumberMargin	#595959	#E4E4E4	0
+SmartHighLighting	#09FF00	#000000	0
+BraceHighLight	#333	#5EFF00	0
+BadBraceHighLight	#FFFFFF	#FF42FF	0
 
 
 > Developper studio
@@ -229,3 +273,10 @@ Error1	#9C6500	#FFEB9C	0
 Error2	#833C0C	#FFCC99	0
 Error3	#9C0006	#FFC7CE	0
 Error4	#58267E	#CC99FF	0
+CaretColor	@Default	#000000	0
+FoldMargin	#595959	#F3F3F3	0
+FoldActiveMarker	@SimpleQuote	#000000	0
+LineNumberMargin	#595959	#E4E4E4	0
+SmartHighLighting	#09FF00	#000000	0
+BraceHighLight	#333	#5EFF00	0
+BadBraceHighLight	#FFFFFF	#FF42FF	0

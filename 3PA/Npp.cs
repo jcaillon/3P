@@ -114,10 +114,12 @@ namespace _3PA {
         /// Returns the screen on which npp is displayed
         /// </summary>
         /// <returns></returns>
-        public static Screen GetNppScreen() {
-            Rectangle output = new Rectangle();
-            WinApi.GetWindowRect(HandleScintilla, ref output);
-            return Screen.FromPoint(output.Location);
+        public static Screen NppScreen {
+            get {
+                Rectangle output = new Rectangle();
+                WinApi.GetWindowRect(HandleScintilla, ref output);
+                return Screen.FromPoint(output.Location);
+            }
         }
 
         /// <summary>
@@ -140,37 +142,43 @@ namespace _3PA {
         /// <summary>
         /// Switch to a document, can be already opended or not
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="line"></param>
-        /// <param name="column"></param>
         public static void Goto(string document, int line = -1, int column = -1) {
-            Goto(document, line, column, true);
+            Goto(document, -1, line, column, true);
+        }
+
+        /// <summary>
+        /// Switch to a document, can be already opended or not
+        /// </summary>
+        public static void GotoPos(string document, int position) {
+            Goto(document, position, -1, -1, true);
         }
 
         /// <summary>
         /// Switch to a document, can be already opended or not, can decide to remember the current position to jump back to it
         /// </summary>
-        /// <param name="document"></param>
-        /// <param name="line"></param>
-        /// <param name="column"></param>
-        /// <param name="saveHistoric"></param>
-        public static void Goto(string document, int line, int column, bool saveHistoric) {
+        public static void Goto(string document, int position, int line, int column, bool saveHistoric) {
             if (!File.Exists(document)) {
                 UserCommunication.Notify(@"Can't find/open the following file :<br>" + document, MessageImg.MsgHighImportance, "Warning", "File not found", 5);
                 return;
             }
-            if (saveHistoric)
+            if (saveHistoric && Plug.IsCurrentFileProgress)
                 _goToHistory.Push(new Tuple<string, int, Point>(GetCurrentFilePath(), FirstVisibleLine, new Point(LineFromPosition(CurrentPosition), GetColumn(CurrentPosition))));
-            if (!String.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
+            if (!string.IsNullOrEmpty(document) && !document.Equals(GetCurrentFilePath())) {
                 if (GetOpenedFiles().Contains(document))
                     SwitchToDocument(document);
                 else
                     OpenFile(document);
             }
-            if (line >= 0) {
+            if (position >= 0) {
+                GoToLine(LineFromPosition(position));
+                SetSel(position);
+            } else if (line >= 0) {
                 GoToLine(line);
                 if (column >= 0)
                     SetSel(GetPosFromLineColumn(line, column));
+                else
+                    SetSel(GetLine(line).Position);
+
             }
             GrabFocus();
         }
@@ -189,14 +197,13 @@ namespace _3PA {
             try {
                 if (_goToHistory.Count > 0) {
                     var lastPoint = _goToHistory.Pop();
-                    Goto(lastPoint.Item1, lastPoint.Item3.X, lastPoint.Item3.Y, false);
+                    Goto(lastPoint.Item1, -1, lastPoint.Item3.X, lastPoint.Item3.Y, false);
                     FirstVisibleLine = lastPoint.Item2;
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in GoBackFromDefinition");
             }
         }
-
 
         /// <summary>
         /// Helper to add a clickable icon in the toolbar
@@ -210,7 +217,6 @@ namespace _3PA {
             WinApi.SendMessage(HandleNpp, NppMsg.NPPM_ADDTOOLBARICON, UnmanagedExports.FuncItems.Items[pluginId]._cmdID, pTbIcons);
             Marshal.FreeHGlobal(pTbIcons);
         }
-
 
         /// <summary>
         /// Creates entry in the FuncItems list, which list the menu entry displayed in Npp's plugin menu
@@ -514,18 +520,7 @@ namespace _3PA {
                 Marshal.FreeHGlobal(text0);
             }
             return retval;
-        }
-
-        /// <summary>
-        /// Returns a bool informing if a macro is being recorded or not
-        /// </summary>
-        /// <returns></returns>
-        public static bool IsMacroRecording {
-            get {
-                return (int) WinApi.SendMessage(HandleNpp, NppMsg.WM_GETCURRENTMACROSTATUS, 0, 0) == 1;
-            }
-        }
-            
+        }          
 
         /// <summary>
         /// Allows to execute one of Npp's command

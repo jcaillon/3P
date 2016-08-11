@@ -22,8 +22,10 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
+using System.IO;
 using System.Net.Mime;
 using System.Windows.Forms;
+using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Adapters.Entities;
 using YamuiFramework.HtmlRenderer.Core.Core;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
@@ -170,10 +172,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms
                 _text = value;
                 base.Text = value;
                 if (!IsDisposed) {
-                    if (_text.StartsWith(@"<div class='yamui-text'>"))
-                        _htmlContainer.SetHtml(_text, YamuiThemeManager.CurrentThemeCss);
-                    else
-                        _htmlContainer.SetHtml(@"<div class='yamui-text'>" + _text + @"</div>", YamuiThemeManager.CurrentThemeCss);
+                    _htmlContainer.SetHtml(YamuiThemeManager.WrapLabelText(_text), YamuiThemeManager.CurrentThemeCss);
                     PerformLayout();
                     Invalidate();
                 }
@@ -183,29 +182,16 @@ namespace YamuiFramework.HtmlRenderer.WinForms
         /// <summary>
         /// adapts width to content (the label needs to be in AutoSizeHeight only)
         /// </summary>
-        public void SetNeededSize(string content, int minWidth, int maxWidth) {
-            // find max height taken by the html
-            Width = maxWidth;
+        public void SetNeededSize(string content, int minWidth, int maxWidth, bool dontSquareIt = false) {
+            Width = Helper.Utilities.MeasureHtmlPrefWidth(content, minWidth, maxWidth);
             Text = content;
-            var prefHeight = Height;
 
-            // now we got the final height, resize width until height changes
-            int j = 0;
-            int detla = maxWidth / 20;
-            int curWidth = maxWidth;
-            do {
-                curWidth -= detla;
-                Width = Math.Max(Math.Min(maxWidth, curWidth), minWidth);
+            // make it more square shaped if possible
+            if (!dontSquareIt && Width > Height) {
+                Width = ((int) Math.Sqrt(Width*Height)).Clamp(minWidth, maxWidth);
                 PerformLayout();
-                //Invalidate();
-                if (Height > prefHeight) {
-                    curWidth += detla;
-                    detla /= 2;
-                }
-                j++;
-            } while (j < 20);
-
-            Width += 10;
+                Invalidate();
+            }
         }
 
         /// <summary>

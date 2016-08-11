@@ -23,6 +23,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
@@ -82,7 +83,7 @@ namespace YamuiFramework.Controls {
 
                 designRect.Width += 2;
                 designRect.Height += 2;
-                TextRenderer.DrawText(e.Graphics, ButtonChar, new Font((UseWingdings) ? "Wingdings" : "Webdings", (float)(Height*0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
+                TextRenderer.DrawText(e.Graphics, ButtonChar, FontManager.GetOtherFont(UseWingdings ? "Wingdings" : "Webdings", FontStyle.Regular, (float)(Height * 0.45)), designRect, foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             } catch {
                 // ignored
             }

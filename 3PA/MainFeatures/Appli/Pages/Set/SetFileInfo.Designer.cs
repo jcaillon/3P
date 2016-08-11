@@ -99,12 +99,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // lbl_about
@@ -115,9 +115,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lbl_about.AutoSizeHeightOnly = true;
             this.lbl_about.BackColor = System.Drawing.Color.Transparent;
             this.lbl_about.BaseStylesheet = null;
+            this.lbl_about.IsSelectionEnabled = false;
             this.lbl_about.Location = new System.Drawing.Point(30, 29);
             this.lbl_about.Name = "lbl_about";
-            this.lbl_about.Size = new System.Drawing.Size(682, 30);
+            this.lbl_about.Size = new System.Drawing.Size(862, 30);
             this.lbl_about.TabIndex = 74;
             this.lbl_about.TabStop = false;
             this.lbl_about.Text = resources.GetString("lbl_about.Text");
@@ -136,10 +137,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_delete
             // 
             this.bt_delete.BackGrndImage = null;
-            this.bt_delete.Location = new System.Drawing.Point(524, 483);
+            this.bt_delete.Location = new System.Drawing.Point(463, 483);
             this.bt_delete.Name = "bt_delete";
-            this.bt_delete.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_delete.Size = new System.Drawing.Size(46, 23);
+            this.bt_delete.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_delete.Size = new System.Drawing.Size(67, 23);
             this.bt_delete.TabIndex = 72;
             this.bt_delete.TabStop = false;
             this.bt_delete.Text = "Delete";
@@ -150,6 +151,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel7.AutoSizeHeightOnly = true;
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
             this.htmlLabel7.Location = new System.Drawing.Point(30, 182);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(157, 30);
@@ -163,6 +165,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.lb_FileName.AutoSizeHeightOnly = true;
             this.lb_FileName.BackColor = System.Drawing.Color.Transparent;
             this.lb_FileName.BaseStylesheet = null;
+            this.lb_FileName.IsSelectionEnabled = false;
             this.lb_FileName.Location = new System.Drawing.Point(193, 182);
             this.lb_FileName.Name = "lb_FileName";
             this.lb_FileName.Size = new System.Drawing.Size(519, 15);
@@ -199,6 +202,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel9.AutoSizeHeightOnly = true;
             this.htmlLabel9.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel9.BaseStylesheet = null;
+            this.htmlLabel9.IsSelectionEnabled = false;
             this.htmlLabel9.Location = new System.Drawing.Point(30, 114);
             this.htmlLabel9.Name = "htmlLabel9";
             this.htmlLabel9.Size = new System.Drawing.Size(152, 60);
@@ -213,6 +217,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel6.AutoSizeHeightOnly = true;
             this.htmlLabel6.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel6.BaseStylesheet = null;
+            this.htmlLabel6.IsSelectionEnabled = false;
             this.htmlLabel6.Location = new System.Drawing.Point(30, 369);
             this.htmlLabel6.Name = "htmlLabel6";
             this.htmlLabel6.Size = new System.Drawing.Size(157, 15);
@@ -226,6 +231,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel5.AutoSizeHeightOnly = true;
             this.htmlLabel5.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel5.BaseStylesheet = null;
+            this.htmlLabel5.IsSelectionEnabled = false;
             this.htmlLabel5.Location = new System.Drawing.Point(30, 343);
             this.htmlLabel5.Name = "htmlLabel5";
             this.htmlLabel5.Size = new System.Drawing.Size(157, 15);
@@ -239,6 +245,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel4.AutoSizeHeightOnly = true;
             this.htmlLabel4.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel4.BaseStylesheet = null;
+            this.htmlLabel4.IsSelectionEnabled = false;
             this.htmlLabel4.Location = new System.Drawing.Point(30, 317);
             this.htmlLabel4.Name = "htmlLabel4";
             this.htmlLabel4.Size = new System.Drawing.Size(157, 15);
@@ -252,6 +259,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel3.AutoSizeHeightOnly = true;
             this.htmlLabel3.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel3.BaseStylesheet = null;
+            this.htmlLabel3.IsSelectionEnabled = false;
             this.htmlLabel3.Location = new System.Drawing.Point(30, 291);
             this.htmlLabel3.Name = "htmlLabel3";
             this.htmlLabel3.Size = new System.Drawing.Size(157, 15);
@@ -265,6 +273,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel2.AutoSizeHeightOnly = true;
             this.htmlLabel2.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel2.BaseStylesheet = null;
+            this.htmlLabel2.IsSelectionEnabled = false;
             this.htmlLabel2.Location = new System.Drawing.Point(30, 265);
             this.htmlLabel2.Name = "htmlLabel2";
             this.htmlLabel2.Size = new System.Drawing.Size(157, 15);
@@ -278,6 +287,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.htmlLabel1.AutoSizeHeightOnly = true;
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
             this.htmlLabel1.Location = new System.Drawing.Point(30, 229);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(139, 30);
@@ -382,7 +392,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.fl_correctionDate.CustomForeColor = System.Drawing.Color.Empty;
             this.fl_correctionDate.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Pixel);
             this.fl_correctionDate.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(30)))), ((int)(((byte)(30)))), ((int)(((byte)(30)))));
-            this.fl_correctionDate.Location = new System.Drawing.Point(244, 369);
+            this.fl_correctionDate.Location = new System.Drawing.Point(266, 369);
             this.fl_correctionDate.Name = "fl_correctionDate";
             this.fl_correctionDate.Size = new System.Drawing.Size(103, 20);
             this.fl_correctionDate.TabIndex = 44;
@@ -408,18 +418,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_ok.BackGrndImage = null;
             this.bt_ok.Location = new System.Drawing.Point(193, 483);
             this.bt_ok.Name = "bt_ok";
-            this.bt_ok.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_ok.Size = new System.Drawing.Size(93, 23);
+            this.bt_ok.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_ok.Size = new System.Drawing.Size(113, 23);
             this.bt_ok.TabIndex = 42;
             this.bt_ok.Text = "&Save and close";
             // 
             // bt_cancel
             // 
             this.bt_cancel.BackGrndImage = null;
-            this.bt_cancel.Location = new System.Drawing.Point(292, 483);
+            this.bt_cancel.Location = new System.Drawing.Point(312, 483);
             this.bt_cancel.Name = "bt_cancel";
-            this.bt_cancel.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_cancel.Size = new System.Drawing.Size(101, 23);
+            this.bt_cancel.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_cancel.Size = new System.Drawing.Size(124, 23);
             this.bt_cancel.TabIndex = 41;
             this.bt_cancel.Text = "&Cancel and close";
             // 
@@ -428,8 +438,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.bt_today.BackGrndImage = null;
             this.bt_today.Location = new System.Drawing.Point(193, 369);
             this.bt_today.Name = "bt_today";
-            this.bt_today.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_today.Size = new System.Drawing.Size(45, 20);
+            this.bt_today.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_today.Size = new System.Drawing.Size(67, 20);
             this.bt_today.TabIndex = 33;
             this.bt_today.TabStop = false;
             this.bt_today.Text = "&Today";
@@ -437,10 +447,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_default
             // 
             this.bt_default.BackGrndImage = null;
-            this.bt_default.Location = new System.Drawing.Point(628, 483);
+            this.bt_default.Location = new System.Drawing.Point(607, 483);
             this.bt_default.Name = "bt_default";
-            this.bt_default.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_default.Size = new System.Drawing.Size(84, 23);
+            this.bt_default.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_default.Size = new System.Drawing.Size(105, 23);
             this.bt_default.TabIndex = 37;
             this.bt_default.TabStop = false;
             this.bt_default.Text = "Set as &default";
@@ -448,10 +458,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // bt_clear
             // 
             this.bt_clear.BackGrndImage = null;
-            this.bt_clear.Location = new System.Drawing.Point(576, 483);
+            this.bt_clear.Location = new System.Drawing.Point(536, 483);
             this.bt_clear.Name = "bt_clear";
-            this.bt_clear.SetImgSize = new System.Drawing.Size(0, 0);
-            this.bt_clear.Size = new System.Drawing.Size(46, 23);
+            this.bt_clear.SetImgSize = new System.Drawing.Size(20, 20);
+            this.bt_clear.Size = new System.Drawing.Size(65, 23);
             this.bt_clear.TabIndex = 36;
             this.bt_clear.TabStop = false;
             this.bt_clear.Text = "Clear";
@@ -465,7 +475,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
-            this.toolTip.TooltipCssClass = "htmltooltip";
             // 
             // SetFileInfo
             // 
@@ -473,7 +482,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SetFileInfo";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

@@ -25,13 +25,21 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
+using System.Net;
+using System.Security;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.Core.Core.Entities;
-using YamuiFramework.Themes;
+using _3PA.Images;
+using _3PA.Interop;
+using _3PA.Lib.Ftp;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli;
+using _3PA.MainFeatures.FileExplorer;
 
 namespace _3PA.Lib {
 
@@ -47,24 +55,7 @@ namespace _3PA.Lib {
         }
 
         #endregion
-   
-    
      */
-
-    #region Enumeration attributes
-
-    /// <summary>
-    /// in an enumeration, above the item:
-    /// [DisplayAttr(Name = "my stuff")]
-    /// how to use it:
-    /// ((DisplayAttr)myenumValue.GetAttributes()).Name)
-    /// </summary>
-    internal class DisplayAttr : Extensions.EnumAttr {
-        public string Name { get; set; }
-        public string ActionText { get; set; }
-    }
-
-    #endregion
 
     /// <summary>
     /// Class that exposes utility methods
@@ -72,6 +63,74 @@ namespace _3PA.Lib {
     internal static class Utils {
 
         #region File manipulation wrappers
+
+        /// <summary>
+        /// File write all bytes
+        /// </summary>
+        public static bool FileWriteAllBytes(string path, byte[] bytes) {
+            try {
+                File.WriteAllBytes(path, bytes);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// File write all text
+        /// </summary>
+        public static bool FileWriteAllText(string path, string text, Encoding encoding = null) {
+            try {
+                if (encoding == null)
+                    encoding = Encoding.Default;
+                File.WriteAllText(path, text, encoding);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// File write all text
+        /// </summary>
+        public static bool FileAppendAllText(string path, string text, Encoding encoding = null) {
+            try {
+                if (encoding == null)
+                    encoding = Encoding.Default;
+                File.AppendAllText(path, text, encoding);
+                return true;
+            } catch (Exception e) {
+                UserCommunication.Notify("Unable to write the following file :<br>" + path + "<br>Please check that you have the appropriate rights on this folder" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Write file", "Failed");
+            }
+            return false;
+        }
+
+        /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
+        /// Apply the action toApplyOnEachLine to each line
+        /// Uses encoding as the Encoding to read the file or convert the byte array to a string
+        /// Uses the char # as a comment in the file (must be the first char of a line)
+        public static void ForEachLine(string filePath, byte[] dataResources, Action<string> toApplyOnEachLine, Encoding encoding = null) {
+            try {
+                Exception ex = new Exception("Undetermined");
+                if (!Utilities.ForEachLine(filePath, dataResources, toApplyOnEachLine, encoding ?? TextEncodingDetect.GetFileEncoding(filePath), exception => ex = exception)) {
+                    ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
+            }
+        }
+
+        /// <summary>
+        /// Read all the text of a file in one go, same as File.ReadAllText expect it's truly a read only function
+        /// </summary>
+        public static string ReadAllText(string path, Encoding encoding = null) {
+            using (var fileStream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var textReader = new StreamReader(fileStream, encoding ?? TextEncodingDetect.GetFileEncoding(path))) {
+                return textReader.ReadToEnd();
+            }
+        }
 
         /// <summary>
         /// Allows to hide a directory
@@ -113,11 +172,11 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool DeleteDirectory(string path, bool recursive) {
             try {
-                if (!Directory.Exists(path))
+                if (string.IsNullOrEmpty(path) || !Directory.Exists(path))
                     return true;
                 Directory.Delete(path, true);
-            } catch (Exception) {
-                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
+            } catch (Exception e) {
+                UserCommunication.Notify("Failed to delete the following directory :<br>" + path.ToHtmlLink() + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgHighImportance, "Delete folder", "Can't delete a folder!");
                 return false;
             }
             return true;
@@ -128,28 +187,14 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool DeleteFile(string path) {
             try {
-                if (!File.Exists(path))
+                if (string.IsNullOrEmpty(path) || !File.Exists(path))
                     return true;
                 File.Delete(path);
-            } catch (Exception) {
-                UserCommunication.Notify("Failed to delete the following file :<br>" + path.ToHtmlLink(), MessageImg.MsgHighImportance, "Delete file", "Can't delete a file!");
+            } catch (Exception e) {
+                UserCommunication.Notify("Failed to delete the following file :<br>" + path.ToHtmlLink() + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgHighImportance, "Delete file", "Can't delete a file!");
                 return false;
             }
             return true;
-        }
-
-        /// <summary>
-        /// File write all bytes
-        /// </summary>
-        public static bool FileWriteAllBytes(string path, byte[] bytes) {
-            try {
-                File.WriteAllBytes(path, bytes);
-                return true;
-            } catch (Exception e) {
-                ErrorHandler.Log(e.Message);
-                UserCommunication.Notify("Unable to create the following file :<br>" + Config.FileStartProlint + "<br>Please check the rights of this folder", MessageImg.MsgError, "Creation file failed", "Prolint interface program");
-            }
-            return false;
         }
 
         /// <summary>
@@ -161,8 +206,8 @@ namespace _3PA.Lib {
                     return true;
                 var dirInfo = Directory.CreateDirectory(path);
                 dirInfo.Attributes |= attributes;
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to create the directory:<br>" + path + "<br><br><i>Please make sure that you have the privileges to create this directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Create directory", "Couldn't create the directory");
                 return false;
             }
             return true;
@@ -183,9 +228,9 @@ namespace _3PA.Lib {
                     return true;
                 File.Delete(targetFile);
                 File.Move(sourceFile, targetFile);
-            } catch (Exception) {
+            } catch (Exception e) {
                 if (!silent)
-                    UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Move file", "Couldn't write target file");
+                    UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Move file", "Couldn't write target file");
                 return false;
             }
             return true;
@@ -197,14 +242,16 @@ namespace _3PA.Lib {
         /// </summary>
         public static bool CopyFile(string sourceFile, string targetFile) {
             try {
+                if (sourceFile.Equals(targetFile))
+                    return true;
                 if (!File.Exists(sourceFile)) {
                     UserCommunication.Notify("There was a problem when trying to copy a file, the source doesn't exist :<br>" + sourceFile, MessageImg.MsgError, "Copy file", "Couldn't find source file");
                     return false;
                 }
                 File.Delete(targetFile);
                 File.Copy(sourceFile, targetFile);
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to write the following file:<br>" + targetFile.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory / file</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy file", "Couldn't write target file");
                 return false;
             }
             return true;
@@ -228,8 +275,8 @@ namespace _3PA.Lib {
                 //Copy all the files & Replaces any files with the same name
                 foreach (string newPath in Directory.GetFiles(sourceFolder, "*.*", SearchOption.TopDirectoryOnly))
                     File.Copy(newPath, newPath.Replace(sourceFolder, targetFolder), true);
-            } catch (Exception) {
-                UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
+            } catch (Exception e) {
+                UserCommunication.Notify("There was a problem when i tried to copy the following folder:<br>" + targetFolder.ToHtmlLink() + "<br><br><i>Please make sure that you have the privileges to write in the targeted directory</i>" + "<div class='AlternatBackColor' style='padding: 5px; margin: 5px;'>\"" + e.Message + "\"</div>", MessageImg.MsgError, "Copy folder", "Couldn't write target folder");
                 return false;
             }
             return true;
@@ -246,17 +293,18 @@ namespace _3PA.Lib {
         /// <param name="filter">txt files (*.txt)|*.txt|All files (*.*)|*.*</param>
         /// <returns></returns>
         public static string ShowFileSelection(string initialFile, string filter) {
-            OpenFileDialog dialog = new OpenFileDialog {
-                Multiselect = false,
-                Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
-                Title = @"Select a file"
-            };
-            var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
-            if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
-                dialog.InitialDirectory = initialFolder;
-            if (File.Exists(initialFile))
-                dialog.FileName = initialFile;
-            return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : string.Empty;
+            using (OpenFileDialog dialog = new OpenFileDialog {
+                    Multiselect = false,
+                    Filter = string.IsNullOrEmpty(filter) ? "All files (*.*)|*.*" : filter,
+                    Title = @"Select a file"
+                }) {
+                var initialFolder = (!File.Exists(initialFile)) ? null : Path.GetDirectoryName(initialFile);
+                if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
+                    dialog.InitialDirectory = initialFolder;
+                if (File.Exists(initialFile))
+                    dialog.FileName = initialFile;
+                return dialog.ShowDialog() == DialogResult.OK ? dialog.FileName : string.Empty;
+            }
         }
 
         /// <summary>
@@ -268,7 +316,15 @@ namespace _3PA.Lib {
             var fsd = new FolderSelectDialog();
             if (!string.IsNullOrEmpty(initialFolder) && Directory.Exists(initialFolder))
                 fsd.InitialDirectory = initialFolder;
-            fsd.ShowDialog();
+            if (Appli.IsVisible) {
+                try {
+                    WinApi.EnableWindow(Npp.HandleNpp, false);
+                    fsd.ShowDialog(Appli.Form.Handle);
+                } finally {
+                    WinApi.EnableWindow(Npp.HandleNpp, true);
+                }
+            } else
+                fsd.ShowDialog(Npp.HandleNpp);
             return fsd.FileName ?? string.Empty;
         }
 
@@ -345,7 +401,7 @@ namespace _3PA.Lib {
 
             } catch (Exception e) {
                 if (!(e is Win32Exception))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             return true;
         }
@@ -427,6 +483,67 @@ namespace _3PA.Lib {
 
         #region Misc
 
+        /// <summary>
+        /// Allows to know how many files of each file type there is
+        /// </summary>
+        public static Dictionary<FileType, int> GetNbFilesPerType(List<string> files) {
+
+            Dictionary<FileType, int> output = new Dictionary<FileType, int>();
+
+            foreach (var file in files) {
+                FileType fileType;
+                if (!Enum.TryParse((Path.GetExtension(file) ?? "").Replace(".", ""), true, out fileType))
+                    fileType = FileType.Unknow;
+                if (output.ContainsKey(fileType))
+                    output[fileType]++;
+                else
+                    output.Add(fileType, 1);
+            }
+
+            return output;
+        }
+
+        /// <summary>
+        /// Get the time elapsed in a human readable format
+        /// </summary>
+        public static string ConvertToHumanTime(TimeSpan t) {
+            if (t.Hours > 0)
+                return string.Format("{0:D2}h:{1:D2}m:{2:D2}s", t.Hours, t.Minutes, t.Seconds);
+            if (t.Minutes > 0)
+                return string.Format("{0:D2}m:{1:D2}s", t.Minutes, t.Seconds);
+            if (t.Seconds > 0)
+                return string.Format("{0:D2}s", t.Seconds);
+            return string.Format("{0:D3}ms", t.Milliseconds);
+        }
+
+        /// <summary>
+        /// Allows to download the given file asynchronously
+        /// </summary>
+        public static void DownloadFile(string url, string downloadPath, AsyncCompletedEventHandler handler, Action<WebClient> setWebClient = null) {
+            using (WebClient wc = new WebClient()) {
+                wc.Proxy = Config.Instance.GetWebClientProxy();
+                wc.Headers.Add("user-agent", Config.GetUserAgent);
+                if (setWebClient != null)
+                    setWebClient(wc);
+                wc.DownloadFileCompleted += handler;
+                wc.DownloadFileAsync(new Uri(url), downloadPath);
+            }
+        }
+
+        /// <summary>
+        /// Computes the MD5 hash of the given string
+        /// </summary>
+        public static string CalculateMd5Hash(string input) {
+            MD5 md5 = MD5.Create();
+            byte[] inputBytes = Encoding.ASCII.GetBytes(input);
+            byte[] hash = md5.ComputeHash(inputBytes);
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < hash.Length; i++) {
+                sb.Append(hash[i].ToString("X2"));
+            }
+            return sb.ToString();
+        }
+
         private static Dictionary<string, DateTime> _registeredEvents = new Dictionary<string, DateTime>();
 
         /// <summary>
@@ -475,7 +592,7 @@ namespace _3PA.Lib {
         public static string ReadAndFormatLogToHtml(string logFullPath) {
             string output = "";
             if (!string.IsNullOrEmpty(logFullPath) && File.Exists(logFullPath)) {
-                output = File.ReadAllText(logFullPath, TextEncodingDetect.GetFileEncoding(logFullPath)).Replace("\n", "<br>");
+                output = ReadAllText(logFullPath).Replace("\n", "<br>");
                 output = "<div class='ToolTipcodeSnippet'>" + output + "</div>";
             }
             return output;
@@ -495,6 +612,26 @@ namespace _3PA.Lib {
             }
         }
 
+        /// <summary>
+        /// Returns the name of the image to use for a particular extension
+        /// </summary>
+        public static string GetExtensionImage(string ext, bool exist = false) {
+            if (exist)
+                return ext + "Type";
+            FileType fileType;
+            if (!Enum.TryParse(ext, true, out fileType))
+                fileType = FileType.Unknow;
+            return fileType + "Type";
+        }
+
+        /// <summary>
+        /// Returns the image from the resources
+        /// </summary>
+        public static Image GetImageFromStr(string typeStr) {
+            Image tryImg = (Image) ImageResources.ResourceManager.GetObject(typeStr);
+            return tryImg ?? ImageResources.Error;
+        }
+
         #endregion
 
         #region ZipStorer wrapper
@@ -502,31 +639,98 @@ namespace _3PA.Lib {
         /// <summary>
         /// This methods extract a zip file in the given directory
         /// </summary>
-        /// <param name="filename"></param>
+        /// <param name="filePath"></param>
         /// <param name="targetDir"></param>
-        public static bool ExtractAll(string filename, string targetDir) {
+        public static bool ExtractAll(string filePath, string targetDir) {
+
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+                return false;
+            if (!CreateDirectory(targetDir))
+                return false;
 
             bool result = true;
 
             try {
                 // Opens existing zip file
-                ZipStorer zip = ZipStorer.Open(filename, FileAccess.Read);
-                if (string.IsNullOrEmpty(filename) || string.IsNullOrEmpty(targetDir))
-                    return false;
+                using (ZipStorer zip = ZipStorer.Open(filePath, FileAccess.Read)) {
 
-                if (!CreateDirectory(targetDir))
-                    return false;
+                    // Extract all files in target directory
+                    foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
+                        var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
+                        if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
+                            return false;
+                        result = result && zip.ExtractFile(entry, outputPath);
+                    }
+                }
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Unzipping " + Path.GetFileName(filePath));
+                result = false;
+            }
 
-                // Extract all files in target directory
-                foreach (ZipStorer.ZipFileEntry entry in zip.ReadCentralDir()) {
-                    var outputPath = Path.Combine(targetDir, entry.FilenameInZip);
-                    if (!CreateDirectory(Path.GetDirectoryName(outputPath)))
+            return result;
+        } 
+
+        /// <summary>
+        /// This methods pushes a file into a new/existing zip file
+        /// </summary>
+        public static bool ZipFile(string zipPath, string filePath, string filePathInZip, ZipStorer.Compression compressionMethod) {
+
+            if (string.IsNullOrEmpty(zipPath))
+                return false;
+
+            bool result = true;
+
+            try {
+                ZipStorer zip;
+                if (!File.Exists(zipPath)) {
+                    var zipFolder = Path.GetDirectoryName(zipPath);
+                    if (!CreateDirectory(zipFolder))
                         return false;
-                    result = result && zip.ExtractFile(entry, outputPath);
+
+                    zip = ZipStorer.Create(zipPath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite);
+                } else {
+                    zip = ZipStorer.Open(zipPath, FileAccess.Write);
+                }
+                zip.AddFile(compressionMethod, filePath, filePathInZip, "Added @ " + DateTime.Now);
+                zip.Close();
+            } catch (Exception e) {
+                ErrorHandler.ShowErrors(e, "Error zipping " + filePath + " to " + zipPath);
+                result = false;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Zip the given folder
+        /// </summary>
+        public static bool ZipFolder(string zipPath, string folderPath, ZipStorer.Compression compressionMethod) {
+
+            if (string.IsNullOrEmpty(zipPath) || string.IsNullOrEmpty(folderPath))
+                return false;
+
+            if (!Directory.Exists(folderPath))
+                return false;
+
+            bool result = true;
+
+            try {
+                ZipStorer zip;
+                if (!File.Exists(zipPath)) {
+                    var zipFolder = Path.GetDirectoryName(zipPath);
+                    if (!CreateDirectory(zipFolder))
+                        return false;
+                    zip = ZipStorer.Create(zipPath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite);
+                } else {
+                    zip = ZipStorer.Open(zipPath, FileAccess.Write);
+                }
+                foreach (var file in Directory.EnumerateFiles(folderPath, "*", SearchOption.AllDirectories)) {
+                    zip.AddFile(compressionMethod, file, file.Replace(folderPath, "").TrimStart('\\'), "Added @ " + DateTime.Now);
                 }
                 zip.Close();
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Unzipping " + Path.GetFileName(filename));
+                ErrorHandler.ShowErrors(e, "Error zipping " + folderPath);
+                result = false;
             }
 
             return result;
@@ -534,24 +738,124 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region configuration file reader
+        #region Wrapper around FtpsClient
 
-        /// Reads all the line of either the filePath (if the file exists) or from byte array dataResources,
-        /// Apply the action toApplyOnEachLine to each line
-        /// Uses encoding as the Encoding to read the file or convert the byte array to a string
-        /// Uses the char # as a comment in the file
-        public static void ForEachLine(string filePath, byte[] dataResources, Encoding encoding, Action<string> toApplyOnEachLine) {
+        private static Dictionary<string, FtpsClient> _ftpClients = new Dictionary<string, FtpsClient>();
+
+        /// <summary>
+        /// Sends a file to a ftp(s) server : EASY MODE, connects, create the directories...
+        /// Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
+        /// </summary>
+        public static bool SendFileToFtp(string localFilePath, string ftpUri) {
+
+            if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
+                return false;
+
             try {
-                Exception ex = new Exception("Undetermined");
-                if (!Utilities.ForEachLine(filePath, dataResources, encoding, toApplyOnEachLine, exception => ex = exception)) {
-                    ErrorHandler.ShowErrors(ex, "Error reading file", filePath);
+                // parse our uri
+                var regex = new Regex(@"^(ftps?:\/\/([^:\/@]*)?(:[^:\/@]*)?(@[^:\/@]*)?(:[^:\/@]*)?)(\/.*)$");
+                var match = regex.Match(ftpUri.Replace("\\", "/"));
+                if (!match.Success)
+                    return false;
+
+                var serverUri = match.Groups[1].Value;
+                var distantPath = match.Groups[6].Value;
+                string userName = null;
+                string passWord = null;
+                string server;
+                int port;
+                if (!string.IsNullOrEmpty(match.Groups[4].Value)) {
+                    userName = match.Groups[2].Value;
+                    passWord = match.Groups[3].Value.Trim(':');
+                    server = match.Groups[4].Value.Trim('@');
+                    if (!int.TryParse(match.Groups[5].Value.Trim(':'), out port))
+                        port = -1;
+                } else {
+                    server = match.Groups[2].Value;
+                    if (!int.TryParse(match.Groups[3].Value.Trim(':'), out port))
+                        port = -1;
                 }
+
+                FtpsClient ftp;
+                if (!_ftpClients.ContainsKey(serverUri))
+                    _ftpClients.Add(serverUri, new FtpsClient());
+                ftp = _ftpClients[serverUri];
+                
+                // try to connect!
+                if (!ftp.Connected) {
+                    if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
+                        return false;
+                }
+
+                // dispose of the ftp on shutdown
+                Plug.OnShutDown += DisconnectFtp;
+
+                try {
+                    ftp.PutFile(localFilePath, distantPath);
+                } catch (Exception) {
+                    // might be disconnected??
+                    try {
+                        ftp.GetCurrentDirectory();
+                    } catch (Exception) {
+                        if (!ConnectFtp(ftp, userName, passWord, server, port, serverUri))
+                            return false;
+                    }
+                    try {
+                        // try to create the directory and then push the file again
+                        ftp.MakeDir((Path.GetDirectoryName(distantPath) ?? "").Replace('\\', '/'), true);
+                        ftp.PutFile(localFilePath, distantPath);
+                    } catch (Exception e) {
+                        if (!IsSpamming(serverUri, 2000, true))
+                            ErrorHandler.ShowErrors(e, "Error sending a file! " + e.Message);
+                    }
+                }
+            
             } catch (Exception e) {
-                ErrorHandler.ShowErrors(e, "Error while reading an internal ressource!");
+                ErrorHandler.ShowErrors(e, "Error sending a file to FTP");
             }
+
+            return true;
         }
 
+        private static bool ConnectFtp(FtpsClient ftp, string userName, string passWord, string server, int port, string serverUri) {
+            NetworkCredential credential = null;
+            if (!string.IsNullOrEmpty(userName))
+                credential = new NetworkCredential(userName, passWord);
+            foreach (var mode in EsslSupportMode.ClearText.GetEnumValues<EsslSupportMode>().OrderByDescending(mode => mode)) {
+                try {
+                    var curPort = port > -1 ? port : ((mode & EsslSupportMode.Implicit) == EsslSupportMode.Implicit ? 990 : 21);
+                    ftp.Connect(server, curPort, credential, mode, 1800);
+                    ftp.Connected = true;
+                    break;
+                } catch (Exception) {
+                    //ignored
+                }
+            }
+
+            // failed?
+            if (!ftp.Connected) {
+                if (!IsSpamming(serverUri, 2000, true)) {
+                    UserCommunication.Notify(string.Format(@"Failed to connect to the FTP server!<br><br>The connexion used was:
+                            <br>- Username : {0}
+                            <br>- Password : {1}
+                            <br>- Host : {2}
+                            <br>- Port : {3}
+                            ", userName ?? "none", passWord ?? "none", server, port == -1 ? 21 : port), MessageImg.MsgError, "Ftp connexion", "Failed");
+                }
+                return false;
+            }
+            return true;
+        }
+
+        private static void DisconnectFtp() {
+            foreach (var ftpsClient in _ftpClients) {
+                ftpsClient.Value.Close();
+            }
+            _ftpClients.Clear();
+        }
+        
         #endregion
+
 
     }
 }

@@ -91,11 +91,19 @@ namespace _3PA.Lib {
         public static Encoding GetFileEncoding(string srcFile) {
             Encoding encoding = Encoding.Default;
 
+            if (string.IsNullOrEmpty(srcFile) || !File.Exists(srcFile)) {
+                return encoding;
+            }
+
             // Read in the file in binary
             byte[] buffer;
-
             try {
-                buffer = File.ReadAllBytes(srcFile);
+                using (var file = new FileStream(srcFile, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
+                    using (var memoryStream = new MemoryStream()) {
+                        file.CopyTo(memoryStream);
+                        buffer = memoryStream.ToArray();
+                    }
+                }
             } catch (Exception) {
                 return encoding;
             }
@@ -129,6 +137,7 @@ namespace _3PA.Lib {
                     encoding = Encoding.BigEndianUnicode;
                     break;
             }
+
             return encoding;
         }
 

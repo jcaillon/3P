@@ -20,17 +20,21 @@
 namespace _3PA.MainFeatures.Parser {
 
     internal interface IParserVisitor {
-        void Visit(ParsedFunction pars);
+        void PreVisit();
+        void Visit(ParsedFile pars);
+        void Visit(ParsedPreProcBlock pars);
+        void Visit(ParsedImplementation pars);
+        void Visit(ParsedPrototype pars);
         void Visit(ParsedProcedure pars);
         void Visit(ParsedIncludeFile pars);
         void Visit(ParsedPreProc pars);
         void Visit(ParsedDefine pars);
         void Visit(ParsedTable pars);
-        void Visit(ParsedOnEvent pars);
+        void Visit(ParsedOnStatement pars);
         void Visit(ParsedRun pars);
-        void Visit(ParsedBlock pars);
         void Visit(ParsedLabel pars);
         void Visit(ParsedFunctionCall pars);
         void Visit(ParsedFoundTableUse pars);
+        void PostVisit();
     }
 }

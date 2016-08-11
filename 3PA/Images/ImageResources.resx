@@ -268,9 +268,6 @@
   <data name="expand" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\buttons\expand.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
-  <data name="numerical_sorting_12" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>dockableexplorer\buttons\numerical_sorting_12.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
   <data name="refresh" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>dockableexplorer\buttons\refresh.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -636,5 +633,86 @@
   </data>
   <data name="logo16x16" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>toolbar\logo16x16.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Synchronize" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\synchronize.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="alphabetical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\buttons\alphabetical_sorting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="numerical_sorting" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>dockableexplorer\buttons\numerical_sorting.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\stop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="BringToFront" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\bringtofront.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DeleteFunction" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\deletefunction.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DeleteProcedure" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\deleteprocedure.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DataDigger" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\datadigger.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DatabaseTools" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\databasetools.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DataReader" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\datareader.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="DataAdmin" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\dataadmin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ProDesktop" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\prodesktop.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="EditCode" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\editcode.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Miscellaneous" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>menu\miscellaneous.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Rules" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\rules.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Update" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\update.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Calendar" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\calendar.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Deploy" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\deploy.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Default" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\default.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Report_64x64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\report_64x64.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="XmlType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\xmltype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="XrefType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\xreftype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="PlType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\pltype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ZipType" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>fileexplorer\ziptype.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Error30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\error30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Ok30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\ok30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Warning30x30" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>appli\warning30x30.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

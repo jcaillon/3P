@@ -112,13 +112,16 @@ namespace _3PA.Lib {
                     r.CallAs(typeIFileDialog, dialog, "Unadvise", num);
                     GC.KeepAlive(pfde);
                 }
+
             } else {
-                var fbd = new FolderBrowserDialog();
-                fbd.Description = Title;
-                fbd.SelectedPath = InitialDirectory;
-                fbd.ShowNewFolderButton = false;
-                if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
-                _ofd.FileName = fbd.SelectedPath;
+                using (var fbd = new FolderBrowserDialog {
+                        Description = Title,
+                        SelectedPath = InitialDirectory,
+                        ShowNewFolderButton = false
+                    }) {
+                    if (fbd.ShowDialog(new WindowWrapper(hWndOwner)) != DialogResult.OK) return false;
+                    _ofd.FileName = fbd.SelectedPath;
+                }
                 flag = true;
             }
 

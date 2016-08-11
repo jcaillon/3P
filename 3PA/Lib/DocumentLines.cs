@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using System.Diagnostics;
 using System.Text;
 using _3PA.Interop;
 using _3PA.MainFeatures;
@@ -73,8 +74,7 @@ namespace _3PA.Lib {
         /// <summary>
         /// When receiving a modification notification by scintilla
         /// </summary>
-        /// <param name="scn"></param>
-        public void OnScnModified(SCNotification scn) {
+        public void OnScnModified(SCNotification scn, bool isInsertion) {
             _lastEncoding = Npp.Encoding;
             _oneByteCharEncoding = _lastEncoding.Equals(Encoding.Default);
 
@@ -82,9 +82,9 @@ namespace _3PA.Lib {
             if (_oneByteCharEncoding)
                 return;
 
-            if ((scn.modificationType & (int)SciMsg.SC_MOD_INSERTTEXT) > 0) {
+            if (isInsertion) {
                 OnInsertedText(scn);
-            } else if ((scn.modificationType & (int) SciMsg.SC_MOD_DELETETEXT) > 0) {
+            } else {
                 OnDeletedText(scn);
             } 
         }
@@ -243,14 +243,16 @@ namespace _3PA.Lib {
             try {
                 return PrivateCharPositionFromLine(index);
             } catch (Exception e) {
+                if (Config.IsDevelopper)
+                    Debug.Assert(false);
+                ErrorHandler.LogError(e, "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
                 try {
                     Reset();
                     return PrivateCharPositionFromLine(index);
-                } catch (Exception) {
-                    // ignored
+                } catch (Exception x) {
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines");
                 }
-                ErrorHandler.Log(e + "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
-                return 0;
+                return SciPositionFromLine(index);
             }
         }
 

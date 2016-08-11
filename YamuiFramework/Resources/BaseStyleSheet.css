@@ -5,24 +5,9 @@
     color: @FormFore;
 }
 
-body {
-    padding: 0;
-    margin: 0;
-}
-
-/* this decorates the html labels */
-.yamui-text { 
-    Font: 12px "Segoe UI";
-    color: @FormFore;
-    margin: 0;
-    padding: 0;
-}
-
 /* This is the class of the Html ToolTip */
 .yamui-tooltip {
     border: solid 1px @FormBorder;
     background-color: @FormBack;
-    color: @FormFore;
     padding: 5px;
-    Font: 12px "Segoe UI";
 }

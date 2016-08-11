@@ -47,15 +47,9 @@ namespace _3PA.MainFeatures.CodeExplorer {
         private bool _isExpanded = true;
 
         /// <summary>
-        /// tracks if we want to display the "normal" list, with folders and stuff, or the
-        /// unsorted list, which is the list in code order
-        /// </summary>
-        private bool _displayUnSorted;
-
-        /// <summary>
         /// The filter to apply to the autocompletion form
         /// </summary>
-        public string FilterByText {
+        private string FilterByText {
             get { return _filterByText; }
             set {
                 _filterByText = value.ToLower();
@@ -76,41 +70,29 @@ namespace _3PA.MainFeatures.CodeExplorer {
             get { return _refreshing; }
             set {
                 _refreshing = value;
-                if (IsHandleCreated) {
-                    BeginInvoke((Action)delegate {
-                        if (_refreshing) {
-                            buttonRefresh.BackGrndImage = ImageResources.refreshing;
-                            buttonRefresh.Invalidate();
-                            toolTipHtml.SetToolTip(buttonRefresh, "The tree is being refreshed, please wait");
-                        } else {
-                            buttonRefresh.BackGrndImage = ImageResources.refresh;
-                            buttonRefresh.Invalidate();
-                            toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
-                        }
-                    });
-                }
+                this.SafeInvoke(form => {
+                    if (_refreshing) {
+                        buttonRefresh.BackGrndImage = ImageResources.refreshing;
+                        buttonRefresh.Invalidate();
+                        toolTipHtml.SetToolTip(buttonRefresh, "The tree is being refreshed, please wait");
+                    } else {
+                        buttonRefresh.BackGrndImage = ImageResources.refresh;
+                        buttonRefresh.Invalidate();
+                        toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
+                    }
+                });
             }
         }
-        private bool _refreshing;
+        private volatile bool _refreshing;
+
+        private volatile bool _updating;
 
         private bool _isFiltering;
 
         /// <summary>
-        /// returns the ranking of each BranchType, helps sorting them as we wish
-        /// </summary>
-        public static List<int> GetPriorityList {
-            get {
-                if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
-                _explorerBranchTypePriority = Config.GetPriorityList(typeof (CompletionType), "CodeExplorerPriorityList");
-                return _explorerBranchTypePriority;
-            }
-        }
-        private static List<int> _explorerBranchTypePriority;
-
-        /// <summary>
         ///  gets or sets the total items currently displayed in the form
         /// </summary>
-        public int TotalItems { get; set; }
+        private int TotalItems { get; set; }
 
         // remember the original list of items
         private List<CodeExplorerItem> _initialObjectsList;
@@ -120,7 +102,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         private OLVColumn _displayText;
         private FastObjectListView fastOLV;
-        
+
         #endregion
 
         #region constructor
@@ -204,9 +186,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonCleanText.BackGrndImage = ImageResources.eraser;
             buttonExpandRetract.BackGrndImage = ImageResources.collapse;
             buttonRefresh.BackGrndImage = ImageResources.refresh;
-            buttonSort.BackGrndImage = ImageResources.numerical_sorting_12;
             buttonIncludeExternal.BackGrndImage = ImageResources.External;
             buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
+
+            RefreshSortButton();
 
             // Register buttons to events
             buttonCleanText.ButtonPressed += buttonCleanText_Click;
@@ -221,7 +204,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             toolTipHtml.SetToolTip(buttonExpandRetract, "Toggle <b>Expand/Collapse</b>");
             toolTipHtml.SetToolTip(buttonCleanText, "<b>Clean</b> the current text filter");
             toolTipHtml.SetToolTip(buttonRefresh, "Click to <b>Refresh</b> the tree");
-            toolTipHtml.SetToolTip(buttonSort, "Toggle <b>Categories/Code order sorting</b>");
+            toolTipHtml.SetToolTip(buttonSort, "Choose the way the items are sorted :<br>- Natural order (code order)<br>-Alphabetical order<br>-Uncategorized, unsorted");
             toolTipHtml.SetToolTip(buttonIncludeExternal, "Toggle on/off <b>the display</b> of external items in the list<br>(i.e. will a 'run' statement defined in a included file (.i) appear in this list or not)");
             toolTipHtml.SetToolTip(textBoxFilter, "Allows to <b>filter</b> the items of the list below");
 
@@ -289,9 +272,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <param name="args"></param>
         private static void FastOlvOnFormatCell(object sender, FormatCellEventArgs args) {
             CodeExplorerItem obj = (CodeExplorerItem) args.Model;
+            var curScope = ParserHandler.GetScopeOfLine(Npp.Line.CurrentLine);
 
             // currently selected block
-            if (!obj.IsNotBlock && obj.DisplayText.EqualsCi(ParserHandler.GetCarretLineOwnerName(Npp.Line.CurrentLine))) {
+            if (curScope != null && !obj.IsNotBlock && obj.DisplayText.Equals(curScope.Name)) {
                 RowBorderDecoration rbd = new RowBorderDecoration {
                     FillBrush = new SolidBrush(Color.FromArgb(50, ThemeManager.Current.MenuFocusedBack)),
                     BorderPen = new Pen(Color.FromArgb(128, ThemeManager.Current.MenuFocusedBack.IsColorDark() ? ControlPaint.Light(ThemeManager.Current.MenuFocusedBack, 0.10f) : ControlPaint.Dark(ThemeManager.Current.MenuFocusedBack, 0.10f)), 1),
@@ -338,8 +322,10 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Apply thememanager theme to the treeview
         /// </summary>
         public void StyleOvlTree() {
-            OlvStyler.StyleIt(fastOLV, StrEmptyList);
-            fastOLV.DefaultRenderer = new FilteredItemTreeRenderer();
+            this.SafeInvoke(form => {
+                OlvStyler.StyleIt(fastOLV, StrEmptyList);
+                fastOLV.DefaultRenderer = new FilteredItemTreeRenderer();
+            });
         }
 
         #endregion
@@ -351,27 +337,35 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// </summary>
         public void UpdateTreeData() {
             Task.Factory.StartNew(() => {
-                try {
-                    UpdateTreeDataAction();
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
-                } finally {
-                    Refreshing = false;
-                }
+                this.SafeInvoke(form => {
+                    try {
+                        if (!_updating) {
+                            _updating = true;
+                            UpdateTreeDataAction();
+                        }
+                    } catch (Exception e) {
+                        ErrorHandler.ShowErrors(e, "Error while getting the code explorer content");
+                    } finally {
+                        _updating = false;
+                        Refreshing = false;
+                    }
+                });
             });
         }
 
         private void UpdateTreeDataAction() {
+
             // get the list of items
-            var tempList = ParserHandler.GetParsedExplorerItemsList();
-            if (tempList == null || tempList.Count == 0)
+            var tempList = ParserHandler.ParserVisitor.ParsedExplorerItemsList.ToList();
+            if (tempList.Count == 0)
                 return;
 
             _initialObjectsList = new List<CodeExplorerItem>();
 
-            if (!_displayUnSorted) {
+            if (Config.Instance.CodeExplorerSortingType != SortingType.Unsorted) {
+
                 // we built the tree "manually"
-                tempList.Sort(new ExplorerObjectSortingClass());
+                tempList.Sort(new ExplorerObjectSortingClass(Config.Instance.CodeExplorerSortingType));
 
                 HashSet<CodeExplorerBranch> foundBranches = new HashSet<CodeExplorerBranch>();
 
@@ -383,7 +377,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
                     // add an extra item that will be a new branch
                     if (!item.IsRoot && !foundBranches.Contains(item.Branch)) {
-                        var branchDisplayText = ((DisplayAttr) item.Branch.GetAttributes()).Name;
+                        var branchDisplayText = item.Branch.GetDescription();
 
                         currentLvl1Parent = new CodeExplorerItem {
                             DisplayText = branchDisplayText,
@@ -472,17 +466,8 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 _initialObjectsList = tempList;
             }
 
-            // invoke on ui thread
-            if (IsHandleCreated) {
-                BeginInvoke((Action) delegate {
-                    try {
-                        TotalItems = _initialObjectsList.Count;
-                        ApplyFilter();
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error while displaying the code explorer content");
-                    }
-                });
-            }
+            TotalItems = _initialObjectsList.Count;
+            ApplyFilter();
         }
 
         #endregion
@@ -492,7 +477,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// <summary>
         /// Executed when the user double click an item or press enter
         /// </summary>
-        public void OnActivateItem() {
+        private void OnActivateItem() {
             var curItem = GetCurrentItem();
             if (curItem == null)
                 return;
@@ -531,7 +516,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
 
         #region on key events
 
-        public bool OnKeyDown(Keys key) {
+        private bool OnKeyDown(Keys key) {
             bool handled = true;
             // down and up change the selection
             if (key == Keys.Up) {
@@ -593,7 +578,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 _initialObjectsList.ForEach(data => data.FilterApply(_filterByText));
             } catch (Exception e) {
                 if (!(e is NullReferenceException))
-                    ErrorHandler.Log(e.ToString());
+                    ErrorHandler.LogError(e);
             }
             if (!_isFiltering) {
                 fastOLV.SetObjects(_initialObjectsList);
@@ -602,7 +587,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
             }
 
             // display as tree or flat list?
-            ((FilteredItemTreeRenderer)fastOLV.DefaultRenderer).DoNotDrawTree = _displayUnSorted || _isFiltering;
+            ((FilteredItemTreeRenderer)fastOLV.DefaultRenderer).DoNotDrawTree = (Config.Instance.CodeExplorerSortingType == SortingType.Unsorted) || _isFiltering;
 
             // apply the filter, need to match the filter + need to be an active type (Selector button activated)
             fastOLV.ModelFilter = new ModelFilter(FilterPredicate);
@@ -613,7 +598,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             // reposition the cursor in the list
             if (TotalItems > 0) {
                 fastOLV.SelectedIndex = Math.Max(0, Math.Min(curPos.X, TotalItems - 1));
-                fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+                try {
+                    fastOLV.TopItemIndex = Math.Max(0, Math.Min(curPos.Y, TotalItems - 1));
+                } catch(Exception) {
+                    // ignored
+                }
             }
         }
 
@@ -630,7 +619,7 @@ namespace _3PA.MainFeatures.CodeExplorer {
                 output = item.FilterFullyMatch;
 
                 // when filtering, only display items not branches
-                if (_displayUnSorted || _isFiltering)
+                if (Config.Instance.CodeExplorerSortingType == SortingType.Unsorted || _isFiltering)
                     output = output && !item.CanExpand;
                 else
                     // branches it belongs to must be expanded
@@ -647,40 +636,42 @@ namespace _3PA.MainFeatures.CodeExplorer {
         /// Get the current selected item
         /// </summary>
         /// <returns></returns>
-        public CodeExplorerItem GetCurrentItem() {
+        private CodeExplorerItem GetCurrentItem() {
             try {
                 if (fastOLV.SelectedItem != null)
                     return (CodeExplorerItem)fastOLV.SelectedItem.RowObject;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
             return null;
         }
 
-        internal void Redraw() {
-            fastOLV.Invalidate();
+        public void Redraw() {
+            this.SafeInvoke(form => { fastOLV.Invalidate(); });
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
-        public void GiveFocustoTextBox() {
+        private void GiveFocustoTextBox() {
             textBoxFilter.Focus();
         }
 
         /// <summary>
         /// Explicit
         /// </summary>
-        public void ClearFilter() {
+        private void ClearFilter() {
             textBoxFilter.Text = "";
             FilterByText = "";
             textBoxFilter.Invalidate();
         }
 
         public void RefreshParserAndCodeExplorer() {
-            ClearFilter();
-            ParserHandler.SavedParserVisitors.Clear();
-            Plug.OnDocumentSwitched();
+            this.SafeInvoke(form => {
+                ClearFilter();
+                ParserHandler.ParserVisitor.ClearSavedParserVisitors();
+                Plug.DoNppDocumentSwitched();
+            });
         }
 
         #endregion
@@ -710,15 +701,20 @@ namespace _3PA.MainFeatures.CodeExplorer {
         }
 
         private void buttonSort_Click(object sender, EventArgs e) {
-            _displayUnSorted = !_displayUnSorted;
-
+            Config.Instance.CodeExplorerSortingType++;
+            if (Config.Instance.CodeExplorerSortingType > SortingType.Unsorted)
+                Config.Instance.CodeExplorerSortingType = SortingType.NaturalOrder;
             ClearFilter();
             UpdateTreeData();
 
-            buttonSort.BackGrndImage = _displayUnSorted ? ImageResources.clear_filters : ImageResources.numerical_sorting_12;
-            buttonSort.Invalidate();
+            RefreshSortButton();
 
             Npp.GrabFocus();
+        }
+
+        private void RefreshSortButton() {
+            buttonSort.BackGrndImage = Config.Instance.CodeExplorerSortingType == SortingType.Unsorted ? ImageResources.clear_filters : (Config.Instance.CodeExplorerSortingType == SortingType.Alphabetical ? ImageResources.alphabetical_sorting : ImageResources.numerical_sorting);
+            buttonSort.Invalidate();
         }
 
         private void buttonCleanText_Click(object sender, EventArgs e) {
@@ -744,9 +740,19 @@ namespace _3PA.MainFeatures.CodeExplorer {
             buttonIncludeExternal.UseGreyScale = !Config.Instance.CodeExplorerDisplayExternalItems;
 
             // parse document
-            Plug.OnDocumentSwitched();
+            Plug.DoNppDocumentSwitched();
 
             Npp.GrabFocus();
+        }
+
+        #endregion
+
+        #region SortingType
+
+        public enum SortingType {
+            NaturalOrder = 0,
+            Alphabetical = 1,
+            Unsorted = 2
         }
 
         #endregion
@@ -759,10 +765,30 @@ namespace _3PA.MainFeatures.CodeExplorer {
     /// Class used in objectlist.Sort method
     /// </summary>
     internal class ExplorerObjectSortingClass : IComparer<CodeExplorerItem> {
+
+        /// <summary>
+        /// returns the ranking of each BranchType, helps sorting them as we wish
+        /// </summary>
+        public static List<int> GetPriorityList {
+            get {
+                if (_explorerBranchTypePriority != null) return _explorerBranchTypePriority;
+                _explorerBranchTypePriority = Config.GetPriorityList(typeof(CompletionType), "CodeExplorerPriorityList");
+                return _explorerBranchTypePriority;
+            }
+        }
+
+        private static List<int> _explorerBranchTypePriority;
+
+        private CodeExplorerForm.SortingType _sortingType;
+
+        public ExplorerObjectSortingClass(CodeExplorerForm.SortingType sortingType) {
+            _sortingType = sortingType;
+        }
+
         public int Compare(CodeExplorerItem x, CodeExplorerItem y) {
 
             // compare first by BranchType
-            int compare = CodeExplorerForm.GetPriorityList[(int)x.Branch].CompareTo(CodeExplorerForm.GetPriorityList[(int)y.Branch]);
+            int compare = GetPriorityList[(int)x.Branch].CompareTo(GetPriorityList[(int)y.Branch]);
             if (compare != 0) return compare;
 
             // compare by IconType
@@ -770,8 +796,11 @@ namespace _3PA.MainFeatures.CodeExplorer {
             if (compare != 0) return compare;
 
             // sort by display text
-            compare = string.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
-            if (compare != 0) return compare;
+            if (_sortingType == CodeExplorerForm.SortingType.Alphabetical) {
+                compare = String.Compare(x.DisplayText, y.DisplayText, StringComparison.CurrentCultureIgnoreCase);
+                if (compare != 0) return compare;
+            }
+
             return x.GoToLine.CompareTo(y.GoToLine);
         }
     }

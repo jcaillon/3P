@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         }
 
         private static DateTime _startTime;
-        
+
         /// <summary>
         /// Add each files/folders of a given path to the output List of FileObject,
         /// can be set to be recursive,
@@ -209,7 +209,7 @@ namespace _3PA.MainFeatures.FileExplorer {
         /// </summary>
         public static void UpdateMenuItemChecked() {
             if (FakeForm == null) return;
-            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible ? 1 : 0);
+            WinApi.SendMessage(Npp.HandleNpp, NppMsg.NPPM_SETMENUITEMCHECK, UnmanagedExports.FuncItems.Items[DockableCommandIndex]._cmdID, FakeForm.Visible);
             Config.Instance.FileExplorerVisible = FakeForm.Visible;
         }
 
@@ -273,9 +273,13 @@ namespace _3PA.MainFeatures.FileExplorer {
         I,
         Lst,
         P,
+        Pl,
         R,
         T,
-        W
+        W,
+        Xml,
+        Xref,
+        Zip
     }
 
     /// <summary>

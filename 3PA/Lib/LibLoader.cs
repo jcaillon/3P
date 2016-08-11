@@ -49,7 +49,7 @@ namespace _3PA.Lib {
                         var lib = (byte[])Resources.ResourceManager.GetObject(requestedAssembly.Name);
                         if (lib != null) {
                             if (Npp.NumberOfNppStarted <= 1)
-                                File.WriteAllBytes(pathToLib, lib);
+                                Utils.FileWriteAllBytes(pathToLib, lib);
                         } else {
                             // the library doesn't exist in 3P!
                             return null;

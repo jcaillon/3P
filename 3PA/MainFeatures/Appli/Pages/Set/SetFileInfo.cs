@@ -23,7 +23,7 @@ using System.Linq;
 using YamuiFramework.Controls;
 using _3PA.Images;
 using _3PA.Lib;
-using _3PA.MainFeatures.ProgressExecutionNs;
+using _3PA.MainFeatures.Pro;
 
 namespace _3PA.MainFeatures.Appli.Pages.Set {
     internal partial class SetFileInfo : YamuiPage {
@@ -43,12 +43,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             // add event handlers
             cb_info.SelectedIndexChanged += SelectedIndexChanged;
             bt_ok.ButtonPressed += BtOkOnButtonPressed;
+            bt_ok.BackGrndImage = ImageResources.Save;
             bt_cancel.ButtonPressed += BtCancelOnButtonPressed;
+            bt_cancel.BackGrndImage = ImageResources.Cancel;
             bt_clear.ButtonPressed += BtClearOnButtonPressed;
+            bt_clear.BackGrndImage = ImageResources.ClearAll;
             bt_default.ButtonPressed += BtDefaultOnButtonPressed;
+            bt_default.BackGrndImage = ImageResources.UndoUserAction;
             bt_today.ButtonPressed += BtTodayOnButtonPressed;
+            bt_today.BackGrndImage = ImageResources.Calendar;
             bt_today.Click += (sender, args) => { fl_correctionDate.Text = DateTime.Now.ToString("dd/MM/yy"); };
             bt_delete.ButtonPressed += BtDeleteOnButtonPressed;
+            bt_delete.BackGrndImage = ImageResources.Delete;
 
             toolTip.SetToolTip(bt_today, "Click to automatically fill the <i>date</i> field");
 

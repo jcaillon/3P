@@ -46,14 +46,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.tooltip.MaximumSize = new System.Drawing.Size(0, 0);
             this.tooltip.OwnerDraw = true;
             this.tooltip.ReshowDelay = 10;
-            this.tooltip.TooltipCssClass = "htmltooltip";
             this.tooltip.UseAnimation = false;
             this.tooltip.UseFading = false;
             // 
-            // dockedPanel
+            // scrollPanel
             // 
             // 
-            // dockedPanel.ContentPanel
+            // scrollPanel.ContentPanel
             // 
             this.scrollPanel.ContentPanel.Controls.Add(this.static_name);
             this.scrollPanel.ContentPanel.Controls.Add(this.static_keys);
@@ -61,18 +60,19 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // static_name
             // 
             this.static_name.BackColor = System.Drawing.Color.Transparent;
             this.static_name.BaseStylesheet = null;
+            this.static_name.IsSelectionEnabled = false;
             this.static_name.Location = new System.Drawing.Point(60, 29);
             this.static_name.Name = "static_name";
             this.static_name.Size = new System.Drawing.Size(33, 15);
@@ -82,9 +82,11 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // static_keys
             // 
+            this.static_keys.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.static_keys.BackColor = System.Drawing.Color.Transparent;
             this.static_keys.BaseStylesheet = null;
-            this.static_keys.Location = new System.Drawing.Point(420, 29);
+            this.static_keys.IsSelectionEnabled = false;
+            this.static_keys.Location = new System.Drawing.Point(716, 29);
             this.static_keys.Name = "static_keys";
             this.static_keys.Size = new System.Drawing.Size(103, 15);
             this.static_keys.TabIndex = 114;
@@ -109,7 +111,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.BackColor = System.Drawing.Color.White;
             this.Controls.Add(this.scrollPanel);
             this.Name = "ShortCutsPage";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

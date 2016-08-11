@@ -47,13 +47,24 @@ namespace YamuiFramework.Controls {
 
         [DefaultValue(false)]
         [Category("Yamui")]
-        public bool NoBackgroundImage { get; set; }
+        public bool NoBackgroundImage {
+            get { return _noBackgroundImage; }
+            set {
+                _contentPanel.DontUseTransparentBackGround = value;
+                _noBackgroundImage = value;
+            }
+        }
+
+        private bool _noBackgroundImage;
 
         private YamuiInternalPanel _contentPanel;
         private Point _lastMouseMove;
         private int _thumbPadding = 2;
 
-        public bool TurnOffScroll { get; private set; }
+        /// <summary>
+        /// Exposes the states of the scroll bars, true if they are displayed
+        /// </summary>
+        public bool HasScrolls { get; private set; }
 
         private Rectangle _barRectangle;
         private Rectangle _thumbRectangle;
@@ -77,8 +88,6 @@ namespace YamuiFramework.Controls {
                 Height = Height,
                 OwnerPanel = this
             };
-            if (NoBackgroundImage)
-                _contentPanel.DontUseTransparentBackGround = true;
             Controls.Add(_contentPanel);
 
             _barRectangle = new Rectangle(Width - 10, 0, 10, Height);
@@ -92,7 +101,7 @@ namespace YamuiFramework.Controls {
         protected override void OnPaint(PaintEventArgs e) {
             // paint background
             e.Graphics.Clear(YamuiThemeManager.Current.FormBack);
-            if (!NoBackgroundImage && !DesignMode) {
+            if (!HasScrolls && !NoBackgroundImage && !DesignMode) {
                 var img = YamuiThemeManager.CurrentThemeImage;
                 if (img != null) {
                     Rectangle rect = new Rectangle(ClientRectangle.Right - img.Width, ClientRectangle.Height - img.Height, img.Width, img.Height);
@@ -100,7 +109,7 @@ namespace YamuiFramework.Controls {
                 }
             }
 
-            if (!TurnOffScroll)
+            if (HasScrolls)
                 OnPaintForeground(e);
         }
 
@@ -127,7 +136,7 @@ namespace YamuiFramework.Controls {
 
         [SecuritySafeCritical]
         protected override void WndProc(ref Message message) {
-            if (!TurnOffScroll)
+            if (HasScrolls)
                 HandleWindowsProc(message);
             base.WndProc(ref message);
         }
@@ -236,15 +245,16 @@ namespace YamuiFramework.Controls {
             // if the content is not too tall, no need to display the scroll bars
             if (_contentPanel.Height <= Height) {
                 _contentPanel.Width = Width;
-                TurnOffScroll = true;
+                HasScrolls = false;
             } else {
                 // thumb heigh is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = Math.Max(Convert.ToInt32(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
+                _thumbRectangle.Height = Math.Max((int)(_barRectangle.Height * ((float)Height / _contentPanel.Height)) - _thumbPadding * 2, 10);
                 _contentPanel.Width = Width - 10;
-                TurnOffScroll = false;
+                HasScrolls = true;
             }
 
-            _contentPanel.DontUseTransparentBackGround = !TurnOffScroll;
+            if (!NoBackgroundImage)
+                _contentPanel.DontUseTransparentBackGround = HasScrolls;
 
             DoScroll(0);
         }

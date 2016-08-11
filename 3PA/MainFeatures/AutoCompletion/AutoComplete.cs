@@ -21,12 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using _3PA.Interop;
 using _3PA.Lib;
 using _3PA.MainFeatures.Parser;
-using Timer = System.Windows.Forms.Timer;
 
 namespace _3PA.MainFeatures.AutoCompletion {
 
@@ -34,6 +32,15 @@ namespace _3PA.MainFeatures.AutoCompletion {
     /// This class handles the AutoCompletionForm
     /// </summary>
     internal static class AutoComplete {
+
+        #region events
+
+        /// <summary>
+        /// published when the list of static items (keywords, database info, snippets) is updated
+        /// </summary>
+        public static event Action OnUpdatedStaticItems;
+
+        #endregion
 
         #region field
 
@@ -76,26 +83,28 @@ namespace _3PA.MainFeatures.AutoCompletion {
         private static bool _needToSetActiveTypes;
 
         // contains the list of items currently display in the form
-        private static List<CompletionData> _currentItems = new List<CompletionData>();
+        private static List<CompletionItem> _currentItems = new List<CompletionItem>();
 
-        // contains the whole list of items (minus the fields) to show, can be updated through FillItems() method
-        private static List<CompletionData> _savedAllItems = new List<CompletionData>();
+        // contains the whole list of items (minus the fields) to show
+        private static List<CompletionItem> _savedAllItems = new List<CompletionItem>();
 
         // contains the list of items that do not depend on the current file (keywords, database, snippets)
-        private static List<CompletionData> _staticItems = new List<CompletionData>();
-
-        // holds the display order of the CompletionType
-        private static List<int> _completionTypePriority;
+        private static List<CompletionItem> _staticItems = new List<CompletionItem>();
 
         /// <summary>
-        /// is used to make sure that 2 different threads dont try to access
-        /// the same resource (_parserTimer) at the same time, which would be problematic
+        /// This dictionnary is what is used to remember the ranking of each word for the current session
+        /// (otherwise this info is lost since we clear the ParsedItemsList each time we parse!)
         /// </summary>
-        private static ReaderWriterLockSlim _lock = new ReaderWriterLockSlim();
+        private static Dictionary<string, int> _displayTextRankingParsedItems = new Dictionary<string, int>();
 
-        private static ReaderWriterLockSlim _lockShowList = new ReaderWriterLockSlim();
+        /// <summary>
+        /// Same as above but for static stuff (= database)
+        /// (it is especially useful for fields because we recreate the list each time!
+        /// otherwise it is not that useful indeed)
+        /// </summary>
+        private static Dictionary<string, int> _displayTextRankingDatabase = new Dictionary<string, int>();
 
-        private static Timer _parserTimer;
+        private static ReaderWriterLockSlim _itemsListLock = new ReaderWriterLockSlim();
 
         private static string _lastRememberedKeyword = "";
 
@@ -103,22 +112,68 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
         #endregion
 
-        #region public misc.
+        #region public accessors (thread safe)
 
         /// <summary>
-        /// A dictionnary of known keywords and database info
+        /// List of the current items in the autocompletion (thread safe)
         /// </summary>
-        public static Dictionary<string, CompletionType> KnownStaticItems { get; private set; }
-
-        /// <summary>
-        /// returns the ranking of each CompletionType, helps sorting them as we wish
-        /// </summary>
-        public static List<int> GetPriorityList {
+        public static List<CompletionItem> CurrentItems {
             get {
-                if (_completionTypePriority != null) return _completionTypePriority;
-                _completionTypePriority = Config.GetPriorityList(typeof(CompletionType), "AutoCompletePriorityList");
-                return _completionTypePriority;
+                if (_itemsListLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _currentItems;
+                    } finally {
+                        _itemsListLock.ExitReadLock();
+                    }
+                }
+                return new List<CompletionItem>();
             }
+        }
+
+        /// <summary>
+        /// List of all the items (minus fields) (thread safe)
+        /// </summary>
+        public static List<CompletionItem> SavedAllItems {
+            get {
+                if (_itemsListLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _savedAllItems;
+                    } finally {
+                        _itemsListLock.ExitReadLock();
+                    }
+                }
+                return new List<CompletionItem>();
+            }
+        }
+
+        /// <summary>
+        /// List of static items (thread safe)
+        /// </summary>
+        public static List<CompletionItem> StaticItems {
+            get {
+                if (_itemsListLock.TryEnterReadLock(-1)) {
+                    try {
+                        return _staticItems;
+                    } finally {
+                        _itemsListLock.ExitReadLock();
+                    }
+                }
+                return new List<CompletionItem>();
+            }
+        }
+
+        #endregion
+
+        #region public misc
+
+        /// <summary>
+        /// Called from CTRL + Space shortcut
+        /// </summary>
+        public static void OnShowCompleteSuggestionList() {
+            ParserHandler.ParseCurrentDocument();
+            _openedFromShortCut = true;
+            _openedFromShortCutPosition = Npp.CurrentPosition;
+            UpdateAutocompletion();
         }
 
         /// <summary>
@@ -147,13 +202,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                     if (tableFound != null) {
                         var fieldFound = DataBase.FindFieldByName(keyword, tableFound);
                         if (fieldFound != null) {
-                            RememberUseOf(new CompletionData {
+                            RememberUseOf(new CompletionItem {
                                 FromParser = false,
                                 DisplayText = fieldFound.Name,
                                 Type = CompletionType.Field,
                                 Ranking = 0
                             });
-                            ParserHandler.RememberUseOfDatabaseItem(fieldFound.Name);
+                            RememberUseOfDatabaseItem(fieldFound.Name);
                             output = keyword.ConvertCase(tableFound.IsTempTable ? 4 : Config.Instance.DatabaseChangeCaseMode, fieldFound.Name);
                         }
                     }
@@ -166,10 +221,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// try to match the keyword with an item in the autocomplete list
         /// </summary>
         /// <returns></returns>
-        public static CompletionData FindInSavedItems(string keyword, int line) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), line);
+        public static CompletionItem FindInSavedItems(string keyword, int line) {
+            var filteredList = AutoCompletionForm.ExternalFilterItems(SavedAllItems.ToList(), line);
             if (filteredList == null || filteredList.Count <= 0) return null;
-            CompletionData found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
+            CompletionItem found = filteredList.FirstOrDefault(data => data.DisplayText.EqualsCi(keyword));
             return found;
         }
 
@@ -178,8 +233,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// Uses the position to filter the list the same way the autocompletion form would
         /// </summary>
         /// <returns></returns>
-        public static List<CompletionData> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
-            var filteredList = AutoCompletionForm.ExternalFilterItems(_savedAllItems.ToList(), Npp.LineFromPosition(position), dontCheckLine);
+        public static List<CompletionItem> FindInCompletionData(string keyword, int position, bool dontCheckLine = false) {
+            var filteredList = AutoCompletionForm.ExternalFilterItems(SavedAllItems.ToList(), Npp.LineFromPosition(position), dontCheckLine);
             if (filteredList == null || filteredList.Count <= 0) return null;
             var found = filteredList.Where(data => data.DisplayText.EqualsCi(keyword)).ToList();
             if (found.Count > 0)
@@ -197,7 +252,7 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the keyword currently selected in the completion list
         /// </summary>
         /// <returns></returns>
-        public static CompletionData GetCurrentSuggestion() {
+        public static CompletionItem GetCurrentSuggestion() {
             return _form.GetCurrentSuggestion();
         }
 
@@ -206,249 +261,182 @@ namespace _3PA.MainFeatures.AutoCompletion {
         #region core mechanism
 
         /// <summary>
-        /// Call this method to parse the current document after a small delay 
-        /// (delay that is reset each time this function is called, so if you call it continously, nothing is done)
-        /// or set doNow = true to do it without waiting a timer
-        /// </summary>
-        /// <param name="doNow"></param>
-        public static void ParseCurrentDocument(bool doNow = false) {
-            // parse immediatly
-            if (doNow) {
-                ParseCurrentDocumentTick();
-                return;
-            }
-
-            // parse in 1s, if nothing delays the timer
-            if (_lock.TryEnterWriteLock(500)) {
-                try {
-                    if (_parserTimer == null) {
-                        _parserTimer = new Timer {Interval = 800};
-                        _parserTimer.Tick += (sender, args) => ParseCurrentDocumentTick();
-                        _parserTimer.Start();
-                    } else {
-                        // reset timer
-                        _parserTimer.Stop();
-                        _parserTimer.Start();
-                    }
-                } finally {
-                    _lock.ExitWriteLock();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Called when the _parserTimer ticks
-        /// refresh the Items list with all the static items
-        /// as well as the dynamic items found by the parser
-        /// </summary>
-        private static void ParseCurrentDocumentTick() {
-            Task.Factory.StartNew(() => {
-                if (_lock.TryEnterWriteLock(500)) {
-                    try {
-                        // delete timer
-                        if (_parserTimer != null) {
-                            _parserTimer.Dispose();
-                            _parserTimer = null;
-                        }
-
-                        //------------
-                        //var watch = Stopwatch.StartNew();
-
-                        CodeExplorer.CodeExplorer.Refreshing = true;
-
-                        // init with static items
-                        _savedAllItems.Clear();
-                        _savedAllItems = _staticItems.ToList();
-
-                        do {
-
-                            // we launch the parser, that will fill the DynamicItems
-                            ParserHandler.RefreshParser();
-
-                            // we had the dynamic items to the list
-                            _savedAllItems.AddRange(ParserHandler.GetParsedItemsList());
-
-                            // update autocompletion
-                            CurrentTypeOfList = TypeOfList.Reset;
-                            if (IsVisible)
-                                UpdateAutocompletion();
-
-                        } while (!ParserHandler.LastParsedFilePath.Equals(Plug.CurrentFilePath));
-
-                        // ## for the code explorer we ask it to update itself ##
-                        CodeExplorer.CodeExplorer.UpdateCodeExplorer();
-
-                        //watch.Stop();
-                        //UserCommunication.Notify("Updated in " + watch.ElapsedMilliseconds + " ms", 1);
-                        //------------
-
-                    } catch (Exception e) {
-                        ErrorHandler.ShowErrors(e, "Error in ParseCurrentDocumentTick");
-                    } finally {
-                        _lock.ExitWriteLock();
-                    }
-                }
-            });
-        }
-
-        /// <summary>
         /// this method should be called at the plugin's start and when we change the current database
         /// It refreshed the "static" items of the autocompletion : keywords, snippets, databases, tables, sequences
         /// </summary>
         public static void RefreshStaticItems() {
+            if (_itemsListLock.TryEnterWriteLock(-1)) {
+                try {
 
-            // subscribe to events that indicate the static items should be updated
-            if (!_initialized) {
-                DataBase.OnDatabaseInfoUpdated += RefreshStaticItems;
+                    _staticItems.Clear();
+                    _staticItems = Keywords.GetList().ToList();
+                    _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionItem {
+                        DisplayText = x,
+                        Type = CompletionType.Snippet,
+                        Ranking = 0,
+                        FromParser = false,
+                        Flag = 0
+                    }).ToList());
+                    _staticItems.AddRange(DataBase.GetDbList());
+                    _staticItems.AddRange(DataBase.GetSequencesList());
+                    _staticItems.AddRange(DataBase.GetTablesList());
+
+                    // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
+                    _staticItems.Sort(new CompletionDataSortingClass());
+
+                } finally {
+                    _itemsListLock.ExitWriteLock();
+                }
             }
-
-            _staticItems.Clear();
-            _staticItems = Keywords.GetList().ToList();
-            _staticItems.AddRange(Snippets.Keys.Select(x => new CompletionData {
-                DisplayText = x,
-                Type = CompletionType.Snippet,
-                Ranking = 0,
-                FromParser = false,
-                Flag = 0
-            }).ToList());
-            _staticItems.AddRange(DataBase.GetDbList());
-            _staticItems.AddRange(DataBase.GetSequencesList());
-            _staticItems.AddRange(DataBase.GetTablesList());
-
-            // we do the sorting (by type and then by ranking), doing it now will reduce the time for the next sort()
-            _staticItems.Sort(new CompletionDataSortingClass());
-            _savedAllItems = _staticItems.ToList();
-
-            // Update the known items!
-            KnownStaticItems = DataBase.GetDbDictionnary();
-            foreach (var keyword in Keywords.GetList().Where(keyword => !KnownStaticItems.ContainsKey(keyword.DisplayText))) {
-                KnownStaticItems[keyword.DisplayText] = keyword.Type;
-            }
-
-            // Update the form
-            CurrentTypeOfList = TypeOfList.Reset;
-            if (IsVisible)
-                UpdateAutocompletion();
 
             // update parser?
             if (_initialized)
-                ParseCurrentDocument();
+                ParserHandler.ParseCurrentDocument();
 
             _initialized = true;
+
+            // OnUpdatedStaticItems
+            if (OnUpdatedStaticItems != null)
+                OnUpdatedStaticItems();
+
+            // refresh the list of all the saved items (static + dynamic)
+            RefreshDynamicItems();
         }
 
         /// <summary>
-        /// Called from CTRL + Space shortcut
+        /// Method called when the event OnParseEnded triggers, i.e. when we just parsed the document and
+        /// need to refresh the autocompletion
         /// </summary>
-        public static void OnShowCompleteSuggestionList() {
-            ParseCurrentDocument();
-            _openedFromShortCut = true;
-            _openedFromShortCutPosition = Npp.CurrentPosition;
-            UpdateAutocompletion();
+        public static void RefreshDynamicItems() {
+            if (_itemsListLock.TryEnterWriteLock(-1)) {
+                try {
+
+                    // init with static items
+                    _savedAllItems.Clear();
+                    _savedAllItems = _staticItems.ToList();
+
+                    // we add the dynamic items to the list
+                    _savedAllItems.AddRange(ParserHandler.ParserVisitor.ParsedCompletionItemsList.ToList());
+
+                } finally {
+                    _itemsListLock.ExitWriteLock();
+                }
+            }
+
+            // update the autocompletion (if shown)
+            CurrentTypeOfList = TypeOfList.Reset;
+            if (IsVisible)
+                UpdateAutocompletion();
         }
 
         /// <summary>
+        /// Set the list of current items, handles the lock
+        /// </summary>
+        private static void SetCurrentItems(List<CompletionItem> currentItems) {
+            if (_itemsListLock.TryEnterWriteLock(-1)) {
+                try {
+                    _currentItems = currentItems;
+                } finally {
+                    _itemsListLock.ExitWriteLock();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the CURRENT ITEMS LIST,
         /// handles the opening or the closing of the autocompletion form on key input, 
         /// it is only called when the user adds or delete a char
         /// </summary>
         public static void UpdateAutocompletion() {
-            if (_lockShowList.TryEnterWriteLock(500)) {
-                try {
-                    if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
-                        return;
+            if (!Config.Instance.AutoCompleteOnKeyInputShowSuggestions && !_openedFromShortCut)
+                return;
 
-                    // dont show in string/comments..?
-                    if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
-                        return;
+            // dont show in string/comments..?
+            if (!_openedFromShortCut && !IsVisible && !Config.Instance.AutoCompleteShowInCommentsAndStrings && !Style.IsCarretInNormalContext(Npp.CurrentPosition))
+                return;
 
-                    // get current word, current previous word (table or database name)
-                    int nbPoints;
-                    string previousWord = "";
-                    var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
-                    var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
-                    var splitted = keyword.Split('.');
-                    string lastCharBeforeWord = "";
-                    switch (nbPoints) {
-                        case 0:
-                            int startPos = strOnLeft.Length - 1 - keyword.Length;
-                            lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : string.Empty;
-                            break;
-                        case 1:
-                            previousWord = splitted[0];
-                            keyword = splitted[1];
-                            break;
-                        case 2:
-                            previousWord = splitted[1];
-                            keyword = splitted[2];
-                            break;
-                        default:
-                            keyword = splitted[nbPoints];
-                            break;
-                    }
+            // get current word, current previous word (table or database name)
+            int nbPoints;
+            string previousWord = "";
+            var strOnLeft = Npp.GetTextOnLeftOfPos(Npp.CurrentPosition);
+            var keyword = Abl.ReadAblWord(strOnLeft, false, out nbPoints);
+            var splitted = keyword.Split('.');
+            string lastCharBeforeWord = "";
+            switch (nbPoints) {
+                case 0:
+                    int startPos = strOnLeft.Length - 1 - keyword.Length;
+                    lastCharBeforeWord = startPos >= 0 ? strOnLeft.Substring(startPos, 1) : String.Empty;
+                    break;
+                case 1:
+                    previousWord = splitted[0];
+                    keyword = splitted[1];
+                    break;
+                case 2:
+                    previousWord = splitted[1];
+                    keyword = splitted[2];
+                    break;
+                default:
+                    keyword = splitted[nbPoints];
+                    break;
+            }
 
-                    // list of fields or tables
-                    if (!string.IsNullOrEmpty(previousWord)) {
-                        // are we entering a field from a known table?
-                        var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
-                        if (foundTable != null) {
-                            if (CurrentTypeOfList != TypeOfList.Fields) {
-                                CurrentTypeOfList = TypeOfList.Fields;
-                                _currentItems = DataBase.GetFieldsList(foundTable).ToList();
-                            }
-                            ShowSuggestionList(keyword);
-                            return;
-                        }
+            // list of fields or tables
+            if (!string.IsNullOrEmpty(previousWord)) {
 
-                        // are we entering a table from a connected database?
-                        var foundDatabase = DataBase.FindDatabaseByName(previousWord);
-                        if (foundDatabase != null) {
-                            if (CurrentTypeOfList != TypeOfList.Tables) {
-                                CurrentTypeOfList = TypeOfList.Tables;
-                                _currentItems = DataBase.GetTablesList(foundDatabase).ToList();
-                            }
-                            ShowSuggestionList(keyword);
-                            return;
-                        }
-                    }
-
-                    // close if there is nothing to suggest
-                    if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (string.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
-                        Close();
-                        return;
-                    }
-
-                    // if the current is directly preceded by a :, we are entering an object field/method
-                    if (lastCharBeforeWord.Equals(":")) {
-                        if (CurrentTypeOfList != TypeOfList.KeywordObject) {
-                            CurrentTypeOfList = TypeOfList.KeywordObject;
-                            _currentItems = _savedAllItems;
-                        }
-                        ShowSuggestionList(keyword);
-                        return;
-                    }
-
-                    // show normal complete list
-                    if (CurrentTypeOfList != TypeOfList.Complete) {
-                        CurrentTypeOfList = TypeOfList.Complete;
-                        _currentItems = _savedAllItems;
+                // are we entering a field from a known table?
+                var foundTable = ParserHandler.FindAnyTableOrBufferByName(previousWord);
+                if (foundTable != null) {
+                    if (CurrentTypeOfList != TypeOfList.Fields) {
+                        CurrentTypeOfList = TypeOfList.Fields;
+                        SetCurrentItems(DataBase.GetFieldsList(foundTable).ToList());
                     }
                     ShowSuggestionList(keyword);
+                    return;
+                }
 
-                } catch (Exception e) {
-                    ErrorHandler.ShowErrors(e, "Error in UpdateAutocompletion");
-                } finally {
-                    _lockShowList.ExitWriteLock();
+                // are we entering a table from a connected database?
+                var foundDatabase = DataBase.FindDatabaseByName(previousWord);
+                if (foundDatabase != null) {
+                    if (CurrentTypeOfList != TypeOfList.Tables) {
+                        CurrentTypeOfList = TypeOfList.Tables;
+                        SetCurrentItems(DataBase.GetTablesList(foundDatabase).ToList());
+                    }
+                    ShowSuggestionList(keyword);
+                    return;
                 }
             }
+
+            // close if there is nothing to suggest
+            if ((!_openedFromShortCut || _openedFromShortCutPosition != Npp.CurrentPosition) && (String.IsNullOrEmpty(keyword) || keyword != null && keyword.Length < Config.Instance.AutoCompleteStartShowingListAfterXChar)) {
+                Close();
+                return;
+            }
+
+            // if the current is directly preceded by a :, we are entering an object field/method
+            if (lastCharBeforeWord.Equals(":")) {
+                if (CurrentTypeOfList != TypeOfList.KeywordObject) {
+                    CurrentTypeOfList = TypeOfList.KeywordObject;
+                    SetCurrentItems(SavedAllItems);
+                }
+                ShowSuggestionList(keyword);
+                return;
+            }
+
+            // show normal complete list
+            if (CurrentTypeOfList != TypeOfList.Complete) {
+                CurrentTypeOfList = TypeOfList.Complete;
+                SetCurrentItems(SavedAllItems);
+            }
+            ShowSuggestionList(keyword);
             
         }
 
         /// <summary>
         /// This function handles the display of the autocomplete form, create or update it
         /// </summary>
-        /// <param name="keyword"></param>
         private static void ShowSuggestionList(string keyword) {
-            if (_currentItems.Count == 0) {
+
+            if (CurrentItems.Count == 0) {
                 Close();
                 return;
             }
@@ -461,11 +449,13 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 };
                 _form.InsertSuggestion += OnInsertSuggestion;
                 _form.Show(Npp.Win32WindowNpp);
-                _form.SetItems(_currentItems);
+                _form.SetItems(CurrentItems);
             } else if (_needToSetItems) {
                 // we changed the mode, we need to Set the items of the autocompletion
-                _form.SetItems(_currentItems, _needToSetActiveTypes || !_form.Visible);
+                _form.SetItems(CurrentItems, _needToSetActiveTypes || !_form.Visible);
                 _needToSetItems = false;
+            } else {
+                _form.SortItems();
             }
 
             // only activate certain types
@@ -513,12 +503,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <summary>
         /// Method called by the form when the user accepts a suggestion (tab or enter or doubleclick)
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="tabCompletedEventArgs"></param>
-        private static void OnInsertSuggestion(object sender, TabCompletedEventArgs tabCompletedEventArgs) {
+        private static void OnInsertSuggestion(CompletionItem data) {
             try {
-                var data = tabCompletedEventArgs.CompletionItem;
-
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
                 if (Config.Instance.CodeReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
@@ -541,23 +527,20 @@ namespace _3PA.MainFeatures.AutoCompletion {
         }
 
         /// <summary>
-        /// Increase ranking of a given CompletionData
+        /// Increase ranking of a given CompletionItem
         /// </summary>
-        /// <param name="data"></param>
-        private static void RememberUseOf(CompletionData data) {
+        /// <param name="item"></param>
+        private static void RememberUseOf(CompletionItem item) {
+
             // handles unwanted rank progression (when the user enter several times the same keyword)
-            if (data.DisplayText.Equals(_lastRememberedKeyword)) return;
-            _lastRememberedKeyword = data.DisplayText;
+            if (item.DisplayText.Equals(_lastRememberedKeyword)) return;
+            _lastRememberedKeyword = item.DisplayText;
 
-            data.Ranking++;
-            if (data.FromParser)
-                ParserHandler.RememberUseOfParsedItem(data.DisplayText);
-            else if (data.Type != CompletionType.Keyword && data.Type != CompletionType.Snippet)
-                ParserHandler.RememberUseOfDatabaseItem(data.DisplayText);
-
-            // sort the items, to reflect the latest ranking
-            if (_form != null)
-                _form.SortItems();
+            item.Ranking++;
+            if (item.FromParser)
+                RememberUseOfParsedItem(item.DisplayText);
+            else if (item.Type != CompletionType.Keyword && item.Type != CompletionType.Snippet)
+                RememberUseOfDatabaseItem(item.DisplayText);                
         }
 
         #endregion
@@ -582,8 +565,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
 
                 // closing the autocompletion form also closes the tooltip
                 InfoToolTip.InfoToolTip.CloseIfOpenedForCompletion();
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
@@ -595,8 +578,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
                 if (_form != null)
                     _form.ForceClose();
                 _form = null;
-            } catch (Exception x) {
-                ErrorHandler.Log(x.Message);
+            } catch (Exception e) {
+                ErrorHandler.LogError(e);
             }
         }
 
@@ -614,6 +597,52 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         public static bool IsMouseIn() {
             return WinApi.IsCursorIn(_form.Handle);
+        }
+
+        #endregion
+
+        #region handling item ranking
+
+        /// <summary>
+        /// Find ranking of a parsed item
+        /// </summary>
+        /// <param name="displayText"></param>
+        /// <returns></returns>
+        public static int FindRankingOfParsedItem(string displayText) {
+            return _displayTextRankingParsedItems.ContainsKey(displayText) ? _displayTextRankingParsedItems[displayText] : 0;
+        }
+
+        /// <summary>
+        /// Find ranking of a database item
+        /// </summary>
+        /// <param name="displayText"></param>
+        /// <returns></returns>
+        public static int FindRankingOfDatabaseItem(string displayText) {
+            return _displayTextRankingDatabase.ContainsKey(displayText) ? _displayTextRankingDatabase[displayText] : 0;
+        }
+
+        /// <summary>
+        /// remember the use of a particular item in the completion list
+        /// (for dynamic items = parsed items)
+        /// </summary>
+        /// <param name="displayText"></param>
+        public static void RememberUseOfParsedItem(string displayText) {
+            if (!_displayTextRankingParsedItems.ContainsKey(displayText))
+                _displayTextRankingParsedItems.Add(displayText, 1);
+            else
+                _displayTextRankingParsedItems[displayText]++;
+        }
+
+        /// <summary>
+        /// remember the use of a particular item in the completion list
+        /// (for database items!)
+        /// </summary>
+        /// <param name="displayText"></param>
+        public static void RememberUseOfDatabaseItem(string displayText) {
+            if (!_displayTextRankingDatabase.ContainsKey(displayText))
+                _displayTextRankingDatabase.Add(displayText, 1);
+            else
+                _displayTextRankingDatabase[displayText]++;
         }
 
         #endregion

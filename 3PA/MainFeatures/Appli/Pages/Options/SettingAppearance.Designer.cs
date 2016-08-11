@@ -59,12 +59,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.ContentPanel.Name = "ContentPanel";
             this.scrollPanel.ContentPanel.OwnerPanel = this.scrollPanel;
-            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.ContentPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.TabIndex = 0;
             this.scrollPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.scrollPanel.Location = new System.Drawing.Point(0, 0);
             this.scrollPanel.Name = "scrollPanel";
-            this.scrollPanel.Size = new System.Drawing.Size(720, 550);
+            this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
             // 
             // linkurl
@@ -96,6 +96,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel1.AutoSizeHeightOnly = true;
             this.htmlLabel1.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel1.BaseStylesheet = null;
+            this.htmlLabel1.IsSelectionEnabled = false;
             this.htmlLabel1.Location = new System.Drawing.Point(25, 29);
             this.htmlLabel1.Name = "htmlLabel1";
             this.htmlLabel1.Size = new System.Drawing.Size(157, 15);
@@ -109,6 +110,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlLabel7.AutoSizeHeightOnly = true;
             this.htmlLabel7.BackColor = System.Drawing.Color.Transparent;
             this.htmlLabel7.BaseStylesheet = null;
+            this.htmlLabel7.IsSelectionEnabled = false;
             this.htmlLabel7.Location = new System.Drawing.Point(25, 86);
             this.htmlLabel7.Name = "htmlLabel7";
             this.htmlLabel7.Size = new System.Drawing.Size(157, 15);
@@ -171,7 +173,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.toolTip.MaximumSize = new System.Drawing.Size(0, 0);
             this.toolTip.OwnerDraw = true;
             this.toolTip.ReshowDelay = 100;
-            this.toolTip.TooltipCssClass = "htmltooltip";
             // 
             // SettingAppearance
             // 
@@ -179,7 +180,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.scrollPanel);
             this.Name = "SettingAppearance";
-            this.Size = new System.Drawing.Size(720, 550);
+            this.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.ContentPanel.ResumeLayout(false);
             this.scrollPanel.ContentPanel.PerformLayout();
             this.scrollPanel.ResumeLayout(false);

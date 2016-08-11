@@ -19,16 +19,16 @@
 #endregion
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.IO;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Text;
-
-// ReSharper disable InconsistentNaming
 
 namespace _3PA.Interop {
 
+    [SuppressUnmanagedCodeSecurity]
+    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class WinApi {
 
         #region SendMessage
@@ -52,6 +52,9 @@ namespace _3PA.Interop {
 
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam);
 
         [DllImport("user32.dll")]
         public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam);
@@ -89,6 +92,10 @@ namespace _3PA.Interop {
         #endregion
 
         #region Api
+
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
 
         [DllImport("user32.dll")]
         public static extern bool ClientToScreen(IntPtr hWnd, ref Point lpPoint);
