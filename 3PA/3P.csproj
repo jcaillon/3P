@@ -517,6 +517,7 @@
     <Content Include="Images\DockableExplorer\buttons\refreshing.png" />
     <Content Include="Images\DockableExplorer\CodeExplorerLogo.png" />
     <Content Include="Images\FileExplorer\BringToFront.png" />
+    <Content Include="Images\FileExplorer\FtpType.png" />
     <Content Include="Images\FileExplorer\PlType.png" />
     <Content Include="Images\FileExplorer\Stop.png" />
     <Content Include="Images\FileExplorer\XmlType.png" />

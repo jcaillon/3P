@@ -387,7 +387,35 @@ namespace _3PA.MainFeatures.Pro {
         /// Deploy the current file, if it's a progress file then compile it, otherwise follow the transer rules of step 1
         /// </summary>
         public static void DeployCurrentFile() {
-            UserCommunication.Notify("DEPLOY : " + Npp.GetCurrentFilePath());
+            if (Abl.IsCurrentFileCompilable) {
+                // then that's just a link to compilation
+                StartProgressExec(ExecutionType.Compile);
+
+                UserCommunication.Notify("Deploying a compilable file is strictly equal as compiling it<br>The deployment rules for step 0 are applied in both case!", MessageImg.MsgInfo, "Deploy a file", "Bypass to compilation", 2);
+            } else {
+                if (ProEnvironment.Current.Deployer.IsFilePassingFilters(
+                    Plug.CurrentFilePath,
+                    ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && rule.Include).ToList(),
+                    ProEnvironment.Current.Deployer.DeployFilterRules.Where(rule => rule.Step == 1 && !rule.Include).ToList())) {
+
+                    // deploy the file for STEP 1
+                    var deployedFiles = ProEnvironment.Current.Deployer.DeployFiles(ProEnvironment.Current.Deployer.GetTransfersNeededForFile(Plug.CurrentFilePath, 1));
+                    if (deployedFiles == null || deployedFiles.Count == 0) {
+                        UserCommunication.Notify("The current file doesn't match any transfer rules for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "No transfer rules", args => {
+                            Deployer.EditRules();
+                            args.Handled = true;
+                        }, 5);
+                    } else {
+                        var hasError = deployedFiles.Exists(deploy => !deploy.IsOk);
+                        UserCommunication.NotifyUnique(Plug.CurrentFilePath, "Rules applied for <b>step 1</b>, was deploying :<br>" + ProCompilation.FormatCompilationResult(Plug.CurrentFilePath, null, deployedFiles), hasError ? MessageImg.MsgError : MessageImg.MsgOk, "Deploy a file", "Transfer results", null, hasError ? 0 : 5);
+                    }
+                } else { 
+                    UserCommunication.Notify("The current file didn't pass the deployment filters for the current environment and <b>step 1</b><br>You can modify the rules " + "here".ToHtmlLink(), MessageImg.MsgInfo, "Deploy a file", "Filtered by deployment rules", args => {
+                        Deployer.EditRules();
+                        args.Handled = true;
+                    }, 5);
+                }
+            }
         }
 
         #endregion

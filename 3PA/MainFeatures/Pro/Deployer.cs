@@ -183,15 +183,6 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Object
-
-        #region Properties
-
-        /// <summary>
-        /// The deployer works for a specific environment
-        /// </summary>
-        private ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
-
-        #endregion
         
         #region Fields
 
@@ -228,6 +219,11 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// The deployer works for a specific environment
+        /// </summary>
+        private ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
 
         /// <summary>
         /// List of deployment rules filtered + sorted for this env
@@ -397,42 +393,34 @@ namespace _3PA.MainFeatures.Pro {
 
             foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
                 foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions))) {
-                    if (!filesToCompile.Contains(filePath)) {
-
-                        bool toAdd = true;
-
-                        // test include filters
-                        if (includeFiltersList.Count > 0) {
-                            var hasMatch = false;
-                            foreach (var rule in includeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasMatch = true;
-                                    break;
-                                }
-                            }
-                            toAdd = hasMatch;
-                        }
-
-                        // test exclude filters
-                        if (excludeFiltersList.Count > 0) {
-                            var hasNoMatch = true;
-                            foreach (var rule in excludeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasNoMatch = false;
-                                    break;
-                                }
-                            }
-                            toAdd = toAdd && hasNoMatch;
-                        }
-
-                        if (toAdd)
-                            filesToCompile.Add(filePath);
-                    }
+                    if (!filesToCompile.Contains(filePath) && IsFilePassingFilters(filePath, includeFiltersList, excludeFiltersList))
+                        filesToCompile.Add(filePath);
                 }
 
             }
 
             return filesToCompile;
+        }
+
+        /// <summary>
+        /// Returns true if the given file path passes the include + exclude filters
+        /// </summary>
+        public bool IsFilePassingFilters(string filePath, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
+            bool passing = true;
+
+            // test include filters
+            if (includeFiltersList.Count > 0) {
+                var hasMatch = includeFiltersList.Any(rule => filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                passing = hasMatch;
+            }
+
+            // test exclude filters
+            if (excludeFiltersList.Count > 0) {
+                var hasNoMatch = excludeFiltersList.All(rule => !filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                passing = passing && hasNoMatch;
+            }
+
+            return passing;
         }
 
         #endregion
@@ -482,38 +470,39 @@ namespace _3PA.MainFeatures.Pro {
                 .ToNonNullList()
                 .ForEach(deploy => Utils.CreateDirectory(Path.GetDirectoryName(deploy.To)));
 
+            #region for archives (zip/pl)
+
             // for archives, compute the path to the archive file (+ make sure the directory of the archive exists)
-            deployToDo
-                .Where(deploy => deploy.DeployType <= DeployType.Archive)
-                .ToNonNullList()
-                .ForEach(deploy => {
-                    var ext = deploy.DeployType == DeployType.Prolib ? ".pl" : ".zip";
-                    var pos = deploy.To.LastIndexOf(ext, StringComparison.CurrentCultureIgnoreCase);
-                    if (pos >= 0) {
-                        var posEnd = pos + ext.Length;
-                        deploy.ArchivePath = deploy.To.Substring(0, posEnd);
-                        deploy.RelativePathInArchive = deploy.To.Substring(posEnd + 1);
+            deployToDo.Where(deploy => deploy.DeployType <= DeployType.Archive).ToNonNullList().ForEach(deploy => {
+                var ext = deploy.DeployType == DeployType.Prolib ? ".pl" : ".zip";
+                var pos = deploy.To.LastIndexOf(ext, StringComparison.CurrentCultureIgnoreCase);
+                if (pos >= 0) {
+                    var posEnd = pos + ext.Length;
+                    deploy.ArchivePath = deploy.To.Substring(0, posEnd);
+                    deploy.RelativePathInArchive = deploy.To.Substring(posEnd + 1);
 
-                        // ensure that the folder to the .archive file exists
-                        Utils.CreateDirectory(Path.GetDirectoryName(deploy.ArchivePath));
+                    // ensure that the folder to the .archive file exists
+                    Utils.CreateDirectory(Path.GetDirectoryName(deploy.ArchivePath));
 
-                        // for .zip, open the zip stream for later usage
-                        if (deploy.DeployType > DeployType.Prolib) {
-                            if (!_openedZip.ContainsKey(deploy.ArchivePath)) {
-                                try {
-                                    if (!File.Exists(deploy.ArchivePath)) {
-                                        _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
-                                    } else {
-                                        _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
-                                    }
-                                } catch (Exception e) {
-                                    ErrorHandler.ShowErrors(e, "Couldn't create the .zip file : " + deploy.ArchivePath);
+                    // for .zip, open the zip stream for later usage
+                    if (deploy.DeployType > DeployType.Prolib) {
+                        if (!_openedZip.ContainsKey(deploy.ArchivePath)) {
+                            try {
+                                if (!File.Exists(deploy.ArchivePath)) {
+                                    _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
+                                } else {
+                                    _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
                                 }
-                                
+                            } catch (Exception e) {
+                                ErrorHandler.ShowErrors(e, "Couldn't create the .zip file : " + deploy.ArchivePath);
                             }
+
                         }
                     }
-                });
+                }
+            });
+
+            #endregion
             
             #region for .pl deployments, we treat them before anything else
 
@@ -639,19 +628,22 @@ namespace _3PA.MainFeatures.Pro {
                     updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
             });
 
-            // for archives, do it one by one to avoid bad screwing the zip file
+            #region for archives (zip/pl)
+
+            // for archives, do it one by one to avoid screwing the zip file
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
+                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
             }
-            
-            // for .zip, need to dispose of the object/stream here
+            // also, need to dispose of the object/stream here
             foreach (var zipStorer in _openedZip)
                 zipStorer.Value.Close();
             _openedZip.Clear();
 
+            #endregion
+            
             return deployToDo;
         }
 

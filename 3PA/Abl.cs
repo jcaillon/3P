@@ -36,11 +36,20 @@ namespace _3PA {
         /// <summary>
         /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
         /// </summary>
-        /// <returns></returns>
         public static bool IsCurrentProgressFile {
             get {
                 var ext = Npp.GetCurrentFileExtension();
                 return !string.IsNullOrEmpty(ext) && Config.Instance.KnownProgressExtension.Contains(ext);
+            }
+        }
+
+        /// <summary>
+        /// Is the current file compilable in progress
+        /// </summary>
+        public static bool IsCurrentFileCompilable {
+            get {
+                var ext = Npp.GetCurrentFileExtension();
+                return !string.IsNullOrEmpty(ext) && Config.Instance.CompileKnownExtension.Contains(ext);
             }
         }
 

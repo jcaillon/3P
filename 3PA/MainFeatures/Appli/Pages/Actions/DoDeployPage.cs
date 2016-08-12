@@ -57,7 +57,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         // proenv copied when clicking on the start button
         private ProEnvironment.ProEnvironmentObject _proEnv;
 
-        private DeployProfile _deployProfile;
+        private DeployProfile _currentProfile;
 
         private Dictionary<int, List<FileToDeploy>> _filesToDeployPerStep = new Dictionary<int, List<FileToDeploy>>();
 
@@ -68,6 +68,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
         // true if the interface has been shown at least once
         private bool _shownOnce;
+
+        private bool _executingHook;
+
+        private StringBuilder _hookProcedureErrors = new StringBuilder();
 
         #endregion
 
@@ -315,21 +319,28 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
 
                             line.Clear();
                             line.Append("<div %ALTERNATE%style=\"background-repeat: no-repeat; background-image: url('" + (deployFailed ? "Error30x30" : "Ok30x30") + "'); padding-left: 40px; padding-top: 6px; padding-bottom: 6px;\">");
-                
-                            if (first.DeployType <= DeployType.Zip) {
-                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", first.ArchivePath, Path.GetFileName(first.ArchivePath)) + "</b> in " + Path.GetDirectoryName(first.ArchivePath).ToHtmlLink() + "</div>");
+
+                            string groupBase;
+                            if (first.DeployType < DeployType.Archive) {
+                                groupBase = first.ArchivePath;
+                                var dirPath = Path.GetDirectoryName(first.TargetDir);
+                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + groupBase.ToHtmlLink(Path.GetFileName(groupBase)) + "</b> in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", dirPath, dirPath) + "</div>");
                             } else {
-                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage("Folder", true) + "' height='15px'><b>" + Path.GetDirectoryName(first.To).ToHtmlLink() + "</div>");
+                                groupBase = first.TargetDir;
+                                line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Ftp ? "Ftp" : "Folder", true) + "' height='15px'><b>" + groupBase.ToHtmlLink() + "</div>");
                             }
 
                             foreach (var file in group.OrderBy(deploy => deploy.To)) {
                                 var ext = (Path.GetExtension(file.To) ?? "").Replace(".", "");
                                 var transferMsg = file.DeployType == DeployType.Move ? "" : "(" + file.DeployType + ") ";
+                                line.Append("<div style='padding-left: 10px'>");
                                 if (file.IsOk) {
-                                    line.Append("<div style='padding-left: 10px'>" + "<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + (ext.EqualsCi("lst") ? file.To.ToHtmlLink() : Path.GetDirectoryName(file.To).ToHtmlLink(file.To)) + "</div>");
+                                    line.Append("<img src='" + Utils.GetExtensionImage(ext) + "' height='15px'>" + transferMsg + file.To.ToHtmlLink(file.To.Replace(groupBase, "").TrimStart('\\')));
                                 } else {
-                                    line.Append("<div style='padding-left: 10px'>" + "<img src='Error30x30' height='15px'>Transfer error " + transferMsg + file.To + "</div>");
+                                    line.Append("<img src='Error30x30' height='15px'>Transfer error for " + transferMsg + file.To.Replace(_proEnv.BaseCompilationPath, ""));
                                 }
+                                line.Append(" <span style='padding-left: 8px; padding-right: 8px;'>from</span> " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", Path.GetDirectoryName(file.Origin), file.Origin.Replace(kpv.Key <= 1 ? _proEnv.BaseLocalPath : _proEnv.BaseCompilationPath, "").TrimStart('\\')));
+                                line.Append("</div>");
                             }
 
                             line.Append("</div>");
@@ -380,6 +391,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         currentReport.Append(listLine.Item2.Replace("%ALTERNATE%", boolAlternate ? "class='AlternatBackColor' " : "class='NormalBackColor' "));
                         boolAlternate = !boolAlternate;
                     }
+                }
+
+                // hook procedure errors
+                if (_hookProcedureErrors.Length > 0) {
+                    currentReport.Append("<h3 style='margin-top: 7px; margin-bottom: 7px;'>Deployment hook procedures errors :</h3>");
+                    currentReport.Append(_hookProcedureErrors);
                 }
 
                 // deployment steps
@@ -444,24 +461,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             Task.Factory.StartNew(() => {
 
                 _proEnv = new ProEnvironment.ProEnvironmentObject(ProEnvironment.Current);
-                _deployProfile = new DeployProfile(DeployProfile.Current);
+                _currentProfile = new DeployProfile(DeployProfile.Current);
 
                 // new mass compilation
                 _currentCompil = new ProCompilation {
                     // check if we need to force the compiler to only use 1 process 
                     // (either because the user want to, or because we have a single user mode database)
-                    MonoProcess = _deployProfile.ForceSingleProcess || _proEnv.IsDatabaseSingleUser(),
-                    NumberOfProcessesPerCore = _deployProfile.NumberProcessPerCore,
-                    RFilesOnly = _deployProfile.OnlyGenerateRcode
+                    MonoProcess = _currentProfile.ForceSingleProcess || _proEnv.IsDatabaseSingleUser(),
+                    NumberOfProcessesPerCore = _currentProfile.NumberProcessPerCore,
+                    RFilesOnly = _currentProfile.OnlyGenerateRcode
                 };
                 _currentCompil.OnCompilationEnd += OnCompilationEnd;
 
-                var filesToCompile = _proEnv.Deployer.GetFilesList(new List<string> { _deployProfile.SourceDirectory }, _deployProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 0);
+                var filesToCompile = _proEnv.Deployer.GetFilesList(new List<string> { _currentProfile.SourceDirectory }, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, 0);
                 
                 _deploymentPercentage = 0;
                 _currentStep = 0;
                 _totalSteps = _proEnv.Deployer.DeployTransferRules.Count > 0 ? _proEnv.Deployer.DeployTransferRules.Max(rule => rule.Step) : 0;
                 _filesToDeployPerStep.Clear();
+                _hookProcedureErrors.Clear();
 
                 if (filesToCompile.Count > 0 && _currentCompil.CompileFiles(filesToCompile)) {
 
@@ -510,7 +528,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     while (_proEnv.Deployer.DeployTransferRules.Exists(rule => rule.Step == _currentStep)) {
 
                         _filesToDeployPerStep.Add(_currentStep,
-                            _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> { _currentStep == 1 ? _deployProfile.SourceDirectory : _proEnv.BaseCompilationPath }, _deployProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
+                            _proEnv.Deployer.DeployFilesForStep(_currentStep, new List<string> { _currentStep == 1 ? _currentProfile.SourceDirectory : _proEnv.BaseCompilationPath }, _currentProfile.ExploreRecursively ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly, f => _deploymentPercentage = f));
 
                         // hook
                         ExecuteDeploymentHook();
@@ -655,22 +673,33 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void ExecuteDeploymentHook() {
             // launch the compile process for the current file
             if (File.Exists(Config.FileDeploymentHook)) {
-                var hookExec = new ProExecution {
-                    DeploymentStep = _currentStep,
-                    DeploymentSourcePath = _deployProfile.SourceDirectory
-                };
-                if (hookExec.Do(ExecutionType.DeploymentHook)) {
-                    hookExec.Process.WaitForExit();
 
-                    var fileInfo = new FileInfo(hookExec.LogPath);
-                    if (fileInfo.Length > 0) {
-                        // the .log is not empty, maybe something went wrong in the runner, display errors
-                        UserCommunication.Notify(
-                            "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
-                            Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
-                            "Deployment hook procedure", "Execution failed");
+                _executingHook = true;
+
+                try {
+                    var hookExec = new ProExecution {
+                        DeploymentStep = _currentStep,
+                        DeploymentSourcePath = _currentProfile.SourceDirectory
+                    };
+                    if (hookExec.Do(ExecutionType.DeploymentHook)) {
+                        hookExec.Process.WaitForExit();
+
+                        var fileInfo = new FileInfo(hookExec.LogPath);
+                        if (fileInfo.Length > 0) {
+                            // the .log is not empty, maybe something went wrong in the runner, display errors
+                            UserCommunication.Notify(
+                                "Something went wrong while executing the deployment hook procedure:<br>" + Config.FileDeploymentHook.ToHtmlLink() + "<br>The following problems were logged :" +
+                                Utils.ReadAndFormatLogToHtml(hookExec.LogPath), MessageImg.MsgError,
+                                "Deployment hook procedure", "Execution failed");
+                            _hookProcedureErrors.Append("The execution for step " + _currentStep + " returned the following errors :" + Utils.ReadAndFormatLogToHtml(hookExec.LogPath));
+                        }
                     }
+
+                } finally {
+                    _executingHook = false;
                 }
+
+
             }
         }
 
@@ -678,7 +707,13 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
         private void UpdateProgressBar() {
             this.SafeInvoke(page => {
 
-                if (_currentStep == 0) {
+                var elapsedTime = @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+
+                if (_executingHook) {
+                    progressBar.Progress = 100;
+                    progressBar.Text = @"Executing deployment hook procedure for step " + _currentStep + @"..." + elapsedTime;
+
+                } else if (_currentStep == 0) {
 
                     var progression = _currentCompil.GetOverallProgression();
 
@@ -691,10 +726,10 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     } else if (progressBar.Style != ProgressStyle.Normal)
                         progressBar.Style = ProgressStyle.Normal;
 
-                    progressBar.Text = @"Step 0 / " + _totalSteps + @" ~ " + (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                    progressBar.Text = @"Step 0 / " + _totalSteps + @" ~ " + (Math.Abs(progression) < 0.01 ? (!_currentCompil.CompilationDone ? "Initialization" : "Creating deployment folder... ") : (!_currentCompil.CompilationDone ? "Compiling... " : "Deploying files... ") + Math.Round(progression, 1) + "%") + elapsedTime;
                     progressBar.Progress = progression;
 
-                } else {
+                } else { 
 
                     var neededStyle = _currentStep%2 == 0 ? ProgressStyle.Reversed : ProgressStyle.Normal;
 
@@ -702,7 +737,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                         progressBar.Style = neededStyle;
                     }
 
-                    progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + (_deploymentPercentage > 0.01 ? @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" : "Enumerating files to deploy...") + @" (elapsed time = " + _currentCompil.GetElapsedTime() + @")";
+                    progressBar.Text = @"Step " + _currentStep + @" / " + _totalSteps + @" ~ " + (_deploymentPercentage > 0.01 ? @"Deploying files... " + Math.Round(_deploymentPercentage, 1) + @"%" : "Enumerating files to deploy...") + elapsedTime;
                     progressBar.Progress = _deploymentPercentage;
                     
                 }
@@ -735,7 +770,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 <tr><td style='padding-right: 20px'>Number of Prowin processes used for the compilation :</td><td><b>" + _currentCompil.NumberOfProcesses + @" processes</b></td></tr>
                                 <tr><td style='padding-right: 20px'>Forced to mono process? :</td><td><b>" + _currentCompil.MonoProcess + (_proEnv.IsDatabaseSingleUser() ? " (connected to database in single user mode!)" : "") + @"</b></td></tr>
                                 <tr><td style='width: 40%; padding-right: 20px'>Total number of files being compile :</td><td><b>" + _currentCompil.NbFilesToCompile + @" files</b></td></tr>
-                                <tr><td style='width: 40%; padding-right: 20px'>Source directory :</td><td><b>" + _deployProfile.SourceDirectory.ToHtmlLink() + @"</b></td></tr>
+                                <tr><td style='width: 40%; padding-right: 20px'>Source directory :</td><td><b>" + _currentProfile.SourceDirectory.ToHtmlLink() + @"</b></td></tr>
                                 <tr><td style='width: 40%; padding-right: 20px'>Target deployment directory :</td><td><b>" + _proEnv.BaseCompilationPath.ToHtmlLink() + @"</b></td></tr>
                             </table>           
                         </div>

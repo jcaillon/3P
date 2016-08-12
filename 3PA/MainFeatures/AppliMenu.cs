@@ -275,10 +275,10 @@ namespace _3PA.MainFeatures {
                 new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
                     Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 },
-                new MenuItem(this, "Edit code", ImageResources.EditCode, ShowEditCodeMenuAtCursor, "Edit_code", "Ctrl+Insert") {
+                new MenuItem(this, "Edit code", ImageResources.EditCode, ShowEditCodeMenuAtCursor, "Edit_code", "Alt+E") {
                     Children = _editCodeList.Select(item => (YamuiMenuItem)item).ToList(),
                 },
-                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, ShowMiscMenuAtCursor, "Miscellaneous", "") {
+                new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, ShowMiscMenuAtCursor, "Miscellaneous", "Alt+M") {
                     Children = _miscMenuList.Select(item => (YamuiMenuItem)item).ToList(),
                 },
                 new MenuItem(true), // --------------------------
