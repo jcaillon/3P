@@ -419,7 +419,7 @@ namespace _3PA.MainFeatures.Pro {
 
             var lastLineNbCouple = new[] { -10, -10 };
 
-            Utils.ForEachLine(fullPath, null, line => {
+            Utils.ForEachLine(fullPath, null, (i, line) => {
 
                 var fields = line.Split('\t').ToList();
                 if (fields.Count == 8) {

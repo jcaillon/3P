@@ -45,6 +45,11 @@ namespace _3PA.MainFeatures.Pro {
 
         #region Import/export
 
+        public static void EditRules() {
+            Export();
+            Npp.OpenFile(Config.FileDeploymentRules);
+        }
+
         public static void Export() {
             if (!File.Exists(Config.FileDeploymentRules))
                 Utils.FileWriteAllBytes(Config.FileDeploymentRules, DataResources.DeploymentRules);
@@ -58,20 +63,19 @@ namespace _3PA.MainFeatures.Pro {
 
             var outputMessage = new StringBuilder();
 
-            var i = 0;
             _fullDeployRulesList = new List<DeployRule>();
-            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], s => {
-                var items = s.Split('\t');
+            Utils.ForEachLine(Config.FileDeploymentRules, new byte[0], (lineNb, lineString) => {
+                var items = lineString.Split('\t');
 
                 int step = 0;
-                if (items.Length > 1 && !int.TryParse(items[0], out step))
+                if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
                     step = 0;
 
                 // new transfer rule
                 if (items.Length == 7) {
 
                     DeployType type;
-                    if (!Enum.TryParse(items[3], true, out type))
+                    if (!Enum.TryParse(items[3].Trim(), true, out type))
                         type = DeployType.Copy;
 
                     var obj = new DeployTransferRule {
@@ -82,21 +86,21 @@ namespace _3PA.MainFeatures.Pro {
                         ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), 
                         SourcePattern = items[5].Trim().Replace('/', '\\'), 
                         DeployTarget = items[6].Trim().Replace('/', '\\'), 
-                        Line = i++
+                        Line = (lineNb + 1)
                     };
 
                     if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
-                        outputMessage.Append("- The FTP rule n°" + i + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
+                        outputMessage.Append("- The FTP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Zip && !obj.DeployTarget.ContainsFast(".zip")) {
-                        outputMessage.Append("- The ZIP rule n°" + i + " has an incorrect deployment target, a .zip should be found<br>");
+                        outputMessage.Append("- The ZIP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .zip should be found<br>");
                         return;
                     }
 
                     if (obj.Type == DeployType.Prolib && !obj.DeployTarget.ContainsFast(".pl")) {
-                        outputMessage.Append("- The Prolib rule n°" + i + " has an incorrect deployment target, a .pl should be found<br>");
+                        outputMessage.Append("- The Prolib rule line n°" + (lineNb + 1) + " has an incorrect deployment target, a .pl should be found<br>");
                         return;
                     }
 
@@ -106,7 +110,13 @@ namespace _3PA.MainFeatures.Pro {
                     // new filter rule
                 } else if (items.Length == 5) {
 
-                    var obj = new DeployFilterRule {Step = step, NameFilter = items[1].Trim(), SuffixFilter = items[2].Trim(), Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"), SourcePattern = items[4].Trim().Replace('/', '\\'),};
+                    var obj = new DeployFilterRule {
+                        Step = step, 
+                        NameFilter = items[1].Trim(), 
+                        SuffixFilter = items[2].Trim(), 
+                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"), 
+                        SourcePattern = items[4].Trim().Replace('/', '\\'),
+                    };
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern))
                         _fullDeployRulesList.Add(obj);
@@ -115,7 +125,7 @@ namespace _3PA.MainFeatures.Pro {
 
             if (outputMessage.Length > 0)
                 UserCommunication.NotifyUnique("deployRulesErrors", "The following rules are incorrect:<br><br>" + outputMessage + "<br><br>Please correct them " + Config.FileDeploymentRules.ToHtmlLink("here"), MessageImg.MsgHighImportance, "Errors reading rules file", "Rules incorrect", args => {
-                    Npp.OpenFile(args.Link);
+                    EditRules();
                     args.Handled = true;
                 });
             else
@@ -160,7 +170,7 @@ namespace _3PA.MainFeatures.Pro {
 
                     var alt = false;
                     foreach (var rule in rules.OfType<DeployTransferRule>()) {
-                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + (rule.SourcePattern.Length > 45 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 45) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.DeployTarget.Length > 45 ? "..." + rule.SourcePattern.Substring(rule.DeployTarget.Length - 45) : rule.DeployTarget) + "</td></tr>");
+                        strBuilder.Append("<tr><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Step + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.NameFilter) ? "*" : rule.NameFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (string.IsNullOrEmpty(rule.SuffixFilter) ? "*" : rule.SuffixFilter) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + rule.Type + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='center'>" + (rule.ContinueAfterThisRule ? "Yes" : "No") + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + ">" + (rule.SourcePattern.Length > 50 ? "..." + rule.SourcePattern.Substring(rule.SourcePattern.Length - 50) : rule.SourcePattern) + "</td><td" + (alt ? " class='AlternatBackColor'" : "") + " align='right'>" + (rule.DeployTarget.Length > 50 ? "..." + rule.DeployTarget.Substring(rule.DeployTarget.Length - 50) : rule.DeployTarget) + "</td></tr>");
                         alt = !alt;
                     }
 
@@ -179,15 +189,6 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Object
-
-        #region Properties
-
-        /// <summary>
-        /// The deployer works for a specific environment
-        /// </summary>
-        private ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
-
-        #endregion
         
         #region Fields
 
@@ -195,9 +196,18 @@ namespace _3PA.MainFeatures.Pro {
         /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
         /// </summary>
         
+        private List<DeployRule> _deployRulesList;
+
+
+        /// <summary>
+        /// Allows us to keep track of the opened zip needed for this deployment
+        /// </summary>
         private Dictionary<string, ZipStorer> _openedZip = new Dictionary<string, ZipStorer>();
 
-        private List<DeployRule> _deployRulesList;
+        /// <summary>
+        /// Allows us to know which file to remove in which zip when they are not freshly created
+        /// </summary>
+        private Dictionary<string, HashSet<string>> _filesToRemoveFromZip = new Dictionary<string, HashSet<string>>();
 
         #endregion
 
@@ -224,6 +234,11 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// The deployer works for a specific environment
+        /// </summary>
+        private ProEnvironment.ProEnvironmentObject ProEnv { get; set; }
 
         /// <summary>
         /// List of deployment rules filtered + sorted for this env
@@ -315,7 +330,7 @@ namespace _3PA.MainFeatures.Pro {
         /// If CompileLocally, returns the directory of the source
         /// If the deployment dir is empty and we didn't match an absolute compilation path, returns the source directoy as well
         /// </summary>
-        public List<FileToDeploy> GetTransfersNeededForFile(string sourcePath, int step) {
+        public List<FileToDeploy> GetTargetDirsNeededForFile(string sourcePath, int step) {
 
             // local compilation? return only one path, MOVE next to the source
             if (step == 0 && ProEnv.CompileLocally)
@@ -366,6 +381,16 @@ namespace _3PA.MainFeatures.Pro {
         }
 
         /// <summary>
+        /// returns the list of transfers needed for a given file
+        /// </summary>
+        public List<FileToDeploy> GetTransfersNeededForFile(string file, int step) {
+            var fileName = Path.GetFileName(file);
+            if (fileName != null)
+                return ProEnv.Deployer.GetTargetDirsNeededForFile(file, step).Select(deploy => deploy.Set(file, file, Path.Combine(deploy.TargetDir, fileName))).ToList();
+            return new List<FileToDeploy>();
+        }
+
+        /// <summary>
         /// Returns a list of files in the given folders (recursively or not depending on the option),
         /// this list is filtered thanks to the rules given (also, for step == 0, only progress files are listed)
         /// </summary>
@@ -383,42 +408,34 @@ namespace _3PA.MainFeatures.Pro {
 
             foreach (var folderPath in listOfFolderPath.Where(Directory.Exists)) {
                 foreach (var filePath in fileExtensionFilter.Split(',').SelectMany(s => Directory.EnumerateFiles(folderPath, "*" + s, searchOptions))) {
-                    if (!filesToCompile.Contains(filePath)) {
-
-                        bool toAdd = true;
-
-                        // test include filters
-                        if (includeFiltersList.Count > 0) {
-                            var hasMatch = false;
-                            foreach (var rule in includeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasMatch = true;
-                                    break;
-                                }
-                            }
-                            toAdd = hasMatch;
-                        }
-
-                        // test exclude filters
-                        if (excludeFiltersList.Count > 0) {
-                            var hasNoMatch = true;
-                            foreach (var rule in excludeFiltersList) {
-                                if (filePath.RegexMatch(rule.SourcePattern.WildCardToRegex())) {
-                                    hasNoMatch = false;
-                                    break;
-                                }
-                            }
-                            toAdd = toAdd && hasNoMatch;
-                        }
-
-                        if (toAdd)
-                            filesToCompile.Add(filePath);
-                    }
+                    if (!filesToCompile.Contains(filePath) && IsFilePassingFilters(filePath, includeFiltersList, excludeFiltersList))
+                        filesToCompile.Add(filePath);
                 }
 
             }
 
             return filesToCompile;
+        }
+
+        /// <summary>
+        /// Returns true if the given file path passes the include + exclude filters
+        /// </summary>
+        public bool IsFilePassingFilters(string filePath, List<DeployFilterRule> includeFiltersList, List<DeployFilterRule> excludeFiltersList) {
+            bool passing = true;
+
+            // test include filters
+            if (includeFiltersList.Count > 0) {
+                var hasMatch = includeFiltersList.Any(rule => filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                passing = hasMatch;
+            }
+
+            // test exclude filters
+            if (excludeFiltersList.Count > 0) {
+                var hasNoMatch = excludeFiltersList.All(rule => !filePath.RegexMatch(rule.SourcePattern.WildCardToRegex()));
+                passing = passing && hasNoMatch;
+            }
+
+            return passing;
         }
 
         #endregion
@@ -436,11 +453,7 @@ namespace _3PA.MainFeatures.Pro {
 
             // list the files to deploy
             foreach (var file in GetFilesList(listOfSourceDir, searchOptions, step)) {
-                foreach (var deployNeeded in ProEnv.Deployer.GetTransfersNeededForFile(file, step)) {
-                    var fileName = Path.GetFileName(file);
-                    if (fileName != null)
-                        outputList.Add(deployNeeded.Set(file, file, Path.Combine(deployNeeded.TargetDir, fileName)));
-                }
+                outputList.AddRange(GetTransfersNeededForFile(file, step));
             }
 
             // do deploy
@@ -472,38 +485,44 @@ namespace _3PA.MainFeatures.Pro {
                 .ToNonNullList()
                 .ForEach(deploy => Utils.CreateDirectory(Path.GetDirectoryName(deploy.To)));
 
+            #region for archives (zip/pl)
+
             // for archives, compute the path to the archive file (+ make sure the directory of the archive exists)
-            deployToDo
-                .Where(deploy => deploy.DeployType <= DeployType.Archive)
-                .ToNonNullList()
-                .ForEach(deploy => {
-                    var ext = deploy.DeployType == DeployType.Prolib ? ".pl" : ".zip";
-                    var pos = deploy.To.LastIndexOf(ext, StringComparison.CurrentCultureIgnoreCase);
-                    if (pos >= 0) {
-                        var posEnd = pos + ext.Length;
-                        deploy.ArchivePath = deploy.To.Substring(0, posEnd);
-                        deploy.RelativePathInArchive = deploy.To.Substring(posEnd + 1);
+            deployToDo.Where(deploy => deploy.DeployType <= DeployType.Archive).ToNonNullList().ForEach(deploy => {
+                var ext = deploy.DeployType == DeployType.Prolib ? ".pl" : ".zip";
+                var pos = deploy.To.LastIndexOf(ext, StringComparison.CurrentCultureIgnoreCase);
+                if (pos >= 0) {
+                    var posEnd = pos + ext.Length;
+                    deploy.ArchivePath = deploy.To.Substring(0, posEnd);
+                    deploy.RelativePathInArchive = deploy.To.Substring(posEnd + 1);
 
-                        // ensure that the folder to the .archive file exists
-                        Utils.CreateDirectory(Path.GetDirectoryName(deploy.ArchivePath));
+                    // ensure that the folder to the .archive file exists
+                    Utils.CreateDirectory(Path.GetDirectoryName(deploy.ArchivePath));
 
-                        // for .zip, open the zip stream for later usage
-                        if (deploy.DeployType > DeployType.Prolib) {
-                            if (!_openedZip.ContainsKey(deploy.ArchivePath)) {
-                                try {
-                                    if (!File.Exists(deploy.ArchivePath)) {
-                                        _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
-                                    } else {
-                                        _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
-                                    }
-                                } catch (Exception e) {
-                                    ErrorHandler.ShowErrors(e, "Couldn't create the .zip file : " + deploy.ArchivePath);
+                    // for .zip, open the zip stream for later usage
+                    if (deploy.DeployType > DeployType.Prolib) {
+                        if (!_openedZip.ContainsKey(deploy.ArchivePath)) {
+                            try {
+                                if (!File.Exists(deploy.ArchivePath)) {
+                                    _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
+                                } else {
+                                    _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
+                                    _filesToRemoveFromZip.Add(deploy.ArchivePath, new HashSet<string>());
                                 }
-                                
+                            } catch (Exception e) {
+                                ErrorHandler.ShowErrors(e, "Couldn't create/open the .zip file");
                             }
+
                         }
+
+                        // we didn't create the zip? then we need to remove this file if it exists
+                        if (_filesToRemoveFromZip.ContainsKey(deploy.ArchivePath)) 
+                            _filesToRemoveFromZip[deploy.ArchivePath].Add(deploy.RelativePathInArchive.Replace('\\', '/'));
                     }
-                });
+                }
+            });
+
+            #endregion
             
             #region for .pl deployments, we treat them before anything else
 
@@ -621,27 +640,44 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            // do a deployment action for each file
+            #region for zip
+
+            // remove the files that are already in the zip file or they will appear twice when we add them
+            foreach (var kpv in _filesToRemoveFromZip) {
+                ZipStorer zip = _openedZip[kpv.Key];
+                var filesToDelete = zip.ReadCentralDir().Where(zipFileEntry => kpv.Value.Contains(zipFileEntry.FilenameInZip)).ToList();
+                _openedZip.Remove(kpv.Key);
+                ZipStorer.RemoveEntries(ref zip, filesToDelete);
+                _openedZip.Add(kpv.Key, zip);
+            }
+
+            #endregion
+
+
+            // do a deployment action for each file (parallel for MOVE and COPY)
             Parallel.ForEach(deployToDo.Where(deploy => deploy.DeployType >= DeployType.Copy), file => {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
                     updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
             });
-
-            // for archives, do it one by one to avoid bad screwing the zip file
+            // don't use parallel for the other types
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
-                    updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
+                    updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
             }
-            
-            // for .zip, need to dispose of the object/stream here
+
+            #region for zip, dispose of zipStorers
+
+            // also, need to dispose of the object/stream here
             foreach (var zipStorer in _openedZip)
                 zipStorer.Value.Close();
             _openedZip.Clear();
 
+            #endregion
+            
             return deployToDo;
         }
 

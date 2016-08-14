@@ -47,8 +47,8 @@ namespace _3PA.MainFeatures.Pro {
         public static void Import() {
             _filesInfo.Clear();
 
-            Utils.ForEachLine(Config.FileFilesInfo, new byte[0], s => {
-                var items = s.Split('\t');
+            Utils.ForEachLine(Config.FileFilesInfo, new byte[0], (i, line) => {
+                var items = line.Split('\t');
                 if (items.Count() == 8) {
                     var fileName = items[0].Trim();
                     var fileInfo = new FileTagObject {

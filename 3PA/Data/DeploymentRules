@@ -30,7 +30,7 @@
 # - The deployment step : integer (a rule is always defined for a particular step)
 # - The application name filter : If the application name of your current environment matches this filter (you can use wildcards), the rule can apply 
 # - The application suffix filter : If the application suffix of your current environment matches this filter (you can use wildcards), the rule can apply 
-# - Rule type : `+` / `` (or `Include` / `Exclude`) decide if the files matching the *source path pattern* below are included or excluded from the deployment
+# - Rule type : `+` / `-` (or `Include` / `Exclude`) decide if the files matching the *source path pattern* below are included or excluded from the deployment
 # - The source path pattern : when deploying, if a file matches this pattern (you can use wildcards), the rule can apply
 # 
 ## ======================
@@ -40,7 +40,7 @@
 # - The deployment step : integer (a rule is always defined for a particular step)
 # - The application name filter : If the application name of your current environment matches this filter (you can use wildcards), the rule can apply 
 # - The application suffix filter : If the application suffix of your current environment matches this filter (you can use wildcards), the rule can apply 
-# - The deployment type : `Move` / `Copy` / `Prolib` (the file will be added to a progress library .pl) / `Ftp` (the file will be sent to an ftp server) / `Ftp` (see next § for more details)
+# - The deployment type : `Move` / `Copy` / `Prolib` (the file will be added to a progress library .pl) / `Ftp` (the file will be sent to an ftp server) / `Ftp` (see next paragraph for more details)
 # - Execute further rules : `yes` / `no` : yes if more rules can be applied after this one, no to stop at this rule
 # - The source path pattern : when deploying, if a file matches this pattern (you can use wildcards), the rule can apply
 # - The deployment target : It can either be an absolute path or a relative one; If relative, it will be relative to the deployment base directory set for your current environment
@@ -76,10 +76,21 @@
 # - For step 0, if the environment is set to `compile next to source` then the *.r will be moved next to the source and no transfer rules will apply
 # ========================================================================
 
-# Examples (commented with #) :
+# Example of filter rules (commented with #)
+##############################################
+#step	name	suffix	type    	source_pattern
+##############################################
+#1  	*   	*   	Include 	*.filetype
+#1  	*APP*	*   	+       	*\folder\*
+#1  	APP??	start* 	Exclude 	*specific_numbered_file_???.txt
+#1  	APP??	start* 	-       	*\file_starting_with*
 
-#0	*	*	Ftp 	yes	*myfilter\*	ftp://progress@127.0.0.1/myfolder/deploy/
-#0	*	*	Prolib	No	*myfilter\*	file.pl
-#0	*	*	Zip 	no	*.myfilter	file.zip
-#0	*	*	Copy	yes	*.thing 	C:\temp\
-#0	*	*	Move	no	*.thing 	temp\2\
+# Examples of transfer rules (commented with #) :
+#####################################################################
+#step	name	suffix	type	next?	source_pattern	deploy_target
+#####################################################################
+#0  	*   	*   	Ftp 	yes 	*myfilter\*  	ftp://progress@127.0.0.1/myfolder/deploy/
+#0  	*APP*	deploy*	Prolib	No  	*myfilter\*  	file.pl
+#0  	*   	*   	Zip 	no  	*.myfilter  	file.zip
+#0  	APP??	*   	Copy	yes 	*.thing     	C:\temp\
+#0  	*   	*   	Move	no  	*.thing     	temp\2\

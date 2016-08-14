@@ -77,7 +77,7 @@ namespace _3PA.MainFeatures {
             if (LogError(e, message)) {
                 if (UserCommunication.Ready) {
                     // show it to the user
-                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<br><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
+                    UserCommunication.Notify("The last action you started has triggered an error and has been cancelled.<div class='ToolTipcodeSnippet'>" + e.Message + "</div><br>1. If you didn't ask anything from 3P then you can probably ignore this message.<br>2. Otherwise, you might want to check out the error log below for more details :" + (File.Exists(Config.FileErrorLog) ? "<br>" + Config.FileErrorLog.ToHtmlLink("Link to the error log") : "no .log found!") + "<br>Consider opening an issue on GitHub :<br>" + Config.IssueUrl.ToHtmlLink() + "<br><br>If needed, try to restart Notepad++ and see if things are better!</b>",
                         MessageImg.MsgPoison, "An error has occured", message,
                         args => {
                             if (args.Link.EndsWith(".log")) {

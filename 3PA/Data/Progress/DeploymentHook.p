@@ -80,14 +80,15 @@
 
 /* ***************************  Main Block  *************************** */
 
-/* don't handle error, let it crash so 3P knows when something is wrong */
 RUN pi_main (
     INPUT {&ApplicationName},
     INPUT {&ApplicationSuffix},
     INPUT {&StepNumber},
     INPUT {&SourceDirectory},
     INPUT {&DeploymentDirectory}    
-    ).
+    ) NO-ERROR.
+IF ERROR-STATUS:ERROR THEN
+    RETURN ERROR (IF RETURN-VALUE > "" THEN RETURN-VALUE ELSE ERROR-STATUS:GET-MESSAGE(1)).
 
 RETURN "".
 

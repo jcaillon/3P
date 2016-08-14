@@ -242,15 +242,14 @@ namespace _3PA.Lib {
 
             try {
                 return PrivateCharPositionFromLine(index);
-            } catch (Exception e) {
-                if (Config.IsDevelopper)
-                    Debug.Assert(false);
-                ErrorHandler.LogError(e, "\r\nindex = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine);
+            } catch (Exception) {
                 try {
                     Reset();
+                    if (_oneByteCharEncoding)
+                        return SciPositionFromLine(index);
                     return PrivateCharPositionFromLine(index);
                 } catch (Exception x) {
-                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines");
+                    ErrorHandler.LogError(x, "FAILED TO RESET DocumentLines for index = " + index + ", _linesList.Count = " + _linesList.Count + ", _holeLenght = " + _holeLenght + ", _holeLine = " + _holeLine + ", current file ABL? " + Abl.IsCurrentProgressFile);
                 }
                 return SciPositionFromLine(index);
             }

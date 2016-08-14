@@ -60,7 +60,7 @@ namespace YamuiFramework.Helper {
             Dictionary<string, string> previousStringValues = new Dictionary<string, string>();
 
             Utilities.ForEachLine(filePath, dataResources,
-                line => {
+                (i, line) => {
                     // beggining of a new theme, read its name
                     if (line.Length > 2 && line[0] == '>') {
                         if (curTheme != null)
