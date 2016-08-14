@@ -444,7 +444,7 @@ namespace _3PA.MainFeatures {
             // THEMES
             public int ThemeId = 0;
             public Color AccentColor = ColorTranslator.FromHtml("#647687");
-            public int SyntaxHighlightThemeId = 1;
+            public int SyntaxHighlightThemeId = 0;
             public bool UseSyntaxHighlightTheme = true;
 
             // SHORTCUTS (id, spec)
@@ -551,11 +551,11 @@ namespace _3PA.MainFeatures {
 
         // HELP URL
         public static string UrlWebSite { get { return @"http://jcaillon.github.io/3P/"; } }
-        public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set_environment"; } }
+        public static string UrlHelpSetEnv { get { return @"http://jcaillon.github.io/3P/#/set-environment"; } }
         public static string UrlHelpCustomThemes { get { return @"http://jcaillon.github.io/3P/#/custom-themes"; } }
         public static string UrlCheckReleases { get { return @"https://github.com/jcaillon/3P/releases"; } }
-        public static string UrlHelpMassCompiler { get { return @"http://jcaillon.github.io/3P/#/mass_compiler"; } }
         public static string UrlHelpDeploy { get { return @"http://jcaillon.github.io/3P/#/deployment"; } }
+        public static string UrlHelpDeployRules { get { return @"http://jcaillon.github.io/3P/#/deployment-rules"; } }
         
 
         /// <summary>

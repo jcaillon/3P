@@ -68,14 +68,14 @@ namespace _3PA.MainFeatures.Pro {
                 var items = lineString.Split('\t');
 
                 int step = 0;
-                if (items.Length > 1 && !int.TryParse(items[0], out step))
+                if (items.Length > 1 && !int.TryParse(items[0].Trim(), out step))
                     step = 0;
 
                 // new transfer rule
                 if (items.Length == 7) {
 
                     DeployType type;
-                    if (!Enum.TryParse(items[3], true, out type))
+                    if (!Enum.TryParse(items[3].Trim(), true, out type))
                         type = DeployType.Copy;
 
                     var obj = new DeployTransferRule {
@@ -110,7 +110,13 @@ namespace _3PA.MainFeatures.Pro {
                     // new filter rule
                 } else if (items.Length == 5) {
 
-                    var obj = new DeployFilterRule {Step = step, NameFilter = items[1].Trim(), SuffixFilter = items[2].Trim(), Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"), SourcePattern = items[4].Trim().Replace('/', '\\'),};
+                    var obj = new DeployFilterRule {
+                        Step = step, 
+                        NameFilter = items[1].Trim(), 
+                        SuffixFilter = items[2].Trim(), 
+                        Include = items[3].Trim().EqualsCi("+") || items[3].Trim().EqualsCi("Include"), 
+                        SourcePattern = items[4].Trim().Replace('/', '\\'),
+                    };
 
                     if (!string.IsNullOrEmpty(obj.SourcePattern))
                         _fullDeployRulesList.Add(obj);
@@ -190,9 +196,18 @@ namespace _3PA.MainFeatures.Pro {
         /// IF YOU ADD A FIELD, DO NOT FORGET TO ALSO ADD THEM IN THE HARD COPY CONSTRUCTOR!!!
         /// </summary>
         
+        private List<DeployRule> _deployRulesList;
+
+
+        /// <summary>
+        /// Allows us to keep track of the opened zip needed for this deployment
+        /// </summary>
         private Dictionary<string, ZipStorer> _openedZip = new Dictionary<string, ZipStorer>();
 
-        private List<DeployRule> _deployRulesList;
+        /// <summary>
+        /// Allows us to know which file to remove in which zip when they are not freshly created
+        /// </summary>
+        private Dictionary<string, HashSet<string>> _filesToRemoveFromZip = new Dictionary<string, HashSet<string>>();
 
         #endregion
 
@@ -492,12 +507,17 @@ namespace _3PA.MainFeatures.Pro {
                                     _openedZip.Add(deploy.ArchivePath, ZipStorer.Create(deploy.ArchivePath, "Created with 3P @ " + DateTime.Now + "\r\n" + Config.UrlWebSite));
                                 } else {
                                     _openedZip.Add(deploy.ArchivePath, ZipStorer.Open(deploy.ArchivePath, FileAccess.Write));
+                                    _filesToRemoveFromZip.Add(deploy.ArchivePath, new HashSet<string>());
                                 }
                             } catch (Exception e) {
-                                ErrorHandler.ShowErrors(e, "Couldn't create the .zip file : " + deploy.ArchivePath);
+                                ErrorHandler.ShowErrors(e, "Couldn't create/open the .zip file");
                             }
 
                         }
+
+                        // we didn't create the zip? then we need to remove this file if it exists
+                        if (_filesToRemoveFromZip.ContainsKey(deploy.ArchivePath)) 
+                            _filesToRemoveFromZip[deploy.ArchivePath].Add(deploy.RelativePathInArchive.Replace('\\', '/'));
                     }
                 }
             });
@@ -620,23 +640,37 @@ namespace _3PA.MainFeatures.Pro {
 
             #endregion
 
-            // do a deployment action for each file
+            #region for zip
+
+            // remove the files that are already in the zip file or they will appear twice when we add them
+            foreach (var kpv in _filesToRemoveFromZip) {
+                ZipStorer zip = _openedZip[kpv.Key];
+                var filesToDelete = zip.ReadCentralDir().Where(zipFileEntry => kpv.Value.Contains(zipFileEntry.FilenameInZip)).ToList();
+                _openedZip.Remove(kpv.Key);
+                ZipStorer.RemoveEntries(ref zip, filesToDelete);
+                _openedZip.Add(kpv.Key, zip);
+            }
+
+            #endregion
+
+
+            // do a deployment action for each file (parallel for MOVE and COPY)
             Parallel.ForEach(deployToDo.Where(deploy => deploy.DeployType >= DeployType.Copy), file => {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
                     updateDeploymentPercentage((float)nbFilesDone[0] / totalFile[0] * 100);
             });
-
-            #region for archives (zip/pl)
-
-            // for archives, do it one by one to avoid screwing the zip file
+            // don't use parallel for the other types
             foreach (var file in deployToDo.Where(deploy => deploy.DeployType < DeployType.Copy)) {
                 if (DeploySingleFile(file))
                     nbFilesDone[0]++;
                 if (updateDeploymentPercentage != null)
                     updateDeploymentPercentage((float) nbFilesDone[0]/totalFile[0]*100);
             }
+
+            #region for zip, dispose of zipStorers
+
             // also, need to dispose of the object/stream here
             foreach (var zipStorer in _openedZip)
                 zipStorer.Value.Close();

@@ -50,7 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Set {
             };
             bt_modify.ButtonPressed += (sender, args) => Deployer.EditRules();
 
-            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeployRules + @"'>Learn more about this feature?</a>";
 
             Deployer.OnDeployConfigurationUpdate += UpdateList;
 

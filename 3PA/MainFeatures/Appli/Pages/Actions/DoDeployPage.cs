@@ -145,7 +145,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             btReset.ButtonPressed += (sender, args) => { ResetFields(); };
 
             // help kink
-            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpMassCompiler + @"'>Learn more about this feature?</a>";
+            linkurl.Text = @"<img src='Help'><a href='" + Config.UrlHelpDeploy + @"'>Learn more about this feature?</a>";
 
             // switch link
             lblCurEnv.LinkClicked += (sender, args) => {
@@ -326,7 +326,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                                 var dirPath = Path.GetDirectoryName(first.TargetDir);
                                 line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Prolib ? "Pl": "Zip", true) + "' height='15px'><b>" + groupBase.ToHtmlLink(Path.GetFileName(groupBase)) + "</b> in " + string.Format("<a class='SubTextColor' href='{0}'>{1}</a>", dirPath, dirPath) + "</div>");
                             } else {
-                                groupBase = first.TargetDir;
+                                groupBase = Path.GetDirectoryName(first.To);
                                 line.Append("<div style='padding-bottom: 5px;'><img src='" + Utils.GetExtensionImage(first.DeployType == DeployType.Ftp ? "Ftp" : "Folder", true) + "' height='15px'><b>" + groupBase.ToHtmlLink() + "</div>");
                             }
 
