@@ -115,7 +115,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 button.ButtonPressed += UndoButtonOnButtonPressed;
                 tooltip.SetToolTip(button, "Click this button to reset the shortcut to its default value");
 
-                // reset
+                // delete
                 button = new YamuiButtonImage {
                     Anchor = AnchorStyles.Right | AnchorStyles.Top,
                     BackGrndImage = ImageResources.Delete,

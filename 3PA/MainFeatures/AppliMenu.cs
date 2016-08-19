@@ -412,8 +412,10 @@ namespace _3PA.MainFeatures {
                     Config.Instance.ShortCuts.Remove(ItemId);
                 }
 
+                
+                Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
+
                 if (!string.IsNullOrEmpty(ItemSpec)) {
-                    Config.Instance.ShortCuts.Add(ItemId, ItemSpec);
                     Shortcut = new ShortcutKey(ItemSpec);
                     SubText = ItemSpec;
                 }
