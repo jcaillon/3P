@@ -104,6 +104,12 @@ namespace YamuiFramework.Controls {
         public event EventHandler<EventArgs> ButtonPressed;
 
         /// <summary>
+        /// You should register to this event when you want to subscribe to Keydown
+        /// </summary>
+        [Category("Yamui")]
+        public event Action<KeyEventArgs> SuperKeyDown;
+
+        /// <summary>
         /// This public prop is only defined so we can set it from the transitions (animation component)
         /// </summary>
         [Browsable(false)]
@@ -148,14 +154,7 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #region methods
-
-        /// <summary>
-        /// Call this method to activate the OnPressedButton event manually
-        /// </summary>
-        public void HandlePressedButton() {
-            OnClick(new EventArgs());
-        }
-
+        
         private void OnButtonPressed(EventArgs eventArgs) {
             // we could do something here, like preventing the user to click the button when the OnClick is being ran
             if (ButtonPressed != null) 
@@ -295,12 +294,21 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyDown(KeyEventArgs e) {
-            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
-                IsPressed = true;
-                Invalidate();
-                e.Handled = true;
-            }
+            OnSuperKeyDown(e);
             base.OnKeyDown(e);
+        }
+
+        public void OnSuperKeyDown(KeyEventArgs e) {
+            if (SuperKeyDown != null)
+                SuperKeyDown(e);
+
+            if (!e.Handled) {
+                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
+                    IsPressed = true;
+                    Invalidate();
+                    e.Handled = true;
+                }
+            }
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {

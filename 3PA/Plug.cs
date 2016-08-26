@@ -25,6 +25,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using _3PA.Images;
@@ -360,80 +361,108 @@ namespace _3PA {
                 // Since it's a keydown message, we can receive this a lot if the user let a button pressed
                 var isSpamming = Utils.IsSpamming(key.ToString(), 100, true);
 
-                //HACK:
-                // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
-                // like we normally can, for some reasons, they don't react to certain keys (like enter!)
-                // It only works "almost normally" if we ShowDialog() the form?! Wtf right?
-                // So i gave up and handle things here!
-                if (Appli.IsFocused()) {
-                    handled = Appli.Form.HandleKeyPressed(key, keyModifiers);
-                } else {
-                    // same shit for the YamuiMenu
-                    var curMenu = (Control.FromHandle(WinApi.GetForegroundWindow()));
-                    var menu = curMenu as YamuiMenu;
-                    if (menu != null) {
-                        menu.OnKeyDown(key);
-                    }
-                }
-
                 // check if the user triggered a 3P function defined in the AppliMenu
                 menuItem = TriggeredMenuItem(AppliMenu.Instance.ShortcutableItemList, isSpamming, key, keyModifiers, ref handled);
                 if (handled)
                     return true;
 
+                // hide window on escape
+                if (Appli.IsFocused() && key == Keys.Escape) {
+                    Appli.Form.Cloack();
+                    return true;
+                }
+
                 // The following is specific to 3P so don't go further if we are not on a valid file
-                if (!IsCurrentFileProgress) {
-                    return false;
-                }
+                if (IsCurrentFileProgress) {
 
-                // Close interfacePopups
-                if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
-                    ClosePopups();
-                }
-
-                // Autocompletion 
-                if (AutoComplete.IsVisible) {
-                    if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
-                        handled = AutoComplete.OnKeyDown(key);
-                    else {
-
-                        if ((key == Keys.Right || key == Keys.Left) && keyModifiers.IsAlt)
-                            handled = AutoComplete.OnKeyDown(key);
+                    // Close interfacePopups
+                    if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
+                        ClosePopups();
                     }
-                } else {
-                    // snippet ?
-                    if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
-                        if (!keyModifiers.IsCtrl && !keyModifiers.IsAlt && !keyModifiers.IsShift) {
-                            if (!Snippets.InsertionActive) {
-                                //no snippet insertion in progress
-                                if (key == Keys.Tab) {
-                                    if (Snippets.TriggerCodeSnippetInsertion()) {
-                                        handled = true;
+
+                    // Autocompletion 
+                    if (AutoComplete.IsVisible) {
+                        if (key == Keys.Up || key == Keys.Down || key == Keys.Tab || key == Keys.Return || key == Keys.Escape)
+                            handled = AutoComplete.OnKeyDown(key);
+                        else {
+
+                            if ((key == Keys.Right || key == Keys.Left) && keyModifiers.IsAlt)
+                                handled = AutoComplete.OnKeyDown(key);
+                        }
+                    } else {
+                        // snippet ?
+                        if (key == Keys.Tab || key == Keys.Escape || key == Keys.Return) {
+                            if (!keyModifiers.IsCtrl && !keyModifiers.IsAlt && !keyModifiers.IsShift) {
+                                if (!Snippets.InsertionActive) {
+                                    //no snippet insertion in progress
+                                    if (key == Keys.Tab) {
+                                        if (Snippets.TriggerCodeSnippetInsertion()) {
+                                            handled = true;
+                                        }
                                     }
-                                }
-                            } else {
-                                //there is a snippet insertion in progress
-                                if (key == Keys.Tab) {
-                                    if (Snippets.NavigateToNextParam())
-                                        handled = true;
-                                } else if (key == Keys.Escape || key == Keys.Return) {
-                                    Snippets.FinalizeCurrent();
-                                    if (key == Keys.Return)
-                                        handled = true;
+                                } else {
+                                    //there is a snippet insertion in progress
+                                    if (key == Keys.Tab) {
+                                        if (Snippets.NavigateToNextParam())
+                                            handled = true;
+                                    } else if (key == Keys.Escape || key == Keys.Return) {
+                                        Snippets.FinalizeCurrent();
+                                        if (key == Keys.Return)
+                                            handled = true;
+                                    }
                                 }
                             }
                         }
                     }
-                }
 
-                // next tooltip
-                if (keyModifiers.IsCtrl && InfoToolTip.IsVisible && (key == Keys.Up || key == Keys.Down)) {
-                    if (key == Keys.Up)
-                        InfoToolTip.IndexToShow--;
-                    else
-                        InfoToolTip.IndexToShow++;
-                    InfoToolTip.TryToShowIndex();
-                    handled = true;
+                    // next tooltip
+                    if (!handled && InfoToolTip.IsVisible && keyModifiers.IsCtrl && (key == Keys.Up || key == Keys.Down)) {
+                        if (key == Keys.Up)
+                            InfoToolTip.IndexToShow--;
+                        else
+                            InfoToolTip.IndexToShow++;
+                        InfoToolTip.TryToShowIndex();
+                        handled = true;
+                    }
+
+                    if (handled)
+                        return true;
+                }
+                
+                //HACK:
+                // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
+                // like we normally can, for some reasons, they don't react to certain keys (like enter!)
+                // It only works "almost normally" if we ShowDialog() the form?!
+                // So i gave up and handle things here!
+
+                // YamuiMenu
+                var curMenu = (Control.FromHandle(WinApi.GetForegroundWindow()));
+                var menu = curMenu as YamuiMenu;
+                if (menu != null) {
+                    handled = menu.OnKeyDown(key);
+                } else {
+                    var currentCtrl = WinApi.GetFocusedControl();
+
+                    // YamuiButton
+                    var currentButton = currentCtrl as YamuiButton;
+                    if (currentButton != null) {
+                        var evnt = new KeyEventArgs(key);
+                        currentButton.OnSuperKeyDown(evnt);
+                        handled = evnt.Handled;
+                    } else {
+
+                        // YamuiTextBox
+                        var currentTxtBox = currentCtrl as YamuiTextBox;
+                        if (currentTxtBox != null && key == Keys.Return) {
+                            if (currentTxtBox.MultiLines) {
+                                var initialPos = currentTxtBox.SelectionStart;
+                                currentTxtBox.Text = currentTxtBox.Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < currentTxtBox.TextLength ? currentTxtBox.Text.Substring(initialPos, currentTxtBox.TextLength - initialPos) : "");
+                                currentTxtBox.SelectionStart = initialPos + 2;
+                                currentTxtBox.SelectionLength = 0;
+                                currentTxtBox.ScrollToCaret();
+                            }
+                        } 
+                    }
                 }
 
             } catch (Exception e) {

@@ -74,6 +74,9 @@
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiScrollList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiScrollPanel.cs">
       <SubType>UserControl</SubType>
     </Compile>

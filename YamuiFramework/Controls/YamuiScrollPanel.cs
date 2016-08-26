@@ -152,6 +152,10 @@ namespace YamuiFramework.Controls {
                         _isPressed = true;
                         _lastMouseMove = PointToScreen(MousePosition);
                         Invalidate();
+                        var mousePosRelativeToThis = PointToClient(MousePosition);
+                        if (_barRectangle.Contains(mousePosRelativeToThis) && !_thumbRectangle.Contains(mousePosRelativeToThis)) {
+                            DoScroll(mousePosRelativeToThis.Y - _thumbRectangle.Y);
+                        }
                     }
                     break;
                 case (int)WinApi.Messages.WM_LBUTTONUP:

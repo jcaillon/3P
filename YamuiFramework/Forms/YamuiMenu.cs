@@ -313,7 +313,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// A key has been pressed on the menu
         /// </summary>
-        public void OnKeyDown(Keys pressedKey) {
+        public bool OnKeyDown(Keys pressedKey) {
             var initialIndex = _selectedIndex;
             do {
                 switch (pressedKey) {
@@ -341,6 +341,8 @@ namespace YamuiFramework.Forms {
                     case Keys.PageUp:
                         _selectedIndex = 0;
                         break;
+                    default:
+                        return false;
                 }
                 if (_selectedIndex > _content.Count - 1)
                     _selectedIndex = 0;
@@ -350,8 +352,9 @@ namespace YamuiFramework.Forms {
                     ActiveControl = Controls[_selectedIndex];
             }
             // do this while the current button is disabled and we didn't already try every button
-            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
+            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex && _content.Count(item => !item.IsDisabled) > 1);
 
+            return true;
         }
 
         /// <summary>

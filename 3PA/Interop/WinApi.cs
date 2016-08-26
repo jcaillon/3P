@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using System.Windows.Forms;
 
 namespace _3PA.Interop {
 
@@ -92,6 +93,20 @@ namespace _3PA.Interop {
         #endregion
 
         #region Api
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetFocus();
+
+        public static Control GetFocusedControl() {
+            Control focusedControl = null;
+            // To get hold of the focused control: 
+            IntPtr focusedHandle = GetFocus();
+            if (focusedHandle != IntPtr.Zero) {
+                // Note that if the focused Control is not a .Net control, then this will return null. 
+                focusedControl = Control.FromHandle(focusedHandle);
+            }
+            return focusedControl;
+        } 
 
         [DllImport("user32.dll")]
         [return: MarshalAs(UnmanagedType.Bool)]
