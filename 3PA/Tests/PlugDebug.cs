@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -29,10 +30,13 @@ using System.Runtime.InteropServices;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using Microsoft.Win32.SafeHandles;
+using YamuiFramework.Controls;
 using YamuiFramework.Helper;
 using _3PA.Lib;
 using _3PA.MainFeatures;
+using _3PA.MainFeatures.Appli.Pages.Options;
 using _3PA.MainFeatures.Parser;
 using _3PA.MainFeatures.Pro;
 using Lexer = _3PA.MainFeatures.Parser.Lexer;
@@ -179,11 +183,25 @@ namespace _3PA.Tests {
             return outList;
         }
 
+
         public static void DebugTest1() {
-            Task.Factory.StartNew(() => {
-                Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://cnaf049:sopra100@rs28.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
-                //Utils.SendFileToFtp(@"D:\Profiles\jcaillon\Downloads\function_forward_sample.p", "ftp://fuck.lyon.fr.sopra/cnaf/users/cnaf049/vm/jca/derp/yolo/test.p");
-            });
+
+            /*
+            var webServiceJson = new WebServiceJson(WebServiceJson.WebRequestMethod.Post, Config.PingPostWebWervice);
+            webServiceJson.AddToReq("UUID", "allo");
+            webServiceJson.AddToReq("userName", "yoyo");
+            webServiceJson.AddToReq("version", AssemblyInfo.Version);
+            webServiceJson.OnRequestEnded += req => {
+                UserCommunication.Notify(req.JsonResponse);
+            };
+            webServiceJson.Execute();
+            */
+
+            var form = new Form();
+            form.Size = new Size(1200, 1000);
+            form.Controls.Add(new ProfilesPage());
+            form.Controls[0].Dock = DockStyle.Fill;
+            form.ShowDialog();
         }
 
         public static void DebugTest2() {

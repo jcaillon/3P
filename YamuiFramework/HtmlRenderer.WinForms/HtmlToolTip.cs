@@ -28,8 +28,9 @@ using YamuiFramework.HtmlRenderer.WinForms.Utilities;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.HtmlRenderer.WinForms {
+
     /// <summary>
-    /// Provides HTML rendering on the tooltips.
+    /// Provides HTML rendering on the tooltips
     /// </summary>
     public class HtmlToolTip : ToolTip {
 
@@ -85,8 +86,7 @@ namespace YamuiFramework.HtmlRenderer.WinForms {
 #endif
 
         #endregion
-
-
+        
         /// <summary>
         /// Init.
         /// </summary>

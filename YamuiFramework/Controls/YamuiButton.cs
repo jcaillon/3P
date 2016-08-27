@@ -34,7 +34,7 @@ namespace YamuiFramework.Controls {
     [DefaultEvent("ButtonPressed")]
     public class YamuiButton : Button {
 
-        #region Fields
+        #region Properties
 
         /// <summary>
         /// Set to true if you wish to use the BackColor property
@@ -98,16 +98,11 @@ namespace YamuiFramework.Controls {
         }
 
         /// <summary>
-        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// Returns a grey scale version of the image
         /// </summary>
-        [Category("Yamui")]
-        public event EventHandler<EventArgs> ButtonPressed;
-
-        /// <summary>
-        /// You should register to this event when you want to subscribe to Keydown
-        /// </summary>
-        [Category("Yamui")]
-        public event Action<KeyEventArgs> SuperKeyDown;
+        public Image GreyScaleBackGrndImage {
+            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
+        }
 
         /// <summary>
         /// This public prop is only defined so we can set it from the transitions (animation component)
@@ -122,18 +117,44 @@ namespace YamuiFramework.Controls {
             }
         }
 
-        public bool IsHovered;
-        public bool IsPressed;
-        public bool IsFocused;
-        private bool _useGreyScale;
-        private Image _greyScaleBackGrndImage;
+        /// <summary>
+        /// The control has focus?
+        /// </summary>
+        public bool IsFocused { get; set; }
 
         /// <summary>
-        /// Returns a grey scale version of the image
+        /// The control is hovered by the cursor?
         /// </summary>
-        public Image GreyScaleBackGrndImage {
-            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
-        }
+        public bool IsHovered { get; set; }
+
+        /// <summary>
+        /// The control is pressed?
+        /// </summary>
+        public bool IsPressed { get; set; }
+
+        #endregion
+
+        #region Public events
+
+        /// <summary>
+        /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// </summary>
+        [Category("Yamui")]
+        public event EventHandler<EventArgs> ButtonPressed;
+
+        /// <summary>
+        /// You should register to this event when you want to subscribe to Keydown
+        /// </summary>
+        [Category("Yamui")]
+        public event Action<KeyEventArgs> SuperKeyDown;
+        
+        #endregion
+
+        #region private fields
+
+        private bool _useGreyScale;
+
+        private Image _greyScaleBackGrndImage;
 
         #endregion
 
@@ -255,20 +276,6 @@ namespace YamuiFramework.Controls {
 
         #region Focus Methods
 
-        protected override void OnGotFocus(EventArgs e) {
-            IsFocused = true;
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            IsFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
-
         protected override void OnEnter(EventArgs e) {
             IsFocused = true;
             Invalidate();
@@ -298,6 +305,9 @@ namespace YamuiFramework.Controls {
             base.OnKeyDown(e);
         }
 
+        /// <summary>
+        /// This method is public because external method should be able to call this to pass a key press to this button...
+        /// </summary>
         public void OnSuperKeyDown(KeyEventArgs e) {
             if (SuperKeyDown != null)
                 SuperKeyDown(e);

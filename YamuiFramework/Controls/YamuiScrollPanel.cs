@@ -143,35 +143,39 @@ namespace YamuiFramework.Controls {
 
         private void HandleWindowsProc(Message message) {
             switch (message.Msg) {
+
                 case (int) WinApi.Messages.WM_MOUSEWHEEL:
+                    // delta negative when scrolling up
                     var delta = -((short)(message.WParam.ToInt32() >> 16));
                     DoScroll(Math.Sign(delta) * _thumbRectangle.Height / 2);
                     break;
+
                 case (int)WinApi.Messages.WM_LBUTTONDOWN:
-                    if (!_isPressed) {
-                        _isPressed = true;
-                        _lastMouseMove = PointToScreen(MousePosition);
-                        Invalidate();
-                        var mousePosRelativeToThis = PointToClient(MousePosition);
-                        if (_barRectangle.Contains(mousePosRelativeToThis) && !_thumbRectangle.Contains(mousePosRelativeToThis)) {
+                    var mousePosRelativeToThis = PointToClient(MousePosition);
+
+                    // mouse in scrollbar
+                    if (_barRectangle.Contains(mousePosRelativeToThis)) {
+
+                        // mouse in thumb
+                        if (_thumbRectangle.Contains(mousePosRelativeToThis)) {
+                            _isPressed = true;
+                            _lastMouseMove = PointToScreen(MousePosition);
+                            Invalidate();
+                        } else {
                             DoScroll(mousePosRelativeToThis.Y - _thumbRectangle.Y);
                         }
                     }
                     break;
+
                 case (int)WinApi.Messages.WM_LBUTTONUP:
                     if (_isPressed) {
                         _isPressed = false;
                         Invalidate();
                     }
                     break;
+
                 case (int)WinApi.Messages.WM_MOUSEMOVE:
-                    if (_isPressed) {
-                        Point currentlMouse = PointToScreen(MousePosition);
-                        if (_lastMouseMove != currentlMouse) {
-                            DoScroll(currentlMouse.Y - _lastMouseMove.Y);
-                        }
-                        _lastMouseMove = PointToScreen(MousePosition);
-                    }
+                    // hover thumb
                     var controlPos = PointToScreen(Location);
                     var mousePosInControl = new Point(MousePosition.X - controlPos.X, MousePosition.Y - controlPos.Y);
                     if (_thumbRectangle.Contains(mousePosInControl)) {
@@ -183,6 +187,15 @@ namespace YamuiFramework.Controls {
                             Invalidate();
                         }
                     }
+                    // move thumb
+                    if (_isPressed) {
+                        Point currentlMouse = PointToScreen(MousePosition);
+                        if (_lastMouseMove != currentlMouse) {
+                            DoScroll(currentlMouse.Y - _lastMouseMove.Y);
+                        }
+                        _lastMouseMove = currentlMouse;
+                    }
+ 
                     break;
             }
         }

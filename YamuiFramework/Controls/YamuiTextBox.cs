@@ -188,21 +188,6 @@ namespace YamuiFramework.Controls {
 
         #region Focus Methods
 
-        protected override void OnGotFocus(EventArgs e) {
-            _isFocused = true;
-            SelectAll();
-            Invalidate();
-
-            base.OnGotFocus(e);
-        }
-
-        protected override void OnLostFocus(EventArgs e) {
-            _isFocused = false;
-            Invalidate();
-
-            base.OnLostFocus(e);
-        }
-
         protected override void OnEnter(EventArgs e) {
             _isFocused = true;
             SelectAll();
