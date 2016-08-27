@@ -352,7 +352,7 @@ namespace YamuiFramework.Forms {
                     ActiveControl = Controls[_selectedIndex];
             }
             // do this while the current button is disabled and we didn't already try every button
-            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex && _content.Count(item => !item.IsDisabled) > 1);
+            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
 
             return true;
         }

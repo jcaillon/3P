@@ -71,10 +71,11 @@
     <Compile Include="Controls\YamuiArea.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiList\ListItem.cs" />
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="Controls\YamuiScrollList.cs">
+    <Compile Include="Controls\YamuiList\YamuiScrollList.cs">
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiScrollPanel.cs">

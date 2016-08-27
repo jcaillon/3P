@@ -18,7 +18,12 @@
 // ========================================================================
 #endregion
 
+using System.Collections.Generic;
+using System.Drawing;
+
 namespace YamuiFramework.Controls.YamuiList {
+
+    #region ListItem
 
     /// <summary>
     /// Describes a basic item of a scroll list
@@ -32,4 +37,151 @@ namespace YamuiFramework.Controls.YamuiList {
 
         public bool IsDisabled { get; set; }
     }
+
+    #endregion
+
+    #region FilteredItem
+
+    /// <summary>
+    /// Adds attributes that allow to filter the list of items to display, the method FilterApply allows to compute the attributes
+    /// </summary>
+    public class FilteredItem : ListItem {
+
+        #region Filter
+
+        /// <summary>
+        /// The dispertion level with which the lowerCaseFilterString matches the DisplayText
+        /// </summary>
+        public int FilterDispertionLevel { get; set; }
+
+        /// <summary>
+        /// True of the lowerCaseFilterString fully matches DisplayText
+        /// </summary>
+        public bool FilterFullyMatch { get; set; }
+
+        /// <summary>
+        /// The way lowerCaseFilterString matches DisplayText
+        /// </summary>
+        public List<CharacterRange> FilterMatchedRanges { get; set; }
+
+        /// <summary>
+        /// Call this method to compute the value of
+        /// FilterDispertionLevel, FilterFullyMatch, FilterMatchedRanges
+        /// </summary>
+        /// <param name="lowerCaseFilterString"></param>
+        public void FilterApply(string lowerCaseFilterString) {
+
+            FilterMatchedRanges = new List<CharacterRange>();
+            FilterFullyMatch = true;
+            FilterDispertionLevel = 0;
+
+            if (string.IsNullOrEmpty(lowerCaseFilterString) || string.IsNullOrEmpty(DisplayText))
+                return;
+
+            var lcText = DisplayText.ToLower();
+            var textLenght = lcText.Length;
+            var filterLenght = lowerCaseFilterString.Length;
+
+            int pos = 0;
+            int posFilter = 0;
+            bool matching = false;
+            int startMatch = 0;
+
+            while (pos < textLenght) {
+                // remember matching state at the beginning of the loop
+                bool wasMatching = matching;
+                // we match the current char of the filter
+                if (lcText[pos] == lowerCaseFilterString[posFilter]) {
+                    if (!matching) {
+                        matching = true;
+                        startMatch = pos;
+                    }
+                    posFilter++;
+                    // we matched the entire filter
+                    if (posFilter >= filterLenght) {
+                        FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch + 1));
+                        break;
+                    }
+                } else {
+                    matching = false;
+
+                    // gap between match mean more penalty than finding the match later in the string
+                    if (posFilter > 0) {
+                        FilterDispertionLevel += 900;
+                    } else {
+                        FilterDispertionLevel += 30;
+                    }
+                }
+                // we stopped matching, remember matching range
+                if (!matching && wasMatching)
+                    FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - startMatch));
+                pos++;
+            }
+
+            // put the exact matches first
+            if (filterLenght != textLenght)
+                FilterDispertionLevel += 1;
+
+            // we reached the end of the input, if we were matching stuff, remember matching range
+            if (pos >= textLenght && matching)
+                FilterMatchedRanges.Add(new CharacterRange(startMatch, pos - 1 - startMatch));
+
+            // we didn't match the entire filter
+            if (posFilter < filterLenght)
+                FilterFullyMatch = false;
+        }
+
+        #endregion
+    }
+
+    #endregion
+
+    #region FilteredItemTree
+
+    /// <summary>
+    /// Each item is now view as a node of the tree, allows to view the list as a tree
+    /// </summary>
+    public class FilteredItemTree : FilteredItem {
+
+        /// <summary>
+        /// Is this item expanded? (useful only if CanExpand)
+        /// </summary>
+        public bool IsExpanded { get; set; }
+
+        /// <summary>
+        /// Does it have children?
+        /// </summary>
+        public bool CanExpand { get; set; }
+
+        /// <summary>
+        /// Is this the first item of the tree?
+        /// </summary>
+        public bool IsFirstItem { get; set; }
+
+        /// <summary>
+        /// This is the last item of the tree or the last item of its branch
+        /// </summary>
+        public bool IsLastItem { get; set; }
+
+        /// <summary>
+        /// A list of this object ancestors (PARENT) node
+        /// </summary>
+        public List<FilteredItemTree> Ancestors { get; set; }
+
+        /// <summary>
+        /// True if the object is at root level as an item, not as a branch
+        /// </summary>
+        public bool IsRoot { get; set; }
+
+        /// <summary>
+        /// The level of the item defines its place in the tree, level 1 is the root, 2 is deeper and so on...
+        /// </summary>
+        public int Level {
+            get { return (Ancestors == null ? 0 : Ancestors.Count) + 1; }
+        }
+    }
+
+    #endregion
+
+
 }
