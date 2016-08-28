@@ -110,6 +110,12 @@ namespace _3PA {
             }
         }
 
+        public static bool IsScintillaFocused {
+            get {
+                return (WinApi.GetForegroundWindow() == HandleScintilla);
+            }
+        }
+
         /// <summary>
         /// Returns the screen on which npp is displayed
         /// </summary>

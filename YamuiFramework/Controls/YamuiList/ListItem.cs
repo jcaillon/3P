@@ -43,7 +43,8 @@ namespace YamuiFramework.Controls.YamuiList {
     #region FilteredItem
 
     /// <summary>
-    /// Adds attributes that allow to filter the list of items to display, the method FilterApply allows to compute the attributes
+    /// Adds attributes that allow to filter the list of items to display based on a filter string, 
+    /// the method FilterApply allows to compute the attributes
     /// </summary>
     public class FilteredItem : ListItem {
 
@@ -68,7 +69,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Call this method to compute the value of
         /// FilterDispertionLevel, FilterFullyMatch, FilterMatchedRanges
         /// </summary>
-        /// <param name="lowerCaseFilterString"></param>
         public void FilterApply(string lowerCaseFilterString) {
 
             FilterMatchedRanges = new List<CharacterRange>();

@@ -372,13 +372,8 @@ namespace _3PA {
                     return true;
                 }
 
-                // The following is specific to 3P so don't go further if we are not on a valid file
+                // The following is specific to 3P files
                 if (IsCurrentFileProgress) {
-
-                    // Close interfacePopups
-                    if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior) {
-                        ClosePopups();
-                    }
 
                     // Autocompletion 
                     if (AutoComplete.IsVisible) {
@@ -424,7 +419,7 @@ namespace _3PA {
                         InfoToolTip.TryToShowIndex();
                         handled = true;
                     }
-
+                                        
                     if (handled)
                         return true;
                 }
@@ -464,6 +459,13 @@ namespace _3PA {
                         } 
                     }
                 }
+
+                if (handled)
+                    return true;
+
+                // Close interfacePopups
+                if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior)
+                    ClosePopups();
 
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Occured in : " + (menuItem == null ? (new ShortcutKey(keyModifiers.IsCtrl, keyModifiers.IsAlt, keyModifiers.IsShift, key)).ToString() : menuItem.ItemId));

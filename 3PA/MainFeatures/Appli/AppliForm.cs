@@ -52,6 +52,9 @@ namespace _3PA.MainFeatures.Appli {
 
             // create the tabs / content
             CreateContent(new List<YamuiMainMenu> {
+                new YamuiMainMenu("TESTS", null, false, new List<YamuiSecMenu> {
+                    new YamuiSecMenu("Autocomp", PageNames.Welcome.ToString(), new ProfilesPage())
+                }),
                 new YamuiMainMenu("Home", null, false, new List<YamuiSecMenu> {
                     new YamuiSecMenu("WELCOME", PageNames.Welcome.ToString(), new HomePage())
                 }),
@@ -67,7 +70,7 @@ namespace _3PA.MainFeatures.Appli {
                 }),
                 new YamuiMainMenu("Options", null, false, new List<YamuiSecMenu> {
                     //new YamuiSecMenu("PROFILES", PageNames.OptionsGeneral.ToString(), new ProfilesPage()),
-                    new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General", "Compilation" })), //TODO change the page name!
+                    new YamuiSecMenu("GENERAL", PageNames.OptionsGeneral.ToString(), new OptionPage(new List<string> { "General", "Compilation" })),
                     new YamuiSecMenu("COLOR SCHEMES", "colors", new SettingAppearance()),
                     new YamuiSecMenu("UPDATES", "updates", new OptionPage(new List<string> { "Updates" })),
                     new YamuiSecMenu("AUTO-COMPLETION", "autocompletion", new OptionPage(new List<string> { "Auto-completion" })),
@@ -184,41 +187,6 @@ namespace _3PA.MainFeatures.Appli {
                 base.OnClosing(e);
             }
         }
-        #endregion
-
-        #region Key pressed handler
-
-        /// <summary>
-        /// Handling key board event sent from the global hook
-        /// </summary>
-        /// <param name="key"></param>
-        /// <param name="keyModifiers"></param>
-        public bool HandleKeyPressed(Keys key, KeyModifiers keyModifiers) {
-            var handled = false;
-            if (key == Keys.Return) {
-                var activeCtrl = Appli.ActiveControl;
-                if (activeCtrl is YamuiTextBox) {
-                    // enter in a text box?
-                    var txtBox = ((YamuiTextBox) activeCtrl);
-                    if (txtBox.MultiLines) {
-                        var initialPos = txtBox.SelectionStart;
-                        txtBox.Text = txtBox.Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < txtBox.TextLength ? txtBox.Text.Substring(initialPos, txtBox.TextLength - initialPos) : "");
-                        txtBox.SelectionStart = initialPos + 2;
-                        txtBox.SelectionLength = 0;
-                        txtBox.ScrollToCaret();
-                    }
-                } else if (activeCtrl is YamuiButton) {
-                    // button, press enter
-                    ((YamuiButton) activeCtrl).HandlePressedButton();
-                }
-                handled = true;
-            } else if (key == Keys.Escape) {
-                Cloack();
-                handled = true;
-            }
-            return handled;
-        }
-
         #endregion
 
     }
