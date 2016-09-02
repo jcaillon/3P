@@ -28,18 +28,18 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         /// </summary>
         private void InitializeComponent() {
             this.scrollPanel = new YamuiFramework.Controls.YamuiScrollPanel();
+            this.yamuiButton6 = new YamuiFramework.Controls.YamuiButton();
+            this.yamuiButton5 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton4 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton3 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiButton2 = new YamuiFramework.Controls.YamuiButton();
             this.yamuiTextBox1 = new YamuiFramework.Controls.YamuiTextBox();
             this.yamuiButton1 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiScrollList1 = new YamuiFramework.Controls.YamuiList.YamuiScrollList();
+            this.YamuiFilteredList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredList();
             this.yamuiLabel3 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlToolTip1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
-            this.yamuiButton5 = new YamuiFramework.Controls.YamuiButton();
-            this.yamuiButton6 = new YamuiFramework.Controls.YamuiButton();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton2);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiTextBox1);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton1);
-            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiScrollList1);
+            this.scrollPanel.ContentPanel.Controls.Add(this.YamuiFilteredList1);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel3);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel2);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiLabel1);
@@ -70,6 +70,32 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.scrollPanel.Name = "scrollPanel";
             this.scrollPanel.Size = new System.Drawing.Size(900, 650);
             this.scrollPanel.TabIndex = 0;
+            // 
+            // yamuiButton6
+            // 
+            this.yamuiButton6.BackGrndImage = null;
+            this.yamuiButton6.IsFocused = false;
+            this.yamuiButton6.IsHovered = false;
+            this.yamuiButton6.IsPressed = false;
+            this.yamuiButton6.Location = new System.Drawing.Point(242, 189);
+            this.yamuiButton6.Name = "yamuiButton6";
+            this.yamuiButton6.SetImgSize = new System.Drawing.Size(0, 0);
+            this.yamuiButton6.Size = new System.Drawing.Size(26, 23);
+            this.yamuiButton6.TabIndex = 16;
+            this.yamuiButton6.Text = "-";
+            // 
+            // yamuiButton5
+            // 
+            this.yamuiButton5.BackGrndImage = null;
+            this.yamuiButton5.IsFocused = false;
+            this.yamuiButton5.IsHovered = false;
+            this.yamuiButton5.IsPressed = false;
+            this.yamuiButton5.Location = new System.Drawing.Point(242, 160);
+            this.yamuiButton5.Name = "yamuiButton5";
+            this.yamuiButton5.SetImgSize = new System.Drawing.Size(0, 0);
+            this.yamuiButton5.Size = new System.Drawing.Size(26, 23);
+            this.yamuiButton5.TabIndex = 15;
+            this.yamuiButton5.Text = "+";
             // 
             // yamuiButton4
             // 
@@ -138,25 +164,25 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiButton1.TabIndex = 9;
             this.yamuiButton1.Text = "yamuiButton1";
             // 
-            // yamuiScrollList1
+            // YamuiFilteredList1
             // 
-            this.yamuiScrollList1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.YamuiFilteredList1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.yamuiScrollList1.EmptyListString = "Empty list!";
-            this.yamuiScrollList1.HotRow = 0;
-            this.yamuiScrollList1.IsFocused = false;
-            this.yamuiScrollList1.IsHovered = false;
-            this.yamuiScrollList1.ListPadding = new System.Windows.Forms.Padding(0, 0, 0, 0);
-            this.yamuiScrollList1.Location = new System.Drawing.Point(29, 270);
-            this.yamuiScrollList1.Name = "yamuiScrollList1";
-            this.yamuiScrollList1.RowHeight = 18;
-            this.yamuiScrollList1.ScrollWidth = 10;
-            this.yamuiScrollList1.SelectedItemIndex = 0;
-            this.yamuiScrollList1.Size = new System.Drawing.Size(181, 137);
-            this.yamuiScrollList1.TabIndex = 14;
-            this.yamuiScrollList1.TopIndex = 0;
-            this.yamuiScrollList1.UseCustomBackColor = false;
+            this.YamuiFilteredList1.EmptyListString = "Empty list!";
+            this.YamuiFilteredList1.HotRow = 0;
+            this.YamuiFilteredList1.IsFocused = false;
+            this.YamuiFilteredList1.IsHovered = false;
+            this.YamuiFilteredList1.ListPadding = new System.Windows.Forms.Padding(0);
+            this.YamuiFilteredList1.Location = new System.Drawing.Point(29, 270);
+            this.YamuiFilteredList1.Name = "YamuiFilteredList1";
+            this.YamuiFilteredList1.RowHeight = 18;
+            this.YamuiFilteredList1.ScrollWidth = 10;
+            this.YamuiFilteredList1.SelectedItemIndex = 0;
+            this.YamuiFilteredList1.Size = new System.Drawing.Size(181, 137);
+            this.YamuiFilteredList1.TabIndex = 14;
+            this.YamuiFilteredList1.TopIndex = 0;
+            this.YamuiFilteredList1.UseCustomBackColor = false;
             // 
             // yamuiLabel3
             // 
@@ -201,32 +227,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlToolTip1.OwnerDraw = true;
             this.htmlToolTip1.ReshowDelay = 100;
             // 
-            // yamuiButton5
-            // 
-            this.yamuiButton5.BackGrndImage = null;
-            this.yamuiButton5.IsFocused = false;
-            this.yamuiButton5.IsHovered = false;
-            this.yamuiButton5.IsPressed = false;
-            this.yamuiButton5.Location = new System.Drawing.Point(242, 160);
-            this.yamuiButton5.Name = "yamuiButton5";
-            this.yamuiButton5.SetImgSize = new System.Drawing.Size(0, 0);
-            this.yamuiButton5.Size = new System.Drawing.Size(26, 23);
-            this.yamuiButton5.TabIndex = 15;
-            this.yamuiButton5.Text = "+";
-            // 
-            // yamuiButton6
-            // 
-            this.yamuiButton6.BackGrndImage = null;
-            this.yamuiButton6.IsFocused = false;
-            this.yamuiButton6.IsHovered = false;
-            this.yamuiButton6.IsPressed = false;
-            this.yamuiButton6.Location = new System.Drawing.Point(242, 189);
-            this.yamuiButton6.Name = "yamuiButton6";
-            this.yamuiButton6.SetImgSize = new System.Drawing.Size(0, 0);
-            this.yamuiButton6.Size = new System.Drawing.Size(26, 23);
-            this.yamuiButton6.TabIndex = 16;
-            this.yamuiButton6.Text = "-";
-            // 
             // ProfilesPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -247,7 +247,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiLabel yamuiLabel3;
         private YamuiLabel yamuiLabel2;
         private YamuiLabel yamuiLabel1;
-        private YamuiScrollList yamuiScrollList1;
+        private YamuiFilteredList YamuiFilteredList1;
         private YamuiTextBox yamuiTextBox1;
         private YamuiButton yamuiButton1;
         private YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip htmlToolTip1;

@@ -82,14 +82,6 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Return a GraphicPath that is a round cornered rectangle
         /// </summary>
-        /// <returns>A round cornered rectagle path</returns>   
-        public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
-            return new RectangleF(x, y, width, height).GetRoundedRect(diameter);
-        }
-
-        /// <summary>
-        /// Return a GraphicPath that is a round cornered rectangle
-        /// </summary>
         /// <param name="rect">The rectangle</param>
         /// <param name="diameter">The diameter of the corners</param>
         /// <returns>A round cornered rectagle path</returns>

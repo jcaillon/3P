@@ -98,6 +98,9 @@ namespace YamuiFramework.Themes {
         public Color MenuDisabledBack = Color.FromArgb(230, 230, 230);
         public Color MenuDisabledFore = Color.FromArgb(100, 100, 100);
 
+        public Color AutoCompletionHighlightBack = Color.FromArgb(254, 228, 101);
+        public Color AutoCompletionHighlightBorder = Color.FromArgb(255, 171, 0);
+
         #endregion
 
         #region Accent color

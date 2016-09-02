@@ -233,9 +233,6 @@ namespace _3PA {
         public class Theme : YamuiTheme {
 
             // special for 3P
-            public Color AutoCompletionHighlightBack = Color.FromArgb(254, 228, 101);
-            public Color AutoCompletionHighlightBorder = Color.FromArgb(255, 171, 0);
-
             public Color GenericLinkColor = Color.FromArgb(95, 158, 142);
             public Color GenericErrorColor = Color.OrangeRed;
 

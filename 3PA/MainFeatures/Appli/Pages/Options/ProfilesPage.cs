@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -41,89 +42,94 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             
             yamuiButton1.ButtonPressed += (sender, args) => {
-                var de = new List<ListItem>();
+                var de = new List<FilteredItem>();
                 for (int i = 0; i < 100; i++) {
-                    de.Add(new ListItem { DisplayText = "new" + i });
+                    de.Add(new FilteredItem { DisplayText = "new" + i });
                 }
                 for (int i = 101; i < 1000; i++) {
-                    de.Add(new ListItem { DisplayText = "new" + i, IsDisabled = true});
+                    de.Add(new FilteredItem { DisplayText = "new" + i, IsDisabled = true});
                 }
                 for (int i = 1001; i < 100000; i++) {
-                    de.Add(new ListItem { DisplayText = "new" + i });
+                    de.Add(new FilteredItem { DisplayText = "new" + i });
                 }
-                yamuiScrollList1.SetItems(de);
-                yamuiScrollList1.GrabFocus();
+                YamuiFilteredList1.SetItems(de);
+                YamuiFilteredList1.GrabFocus();
             };
 
             yamuiButton2.ButtonPressed += (sender, args) => {
-                var de = new List<ListItem>();
-                yamuiScrollList1.SetItems(de);
+                var de = new List<FilteredItem>();
+                YamuiFilteredList1.SetItems(de);
             };
 
             yamuiButton3.ButtonPressed += (sender, args) => {
-                yamuiScrollList1.SetItems(new List<ListItem> {
-                    new ListItem { DisplayText = "fuck1", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck2", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck3", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck4", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck5", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck6", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck7", IsDisabled = false},
-                    new ListItem { DisplayText = "fuck8", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck9", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck10", IsDisabled = false},
+                YamuiFilteredList1.SetItems(new List<FilteredItem> {
+                    new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck4", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck5", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck6", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck7", IsDisabled = false},
+                    new FilteredItem { DisplayText = "fuck8", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck9", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck10", IsDisabled = false},
                 });
             };
 
             yamuiButton4.ButtonPressed += (sender, args) => {
-                yamuiScrollList1.SetItems(new List<ListItem> {
-                    new ListItem { DisplayText = "fuck1", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck2", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck3", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck4", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck5", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck6", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck7", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck8", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck9", IsDisabled = true},
-                    new ListItem { DisplayText = "fuck10", IsDisabled = true},
+                YamuiFilteredList1.SetItems(new List<FilteredItem> {
+                    new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck4", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck5", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck6", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck7", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck8", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck9", IsDisabled = true},
+                    new FilteredItem { DisplayText = "fuck10", IsDisabled = true},
                 });
             };
-            yamuiScrollList1.EnterPressed += list => {
-                UserCommunication.Notify(list.SelectedItemIndex + " = " + (list.SelectedItem ?? new ListItem {DisplayText = "null"}).DisplayText);
+            YamuiFilteredList1.EnterPressed += list => {
+                UserCommunication.Notify(list.SelectedItemIndex + " = " + (list.SelectedItem ?? new FilteredItem { DisplayText = "null"}).DisplayText);
             };
-            yamuiScrollList1.TabPressed += list => {
-                yamuiScrollList1.ListPadding = new Padding(5, 10, 15, 25);
+            YamuiFilteredList1.TabPressed += list => {
+                YamuiFilteredList1.ListPadding = new Padding(5, 10, 15, 25);
                 list.SelectedItemIndex = 1115;
             };
-            yamuiScrollList1.RowClicked += (list, args) => {
+            YamuiFilteredList1.RowClicked += (list, args) => {
                 UserCommunication.Notify(list.SelectedItemIndex + " " + args.Button);
             };
 
 
             yamuiButton5.ButtonPressed += (sender, args) => {
-                yamuiScrollList1.Height += 10;
+                YamuiFilteredList1.Height += 10;
             };
             yamuiButton6.ButtonPressed += (sender, args) => {
-                yamuiScrollList1.Height -= 10;
+                YamuiFilteredList1.Height -= 10;
             };
 
-            yamuiScrollList1.SetItems(new List<ListItem> {
-                new ListItem { DisplayText = "fuck1"},
-                new ListItem { DisplayText = "fuck2"},
-                new ListItem { DisplayText = "fuck3"},
-                new ListItem { DisplayText = "fuck4"},
-                new ListItem { DisplayText = "fuck5"},
-                new ListItem { DisplayText = "fuck6"},
-                new ListItem { DisplayText = "fuck7"},
-                new ListItem { DisplayText = "fuck8"},
-                new ListItem { DisplayText = "fuck9"},
-                new ListItem { DisplayText = "fuck10"},
+            YamuiFilteredList1.SetItems(new List<FilteredItem> {
+                new FilteredItem { DisplayText = "CODAPP"},
+                new FilteredItem { DisplayText = "NOMOBJ"},
+                new FilteredItem { DisplayText = "CODORG"},
+                new FilteredItem { DisplayText = "PROFIL"},
+                new FilteredItem { DisplayText = "CODSOUFUCK"},
+                new FilteredItem { DisplayText = "CODORGA"},
+                new FilteredItem { DisplayText = "SRVEDIN"},
+                new FilteredItem { DisplayText = "NOMIMPR"},
+                new FilteredItem { DisplayText = "CHRONHA"},
+                new FilteredItem { DisplayText = "FUCK0"},
             });
+
+            YamuiFilteredList1.RowHeight = 22;
+
+            yamuiTextBox1.TextChanged += YamuiFilteredList1.OnTextChangedEvent;
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
+
         #endregion
 
     }

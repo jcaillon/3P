@@ -240,7 +240,10 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Action that will be called each time a row needs to be painted
         /// </summary>
-        public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint;
+        public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint {
+            get { return _onRowPaint; }
+            set { _onRowPaint = value; }
+        }
 
         #endregion
 
@@ -309,6 +312,8 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region private fields
+
+        protected Action<ListItem, YamuiListRow, PaintEventArgs> _onRowPaint;
 
         protected Padding _listPadding;
 
@@ -524,9 +529,9 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Override this method to set the default paint action
+        /// Paint action of each row (button)
         /// </summary>
-        protected void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
+        private void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
             if (OnRowPaint != null)
                 OnRowPaint(item, row, e);
             else {

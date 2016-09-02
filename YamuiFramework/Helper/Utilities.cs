@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -35,6 +36,19 @@ namespace YamuiFramework.Helper {
     /// This class provides various utilies to use in YamuiFramework and outside
     /// </summary>
     public static class Utilities {
+
+        #region Paint
+
+        /// <summary>
+        /// Return a GraphicPath that is a round cornered rectangle
+        /// </summary>
+        /// <returns>A round cornered rectagle path</returns>   
+        public static GraphicsPath GetRoundedRect(float x, float y, float width, float height, float diameter) {
+            return new RectangleF(x, y, width, height).GetRoundedRect(diameter);
+        }
+
+        #endregion
+
 
         #region Html utilities
 
@@ -147,62 +161,62 @@ namespace YamuiFramework.Helper {
             {
                 typeof (byte), s => {
                     byte n;
-                    return byte.TryParse(s, out n);
+                    return Byte.TryParse(s, out n);
                 }
             }, {
                 typeof (sbyte), s => {
                     sbyte n;
-                    return sbyte.TryParse(s, out n);
+                    return SByte.TryParse(s, out n);
                 }
             }, {
                 typeof (short), s => {
                     short n;
-                    return short.TryParse(s, out n);
+                    return Int16.TryParse(s, out n);
                 }
             }, {
                 typeof (ushort), s => {
                     ushort n;
-                    return ushort.TryParse(s, out n);
+                    return UInt16.TryParse(s, out n);
                 }
             }, {
                 typeof (int), s => {
                     int n;
-                    return int.TryParse(s, out n);
+                    return Int32.TryParse(s, out n);
                 }
             }, {
                 typeof (uint), s => {
                     uint n;
-                    return uint.TryParse(s, out n);
+                    return UInt32.TryParse(s, out n);
                 }
             }, {
                 typeof (long), s => {
                     long n;
-                    return long.TryParse(s, out n);
+                    return Int64.TryParse(s, out n);
                 }
             }, {
                 typeof (ulong), s => {
                     ulong n;
-                    return ulong.TryParse(s, out n);
+                    return UInt64.TryParse(s, out n);
                 }
             }, {
                 typeof (char), s => {
                     char n;
-                    return char.TryParse(s, out n);
+                    return Char.TryParse(s, out n);
                 }
             }, {
                 typeof (double), s => {
                     double n;
-                    return double.TryParse(s, out n);
+                    return Double.TryParse(s, out n);
                 }
             }, {
                 typeof (float), s => {
                     float n;
-                    return float.TryParse(s, out n);
+                    return Single.TryParse(s, out n);
                 }
             }, {
                 typeof (decimal), s => {
                     decimal n;
-                    return decimal.TryParse(s, out n);
+                    return Decimal.TryParse(s, out n);
                 }
             }, {
                 typeof (DateTime), s => {
@@ -247,7 +261,7 @@ namespace YamuiFramework.Helper {
         };
 
         public static bool IsInvalidKey(char keyChar, Type itemType) {
-            if (char.IsControl(keyChar))
+            if (Char.IsControl(keyChar))
                 return false;
             char[] chars;
             KeyPressValidChars.TryGetValue(itemType, out chars);
@@ -298,7 +312,7 @@ namespace YamuiFramework.Helper {
             };
 
             // either read from the file or from the byte array
-            if (!string.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
+            if (!String.IsNullOrEmpty(filePath) && File.Exists(filePath)) {
                 using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)) {
                     using (var reader = new StreamReader(fileStream, encoding)) {
                         action(reader);
@@ -348,6 +362,5 @@ namespace YamuiFramework.Helper {
         }
 
         #endregion
-
     }
 }
