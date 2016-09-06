@@ -75,6 +75,9 @@
     <Compile Include="Controls\YamuiList\YamuiFilteredList.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiList\YamuiFilteredTypeList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>

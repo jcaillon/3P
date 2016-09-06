@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -17,6 +18,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Set this to filter the list with the given text
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string FilterString {
             set {
                 _filterString = value.ToLower().Trim();
@@ -43,10 +45,11 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
             }
         }
-        
+
         /// <summary>
         /// Action that will be called each time a row needs to be painted
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint {
             get { return _newOnRowPaint ?? RowPaintFilter; }
             set { _newOnRowPaint = value; }
@@ -55,6 +58,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Predicate to filter the items, only items meeting the predicate requirements will be displayed (applied in addition to the default string filter)
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Predicate<FilteredItem> FilterPredicate {
             get { return _filterPredicate; }
             set { _filterPredicate = value; }
@@ -80,7 +84,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private Pen _framePen;
         
-        const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
+        protected const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
 
         #endregion
 

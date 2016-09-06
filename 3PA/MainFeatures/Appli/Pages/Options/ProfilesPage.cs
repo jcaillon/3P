@@ -42,6 +42,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             
             yamuiButton1.ButtonPressed += (sender, args) => {
+                UserCommunication.Notify(yamuiFilteredTypeList1.ListPadding.ToString());
+                return;
                 var de = new List<FilteredItem>();
                 for (int i = 0; i < 100; i++) {
                     de.Add(new FilteredItem { DisplayText = "new" + i });

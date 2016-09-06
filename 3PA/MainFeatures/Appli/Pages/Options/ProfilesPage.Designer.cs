@@ -40,6 +40,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiLabel2 = new YamuiFramework.Controls.YamuiLabel();
             this.yamuiLabel1 = new YamuiFramework.Controls.YamuiLabel();
             this.htmlToolTip1 = new YamuiFramework.HtmlRenderer.WinForms.HtmlToolTip();
+            this.yamuiFilteredTypeList1 = new YamuiFramework.Controls.YamuiList.YamuiFilteredTypeList();
             this.scrollPanel.ContentPanel.SuspendLayout();
             this.scrollPanel.SuspendLayout();
             this.SuspendLayout();
@@ -49,6 +50,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // scrollPanel.ContentPanel
             // 
+            this.scrollPanel.ContentPanel.Controls.Add(this.yamuiFilteredTypeList1);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton6);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton5);
             this.scrollPanel.ContentPanel.Controls.Add(this.yamuiButton4);
@@ -169,19 +171,12 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.YamuiFilteredList1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.YamuiFilteredList1.EmptyListString = "Empty list!";
-            this.YamuiFilteredList1.HotRow = 0;
-            this.YamuiFilteredList1.IsFocused = false;
-            this.YamuiFilteredList1.IsHovered = false;
-            this.YamuiFilteredList1.ListPadding = new System.Windows.Forms.Padding(0);
-            this.YamuiFilteredList1.Location = new System.Drawing.Point(29, 270);
+            this.YamuiFilteredList1.Location = new System.Drawing.Point(29, 244);
             this.YamuiFilteredList1.Name = "YamuiFilteredList1";
             this.YamuiFilteredList1.RowHeight = 18;
             this.YamuiFilteredList1.ScrollWidth = 10;
-            this.YamuiFilteredList1.SelectedItemIndex = 0;
             this.YamuiFilteredList1.Size = new System.Drawing.Size(181, 137);
             this.YamuiFilteredList1.TabIndex = 14;
-            this.YamuiFilteredList1.TopIndex = 0;
             this.YamuiFilteredList1.UseCustomBackColor = false;
             // 
             // yamuiLabel3
@@ -227,6 +222,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.htmlToolTip1.OwnerDraw = true;
             this.htmlToolTip1.ReshowDelay = 100;
             // 
+            // yamuiFilteredTypeList1
+            // 
+            this.yamuiFilteredTypeList1.Location = new System.Drawing.Point(242, 244);
+            this.yamuiFilteredTypeList1.Name = "yamuiFilteredTypeList1";
+            this.yamuiFilteredTypeList1.RowHeight = 18;
+            this.yamuiFilteredTypeList1.ScrollWidth = 10;
+            this.yamuiFilteredTypeList1.Size = new System.Drawing.Size(241, 202);
+            this.yamuiFilteredTypeList1.TabIndex = 17;
+            this.yamuiFilteredTypeList1.UseCustomBackColor = false;
+            // 
             // ProfilesPage
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -256,6 +261,6 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         private YamuiButton yamuiButton4;
         private YamuiButton yamuiButton6;
         private YamuiButton yamuiButton5;
-
+        private YamuiFilteredTypeList yamuiFilteredTypeList1;
     }
 }

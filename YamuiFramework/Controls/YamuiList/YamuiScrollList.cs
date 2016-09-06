@@ -40,13 +40,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// true if you want to use the BackColor property
         /// </summary>
-        [Browsable(false)]
         public bool UseCustomBackColor { get; set; }
 
         /// <summary>
         /// Width of the scroll bar
         /// </summary>
-        [Browsable(false)]
         public int ScrollWidth {
             get { return _scrollWidth; }
             set { _scrollWidth = value; }
@@ -55,16 +53,23 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Height of each row
         /// </summary>
-        [Browsable(false)]
         public int RowHeight {
             get { return _rowHeight; }
             set { _rowHeight = value; }
         }
 
         /// <summary>
+        /// The text that appears when the list is empty
+        /// </summary>
+        public string EmptyListString {
+            get { return _emptyListString; }
+            set { _emptyListString = value; }
+        }
+
+        /// <summary>
         /// index of the first item currently displayed
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int TopIndex {
             get { return _topIndex; }
             set {
@@ -83,7 +88,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Index of the item currently selected
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int SelectedItemIndex {
             get { return _selectedItemIndex; }
             set {
@@ -109,7 +114,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Returns the currently selected item or null if it doesn't exist
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ListItem SelectedItem {
             get {
                 var item = GetItem(SelectedItemIndex);
@@ -120,7 +125,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Index of the selected row (can be negative or too high if the selected index isn't visible)
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         private int SelectedRowIndex {
             get { return _selectedRowIndex; }
             set {
@@ -141,7 +146,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Returns the currently selected row or null if it doesn't exist
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public YamuiListRow SelectedRow {
             get { return 0 <= SelectedRowIndex && SelectedRowIndex < _nbRowDisplayed ? _rows[SelectedRowIndex] : null; }
         }
@@ -149,13 +154,13 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Exposes the states of the scroll bars, true if they are displayed
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool HasScrolls { get; private set; }
 
         /// <summary>
         /// The row currently hovered by the cursor
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int HotRow {
             get { return _hotRow; }
             set {
@@ -168,7 +173,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Is the control hovered by the mouse?
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsHovered {
             get { return _isHovered; }
             set {
@@ -188,7 +193,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// The control has focus?
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsFocused {
             get { return _isFocused; }
             set {
@@ -209,18 +214,9 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// The text that appears when the list is empty
-        /// </summary>
-        [Browsable(false)]
-        public string EmptyListString {
-            get { return _emptyListString; }
-            set { _emptyListString = value; }
-        }
-
-        /// <summary>
         /// The padding to apply to display the list
         /// </summary>
-        [Browsable(false)]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Padding ListPadding {
             get { return _listPadding; }
             set {
@@ -240,6 +236,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Action that will be called each time a row needs to be painted
         /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint {
             get { return _onRowPaint; }
             set { _onRowPaint = value; }
@@ -315,7 +312,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected Action<ListItem, YamuiListRow, PaintEventArgs> _onRowPaint;
 
-        protected Padding _listPadding;
+        protected Padding _listPadding = new Padding(0);
 
         private string _emptyListString = @"Empty list!";
 
@@ -414,8 +411,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         protected override void OnPaintBackground(PaintEventArgs e) {
-            e.Graphics.Clear(Color.Yellow);
-            //e.Graphics.Clear(!UseCustomBackColor ? YamuiThemeManager.Current.MenuNormalBack : BackColor);
+            e.Graphics.Clear(!UseCustomBackColor ? YamuiThemeManager.Current.MenuNormalBack : BackColor);
         }
 
         /// <summary>
