@@ -22,12 +22,16 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
 using System.Windows.Forms;
+using BrightIdeasSoftware;
 using YamuiFramework.Controls;
 using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Fonts;
 using YamuiFramework.Themes;
+using _3PA.Images;
 using _3PA.Lib;
+using _3PA.MainFeatures.AutoCompletion;
 
 namespace _3PA.MainFeatures.Appli.Pages.Options {
     internal partial class ProfilesPage : YamuiPage {
@@ -40,31 +44,75 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
         public ProfilesPage() {
             InitializeComponent();
 
-            
+            // scroll list
+            var de = new List<ListItem>();
+            for (int i = 0; i < 100; i++) {
+                de.Add(new ListItem { DisplayText = "new" + i });
+            }
+            for (int i = 101; i < 1000; i++) {
+                de.Add(new ListItem { DisplayText = "new" + i, IsDisabled = true });
+            }
+            for (int i = 1001; i < 100000; i++) {
+                de.Add(new ListItem { DisplayText = "new" + i });
+            }
+            yamuiScrollList1.SetItems(de);
+
+            // filtered list
+            YamuiFilteredList1.SetItems(new List<ListItem> {
+                new FilteredItem { DisplayText = "CODAPP"},
+                new FilteredItem { DisplayText = "NOMOBJ"},
+                new FilteredItem { DisplayText = "CODORG"},
+                new FilteredItem { DisplayText = "PROFIL"},
+                new FilteredItem { DisplayText = "CODSOUFUCK"},
+                new FilteredItem { DisplayText = "CODORGA"},
+                new FilteredItem { DisplayText = "SRVEDIN"},
+                new FilteredItem { DisplayText = "NOMIMPR"},
+                new FilteredItem { DisplayText = "CHRONHA"},
+                new FilteredItem { DisplayText = "FUCK0"},
+            });
+
+            flFilter1.TextChanged += YamuiFilteredList1.OnTextChangedEvent;
+            flFilter1.KeyDown += (sender, args) => args.Handled = YamuiFilteredList1.OnKeyDown(args.KeyCode);
+
+            // autocompletion list
+            flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.OnKeyDown(args.KeyCode);
+
+            yamuiFilteredTypeList1.GetObjectImage += item => {
+                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((FuckItem) item).Type.ToString());
+                return tryImg ?? ImageResources.Error;
+            };
+            yamuiFilteredTypeList1.GetObjectSubText += item => { return ((FuckItem) item).SubString; };
+            yamuiFilteredTypeList1.GetObjectTagImages += item => {
+                var curItem = item as FuckItem;
+                var outList = new List<Image>();
+                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                    if (flag == 0 || !curItem.Flag.HasFlag(flag)) continue;
+
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    if (tryImg != null) {
+                        outList.Add(tryImg);
+                    }
+                }
+                return outList;
+            };
+
+
             yamuiButton1.ButtonPressed += (sender, args) => {
-                UserCommunication.Notify(yamuiFilteredTypeList1.ListPadding.ToString());
-                return;
-                var de = new List<FilteredItem>();
-                for (int i = 0; i < 100; i++) {
-                    de.Add(new FilteredItem { DisplayText = "new" + i });
-                }
-                for (int i = 101; i < 1000; i++) {
-                    de.Add(new FilteredItem { DisplayText = "new" + i, IsDisabled = true});
-                }
-                for (int i = 1001; i < 100000; i++) {
-                    de.Add(new FilteredItem { DisplayText = "new" + i });
-                }
-                YamuiFilteredList1.SetItems(de);
-                YamuiFilteredList1.GrabFocus();
+                yamuiFilteredTypeList1.SetItems(AutoComplete.CurrentItems.Select(item => new FuckItem {
+                    DisplayText = item.DisplayText,
+                    Type = item.Type,
+                    SubString = item.SubString,
+                    Flag = item.Flag
+                }).Cast<ListItem>().ToList());
             };
 
             yamuiButton2.ButtonPressed += (sender, args) => {
-                var de = new List<FilteredItem>();
-                YamuiFilteredList1.SetItems(de);
             };
 
             yamuiButton3.ButtonPressed += (sender, args) => {
-                YamuiFilteredList1.SetItems(new List<FilteredItem> {
+                YamuiFilteredList1.SetItems(new List<ListItem> {
                     new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
                     new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
                     new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
@@ -79,7 +127,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
 
             yamuiButton4.ButtonPressed += (sender, args) => {
-                YamuiFilteredList1.SetItems(new List<FilteredItem> {
+                YamuiFilteredList1.SetItems(new List<ListItem> {
                     new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
                     new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
                     new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
@@ -104,29 +152,16 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
 
 
-            yamuiButton5.ButtonPressed += (sender, args) => {
+            btPlus.ButtonPressed += (sender, args) => {
                 YamuiFilteredList1.Height += 10;
+                yamuiScrollList1.Height += 10;
+                yamuiFilteredTypeList1.Height += 10;
             };
-            yamuiButton6.ButtonPressed += (sender, args) => {
+            btMinus.ButtonPressed += (sender, args) => {
                 YamuiFilteredList1.Height -= 10;
+                yamuiScrollList1.Height -= 10;
+                yamuiFilteredTypeList1.Height -= 10;
             };
-
-            YamuiFilteredList1.SetItems(new List<FilteredItem> {
-                new FilteredItem { DisplayText = "CODAPP"},
-                new FilteredItem { DisplayText = "NOMOBJ"},
-                new FilteredItem { DisplayText = "CODORG"},
-                new FilteredItem { DisplayText = "PROFIL"},
-                new FilteredItem { DisplayText = "CODSOUFUCK"},
-                new FilteredItem { DisplayText = "CODORGA"},
-                new FilteredItem { DisplayText = "SRVEDIN"},
-                new FilteredItem { DisplayText = "NOMIMPR"},
-                new FilteredItem { DisplayText = "CHRONHA"},
-                new FilteredItem { DisplayText = "FUCK0"},
-            });
-
-            YamuiFilteredList1.RowHeight = 22;
-
-            yamuiTextBox1.TextChanged += YamuiFilteredList1.OnTextChangedEvent;
 
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
@@ -134,5 +169,15 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
         #endregion
 
+    }
+
+    internal class FuckItem : FilteredTypeItem {
+        public CompletionType Type;
+        public string SubString;
+        public ParseFlag Flag;
+
+        public override int ItemType {
+            get { return (int) Type; }
+        }
     }
 }

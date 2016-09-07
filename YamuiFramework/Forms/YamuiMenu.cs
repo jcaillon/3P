@@ -50,7 +50,7 @@ namespace YamuiFramework.Forms {
 
         public bool IamMain = true;
 
-        public int SubTextOpacity = 100;
+        public float SubTextOpacity = 0.3f;
 
         #endregion
 
@@ -61,7 +61,7 @@ namespace YamuiFramework.Forms {
 
         private bool _closing;
 
-        private const int LineHeight = 22;
+        private const int LineHeight = 20;
         private const int SeparatorLineHeight = 8;
 
         private bool _reverseX;
@@ -396,7 +396,7 @@ namespace YamuiFramework.Forms {
             public bool NoIconImage { private get; set; }
             public bool NoChildren { private get; set; }
             public string SubText { get; set; }
-            public int SubTextOpacity { get; set; }
+            public float SubTextOpacity { get; set; }
 
             protected override void OnPaint(PaintEventArgs e) {
 
@@ -427,10 +427,10 @@ namespace YamuiFramework.Forms {
                     var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
 
                     var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
-                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb(SubTextOpacity, subColor)), drawPoint);
+                    e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
 
-                    using (var pen = new Pen(Color.FromArgb((int) (SubTextOpacity*0.8), subColor), 1) {Alignment = PenAlignment.Left}) {
-                        e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
+                    using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {
+                        e.Graphics.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
                     }
                 }
 

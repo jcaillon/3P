@@ -35,6 +35,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public string DisplayText { get; set; }
 
+        /// <summary>
+        /// The item is disabled or not
+        /// </summary>
         public bool IsDisabled { get; set; }
     }
 
@@ -136,12 +139,27 @@ namespace YamuiFramework.Controls.YamuiList {
 
     #endregion
 
-    #region FilteredItemTree
+    #region FilteredTypeItem
+
+    public class FilteredTypeItem : FilteredItem {
+
+        /// <summary>
+        /// to override, should return a unique int for each item type
+        /// </summary>
+        public virtual int ItemType {
+            get { return 0; }
+        }
+
+    }
+
+    #endregion
+
+    #region FilteredTypeItemTree
 
     /// <summary>
     /// Each item is now view as a node of the tree, allows to view the list as a tree
     /// </summary>
-    public class FilteredItemTree : FilteredItem {
+    public class FilteredTypeItemTree : FilteredTypeItem {
 
         /// <summary>
         /// Is this item expanded? (useful only if CanExpand)
@@ -166,7 +184,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// A list of this object ancestors (PARENT) node
         /// </summary>
-        public List<FilteredItemTree> Ancestors { get; set; }
+        public List<FilteredTypeItemTree> Ancestors { get; set; }
 
         /// <summary>
         /// True if the object is at root level as an item, not as a branch
@@ -182,6 +200,5 @@ namespace YamuiFramework.Controls.YamuiList {
     }
 
     #endregion
-
 
 }
