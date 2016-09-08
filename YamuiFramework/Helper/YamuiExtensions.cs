@@ -4,21 +4,38 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Linq;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 
 namespace YamuiFramework.Helper {
     public static class YamuiExtensions {
 
+        #region ui thread safe invoke
+
         /// <summary>
-        /// Returns a collection of all the values of a given Enum
+        /// Executes a function on the thread of the given object
         /// </summary>
-        public static IEnumerable<T> GetEnumValues<T>(this Enum value) {
-            return Enum.GetValues(typeof(T)).Cast<T>();
+        public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) {
+                IAsyncResult result = isi.BeginInvoke(call, new object[] { isi });
+                object endResult = isi.EndInvoke(result);
+                return (TResult)endResult;
+            }
+            return call(isi);
         }
 
-        #region Math lol
+        /// <summary>
+        /// Executes an action on the thread of the given object
+        /// </summary>
+        public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
+            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] { isi });
+            else
+                call(isi);
+        }
+
+        #endregion
+
+        #region Simple math
 
         /// <summary>
         /// Forces a value between a minimum and a maximum
@@ -112,9 +129,6 @@ namespace YamuiFramework.Helper {
         /// <summary>
         /// Replace all the occurences of @alias thx to the aliasDictionnary
         /// </summary>
-        /// <param name="value"></param>
-        /// <param name="aliasDictionnary"></param>
-        /// <returns></returns>
         public static string ReplaceAliases(this string value, Dictionary<string, string> aliasDictionnary) {
             while (true) {
                 if (value.Contains("@")) {
@@ -136,8 +150,6 @@ namespace YamuiFramework.Helper {
         /// lighten(#000000, 35%)
         /// darken(#FFFFFF, 35%)
         /// </summary>
-        /// <param name="htmlColor"></param>
-        /// <returns></returns>
         public static string ApplyColorFunctions(this string htmlColor) {
             if (htmlColor.Contains("(")) {
                 var functionName = htmlColor.Substring(0, htmlColor.IndexOf("(", StringComparison.CurrentCultureIgnoreCase));

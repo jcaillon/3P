@@ -29,6 +29,7 @@ using System.Windows.Forms;
 using BrightIdeasSoftware;
 using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Fonts;
+using YamuiFramework.Helper;
 using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures.Appli;

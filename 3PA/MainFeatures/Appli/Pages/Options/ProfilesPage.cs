@@ -78,8 +78,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
             flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.OnKeyDown(args.KeyCode);
 
-            yamuiFilteredTypeList1.GetObjectImage += item => {
-                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((FuckItem) item).Type.ToString());
+            yamuiFilteredTypeList1.GetObjectTypeImage += type => {
+                Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((CompletionType) type).ToString());
                 return tryImg ?? ImageResources.Error;
             };
             yamuiFilteredTypeList1.GetObjectSubText += item => { return ((FuckItem) item).SubString; };

@@ -35,6 +35,20 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class YamuiScrollList : UserControl {
 
+        #region constants
+
+        private const int ThumbPadding = 2;
+
+        private const int MinThumbHeight = 15;
+
+        private const int DefaultRowHeight = 18;
+
+        private const int DefaultScrollWidth = 10;
+
+        private const string DefaultEmptyString = @"Empty list!";
+
+        #endregion
+
         #region public properties
 
         /// <summary>
@@ -163,7 +177,7 @@ namespace YamuiFramework.Controls.YamuiList {
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int HotRow {
             get { return _hotRow; }
-            set {
+            private set {
                 _hotRow = value;
                 if (HotIndexChanged != null)
                     HotIndexChanged(this);
@@ -176,7 +190,7 @@ namespace YamuiFramework.Controls.YamuiList {
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsHovered {
             get { return _isHovered; }
-            set {
+            private set {
                 if (_isHovered != value) {
                     _isHovered = value;
                     if (_isHovered) {
@@ -196,7 +210,7 @@ namespace YamuiFramework.Controls.YamuiList {
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool IsFocused {
             get { return _isFocused; }
-            set {
+            private set {
                 if (_isFocused != value) {
                     if (value) {
                         _isFocused = true;
@@ -314,11 +328,11 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected Padding _listPadding = new Padding(0);
 
-        private string _emptyListString = @"Empty list!";
+        private string _emptyListString = DefaultEmptyString;
 
-        private int _scrollWidth = 10;
+        private int _scrollWidth = DefaultScrollWidth;
         
-        private int _rowHeight = 18;
+        private int _rowHeight = DefaultRowHeight;
 
         protected List<ListItem> _items;
 
@@ -342,10 +356,6 @@ namespace YamuiFramework.Controls.YamuiList {
         private int _selectedRowIndex;
 
         private int _yPosOnThumb;
-
-        private int _thumbPadding = 2;
-
-        private int _minThumbHeight = 15;
 
         private Rectangle _scrollRectangle;
         private Rectangle _listRectangle;
@@ -479,11 +489,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// This method just add the number of buttons required to display the list
         /// </summary>
-        private bool DrawButtons() {
+        protected virtual void DrawButtons() {
 
             // we already display the right number of items?
             if ((_nbRowDisplayed - 1) * RowHeight <= _listRectangle.Height && _listRectangle.Height <= _nbRowDisplayed * RowHeight)
-                return false;
+                return;
 
             Controls.Clear();
 
@@ -531,7 +541,6 @@ namespace YamuiFramework.Controls.YamuiList {
                 Controls.Add(_rows[i]);
             }
             
-            return true;
         }
 
         /// <summary>
@@ -665,8 +674,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Converts a thumb Y location to a top index
         /// </summary>
         protected void ThumbPosToTopIndex(int yPos) {
-            yPos = yPos.Clamp(_thumbPadding, _barRectangle.Height - _thumbPadding - _thumbRectangle.Height);
-            var percent = (yPos - _thumbPadding) / (float)(_barRectangle.Height - _thumbPadding * 2 - _thumbRectangle.Height);
+            yPos = yPos.Clamp(ThumbPadding, _barRectangle.Height - ThumbPadding - _thumbRectangle.Height);
+            var percent = (yPos - ThumbPadding) / (float)(_barRectangle.Height - ThumbPadding * 2 - _thumbRectangle.Height);
             var newTopIndex = (int) Math.Round(percent * (_nbItems - _nbRowFullyDisplayed));
             if (TopIndex != newTopIndex)
                 TopIndex = newTopIndex;
@@ -676,7 +685,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// This method simply reposition the thumb rectangle in the scroll bar according to the current top index
         /// </summary>
         protected void RepositionThumb() {
-            _thumbRectangle.Location = new Point(_thumbRectangle.X, _barRectangle.Top + _thumbPadding + (int)((float)TopIndex / _nbItems * (_barRectangle.Height - _thumbPadding * 2)));
+            _thumbRectangle.Location = new Point(_thumbRectangle.X, _barRectangle.Top + ThumbPadding + (int)((float)TopIndex / _nbItems * (_barRectangle.Height - ThumbPadding * 2)));
             Invalidate();
         }
 
@@ -690,7 +699,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             _barRectangle.Height = _scrollRectangle.Height = _listRectangle.Height;
             _barRectangle.X = _scrollRectangle.X = _listRectangle.Left + _listRectangle.Width - _barRectangle.Width;
-            _thumbRectangle.X = _listRectangle.Left + _listRectangle.Width - _barRectangle.Width + _thumbPadding;
+            _thumbRectangle.X = _listRectangle.Left + _listRectangle.Width - _barRectangle.Width + ThumbPadding;
 
             _nbRowFullyDisplayed = (int)Math.Floor((decimal)_listRectangle.Height / RowHeight);
 
@@ -707,10 +716,10 @@ namespace YamuiFramework.Controls.YamuiList {
                 HasScrolls = true;
 
                 // thumb height is a ratio of displayed height and the content panel height
-                _thumbRectangle.Height = (int)((_barRectangle.Height - _thumbPadding * 2) * ((float)_nbRowFullyDisplayed / _nbItems));
-                if (_thumbRectangle.Height < _minThumbHeight) {
-                    _thumbRectangle.Height = _minThumbHeight;
-                    _barRectangle.Height = _listRectangle.Height - _minThumbHeight;
+                _thumbRectangle.Height = (int)((_barRectangle.Height - ThumbPadding * 2) * ((float)_nbRowFullyDisplayed / _nbItems));
+                if (_thumbRectangle.Height < MinThumbHeight) {
+                    _thumbRectangle.Height = MinThumbHeight;
+                    _barRectangle.Height = _listRectangle.Height - MinThumbHeight;
                 }
             }
 
@@ -825,7 +834,7 @@ namespace YamuiFramework.Controls.YamuiList {
             _listRectangle = new Rectangle(ListPadding.Left, ListPadding.Top, Width - ListPadding.Horizontal, Height - ListPadding.Vertical);
             _scrollRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth, _listRectangle.Top, ScrollWidth, _listRectangle.Height);
             _barRectangle = _scrollRectangle;
-            _thumbRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth + _thumbPadding, _listRectangle.Top + _thumbPadding, ScrollWidth - _thumbPadding * 2, _listRectangle.Height - _thumbPadding * 2);
+            _thumbRectangle = new Rectangle(_listRectangle.Left + _listRectangle.Width - ScrollWidth + ThumbPadding, _listRectangle.Top + ThumbPadding, ScrollWidth - ThumbPadding * 2, _listRectangle.Height - ThumbPadding * 2);
         }
 
         /// <summary>

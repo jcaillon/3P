@@ -118,31 +118,6 @@ namespace _3PA.Lib {
 
         #endregion
 
-        #region ui thread safe invoke
-
-        /// <summary>
-        /// Executes a function on the thread of the given object
-        /// </summary>
-        public static TResult SafeInvoke<T, TResult>(this T isi, Func<T, TResult> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) {
-                IAsyncResult result = isi.BeginInvoke(call, new object[] { isi });
-                object endResult = isi.EndInvoke(result);
-                return (TResult)endResult;
-            }
-            return call(isi);
-        }
-
-        /// <summary>
-        /// Executes an action on the thread of the given object
-        /// </summary>
-        public static void SafeInvoke<T>(this T isi, Action<T> call) where T : ISynchronizeInvoke {
-            if (isi.InvokeRequired) isi.BeginInvoke(call, new object[] { isi });
-            else
-                call(isi);
-        }
-
-        #endregion
-
         #region Enum and attributes extensions
 
         /// <summary>

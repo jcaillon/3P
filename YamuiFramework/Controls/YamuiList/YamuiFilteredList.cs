@@ -13,6 +13,12 @@ namespace YamuiFramework.Controls.YamuiList {
 
     public class YamuiFilteredList : YamuiScrollList {
 
+        #region constants
+
+        protected const int MinRowHeight = 20;
+
+        #endregion
+
         #region public properties
 
         /// <summary>
@@ -20,7 +26,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override int RowHeight {
-            get { return base.RowHeight.ClampMin(20); }
+            get { return base.RowHeight.ClampMin(MinRowHeight); }
             set { base.RowHeight = value; }
         }
 
@@ -29,6 +35,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public string FilterString {
+            get { return _filterString; }
             set {
                 _filterString = value.ToLower().Trim();
                 
@@ -61,7 +68,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Predicate to filter the items, only items meeting the predicate requirements will be displayed (applied in addition to the default string filter)
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Predicate<FilteredItem> FilterPredicate {
+        public virtual Predicate<FilteredItem> FilterPredicate {
             get { return _filterPredicate; }
             set { _filterPredicate = value; }
         }
