@@ -97,7 +97,8 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 }
                 return outList;
             };
-
+            //yamuiFilteredTypeList1.GetMoreTypeImage = () => ImageResources.More;
+            yamuiFilteredTypeList1.MoreTypesImage = ImageResources.More;
 
             yamuiButton1.ButtonPressed += (sender, args) => {
                 yamuiFilteredTypeList1.SetItems(AutoComplete.CurrentItems.Select(item => new FuckItem {

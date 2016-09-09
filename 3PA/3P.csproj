@@ -509,6 +509,7 @@
     <Content Include="Images\AutoCompletion\CompletionType\VariableComplex.png" />
     <Content Include="Images\AutoCompletion\CompletionType\VariablePrimitive.png" />
     <Content Include="Images\AutoCompletion\CompletionType\Widget.png" />
+    <Content Include="Images\AutoCompletion\More.png" />
     <Content Include="Images\Backgrounds\bg_hellokitty.jpg" />
     <Content Include="Images\Backgrounds\bg_darkmaul.jpg" />
     <Content Include="Images\Backgrounds\bg_MaximoVLorenzo.jpg" />

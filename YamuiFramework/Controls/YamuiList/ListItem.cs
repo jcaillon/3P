@@ -51,6 +51,14 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class FilteredItem : ListItem {
 
+        #region Constructor
+
+        public FilteredItem() {
+            FilterFullyMatch = true;
+        }
+
+        #endregion
+
         #region Filter
 
         /// <summary>

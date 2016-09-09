@@ -16,7 +16,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region constants
 
-        protected const int DefaultBottomPadding = 28;
+        protected const int DefaultBottomHeight = 28;
 
         protected const int MinItemLabelWidth = 45;
 
@@ -24,9 +24,9 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected const float DefaultFlagImagesOpacity = 0.5f;
 
-        protected const int LabelPadding = 2;
+        protected const int BottomPadding = 2;
 
-        protected const int TypeButtonSize = 24;
+        protected const int TypeButtonWidth = 22;
 
         #endregion
 
@@ -51,13 +51,19 @@ namespace YamuiFramework.Controls.YamuiList {
         public Func<FilteredTypeItem, List<Image>> GetObjectTagImages { get; set; }
 
         /// <summary>
+        /// The image to display for the button "display more type"
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Image MoreTypesImage { get; set; }
+
+        /// <summary>
         /// The padding to apply to display the list
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override Padding ListPadding {
             get {
                 var pad = base.ListPadding;
-                pad.Bottom = pad.Bottom.ClampMin(BottomPadding);
+                pad.Bottom = pad.Bottom.ClampMin(BottomHeight);
                 return pad;
             }
             set { base.ListPadding = value; }
@@ -67,9 +73,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Space reserved to write the showing x items label
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public int BottomPadding {
-            get { return _bottomPadding; }
-            set { _bottomPadding = value; }
+        public int BottomHeight {
+            get { return _bottomHeight; }
+            set { _bottomHeight = value; }
         }
 
         /// <summary>
@@ -100,7 +106,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 return item => {
                     var typeItem = item as FilteredTypeItem;
                     if (typeItem != null) {
-                        return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType].Activated) && 
+                        return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType] == null || _typeButtons[typeItem.ItemType].Activated) && 
                             (_filterPredicate != null ? _filterPredicate(item) : true);
                     }
                     return false;
@@ -119,7 +125,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected const TextFormatFlags TextRightFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPadding;
 
-        private int _bottomPadding = DefaultBottomPadding;
+        private int _bottomHeight = DefaultBottomHeight;
 
         private int _itemsNbLabelWidth = 45;
 
@@ -127,8 +133,14 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private float _flagImagesOpacity = DefaultFlagImagesOpacity;
 
+        private int _currentButtonIndex;
+
+        private int _nbDisplayableTypeButton;
+
+        private SelectorButton _moreButton;
+
         #endregion
-        
+
         #region Set
 
         /// <summary>
@@ -151,9 +163,11 @@ namespace YamuiFramework.Controls.YamuiList {
             }
 
             // set the type buttons needed
+            ResetButtons();
             _typeList = listItems.Select(x => ((FilteredTypeItem) x).ItemType).Distinct().ToList();
             foreach (var type in _typeList)
-                _typeButtons.Add(type, null);
+                if (!_typeButtons.ContainsKey(type))
+                    _typeButtons.Add(type, null);
 
             base.SetItems(listItems);
         }
@@ -165,38 +179,76 @@ namespace YamuiFramework.Controls.YamuiList {
         protected override void DrawButtons() {
             base.DrawButtons();
 
-            // add type buttons
-            int xPos = LabelPadding;
+            int maxWidthForTypeButtons = Width - BottomPadding * 3 - _itemsNbLabelWidth - 10;
+            _nbDisplayableTypeButton = (int) Math.Floor((decimal) maxWidthForTypeButtons / TypeButtonWidth);
 
-            // for each distinct type of items, create the buttons if they do not exist yet
+            // for each distinct type of items, create the buttons
+            int xPos = BottomPadding;
+            int nBut = 0;
             foreach (var type in _typeList) {
                 if (_typeButtons[type] == null) {
                     _typeButtons[type] = new SelectorButton {
                         BackGrndImage = GetObjectTypeImage(type),
                         Activated = true,
-                        Size = new Size(TypeButtonSize, TypeButtonSize),
+                        Size = new Size(TypeButtonWidth, DefaultBottomHeight),
                         TabStop = false,
                         Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
                         Type = type,
                         AcceptsRightClick = true,
                         HideFocusedIndicator = true
                     };
-                    //but.ButtonPressed += HandleTypeClick;
+                    _typeButtons[type].ButtonPressed += HandleTypeClick;
                     //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
                 }
 
-                _typeButtons[type].Location = new Point(xPos, Height - BottomPadding / 2 - TypeButtonSize / 2);
-                xPos += TypeButtonSize;
-            }
+                _typeButtons[type].Location = new Point(xPos, Height - BottomHeight / 2 - _typeButtons[type].Height / 2);
+                nBut++;
 
-            if (xPos > Width - LabelPadding - _itemsNbLabelWidth) {
-                
-            } else {
-                foreach (var button in _typeButtons.Values) {
-                    Controls.Add(button);
+                // who as many button as we can show - 1
+                if (nBut < _nbDisplayableTypeButton) {
+                    xPos += TypeButtonWidth;
+                    if (!Controls.Contains(_typeButtons[type]))
+                        Controls.Add(_typeButtons[type]);
+                } else {
+                    if (Controls.Contains(_typeButtons[type]))
+                        Controls.Remove(_typeButtons[type]);
                 }
             }
 
+            if (nBut > 0) { 
+
+                // if we have enough space to display the last button, display it
+                if (nBut <= _nbDisplayableTypeButton) {
+                    var lastButton = _typeButtons.LastOrDefault();
+                    if (lastButton.Value != null) {
+                        if (!Controls.Contains(lastButton.Value))
+                            Controls.Add(lastButton.Value);
+                    }
+
+                    // remove the more button if it exists
+                    if (_moreButton != null) {
+                        if (Controls.Contains(_moreButton))
+                            Controls.Remove(_moreButton);
+                    }
+                } else {
+                    // otherwise, we display a "more button" that opens a small interface to show the extra buttons
+                    if (_moreButton == null) { 
+                        _moreButton = new SelectorButton {
+                            BackGrndImage = MoreTypesImage,
+                            Activated = true,
+                            Size = new Size(TypeButtonWidth, DefaultBottomHeight),
+                            TabStop = false,
+                            Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
+                            HideFocusedIndicator = true
+                        };
+                        _moreButton.ButtonPressed += HandleTypeClick;
+                        //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                    }
+                    _moreButton.Location = new Point(xPos, Height - BottomHeight / 2 - _moreButton.Height / 2);
+                    if (!Controls.Contains(_moreButton))
+                        Controls.Add(_moreButton);
+                }
+            }
         }
 
         #endregion
@@ -207,9 +259,9 @@ namespace YamuiFramework.Controls.YamuiList {
             e.Graphics.Clear(!UseCustomBackColor ? YamuiThemeManager.Current.MenuNormalBack : BackColor);
 
             // text
-            var textHeight = (BottomPadding - LabelPadding * 2) /2;
-            TextRenderer.DrawText(e.Graphics, "Showing", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - LabelPadding - _itemsNbLabelWidth, Height - BottomPadding + LabelPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
-            TextRenderer.DrawText(e.Graphics, _nbItems + " items", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - LabelPadding - _itemsNbLabelWidth, Height - textHeight - LabelPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+            var textHeight = (BottomHeight - BottomPadding * 2) /2;
+            TextRenderer.DrawText(e.Graphics, "Showing", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - BottomHeight + BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+            TextRenderer.DrawText(e.Graphics, _nbItems + " items", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - textHeight - BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
            
         }
 
@@ -269,6 +321,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         e.Graphics.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
                     }
                 }
+                
                
                 var textRectangle = new Rectangle(3 + (img != null ? img.Width : 0), 0, row.ClientRectangle.Width, RowHeight);
                 textRectangle.Width -= textRectangle.X;
@@ -289,11 +342,32 @@ namespace YamuiFramework.Controls.YamuiList {
         public override bool OnKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
+                    LeftRight(true);
                     return true;
                 case Keys.Right:
+                    LeftRight(false);
                     return true;
             }
             return base.OnKeyDown(pressedKey);
+        }
+
+        /// <summary>
+        /// Handles the left/right buttons
+        /// </summary>
+        private void LeftRight(bool isLeft) {
+            // only 1 type is active
+            if (_typeButtons.Count(b => b.Value.Activated) == 1) {
+                _currentButtonIndex = 0;
+                foreach (var button in _typeButtons) {
+                    if (button.Value.Activated)
+                        break;
+                    _currentButtonIndex++;
+                }
+                _currentButtonIndex = _currentButtonIndex + (isLeft ? -1 : 1);
+            }
+            if (_currentButtonIndex > _typeButtons.Count - 1) _currentButtonIndex = 0;
+            if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
+            SetActiveType(new List<int> { _typeButtons.ElementAt(_currentButtonIndex).Key });
         }
 
         #endregion
@@ -301,17 +375,38 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Active types
 
         /// <summary>
+        /// handles click on a type
+        /// </summary>
+        private void HandleTypeClick(object sender, EventArgs args) {
+            var mouseEvent = args as MouseEventArgs;
+            int clickedType = ((SelectorButton)sender).Type;
+
+            // on right click
+            if (mouseEvent != null && mouseEvent.Button == MouseButtons.Right) {
+                // everything is unactive but this one
+                if (_typeButtons.Count(b => b.Value.Activated) == 1 && _typeButtons.First(b => b.Value.Activated).Key == clickedType) {
+                    SetUnActiveType(null);
+                } else {
+                    SetActiveType(new List<int> {clickedType});
+                }
+            } else {
+                // left click is only a toggle
+                _typeButtons[clickedType].Activated = !_typeButtons[clickedType].Activated;
+                ApplyFilterPredicate();
+            }
+        }
+
+        /// <summary>
         /// use this to programmatically uncheck any type that is not in the given list
         /// </summary>
         public void SetActiveType(List<int> allowedType) {
             this.SafeInvoke(form => {
-                if (_typeButtons == null)
-                    return;
                 if (allowedType == null)
                     allowedType = new List<int>();
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) >= 0;
                 }
+                ApplyFilterPredicate();
             });
         }
 
@@ -320,13 +415,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void SetUnActiveType(List<int> allowedType) {
             this.SafeInvoke(form => {
-                if (_typeButtons == null)
-                    return;
                 if (allowedType == null)
                     allowedType = new List<int>();
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = allowedType.IndexOf(selectorButton.Value.Type) < 0;
                 }
+                ApplyFilterPredicate();
             });
         }
 
@@ -335,16 +429,38 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public void ResetActiveType() {
             this.SafeInvoke(form => {
-                if (_typeButtons == null)
-                    return;
                 foreach (var selectorButton in _typeButtons) {
                     selectorButton.Value.Activated = true;
                 }
+                ApplyFilterPredicate();
             });
         }
 
         #endregion
-        
+
+        #region Misc
+
+        /// <summary>
+        /// Reset all the rows + selector buttons
+        /// </summary>
+        protected override void ResetButtons() {
+            base.ResetButtons();
+
+            foreach (var button in _typeButtons)
+                button.Value.Dispose();
+            _typeButtons.Clear();
+
+            foreach (var type in _typeList)
+                if (!_typeButtons.ContainsKey(type))
+                    _typeButtons.Add(type, null);
+
+            if (_moreButton != null) {
+                _moreButton.Dispose();
+                _moreButton = null;
+            }
+        }
+
+        #endregion
     }
 
     #region SelectorButtons

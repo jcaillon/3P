@@ -102,6 +102,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         public Image GreyScaleBackGrndImage {
             get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
+            set { _greyScaleBackGrndImage = value; }
         }
 
         /// <summary>

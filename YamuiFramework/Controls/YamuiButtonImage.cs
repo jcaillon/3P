@@ -45,41 +45,37 @@ namespace YamuiFramework.Controls {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-            try {
-                Color backColor = DesignMode ? Color.Fuchsia : YamuiThemeManager.Current.ButtonImageBg(IsHovered, IsPressed);
-                Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
+            Color backColor = DesignMode ? Color.Fuchsia : YamuiThemeManager.Current.ButtonImageBg(IsHovered, IsPressed);
+            Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
 
-                // draw background
-                using (SolidBrush b = new SolidBrush(backColor)) {
-                    e.Graphics.FillRectangle(b, ClientRectangle);
+            // draw background
+            using (SolidBrush b = new SolidBrush(backColor)) {
+                e.Graphics.FillRectangle(b, ClientRectangle);
+            }
+
+            // draw an indicator to know the image is focused
+            if (!HideFocusedIndicator && IsFocused)
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
+                    GraphicsPath path = new GraphicsPath();
+                    path.AddLines(new[] { new Point(0, 0), new Point(ClientRectangle.Width / 2, 0), new Point(0, ClientRectangle.Height / 2), new Point(0, 0), });
+                    e.Graphics.FillPath(b, path);
                 }
 
-                // draw an indicator to know the image is focused
-                if (!HideFocusedIndicator && IsFocused)
-                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
-                        GraphicsPath path = new GraphicsPath();
-                        path.AddLines(new[] { new Point(0, 0), new Point(ClientRectangle.Width / 2, 0), new Point(0, ClientRectangle.Height / 2), new Point(0, 0), });
-                        e.Graphics.FillPath(b, path);
-                    }
+            // draw main image, in greyscale if not activated
+            if (BackGrndImage != null) {
+                var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
+                e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
+            }
 
-                // draw main image, in greyscale if not activated
-                if (BackGrndImage != null) {
-                    var recImg = new Rectangle(new Point((ClientRectangle.Width - BackGrndImage.Width) / 2, (ClientRectangle.Height - BackGrndImage.Height) / 2), new Size(BackGrndImage.Width, BackGrndImage.Height));
-                    e.Graphics.DrawImage((!Enabled || UseGreyScale) ? GreyScaleBackGrndImage : BackGrndImage, recImg);
-                }
-
-                // border
-                if (DrawBorder) {
-                    var recBorder = ClientRectangle;
-                    recBorder.Inflate(-1, -1);
-                    if (borderColor != Color.Transparent) {
-                        using (Pen b = new Pen(borderColor, 1f)) {
-                            e.Graphics.DrawRectangle(b, recBorder);
-                        }
+            // border
+            if (DrawBorder) {
+                var recBorder = ClientRectangle;
+                recBorder.Inflate(-1, -1);
+                if (borderColor != Color.Transparent) {
+                    using (Pen b = new Pen(borderColor, 1f)) {
+                        e.Graphics.DrawRectangle(b, recBorder);
                     }
                 }
-            } catch {
-                // ignored
             }
         }
         #endregion

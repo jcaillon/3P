@@ -44,22 +44,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     // apply the filter on each item to compute internal properties
                     _initialItems.ForEach(data => data.FilterApply(_filterString));
 
-                    List<ListItem> items;
-
-                    if (!string.IsNullOrEmpty(_filterString)) {
-
-                        // apply filter + sort
-                        if (FilterPredicate != null)
-                            items = _initialItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList(); 
-                        else
-                            items = _initialItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
-
-                    } else {
-                        items = _initialItems.Cast<ListItem>().ToList();
-                    }
-
-                    // base setItems
-                    base.SetItems(items);
+                    ApplyFilterPredicate();
                 }
             }
         }
@@ -83,7 +68,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected int _nbInitialItems;
 
-        protected string _filterString;
+        protected string _filterString = string.Empty;
 
         private Brush _fillBrush;
 
@@ -93,7 +78,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region Draw list
+        #region Set
 
         /// <summary>
         /// Constructor to initialize stuff
@@ -109,8 +94,38 @@ namespace YamuiFramework.Controls.YamuiList {
         public override void SetItems(List<ListItem> listItems) {
             _initialItems = listItems.Cast<FilteredItem>().ToList();
             _nbInitialItems = _initialItems.Count;
-            base.SetItems(listItems);
+
+            // we reapply the current filter to this new list
+            FilterString = FilterString;
         }
+
+        #endregion
+
+        #region 
+
+        /// <summary>
+        /// Filter the list of initial items with the filter predicate and the FilterFullyMatch
+        /// </summary>
+        protected void ApplyFilterPredicate() {
+            if (_initialItems == null || _nbInitialItems == 0)
+                return;
+
+            List<ListItem> items;
+
+            // apply filter + sort
+            if (FilterPredicate != null)
+                items = _initialItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+            else
+                items = _initialItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+
+            // base setItems
+            base.SetItems(items);
+        }
+
+        #endregion
+
+        #region Draw list
+
 
         /// <summary>
         /// Called by default to paint the row if no OnRowPaint is defined

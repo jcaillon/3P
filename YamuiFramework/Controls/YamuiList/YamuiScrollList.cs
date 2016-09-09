@@ -495,8 +495,6 @@ namespace YamuiFramework.Controls.YamuiList {
             if ((_nbRowDisplayed - 1) * RowHeight <= _listRectangle.Height && _listRectangle.Height <= _nbRowDisplayed * RowHeight)
                 return;
 
-            Controls.Clear();
-
             // how many items should be displayed?
             _nbRowDisplayed = _nbItems.ClampMax(_listRectangle.Height / RowHeight + 1);
 
@@ -538,7 +536,13 @@ namespace YamuiFramework.Controls.YamuiList {
                 _rows[i].IsSelected = i == SelectedRowIndex;
 
                 // add it to the visible controls
-                Controls.Add(_rows[i]);
+                if (!Controls.Contains(_rows[i]))
+                    Controls.Add(_rows[i]);
+            }
+
+            for (int i = _nbRowDisplayed; i < _rows.Count; i++) {
+                if (Controls.Contains(_rows[i]))
+                    Controls.Remove(_rows[i]);
             }
             
         }
@@ -818,6 +822,17 @@ namespace YamuiFramework.Controls.YamuiList {
         public void GrabFocus() {
             if (_nbRowDisplayed > 0)
                 ActiveControl = _rows[0];
+        }
+
+        /// <summary>
+        /// Reset all the rows
+        /// </summary>
+        protected virtual void ResetButtons() {
+            Controls.Clear();
+            foreach (var row in _rows)
+                row.Dispose();
+
+            _rows.Clear();
         }
 
         /// <summary>

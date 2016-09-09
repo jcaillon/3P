@@ -176,6 +176,7 @@
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
     <Compile Include="Helper\GenericThemeHolder.cs" />
+    <Compile Include="Helper\NativeTextRenderer.cs" />
     <Compile Include="Helper\TabOrderManager.cs" />
     <Compile Include="Helper\Utilities.cs" />
     <Compile Include="Helper\WindowWrapper.cs" />

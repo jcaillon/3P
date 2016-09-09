@@ -80,6 +80,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             this.yamuiScrollList1.EmptyListString = "Empty list!";
             this.yamuiScrollList1.Location = new System.Drawing.Point(29, 257);
             this.yamuiScrollList1.Name = "yamuiScrollList1";
+            this.yamuiScrollList1.RowHeight = 18;
             this.yamuiScrollList1.ScrollWidth = 10;
             this.yamuiScrollList1.Size = new System.Drawing.Size(178, 221);
             this.yamuiScrollList1.TabIndex = 18;
@@ -87,6 +88,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             // 
             // yamuiFilteredTypeList1
             // 
+            this.yamuiFilteredTypeList1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.yamuiFilteredTypeList1.EmptyListString = "Empty list!";
             this.yamuiFilteredTypeList1.Location = new System.Drawing.Point(385, 257);
             this.yamuiFilteredTypeList1.Name = "yamuiFilteredTypeList1";
