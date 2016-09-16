@@ -38,7 +38,7 @@ using Timer = System.Timers.Timer;
 
 namespace YamuiFramework.Forms {
 
-    public class YamuiForm : Form {
+    public class YamuiForm : FormWithShadow {
 
         #region Fields
 
@@ -112,6 +112,10 @@ namespace YamuiFramework.Forms {
         private YamuiNotifLabel _bottomNotif;
 
         public const int FormButtonWidth = 25;
+
+        private const int WmNchittest = 0x84; // variables for dragging the form
+        private const int Htclient = 0x1;
+        private const int Htcaption = 0x2;
 
         #endregion
 
@@ -495,15 +499,6 @@ namespace YamuiFramework.Forms {
 
                 case (int)WinApi.Messages.WM_DWMCOMPOSITIONCHANGED:
                     break;
-
-                case WmNcpaint: // box shadow
-                    if (_mAeroEnabled) {
-                        var v = 2;
-                        DwmApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-                        var margins = new DwmApi.MARGINS(1, 1, 1, 1);
-                        DwmApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
-                    }
-                    break;
             }
 
             base.WndProc(ref m);
@@ -740,39 +735,6 @@ namespace YamuiFramework.Forms {
             }
 
             #endregion
-        }
-
-        #endregion
-
-        #region Shadows
-
-        private bool _mAeroEnabled; // variables for box shadow
-        private const int CsDropshadow = 0x00020000;
-        private const int WmNcpaint = 0x0085;
-
-        private const int WmNchittest = 0x84; // variables for dragging the form
-        private const int Htclient = 0x1;
-        private const int Htcaption = 0x2;
-
-        protected override CreateParams CreateParams {
-            get {
-                _mAeroEnabled = CheckAeroEnabled();
-
-                var cp = base.CreateParams;
-                if (!_mAeroEnabled)
-                    cp.ClassStyle |= CsDropshadow;
-
-                return cp;
-            }
-        }
-
-        private bool CheckAeroEnabled() {
-            if (Environment.OSVersion.Version.Major >= 6) {
-                var enabled = 0;
-                DwmApi.DwmIsCompositionEnabled(ref enabled);
-                return (enabled == 1);
-            }
-            return false;
         }
 
         #endregion

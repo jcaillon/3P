@@ -7,6 +7,7 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
+using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
@@ -139,6 +140,8 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private SelectorButton _moreButton;
 
+        private MoreTypesForm _moreForm;
+
         #endregion
 
         #region Set
@@ -152,6 +155,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Set the items that will be displayed in the list
         /// </summary>
         public override void SetItems(List<ListItem> listItems) {
+
             var firstItem = listItems.FirstOrDefault();
             if (firstItem != null && !(firstItem is FilteredTypeItem))
                 throw new Exception("listItems shoud contain objects of type FilteredTypeItem");
@@ -163,13 +167,14 @@ namespace YamuiFramework.Controls.YamuiList {
             }
 
             // set the type buttons needed
-            ResetButtons();
-            _typeList = listItems.Select(x => ((FilteredTypeItem) x).ItemType).Distinct().ToList();
-            foreach (var type in _typeList)
-                if (!_typeButtons.ContainsKey(type))
-                    _typeButtons.Add(type, null);
+            ComputeTypeButtonsNeeded(listItems);
 
             base.SetItems(listItems);
+        }
+
+        protected void ComputeTypeButtonsNeeded(List<ListItem> listItems) {
+            // set the type buttons needed
+            _typeList = listItems.Select(x => ((FilteredTypeItem)x).ItemType).Distinct().ToList();
         }
 
         #endregion
@@ -181,31 +186,36 @@ namespace YamuiFramework.Controls.YamuiList {
 
             int maxWidthForTypeButtons = Width - BottomPadding * 3 - _itemsNbLabelWidth - 10;
             _nbDisplayableTypeButton = (int) Math.Floor((decimal) maxWidthForTypeButtons / TypeButtonWidth);
+            _nbDisplayableTypeButton = _nbDisplayableTypeButton.ClampMax(_typeList.Count);
+            var buttonsToDisplay = _typeList.Count;
 
             // for each distinct type of items, create the buttons
             int xPos = BottomPadding;
             int nBut = 0;
             foreach (var type in _typeList) {
-                if (_typeButtons[type] == null) {
-                    _typeButtons[type] = new SelectorButton {
-                        BackGrndImage = GetObjectTypeImage(type),
-                        Activated = true,
+
+                // new type, add a button for it
+                if (!_typeButtons.ContainsKey(type)) {
+                    _typeButtons.Add(type, new SelectorButton {
                         Size = new Size(TypeButtonWidth, DefaultBottomHeight),
                         TabStop = false,
                         Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-                        Type = type,
                         AcceptsRightClick = true,
-                        HideFocusedIndicator = true
-                    };
+                        HideFocusedIndicator = true,
+                        Activated = true,
+                    });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
                     //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
                 }
 
+                _typeButtons[type].BackGrndImage = GetObjectTypeImage(type);
+                _typeButtons[type].Type = type;
+                _typeButtons[type].Activated = _typeButtons[type].Activated;
                 _typeButtons[type].Location = new Point(xPos, Height - BottomHeight / 2 - _typeButtons[type].Height / 2);
                 nBut++;
 
-                // who as many button as we can show - 1
-                if (nBut < _nbDisplayableTypeButton) {
+                // show as many button as we can show - 1
+                if (nBut < _nbDisplayableTypeButton || buttonsToDisplay == _nbDisplayableTypeButton) {
                     xPos += TypeButtonWidth;
                     if (!Controls.Contains(_typeButtons[type]))
                         Controls.Add(_typeButtons[type]);
@@ -215,15 +225,15 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
             }
 
+            foreach (var button in _typeButtons.Where(pair => !_typeList.Contains(pair.Key)).Select(pair => pair.Value)) {
+                if (Controls.Contains(button))
+                    Controls.Remove(button);
+            }
+
             if (nBut > 0) { 
 
-                // if we have enough space to display the last button, display it
-                if (nBut <= _nbDisplayableTypeButton) {
-                    var lastButton = _typeButtons.LastOrDefault();
-                    if (lastButton.Value != null) {
-                        if (!Controls.Contains(lastButton.Value))
-                            Controls.Add(lastButton.Value);
-                    }
+                // if we have enough space to display the last button, hide the more button
+                if (buttonsToDisplay == _nbDisplayableTypeButton) {
 
                     // remove the more button if it exists
                     if (_moreButton != null) {
@@ -241,9 +251,10 @@ namespace YamuiFramework.Controls.YamuiList {
                             Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
                             HideFocusedIndicator = true
                         };
-                        _moreButton.ButtonPressed += HandleTypeClick;
+                        _moreButton.ButtonPressed += HandleMoreTypeClick;
                         //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
                     }
+
                     _moreButton.Location = new Point(xPos, Height - BottomHeight / 2 - _moreButton.Height / 2);
                     if (!Controls.Contains(_moreButton))
                         Controls.Add(_moreButton);
@@ -372,6 +383,43 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
+        #region More types
+
+        /// <summary>
+        /// Handles the click on the "more" button
+        /// </summary>
+        private void HandleMoreTypeClick(object sender, EventArgs args) {
+            // dispose of an existing form
+            CloseMoreForm();
+
+            // list of the types to display on the form
+            List<int> typesSubList = new List<int>();
+            int nBut = 0;
+            foreach (var type in _typeList) {
+                if (nBut >= _nbDisplayableTypeButton - 1)
+                    typesSubList.Add(type);
+                nBut++;
+            }
+
+            _moreForm = new MoreTypesForm() {
+                ButtonSize = new Size(TypeButtonWidth, DefaultBottomHeight),
+                GetObjectTypeImage = GetObjectTypeImage,
+            };
+            _moreForm.Build(MousePosition, typesSubList, ref _typeButtons);
+            _moreForm.Show();
+        }
+
+        private void CloseMoreForm() {
+            // dispose of an existing form
+            if (_moreForm != null) {
+                if (_moreForm.Visible)
+                    _moreForm.Close();
+                _moreForm.Dispose();
+            }
+        }
+
+        #endregion
+        
         #region Active types
 
         /// <summary>
@@ -440,25 +488,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region Misc
 
-        /// <summary>
-        /// Reset all the rows + selector buttons
-        /// </summary>
-        protected override void ResetButtons() {
-            base.ResetButtons();
 
-            foreach (var button in _typeButtons)
-                button.Value.Dispose();
-            _typeButtons.Clear();
-
-            foreach (var type in _typeList)
-                if (!_typeButtons.ContainsKey(type))
-                    _typeButtons.Add(type, null);
-
-            if (_moreButton != null) {
-                _moreButton.Dispose();
-                _moreButton = null;
-            }
-        }
 
         #endregion
     }

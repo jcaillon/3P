@@ -78,6 +78,9 @@
     <Compile Include="Controls\YamuiList\YamuiFilteredTypeList.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiList\MoreTypesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -152,6 +155,9 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>ResourceFont.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\FormWithShadow.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiNotification.cs">
       <SubType>Form</SubType>

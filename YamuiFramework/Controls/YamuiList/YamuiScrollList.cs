@@ -825,17 +825,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Reset all the rows
-        /// </summary>
-        protected virtual void ResetButtons() {
-            Controls.Clear();
-            foreach (var row in _rows)
-                row.Dispose();
-
-            _rows.Clear();
-        }
-
-        /// <summary>
         /// Return the item at the given index
         /// </summary>
         protected ListItem GetItem(int index) {
