@@ -84,10 +84,16 @@ namespace _3PA.MainFeatures.Pro {
                         SuffixFilter = items[2].Trim(), 
                         Type = type, 
                         ContinueAfterThisRule = items[4].Trim().EqualsCi("yes"), 
-                        SourcePattern = items[5].Trim().Replace('/', '\\'), 
-                        DeployTarget = items[6].Trim().Replace('/', '\\'), 
+                        SourcePattern = items[5].Trim(),
+                        DeployTarget = items[6].Trim(), 
                         Line = (lineNb + 1)
                     };
+
+                    obj.IsSourcePatternInRegex = obj.SourcePattern.StartsWith(":");
+                    obj.SourcePattern = obj.IsSourcePatternInRegex ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\');
+
+                    obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
+                    obj.DeployTarget = obj.ShouldDeployTargetReplaceDollar ? obj.DeployTarget.Remove(0, 1) : obj.DeployTarget.Replace('/', '\\');
 
                     if (obj.Type == DeployType.Ftp && !obj.DeployTarget.IsValidFtpAdress()) {
                         outputMessage.Append("- The FTP rule line n°" + (lineNb + 1) + " has an incorrect deployment target, it should follow the pattern ftp://user:pass@server:port/distantpath/ (with user/pass/port being optionnal)<br>");
@@ -340,15 +346,19 @@ namespace _3PA.MainFeatures.Pro {
 
             // for each transfer rule that match the source pattern
             foreach (var rule in DeployTransferRules.Where(
-                rule => sourcePath.RegexMatch(rule.SourcePattern.WildCardToRegex()) && rule.Step == step)
+                rule => sourcePath.RegexMatch(rule.IsSourcePatternInRegex ? rule.SourcePattern : rule.SourcePattern.WildCardToRegex()) && rule.Step == step)
                 ) {
 
                 string outPath;
 
-                if (rule.Type == DeployType.Ftp || Path.IsPathRooted(rule.DeployTarget)) {
-                    outPath = rule.DeployTarget;
+                if (rule.ShouldDeployTargetReplaceDollar) {
+                    outPath = sourcePath.RegexReplace(rule.SourcePattern, rule.DeployTarget);
                 } else {
-                    outPath = Path.Combine(ProEnv.BaseCompilationPath, rule.DeployTarget);
+                    outPath = rule.DeployTarget;
+                }
+
+                if (rule.Type != DeployType.Ftp && !Path.IsPathRooted(rule.DeployTarget)) {
+                    outPath = Path.Combine(ProEnv.BaseCompilationPath, outPath);
                 }
 
                 if (!outList.Exists(needed => needed.TargetDir.EqualsCi(outPath)))
@@ -764,9 +774,19 @@ namespace _3PA.MainFeatures.Pro {
         public string SourcePattern { get; set; }
 
         /// <summary>
+        /// True if the rule is directly written as a regex (in that case it must start with ":") otherwise it uses wildcards
+        /// </summary>
+        public bool IsSourcePatternInRegex { get; set; }
+
+        /// <summary>
         /// deploy target depending on the deploytype of this rule
         /// </summary>
         public string DeployTarget { get; set; }
+
+        /// <summary>
+        /// True if the rule is directly written as a regex and we want to replace matches in the source directory in the deploy target (in that case it must start with ":")
+        /// </summary>
+        public bool ShouldDeployTargetReplaceDollar { get; set; }
 
         /// <summary>
         /// The line from which we read this info, allows to sort by line

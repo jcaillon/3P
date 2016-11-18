@@ -74,6 +74,11 @@
 # - For step 0, if no transfer rules can be applied to a file, then the file will be `Moved` to the deployment base directory by default
 # - For other steps, if no transfer rules apply then the file is not transfered at all
 # - For step 0, if the environment is set to `compile next to source` then the *.r will be moved next to the source and no transfer rules will apply
+## ======================
+# EXTRA :
+# If you wish, you can also directly use regular expression in the "source pattern". If you do so, you can then use capturing groups and
+# use $1, $2... in the "deploy target" to dynamically rename the "deploy target" in function of the source
+# To activate this feature, the "source pattern" and "deploy target" should start with the character ":"
 # ========================================================================
 
 # Example of filter rules (commented with #)

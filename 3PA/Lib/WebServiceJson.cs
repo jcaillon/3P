@@ -77,7 +77,6 @@ namespace _3PA.Lib {
 
         #endregion
 
-
         #region life and death
 
         /// <summary>
