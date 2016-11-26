@@ -32,7 +32,7 @@ namespace _3PA.Interop {
          * hwndFrom is really an environment specific window handle or pointer
          * but most clients of Scintilla.h do not have this type visible. */
         public IntPtr hwndFrom;
-        public uint idFrom;
+        public IntPtr idFrom;
         public uint code;
     }
 
@@ -47,8 +47,8 @@ namespace _3PA.Interop {
         public int length; /* SCN_MODIFIED */
         public int linesAdded; /* SCN_MODIFIED */
         public int message; /* SCN_MACRORECORD */
-        public uint wParam; /* SCN_MACRORECORD */
-        public int lParam; /* SCN_MACRORECORD */
+        public IntPtr wParam; /* SCN_MACRORECORD */
+        public IntPtr lParam; /* SCN_MACRORECORD */
         public int line; /* SCN_MODIFIED */
         public int foldLevelNow; /* SCN_MODIFIED */
         public int foldLevelPrev; /* SCN_MODIFIED */

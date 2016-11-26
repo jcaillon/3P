@@ -3828,15 +3828,15 @@ namespace _3PA {
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam, IntPtr lParam) {
-            return _directFunction(_directMessagePointer, (int) msg, wParam, lParam);
+            return _directFunction(_directMessagePointer, (uint) msg, wParam, lParam);
         }
 
         public IntPtr Send(SciMsg msg, IntPtr wParam) {
-            return _directFunction(_directMessagePointer, (int) msg, wParam, IntPtr.Zero);
+            return _directFunction(_directMessagePointer, (uint) msg, wParam, IntPtr.Zero);
         }
 
         public IntPtr Send(SciMsg msg) {
-            return _directFunction(_directMessagePointer, (int) msg, IntPtr.Zero, IntPtr.Zero);
+            return _directFunction(_directMessagePointer, (uint) msg, IntPtr.Zero, IntPtr.Zero);
         }
     }
 

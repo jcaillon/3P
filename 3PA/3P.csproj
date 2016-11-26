@@ -32,34 +32,14 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <DebugType>full</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <PlatformTarget>x86</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <UseVSHostingProcess>false</UseVSHostingProcess>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DefineConstants>TRACE</DefineConstants>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release</OutputPath>
-    <DebugType>pdbonly</DebugType>
-    <ErrorReport>prompt</ErrorReport>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-  </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>
     </ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
-    <OutputPath>..\..\..\LiberKey\Apps\Notepad++\App\Notepad++\plugins\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugType>full</DebugType>
     <PlatformTarget>x86</PlatformTarget>
@@ -74,6 +54,27 @@
     <Optimize>true</Optimize>
     <DebugType>pdbonly</DebugType>
     <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
@@ -677,8 +678,10 @@
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetPath)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetFileName)"
-if exist "$(SolutionDir)..\3P_notepad++\plugins\" copy /Y "$(TargetDir)$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName).pdb"</PostBuildEvent>
+    <PostBuildEvent>if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( if exist "$(ProjectDir)bin\x86\Debug\$(TargetName)$(TargetExt)" (copy /Y "$(ProjectDir)bin\x86\Debug\$(TargetName)$(TargetExt)" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName)$(TargetExt)"))
+if exist "$(SolutionDir)..\3P_notepad++\plugins\" ( if exist "$(ProjectDir)bin\x86\Debug\$(TargetName).pdb" (copy /Y "$(ProjectDir)bin\x86\Debug\$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++\plugins\$(TargetName).pdb"))
+if exist "$(SolutionDir)..\3P_notepad++x64\plugins\" ( if exist "$(ProjectDir)bin\x64\Debug\$(TargetName)$(TargetExt)" (copy /Y "$(ProjectDir)bin\x64\Debug\$(TargetName)$(TargetExt)" "$(SolutionDir)..\3P_notepad++x64\plugins\$(TargetName)$(TargetExt)"))
+if exist "$(SolutionDir)..\3P_notepad++x64\plugins\" ( if exist "$(ProjectDir)bin\x64\Debug\$(TargetName).pdb" (copy /Y "$(ProjectDir)bin\x64\Debug\$(TargetName).pdb" "$(SolutionDir)..\3P_notepad++x64\plugins\$(TargetName).pdb"))</PostBuildEvent>
   </PropertyGroup>
   <Import Project="../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets" Condition="Exists('../packages/UnmanagedExports.1.2.7/tools/RGiesecke.DllExport.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -557,7 +557,7 @@ namespace YamuiFramework.Forms {
         [SecuritySafeCritical]
         private void MoveControl() {
             WinApi.ReleaseCapture();
-            WinApi.SendMessage(Handle, (int)WinApi.Messages.WM_NCLBUTTONDOWN, (int)WinApi.HitTest.HTCAPTION, 0);
+            WinApi.SendMessage(Handle, (uint)WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int)WinApi.HitTest.HTCAPTION), new IntPtr(0));
         }
 
         #endregion

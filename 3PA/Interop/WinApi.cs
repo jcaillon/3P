@@ -40,46 +40,77 @@ namespace _3PA.Interop {
         /// Scintilla provides messages that allow you to call the Scintilla message function directly.
         /// This is the delegate!
         /// </summary>
-        public delegate IntPtr Scintilla_DirectFunction(IntPtr ptr, int iMessage, IntPtr wParam, IntPtr lParam);
+        /// <remarks>
+        /// The interface defined in notepad++ scintilla.h is :
+        /// public delegate long Scintilla_DirectFunction(long ptr, uint iMessage, ulong wParam, long lParam);
+        /// </remarks>
+        public delegate IntPtr Scintilla_DirectFunction(IntPtr ptr, uint iMessage, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, out IntPtr lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam);
+        public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wParam, IntPtr lParam) {
+            return SendMessage(hWnd, (UInt32)msg, wParam, lParam);
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, NppMenuCmd lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr((uint) lParam));
+        }        
+        
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, IntPtr lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, int lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr(lParam));
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, bool lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam.ToPointer());
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, out int lParam) {
+            IntPtr outVal;
+            IntPtr retval = SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), out outVal);
+            lParam = outVal.ToInt32();
+            return retval;
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, [MarshalAs(UnmanagedType.LPWStr)] string lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, int lParam) {
+            return SendMessage(hWnd, (UInt32)msg, wParam, new IntPtr(lParam));
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, string lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, StringBuilder lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+        }
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, int wParam, string lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, int lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, NppMsg msg, IntPtr wParam, string lParam) {
+            return SendMessage(hWnd, (UInt32)msg, wParam, lParam);
+        }
 
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam);
+        public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, string lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), lParam);
+        }
+
+        public static IntPtr SendMessage(IntPtr hWnd, SciMsg msg, int wParam, int lParam) {
+            return SendMessage(hWnd, (UInt32)msg, new IntPtr(wParam), new IntPtr(lParam));
+        }
+
+        public static IntPtr SendMessage(IntPtr hWnd, uint msg, int wParam, IntPtr lParam) {
+            return SendMessage(hWnd, msg, new IntPtr(wParam), lParam);
+        }
 
         public const int MaxPath = 260;
 

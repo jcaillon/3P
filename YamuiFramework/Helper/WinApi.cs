@@ -457,10 +457,7 @@ namespace YamuiFramework.Helper {
         public static extern bool ReleaseCapture();
 
         [DllImport("user32.dll")]
-        public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int msg, IntPtr wp, IntPtr lp);
+        public static extern IntPtr SendMessage(IntPtr hWnd, uint msg, IntPtr wp, IntPtr lp);
 
         #endregion
     }

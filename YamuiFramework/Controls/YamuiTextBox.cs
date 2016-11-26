@@ -130,7 +130,7 @@ namespace YamuiFramework.Controls {
         protected override void WndProc(ref Message m) {
 
             // Send WM_MOUSEWHEEL messages to the parent
-            if (!MultiLines && m.Msg == 0x20a) WinApi.SendMessage(Parent.Handle, m.Msg, m.WParam, m.LParam);
+            if (!MultiLines && m.Msg == 0x20a) WinApi.SendMessage(Parent.Handle, (uint) m.Msg, m.WParam, m.LParam);
             else base.WndProc(ref m);
 
             if ((m.Msg == WmPaint) || (m.Msg == OcmCommand)) {

@@ -75,8 +75,8 @@ namespace _3PA.Lib {
         #region Override HandleHookEvent
 
         protected override bool HandleHookEvent(IntPtr wParam, IntPtr lParam) {
-            var key = (Keys)((int)wParam);
-            int context = (int) lParam;
+            var key = (Keys)(wParam.ToInt64());
+            long context = lParam.ToInt64();
 
             // bypass the normal keydown handler, send all the messages
             if (KeyDownByPass != null) {

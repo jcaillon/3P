@@ -105,6 +105,14 @@ namespace _3PA.Lib {
             return (b & (1 << pos)) != 0;
         }
 
+
+        /// <summary>
+        /// Returns true if the bit at the given position is set to true
+        /// </summary>
+        public static bool IsBitSet(this long b, int pos) {
+            return (b & (1 << pos)) != 0;
+        }
+
         #endregion
 
         #region Colors
