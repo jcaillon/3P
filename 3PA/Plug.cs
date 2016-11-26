@@ -632,10 +632,6 @@ namespace _3PA {
             // the user can open a .txt and save it as a .p
             DoNppDocumentSwitched();
 
-            // update function prototypes
-            if (IsCurrentFileProgress)
-                ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
-
             // if it's a conf file, import it
             ShareExportConf.TryToImportFile(CurrentFilePath);
         }
@@ -894,6 +890,10 @@ namespace _3PA {
             if (Config.IsDevelopper && ParserHandler.AblParser.ParserErrors.Count > 0) {
                 UserCommunication.Notify("The parser found erros on this file:<br>" + ProCodeFormat.GetParserErrorDescription(), MessageImg.MsgInfo, "Parser message", "Errors found", 3);
             }
+
+            // update function prototypes
+            if (IsCurrentFileProgress)
+                ProGenerateCode.UpdateFunctionPrototypesIfNeeded(true);
         }
 
         #endregion

@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.Pro {
                 if (listOfSoloImplementation.Count > 0) {
                     var tempMes = new StringBuilder("The following function prototypes have been created :");
 
-                    while (listOfSoloImplementation.Count > nbNotCreated && nbLoop <= nbToDo) {
+                    while (listOfSoloImplementation.Count > nbNotCreated && nbLoop < nbToDo) {
                         if (AddPrototypes(ref tempMes, listOfSoloImplementation[nbNotCreated]))
                             nbThingsDone++;
                         else
@@ -89,7 +89,7 @@ namespace _3PA.MainFeatures.Pro {
                 // delete proto
                 if (listOfUselessProto.Count > 0) {
                     outputMessage.Append("The following prototypes have been deleted :");
-                    while (listOfUselessProto.Count > 0 && nbLoop <= nbToDo) {
+                    while (listOfUselessProto.Count > 0 && nbLoop < nbToDo) {
                         if (DeletePrototypes(ref outputMessage, listOfUselessProto[0]))
                             nbThingsDone++;
 
@@ -100,9 +100,9 @@ namespace _3PA.MainFeatures.Pro {
                 }
 
                 // update proto
-                if (listOfOutDatedProto.Count > 0 && nbLoop <= nbToDo) {
+                if (listOfOutDatedProto.Count > 0) {
                     outputMessage.Append("The following functions have had their prototype synchronized :");
-                    while (listOfOutDatedProto.Count > 0) {
+                    while (listOfOutDatedProto.Count > 0 && nbLoop < nbToDo) {
                         if (UpdatePrototypes(ref outputMessage, listOfOutDatedProto[0]))
                             nbThingsDone++;
 
