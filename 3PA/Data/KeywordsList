@@ -26,15 +26,12 @@
 5	&ELSEIF	Preprocessor	1	1
 6	&ENDIF	Preprocessor	1	20
 7	&FILE-NAME	Preprocessor	0	0
-8	&GLOB	Preprocessor	0	0
-9	&GLOBAL	Preprocessor	0	0
 10	&GLOBAL-DEFINE	Preprocessor	1	0
 11	&IF	Preprocessor	1	20
 12	&LINE-NUMBER	Preprocessor	0	0
 13	&MESSAGE	Preprocessor	1	0
 14	&OPEN-QUERY-	Preprocessor	0	0
 15	&OPSYS	Preprocessor	0	0
-16	&SCOPED	Preprocessor	0	0
 17	&SCOPED-DEFINE	Preprocessor	1	0
 18	&SEQUENCE	Preprocessor	0	0
 19	&THEN	Preprocessor	1	20

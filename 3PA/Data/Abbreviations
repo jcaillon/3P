@@ -19,6 +19,8 @@
 # each line contains tab separated info :
 # abbreviation	complete_correspoding_keyword
 # ========================================================================
+&GLOB	&GLOBAL-DEFINE
+&SCOPED	&SCOPED-DEFINE
 ABS	ABSOLUTE
 ACCUM	ACCUMULATE
 AMBIG	AMBIGUOUS
