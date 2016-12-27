@@ -750,9 +750,10 @@ namespace _3PA.MainFeatures.Parser {
                 switch (state) {
                     case 0:
                         // matching event type
-                        if (!(token is TokenWord) && !(token is TokenString)) break;
-                        eventList.Append((eventList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
-                        state++;
+                        if (token is TokenWord || token is TokenString || (token is TokenSymbol && token.Value == "*")) {
+                            eventList.Append((eventList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
+                            state++;
+                        }
                         break;
                     case 1:
                         // matching "of"
