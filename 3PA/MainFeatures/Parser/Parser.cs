@@ -893,10 +893,25 @@ namespace _3PA.MainFeatures.Parser {
                         return;
                     case 2:
                         // matching widget name
-                        if (token is TokenWord || token is TokenInclude || token is TokenString) {
+                        if (token is TokenWord || token is TokenString) {
                             widgetList.Append((widgetList.Length == 0 ? "" : ", ") + GetTokenStrippedValue(token));
 
                             // we can match several widget name separated by a comma or resume to next state
+                            if (token.Value.ToLower() == "frame") {
+                                state = 4;
+                                break;
+                            }
+
+                            var nextNonSpace = PeekAtNextNonSpace(1);
+                            if (!(nextNonSpace is TokenSymbol && nextNonSpace.Value.Equals(",")))
+                                state++;
+                        }
+                        break;
+                    case 4:
+                        if (token is TokenWord || token is TokenString) {
+                            widgetList.Append(" ").Append(token.Value);
+                            state = 2;
+
                             var nextNonSpace = PeekAtNextNonSpace(1);
                             if (!(nextNonSpace is TokenSymbol && nextNonSpace.Value.Equals(",")))
                                 state++;
