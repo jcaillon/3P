@@ -442,7 +442,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                     case CompletionType.Label:
                         break;
                     case CompletionType.Preprocessed:
-                        var preprocItem = (ParsedPreProc) data.ParsedItem;
+                        var preprocItem = (ParsedPreProcVariable) data.ParsedItem;
                         if (preprocItem.UndefinedLine > 0)
                             toDisplay.Append(FormatRow("Undefined line", preprocItem.UndefinedLine.ToString()));
                             toDisplay.Append(FormatSubtitle("VALUE"));

@@ -579,10 +579,10 @@ namespace _3PA.MainFeatures.AutoCompletion {
                         output = output && _currentLineNumber <= ((ParsedLabel) compData.ParsedItem).UndefinedLine;
                 }
 
-            } else if (compData.ParsedItem is ParsedPreProc) {
+            } else if (compData.ParsedItem is ParsedPreProcVariable) {
                 if (_currentLineNumber >= 0) {
                     // if preproc, check line of definition and undefine
-                    var parsedItem = (ParsedPreProc) compData.ParsedItem;
+                    var parsedItem = (ParsedPreProcVariable) compData.ParsedItem;
 
                     output = output && _currentLineNumber >= (parsedItem.IncludeLine >= 0 ? parsedItem.IncludeLine : parsedItem.Line);
                     if (parsedItem.UndefinedLine > 0)

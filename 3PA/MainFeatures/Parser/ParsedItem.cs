@@ -384,22 +384,22 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Pre-processed var parsed item
     /// </summary>
-    internal class ParsedPreProc : ParsedItem {
+    internal class ParsedPreProcVariable : ParsedItem {
         public string Value { get; private set; }
         public int UndefinedLine { get; set; }
-        public ParsedPreProcType Type { get; set; }
+        public ParsedPreProcVariableType Type { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedPreProc(string name, Token token, int undefinedLine, ParsedPreProcType type, string value) : base(name, token) {
+        public ParsedPreProcVariable(string name, Token token, int undefinedLine, ParsedPreProcVariableType type, string value) : base(name, token) {
             UndefinedLine = undefinedLine;
             Type = type;
             Value = value;
         }
     }
 
-    internal enum ParsedPreProcType {
+    internal enum ParsedPreProcVariableType {
         Scope = 2,
         Global = 4
     }

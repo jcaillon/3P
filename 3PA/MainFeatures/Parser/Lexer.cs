@@ -18,7 +18,6 @@
 // ========================================================================
 #endregion
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using _3PA.Lib;
 
@@ -47,12 +46,10 @@ namespace _3PA.MainFeatures.Parser {
         private int _line = LineStartAt;
         private int _column = ColumnStartAt;
         private int _commentDepth;
-        private int _includeDepth;
 
         private int _startCol;
         private int _startLine;
         private int _startPos;
-        private bool _forceCreateEos;
         private bool _previousTokenIsString;
 
         private int _tokenPos = -1;
@@ -72,14 +69,10 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// Returns a copy of the tokens list, strips the last token (EOF) before returning it
+        /// Returns the tokens list
         /// </summary>
-        public List<Token> GetTokensListCopy {
-            get {
-                var outList = _tokenList.ToList();
-                outList.RemoveAt(outList.Count - 1);
-                return outList;
-            }
+        public GapBuffer<Token> GetTokensList {
+            get { return _tokenList; }
         }
 
         #endregion
@@ -112,13 +105,11 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="line"></param>
         /// <param name="column"></param>
         /// <param name="commentDepth"></param>
-        /// <param name="includeDepth"></param>
-        public Lexer(string data, int pos, int line, int column, int commentDepth, int includeDepth) : this(data) {
+        public Lexer(string data, int pos, int line, int column, int commentDepth) : this(data) {
             _pos = pos;
             _line = line;
             _column = column;
             _commentDepth = commentDepth;
-            _includeDepth = includeDepth;
         }
 
         #endregion
@@ -152,35 +143,6 @@ namespace _3PA.MainFeatures.Parser {
             return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", _startLine, _startCol, _startPos, _pos) : _tokenList[_tokenPos + x];
         }
 
-        #region tokens list modifiers
-
-        /// <summary>
-        /// Allows to browse each token from beggining with MoveNextToken
-        /// </summary>
-        public void ResetTokenEnumerator() {
-            _tokenPos = -1;
-        }
-
-        /// <summary>
-        /// Replace the token at the current pos + x by the token given
-        /// </summary>
-        public void ReplaceToken(int x, Token token) {
-            _tokenList[_tokenPos + x] = token;
-        }
-
-        /// <summary>
-        /// Inserts tokens at the current pos + x
-        /// </summary>
-        public void InsertTokens(int x, List<Token> tokens) {
-            _tokenList.InsertRange(_tokenPos + x, tokens);
-        }
-
-        public void RemoveToken(int x) {
-            _tokenList.RemoveAt(_tokenPos + x);
-        }
-
-        #endregion
-
         #endregion
 
         #region Tokenize
@@ -191,28 +153,24 @@ namespace _3PA.MainFeatures.Parser {
         private void Tokenize() {
             Token token;
             do {
-                token = GetNext();
+                token = GetNextToken();
                 _tokenList.Add(token);
 
                 _previousTokenIsString = token is TokenString;
-
-                // in certain cases, we want to add an extra end of statement token!
-                if (_forceCreateEos)
-                    _tokenList.Add(new TokenEos(string.Empty, _startLine, _startCol, _startPos, _pos));
             } while (!(token is TokenEof));
         }
 
         /// <summary>
         /// Peek forward x chars
         /// </summary>
-        private char PeekAt(int x) {
+        private char PeekAtChr(int x) {
             return _pos + x >= _data.Length ? Eof : _data[_pos + x];
         }
 
         /// <summary>
         /// peek backward x chars
         /// </summary>
-        private char PeekAtReverse(int x) {
+        private char PeekAtChrReverse(int x) {
             return _pos - x < 0 ? Eof : _data[_pos - x];
         }
 
@@ -220,7 +178,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Read to the next char,
         /// indirectly adding the current char (_data[_pos]) to the current token
         /// </summary>
-        private void Read() {
+        private void ReadChr() {
             _pos++;
             _column++;
         }
@@ -230,9 +188,9 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="eol"></param>
         private void ReadEol(char eol = '\n') {
-            Read();
-            if (eol == '\r' && PeekAt(0) == '\n')
-                Read();
+            ReadChr();
+            if (eol == '\r' && PeekAtChr(0) == '\n')
+                ReadChr();
             _line++;
             _column = ColumnStartAt;
         }
@@ -249,60 +207,42 @@ namespace _3PA.MainFeatures.Parser {
         /// returns the next token of the string
         /// </summary>
         /// <returns></returns>
-        private Token GetNext() {
-            _forceCreateEos = false;
+        private Token GetNextToken() {
             _startLine = _line;
             _startCol = _column;
             _startPos = _pos;
 
-            var ch = PeekAt(0);
+            var ch = PeekAtChr(0);
 
             // END OF FILE reached
             if (ch == Eof)
                 return new TokenEof(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
 
             // if we started in a comment, read this token as a comment
-            if (_commentDepth > 0) return CreateCommentToken();
-
-            // if we started in an include, read this token as an include
-            if (_includeDepth > 0) return CreateBracketToken();
+            if (_commentDepth > 0) 
+                return CreateCommentToken();
 
             switch (ch) {
                 case '/':
-                    var nextChar = PeekAt(1);
-                    // comment or single line comment (if previous char is a whitespace) or symbol by default
-                    return nextChar == '*' ? CreateCommentToken() : ((char.IsWhiteSpace(PeekAtReverse(1)) && nextChar == '/') ? CreateSingleLineCommentToken() : CreateSymbolToken());
+                    var nextChar = PeekAtChr(1);
+                    // comment
+                    if (nextChar == '*')
+                        return CreateCommentToken();
+                    // single line comment (if previous char is a whitespace)
+                    if (nextChar == '/' && char.IsWhiteSpace(PeekAtChrReverse(1)))
+                        return CreateSingleLineCommentToken();
+                    // symbol
+                    return CreateSymbolToken();
 
                 case '{':
-                    // include file or preproc variable
-                    return CreateBracketToken();
+                    // case of a preprocessed {&variable}/{1} or an include
+                    return CreatePreprocessedToken();
 
                 case '&':
-                    // pre-processed &define, &analyse-suspend, &message
-                    // Read the word, try to match it with define statement
-                    ReadWord();
-                    var word = GetTokenValue().ToUpper();
-                    switch (word) {
-                        case "&ENDIF":
-                        case "&THEN":
-                        case "&ELSE":
-                            _forceCreateEos = true;
-                            break;
-                    }
-                    switch (word) {
-                        case "&ANALYZE-SUSPEND":
-                        case "&ANALYZE-RESUME":
-                        case "&MESSAGE":
-                        case "&UNDEFINE":
-                        case "&GLOBAL-DEFINE":
-                        case "&SCOPED-DEFINE":
-                        case "&SCOPED":
-                        case "&GLOB":
-                        case "&GLOBAL":
-                            _forceCreateEos = true;
-                            return CreatePreProcessedStatement();
-                    }
-                    return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                    // pre-processed directive (i.e. &define, &analyse-suspend, &message)
+                    return new TokenPreProcDirective(
+                        ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), 
+                        _startLine, _startCol, _startPos, _pos);
 
                 case ' ':
                 case '\t':
@@ -310,14 +250,10 @@ namespace _3PA.MainFeatures.Parser {
                     return CreateWhitespaceToken();
 
                 case '-':
-                    // number
-                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                    Read();
-                    return CreateNumberToken();
                 case '+':
                     // number
-                    if (!char.IsDigit(PeekAt(1))) return CreateSymbolToken();
-                    Read();
+                    if (!char.IsDigit(PeekAtChr(1))) return CreateSymbolToken();
+                    ReadChr();
                     return CreateNumberToken();
 
                 case '0':
@@ -342,39 +278,87 @@ namespace _3PA.MainFeatures.Parser {
                 case '\'':
                     // quoted string (read until unescaped ' or ")
                     return CreateStringToken(ch);
+
                 case ':':
-                    // EOS
-                    if (char.IsWhiteSpace(PeekAt(1)))
+                    // EOS (if followed by any space/new line char)
+                    if (char.IsWhiteSpace(PeekAtChr(1)))
                         return CreateEosToken();
-                    // end of statement (if followed by any space/new line char) or a string descriptor
-                    if (_previousTokenIsString) {
-                        // Descriptor
+                    // String descriptor
+                    if (_previousTokenIsString)
                         return CreateStringDescriptorToken();
-                    }
+                    // or a badly placed symbol
                     return CreateSymbolToken();
+
                 case '.':
-                    return (char.IsWhiteSpace(PeekAt(1)) || PeekAt(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
+                    return (char.IsWhiteSpace(PeekAtChr(1)) || PeekAtChr(1) == Eof) ? CreateEosToken() : CreateSymbolToken();
 
                 default:
-                    // keyword = [a-Z_&]+[\w_-]*
-                    if (char.IsLetter(ch) || ch == '_' || ch == '&') {
-                        ReadWord();
-                        var word2 = GetTokenValue().ToLower();
-                        switch (word2) {
-                            case "then":
-                            case "else":
-                                _forceCreateEos = true;
-                                break;
-                        }
-                        return new TokenWord(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+                    // keyword = [a-Z_~]+[\w_-]*
+                    if (char.IsLetter(ch) || ch == '_' || ch == '~') {
+                        return new TokenWord(
+                            ReadWord() ? GetTokenValue().Replace("~", "").Replace("\n", "").Replace("\r", "") : GetTokenValue(), 
+                            _startLine, _startCol, _startPos, _pos);
                     }
                     // symbol
                     if (_symbolChars.Any(t => t == ch))
                         return CreateSymbolToken();
                     // unknown char
-                    Read();
+                    ReadChr();
                     return new TokenUnknown(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+
             }
+        }
+
+        /// <summary>
+        /// reads a word with this format : .[\w_-]*((\.[\w_-~]*)?){1,}
+        /// returns true if a ~ is used in the word
+        /// </summary>
+        private bool ReadWord() {
+
+            bool readTilde = false;
+
+            if (PeekAtChr(0) == '~') {
+                ReadTildeAndEol();
+                readTilde = true;
+            } else
+                ReadChr();
+
+            while (true) {
+                var ch = PeekAtChr(0);
+
+                // normal word
+                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-') {
+                    ReadChr();
+                    continue;
+                }
+
+                // reads a base.table.field as a single word
+                if (ch == '.') {
+                    var car = PeekAtChr(1);
+                    if (char.IsLetterOrDigit(car) || car == '_' || car == '-') {
+                        ReadChr();
+                        continue;
+                    }
+                }
+
+                // escape char (read anything as part of the string after that)
+                if (ch == '~') {
+                    ReadTildeAndEol();
+                    readTilde = true;
+                }
+
+                break;
+            }
+
+            return readTilde;
+        }
+
+        private void ReadTildeAndEol() {
+            // escape char (read anything as part of the string after that)
+            ReadChr();
+            var ch = PeekAtChr(0);
+            if (ch == '\r' || ch == '\n')
+                ReadEol(ch);
         }
 
         private Token CreateEolToken(char ch) {
@@ -383,81 +367,30 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         private Token CreateEosToken() {
-            Read();
+            ReadChr();
             return new TokenEos(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         private Token CreateSymbolToken() {
-            Read();
+            ReadChr();
             return new TokenSymbol(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
         /// <summary>
-        /// reads a preproc definition
+        /// reads '{' for an include and '{&' for a preprocessed variable
         /// </summary>
-        /// <returns></returns>
-        private Token CreatePreProcessedStatement() {
-            while (true) {
-                var ch = PeekAt(0);
-                if (ch == Eof)
-                    break;
-                // escape char (read anything as part of the string after that)
-                if (ch == '~') {
-                    Read();
-                    ch = PeekAt(0);
-                    if (ch == '\r' || ch == '\n')
-                        ReadEol(ch);
-                    continue;
-                }
-                // break on new line (this means the code is not compilable anyway...)
-                if (ch == '\r' || ch == '\n')
-                    break;
-                Read();
-            }
-            return new TokenPreProcStatement(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
-        }
-
-        /// <summary>
-        /// reads an include/preproc variable declaration
-        /// </summary>
-        private Token CreateBracketToken() {
-            var isVar = PeekAt(1) == '&' || char.IsDigit(PeekAt(1));
-
-            while (true) {
-                var ch = PeekAt(0);
-                if (ch == Eof)
-                    break;
-                // start of include
-                if (ch == '{') {
-                    Read();
-                    _includeDepth++;
-                }
-                // end of include
-                else if (ch == '}') {
-                    Read();
-                    _includeDepth--;
-                    // we finished reading
-                    if (_includeDepth == 0)
-                        break;
-                }
-                // new line
-                else if (ch == '\r' || ch == '\n')
-                    ReadEol(ch);
-                else {
-                    // escape char (read anything as part of the string after that)
-                    if (ch == '~')
-                        Read();
-                    Read();
-                }
-            }
+        private Token CreatePreprocessedToken() {
+            ReadChr();
+            var ch = PeekAtChr(0);
 
             // case of a preprocessed {&variable} or {1}
-            if (isVar) 
+            if (ch == '&' || char.IsDigit(ch)) {
+                if (ch == '&') 
+                    ReadChr();
                 return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+            }
 
-            // if this is a file include, we force an end of statement, 
-            // otherwise we might not read the next statement correctly!
-            _forceCreateEos = true;
+            // include file
             return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 
@@ -468,19 +401,19 @@ namespace _3PA.MainFeatures.Parser {
         /// <returns></returns>
         private Token CreateCommentToken() {
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == Eof)
                     break;
                 // we read a comment opening
-                if (ch == '/' && PeekAt(1) == '*') {
-                    Read();
-                    Read();
+                if (ch == '/' && PeekAtChr(1) == '*') {
+                    ReadChr();
+                    ReadChr();
                     _commentDepth++;
                 }
                 // we read a comment closing
-                else if (ch == '*' && PeekAt(1) == '/') {
-                    Read();
-                    Read();
+                else if (ch == '*' && PeekAtChr(1) == '/') {
+                    ReadChr();
+                    ReadChr();
                     _commentDepth--;
                     // we finished reading the comment, leave
                     if (_commentDepth == 0)
@@ -490,7 +423,7 @@ namespace _3PA.MainFeatures.Parser {
                     ReadEol(ch);
                     // continue reading
                 } else
-                    Read();
+                    ReadChr();
             }
             return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos, false);
         }
@@ -502,10 +435,10 @@ namespace _3PA.MainFeatures.Parser {
         private Token CreateSingleLineCommentToken() {
             // read until the end of the line
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == Eof || ch == '\r' || ch == '\n')
                     break;
-                Read();
+                ReadChr();
             }
             return new TokenComment(GetTokenValue(), _startLine, _startCol, _startPos, _pos, true);
         }
@@ -515,11 +448,11 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         private Token CreateWhitespaceToken() {
-            Read();
+            ReadChr();
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == '\t' || ch == ' ')
-                    Read();
+                    ReadChr();
                 else
                     break;
             }
@@ -535,23 +468,23 @@ namespace _3PA.MainFeatures.Parser {
             var isHexa = false;
 
             // we can also read hexadecimal notation (i.e. 0xNNN)
-            if (PeekAt(0) == '0' && PeekAt(1) == 'x') {
-                Read();
+            if (PeekAtChr(0) == '0' && PeekAtChr(1) == 'x') {
+                ReadChr();
                 isHexa = true;
                 hasPoint = true; // don't allow to have a point
             }
-            Read();
+            ReadChr();
 
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (char.IsDigit(ch))
-                    Read();
+                    ReadChr();
                 // for hexadecimal numbers, we don't check if the number is correct, we just read letters and digits...
                 else if (isHexa && char.IsLetter(ch))
-                    Read();
-                else if (ch == '.' && !hasPoint && char.IsDigit(PeekAt(1))) {
+                    ReadChr();
+                else if (ch == '.' && !hasPoint && char.IsDigit(PeekAtChr(1))) {
                     hasPoint = true;
-                    Read();
+                    ReadChr();
                 } else
                     break;
             }
@@ -559,38 +492,13 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// reads a word with this format : [a-Z_&]+[\w_-]*((\.[\w_-]*)?){1,}
-        /// </summary>
-        private void ReadWord() {
-            Read();
-            while (true) {
-                var ch = PeekAt(0);
-
-                // normal word
-                if (char.IsLetterOrDigit(ch) || ch == '_' || ch == '-')
-                    Read();
-                else {
-                    // reads a base.table.field as a single word
-                    if (ch == '.') {
-                        var car = PeekAt(1);
-                        if (char.IsLetterOrDigit(car) || car == '_' || car == '-') {
-                            Read();
-                            continue;
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-
-        /// <summary>
         /// reads a quotes string (either simple of double quote), takes into account escape char ~
         /// </summary>
         /// <returns></returns>
         private Token CreateStringToken(char strChar) {
-            Read();
+            ReadChr();
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == Eof)
                     break;
 
@@ -601,14 +509,14 @@ namespace _3PA.MainFeatures.Parser {
                 }
                 // quote char
                 if (ch == strChar) {
-                    Read();
+                    ReadChr();
                     break; // done reading
                     // keep on reading
                 }
                 // escape char (read anything as part of the string after that)
                 if (ch == '~')
-                    Read();
-                Read();
+                    ReadChr();
+                ReadChr();
             }
             return new TokenString(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
@@ -619,16 +527,16 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <returns></returns>
         private Token CreateStringDescriptorToken() {
-            Read();
+            ReadChr();
             while (true) {
-                var ch = PeekAt(0);
+                var ch = PeekAtChr(0);
                 if (ch == Eof)
                     break;
 
                 // we don't care if the descriptor is valid or not, just read while it's a letter or digit
                 if (!char.IsLetterOrDigit(ch))
                     break;
-                Read();
+                ReadChr();
             }
             return new TokenStringDescriptor(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }

@@ -205,6 +205,8 @@ namespace _3PA.Tests {
         }
 
         public static void DebugTest2() {
+            RunParserTests(Npp.Text);
+
             Task.Factory.StartNew(() => {
                 MeasureIt(() => {
                     var list = Directory.EnumerateFiles(ProEnvironment.Current.BaseLocalPath, "*", SearchOption.AllDirectories).ToList();
@@ -543,7 +545,7 @@ namespace _3PA.Tests {
             AppendEverything(pars);
         }
 
-        public void Visit(ParsedPreProc pars) {
+        public void Visit(ParsedPreProcVariable pars) {
             AppendEverything(pars);
         }
 
@@ -648,7 +650,7 @@ namespace _3PA.Tests {
             NbItems++;
         }
 
-        public void Visit(TokenPreProcStatement tok) {
+        public void Visit(TokenPreProcDirective tok) {
             AppendEverything(tok);
             NbItems++;
         }

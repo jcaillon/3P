@@ -499,13 +499,13 @@ namespace _3PA.MainFeatures.Parser {
         /// Preprocessed variables
         /// </summary>
         /// <param name="pars"></param>
-        public void Visit(ParsedPreProc pars) {
+        public void Visit(ParsedPreProcVariable pars) {
             // to completion data
             _parsedCompletionItemsList.Add(new CompletionItem {
                 DisplayText = "&" + pars.Name,
                 Type = CompletionType.Preprocessed,
                 SubString = !_isBaseFile ? _currentParsedFileName : string.Empty,
-                Flag = AddExternalFlag(pars.Type == ParsedPreProcType.Global ? ParseFlag.FileScope : ParseFlag.LocalScope),
+                Flag = AddExternalFlag(pars.Type == ParsedPreProcVariableType.Global ? ParseFlag.FileScope : ParseFlag.LocalScope),
                 Ranking = AutoComplete.FindRankingOfParsedItem(pars.Name),
                 ParsedItem = pars,
                 FromParser = true

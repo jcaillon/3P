@@ -54,15 +54,15 @@ namespace _3PA.MainFeatures.Parser {
     /// <summary>
     /// Ex: & if, & analyse, & define...
     /// </summary>
-    internal class TokenPreProcStatement : Token {
-        public TokenPreProcStatement(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+    internal class TokenPreProcDirective : Token {
+        public TokenPreProcDirective(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
             visitor.Visit(this);
         }
     }
 
     /// <summary>
-    /// Only for inclusion of files, i.e. {file.x}
+    /// Its value is '{', indicates the beggining of an include
     /// </summary>
     internal class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
@@ -72,7 +72,7 @@ namespace _3PA.MainFeatures.Parser {
     }
 
     /// <summary>
-    /// Use of a pre-processed variable i.e. {& x}
+    /// Use of a pre-processed variable i.e. {& name}, its value is '{&'
     /// </summary>
     internal class TokenPreProcVariable : Token {
         public TokenPreProcVariable(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }

@@ -33,6 +33,6 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(TokenWord tok);
         void Visit(TokenEof tok);
         void Visit(TokenUnknown tok);
-        void Visit(TokenPreProcStatement tok);
+        void Visit(TokenPreProcDirective tok);
     }
 }

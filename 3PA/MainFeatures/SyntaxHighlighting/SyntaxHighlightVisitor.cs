@@ -93,7 +93,7 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
-        public void Visit(TokenPreProcStatement tok) {
+        public void Visit(TokenPreProcDirective tok) {
             
         }
     }
