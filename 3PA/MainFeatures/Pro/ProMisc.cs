@@ -111,7 +111,7 @@ namespace _3PA.MainFeatures.Pro {
                 return;
             }
 
-            UserCommunication.Notify("Sorry pal, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "information", "Failed to find an origin", 5);
+            UserCommunication.Notify("Sorry, couldn't go to the definition of <b>" + curWord + "</b>", MessageImg.MsgInfo, "Information", "Failed to find an origin", 5);
         }
 
         public static void ForEachFlag(Action<string, ParseFlag> toApplyOnFlag) {

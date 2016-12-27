@@ -1043,7 +1043,7 @@ namespace _3PA.MainFeatures.Parser {
                                 case "dataset":
                                 case "dataset-handle":
                                     tempPrimitiveType = lowerToken;
-                                    state = 30;
+                                    state = 80;
                                     break;
                                 default:
                                     state = 10;
@@ -1106,6 +1106,14 @@ namespace _3PA.MainFeatures.Parser {
                             case "help":
                                 // a field has a help text:
                                 state = 27;
+                                break;
+                            case "initial":
+                                // a field has an initial value
+                                state = 29;
+                                break;
+                            case "format":
+                                // a field has a format
+                                state = 30;
                                 break;
                             case "extent":
                                 // a field is extent:
@@ -1219,15 +1227,29 @@ namespace _3PA.MainFeatures.Parser {
                         currentField.Description = GetTokenStrippedValue(token);
                         state = 20;
                         break;
-
+                    case 29:
+                        // define temp-table : match INITIAL for a field
+                        if (!(token is TokenWhiteSpace)) {
+                            currentField.InitialValue = GetTokenStrippedValue(token);
+                            state = 20;
+                        }
+                        break;
                     case 30:
+                        // define temp-table : match FORMAT for a field
+                        if (!(token is TokenWhiteSpace)) {
+                            currentField.Format = GetTokenStrippedValue(token);
+                            state = 20;
+                        }
+                        break;
+
+                    case 80:
                         // define parameter : match a temptable, table, dataset or buffer name
                         if (!(token is TokenWord)) break;
                         if (token.Value.ToLower().Equals("for")) break;
                         name = token.Value;
                         state++;
                         break;
-                    case 31:
+                    case 81:
                         // match the table/dataset name that the buffer or handle is FOR
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
@@ -1282,7 +1304,7 @@ namespace _3PA.MainFeatures.Parser {
                 if (token is TokenEol) break;
 
                 // read the first word after the directive
-                if (variableName == null && token is TokenWord) {
+                if (string.IsNullOrEmpty(variableName) && token is TokenWord) {
                     variableName = token.Value;
                     continue;
                 }
@@ -1388,7 +1410,7 @@ namespace _3PA.MainFeatures.Parser {
             }
 
             // We matched a new preprocessed variable?
-            if (newPreProcVarType > 0) {
+            if (newPreProcVarType > 0 && !string.IsNullOrEmpty(variableName)) {
                 AddParsedItem(new ParsedPreProcVariable(variableName, directiveToken, 0, ParsedPreProcVariableType.Global, definition.ToString().Trim()));
 
                 // add it to the know variables
