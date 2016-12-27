@@ -435,6 +435,20 @@ namespace _3PA.Lib {
             return source.IndexOf(toCheck, StringComparison.CurrentCultureIgnoreCase) >= 0;
         }
 
+        /// <summary>
+        /// Returns the string given only with acceptable characters for a variable name
+        /// </summary>
+        public static string MakeValidVariableName(this string source) {
+            var outStr = "";
+            foreach (char c in source) {
+                if (char.IsLetterOrDigit(c) || c == '_' || c == '-')
+                    outStr += c;
+                else if (c == ' ')
+                    outStr += '_';
+            }
+            return outStr;
+        }
+
         #endregion
 
         #region string builder

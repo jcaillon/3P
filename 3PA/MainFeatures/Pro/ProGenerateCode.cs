@@ -387,6 +387,8 @@ namespace _3PA.MainFeatures.Pro {
                     return;
                 codeCode = (IProCode) input;
 
+                codeCode.Name = codeCode.Name.MakeValidVariableName();
+
                 blockDescription = @"_FUNCTION " + codeCode.Name + " Procedure";
                 insertText = Encoding.Default.GetString(DataResources.FunctionImplementation).Trim();
                 insertText = insertText.Replace("{&type}", ((ProCodeFunction)codeCode).Type);
