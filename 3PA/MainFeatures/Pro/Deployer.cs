@@ -88,9 +88,8 @@ namespace _3PA.MainFeatures.Pro {
                         DeployTarget = items[6].Trim(), 
                         Line = (lineNb + 1)
                     };
-
-                    obj.IsSourcePatternInRegex = obj.SourcePattern.StartsWith(":");
-                    obj.SourcePattern = obj.IsSourcePatternInRegex ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\');
+                    
+                    obj.RegexSourcePattern = obj.SourcePattern.StartsWith(":") ? obj.SourcePattern.Remove(0, 1) : obj.SourcePattern.Replace('/', '\\').WildCardToRegex();
 
                     obj.ShouldDeployTargetReplaceDollar = obj.DeployTarget.StartsWith(":");
                     obj.DeployTarget = obj.ShouldDeployTargetReplaceDollar ? obj.DeployTarget.Remove(0, 1) : obj.DeployTarget.Replace('/', '\\');
@@ -345,14 +344,12 @@ namespace _3PA.MainFeatures.Pro {
             var outList = new List<FileToDeploy>();
 
             // for each transfer rule that match the source pattern
-            foreach (var rule in DeployTransferRules.Where(
-                rule => sourcePath.RegexMatch(rule.IsSourcePatternInRegex ? rule.SourcePattern : rule.SourcePattern.WildCardToRegex()) && rule.Step == step)
-                ) {
+            foreach (var rule in DeployTransferRules.Where(rule => sourcePath.RegexMatch(rule.RegexSourcePattern) && rule.Step == step)) {
 
                 string outPath;
 
                 if (rule.ShouldDeployTargetReplaceDollar) {
-                    outPath = sourcePath.RegexReplace(rule.SourcePattern, rule.DeployTarget);
+                    outPath = sourcePath.RegexReplace(rule.RegexSourcePattern, rule.DeployTarget);
                 } else {
                     outPath = rule.DeployTarget;
                 }
@@ -774,9 +771,9 @@ namespace _3PA.MainFeatures.Pro {
         public string SourcePattern { get; set; }
 
         /// <summary>
-        /// True if the rule is directly written as a regex (in that case it must start with ":") otherwise it uses wildcards
+        /// Pattern to match in the source (as a regular expression)
         /// </summary>
-        public bool IsSourcePatternInRegex { get; set; }
+        public string RegexSourcePattern { get; set; }
 
         /// <summary>
         /// deploy target depending on the deploytype of this rule

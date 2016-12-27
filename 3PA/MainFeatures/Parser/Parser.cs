@@ -20,8 +20,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using _3PA.Lib;
 using _3PA.MainFeatures.AutoCompletion;
 
@@ -102,6 +104,13 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private List<ParserError> _parserErrors = new List<ParserError>();
 
+        /// <summary>
+        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
+        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
+        /// or & DEFINE variables from the current file
+        /// </summary>
+        private Dictionary<string, List<Token>> _preProcVariables;
+
         #endregion
 
         #region public accessors
@@ -143,16 +152,20 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor with a string instead of a lexer
         /// </summary>
-        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords = false) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, matchKnownWords) { }
+        public Parser(string data, string filePathBeingParsed, ParsedScopeItem defaultScope, Dictionary<string, List<Token>> includeParameters, bool matchKnownWords) : this(NewLexerFromData(data), filePathBeingParsed, defaultScope, includeParameters, matchKnownWords) { }
 
         /// <summary>
         /// Parses a text into a list of parsedItems
         /// </summary>
-        public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, bool matchKnownWords = false) {
+        public Parser(Lexer lexer, string filePathBeingParsed, ParsedScopeItem defaultScope, Dictionary<string, List<Token>> includeParameters, bool matchKnownWords) {
 
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
+            _preProcVariables = includeParameters ?? new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase);
+            
+            // the proprocessed variable {0} equals to the filename...
+            _preProcVariables.Add("0", new List<Token> { new TokenWord(Path.GetFileName(_filePathBeingParsed), 0, 0, 0, 0) });
 
             // init context
             _context = new ParseContext {
@@ -169,8 +182,10 @@ namespace _3PA.MainFeatures.Parser {
                 _rootScope = defaultScope;
             _context.Scope = _rootScope;
 
-            // parse
+            // Analyse
             _lexer = lexer;
+            ReplacePreProcVariablesAhead(1); // replaces a preproc var {&x} at token position 0
+            ReplacePreProcVariablesAhead(2); // replaces a preproc var {&x} at token position 1
             while (MoveNext()) {
                 Analyze();
             }
@@ -245,12 +260,18 @@ namespace _3PA.MainFeatures.Parser {
         private bool MoveNext() {
             
             // before moving to the next token, we can choose to analyse the current token
-            var currentToken = PeekAt(0);
-            if (currentToken is TokenWord) {
+            if (PeekAt(0) is TokenWord) {
                 _context.StatementWordCount++;
             }
 
-            return _lexer.MoveNextToken();
+            // move to the next token
+            if (!_lexer.MoveNextToken())
+                return false;
+
+            // replace a pre proc var {&x} at current pos + 2
+            ReplacePreProcVariablesAhead(2);
+
+            return true;
         }
 
         #endregion
@@ -427,7 +448,7 @@ namespace _3PA.MainFeatures.Parser {
                 CreateParsedIncludeFile(token);
             }
 
-            // pre processed
+            // pre processed statement
             else if (token is TokenPreProcStatement) {
 
                 // first word of a statement
@@ -453,8 +474,48 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-
         #region utils
+
+        /// <summary>
+        /// If it is a pre-processed variable, replaces a token at "current position + posAhead" by its value
+        /// </summary>
+        private void ReplacePreProcVariablesAhead(int posAhead) {
+
+            // we check if the token + posAhead will be a proprocessed variable { & x} that needs to be replaced
+            var toReplaceToken = PeekAt(posAhead);
+
+            while (toReplaceToken is TokenPreProcVariable) {
+                var prevToken = PeekAt(posAhead - 1);
+                var nextToken = PeekAt(posAhead + 1);
+                var varName = toReplaceToken.Value.Trim('{', '}').Trim();
+
+                if (!_preProcVariables.ContainsKey(varName)) {
+                    // if we don't have the definition for the variable, it must be replaced by an empty string
+                    _lexer.ReplaceToken(posAhead, new TokenWhiteSpace("", toReplaceToken.Line, toReplaceToken.Column, toReplaceToken.StartPosition, toReplaceToken.EndPosition));
+                } else {
+                    var valueTokens = _preProcVariables[varName].ToList();
+
+                    // we have to "merge" the TokenWord at the beggining and end of what we are inserting, this allows to take care of
+                    // cases like : DEF VAR lc_truc{&extension} AS CHAR NO-UNDO.
+                    if (valueTokens.FirstOrDefault() is TokenWord && prevToken is TokenWord) {
+                        // append previous word with the first word of the value tokens
+                        _lexer.ReplaceToken(posAhead - 1, new TokenWord(prevToken.Value + valueTokens.First().Value, prevToken.Line, prevToken.Column, prevToken.StartPosition, prevToken.EndPosition));
+                        valueTokens.RemoveAt(0);
+                    }
+                    if (valueTokens.LastOrDefault() is TokenWord && nextToken is TokenWord) {
+                        _lexer.ReplaceToken(posAhead + 1, new TokenWord(valueTokens.Last().Value + nextToken.Value, nextToken.Line, nextToken.Column, nextToken.StartPosition, nextToken.EndPosition));
+                        valueTokens.RemoveAt(valueTokens.Count - 1);
+                    }
+
+                    // we have to replace this TokenPreProcVariable by the List of tokens for this variable
+                    _lexer.RemoveToken(posAhead);
+                    if (valueTokens.Count > 0)
+                        _lexer.InsertTokens(posAhead, valueTokens);
+                }
+
+                toReplaceToken = PeekAt(posAhead);
+            }
+        }
 
         /// <summary>
         /// called when a Eos token is found, store information on the statement's line
@@ -747,6 +808,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Matches a new definition
         /// </summary>
         private void CreateParsedDefine(Token functionToken, bool isDynamic) {
+
             // info we will extract from the current statement :
             string name = "";
             ParsedAsLike asLike = ParsedAsLike.None;
@@ -765,7 +827,13 @@ namespace _3PA.MainFeatures.Parser {
             var fields = new List<ParsedField>();
             ParsedField currentField = new ParsedField("", "", "", 0, ParsedFieldFlag.None, "", "", ParsedAsLike.None);
             StringBuilder useIndex = new StringBuilder();
-            bool isPrimary = false;
+
+            // for tt indexes
+            var indexList = new List<ParsedIndex>();
+            string indexName = "";
+            var indexFields = new List<string>();
+            ParsedIndexFlag indexFlags = ParsedIndexFlag.None;
+            var indexSort = "+"; // + for ascending, - for descending
 
             Token token;
             int state = 0;
@@ -970,20 +1038,56 @@ namespace _3PA.MainFeatures.Parser {
                         break;
 
                     case 25:
-                        // define temp-table : match an index definition
+                        // define temp-table : match an index name
+                        if (!(token is TokenWord)) break;
+                        indexName = token.Value;
+                        state = 28;
+                        break;
+
+                    case 28:
+                        // define temp-table : match the definition of the index
                         if (!(token is TokenWord)) break;
                         lowerToken = token.Value.ToLower();
-                        if (lowerToken.Equals("primary")) {
-                            // ReSharper disable once RedundantAssignment
-                            isPrimary = true;
-                            break;
+                        if (lowerToken.Equals("unique")) {
+                            indexFlags = indexFlags | ParsedIndexFlag.Unique;
+                        } else if (lowerToken.Equals("primary")) {
+                            indexFlags = indexFlags | ParsedIndexFlag.Primary;
+                        } else if (lowerToken.Equals("word-index")) {
+                            indexFlags = indexFlags | ParsedIndexFlag.WordIndex;
+                        } else if (lowerToken.Equals("ascending")) {
+                            // match a sort order for a field
+                            indexSort = "+";
+                            var lastField = indexFields.LastOrDefault();
+                            if (lastField != null) {
+                                indexFields.RemoveAt(indexFields.Count - 1);
+                                indexFields.Add(lastField.Replace("-", "+"));
+                            }
+                        } else if (lowerToken.Equals("descending")) {
+                            // match a sort order for a field
+                            indexSort = "-";
+                            var lastField = indexFields.LastOrDefault();
+                            if (lastField != null) {
+                                indexFields.RemoveAt(indexFields.Count - 1);
+                                indexFields.Add(lastField.Replace("+", "-"));
+                            }
+                        } else if (lowerToken.Equals("index")) {
+                            // matching a new index
+                            if (!string.IsNullOrEmpty(indexName))
+                                indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields.ToList()));
+
+                            indexName = "";
+                            indexFields.Clear();
+                            indexFlags = ParsedIndexFlag.None;
+                            indexSort = "+";
+
+                            state = 25;
+                        } else {
+                            // Otherwise, it's a field name
+                            var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
+                            if (found != null) {
+                                indexFields.Add(token.Value + indexSort);
+                            }
                         }
-                        var found = fields.Find(field => field.Name.EqualsCi(lowerToken));
-                        if (found != null)
-                            found.Flag = isPrimary ? ParsedFieldFlag.Primary : ParsedFieldFlag.None;
-                        if (lowerToken.Equals("index"))
-                            // ReSharper disable once RedundantAssignment
-                            isPrimary = false;
                         break;
 
                     case 26:
@@ -1025,12 +1129,15 @@ namespace _3PA.MainFeatures.Parser {
             } while (MoveNext());
 
             if (state <= 1) return;
-            if (isTempTable)
-                AddParsedItem(new ParsedTable(name, functionToken, "", "", name, "", likeTable, true, fields, new List<ParsedIndex>(), new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()) {
+            if (isTempTable) {
+                if (!string.IsNullOrEmpty(indexName)) 
+                    indexList.Add(new ParsedIndex(indexName, indexFlags, indexFields));
+
+                AddParsedItem(new ParsedTable(name, functionToken, "", "", name, "", likeTable, true, fields, indexList, new List<ParsedTrigger>(), strFlags.ToString(), useIndex.ToString()) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition
                 });
-            else
+            } else
                 AddParsedItem(new ParsedDefine(name, functionToken, strFlags.ToString(), asLike, left.ToString(), type, tempPrimitiveType, viewAs, bufferFor, isExtended, isDynamic) {
                     // = end position of the EOS of the statement
                     EndPosition = token.EndPosition
@@ -1059,17 +1166,19 @@ namespace _3PA.MainFeatures.Parser {
             // extract define name
             var name = toParse.Substring(pos2, pos - pos2);
 
+            ParsedPreProcType newPreProcVarType = 0;
+
             // match first word of the statement
             switch (firstWord.ToUpper()) {
                 case "&GLOBAL-DEFINE":
                 case "&GLOBAL":
                 case "&GLOB":
-                    AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcType.Global, toParse.Substring(pos, toParse.Length - pos)));
+                    newPreProcVarType = ParsedPreProcType.Global;
                     break;
 
                 case "&SCOPED-DEFINE":
                 case "&SCOPED":
-                    AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcType.Scope, toParse.Substring(pos, toParse.Length - pos)));
+                    newPreProcVarType = ParsedPreProcType.Scope;
                     break;
 
                 case "&ANALYZE-SUSPEND":
@@ -1146,6 +1255,19 @@ namespace _3PA.MainFeatures.Parser {
                     if (found != null)
                         found.UndefinedLine = _context.StatementFirstToken.Line;
                     break;
+            }
+
+            // We matched a new preprocessed variable?
+            if (newPreProcVarType > 0) {
+                var value = toParse.Substring(pos, toParse.Length - pos).Trim();
+                AddParsedItem(new ParsedPreProc(name, token, 0, ParsedPreProcType.Global, value));
+
+                // add it to the know variables
+                var lexer = new Lexer(value);
+                if (_preProcVariables.ContainsKey("&" + name))
+                    _preProcVariables["&" + name] = lexer.GetTokensListCopy;
+                else
+                    _preProcVariables.Add("&" + name, lexer.GetTokensListCopy);
             }
         }
 
@@ -1499,7 +1621,7 @@ namespace _3PA.MainFeatures.Parser {
 
 
         /// <summary>
-        /// matches a include file
+        /// matches an include file
         /// </summary>
         /// <param name="token"></param>
         private void CreateParsedIncludeFile(Token token) {
@@ -1508,24 +1630,47 @@ namespace _3PA.MainFeatures.Parser {
             // skip whitespaces
             int startPos = 1;
             while (startPos < toParse.Length) {
-                if (!Char.IsWhiteSpace(toParse[startPos])) break;
+                if (!char.IsWhiteSpace(toParse[startPos])) break;
                 startPos++;
             }
-            if (toParse[startPos] == '&') return;
 
             // read first word as the filename
             int curPos = startPos;
             while (curPos < toParse.Length) {
-                if (Char.IsWhiteSpace(toParse[curPos]) || toParse[curPos] == '}') break;
+                if (char.IsWhiteSpace(toParse[curPos]) || toParse[curPos] == '}') break;
                 curPos++;
             }
-            toParse = toParse.Substring(startPos, curPos - startPos);
+            var fileName = toParse.Substring(startPos, curPos - startPos);
 
-            if (!toParse.ContainsFast("."))
-                return;
+            // now we need to parse the arguments
+            var parameters = new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase);
+            toParse = toParse.Substring(curPos, toParse.Length - curPos).Trim().TrimEnd('}');
+            if (toParse.Length > 0) {
+                if (toParse[0] == '&') {
+                    // parameter passed with this syntax : {include.i &par1="one" &par2="two"}
+                    // and will replace {&par1} {&par2} in the include.i
+                    foreach (Match match in toParse.RegexFind(@"(\&\w+)\=\s*\""?([^""&]*)\""?\s*")) {
+                        var lexer = new Lexer(match.Groups[2].Value);
+                        parameters.Add(match.Groups[1].Value, lexer.GetTokensListCopy);
+                    }
+                } else {
+                    // parameters passed with this syntax : {include.i one two three}
+                    // and will replace {1} {2} {3} in the include.i
+                    var i = 1;
+                    foreach (var param in toParse.Split(' ')) {
+                        if (!string.IsNullOrEmpty(param)) {
+                            var lexer = new Lexer(param);
+                            parameters.Add(i.ToString(), lexer.GetTokensListCopy);
+                            i++;
+                        }
+                    }
+                }
+            }
+            if (parameters.Count == 0)
+                parameters = null;
 
             // we matched the include file name
-            AddParsedItem(new ParsedIncludeFile(toParse, token));
+            AddParsedItem(new ParsedIncludeFile(fileName, token, parameters));
         }
 
         #endregion

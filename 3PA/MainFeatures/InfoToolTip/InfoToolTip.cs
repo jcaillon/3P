@@ -310,7 +310,7 @@ namespace _3PA.MainFeatures.InfoToolTip {
                             if (tbItem.Indexes.Count > 0) {
                                 toDisplay.Append(FormatSubtitle("INDEXES [x" + tbItem.Indexes.Count + "]"));
                                 foreach (var parsedIndex in tbItem.Indexes) {
-                                    toDisplay.Append(FormatRow(parsedIndex.Name, ((parsedIndex.Flag != ParsedIndexFlag.None) ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
+                                    toDisplay.Append(FormatRow(parsedIndex.Name, (parsedIndex.Flag != ParsedIndexFlag.None ? parsedIndex.Flag + " - " : "") + parsedIndex.FieldsList.Aggregate((i, j) => i + ", " + j)));
                                 }
                             }
                         }

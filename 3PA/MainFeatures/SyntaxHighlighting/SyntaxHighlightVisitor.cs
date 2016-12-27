@@ -49,6 +49,11 @@ namespace _3PA.MainFeatures.SyntaxHighlighting {
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
         }
 
+        public void Visit(TokenPreProcVariable tok) {
+            if (tok.Line < FromLine || tok.Line > ToLine) return;
+            //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);
+        }
+
         public void Visit(TokenNumber tok) {
             if (tok.Line < FromLine || tok.Line > ToLine) return;
             //Npp.StyleText((int)TextStyle.Default, tok.StartPosition, tok.EndPosition);

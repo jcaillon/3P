@@ -295,7 +295,7 @@ namespace _3PA.Tests {
             watch = Stopwatch.StartNew();
             //------------
 
-            Parser parser = new Parser(lexer, "", null, true);
+            Parser parser = new Parser(lexer, "", null, null, true);
 
             //--------------
             watch.Stop();
@@ -594,6 +594,11 @@ namespace _3PA.Tests {
         }
 
         public void Visit(TokenEos tok) {
+            AppendEverything(tok);
+            NbItems++;
+        }
+
+        public void Visit(TokenPreProcVariable tok) {
             AppendEverything(tok);
             NbItems++;
         }

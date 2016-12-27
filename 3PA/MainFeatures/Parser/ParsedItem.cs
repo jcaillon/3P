@@ -363,12 +363,22 @@ namespace _3PA.MainFeatures.Parser {
     /// include file parsed item
     /// </summary>
     internal class ParsedIncludeFile : ParsedItem {
-
+        /// <summary>
+        /// The dictionnary contains the association between parameter name -> value
+        /// passed with the include file; either 1->value or & name->value 
+        /// depending on the way parameters were passed to the include
+        /// The value is tokenized and we store the list of tokens here. During parsing, 
+        /// we will inject those tokens in place of the {& varname}
+        /// </summary>
+        public Dictionary<string, List<Token>> Parameters { get; set; }
         public override void Accept(IParserVisitor visitor) {
             visitor.Visit(this);
         }
 
-        public ParsedIncludeFile(string name, Token token) : base(name, token) {}
+        public ParsedIncludeFile(string name, Token token, Dictionary<string, List<Token>> parameters)
+            : base(name, token) {
+            Parameters = parameters;
+        }
     }
 
     /// <summary>
@@ -654,7 +664,7 @@ namespace _3PA.MainFeatures.Parser {
     /// </summary>
     internal class ParsedIndex {
         public string Name { get; private set; }
-        public ParsedIndexFlag Flag { get; private set; }
+        public ParsedIndexFlag Flag { get; set; }
         public List<string> FieldsList { get; private set; }
         public ParsedIndex(string name, ParsedIndexFlag flag, List<string> fieldsList) {
             Name = name;
@@ -667,7 +677,8 @@ namespace _3PA.MainFeatures.Parser {
     internal enum ParsedIndexFlag {
         None = 1,
         Unique = 2,
-        Primary = 4
+        Primary = 4,
+        WordIndex = 8
     }
 
     /// <summary>

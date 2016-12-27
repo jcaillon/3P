@@ -308,7 +308,8 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// returns the list of databases
         /// </summary>
         public static List<CompletionItem> GetDbList() {
-            if (_dataBases.Count <= 0) return new List<CompletionItem>();
+            if (_dataBases.Count <= 0)
+                return new List<CompletionItem>();
             return _dataBases.Select(@base => new CompletionItem {
                 DisplayText = @base.LogicalName,
                 Type = CompletionType.Database,
@@ -362,10 +363,11 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// <returns></returns>
         public static List<CompletionItem> GetFieldsList(ParsedTable table) {
             var output = new List<CompletionItem>();
-            if (table == null) return output;
+            if (table == null)
+                return output;
             output.AddRange(table.Fields.Select(field => new CompletionItem {
                 DisplayText = field.Name,
-                Type = (field.Flag.HasFlag(ParsedFieldFlag.Primary)) ? CompletionType.FieldPk : CompletionType.Field,
+                Type = field.Flag.HasFlag(ParsedFieldFlag.Primary) ? CompletionType.FieldPk : CompletionType.Field,
                 FromParser = false,
                 SubString = field.Type.ToString(),
                 Ranking = AutoComplete.FindRankingOfDatabaseItem(field.Name),

@@ -132,6 +132,7 @@ namespace _3PA.MainFeatures.Parser {
         /// Constructor
         /// </summary>
         public ParserVisitor(bool isBaseFile, string parsedFilePath, Dictionary<int, LineInfo> lineInfo) {
+
             _isBaseFile = isBaseFile;
             _currentParsedFilePath = parsedFilePath;
             _currentParsedFileName = Path.GetFileName(parsedFilePath);
@@ -288,14 +289,10 @@ namespace _3PA.MainFeatures.Parser {
             });
 
             // Parse the include file ?
-            if (string.IsNullOrEmpty(fullFilePath)) return;
-
-            // ensure to not parse the same file twice in a parser session!
-            if (_parsedFiles.Contains(fullFilePath))
+            if (string.IsNullOrEmpty(fullFilePath))
                 return;
-            _parsedFiles.Add(fullFilePath);
 
-            ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.Scope);
+            ParserVisitor parserVisitor = ParseFile(fullFilePath, pars.Scope, pars.Parameters);
             var parserItemList = parserVisitor._parsedCompletionItemsList.ToList();
 
             // correct the line number of each parsed element, so we can filter the items correctly in the completion list
@@ -678,31 +675,45 @@ namespace _3PA.MainFeatures.Parser {
                 if (foundTable != null) {
                     // add the fields of the found table (minus the primary information)
                     subStr = @"Like " + foundTable.Name;
-
-                    // handles the use-index, for now only add the isPrimary flag to the field...
-                    if (!string.IsNullOrEmpty(pars.UseIndex)) {
-                        foreach (var field in foundTable.Fields) {
-                            pars.Fields.Add(new ParsedField(field.Name, "", field.Format, field.Order, field.Flag.HasFlag(ParsedFieldFlag.Mandatory) ? ParsedFieldFlag.Mandatory : 0, field.InitialValue, field.Description, field.AsLike) {
+                    foreach (var field in foundTable.Fields) {
+                        pars.Fields.Add(
+                            new ParsedField(field.Name, "", field.Format, field.Order, ParsedFieldFlag.None, field.InitialValue, field.Description, field.AsLike) {
                                 Type = field.Type
                             });
-                        }
+                    }
+                    
+                    // handles the use-index
+                    if (!string.IsNullOrEmpty(pars.UseIndex)) {
+                        // add only the indexes that are used
                         foreach (var index in pars.UseIndex.Split(',')) {
-                            // we found a primary index
                             var foundIndex = foundTable.Indexes.Find(index2 => index2.Name.EqualsCi(index.Replace("!", "")));
-                            // if the index is a primary
-                            if (foundIndex != null && (foundIndex.Flag.HasFlag(ParsedIndexFlag.Primary) || index.ContainsFast("!")))
-                                foreach (var fieldName in foundIndex.FieldsList) {
-                                    // then the field is primary
-                                    var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Replace("+", "").Replace("-", "")));
-                                    if (foundfield != null) foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
+                            if (foundIndex != null) {
+                                pars.Indexes.Add(new ParsedIndex(foundIndex.Name, foundIndex.Flag, foundIndex.FieldsList.ToList()));
+                                // if one of the index used is marked as primary
+                                if (index.ContainsFast("!")) {
+                                    pars.Indexes.ForEach(parsedIndex => parsedIndex.Flag &= ~ParsedIndexFlag.Primary);
                                 }
+                                pars.Indexes.Last().Flag |= ParsedIndexFlag.Primary;
+                            }
                         }
                     } else {
                         // if there is no "use index", the tt uses the same index as the original table
-                        pars.Fields.AddRange(foundTable.Fields.ToList());
+                        pars.Indexes = foundTable.Indexes.ToList();
                     }
                 } else {
                     subStr = "Like ??";
+                }
+            }
+
+            // browse all the indexes and set the according flags to each field of the index
+            foreach (var index in pars.Indexes) {
+                foreach (var fieldName in index.FieldsList) {
+                    var foundfield = pars.Fields.Find(field => field.Name.EqualsCi(fieldName.Substring(0, fieldName.Length - 1)));
+                    if (foundfield != null) {
+                        if (index.Flag.HasFlag(ParsedIndexFlag.Primary))
+                            foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Primary;
+                        foundfield.Flag = foundfield.Flag | ParsedFieldFlag.Index;
+                    }
                 }
             }
 
@@ -875,7 +886,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <param name="fileName"></param>
         /// <returns></returns>
         public static ParserVisitor GetParserVisitor(string fileName) {
-            return ParseFile(fileName, null);
+            return ParseFile(fileName, null, null);
         }
 
         /// <summary>
@@ -883,21 +894,31 @@ namespace _3PA.MainFeatures.Parser {
         /// Remarks : it doesn't parse the document against known words since this is only useful for
         /// the CURRENT document and not for the others
         /// </summary>
-        private static ParserVisitor ParseFile(string fileName, ParsedScopeItem scopeItem) {
+        private static ParserVisitor ParseFile(string fileName, ParsedScopeItem scopeItem, Dictionary<string, List<Token>> includeParameters) {
             ParserVisitor parserVisitor;
-            
+
+            var fileNameWithParam = fileName;
+            if (includeParameters != null) {
+                foreach (var kpv in includeParameters) {
+                    fileNameWithParam += "|" + kpv.Key + "=";
+                    foreach (var token in kpv.Value) {
+                        fileNameWithParam += token.Value;
+                    }
+                }
+            }
+
             // did we already parsed this file in a previous parse session?
-            if (_savedParserVisitors.ContainsKey(fileName)) {
-                parserVisitor = _savedParserVisitors[fileName];
+            if (_savedParserVisitors.ContainsKey(fileNameWithParam)) {
+                parserVisitor = _savedParserVisitors[fileNameWithParam];
             } else {
                 // Parse it
-                var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, scopeItem);
+                var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, scopeItem, includeParameters, false);
 
                 parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.LineInfo);
                 ablParser.Accept(parserVisitor);
 
                 // save it for future uses
-                _savedParserVisitors.Add(fileName, parserVisitor);
+                _savedParserVisitors.Add(fileNameWithParam, parserVisitor);
             }
 
             return parserVisitor;
@@ -911,7 +932,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public void LoadProcPersistent(string fileName, ParsedScopeItem scopeItem) {
 
-            ParserVisitor parserVisitor = ParseFile(fileName, scopeItem);
+            ParserVisitor parserVisitor = ParseFile(fileName, scopeItem, null);
 
             // add info to the completion list
             var listToAdd = parserVisitor._parsedCompletionItemsList.Where(data => (data.Type == CompletionType.Function || data.Type == CompletionType.Procedure)).ToList();

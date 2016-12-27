@@ -24,6 +24,7 @@ namespace _3PA.MainFeatures.Parser {
         void Visit(TokenEol tok);
         void Visit(TokenEos tok);
         void Visit(TokenInclude tok);
+        void Visit(TokenPreProcVariable tok);
         void Visit(TokenNumber tok);
         void Visit(TokenString tok);
         void Visit(TokenStringDescriptor tok);

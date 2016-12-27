@@ -215,7 +215,7 @@ namespace _3PA.MainFeatures.Parser {
                             _lastParsedFilePath = Plug.CurrentFilePath;
 
                             // Parse the document
-                            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, true);
+                            _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, null, true);
 
                             // visitor
                             _parserVisitor = new ParserVisitor(true, _lastParsedFilePath, _ablParser.LineInfo);

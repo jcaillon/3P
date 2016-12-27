@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using _3PA.Lib;
 
 namespace _3PA.MainFeatures.Parser {
 
@@ -56,7 +57,8 @@ namespace _3PA.MainFeatures.Parser {
 
         private int _tokenPos = -1;
 
-        private List<Token> _tokenList = new List<Token>();
+        // we could use a List here, but this GapBuffer class is more appropriate to do insertions
+        private GapBuffer<Token> _tokenList = new GapBuffer<Token>();
 
         #endregion
 
@@ -67,6 +69,17 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         public int MaxLine {
             get { return _line; }
+        }
+
+        /// <summary>
+        /// Returns a copy of the tokens list, strips the last token (EOF) before returning it
+        /// </summary>
+        public List<Token> GetTokensListCopy {
+            get {
+                var outList = _tokenList.ToList();
+                outList.RemoveAt(outList.Count - 1);
+                return outList;
+            }
         }
 
         #endregion
@@ -110,7 +123,7 @@ namespace _3PA.MainFeatures.Parser {
 
         #endregion
 
-        #region Visitor
+        #region Visitor/browser
 
         /// <summary>
         /// Feed this method with a visitor implementing ILexerVisitor to visit all the tokens of the input string
@@ -127,7 +140,6 @@ namespace _3PA.MainFeatures.Parser {
         /// To use this lexer as an enumerator,
         /// Move to the next token, return true if it can
         /// </summary>
-        /// <returns></returns>
         public bool MoveNextToken() {
             return ++_tokenPos < _tokenList.Count;
         }
@@ -136,10 +148,38 @@ namespace _3PA.MainFeatures.Parser {
         /// To use this lexer as an enumerator,
         /// peek at the current pos + x token of the list, returns a new TokenEof if can't find
         /// </summary>
-        /// <returns></returns>
         public Token PeekAtToken(int x) {
             return (_tokenPos + x >= _tokenList.Count || _tokenPos + x < 0) ? new TokenEof("", _startLine, _startCol, _startPos, _pos) : _tokenList[_tokenPos + x];
         }
+
+        #region tokens list modifiers
+
+        /// <summary>
+        /// Allows to browse each token from beggining with MoveNextToken
+        /// </summary>
+        public void ResetTokenEnumerator() {
+            _tokenPos = -1;
+        }
+
+        /// <summary>
+        /// Replace the token at the current pos + x by the token given
+        /// </summary>
+        public void ReplaceToken(int x, Token token) {
+            _tokenList[_tokenPos + x] = token;
+        }
+
+        /// <summary>
+        /// Inserts tokens at the current pos + x
+        /// </summary>
+        public void InsertTokens(int x, List<Token> tokens) {
+            _tokenList.InsertRange(_tokenPos + x, tokens);
+        }
+
+        public void RemoveToken(int x) {
+            _tokenList.RemoveAt(_tokenPos + x);
+        }
+
+        #endregion
 
         #endregion
 
@@ -224,8 +264,8 @@ namespace _3PA.MainFeatures.Parser {
             // if we started in a comment, read this token as a comment
             if (_commentDepth > 0) return CreateCommentToken();
 
-            // if we started in a comment, read this token as a comment
-            if (_includeDepth > 0) return CreateIncludeToken();
+            // if we started in an include, read this token as an include
+            if (_includeDepth > 0) return CreateBracketToken();
 
             switch (ch) {
                 case '/':
@@ -235,7 +275,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 case '{':
                     // include file or preproc variable
-                    return CreateIncludeToken();
+                    return CreateBracketToken();
 
                 case '&':
                     // pre-processed &define, &analyse-suspend, &message
@@ -252,13 +292,13 @@ namespace _3PA.MainFeatures.Parser {
                     switch (word) {
                         case "&ANALYZE-SUSPEND":
                         case "&ANALYZE-RESUME":
+                        case "&MESSAGE":
+                        case "&UNDEFINE":
                         case "&GLOBAL-DEFINE":
                         case "&SCOPED-DEFINE":
                         case "&SCOPED":
                         case "&GLOB":
                         case "&GLOBAL":
-                        case "&MESSAGE":
-                        case "&UNDEFINE":
                             _forceCreateEos = true;
                             return CreatePreProcessedStatement();
                     }
@@ -378,13 +418,11 @@ namespace _3PA.MainFeatures.Parser {
         }
 
         /// <summary>
-        /// reads an include declaration
+        /// reads an include/preproc variable declaration
         /// </summary>
-        private Token CreateIncludeToken() {
-            //TODO: handle this case better?
-            // if this is a file include, we assume there will be an end of statement in it
-            // so we force one, otherwise we might not read the next line correctly
-            if (PeekAt(1) != '&' && !char.IsDigit(PeekAt(1))) _forceCreateEos = true;
+        private Token CreateBracketToken() {
+            var isVar = PeekAt(1) == '&' || char.IsDigit(PeekAt(1));
+
             while (true) {
                 var ch = PeekAt(0);
                 if (ch == Eof)
@@ -405,9 +443,21 @@ namespace _3PA.MainFeatures.Parser {
                 // new line
                 else if (ch == '\r' || ch == '\n')
                     ReadEol(ch);
-                else
+                else {
+                    // escape char (read anything as part of the string after that)
+                    if (ch == '~')
+                        Read();
                     Read();
+                }
             }
+
+            // case of a preprocessed {&variable} or {1}
+            if (isVar) 
+                return new TokenPreProcVariable(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
+
+            // if this is a file include, we force an end of statement, 
+            // otherwise we might not read the next statement correctly!
+            _forceCreateEos = true;
             return new TokenInclude(GetTokenValue(), _startLine, _startCol, _startPos, _pos);
         }
 

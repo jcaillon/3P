@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 namespace _3PA.MainFeatures.Parser {
+
     /// <summary>
     /// Token object
     /// </summary>
@@ -37,13 +38,9 @@ namespace _3PA.MainFeatures.Parser {
         public abstract void Accept(ILexerVisitor visitor);
     }
 
-    // Token types...
-    // Eos is end of statement (a .)
-    // Eof is end of file
-    // Eol is end of line (\r\n or \n)
-    // QuotedString is either a simple or double quote string (handles ~ escape char)
-    // Symbol is a single char
-
+    /// <summary>
+    /// Can either be a single (//) or multiline comment (/* */)
+    /// </summary>
     internal class TokenComment : Token {
         public bool IsSingleLine { get; private set; }
         public TokenComment(string value, int line, int column, int startPosition, int endPosition, bool isSingleLine) : base(value, line, column, startPosition, endPosition) {
@@ -54,6 +51,9 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Ex: & if, & analyse, & define...
+    /// </summary>
     internal class TokenPreProcStatement : Token {
         public TokenPreProcStatement(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
@@ -61,6 +61,9 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Only for inclusion of files, i.e. {file.x}
+    /// </summary>
     internal class TokenInclude : Token {
         public TokenInclude(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
@@ -68,6 +71,19 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Use of a pre-processed variable i.e. {& x}
+    /// </summary>
+    internal class TokenPreProcVariable : Token {
+        public TokenPreProcVariable(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
+        public override void Accept(ILexerVisitor visitor) {
+            visitor.Visit(this);
+        }
+    }
+
+    /// <summary>
+    /// Eos is end of statement (a .)
+    /// </summary>
     internal class TokenEos : Token {
         public TokenEos(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
@@ -96,6 +112,9 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Either a simple or double quote string (handles ~ escape char)
+    /// </summary>
     internal class TokenString : Token {
         public TokenString(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
@@ -129,6 +148,9 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Eol is end of line (\r\n or \n)
+    /// </summary>
     internal class TokenEol : Token {
         public TokenEol(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
@@ -136,6 +158,9 @@ namespace _3PA.MainFeatures.Parser {
         }
     }
 
+    /// <summary>
+    /// Eof is end of file
+    /// </summary>
     internal class TokenEof : Token {
         public TokenEof(string value, int line, int column, int startPosition, int endPosition) : base(value, line, column, startPosition, endPosition) { }
         public override void Accept(ILexerVisitor visitor) {
