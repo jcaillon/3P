@@ -350,6 +350,11 @@ namespace _3PA.MainFeatures.Pro {
                 Npp.DeleteTextByRange(toDelete.Position, endPosition);
             }
 
+            // in the case of a new function, create the prototype if needed
+            if (typeof(ParsedImplementation) == typeof(T)) {
+                UpdateFunctionPrototypesIfNeeded(true);
+            }
+
             return true;
         }
 
