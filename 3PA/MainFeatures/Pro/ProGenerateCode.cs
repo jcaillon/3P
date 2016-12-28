@@ -338,7 +338,7 @@ namespace _3PA.MainFeatures.Pro {
             var protoPreProcBlock = GetPreProcBlock(toDelete, preProcBlockType);
 
             // we also want to delete the trailing new lines
-            int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : toDelete.EndPosition);
+            int endPosition = (protoPreProcBlock != null ? protoPreProcBlock.EndBlockPosition : toDelete.EndBlockPosition);
             while (Npp.GetTextByRange(endPosition, endPosition + 2).Equals(Npp.GetEolString)) {
                 endPosition += 2;
             }
@@ -356,11 +356,6 @@ namespace _3PA.MainFeatures.Pro {
             }
 
             return true;
-        }
-
-        internal class ProCodeDelete {
-            [YamuiInput("Selection", AllowListedValuesOnly = true)]
-            public string Value = "";
         }
 
         #endregion
@@ -611,6 +606,10 @@ namespace _3PA.MainFeatures.Pro {
         #endregion
 
         #region Pro code class
+        internal class ProCodeDelete {
+            [YamuiInput("Selection", AllowListedValuesOnly = true)]
+            public string Value = "";
+        }
 
         internal interface IProCode {
             string Name { get; set; }
