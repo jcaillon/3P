@@ -505,13 +505,14 @@ namespace _3PA.MainFeatures.AutoCompletion {
         /// </summary>
         private static void OnInsertSuggestion(CompletionItem data) {
             try {
+
                 // in case of keyword, replace abbreviation if needed
                 var replacementText = data.DisplayText;
                 if (Config.Instance.CodeReplaceAbbreviations && (data.Type == CompletionType.Keyword || data.Type == CompletionType.KeywordObject)) {
                     var fullKeyword = Keywords.GetFullKeyword(data.DisplayText);
                     replacementText = fullKeyword ?? data.DisplayText;
                 }
-                replacementText = CorrectKeywordCase(replacementText, Npp.CurrentPosition) ?? replacementText;
+
                 Npp.ReplaceKeywordWrapped(replacementText, 0);
 
                 // Remember this item to show it higher in the list later

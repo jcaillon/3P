@@ -744,9 +744,11 @@ namespace _3PA {
                     }
 
                     // replace the last keyword by the correct case
-                    var casedKeyword = AutoComplete.CorrectKeywordCase(replacementWord ?? keyword, searchWordAt);
-                    if (casedKeyword != null)
-                        replacementWord = casedKeyword;
+                    if (replacementWord == null) {
+                        var casedKeyword = AutoComplete.CorrectKeywordCase(keyword, searchWordAt);
+                        if (casedKeyword != null)
+                            replacementWord = casedKeyword;
+                    }
 
                     if (replacementWord != null)
                         Npp.ReplaceKeywordWrapped(replacementWord, -offset);
