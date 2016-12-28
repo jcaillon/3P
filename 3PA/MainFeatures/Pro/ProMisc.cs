@@ -94,7 +94,7 @@ namespace _3PA.MainFeatures.Pro {
             // try to read all the . and \
 
             // first look in the propath
-            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.KnownProgressExtension);
+            var fullPaths = ProEnvironment.Current.FindFiles(curWord, Config.Instance.ProgressFilesPattern);
             if (fullPaths.Count > 0) {
                 if (fullPaths.Count > 1) {
                     var output = new StringBuilder(@"Found several files matching this name, please choose the correct one :<br>");

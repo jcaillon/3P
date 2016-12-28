@@ -18,6 +18,7 @@
 // ========================================================================
 #endregion
 using System;
+using _3PA.Lib;
 using _3PA.MainFeatures;
 
 namespace _3PA {
@@ -37,10 +38,7 @@ namespace _3PA {
         /// Is the current file (in npp) a progress file? (allowed extensions defined in Config)
         /// </summary>
         public static bool IsCurrentProgressFile {
-            get {
-                var ext = Npp.GetCurrentFileExtension();
-                return !string.IsNullOrEmpty(ext) && Config.Instance.KnownProgressExtension.Contains(ext);
-            }
+            get { return Npp.GetCurrentFilePath().TestAgainstListOfPatterns(Config.Instance.ProgressFilesPattern); }
         }
 
         /// <summary>

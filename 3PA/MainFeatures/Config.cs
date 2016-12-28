@@ -63,11 +63,11 @@ namespace _3PA.MainFeatures {
                 AutoGenerateField = false)]
             public string UserName = GetTrigramFromPa();
 
-            [Display(Name = "Progress 4GL files extension list",
-                Description = "A comma separated list of valid progress file extensions : <br>It is used to check if you can activate a 3P feature on the file currently opened",
+            [Display(Name = "Progress 4GL files patterns",
+                Description = "A comma separated list of patterns that identify a Progress file<br>It is used to check if you can activate a 3P feature on the file currently opened<br>You can use wildcards * and ?, the pattern is applied on the complete file path<br>Example of patterns : *.p,*\\my_sub_directory\\*,*",
                 GroupName = "General",
                 AutoGenerateField = false)]
-            public string KnownProgressExtension = ".p,.i,.w,.t,.d,.lst,.df,.cls";
+            public string ProgressFilesPattern = "*.p,*.i,*.w,*.t,*.d,*.lst,*.df,*.cls";
 
             [Display(Name = "Npp openable extension",
                 Description = "A comma separated list of file extensions, describes the type of files that should be opened with notepad++ from the file explorer<br>If a file is associated to npp in the shell, it will also be opened with npp, no worries!",
