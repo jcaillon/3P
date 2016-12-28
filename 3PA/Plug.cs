@@ -164,6 +164,9 @@ namespace _3PA {
                 // once this method is done, we are able to publish notifications
                 UserCommunication.Init();
 
+                // Clear the %temp% directory if we didn't do it properly last time
+                Utils.DeleteDirectory(Config.FolderTemp, true);
+
                 // if the UDL is not installed
                 if (!Style.InstallUdl(true)) {
                     Style.InstallUdl();
@@ -716,11 +719,12 @@ namespace _3PA {
                     offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 1;
                 } else
                     offset = 1;
+
                 var searchWordAt = curPos - offset;
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
-                if (!String.IsNullOrWhiteSpace(keyword) && isNormalContext) {
+                if (!String.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoComplete.IsVisible) {
                     string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list
