@@ -7,7 +7,6 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
-using YamuiFramework.Forms;
 using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
@@ -32,6 +31,12 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
 
         #region public properties
+
+        /// <summary>
+        /// Should return true for the rows that need to be highlighted
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public virtual Func<ListItem, YamuiListRow, bool> IsRowHighlighted { get; set; }
 
         /// <summary>
         /// Should return the image to use for the corresponding item
@@ -115,7 +120,7 @@ namespace YamuiFramework.Controls.YamuiList {
             }
             set { _filterPredicate = value; }
         }
-
+        
         #endregion
 
         #region private fields
@@ -199,16 +204,16 @@ namespace YamuiFramework.Controls.YamuiList {
                     _typeButtons.Add(type, new SelectorButton {
                         Size = new Size(TypeButtonWidth, DefaultBottomHeight),
                         TabStop = false,
-                        Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
                         AcceptsRightClick = true,
                         HideFocusedIndicator = true,
                         Activated = true,
+                        BackGrndImage = GetObjectTypeImage(type)
                     });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
                     //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
                 }
 
-                _typeButtons[type].BackGrndImage = GetObjectTypeImage(type);
+                _typeButtons[type].Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
                 _typeButtons[type].Type = type;
                 _typeButtons[type].Activated = _typeButtons[type].Activated;
                 _typeButtons[type].Location = new Point(xPos, Height - BottomHeight / 2 - _typeButtons[type].Height / 2);
@@ -292,6 +297,15 @@ namespace YamuiFramework.Controls.YamuiList {
                 Image img = null;
                 if (GetObjectTypeImage != null)
                     img = GetObjectTypeImage(curItem.ItemType);
+
+                // Highlighted row
+                if (IsRowHighlighted != null && IsRowHighlighted(item, row)) {
+                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
+                        GraphicsPath path = new GraphicsPath();
+                        path.AddLines(new[] { new Point(0, 0), new Point(row.ClientRectangle.Height / 2, 0), new Point(0, row.ClientRectangle.Height / 2), new Point(0, 0), });
+                        e.Graphics.FillPath(b, path);
+                    }
+                }
 
                 // Image icon
                 if (img != null) {
@@ -405,7 +419,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 ButtonSize = new Size(TypeButtonWidth, DefaultBottomHeight),
                 GetObjectTypeImage = GetObjectTypeImage,
             };
-            _moreForm.Build(MousePosition, typesSubList, ref _typeButtons);
+            _moreForm.Build(MousePosition, typesSubList, HandleTypeClick, this);
             _moreForm.Show();
         }
 
@@ -421,6 +435,13 @@ namespace YamuiFramework.Controls.YamuiList {
         #endregion
         
         #region Active types
+
+        /// <summary>
+        /// Returns true if the given type is activated
+        /// </summary>
+        public bool IsTypeActivated(int type) {
+            return _typeButtons.ContainsKey(type) && _typeButtons[type].Activated;
+        }
 
         /// <summary>
         /// handles click on a type

@@ -45,7 +45,7 @@ namespace YamuiFramework.Controls {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-            Color backColor = DesignMode ? Color.Fuchsia : YamuiThemeManager.Current.ButtonImageBg(IsHovered, IsPressed);
+            Color backColor = DesignMode ? Color.Fuchsia : (UseCustomBackColor ? BackColor : YamuiThemeManager.Current.ButtonImageBg(IsHovered, IsPressed));
             Color borderColor = YamuiThemeManager.Current.ButtonBorder(IsFocused, IsHovered, IsPressed, Enabled);
 
             // draw background

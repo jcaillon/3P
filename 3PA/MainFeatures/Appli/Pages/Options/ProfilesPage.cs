@@ -56,7 +56,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 de.Add(new ListItem { DisplayText = "new" + i });
             }
             yamuiScrollList1.SetItems(de);
-
+            
             // filtered list
             YamuiFilteredList1.SetItems(new List<ListItem> {
                 new FilteredItem { DisplayText = "CODAPP"},
@@ -149,9 +149,9 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 list.SelectedItemIndex = 1115;
             };
             YamuiFilteredList1.RowClicked += (list, args) => {
-                UserCommunication.Notify(list.SelectedItemIndex + " " + args.Button);
+                UserCommunication.Notify(list.SelectedItemIndex + " " + args.Button + " " + args.Clicks + " " + args.Location);
             };
-
+            
 
             btPlus.ButtonPressed += (sender, args) => {
                 YamuiFilteredList1.Height += 10;

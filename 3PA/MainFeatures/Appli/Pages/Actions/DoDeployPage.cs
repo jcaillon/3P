@@ -166,7 +166,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             tooltip.SetToolTip(btSaveAs, "Save the settings in a new profile that you will name");
             btSaveAs.BackGrndImage = ImageResources.Save;
             btSaveAs.ButtonPressed += (sender, args) => {
-                var _cur = DeployProfile.Current;
+                var cur = DeployProfile.Current;
                 DeployProfile.List.Add(new DeployProfile());
                 DeployProfile.Current = DeployProfile.List.Last();
                 if (ChooseName()) {
@@ -174,7 +174,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
                     SaveProfilesList();
                 } else {
                     DeployProfile.List.RemoveAt(DeployProfile.List.Count - 1);
-                    DeployProfile.Current = _cur;
+                    DeployProfile.Current = cur;
                 }
                 btDelete.Visible = DeployProfile.List.Count > 1;
             };
@@ -849,7 +849,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             cbName.SelectedIndexChanged -= CbNameOnSelectedIndexChanged;
             cbName.DataSource = DeployProfile.List.Select(profile => profile.Name).ToList();
             if (DeployProfile.List.Exists(profile => profile.Name.Equals(Config.Instance.CurrentDeployProfile)))
-                cbName.SelectedItem = Config.Instance.CurrentDeployProfile;
+                cbName.SelectedText = Config.Instance.CurrentDeployProfile;
             else
                 cbName.SelectedIndex = 0;
             cbName.SelectedIndexChanged += CbNameOnSelectedIndexChanged;

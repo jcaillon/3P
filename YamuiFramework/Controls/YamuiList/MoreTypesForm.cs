@@ -48,8 +48,9 @@ namespace YamuiFramework.Controls.YamuiList {
         #region private fields
 
         private const int BorderWidth = 2;
-
+        private YamuiSimplePanel _panel;
         private const int MousePaddingInsideForm = 10;
+        private YamuiFilteredTypeList _parentFilteredList;
 
         #endregion
         
@@ -73,52 +74,67 @@ namespace YamuiFramework.Controls.YamuiList {
             StartPosition = FormStartPosition.Manual;
 
             // keydown
-            KeyPreview = true;
-            PreviewKeyDown += OnPreviewKeyDown;
+            //KeyPreview = true;
+            //PreviewKeyDown += OnPreviewKeyDown;
+
+            SuspendLayout();
+            _panel = new YamuiSimplePanel {
+                Dock = DockStyle.Fill,
+                DontUseTransparentBackGround = true,
+                Location = new Point(0, 0)
+            };
+            Controls.Add(_panel);
+            Padding = new Padding(2);
+            ResumeLayout();
         }
 
-        public void Build(Point location, List<int> typeList, ref Dictionary<int, SelectorButton> typeButtons) {
+        public void Build(Point location, List<int> typeList, Action<object, EventArgs> clickHandler, YamuiFilteredTypeList parentList) {
+
+            _parentFilteredList = parentList;
 
             // for each distinct type of items, create the buttons
-            int xPos = BorderWidth;
-            int yPos = BorderWidth;
+            int xPos = -ButtonSize.Width;
+            int yPos = 0;
             int nBut = 0;
             int maxNbButPerRow = (int)Math.Ceiling(Math.Sqrt(typeList.Count));
             foreach (var type in typeList) {
 
-                // new type, add a button for it
-                if (!typeButtons.ContainsKey(type)) {
-                    typeButtons.Add(type, new SelectorButton {
-                        Size = ButtonSize,
-                        TabStop = false,
-                        Anchor = AnchorStyles.Left | AnchorStyles.Bottom,
-                        AcceptsRightClick = true,
-                        HideFocusedIndicator = true,
-                        Activated = true,
-                    });
-                    //typeButtons[type].ButtonPressed += HandleTypeClick;
-                    //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
-                }
-
-                typeButtons[type].BackGrndImage = GetObjectTypeImage(type);
-                typeButtons[type].Type = type;
-                typeButtons[type].Activated = typeButtons[type].Activated;
-                typeButtons[type].Location = new Point(xPos, yPos);
-                nBut++;
                 xPos += ButtonSize.Width;
-                if (nBut > maxNbButPerRow) {
+                if (nBut >= maxNbButPerRow) {
                     yPos += ButtonSize.Height;
                     xPos = 0;
                     nBut = 0;
                 }
 
-                if (!Controls.Contains(typeButtons[type]))
-                    Controls.Add(typeButtons[type]);
+                var button = new SelectorButton {
+                    Size = ButtonSize,
+                    TabStop = false,
+                    Anchor = AnchorStyles.Left | AnchorStyles.Top,
+                    AcceptsRightClick = true,
+                    HideFocusedIndicator = true,
+                    Activated = true,
+                    BackGrndImage = GetObjectTypeImage(type),
+                    Type = type,
+                    Location = new Point(xPos, yPos)
+                };
+                button.ButtonPressed += (sender, args) => {
+                    clickHandler(sender, args);
+                    foreach (SelectorButton control in _panel.Controls) {
+                        control.Activated = _parentFilteredList.IsTypeActivated(control.Type);
+                    }
+                };
+                button.Activated = _parentFilteredList.IsTypeActivated(type);
+                //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
+                
+                if (!_panel.Controls.Contains(button))
+                    _panel.Controls.Add(button);
+
+                nBut++;
             }
 
 
             // Size the form
-            Size = new Size(xPos + BorderWidth, yPos + BorderWidth);
+            Size = new Size(xPos + ButtonSize.Width + BorderWidth * 2, yPos + ButtonSize.Height + BorderWidth * 2);
             MinimumSize = Size;
             MaximumSize = Size;
 
@@ -158,16 +174,16 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region Events
 
-        private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
-            previewKeyDownEventArgs.IsInputKey = true;
-        }
-
+        //private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
+        //    previewKeyDownEventArgs.IsInputKey = true;
+        //}
+        
         protected override void OnMouseLeave(EventArgs e) {
             base.OnMouseLeave(e);
             Close();
             Dispose();
         }
-
+        
         protected override void OnLeave(EventArgs e) {
             base.OnLeave(e);
             Close();

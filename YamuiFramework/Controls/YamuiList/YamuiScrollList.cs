@@ -37,10 +37,19 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region constants
 
+        /// <summary>
+        /// Padding for scrollbar thumb
+        /// </summary>
         private const int ThumbPadding = 2;
 
+        /// <summary>
+        /// Min height for scroll bar thumb 
+        /// </summary>
         private const int MinThumbHeight = 15;
 
+        /// <summary>
+        /// Default height for rows
+        /// </summary>
         private const int DefaultRowHeight = 18;
 
         private const int DefaultScrollWidth = 10;
@@ -126,7 +135,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Returns the currently selected item or null if it doesn't exist
+        /// Returns the currently selected item or null if it doesn't exist / disabled
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public ListItem SelectedItem {
@@ -181,6 +190,17 @@ namespace YamuiFramework.Controls.YamuiList {
                 _hotRow = value;
                 if (HotIndexChanged != null)
                     HotIndexChanged(this);
+            }
+        }
+
+        /// <summary>
+        /// Returns the items that currently has the cursor on it
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public ListItem HotItem {
+            get {
+                var item = GetItem(TopIndex + HotRow);
+                return item != null ? (item.IsDisabled ? null : item) : null;
             }
         }
 
@@ -282,8 +302,15 @@ namespace YamuiFramework.Controls.YamuiList {
         
         /// <summary>
         /// Triggered when a row is clicked (no matter with which button)
+        /// You can analyse the MouseEventArgs.Clicks number to know if it's a simple or
+        /// double click
         /// </summary>
-        public event Action<YamuiScrollList, MouseEventArgs> RowClicked;     
+        public event Action<YamuiScrollList, MouseEventArgs> RowClicked;
+
+        /// <summary>
+        /// Triggered when the mouse moves on a row
+        /// </summary>
+        public event Action<YamuiScrollList, MouseEventArgs> RowMouseMove;     
    
         /// <summary>
         /// Triggered when the row hovered changes
@@ -513,7 +540,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     _rows[i].SuperKeyDown += args => args.Handled = OnKeyDown(args.KeyCode);
                     _rows[i].ButtonPressed += OnItemClick;
-                    //_rows[i].DoubleClick += 
+                    _rows[i].DoubleClick += OnItemClick;
                     _rows[i].MouseEnter += (sender, args) => {
                         IsHovered = true;
                         HotRow = int.Parse(((YamuiListRow) sender).Name);
@@ -526,9 +553,12 @@ namespace YamuiFramework.Controls.YamuiList {
                         if (MouseLeftRow != null)
                             MouseLeftRow(this);
                     };
-
                     _rows[i].Enter += (sender, args) => IsFocused = true;
                     _rows[i].Leave += (sender, args) => IsFocused = false;
+                    _rows[i].MouseMove += (sender, args) => {
+                        if (RowMouseMove != null)
+                                RowMouseMove(this, args);
+                    };
                 }
 
                 _rows[i].Location = new Point(_listRectangle.Left, _listRectangle.Top + i*RowHeight);
@@ -864,6 +894,10 @@ namespace YamuiFramework.Controls.YamuiList {
             public bool IsSelected;
 
             public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint;
+
+            public YamuiListRow() {
+                SetStyle(ControlStyles.StandardClick | ControlStyles.StandardDoubleClick, true);
+            }
 
             /// <summary>
             /// redirect all input key to keydown
