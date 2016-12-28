@@ -613,6 +613,7 @@ namespace _3PA.MainFeatures {
         public static string FileNppUdlXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\userDefineLang.xml")); } }
         public static string FileNppConfigXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\config.xml")); } }
         public static string FileNppStylersXml { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\stylers.xml")); } }
+        public static string FolderNppThemes { get { return Path.GetFullPath(Path.Combine(Npp.GetConfigDir(), @"..\..\..\themes")); } }
 
         // updates related
         public static string FileVersionLog { get { return Path.Combine(Npp.GetConfigDir(), "version.log"); } }

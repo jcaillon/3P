@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -999,8 +1000,20 @@ namespace _3PA {
 
             // apply default style...
             try {
+                // read the config.xml to know which theme is in use
+                var guiConfig = XDocument.Load(Config.FileNppConfigXml).Descendants("GUIConfig");
+                string themeXmlPath;
+                try {
+                    // ReSharper disable once PossibleNullReferenceException
+                   themeXmlPath = (string) (guiConfig as XElement[] ?? guiConfig.ToArray()).FirstOrDefault(x => x.Attribute("name").Value.Equals("stylerTheme")).Attribute("path");
+                } catch (Exception) {
+                    themeXmlPath = null;
+                }
+                if (string.IsNullOrEmpty(themeXmlPath) || !File.Exists(themeXmlPath))
+                    themeXmlPath = Config.FileNppStylersXml;
+                
                 // read npp's stylers.xml file
-                var widgetStyle = XDocument.Load(Config.FileNppStylersXml).Descendants("WidgetStyle");
+                var widgetStyle = XDocument.Load(themeXmlPath).Descendants("WidgetStyle");
                 var xElements = widgetStyle as XElement[] ?? widgetStyle.ToArray();
                 var wsFore = GetColorInStylers(xElements, "White space symbol", "fgColor");
                 Npp.SetIndentGuideColor(GetColorInStylers(xElements, "Indent guideline style", "bgColor"), GetColorInStylers(xElements, "Indent guideline style", "fgColor"));
