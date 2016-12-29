@@ -39,8 +39,7 @@ namespace YamuiFramework.Helper {
         private IntPtr _hdc;
 
         #endregion
-
-
+        
         /// <summary>
         /// Init.
         /// </summary>
@@ -104,7 +103,6 @@ namespace YamuiFramework.Helper {
         public void DrawString(String str, Font font, Color color, Point point) {
             SetFont(font);
             SetTextColor(color);
-
             TextOut(_hdc, point.X, point.Y, str, str.Length);
         }
 

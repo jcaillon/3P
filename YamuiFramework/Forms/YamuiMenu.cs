@@ -427,6 +427,7 @@ namespace YamuiFramework.Forms {
                     var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
 
                     var drawPoint = new PointF(Width - (NoChildren ? 0 : 12) - textSize.Width - 3, (ClientRectangle.Height / 2) - (textSize.Height / 2) - 1);
+                    // using Drawstring here because TextRender (GDI) can't draw semi transparent text
                     e.Graphics.DrawString(SubText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
 
                     using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {

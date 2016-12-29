@@ -489,6 +489,7 @@
     <Content Include="Images\AutoCompletion\CompletionFlag\Index.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\LocalScope.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Mandatory.png" />
+    <Content Include="Images\AutoCompletion\CompletionFlag\New.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Parameter.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Private.png" />
     <Content Include="Images\AutoCompletion\CompletionFlag\Reserved.png" />

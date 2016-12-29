@@ -57,48 +57,79 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             }
             yamuiScrollList1.SetItems(de);
             
+
             // filtered list
             YamuiFilteredList1.SetItems(new List<ListItem> {
-                new FilteredItem { DisplayText = "CODAPP"},
-                new FilteredItem { DisplayText = "NOMOBJ"},
-                new FilteredItem { DisplayText = "CODORG"},
-                new FilteredItem { DisplayText = "PROFIL"},
-                new FilteredItem { DisplayText = "CODSOUFUCK"},
-                new FilteredItem { DisplayText = "CODORGA"},
-                new FilteredItem { DisplayText = "SRVEDIN"},
-                new FilteredItem { DisplayText = "NOMIMPR"},
-                new FilteredItem { DisplayText = "CHRONHA"},
-                new FilteredItem { DisplayText = "FUCK0"},
+                new FilteredListItem { DisplayText = "CODAPP"},
+                new FilteredListItem { DisplayText = "NOMOBJ"},
+                new FilteredListItem { DisplayText = "CODORG"},
+                new FilteredListItem { DisplayText = "PROFIL"},
+                new FilteredListItem { DisplayText = "CODSOUFUCK"},
+                new FilteredListItem { DisplayText = "CODORGA"},
+                new FilteredListItem { DisplayText = "SRVEDIN"},
+                new FilteredListItem { DisplayText = "NOMIMPR"},
+                new FilteredListItem { DisplayText = "CHRONHA"},
+                new FilteredListItem { DisplayText = "FUCK0"},
             });
+
+            YamuiFilteredList1.EnterPressed += list => {
+                UserCommunication.Notify(list.SelectedItemIndex + " = " + (list.SelectedItem ?? new FilteredListItem { DisplayText = "null" }).DisplayText);
+            };
+            YamuiFilteredList1.TabPressed += list => {
+                YamuiFilteredList1.ListPadding = new Padding(5, 10, 15, 25);
+                list.SelectedItemIndex = 1115;
+            };
+            YamuiFilteredList1.RowClicked += (list, args) => {
+                UserCommunication.Notify(list.SelectedItemIndex + " " + args.Button + " " + args.Clicks + " " + args.Location);
+            };
 
             flFilter1.TextChanged += YamuiFilteredList1.OnTextChangedEvent;
             flFilter1.KeyDown += (sender, args) => args.Handled = YamuiFilteredList1.OnKeyDown(args.KeyCode);
 
-            // autocompletion list
-            flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
-            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.OnKeyDown(args.KeyCode);
 
-            yamuiFilteredTypeList1.GetObjectTypeImage += type => {
+            // autocompletion list
+            yamuiFilteredTypeList1.GetTypeImage += type => {
                 Image tryImg = (Image) ImageResources.ResourceManager.GetObject(((CompletionType) type).ToString());
                 return tryImg ?? ImageResources.Error;
             };
-            yamuiFilteredTypeList1.GetObjectSubText += item => { return ((FuckItem) item).SubString; };
-            yamuiFilteredTypeList1.GetObjectTagImages += item => {
-                var curItem = item as FuckItem;
-                var outList = new List<Image>();
-                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
-                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
-                    if (flag == 0 || !curItem.Flag.HasFlag(flag)) continue;
-
-                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
-                    if (tryImg != null) {
-                        outList.Add(tryImg);
-                    }
-                }
-                return outList;
-            };
-            //yamuiFilteredTypeList1.GetMoreTypeImage = () => ImageResources.More;
             yamuiFilteredTypeList1.MoreTypesImage = ImageResources.More;
+
+            flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.OnKeyDown(args.KeyCode);
+            
+
+            // tREE
+            yamuiFilteredTypeTreeList1.GetTypeImage += i => {
+                return (Image) ImageResources.ResourceManager.GetObject(i == 0 ? "Block" : "Abbreviation");
+            };
+            yamuiFilteredTypeTreeList1.MoreTypesImage = ImageResources.More;
+            yamuiFilteredTypeTreeList1.SetItems(new List<ListItem> {
+                new TreeItem {
+                    DisplayText = "the one",
+                },
+                new TreeItem {
+                    DisplayText = "and second root",
+                }
+            });
+
+            flFilter1.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.OnKeyDown(args.KeyCode);
+
+
+            // -------------------------------------------------------------
+            // ------------ BUTTONS ----------------------------------------
+            // -------------------------------------------------------------
+
+            btPlus.ButtonPressed += (sender, args) => {
+                YamuiFilteredList1.Height += 10;
+                yamuiScrollList1.Height += 10;
+                yamuiFilteredTypeList1.Height += 10;
+            };
+            btMinus.ButtonPressed += (sender, args) => {
+                YamuiFilteredList1.Height -= 10;
+                yamuiScrollList1.Height -= 10;
+                yamuiFilteredTypeList1.Height -= 10;
+            };
 
             yamuiButton1.ButtonPressed += (sender, args) => {
                 yamuiFilteredTypeList1.SetItems(AutoComplete.CurrentItems.Select(item => new FuckItem {
@@ -114,56 +145,34 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             yamuiButton3.ButtonPressed += (sender, args) => {
                 YamuiFilteredList1.SetItems(new List<ListItem> {
-                    new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck4", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck5", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck6", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck7", IsDisabled = false},
-                    new FilteredItem { DisplayText = "fuck8", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck9", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck10", IsDisabled = false},
+                    new FilteredListItem { DisplayText = "fuck1", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck2", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck3", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck4", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck5", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck6", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck7", IsDisabled = false},
+                    new FilteredListItem { DisplayText = "fuck8", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck9", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck10", IsDisabled = false},
                 });
             };
 
             yamuiButton4.ButtonPressed += (sender, args) => {
                 YamuiFilteredList1.SetItems(new List<ListItem> {
-                    new FilteredItem { DisplayText = "fuck1", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck2", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck3", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck4", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck5", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck6", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck7", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck8", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck9", IsDisabled = true},
-                    new FilteredItem { DisplayText = "fuck10", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck1", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck2", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck3", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck4", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck5", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck6", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck7", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck8", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck9", IsDisabled = true},
+                    new FilteredListItem { DisplayText = "fuck10", IsDisabled = true},
                 });
             };
-            YamuiFilteredList1.EnterPressed += list => {
-                UserCommunication.Notify(list.SelectedItemIndex + " = " + (list.SelectedItem ?? new FilteredItem { DisplayText = "null"}).DisplayText);
-            };
-            YamuiFilteredList1.TabPressed += list => {
-                YamuiFilteredList1.ListPadding = new Padding(5, 10, 15, 25);
-                list.SelectedItemIndex = 1115;
-            };
-            YamuiFilteredList1.RowClicked += (list, args) => {
-                UserCommunication.Notify(list.SelectedItemIndex + " " + args.Button + " " + args.Clicks + " " + args.Location);
-            };
             
-
-            btPlus.ButtonPressed += (sender, args) => {
-                YamuiFilteredList1.Height += 10;
-                yamuiScrollList1.Height += 10;
-                yamuiFilteredTypeList1.Height += 10;
-            };
-            btMinus.ButtonPressed += (sender, args) => {
-                YamuiFilteredList1.Height -= 10;
-                yamuiScrollList1.Height -= 10;
-                yamuiFilteredTypeList1.Height -= 10;
-            };
-
             // dynamically reorder the controls for a correct tab order on notepad++
             SetTabOrder.RemoveAndAddForTabOrder(scrollPanel);
         }
@@ -172,13 +181,96 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
     }
 
-    internal class FuckItem : FilteredTypeItem {
+    internal class TreeItem : FilteredTypeTreeListItem {
+
+        public override int ItemType {
+            get { return Level; }
+        }
+
+        public override Image ItemImage {
+            get { return (Image)ImageResources.ResourceManager.GetObject(Level == 0 ? "Block" : "Abbreviation"); }
+        }
+
+        public override bool IsRowHighlighted {
+            get { return false; }
+        }
+
+        public override string SubText {
+            get { return "Lvl " + Level; }
+        }
+
+        public override List<Image> TagImages {
+            get {
+                return new List<Image> {
+                    (Image)ImageResources.ResourceManager.GetObject("Private"),
+                    (Image)ImageResources.ResourceManager.GetObject("New"),
+                };
+            }
+        }
+
+        /// <summary>
+        /// to override, does this item have children?
+        /// </summary>
+        public override bool CanExpand {
+            get { return Level <= 3; }
+        }
+
+        /// <summary>
+        /// to override, that should return the list of the children for this item (if any) or null
+        /// </summary>
+        public override List<FilteredTypeTreeListItem> Children {
+            get { 
+                return new List<FilteredTypeTreeListItem> {
+                    new TreeItem {
+                        DisplayText = "child 1",
+                    },
+                    new TreeItem {
+                        DisplayText = "child 2",
+                    },
+                    new TreeItem {
+                        DisplayText = "child 3",
+                    }
+                }; 
+            }
+        }
+
+    }
+
+    internal class FuckItem : FilteredTypeListItem {
         public CompletionType Type;
         public string SubString;
         public ParseFlag Flag;
 
         public override int ItemType {
             get { return (int) Type; }
+        }
+
+        public override Image ItemImage {
+            get { return null; }
+        }
+
+        public override bool IsRowHighlighted {
+            get { return false; }
+        }
+
+        public override string SubText {
+            get { return SubString; }
+        }
+
+        public override List<Image> TagImages {
+            get {
+                var outList = new List<Image>();
+                foreach (var name in Enum.GetNames(typeof(ParseFlag))) {
+                    ParseFlag flag = (ParseFlag)Enum.Parse(typeof(ParseFlag), name);
+                    if (flag == 0 || !Flag.HasFlag(flag)) continue;
+
+                    Image tryImg = (Image)ImageResources.ResourceManager.GetObject(name);
+                    if (tryImg != null) {
+                        outList.Add(tryImg);
+                    }
+                }
+                return outList;
+            }
         }
     }
 }

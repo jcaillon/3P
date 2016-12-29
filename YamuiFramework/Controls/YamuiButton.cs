@@ -101,7 +101,7 @@ namespace YamuiFramework.Controls {
         /// Returns a grey scale version of the image
         /// </summary>
         public Image GreyScaleBackGrndImage {
-            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = BackGrndImage.MakeGreyscale3()); }
+            get { return _greyScaleBackGrndImage ?? (_greyScaleBackGrndImage = (BackGrndImage != null ? BackGrndImage.MakeGreyscale3() : null)); }
             set { _greyScaleBackGrndImage = value; }
         }
 

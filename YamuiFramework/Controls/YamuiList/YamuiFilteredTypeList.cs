@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (YamuiFilteredTypeList.cs) is part of YamuiFramework.
+// 
+// YamuiFramework is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// YamuiFramework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -12,6 +31,9 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
 
+    /// <summary>
+    /// Display a filterable list in which each item as a type
+    /// </summary>
     public class YamuiFilteredTypeList : YamuiFilteredList {
 
         #region constants
@@ -30,31 +52,39 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
+        #region private fields
+
+        protected Dictionary<int, SelectorButton> _typeButtons = new Dictionary<int, SelectorButton>();
+
+        protected List<int> _typeList = new List<int>();
+
+        protected const TextFormatFlags TextRightFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPadding;
+
+        private int _bottomHeight = DefaultBottomHeight;
+
+        private int _itemsNbLabelWidth = 45;
+
+        private float _subTextOpacity = DefaultSubTextOpacity;
+
+        private float _flagImagesOpacity = DefaultFlagImagesOpacity;
+
+        private int _currentButtonIndex;
+
+        private int _nbDisplayableTypeButton;
+
+        private SelectorButton _moreButton;
+
+        private MoreTypesForm _moreForm;
+
+        #endregion
+
         #region public properties
 
         /// <summary>
-        /// Should return true for the rows that need to be highlighted
+        /// Should return the image to use for the corresponding type
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public virtual Func<ListItem, YamuiListRow, bool> IsRowHighlighted { get; set; }
-
-        /// <summary>
-        /// Should return the image to use for the corresponding item
-        /// </summary>
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Func<int, Image> GetObjectTypeImage { get; set; }
-
-        /// <summary>
-        /// Should return the sub text to use for the corresponding item
-        /// </summary>
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Func<FilteredTypeItem, string> GetObjectSubText { get; set; }
-
-        /// <summary>
-        /// Should return a list of image to display on the right of the row
-        /// </summary>
-        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public Func<FilteredTypeItem, List<Image>> GetObjectTagImages { get; set; }
+        public Func<int, Image> GetTypeImage { get; set; }
 
         /// <summary>
         /// The image to display for the button "display more type"
@@ -106,11 +136,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Predicate to filter the items, only items meeting the predicate requirements will be displayed (applied in addition to the default string filter)
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public override Predicate<FilteredItem> FilterPredicate {
+        public override Predicate<FilteredListItem> FilterPredicate {
             get {
                 // add a layer of filter which is a type filter
                 return item => {
-                    var typeItem = item as FilteredTypeItem;
+                    var typeItem = item as FilteredTypeListItem;
                     if (typeItem != null) {
                         return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType] == null || _typeButtons[typeItem.ItemType].Activated) && 
                             (_filterPredicate != null ? _filterPredicate(item) : true);
@@ -123,38 +153,7 @@ namespace YamuiFramework.Controls.YamuiList {
         
         #endregion
 
-        #region private fields
-
-        protected Dictionary<int, SelectorButton> _typeButtons = new Dictionary<int, SelectorButton>();
-
-        protected List<int> _typeList = new List<int>();
-
-        protected const TextFormatFlags TextRightFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Right | TextFormatFlags.NoPadding;
-
-        private int _bottomHeight = DefaultBottomHeight;
-
-        private int _itemsNbLabelWidth = 45;
-
-        private float _subTextOpacity = DefaultSubTextOpacity;
-
-        private float _flagImagesOpacity = DefaultFlagImagesOpacity;
-
-        private int _currentButtonIndex;
-
-        private int _nbDisplayableTypeButton;
-
-        private SelectorButton _moreButton;
-
-        private MoreTypesForm _moreForm;
-
-        #endregion
-
         #region Set
-
-        /// <summary>
-        /// Constructor to initialize stuff
-        /// </summary>
-        public YamuiFilteredTypeList() {}
 
         /// <summary>
         /// Set the items that will be displayed in the list
@@ -162,7 +161,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public override void SetItems(List<ListItem> listItems) {
 
             var firstItem = listItems.FirstOrDefault();
-            if (firstItem != null && !(firstItem is FilteredTypeItem))
+            if (firstItem != null && !(firstItem is FilteredTypeListItem))
                 throw new Exception("listItems shoud contain objects of type FilteredTypeItem");
 
             // measure the space taken by the label "showing x items"
@@ -179,13 +178,16 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected void ComputeTypeButtonsNeeded(List<ListItem> listItems) {
             // set the type buttons needed
-            _typeList = listItems.Select(x => ((FilteredTypeItem)x).ItemType).Distinct().ToList();
+            _typeList = listItems.Select(x => ((FilteredTypeListItem)x).ItemType).Distinct().ToList();
         }
 
         #endregion
 
         #region DrawButtons
 
+        /// <summary>
+        /// Overring DrawButtons to add the Type selector buttons
+        /// </summary>
         protected override void DrawButtons() {
             base.DrawButtons();
 
@@ -207,7 +209,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         AcceptsRightClick = true,
                         HideFocusedIndicator = true,
                         Activated = true,
-                        BackGrndImage = GetObjectTypeImage(type)
+                        BackGrndImage = GetTypeImage(type)
                     });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
                     //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
@@ -285,79 +287,85 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
         protected override void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-            var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-
+            
             // background
+            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
             e.Graphics.Clear(backColor);
 
-            var curItem = item as FilteredTypeItem;
+            var curItem = item as FilteredTypeListItem;
             if (curItem != null) {
+                var drawRect = row.ClientRectangle;
+                drawRect.Height = RowHeight;
+                DrawFilteredTypeRow(curItem, drawRect, row, e);
+            }
+        }
 
-                Image img = null;
-                if (GetObjectTypeImage != null)
-                    img = GetObjectTypeImage(curItem.ItemType);
+        protected virtual void DrawFilteredTypeRow(FilteredTypeListItem item, Rectangle drawRect, YamuiListRow row, PaintEventArgs e) {
 
-                // Highlighted row
-                if (IsRowHighlighted != null && IsRowHighlighted(item, row)) {
-                    using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
-                        GraphicsPath path = new GraphicsPath();
-                        path.AddLines(new[] { new Point(0, 0), new Point(row.ClientRectangle.Height / 2, 0), new Point(0, row.ClientRectangle.Height / 2), new Point(0, 0), });
-                        e.Graphics.FillPath(b, path);
-                    }
+            var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+
+            // Highlighted row
+            if (item.IsRowHighlighted) {
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
+                    GraphicsPath path = new GraphicsPath();
+                    path.AddLines(new[] { new Point(drawRect.X, drawRect.Y), new Point(drawRect.X + drawRect.Height / 2, drawRect.Y), new Point(drawRect.X, drawRect.Y + drawRect.Height / 2), new Point(drawRect.X, drawRect.Y) });
+                    e.Graphics.FillPath(b, path);
                 }
+            }
 
-                // Image icon
-                if (img != null) {
-                    var recImg = new Rectangle(new Point(1, (RowHeight - img.Height) / 2), new Size(img.Width, img.Height));
-                    e.Graphics.DrawImage(img, recImg);
-                }
+            // Image icon
+            Image img = item.ItemImage;
+            if (img == null && GetTypeImage != null)
+                img = GetTypeImage(item.ItemType);
+            if (img != null) {
+                var recImg = new Rectangle(new Point(drawRect.X + 1, drawRect.Y + (drawRect.Height - img.Height) / 2), new Size(img.Width, img.Height));
+                e.Graphics.DrawImage(img, recImg);
+            }
 
-                // tag images
-                var xPos = 1;
+            // tag images
+            var xPos = 1;
 
-                var listImg = GetObjectTagImages(curItem);
-                if (listImg != null) {
-                    listImg.Reverse();
+            var listImg = item.TagImages;
+            if (listImg != null) {
+                listImg.Reverse();
+
+                // draw the image with a given opacity
+                ColorMatrix imgColor = new ColorMatrix();
+                imgColor.Matrix33 = FlagImagesOpacity;
+                using (ImageAttributes imgAttrib = new ImageAttributes()) {
+                    imgAttrib.SetColorMatrix(imgColor);
+
                     foreach (var image in listImg) {
                         xPos += image.Width;
-
-                        // draw the image with a given opacity
-                        ColorMatrix imgColor = new ColorMatrix();
-                        imgColor.Matrix33 = FlagImagesOpacity;
-                        using (ImageAttributes imgAttrib = new ImageAttributes()) {
-                            imgAttrib.SetColorMatrix(imgColor);
-                            e.Graphics.DrawImage(image, new Rectangle(new Point(row.Width - xPos, (RowHeight - image.Height)/2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
-                        }
+                        e.Graphics.DrawImage(image, new Rectangle(new Point(drawRect.X + drawRect.Width - xPos, (drawRect.Height - image.Height) / 2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
                     }
                 }
-
-                // sub text 
-                var subText = GetObjectSubText(curItem);
-                if (!string.IsNullOrEmpty(subText)) {
-                    var textFont = FontManager.GetFont(FontStyle.Bold, 10);
-                    var textSize = TextRenderer.MeasureText(subText, textFont);
-                    var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
-
-                    var drawPoint = new PointF(row.Width - xPos - textSize.Width - 3, (RowHeight / 2) - (textSize.Height / 2) - 1);
-                    e.Graphics.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
-
-                    using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {
-                        e.Graphics.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
-                    }
-                }
-                
-               
-                var textRectangle = new Rectangle(3 + (img != null ? img.Width : 0), 0, row.ClientRectangle.Width, RowHeight);
-                textRectangle.Width -= textRectangle.X;
-
-                // letter highlight
-                if (!item.IsDisabled)
-                    DrawTextHighlighting(e.Graphics, curItem.FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
-
-                // text
-                TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
             }
+
+            // sub text 
+            var subText = item.SubText;
+            if (!string.IsNullOrEmpty(subText)) {
+                var textFont = FontManager.GetFont(FontStyle.Bold, 10);
+                var textSize = TextRenderer.MeasureText(subText, textFont);
+                var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
+
+                var drawPoint = new PointF(drawRect.X + drawRect.Width - xPos - textSize.Width - 3, (drawRect.Height / 2) - (textSize.Height / 2) - 1);
+                // using Drawstring here because TextRender (GDI) can't draw semi transparent text
+                e.Graphics.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
+
+                using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {
+                    e.Graphics.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
+                }
+            }
+
+            var textRectangle = new Rectangle(drawRect.X + 3 + (img != null ? img.Width : 0), 0, drawRect.Width - 3 - (img != null ? img.Width : 0), drawRect.Height);
+
+            // letter highlight
+            if (!item.IsDisabled)
+                DrawTextHighlighting(e.Graphics, item.FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
+
+            // text
+            TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
         }
 
         #endregion
@@ -369,6 +377,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 case Keys.Left:
                     LeftRight(true);
                     return true;
+
                 case Keys.Right:
                     LeftRight(false);
                     return true;
@@ -379,12 +388,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Handles the left/right buttons
         /// </summary>
-        private void LeftRight(bool isLeft) {
+        protected void LeftRight(bool isLeft) {
             // only 1 type is active
             if (_typeButtons.Count(b => b.Value.Activated) == 1) {
                 _currentButtonIndex = 0;
-                foreach (var button in _typeButtons) {
-                    if (button.Value.Activated)
+                foreach (var type in _typeList) {
+                    if (_typeButtons.ContainsKey(type) && _typeButtons[type].Activated)
                         break;
                     _currentButtonIndex++;
                 }
@@ -417,7 +426,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             _moreForm = new MoreTypesForm() {
                 ButtonSize = new Size(TypeButtonWidth, DefaultBottomHeight),
-                GetObjectTypeImage = GetObjectTypeImage,
+                GetObjectTypeImage = GetTypeImage,
             };
             _moreForm.Build(MousePosition, typesSubList, HandleTypeClick, this);
             _moreForm.Show();

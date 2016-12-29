@@ -1,4 +1,23 @@
-﻿using System;
+﻿#region header
+// ========================================================================
+// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// This file (YamuiFilteredList.cs) is part of YamuiFramework.
+// 
+// YamuiFramework is a free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+// 
+// YamuiFramework is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// GNU General Public License for more details.
+// 
+// You should have received a copy of the GNU General Public License
+// along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
+// ========================================================================
+#endregion
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -11,11 +30,32 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
 
+    /// <summary>
+    /// Displays a list of items that can them be filtered by their DisplayText value
+    /// </summary>
     public class YamuiFilteredList : YamuiScrollList {
 
         #region constants
 
         protected const int MinRowHeight = 20;
+
+        #endregion
+
+        #region private fields
+
+        protected Predicate<FilteredListItem> _filterPredicate;
+        
+        protected List<FilteredListItem> _initialItems;
+
+        protected int _nbInitialItems;
+
+        protected string _filterString = string.Empty;
+
+        private Brush _fillBrush;
+
+        private Pen _framePen;
+
+        protected const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
 
         #endregion
 
@@ -53,28 +93,18 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Predicate to filter the items, only items meeting the predicate requirements will be displayed (applied in addition to the default string filter)
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public virtual Predicate<FilteredItem> FilterPredicate {
+        public virtual Predicate<FilteredListItem> FilterPredicate {
             get { return _filterPredicate; }
             set { _filterPredicate = value; }
         }
 
-        #endregion
-
-        #region private fields
-
-        protected Predicate<FilteredItem> _filterPredicate;
-
-        protected List<FilteredItem> _initialItems;
-
-        protected int _nbInitialItems;
-
-        protected string _filterString = string.Empty;
-
-        private Brush _fillBrush;
-
-        private Pen _framePen;
-        
-        protected const TextFormatFlags TextFlags = TextFormatFlags.NoPrefix | TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding;
+        /// <summary>
+        /// Returns the list of items passed to the SetItems method, before filters
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public virtual List<ListItem> InitialItems {
+            get { return _items; }
+        }
 
         #endregion
 
@@ -92,7 +122,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Set the items that will be displayed in the list
         /// </summary>
         public override void SetItems(List<ListItem> listItems) {
-            _initialItems = listItems.Cast<FilteredItem>().ToList();
+            _initialItems = listItems.Cast<FilteredListItem>().ToList();
             _nbInitialItems = _initialItems.Count;
 
             // we reapply the current filter to this new list
@@ -101,7 +131,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region 
+        #region ApplyFilter
 
         /// <summary>
         /// Filter the list of initial items with the filter predicate and the FilterFullyMatch
@@ -110,23 +140,29 @@ namespace YamuiFramework.Controls.YamuiList {
             if (_initialItems == null || _nbInitialItems == 0)
                 return;
 
+            // base setItems
+            base.SetItems(GetFilteredAndSortedList(_initialItems));
+        }
+
+        /// <summary>
+        /// To override, should return true if an item is not subject to a filter
+        /// </summary>
+        protected virtual List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
             List<ListItem> items;
 
             // apply filter + sort
             if (FilterPredicate != null)
-                items = _initialItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+                items = listItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
             else
-                items = _initialItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
+                items = listItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
 
-            // base setItems
-            base.SetItems(items);
+            return items;
         }
 
         #endregion
 
         #region Draw list
-
-
+        
         /// <summary>
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
@@ -149,7 +185,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // letter highlight
             if (!item.IsDisabled)
-                DrawTextHighlighting(e.Graphics, ((FilteredItem) item).FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
+                DrawTextHighlighting(e.Graphics, ((FilteredListItem) item).FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text
             TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);

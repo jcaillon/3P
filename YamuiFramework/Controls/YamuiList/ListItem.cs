@@ -49,11 +49,11 @@ namespace YamuiFramework.Controls.YamuiList {
     /// Adds attributes that allow to filter the list of items to display based on a filter string, 
     /// the method FilterApply allows to compute the attributes
     /// </summary>
-    public class FilteredItem : ListItem {
+    public class FilteredListItem : ListItem {
 
         #region Constructor
 
-        public FilteredItem() {
+        public FilteredListItem() {
             FilterFullyMatch = true;
         }
 
@@ -64,22 +64,26 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// The dispertion level with which the lowerCaseFilterString matches the DisplayText
         /// </summary>
-        public int FilterDispertionLevel { get; set; }
+        /// <remarks>Internal use only!</remarks>
+        public int FilterDispertionLevel { get; private set; }
 
         /// <summary>
         /// True of the lowerCaseFilterString fully matches DisplayText
         /// </summary>
-        public bool FilterFullyMatch { get; set; }
+        /// <remarks>Internal use only!</remarks>
+        public bool FilterFullyMatch { get; private set; }
 
         /// <summary>
         /// The way lowerCaseFilterString matches DisplayText
         /// </summary>
-        public List<CharacterRange> FilterMatchedRanges { get; set; }
+        /// <remarks>Internal use only!</remarks>
+        public List<CharacterRange> FilterMatchedRanges { get; private set; }
 
         /// <summary>
         /// Call this method to compute the value of
         /// FilterDispertionLevel, FilterFullyMatch, FilterMatchedRanges
         /// </summary>
+        /// <remarks>Internal use only!</remarks>
         public void FilterApply(string lowerCaseFilterString) {
 
             FilterMatchedRanges = new List<CharacterRange>();
@@ -149,13 +153,45 @@ namespace YamuiFramework.Controls.YamuiList {
 
     #region FilteredTypeItem
 
-    public class FilteredTypeItem : FilteredItem {
-
+    /// <summary>
+    /// Adds a layer "type" for each item, they are then categorized in a particular "type" which can
+    /// be used to quickly filter the items through a set of "type" buttons
+    /// </summary>
+    public class FilteredTypeListItem : FilteredListItem {
+        
         /// <summary>
-        /// to override, should return a unique int for each item type
+        /// to override, should return this item type (a unique int for each item type)
         /// </summary>
         public virtual int ItemType {
             get { return 0; }
+        }
+
+        /// <summary>
+        /// to override, should return the image to display for this item
+        /// </summary>
+        public virtual Image ItemImage {
+            get { return null; }
+        }
+
+        /// <summary>
+        /// to override, should return true if the item is to be highlighted
+        /// </summary>
+        public virtual bool IsRowHighlighted {
+            get { return false; }
+        }
+
+        /// <summary>
+        /// to override, should return a string containing the subtext to display
+        /// </summary>
+        public virtual string SubText {
+            get { return null; }
+        }
+
+        /// <summary>
+        /// to override, should return a list of images to be displayed (in reverse order) for the item
+        /// </summary>
+        public virtual List<Image> TagImages {
+            get { return null; }
         }
 
     }
@@ -167,44 +203,114 @@ namespace YamuiFramework.Controls.YamuiList {
     /// <summary>
     /// Each item is now view as a node of the tree, allows to view the list as a tree
     /// </summary>
-    public class FilteredTypeItemTree : FilteredTypeItem {
+    public class FilteredTypeTreeListItem : FilteredTypeListItem {
 
         /// <summary>
-        /// Is this item expanded? (useful only if CanExpand)
+        /// to override, does this item have children?
+        /// </summary>
+        public virtual bool CanExpand {
+            get { return false; } 
+        }
+
+        /// <summary>
+        /// to override, that should return the list of the children for this item (if any) or null
+        /// </summary>
+        public virtual List<FilteredTypeTreeListItem> Children {
+            get { return null; } 
+        }
+        
+        /// <summary>
+        /// Is this item expanded? (useful only if CanExpand), should only be used in read mode
         /// </summary>
         public bool IsExpanded { get; set; }
 
         /// <summary>
-        /// Does it have children?
+        /// Returns the list of the children for this item, to be used internally by the YamuiList as it
+        /// also sets properties for each child
         /// </summary>
-        public bool CanExpand { get; set; }
+        /// <remarks>Internal use only!</remarks>
+        public List<FilteredTypeTreeListItem> GetItemChildren() {
+            var list = Children;
+            if (list != null && list.Count > 0) {
+                var count = 0;
+                foreach (var itemTree in list) {
+                    itemTree.ParentNode = this;
+                    itemTree.IsFirstItem = (count == 0);
+                    itemTree.IsLastItem = false;
+                    itemTree.ComputeItemProperties();
+                    count++;
+                }
+                list[count - 1].IsLastItem = true;
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Compute the ancestors/path descriptor/level for this item (not required for root items)
+        /// </summary>
+        private void ComputeItemProperties() {
+
+            if (ParentNode != null) {
+
+                // compute ancestors
+                Ancestors = new List<FilteredTypeTreeListItem>();
+                // compute path descriptor
+                _pathDescriptor = string.Empty;
+                // compute node level
+                Level = 0;
+
+                var loopParent = ParentNode;
+                while (loopParent != null) {
+                    Ancestors.Add(loopParent);
+                    _pathDescriptor = loopParent.DisplayText + "(" + loopParent.ItemType + ")/" + _pathDescriptor;
+                    Level++;
+                    loopParent = loopParent.ParentNode;
+                }
+                _pathDescriptor = _pathDescriptor + DisplayText + "(" + ItemType + ")";
+            }
+        }
+
+        /// <summary>
+        /// Parent node for this item (can be null if the item is on the root of the tree)
+        /// </summary>
+        public FilteredTypeTreeListItem ParentNode { get; private set; }
 
         /// <summary>
         /// Is this the first item of the tree?
         /// </summary>
-        public bool IsFirstItem { get; set; }
+        public bool IsFirstItem { get; private set; }
 
         /// <summary>
         /// This is the last item of the tree or the last item of its branch
         /// </summary>
-        public bool IsLastItem { get; set; }
-
-        /// <summary>
-        /// A list of this object ancestors (PARENT) node
-        /// </summary>
-        public List<FilteredTypeItemTree> Ancestors { get; set; }
+        public bool IsLastItem { get; private set; }
 
         /// <summary>
         /// True if the object is at root level as an item, not as a branch
         /// </summary>
-        public bool IsRoot { get; set; }
+        public bool IsRoot {
+            get { return ParentNode == null; } 
+        }
 
         /// <summary>
-        /// The level of the item defines its place in the tree, level 1 is the root, 2 is deeper and so on...
+        /// A list of this object ancestors (PARENT) node (null for root items)
         /// </summary>
-        public int Level {
-            get { return (Ancestors == null ? 0 : Ancestors.Count) + 1; }
+        public List<FilteredTypeTreeListItem> Ancestors { get; private set; }
+
+        /// <summary>
+        /// Returns a string describing the place of this item in the tree in the form of a path (using displaytext + (type)) :
+        /// rootitem(10)/parent(2)/this(4)
+        /// </summary>
+        public string PathDescriptor {
+            get { return _pathDescriptor ?? DisplayText + "(" + ItemType + ")"; }
         }
+        private string _pathDescriptor;
+
+        /// <summary>
+        /// The level of the item defines its place in the tree, level 0 is the root, 1 is deeper and so on...
+        /// </summary>
+        public int Level { get; private set; }
+
     }
 
     #endregion

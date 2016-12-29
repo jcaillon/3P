@@ -31,7 +31,8 @@ using YamuiFramework.Themes;
 namespace YamuiFramework.Controls.YamuiList {
 
     /// <summary>
-    /// A control that allows you to display a list of items super efficiently
+    /// A control that allows you to display a list of items super efficiently,
+    /// use SetItems to start
     /// </summary>
     public class YamuiScrollList : UserControl {
 
@@ -55,6 +56,53 @@ namespace YamuiFramework.Controls.YamuiList {
         private const int DefaultScrollWidth = 10;
 
         private const string DefaultEmptyString = @"Empty list!";
+
+        #endregion
+
+        #region private fields
+
+        protected Action<ListItem, YamuiListRow, PaintEventArgs> _onRowPaint;
+
+        protected Padding _listPadding = new Padding(0);
+
+        private string _emptyListString = DefaultEmptyString;
+
+        private int _scrollWidth = DefaultScrollWidth;
+
+        private int _rowHeight = DefaultRowHeight;
+
+        protected List<ListItem> _items;
+
+        protected int _nbItems;
+
+        private int _topIndex;
+
+        private int _selectedItemIndex;
+
+        private int _hotRow;
+
+        private int _nbRowFullyDisplayed;
+
+        /// <summary>
+        /// Collection of rows
+        /// </summary>
+        private List<YamuiListRow> _rows = new List<YamuiListRow>();
+
+        private int _nbRowDisplayed;
+
+        private int _selectedRowIndex;
+
+        private int _yPosOnThumb;
+
+        private Rectangle _scrollRectangle;
+        private Rectangle _listRectangle;
+        private Rectangle _barRectangle;
+        private Rectangle _thumbRectangle;
+
+        private bool _isScrollPressed;
+        private bool _isScrollHovered;
+        private bool _isHovered;
+        private bool _isFocused;
 
         #endregion
 
@@ -276,6 +324,14 @@ namespace YamuiFramework.Controls.YamuiList {
             set { _onRowPaint = value; }
         }
 
+        /// <summary>
+        /// Returns the list of items currently displayed in the list, use SetItems to define this list
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public virtual List<ListItem> Items {
+            get { return _items; }
+        }
+
         #endregion
 
         #region public Events
@@ -349,53 +405,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region private fields
-
-        protected Action<ListItem, YamuiListRow, PaintEventArgs> _onRowPaint;
-
-        protected Padding _listPadding = new Padding(0);
-
-        private string _emptyListString = DefaultEmptyString;
-
-        private int _scrollWidth = DefaultScrollWidth;
-        
-        private int _rowHeight = DefaultRowHeight;
-
-        protected List<ListItem> _items;
-
-        protected int _nbItems;
-        
-        private int _topIndex;
-        
-        private int _selectedItemIndex;
-
-        private int _hotRow;
-        
-        private int _nbRowFullyDisplayed;
-
-        /// <summary>
-        /// Collection of rows
-        /// </summary>
-        private List<YamuiListRow> _rows = new List<YamuiListRow>();
-        
-        private int _nbRowDisplayed;
-
-        private int _selectedRowIndex;
-
-        private int _yPosOnThumb;
-
-        private Rectangle _scrollRectangle;
-        private Rectangle _listRectangle;
-        private Rectangle _barRectangle;
-        private Rectangle _thumbRectangle;
-
-        private bool _isScrollPressed;
-        private bool _isScrollHovered;
-        private bool _isHovered;
-        private bool _isFocused;
-
-        #endregion
-
         #region constructor
 
         public YamuiScrollList() {
@@ -463,12 +472,12 @@ namespace YamuiFramework.Controls.YamuiList {
             // text
             var foreColor = YamuiThemeManager.Current.MenuNormalFore;
             var textFont = FontManager.GetFont(FontStyle.Bold, 11);
-            var textSize = TextRenderer.MeasureText(_emptyListString, textFont);
-            var drawPoint = new PointF(_listRectangle.Left + _listRectangle.Width / 2 - textSize.Width / 2 - 1, _listRectangle.Top + _listRectangle.Height / 2 - textSize.Height / 2 - 1);
+            var textSize = TextRenderer.MeasureText(EmptyListString, textFont);
+            var drawPoint = new Point(_listRectangle.Left + _listRectangle.Width / 2 - textSize.Width / 2 - 1, _listRectangle.Top + _listRectangle.Height / 2 - textSize.Height / 2 - 1);
             using (var b = new SolidBrush(YamuiThemeManager.Current.MenuNormalBack)) {
                 e.Graphics.FillRectangle(b, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
             }
-            e.Graphics.DrawString("Empty list!", textFont, new SolidBrush(Color.FromArgb(255, foreColor)), drawPoint);
+            TextRenderer.DrawText(e.Graphics, EmptyListString, textFont, drawPoint, foreColor);
             using (var pen = new Pen(Color.FromArgb((int)(255 * 0.8), foreColor), 1) { Alignment = PenAlignment.Left }) {
                 e.Graphics.DrawRectangle(pen, drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3);
             }
@@ -509,8 +518,8 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
             }
 
-            RefreshButtons();
-            RepositionThumb();
+            // Correct the top index if needed, in any case this will Refresh the buttons + reposition the thumb
+            TopIndex = TopIndex;
         }
 
         /// <summary>
@@ -539,8 +548,8 @@ namespace YamuiFramework.Controls.YamuiList {
                     });
 
                     _rows[i].SuperKeyDown += args => args.Handled = OnKeyDown(args.KeyCode);
-                    _rows[i].ButtonPressed += OnItemClick;
-                    _rows[i].DoubleClick += OnItemClick;
+                    _rows[i].ButtonPressed += OnRowClick;
+                    _rows[i].DoubleClick += OnRowClick;
                     _rows[i].MouseEnter += (sender, args) => {
                         IsHovered = true;
                         HotRow = int.Parse(((YamuiListRow) sender).Name);
@@ -768,54 +777,73 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         public virtual bool OnKeyDown(Keys pressedKey) {
             var newIndex = SelectedItemIndex;
-            do {
-                switch (pressedKey) {
-                    case Keys.Tab:
-                        if (TabPressed != null) {
-                            TabPressed(this);
-                            return true;
-                        }
-                        return false;
-                    case Keys.Enter:
-                        if (EnterPressed != null){
-                            EnterPressed(this);
-                            return true;
-                        }
-                        return false;
-                    case Keys.Up:
-                        newIndex--;
-                        break;
-                    case Keys.Down:
-                        newIndex++;
-                        break;
-                    case Keys.PageDown:
-                        if (SelectedRowIndex == _nbRowFullyDisplayed - 1)
-                            newIndex += _nbRowFullyDisplayed;
-                        else
-                            newIndex = TopIndex + _nbRowFullyDisplayed - 1;
-                        pressedKey = Keys.Down;
-                        break;
-                    case Keys.PageUp:
-                        if (SelectedRowIndex == 0)
-                            newIndex -= _nbRowFullyDisplayed;
-                        else
-                            newIndex = TopIndex;
-                        pressedKey = Keys.Up;
-                        break;
-                    default:
-                        if (KeyPressed != null)
-                            return KeyPressed(this);
-                        return false;
-                }
-                if (newIndex > _nbItems - 1)
-                    newIndex = 0;
-                if (newIndex < 0) 
-                    newIndex = _nbItems - 1;
-                if (_nbItems == 0)
-                    return false;
 
-            } // do this while the current button is disabled and we didn't already try every button
-            while (_items[newIndex].IsDisabled && SelectedItemIndex != newIndex);
+            switch (pressedKey) {
+                case Keys.End:
+                    newIndex = _nbItems;
+                    break;
+
+                case Keys.Home:
+                    newIndex = 0;
+                    break;
+
+                default:
+                    do {
+                        switch (pressedKey) {
+                            case Keys.Tab:
+                                if (TabPressed != null) {
+                                    TabPressed(this);
+                                    return true;
+                                }
+                                return false;
+
+                            case Keys.Enter:
+                                if (EnterPressed != null) {
+                                    EnterPressed(this);
+                                    return true;
+                                }
+                                return false;
+
+                            case Keys.Up:
+                                newIndex--;
+                                break;
+
+                            case Keys.Down:
+                                newIndex++;
+                                break;
+
+                            case Keys.PageDown:
+                                if (SelectedRowIndex == _nbRowFullyDisplayed - 1)
+                                    newIndex += _nbRowFullyDisplayed;
+                                else
+                                    newIndex = TopIndex + _nbRowFullyDisplayed - 1;
+                                pressedKey = Keys.Down;
+                                break;
+
+                            case Keys.PageUp:
+                                if (SelectedRowIndex == 0)
+                                    newIndex -= _nbRowFullyDisplayed;
+                                else
+                                    newIndex = TopIndex;
+                                pressedKey = Keys.Up;
+                                break;
+
+                            default:
+                                if (KeyPressed != null)
+                                    return KeyPressed(this);
+                                return false;
+                        }
+                        if (newIndex > _nbItems - 1)
+                            newIndex = 0;
+                        if (newIndex < 0)
+                            newIndex = _nbItems - 1;
+                        if (_nbItems == 0)
+                            return false;
+
+                    } // do this while the current button is disabled and we didn't already try every button
+                    while (_items[newIndex].IsDisabled && SelectedItemIndex != newIndex);
+                    break;
+            }
 
             SelectedItemIndex = newIndex;
 
@@ -825,7 +853,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Click on a row
         /// </summary>
-        protected void OnItemClick(object sender, EventArgs eventArgs) {
+        private void OnRowClick(object sender, EventArgs eventArgs) {
             var args = eventArgs as MouseEventArgs;
             if (args != null) {
                 // can't select a disabled item
@@ -837,9 +865,16 @@ namespace YamuiFramework.Controls.YamuiList {
                 // change the selected row
                 SelectedRowIndex = rowIndex;
 
-                if (RowClicked != null)
-                    RowClicked(this, args);                
+                OnItemClick(args);
             }
+        }
+
+        /// <summary>
+        /// Click on an item, SelectedItem is usable at this time
+        /// </summary>
+        protected virtual void OnItemClick(MouseEventArgs eventArgs) {
+            if (RowClicked != null)
+                RowClicked(this, eventArgs);
         }
 
         #endregion

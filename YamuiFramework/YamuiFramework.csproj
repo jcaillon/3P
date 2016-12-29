@@ -98,6 +98,9 @@
     <Compile Include="Controls\YamuiList\MoreTypesForm.cs">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="Controls\YamuiList\YamuiFilteredTypeTreeList.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -314,9 +317,6 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
-    <EmbeddedResource Include="Controls\YamuiList\MoreTypesForm.resx">
-      <DependentUpon>MoreTypesForm.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Fonts\ResourceFont.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceFont.Designer.cs</LastGenOutput>

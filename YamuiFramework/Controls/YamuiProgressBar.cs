@@ -330,8 +330,8 @@ namespace YamuiFramework.Controls {
             float strHeight = _bufGraphics.Graphics.MeasureString(text, font).Height;
             float xPos = Width / 2f - strWidth / 2f;
             float yPos = Height / 2f - strHeight / 2f;
-            PointF p1 = new PointF(xPos, yPos);
-            _bufGraphics.Graphics.DrawString(text, font, new SolidBrush(foreColor), p1);
+            Point p1 = new Point((int) xPos, (int)yPos);
+            TextRenderer.DrawText(_bufGraphics.Graphics, text, font, p1, foreColor);
         }
 
         private void DrawVerticalProgress() {
