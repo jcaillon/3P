@@ -976,7 +976,7 @@ namespace _3PA.MainFeatures.Parser {
             if (lcFlagString.Contains("global")) flag = flag | ParseFlag.Global;
             if (lcFlagString.Contains("shared")) flag = flag | ParseFlag.Shared;
             if (lcFlagString.Contains("private")) flag = flag | ParseFlag.Private;
-            if (lcFlagString.Contains("new")) flag = flag | ParseFlag.Private;
+            if (lcFlagString.Contains("new")) flag = flag | ParseFlag.New;
             return flag;
         }
 

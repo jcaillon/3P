@@ -1047,7 +1047,7 @@ namespace _3PA.MainFeatures.Parser {
                         if (type == ParseDefineType.Variable) state = 10;
                         if (type == ParseDefineType.Buffer) {
                             tempPrimitiveType = "buffer";
-                            state = 31;
+                            state = 81;
                         }
                         if (type == ParseDefineType.Parameter) {
                             lowerToken = token.Value.ToLower();
