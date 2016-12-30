@@ -74,7 +74,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Set this to filter the list with the given text
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public string FilterString {
+        public virtual string FilterString {
             get { return _filterString; }
             set {
                 _filterString = value.ToLower().Trim();
@@ -145,17 +145,18 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// To override, should return true if an item is not subject to a filter
+        /// Returns a list of items that meet the FilterPredicate requirement as well as the filter string requirement,
+        /// it also sorts the list of items
         /// </summary>
         protected virtual List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
             List<ListItem> items;
 
-            // apply filter + sort
             if (FilterPredicate != null)
                 items = listItems.Where(item => item.FilterFullyMatch && FilterPredicate(item)).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
             else
                 items = listItems.Where(item => item.FilterFullyMatch).OrderBy(data => data.FilterDispertionLevel).Cast<ListItem>().ToList();
 
+            // sort
             return items;
         }
 
@@ -246,7 +247,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Associate the TextChanged event of a text box to this method to filter this list with the input text of the textbox
         /// </summary>
-        public void OnTextChangedEvent(object sender, EventArgs eventArgs) {
+        public virtual void OnTextChangedEvent(object sender, EventArgs eventArgs) {
             var textBox = sender as TextBox;
             if (textBox != null)
                 FilterString = textBox.Text;

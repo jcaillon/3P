@@ -205,6 +205,8 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class FilteredTypeTreeListItem : FilteredTypeListItem {
 
+        public const string TreePathSeparator = "||";
+
         /// <summary>
         /// to override, does this item have children?
         /// </summary>
@@ -246,14 +248,12 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Compute the ancestors/path descriptor/level for this item (not required for root items)
+        /// Compute the path descriptor/level for this item (not required for root items)
         /// </summary>
         private void ComputeItemProperties() {
 
             if (ParentNode != null) {
 
-                // compute ancestors
-                Ancestors = new List<FilteredTypeTreeListItem>();
                 // compute path descriptor
                 _pathDescriptor = string.Empty;
                 // compute node level
@@ -261,8 +261,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
                 var loopParent = ParentNode;
                 while (loopParent != null) {
-                    Ancestors.Add(loopParent);
-                    _pathDescriptor = loopParent.DisplayText + "(" + loopParent.ItemType + ")/" + _pathDescriptor;
+                    _pathDescriptor = loopParent.DisplayText + "(" + loopParent.ItemType + ")" + TreePathSeparator + _pathDescriptor;
                     Level++;
                     loopParent = loopParent.ParentNode;
                 }
@@ -295,7 +294,20 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// A list of this object ancestors (PARENT) node (null for root items)
         /// </summary>
-        public List<FilteredTypeTreeListItem> Ancestors { get; private set; }
+        public List<FilteredTypeTreeListItem> Ancestors {
+            get {
+                if (ParentNode != null) {
+                    var outList = new List<FilteredTypeTreeListItem>();
+                    var loopParent = ParentNode;
+                    while (loopParent != null) {
+                        outList.Add(loopParent);
+                        loopParent = loopParent.ParentNode;
+                    }
+                    return outList;
+                }
+                return null;
+            }
+        }
 
         /// <summary>
         /// Returns a string describing the place of this item in the tree in the form of a path (using displaytext + (type)) :

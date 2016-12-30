@@ -389,6 +389,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Handles the left/right buttons
         /// </summary>
         protected void LeftRight(bool isLeft) {
+            if (_typeButtons.Count == 0)
+                return;
+
             // only 1 type is active
             if (_typeButtons.Count(b => b.Value.Activated) == 1) {
                 _currentButtonIndex = 0;

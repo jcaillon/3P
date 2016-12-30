@@ -19,6 +19,7 @@
 #endregion
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -27,29 +28,81 @@ using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls.YamuiList {
 
+    /// <summary>
+    /// This class is the most complicated, obviously
+    /// The difficulty being handling the filter string correctly;
+    /// basically, we have two separate modes (see SearchMode)
+    /// This is not the conventionnal tree searching but this makes more sense to me
+    /// </summary>
     public class YamuiFilteredTypeTreeList : YamuiFilteredTypeList {
 
         #region private fields
 
-        private Dictionary<string, bool> _savedExpandState = new Dictionary<string, bool>();
+        /// <summary>
+        /// Allows to save the expansion state for each node of the tree
+        /// </summary>
+        private Dictionary<string, bool> _savedState = new Dictionary<string, bool>();
 
         /// <summary>
         /// Root items passed to the SetItems method
         /// </summary>
         protected List<FilteredTypeTreeListItem> _treeRootItems;
 
+        private SearchModeOption _searchMode;
+
         #endregion
 
         #region public properties
 
+        /// <summary>
+        /// Two modes can be active when the filter string isn't empty :
+        /// - either we filter the item + we include their parent and still display the list as a tree
+        /// - or we filter + sort and display the list as a simple filtered list with types
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public SearchModeOption SearchMode {
+            get { return _searchMode; }
+            set {
+                if (value != _searchMode) {
+                    if (value == SearchModeOption.FilterSortWithNoParent)
+                        StartSearching();
+                    else
+                        StopSearching();
+                }
+                _searchMode = value;
+            }
+        }
+
         #endregion
 
-        #region ExpansionState
+        #region private properties
+
+        /// <summary>
+        /// True if the user is currently searching the list through the filter string
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        private bool IsSearching {
+            get { return !string.IsNullOrEmpty(FilterString) && SearchMode == SearchModeOption.FilterSortWithNoParent; }
+        }
+
+        #endregion
+
+        #region Enum
 
         public enum ForceExpansion {
             Idle,
             ForceExpand,
             ForceCollapse
+        }
+
+        /// <summary>
+        /// Two modes can be active when the filter string isn't empty :
+        /// - either we filter the item + we include their parent and still display the list as a tree
+        /// - or we filter + sort and display the list as a simple filtered list with types
+        /// </summary>
+        public enum SearchModeOption {
+            FilterSortWithNoParent,
+            FilterOnlyAndIncludeParent,
         }
 
         #endregion
@@ -66,6 +119,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 throw new Exception("listItems shoud contain objects of type FilteredTypeItem");
 
             _treeRootItems = listItems.Cast<FilteredTypeTreeListItem>().ToList();
+
 
             base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
         }
@@ -84,25 +138,46 @@ namespace YamuiFramework.Controls.YamuiList {
                 outList.Add(item);
                 var descriptor = item.PathDescriptor;
 
-                // force expand/collapse?
-                if (forceExpansion != ForceExpansion.Idle) {
-                    if (_savedExpandState.ContainsKey(descriptor))
-                        _savedExpandState[descriptor] = forceExpansion == ForceExpansion.ForceExpand;
-                    else
-                        _savedExpandState.Add(descriptor, forceExpansion == ForceExpansion.ForceExpand);
+                if (item.CanExpand) {
+
+                    // force expand/collapse?
+                    if (forceExpansion != ForceExpansion.Idle) {
+                        if (_savedState.ContainsKey(descriptor))
+                            _savedState[descriptor] = forceExpansion == ForceExpansion.ForceExpand;
+                        else
+                            _savedState.Add(descriptor, forceExpansion == ForceExpansion.ForceExpand);
+                    }
+
+                    // restore the expand state of the item if needed
+                    if (_savedState.ContainsKey(descriptor))
+                        item.IsExpanded = _savedState[descriptor];
+
+                    if (item.IsExpanded) {
+                        var children = GetExpandedItemsList(item.GetItemChildren(), forceExpansion);
+                        if (children != null)
+                            outList.AddRange(children);
+                    }
                 }
+            }
 
-                // restore the expand state of the item if needed
-                if (_savedExpandState.ContainsKey(descriptor))
-                    item.IsExpanded = _savedExpandState[descriptor];
+            return outList;
+        }
 
-                if (item.CanExpand && item.IsExpanded) {
-                    var children = GetExpandedItemsList(item.GetItemChildren(), forceExpansion);
+        /// <summary>
+        /// Returns the full list of items in the tree
+        /// </summary>
+        private List<ListItem> GetFullItemsList(List<FilteredTypeTreeListItem> list) {
+            if (list == null)
+                return null;
+            var outList = new List<ListItem>();
+            foreach (var item in list) {
+                outList.Add(item);
+                if (item.CanExpand) {
+                    var children = GetFullItemsList(item.GetItemChildren());
                     if (children != null)
                         outList.AddRange(children);
                 }
             }
-
             return outList;
         }
 
@@ -137,7 +212,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// if you want the states to be forgotten, call this method
         /// </summary>
         public void ClearSavedExpansionState() {
-            _savedExpandState.Clear();
+            _savedState.Clear();
         }
 
         /// <summary>
@@ -152,51 +227,21 @@ namespace YamuiFramework.Controls.YamuiList {
             // handles a node expansion
             var currentItem = selectedItem as FilteredTypeTreeListItem;
             if (currentItem != null && currentItem.CanExpand) {
-
-                List<ListItem> newList;
+                string currentItemPathDescriptor = currentItem.PathDescriptor;
 
                 // switch state
                 if (forceExpansion != ForceExpansion.Idle)
                     currentItem.IsExpanded = (forceExpansion == ForceExpansion.ForceExpand);
                 else
                     currentItem.IsExpanded = !currentItem.IsExpanded;
-                string currentItemPathDescriptor = currentItem.PathDescriptor;
 
                 // saves expansion state
-                if (_savedExpandState.ContainsKey(currentItemPathDescriptor))
-                    _savedExpandState[currentItemPathDescriptor] = currentItem.IsExpanded;
+                if (_savedState.ContainsKey(currentItemPathDescriptor))
+                    _savedState[currentItemPathDescriptor] = currentItem.IsExpanded;
                 else
-                    _savedExpandState.Add(currentItemPathDescriptor, currentItem.IsExpanded);
+                    _savedState.Add(currentItemPathDescriptor, currentItem.IsExpanded);
 
-                if (currentItem.IsExpanded) {
-                    // insert children to the existing list
-                    newList = _initialItems.Cast<ListItem>().ToList();
-                    var children = GetExpandedItemsList(currentItem.GetItemChildren(), ForceExpansion.Idle);
-
-                    if (children != null) {
-                        if (itemIndex + 1 < _nbInitialItems)
-                            newList.InsertRange(itemIndex + 1, children);
-                        else
-                            newList.AddRange(children);
-                    }
-                } else {
-                    // remove all children (using the path descriptor to know which are the children)
-                    var list = _initialItems.Cast<FilteredTypeTreeListItem>().ToList();
-                    int idx = itemIndex + 1;
-                    string currentPath = currentItemPathDescriptor + "/";
-
-                    // while the next item (following our current item) begins with the same path descriptor
-                    while (idx < _nbInitialItems && list[idx].PathDescriptor.StartsWith(currentPath)) {
-                        idx++;
-                    }
-                    int nbToDelete = idx - (itemIndex + 1);
-                    if (nbToDelete > 1)
-                        list.RemoveRange(itemIndex + 1, nbToDelete);
-                    newList = list.Cast<ListItem>().ToList();
-                }
-
-                // set the new list
-                base.SetItems(newList);
+                ApplyExpansionState();
 
                 return true;
             }
@@ -239,6 +284,47 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
+        #region ApplyFilter
+
+        /// <summary>
+        /// Returns a list of items that meet the FilterPredicate requirement as well as the filter string requirement,
+        /// it also sorts the list of items
+        /// We override this for trees so that if an item survives the filter, its parent should be displayed as well
+        /// </summary>
+        protected override List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
+
+            var outList = new List<FilteredTypeTreeListItem>();
+            var parentsToInclude = new HashSet<string>();
+
+            var nbItems = listItems.Count;
+            for (int i = nbItems - 1; i >= 0; i--) {
+                var item = listItems[i] as FilteredTypeTreeListItem;
+                if (item == null) continue;
+                
+                // the item must be included
+                if (parentsToInclude.Contains(item.PathDescriptor) || (item.FilterFullyMatch && (FilterPredicate == null || FilterPredicate(item)))) {
+                    outList.Add(item);
+
+                    // we register its parent to be included as well
+                    if (!IsSearching) {
+                        var lastIdx = item.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
+                        if (lastIdx > -1) {
+                            var parentPath = item.PathDescriptor.Substring(0, lastIdx);
+                            if (!parentsToInclude.Contains(parentPath))
+                                parentsToInclude.Add(parentPath);
+                        }
+                    }
+                }
+            }
+
+            // we have our list completed, but we need to reverse it before delivering it
+            outList.Reverse();
+
+            return outList.Cast<ListItem>().ToList();
+        }
+
+        #endregion
+
         #region Events pushed from the button rows
 
         /// <summary>
@@ -246,7 +332,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected override void OnItemClick(MouseEventArgs eventArgs) {
             // handles node expansion
-            ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
+            if (!IsSearching)
+                ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
 
             base.OnItemClick(eventArgs);
         }
@@ -258,7 +345,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public override bool OnKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
-                    if (ModifierKeys.HasFlag(Keys.Control)) {
+                    if (!IsSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(true);
                     } else {
                         // collapse the current item
@@ -267,7 +354,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     return true;
 
                 case Keys.Right:
-                    if (ModifierKeys.HasFlag(Keys.Control)) {
+                    if (!IsSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(false);
                     } else {
                         // expand the current item
@@ -276,6 +363,50 @@ namespace YamuiFramework.Controls.YamuiList {
                     return true;
             }
             return base.OnKeyDown(pressedKey);
+        }
+
+        #endregion
+
+        #region Utilities
+
+        /// <summary>
+        /// Associate the TextChanged event of a text box to this method to filter this list with the input text of the textbox
+        /// </summary>
+        public override void OnTextChangedEvent(object sender, EventArgs eventArgs) {
+            var textBox = sender as TextBox;
+            if (textBox == null)
+                return;
+
+            var oldValue = _filterString;
+            var newValue = textBox.Text.ToLower().Trim();
+
+            // this is the classic filter where we don't search in the whole tree, just what's displayed
+            if (SearchMode == SearchModeOption.FilterOnlyAndIncludeParent) {
+                FilterString = newValue;
+                return;
+            }
+
+            _filterString = newValue;
+            if (string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue)) {
+                StartSearching();
+
+            } else if (!string.IsNullOrEmpty(oldValue) && string.IsNullOrEmpty(newValue)) {
+                StopSearching();
+
+            } else {
+                FilterString = newValue;
+            }
+
+        }
+
+        private void StartSearching() {
+            // we started searching
+            base.SetItems(GetFullItemsList(_treeRootItems));
+        }
+
+        private void StopSearching() {
+            // we stopped seaching
+            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
         }
 
         #endregion

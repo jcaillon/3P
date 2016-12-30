@@ -140,22 +140,21 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 }).Cast<ListItem>().ToList());
             };
 
+            yamuiButton2.Text = @"switch tree mode";
             yamuiButton2.ButtonPressed += (sender, args) => {
+                yamuiFilteredTypeTreeList1.SearchMode = yamuiFilteredTypeTreeList1.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.FilterSortWithNoParent ? YamuiFilteredTypeTreeList.SearchModeOption.FilterOnlyAndIncludeParent : YamuiFilteredTypeTreeList.SearchModeOption.FilterSortWithNoParent;
             };
 
+            yamuiButton3.Text = @"modify root tree";
             yamuiButton3.ButtonPressed += (sender, args) => {
-                YamuiFilteredList1.SetItems(new List<ListItem> {
-                    new FilteredListItem { DisplayText = "fuck1", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck2", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck3", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck4", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck5", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck6", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck7", IsDisabled = false},
-                    new FilteredListItem { DisplayText = "fuck8", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck9", IsDisabled = true},
-                    new FilteredListItem { DisplayText = "fuck10", IsDisabled = false},
-                });
+                yamuiFilteredTypeTreeList1.SetItems(new List<ListItem> {
+                new TreeItem {
+                    DisplayText = "NEW TEST",
+                },
+                new TreeItem {
+                    DisplayText = "ALLO ild",
+                }
+            });
             };
 
             yamuiButton4.ButtonPressed += (sender, args) => {
