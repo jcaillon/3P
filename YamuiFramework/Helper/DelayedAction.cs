@@ -46,6 +46,7 @@ namespace YamuiFramework.Helper {
         /// Use this class to do an action after a given delay
         /// </summary>
         public DelayedAction(int msDelay, Action toDo) {
+            _savedDelayedActions.Add(this);
             _toDo = toDo;
             _timer = new Timer {AutoReset = false, Interval = msDelay};
             _timer.Elapsed += TimerOnElapsed;

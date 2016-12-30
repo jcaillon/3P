@@ -52,7 +52,19 @@ namespace YamuiFramework.Controls.YamuiList {
         private YamuiFilteredTypeList _parentFilteredList;
 
         #endregion
-        
+
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= 0x80;
+                return Params;
+            }
+        }
+
+        #endregion
+
         #region Life and death
 
         public MoreTypesForm() {
@@ -133,7 +145,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
 
             // Size the form
-            Size = new Size(xPos + ButtonSize.Width + BorderWidth * 2, yPos + ButtonSize.Height + BorderWidth * 2);
+            Size = new Size(maxNbButPerRow * ButtonSize.Width + BorderWidth * 2, (int)Math.Ceiling((double) typeList.Count / maxNbButPerRow) * ButtonSize.Height + BorderWidth * 2);
             MinimumSize = Size;
             MaximumSize = Size;
 
@@ -185,6 +197,12 @@ namespace YamuiFramework.Controls.YamuiList {
         
         protected override void OnLeave(EventArgs e) {
             base.OnLeave(e);
+            Close();
+            Dispose();
+        }
+
+        protected override void OnLostFocus(EventArgs e) {
+            base.OnLostFocus(e);
             Close();
             Dispose();
         }

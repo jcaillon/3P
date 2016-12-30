@@ -231,11 +231,17 @@ namespace YamuiFramework.Controls.YamuiList {
                         Controls.Remove(_typeButtons[type]);
                 }
             }
-
-            foreach (var button in _typeButtons.Where(pair => !_typeList.Contains(pair.Key)).Select(pair => pair.Value)) {
-                if (Controls.Contains(button))
-                    Controls.Remove(button);
+            
+            var tmpDic = new Dictionary<int, SelectorButton>();
+            foreach (int key in _typeButtons.Keys) {
+                if (!_typeList.Contains(key)) {
+                    if (Controls.Contains(_typeButtons[key]))
+                        Controls.Remove(_typeButtons[key]);
+                } else {
+                    tmpDic.Add(key, _typeButtons[key]);
+                }
             }
+            _typeButtons = tmpDic;
 
             if (nBut > 0) { 
 
@@ -402,6 +408,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
                 _currentButtonIndex = _currentButtonIndex + (isLeft ? -1 : 1);
             }
+
             if (_currentButtonIndex > _typeButtons.Count - 1) _currentButtonIndex = 0;
             if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
             SetActiveType(new List<int> { _typeButtons.ElementAt(_currentButtonIndex).Key });

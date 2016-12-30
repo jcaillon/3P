@@ -413,16 +413,34 @@ namespace YamuiFramework.Controls.YamuiList {
         public override bool OnKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
-                    if (!_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
+                    if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(true);
                     } else {
-                        // collapse the current item
-                        ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceCollapse);
+                        var curItem = SelectedItem as FilteredTypeTreeListItem;
+                        if (curItem != null) {
+                            if (curItem.CanExpand && curItem.IsExpanded)
+                                // collapse the current item
+                                ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceCollapse);
+                            else {
+                                // select its parent
+                                var lastSep = curItem.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
+                                if (lastSep == -1)
+                                    return true;
+                                var parentPath = curItem.PathDescriptor.Substring(0, lastSep);
+                                var idx = SelectedItemIndex;
+                                FilteredTypeTreeListItem itemAbove;
+                                do {
+                                    idx--;
+                                    itemAbove = GetItem(idx) as FilteredTypeTreeListItem;
+                                } while (itemAbove != null && !itemAbove.PathDescriptor.Equals(parentPath));
+                                SelectedItemIndex = idx;
+                            }
+                        }
                     }
                     return true;
 
                 case Keys.Right:
-                    if (!_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
+                    if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(false);
                     } else {
                         // expand the current item

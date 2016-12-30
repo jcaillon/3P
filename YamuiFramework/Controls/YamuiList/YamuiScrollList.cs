@@ -890,7 +890,7 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Return the item at the given index
+        /// Return the item at the given index (or null)
         /// </summary>
         protected ListItem GetItem(int index) {
             return 0 <= index && index < _nbItems ? _items[index] : null;

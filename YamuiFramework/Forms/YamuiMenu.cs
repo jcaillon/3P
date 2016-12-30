@@ -62,7 +62,7 @@ namespace YamuiFramework.Forms {
         private bool _closing;
 
         private const int LineHeight = 20;
-        private const int SeparatorLineHeight = 8;
+        private const int SeparatorLineHeight = 20;
 
         private bool _reverseX;
         private bool _reverseY;
