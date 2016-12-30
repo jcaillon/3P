@@ -347,7 +347,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (!string.IsNullOrEmpty(subText)) {
                 var textFont = FontManager.GetFont(FontStyle.Bold, 10);
                 var textSize = TextRenderer.MeasureText(subText, textFont);
-                var subColor = Enabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
+                var subColor = !item.IsDisabled ? YamuiThemeManager.Current.SubTextFore : foreColor;
 
                 var drawPoint = new PointF(drawRect.X + drawRect.Width - xPos - textSize.Width - 3, (drawRect.Height / 2) - (textSize.Height / 2) - 1);
                 // using Drawstring here because TextRender (GDI) can't draw semi transparent text

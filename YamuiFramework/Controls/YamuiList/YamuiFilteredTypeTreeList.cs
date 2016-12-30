@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Fonts;
@@ -50,6 +51,13 @@ namespace YamuiFramework.Controls.YamuiList {
 
         private SearchModeOption _searchMode;
 
+        /// <summary>
+        /// True when in FilterSortWithNoParent mode + filter string not empty
+        /// </summary>
+        private bool _isSearching;
+
+        private bool _showTreeBranches = true;
+
         #endregion
 
         #region public properties
@@ -63,33 +71,40 @@ namespace YamuiFramework.Controls.YamuiList {
         public SearchModeOption SearchMode {
             get { return _searchMode; }
             set {
-                if (value != _searchMode) {
-                    if (value == SearchModeOption.FilterSortWithNoParent)
-                        StartSearching();
-                    else
-                        StopSearching();
-                }
                 _searchMode = value;
+                FilterString = FilterString;
             }
         }
 
-        #endregion
-
-        #region private properties
-
         /// <summary>
-        /// True if the user is currently searching the list through the filter string
+        /// Set this to filter the list with the given text
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        private bool IsSearching {
-            get { return !string.IsNullOrEmpty(FilterString) && SearchMode == SearchModeOption.FilterSortWithNoParent; }
+        public override string FilterString {
+            get { return _filterString; }
+            set {
+                _filterString = value.ToLower().Trim();
+                if (SetIsSearching(value, SearchMode))
+                    // base.FilterString = value; is done in SetIsSearching
+                    return;
+                base.FilterString = value;
+            }
+        }
+
+        /// <summary>
+        /// If true, will display the lines representing the tree branches
+        /// </summary>
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public bool ShowTreeBranches {
+            get { return _showTreeBranches; }
+            set { _showTreeBranches = value; }
         }
 
         #endregion
 
         #region Enum
 
-        public enum ForceExpansion {
+        private enum ForceExpansion {
             Idle,
             ForceExpand,
             ForceCollapse
@@ -120,8 +135,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
             _treeRootItems = listItems.Cast<FilteredTypeTreeListItem>().ToList();
 
-
-            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+            if (_isSearching)
+                base.SetItems(GetFullItemsList(_treeRootItems));
+            else
+                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
         }
 
         /// <summary>
@@ -189,14 +206,16 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Call this method to expand the whole tree
         /// </summary>
         public void ForceAllToExpand() {
-            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceExpand));
+            if (!_isSearching)
+                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceExpand));
         }
 
         /// <summary>
         /// Call this method to collapse the whole tree
         /// </summary>
         public void ForceAllToCollapse() {
-            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceCollapse));
+            if (!_isSearching)
+                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.ForceCollapse));
         }
 
         /// <summary>
@@ -204,7 +223,8 @@ namespace YamuiFramework.Controls.YamuiList {
         /// IsExpanded property of items on the list
         /// </summary>
         public void ApplyExpansionState() {
-            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+            if (!_isSearching)
+                base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
         }
 
         /// <summary>
@@ -218,11 +238,11 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Toggle expand/collapse for the an item at the given index
         /// </summary>
-        public bool ExpandCollapse(int itemIndex, ForceExpansion forceExpansion) {
+        private void ExpandCollapse(int itemIndex, ForceExpansion forceExpansion) {
 
             var selectedItem = GetItem(itemIndex);
             if (selectedItem == null)
-                return false;
+                return;
 
             // handles a node expansion
             var currentItem = selectedItem as FilteredTypeTreeListItem;
@@ -242,11 +262,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     _savedState.Add(currentItemPathDescriptor, currentItem.IsExpanded);
 
                 ApplyExpansionState();
-
-                return true;
             }
-
-            return false;
         }
 
         #endregion
@@ -266,19 +282,50 @@ namespace YamuiFramework.Controls.YamuiList {
             if (curItem != null) {
                 var drawRect = row.ClientRectangle;
                 drawRect.Height = RowHeight;
+                var shiftedDrawRect = drawRect;
 
-                for (int i = 0; i <= curItem.Level; i++) {
-                    drawRect.X += 8;
-                    drawRect.Width -= 8;
-                }
+                // draw the tree structure
+                if (!_isSearching) {
 
-                // Draw the arrow icon indicating if the node is expanded or not
-                if (curItem.CanExpand) {
+                    var treeWidth = 8;
                     var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-                    TextRenderer.DrawText(e.Graphics, curItem.IsExpanded ? "y" : "u", FontManager.GetOtherFont("Wingdings 3", FontStyle.Regular, (float) (drawRect.Height*0.40)), new Rectangle(drawRect.X - 8, drawRect.Y, 8, drawRect.Height), curItem.IsExpanded ? YamuiThemeManager.Current.AccentColor : foreColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    var arrowColor = curItem.IsExpanded ? YamuiThemeManager.Current.AccentColor : foreColor;
+
+                    // draw the branches of the tree
+                    if (ShowTreeBranches) {
+                        using (var linePen = new Pen(!item.IsDisabled ? YamuiThemeManager.Current.SubTextFore : foreColor, 1.5f) {DashStyle = DashStyle.Solid}) {
+
+                            // Draw the vertical lines for each ancestors
+                            var pos = drawRect.X + treeWidth/2;
+                            for (int i = 1; i <= curItem.Level; i++) {
+                                if (i == curItem.Level && curItem.IsLastItem)
+                                    e.Graphics.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height/2 - 1);
+                                else
+                                    e.Graphics.DrawLine(linePen, pos, drawRect.Y, pos, drawRect.Y + drawRect.Height);
+                                pos += treeWidth;
+                            }
+
+                            // Draw the horizontal line that goes to the arrow
+                            if (curItem.Level > 0) {
+                                pos -= treeWidth;
+                                linePen.Color = arrowColor;
+                                e.Graphics.DrawLine(linePen, pos, drawRect.Y + drawRect.Height/2 - 1, pos + treeWidth/2, drawRect.Y + drawRect.Height/2 - 1);
+                            }
+                        }
+                    }
+
+                    for (int i = 0; i <= curItem.Level; i++) {
+                        shiftedDrawRect.X += treeWidth;
+                        shiftedDrawRect.Width -= treeWidth;
+                    }
+
+                    // Draw the arrow icon indicating if the node is expanded or not
+                    if (curItem.CanExpand) {
+                        TextRenderer.DrawText(e.Graphics, curItem.IsExpanded ? "q" : "u", FontManager.GetOtherFont("Wingdings 3", FontStyle.Regular, (float) (shiftedDrawRect.Height*0.40)), new Rectangle(shiftedDrawRect.X - treeWidth, shiftedDrawRect.Y, treeWidth, shiftedDrawRect.Height), arrowColor, TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.NoPadding);
+                    }
                 }
 
-                DrawFilteredTypeRow(curItem, drawRect, row, e);
+                DrawFilteredTypeRow(curItem, shiftedDrawRect, row, e);
             }
         }
 
@@ -293,6 +340,10 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected override List<ListItem> GetFilteredAndSortedList(List<FilteredListItem> listItems) {
 
+            // when searching, the tree must actually behave like a FilteredTypeList
+            if (_isSearching)
+                return base.GetFilteredAndSortedList(listItems);
+
             var outList = new List<FilteredTypeTreeListItem>();
             var parentsToInclude = new HashSet<string>();
 
@@ -306,13 +357,11 @@ namespace YamuiFramework.Controls.YamuiList {
                     outList.Add(item);
 
                     // we register its parent to be included as well
-                    if (!IsSearching) {
-                        var lastIdx = item.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
-                        if (lastIdx > -1) {
-                            var parentPath = item.PathDescriptor.Substring(0, lastIdx);
-                            if (!parentsToInclude.Contains(parentPath))
-                                parentsToInclude.Add(parentPath);
-                        }
+                    var lastIdx = item.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
+                    if (lastIdx > -1) {
+                        var parentPath = item.PathDescriptor.Substring(0, lastIdx);
+                        if (!parentsToInclude.Contains(parentPath))
+                            parentsToInclude.Add(parentPath);
                     }
                 }
             }
@@ -321,6 +370,25 @@ namespace YamuiFramework.Controls.YamuiList {
             outList.Reverse();
 
             return outList.Cast<ListItem>().ToList();
+        }
+
+        /// <summary>
+        /// Allows to update the _isSearching value, if it does update, switches the list from
+        /// a tree view to a flat list where we applied the classic filter from the filteredtypelist
+        /// </summary>
+        private bool SetIsSearching(string stringFilter, SearchModeOption searchMode) {
+            var newIsSearching = !string.IsNullOrEmpty(stringFilter.ToLower().Trim()) && searchMode == SearchModeOption.FilterSortWithNoParent;
+            if (newIsSearching != _isSearching) {
+                _isSearching = newIsSearching;
+
+                // we went from searching to not searching or the contrary
+                if (_isSearching)
+                    base.SetItems(GetFullItemsList(_treeRootItems));
+                else
+                    base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
+                return true;
+            }
+            return false;
         }
 
         #endregion
@@ -332,7 +400,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected override void OnItemClick(MouseEventArgs eventArgs) {
             // handles node expansion
-            if (!IsSearching)
+            if (!_isSearching)
                 ExpandCollapse(SelectedItemIndex, ForceExpansion.Idle);
 
             base.OnItemClick(eventArgs);
@@ -345,7 +413,7 @@ namespace YamuiFramework.Controls.YamuiList {
         public override bool OnKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
-                    if (!IsSearching || ModifierKeys.HasFlag(Keys.Control)) {
+                    if (!_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(true);
                     } else {
                         // collapse the current item
@@ -354,7 +422,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     return true;
 
                 case Keys.Right:
-                    if (!IsSearching || ModifierKeys.HasFlag(Keys.Control)) {
+                    if (!_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
                         LeftRight(false);
                     } else {
                         // expand the current item
@@ -363,50 +431,6 @@ namespace YamuiFramework.Controls.YamuiList {
                     return true;
             }
             return base.OnKeyDown(pressedKey);
-        }
-
-        #endregion
-
-        #region Utilities
-
-        /// <summary>
-        /// Associate the TextChanged event of a text box to this method to filter this list with the input text of the textbox
-        /// </summary>
-        public override void OnTextChangedEvent(object sender, EventArgs eventArgs) {
-            var textBox = sender as TextBox;
-            if (textBox == null)
-                return;
-
-            var oldValue = _filterString;
-            var newValue = textBox.Text.ToLower().Trim();
-
-            // this is the classic filter where we don't search in the whole tree, just what's displayed
-            if (SearchMode == SearchModeOption.FilterOnlyAndIncludeParent) {
-                FilterString = newValue;
-                return;
-            }
-
-            _filterString = newValue;
-            if (string.IsNullOrEmpty(oldValue) && !string.IsNullOrEmpty(newValue)) {
-                StartSearching();
-
-            } else if (!string.IsNullOrEmpty(oldValue) && string.IsNullOrEmpty(newValue)) {
-                StopSearching();
-
-            } else {
-                FilterString = newValue;
-            }
-
-        }
-
-        private void StartSearching() {
-            // we started searching
-            base.SetItems(GetFullItemsList(_treeRootItems));
-        }
-
-        private void StopSearching() {
-            // we stopped seaching
-            base.SetItems(GetExpandedItemsList(_treeRootItems, ForceExpansion.Idle));
         }
 
         #endregion

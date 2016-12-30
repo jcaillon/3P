@@ -78,12 +78,9 @@ namespace YamuiFramework.Controls.YamuiList {
             get { return _filterString; }
             set {
                 _filterString = value.ToLower().Trim();
-                
                 if (_initialItems != null && _nbInitialItems > 0) {
-
                     // apply the filter on each item to compute internal properties
                     _initialItems.ForEach(data => data.FilterApply(_filterString));
-
                     ApplyFilterPredicate();
                 }
             }

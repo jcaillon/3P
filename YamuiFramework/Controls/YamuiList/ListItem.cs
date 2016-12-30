@@ -237,7 +237,6 @@ namespace YamuiFramework.Controls.YamuiList {
                 var count = 0;
                 foreach (var itemTree in list) {
                     itemTree.ParentNode = this;
-                    itemTree.IsFirstItem = (count == 0);
                     itemTree.IsLastItem = false;
                     itemTree.ComputeItemProperties();
                     count++;
@@ -275,21 +274,9 @@ namespace YamuiFramework.Controls.YamuiList {
         public FilteredTypeTreeListItem ParentNode { get; private set; }
 
         /// <summary>
-        /// Is this the first item of the tree?
-        /// </summary>
-        public bool IsFirstItem { get; private set; }
-
-        /// <summary>
         /// This is the last item of the tree or the last item of its branch
         /// </summary>
         public bool IsLastItem { get; private set; }
-
-        /// <summary>
-        /// True if the object is at root level as an item, not as a branch
-        /// </summary>
-        public bool IsRoot {
-            get { return ParentNode == null; } 
-        }
 
         /// <summary>
         /// A list of this object ancestors (PARENT) node (null for root items)
