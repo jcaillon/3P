@@ -1,7 +1,7 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
-// This file (YamuiMessageBox.cs) is part of YamuiFramework.
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
+// This file (YamuiInput.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-using YamuiFramework.Animations.Transitions;
 using YamuiFramework.Controls;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
@@ -32,7 +31,7 @@ using YamuiFramework.HtmlRenderer.Core.Core.Entities;
 using YamuiFramework.HtmlRenderer.WinForms;
 
 namespace YamuiFramework.Forms {
-    public sealed partial class YamuiInput : YamuiForm {
+    public sealed partial class YamuiInput : YamuiFormButtons {
 
         #region Fields
 
@@ -56,24 +55,6 @@ namespace YamuiFramework.Forms {
         /// true if the message needed scrolls
         /// </summary>
         private bool _hasScrollMessage;
-
-        /// <summary>
-        /// This field is used for the fade in/out animation, shouldn't be used by the user
-        /// </summary>
-        public double AnimationOpacity {
-            get { return Opacity; }
-            set {
-                if (value < 0) {
-                    try {
-                        Close();
-                    } catch (Exception) {
-                        // ignored
-                    }
-                    return;
-                }
-                Opacity = value;
-            }
-        }
 
         public int DialogIntResult = -1;
 
@@ -180,9 +161,6 @@ namespace YamuiFramework.Forms {
             // quickly correct the tab order.. (we created the button from right to left and i'm too lazy to think atm)
             var tabOrderManager = new TabOrderManager(this);
             tabOrderManager.SetTabOrder(TabOrderManager.TabScheme.AcrossFirst);
-
-            // for the outro animation
-            Tag = false;
         }
 
         #endregion
@@ -204,17 +182,32 @@ namespace YamuiFramework.Forms {
                 ActiveControl = Controls.Find("yamuiButton0", false).FirstOrDefault();
         }
 
-        protected override void OnClosing(CancelEventArgs e) {
-            base.OnClosing(e);
+        /// <summary>
+        /// A key has been pressed on the menu
+        /// </summary>
+        public bool HandleKeyDown(Keys pressedKey) {
+            var evnt = new KeyEventArgs(pressedKey);
+            OnKeyDown(evnt);
+            return evnt.Handled;
+        }
 
-            // cancel initialise close to run an animation, after that allow it
-            if ((bool)Tag)
-                return;
-            Tag = true;
-            e.Cancel = true;
-            Transition.run(this, "AnimationOpacity", 1d, -0.01d, new TransitionType_Linear(300), (o, args1) => {
-                Dispose();
-            });
+        protected override void OnKeyDown(KeyEventArgs e) {
+            switch (e.KeyCode) {
+                case Keys.Escape:
+                    // close the form
+                    Close();
+                    e.Handled = true;
+                    break;
+                case Keys.Enter:
+                    // click the first button
+                    var firstButton = Controls.Find("yamuiButton0", false).FirstOrDefault() as YamuiButton;
+                    if (firstButton != null) {
+                        firstButton.PerformClick();
+                        e.Handled = true;
+                    }
+                    break;
+            }
+            base.OnKeyDown(e);
         }
 
         #endregion
@@ -453,10 +446,9 @@ namespace YamuiFramework.Forms {
             msgBox.Location = new Point((ownerRect.Width - msgBox.Width) / 2 + ownerRect.X, (ownerRect.Height - msgBox.Height) / 2 + ownerRect.Y);
 
             // get yamui form
-            var yamuiForm = FromHandle(ownerHandle) as YamuiForm;
+            var yamuiForm = FromHandle(ownerHandle) as YamuiMainAppli;
 
             // we either display a modal or a normal messagebox
-            Transition.run(msgBox, "AnimationOpacity", 0d, 1d, new TransitionType_Linear(400));
             if (waitResponse) {
                 if (yamuiForm != null)
                     yamuiForm.HasModalOpened = true;
@@ -475,7 +467,10 @@ namespace YamuiFramework.Forms {
                 msgBox.Show(new WindowWrapper(ownerHandle));
             }
 
-            return msgBox.DialogIntResult;
+            var res = msgBox.DialogIntResult;
+            msgBox.Dispose();
+
+            return res;
         }
 
         #endregion

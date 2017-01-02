@@ -176,7 +176,22 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>ResourceFont.resx</DependentUpon>
     </Compile>
-    <Compile Include="Forms\FormWithShadow.cs">
+    <Compile Include="Forms\YamuiFormBaseShadow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiFormBaseShadowFadeIn.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiFormBase.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiFormToolWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiFormButtons.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\YamuiMenuPopup.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Forms\YamuiNotification.cs">
@@ -197,7 +212,7 @@
     <Compile Include="Forms\YamuiSmokeScreen.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Forms\YamuiForm.cs">
+    <Compile Include="Forms\YamuiMainAppli.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Helper\DelayedAction.cs" />
@@ -321,8 +336,8 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>ResourceFont.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="Forms\YamuiForm.resx">
-      <DependentUpon>YamuiForm.cs</DependentUpon>
+    <EmbeddedResource Include="Forms\YamuiMainAppli.resx">
+      <DependentUpon>YamuiMainAppli.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\YamuiNotification.resx">
       <DependentUpon>YamuiNotification.cs</DependentUpon>

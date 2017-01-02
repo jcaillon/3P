@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTab.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ namespace YamuiFramework.Controls {
 
         #region Constructor
 
-        public YamuiTab(List<YamuiMainMenu> content, YamuiForm owner) {
+        public YamuiTab(List<YamuiMainMenu> content, YamuiMainAppli owner) {
             SetStyle(ControlStyles.UserPaint |
                      ControlStyles.AllPaintingInWmPaint |
                      ControlStyles.ResizeRedraw |
@@ -273,7 +273,7 @@ namespace YamuiFramework.Controls {
 
         // the following reference is used to always know the size and position of a secondary tabpage (for animation purposes)
         private static YamuiTabAnimation _animSmokeScreen;
-        private YamuiForm _owner;
+        private YamuiMainAppli _owner;
 
         private bool TabAnimatorInit() {
             if (!YamuiThemeManager.TabAnimationAllowed) return false;

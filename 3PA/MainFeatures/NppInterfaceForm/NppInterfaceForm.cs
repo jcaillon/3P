@@ -20,8 +20,8 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+using YamuiFramework.Forms;
 using _3PA.Interop;
 
 namespace _3PA.MainFeatures.NppInterfaceForm {
@@ -29,9 +29,10 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
     /// <summary>
     /// This is the base class for the tooltips and the autocomplete form
     /// </summary>
-    internal class NppInterfaceForm : Form {
+    internal class NppInterfaceForm : YamuiFormBase {
 
         #region fields
+
         /// <summary>
         /// Should be set when you create the new form
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
@@ -61,26 +62,30 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
         /// Use this to know if the form is currently activated
         /// </summary>
         public bool IsActivated;
+
+        #endregion
+
+        #region Don't show in ATL+TAB
+
+        protected override CreateParams CreateParams {
+            get {
+                var Params = base.CreateParams;
+                Params.ExStyle |= 0x80;
+                return Params;
+            }
+        }
+
         #endregion
 
         #region constructor
+
         /// <summary>
         /// Create a new npp interface form, please set CurrentForegroundWindow
         /// </summary>
         public NppInterfaceForm() {
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
 
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            ShowIcon = false;
             ShowInTaskbar = false;
-            SizeGripStyle = SizeGripStyle.Hide;
+            Movable = true;
 
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
@@ -195,69 +200,5 @@ namespace _3PA.MainFeatures.NppInterfaceForm {
 
         #endregion
 
-        #region Paint Methods
-
-        protected override void OnPaint(PaintEventArgs e) {
-            var backColor = ThemeManager.Current.FormBack;
-            var borderColor = ThemeManager.Current.FormBorder;
-            var borderWidth = 2;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, borderWidth) { Alignment = PenAlignment.Inset };
-            e.Graphics.DrawRectangle(pen, rect);
-        }
-
-        #endregion
-
-        #region Shadows
-
-        private bool _mAeroEnabled; // variables for box shadow
-        private const int CsDropshadow = 0x00020000;
-        private const int WmNcpaint = 0x0085;
-
-        private const int WmNchittest = 0x84; // variables for dragging the form
-        private const int Htclient = 0x1;
-        private const int Htcaption = 0x2;
-
-        protected override CreateParams CreateParams {
-            get {
-                _mAeroEnabled = CheckAeroEnabled();
-
-                var cp = base.CreateParams;
-                if (!_mAeroEnabled)
-                    cp.ClassStyle |= CsDropshadow;
-
-                return cp;
-            }
-        }
-
-        private bool CheckAeroEnabled() {
-            if (Environment.OSVersion.Version.Major >= 6) {
-                var enabled = 0;
-                WinApi.DwmIsCompositionEnabled(ref enabled);
-                return (enabled == 1);
-            }
-            return false;
-        }
-
-        protected override void WndProc(ref Message m) {
-
-            if (m.Msg == WmNcpaint && _mAeroEnabled) {
-                var v = 2;
-                WinApi.DwmSetWindowAttribute(Handle, 2, ref v, 4);
-                var margins = new WinApi.MARGINS(1, 1, 1, 1);
-                WinApi.DwmExtendFrameIntoClientArea(Handle, ref margins);
-            }
-
-            base.WndProc(ref m);
-
-            if (m.Msg == WmNchittest && (int)m.Result == Htclient) // drag the form
-                m.Result = (IntPtr)Htcaption;
-        }
-
-        #endregion
     }
 }

@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiMenu.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -25,6 +25,7 @@ using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Windows.Forms;
 using YamuiFramework.Controls;
+using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Fonts;
 using YamuiFramework.Helper;
 using YamuiFramework.HtmlRenderer.WinForms;
@@ -35,7 +36,7 @@ namespace YamuiFramework.Forms {
     /// <summary>
     /// A class to display a cool custom context menu
     /// </summary>
-    public sealed class YamuiMenu : Form {
+    public sealed class YamuiMenu : YamuiFormBase {
 
         #region static fields
 
@@ -52,9 +53,26 @@ namespace YamuiFramework.Forms {
 
         public float SubTextOpacity = 0.3f;
 
+        /// <summary>
+        /// When an item is clicked, it will be fed to this method that should, in term, be calling .OnClic of said item
+        /// Use this as a wrapper to handle errors for instance
+        /// </summary>
+        public Action<YamuiMenuItem> ClicItemWrapper {
+            get {
+                return _do ?? (item => {
+                    if (item.OnClic != null) {
+                        item.OnClic();
+                    }
+                });
+            }
+            set { _do = value; }
+        }
+
         #endregion
 
         #region private fields
+
+        private Action<YamuiMenuItem> _do;
 
         private YamuiMenu _parentMenu;
         private YamuiMenu _childMenu;
@@ -62,18 +80,13 @@ namespace YamuiFramework.Forms {
         private bool _closing;
 
         private const int LineHeight = 20;
-        private const int SeparatorLineHeight = 20;
-
-        private bool _reverseX;
-        private bool _reverseY;
+        private const int SeparatorLineHeight = 8;
 
         private List<YamuiMenuItem> _content = new List<YamuiMenuItem>();
 
         private List<int> _yPosOfSeparators = new List<int>(); 
 
         private int _selectedIndex;
-
-        private const int BorderWidth = 2;
 
         #endregion
 
@@ -86,35 +99,24 @@ namespace YamuiFramework.Forms {
                 return Params;
             }
         }
-
+        
         #endregion
 
         #region Life and death
 
         public YamuiMenu(Point location, List<YamuiMenuItem> content, string htmlTitle = null, int minSize = 150) {
             if (content == null || content.Count == 0)
-                content = new List<YamuiMenuItem> { new YamuiMenuItem { ItemName = "Empty", IsDisabled = true } };
+                content = new List<YamuiMenuItem> { new YamuiMenuItem { DisplayText = "Empty", IsDisabled = true } };
 
             // init menu form
-            SetStyle(
-                ControlStyles.OptimizedDoubleBuffer |
-                ControlStyles.ResizeRedraw |
-                ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
-            ControlBox = false;
-            FormBorderStyle = FormBorderStyle.None;
-            MaximizeBox = false;
-            MinimizeBox = false;
-            ShowIcon = false;
             ShowInTaskbar = false;
-            SizeGripStyle = SizeGripStyle.Hide;
             StartPosition = FormStartPosition.Manual;
 
             var useImageIcon = content.Exists(item => item.ItemImage != null);
             var noChildren = !content.Exists(item => item.Children != null);
             var maxWidth = content.Select(item => TextRenderer.MeasureText(item.SubText, FontManager.GetFont(FontFunction.Small)).Width).Concat(new[] { 0 }).Max();
             maxWidth += maxWidth == 0 ? 0 : 15;
-            maxWidth += content.Select(item => TextRenderer.MeasureText(item.ItemName, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
+            maxWidth += content.Select(item => TextRenderer.MeasureText(item.DisplayText, FontManager.GetStandardFont()).Width).Concat(new[] { 0 }).Max();
             maxWidth += (useImageIcon ? 35 : 8) + 12 + (noChildren ? 0 : 12);
             maxWidth = Math.Max(minSize, maxWidth);
 
@@ -146,7 +148,7 @@ namespace YamuiFramework.Forms {
                     yPos += SeparatorLineHeight;
                 } else {
                     var button = new YamuiMenuButton {
-                        Text = item.ItemName,
+                        Text = item.DisplayText,
                         NoChildren = item.Children == null || !item.Children.Any(),
                         Location = new Point(BorderWidth, yPos),
                         Size = new Size(maxWidth - BorderWidth * 2, LineHeight),
@@ -183,16 +185,7 @@ namespace YamuiFramework.Forms {
             MaximumSize = Size;
 
             // menu position
-            var screen = Screen.FromPoint(location);
-            if (location.X > screen.WorkingArea.X + screen.WorkingArea.Width/2) {
-                location.X = location.X - Width;
-                _reverseX = true;
-            }
-            if (location.Y > screen.WorkingArea.Y + screen.WorkingArea.Height/2) {
-                location.Y = location.Y - Height;
-                _reverseY = true;
-            }
-            Location = location;
+            Location = GetBestPosition(location);
 
             // events
             Deactivate += OnDeactivate;
@@ -218,16 +211,7 @@ namespace YamuiFramework.Forms {
         #region Paint Methods
 
         protected override void OnPaint(PaintEventArgs e) {
-
-            var backColor = YamuiThemeManager.Current.FormBack;
-            var borderColor = YamuiThemeManager.Current.FormBorder;
-
-            e.Graphics.Clear(backColor);
-
-            // draw the border with Style color
-            var rect = new Rectangle(new Point(0, 0), new Size(Width, Height));
-            var pen = new Pen(borderColor, BorderWidth) { Alignment = PenAlignment.Inset };
-            e.Graphics.DrawRectangle(pen, rect);
+            base.OnPaint(e);
 
             // draw separators
             foreach (var yPosOfSeparator in _yPosOfSeparators) {
@@ -243,7 +227,7 @@ namespace YamuiFramework.Forms {
         #region Events
 
         private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
-            OnKeyDown(previewKeyDownEventArgs.KeyCode);
+            HandleKeyDown(previewKeyDownEventArgs.KeyCode);
             previewKeyDownEventArgs.IsInputKey = true;
         }
 
@@ -273,15 +257,15 @@ namespace YamuiFramework.Forms {
             var item = _content[_selectedIndex];
             // item has children, open a new menu
             if (item.Children != null && item.Children.Any()) {
-                _childMenu = new YamuiMenu(Location, item.Children) {
+                _childMenu = new YamuiMenu(Location, item.Children.Cast<YamuiMenuItem>().ToList()) {
                     IamMain = false,
                     _parentMenu = this
                 };
-                _childMenu.SetPosition(new Rectangle(Location.X + Width, Location.Y + Controls[_selectedIndex].Top, Width, Height), _reverseX, _reverseY);
+                _childMenu.Location = GetChildBestPosition(new Rectangle(Location.X + Width, Location.Y + Controls[_selectedIndex].Top, _childMenu.Width, _childMenu.Height), LineHeight);
                 _childMenu.Show();
             } else {
                 // exec action and close the menu
-                item.Do();
+                ClicItemWrapper(item);
                 CloseAll();
             }
         }
@@ -313,7 +297,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// A key has been pressed on the menu
         /// </summary>
-        public bool OnKeyDown(Keys pressedKey) {
+        public bool HandleKeyDown(Keys pressedKey) {
             var initialIndex = _selectedIndex;
             do {
                 switch (pressedKey) {
@@ -355,13 +339,6 @@ namespace YamuiFramework.Forms {
             while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
 
             return true;
-        }
-
-        /// <summary>
-        /// Position the menu relativly to a parent menu
-        /// </summary>
-        private void SetPosition(Rectangle rect, bool reverseX, bool reverseY) {
-            Location = new Point(reverseX ? (rect.X - rect.Width - Width) : rect.X, reverseY ? (rect.Y - (Height - 2) + LineHeight) : rect.Y);
         }
 
         private void CloseChildren() {
@@ -451,16 +428,7 @@ namespace YamuiFramework.Forms {
 
     #region YamuiMenuItem
 
-    public class YamuiMenuItem {
-        /// <summary>
-        /// Image to associate with the menu
-        /// </summary>
-        public Image ItemImage { get; set; }
-
-        /// <summary>
-        /// displayed main text
-        /// </summary>
-        public string ItemName { get; set; }
+    public class YamuiMenuItem : FilteredTypeTreeListItem {
 
         /// <summary>
         /// Action to execute on clic
@@ -478,42 +446,6 @@ namespace YamuiFramework.Forms {
         /// </summary>
         public bool IsSelectedByDefault { get; set; }
 
-        /// <summary>
-        /// List of child items for the current item
-        /// </summary>
-        public List<YamuiMenuItem> Children { get; set; }
-
-        /// <summary>
-        /// Small text displayed on the right side of the item
-        /// </summary>
-        public string SubText { get; set; }
-
-        /// <summary>
-        /// You can use this field to store any piece of info on this menu item
-        /// </summary>
-        public object Data { get; set; }
-
-        /// <summary>
-        /// true if the item is disabled
-        /// </summary>
-        public bool IsDisabled { get; set; }
-
-        private Action _do;
-
-        /// <summary>
-        /// The OnClic action is executed through this when the using clic an item,
-        /// You probably want to set OnClic instead!
-        /// </summary>
-        public Action Do { 
-            get { 
-                return _do ?? (() => {
-                    if (OnClic != null) {
-                        OnClic();
-                    }
-                }) ; 
-            }
-            set { _do = value; }
-        }
     }
 
     #endregion

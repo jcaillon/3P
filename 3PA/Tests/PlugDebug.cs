@@ -197,11 +197,15 @@ namespace _3PA.Tests {
             webServiceJson.Execute();
             */
 
+            UserCommunication.Notify("test");
+            UserCommunication.Notify("test");
+            /*
             var form = new Form();
             form.Size = new Size(1200, 1000);
             form.Controls.Add(new ProfilesPage());
             form.Controls[0].Dock = DockStyle.Fill;
             form.ShowDialog();
+             * */
         }
 
         public static void DebugTest2() {

@@ -370,12 +370,6 @@ namespace _3PA {
                 if (handled)
                     return true;
 
-                // hide window on escape
-                if (Appli.IsFocused() && key == Keys.Escape) {
-                    Appli.Form.Cloack();
-                    return true;
-                }
-
                 // The following is specific to 3P files
                 if (IsCurrentFileProgress) {
 
@@ -428,43 +422,19 @@ namespace _3PA {
                         return true;
                 }
                 
-                //HACK:
                 // Ok so... when we open a form in notepad++, we can't use the overrides PreviewKeyDown / KeyDown
                 // like we normally can, for some reasons, they don't react to certain keys (like enter!)
                 // It only works "almost normally" if we ShowDialog() the form?!
                 // So i gave up and handle things here!
-
-                // YamuiMenu
-                var curMenu = (Control.FromHandle(WinApi.GetForegroundWindow()));
-                var menu = curMenu as YamuiMenu;
-                if (menu != null) {
-                    handled = menu.OnKeyDown(key);
-                } else {
-                    var currentCtrl = WinApi.GetFocusedControl();
-
-                    // YamuiButton
-                    var currentButton = currentCtrl as YamuiButton;
-                    if (currentButton != null) {
-                        var evnt = new KeyEventArgs(key);
-                        currentButton.OnSuperKeyDown(evnt);
-                        handled = evnt.Handled;
-                    } else {
-
-                        // YamuiTextBox
-                        var currentTxtBox = currentCtrl as YamuiTextBox;
-                        if (currentTxtBox != null && key == Keys.Return) {
-                            if (currentTxtBox.MultiLines) {
-                                var initialPos = currentTxtBox.SelectionStart;
-                                currentTxtBox.Text = currentTxtBox.Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < currentTxtBox.TextLength ? currentTxtBox.Text.Substring(initialPos, currentTxtBox.TextLength - initialPos) : "");
-                                currentTxtBox.SelectionStart = initialPos + 2;
-                                currentTxtBox.SelectionLength = 0;
-                                currentTxtBox.ScrollToCaret();
-                            }
-                        } 
-                    }
-                }
-
-                if (handled)
+                // Each control / form that should use a key not handled by Npp should implement a method 
+                // "HandleKeyDown" that will be triggered from here (see below)
+                var curControl = WinApi.GetFocusedControl();
+                var invokeResponse = curControl.InvokeMethod("HandleKeyDown", new[] { (object)key });
+                if (invokeResponse != null && (bool)invokeResponse)
+                    return true;
+                var curWindow = Control.FromHandle(WinApi.GetForegroundWindow());
+                invokeResponse = curWindow.InvokeMethod("HandleKeyDown", new[] { (object)key });
+                if (invokeResponse != null && (bool)invokeResponse)
                     return true;
 
                 // Close interfacePopups
@@ -491,8 +461,12 @@ namespace _3PA {
                     keyModifiers.IsShift == item.Shortcut.IsShift &&
                     keyModifiers.IsAlt == item.Shortcut.IsAlt &&
                     (item.Generic || IsCurrentFileProgress)) {
-                    if (!isSpamming) {
-                        item.Do();
+                    if (!isSpamming && item.OnClic != null) {
+                        try {
+                            item.OnClic();
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error in : " + item.DisplayText);
+                        }
                     }
                     handled = true;
                     return item;

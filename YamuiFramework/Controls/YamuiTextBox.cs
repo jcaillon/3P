@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiTextBox.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -229,6 +229,35 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #endregion
+
+        #region HandleKeyDown
+
+        /// <summary>
+        /// Triggers the KeyDown event with the given key
+        /// </summary>
+        /// <param name="keyPressed"></param>
+        /// <returns></returns>
+        public bool HandleKeyDown(Keys keyPressed) {
+            var evnt = new KeyEventArgs(keyPressed);
+            OnKeyDown(evnt);
+
+            if (!evnt.Handled && keyPressed == Keys.Return) {
+                if (MultiLines) {
+                    var initialPos = SelectionStart;
+                    Text = Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < TextLength ? Text.Substring(initialPos, TextLength - initialPos) : "");
+                    SelectionStart = initialPos + 2;
+                    SelectionLength = 0;
+                    ScrollToCaret();
+                    return true;
+                }
+            }
+            
+            return evnt.Handled;
+        }
+
+        #endregion
+
+
     }
 
     internal class YamuiTextBox2Designer : ControlDesigner {

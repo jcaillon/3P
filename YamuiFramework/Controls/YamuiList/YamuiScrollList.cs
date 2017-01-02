@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiScrollList.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -547,7 +547,9 @@ namespace YamuiFramework.Controls.YamuiList {
                         OnRowPaint = OnRowPaint
                     });
 
-                    _rows[i].SuperKeyDown += args => args.Handled = OnKeyDown(args.KeyCode);
+                    _rows[i].KeyDown += (sender, args) => {
+                        args.Handled = OnKeyDown(args.KeyCode);
+                    };
                     _rows[i].ButtonPressed += OnRowClick;
                     _rows[i].DoubleClick += OnRowClick;
                     _rows[i].MouseEnter += (sender, args) => {

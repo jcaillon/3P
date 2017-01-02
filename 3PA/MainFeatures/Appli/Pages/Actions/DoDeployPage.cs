@@ -586,7 +586,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Actions {
             foreach (var path in Config.Instance.CompileDirectoriesHistoric.Split(',')) {
                 if (!string.IsNullOrEmpty(path)) {
                     itemList.Add(new YamuiMenuItem {
-                        ItemImage = ImageResources.FolderType, ItemName = path, OnClic = () => {
+                        ItemImage = ImageResources.FolderType, DisplayText = path, OnClic = () => {
                             if (IsHandleCreated) {
                                 BeginInvoke((Action)delegate {
                                     fl_directory.Text = path;

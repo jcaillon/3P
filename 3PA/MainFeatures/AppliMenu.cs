@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
+using YamuiFramework.Controls.YamuiList;
 using YamuiFramework.Forms;
 using _3PA.Images;
 using _3PA.Interop;
@@ -88,6 +89,15 @@ namespace _3PA.MainFeatures {
                 copyMenuList.Insert(0, new YamuiMenuItem { IsSeparator = true });
 
                 var menu = new YamuiMenu(Cursor.Position, copyMenuList, "<div class='contextMenuTitle'><img src='" + menuLogo + "' width='16' Height='16' style='padding-right: 5px; padding-top: 1px;'>" + menuTitle + "</span>", minSize);
+                menu.ClicItemWrapper = item => {
+                    if (item.OnClic != null) {
+                        try {
+                            item.OnClic();
+                        } catch (Exception e) {
+                            ErrorHandler.ShowErrors(e, "Error in : " + item.DisplayText);
+                        }
+                    }
+                };
                 menu.Show();
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error in ShowMenuAtCursor");
@@ -111,7 +121,7 @@ namespace _3PA.MainFeatures {
         }
 
         public static void ShowEnvMenuAtCursor() {
-            ShowMenuAtCursor(Instance._envMenuList, "Switch environment", "Env");
+            ShowMenuAtCursor(Instance._envMenuList.Cast<YamuiMenuItem>().ToList(), "Switch environment", "Env");
         }
 
         public static void ShowMiscMenuAtCursor() {
@@ -160,7 +170,7 @@ namespace _3PA.MainFeatures {
 
         private List<MenuItem> _databaseTools;
 
-        private List<YamuiMenuItem> _envMenuList;
+        private List<MenuItem> _envMenuList;
 
         private MenuItem _envMenu;
 
@@ -270,16 +280,16 @@ namespace _3PA.MainFeatures {
                 _envMenu,
                 new MenuItem(this, "Database tools", ImageResources.DatabaseTools, ShowDatabaseToolsMenuAtCursor, "DatabaseTools", "Alt+D") {
                     Generic = true,
-                    Children = _databaseTools.Select(item => (YamuiMenuItem)item).ToList(),
+                    Children = _databaseTools.Cast<FilteredTypeTreeListItem>().ToList(),
                 },
                 new MenuItem(this, "Generate and revise code", ImageResources.GenerateCode, ShowGenerateCodeMenuAtCursor, "Generate_code", "Alt+Insert") {
-                    Children = _generateCodeMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                    Children = _generateCodeMenuList.Cast<FilteredTypeTreeListItem>().ToList(),
                 },
                 new MenuItem(this, "Edit code", ImageResources.EditCode, ShowEditCodeMenuAtCursor, "Edit_code", "Alt+E") {
-                    Children = _editCodeList.Select(item => (YamuiMenuItem)item).ToList(),
+                    Children = _editCodeList.Cast<FilteredTypeTreeListItem>().ToList(),
                 },
                 new MenuItem(this, "Miscellaneous", ImageResources.Miscellaneous, ShowMiscMenuAtCursor, "Miscellaneous", "Alt+M") {
-                    Children = _miscMenuList.Select(item => (YamuiMenuItem)item).ToList(),
+                    Children = _miscMenuList.Cast<FilteredTypeTreeListItem>().ToList(),
                 },
                 new MenuItem(true), // --------------------------
                 new MenuItem(this, "Options", ImageResources.ShowOptions, () => Appli.Appli.GoToPage(PageNames.OptionsGeneral), "Go_to_options", null) {Generic = true}
@@ -317,16 +327,16 @@ namespace _3PA.MainFeatures {
         /// rebuilds the environment menu
         /// </summary>
         private void RebuildSwitchEnvMenu() {
-            _envMenuList = new List<YamuiMenuItem>();
+            _envMenuList = new List<MenuItem>();
 
             foreach (var env in ProEnvironment.GetList) {
                 var name = env.Name;
                 var suffix = env.Suffix;
-                var existingItem = _envMenuList.FirstOrDefault(item => item.ItemName.Equals(env.Name));
+                var existingItem = _envMenuList.FirstOrDefault(item => item.DisplayText.Equals(env.Name));
                 // add a new suffix item
                 if (existingItem != null) {
                     var newSub = new YamuiMenuItem() {
-                        ItemName = env.Suffix,
+                        DisplayText = env.Suffix,
                         ItemImage = ImageResources.EnvSuffix,
                         OnClic = () => ProEnvironment.SetCurrent(name, suffix, null),
                         IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && suffix.Equals(Config.Instance.EnvSuffix)
@@ -336,9 +346,9 @@ namespace _3PA.MainFeatures {
                     else {
                         // also add the first sub item..
                         var firstItemSuffix = ((string)existingItem.Data) ?? "";
-                        existingItem.Children = new List<YamuiMenuItem> {
+                        existingItem.Children = new List<FilteredTypeTreeListItem> {
                             new YamuiMenuItem {
-                                ItemName = firstItemSuffix,
+                                DisplayText = firstItemSuffix,
                                 ItemImage = ImageResources.EnvSuffix,
                                 OnClic = () => ProEnvironment.SetCurrent(name, firstItemSuffix, null),
                                 IsSelectedByDefault = name.Equals(Config.Instance.EnvName) && firstItemSuffix.Equals(Config.Instance.EnvSuffix)
@@ -348,8 +358,8 @@ namespace _3PA.MainFeatures {
                     existingItem.SubText = existingItem.Children.Count.ToString();
                 } else {
                     // add a new env item
-                    _envMenuList.Add(new YamuiMenuItem() {
-                        ItemName = env.Name,
+                    _envMenuList.Add(new MenuItem(false) {
+                        DisplayText = env.Name,
                         ItemImage = ImageResources.EnvName,
                         OnClic = () => ProEnvironment.SetCurrent(name, suffix, null),
                         Data = env.Suffix,
@@ -358,7 +368,7 @@ namespace _3PA.MainFeatures {
                 }
             }
 
-            _envMenu.Children = _envMenuList;
+            _envMenu.Children = _envMenuList.Cast<FilteredTypeTreeListItem>().ToList();
         }
 
         #endregion
@@ -367,38 +377,47 @@ namespace _3PA.MainFeatures {
 
     #region MenuItem
 
-    internal class MenuItem : YamuiMenuItem {
+    internal sealed class MenuItem : YamuiMenuItem {
 
         /// <summary>
         /// Key of the item in the shortcut dictionnary stored in the config,
         /// must not be null if you want to be able to set a shortcut for the item
         /// </summary>
         public string ItemId { get; set; }
+
         /// <summary>
         /// Same as ItemId, it must be set if you want to be able to use/set shortcuts on children
         /// </summary>
         public List<MenuItem> ChildrenList { get; set; }
+
         /// <summary>
         /// Item shorcut (string format)
         /// </summary>
         public string ItemSpec { get; set; }
+
         /// <summary>
         /// Item shortcut
         /// </summary>
         public ShortcutKey Shortcut { get; set; }
+
         /// <summary>
         /// true if the item must appear no matter which doc we are on, otherwise the menu appears for 3P documents
         /// </summary>
         public bool Generic { get; set; }
 
+        /// <summary>
+        /// You can use this field to store any piece of info on this menu item
+        /// </summary>
+        public object Data { get; set; }
+
         public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action action, string itemId, string defaultKey, List<MenuItem> children) {
-            ItemName = name;
+            DisplayText = name;
             ItemImage = img;
 
             // children?
             if (children != null) {
                 ChildrenList = children;
-                Children = children.Select(item => (YamuiMenuItem)item).ToList();
+                Children = children.Cast<FilteredTypeTreeListItem>().ToList();
             }
 
             // shortcut?
@@ -426,19 +445,7 @@ namespace _3PA.MainFeatures {
             }
 
             // action?
-            if (action != null) {
-                OnClic = action;
-                // We set the Do() action, which is the "go through" action when the OnClic action is activated
-                Do = () => {
-                    if (OnClic != null) {
-                        try {
-                            OnClic();
-                        } catch (Exception e) {
-                            ErrorHandler.ShowErrors(e, "Error in : " + ItemName);
-                        }
-                    }
-                };
-            }
+            OnClic = action;
         }
 
         public MenuItem(AppliMenu menuToRegisterTo, string name, Image img, Action action, string itemId, string defaultKey) :

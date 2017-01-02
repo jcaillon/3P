@@ -49,15 +49,13 @@ namespace _3PA.MainFeatures.Appli {
                     if (!_hasBeenShownOnce) {
                         _hasBeenShownOnce = true;
                         _form.Show(Npp.Win32WindowNpp);
-                        _form.DoShow();
-                        return;
+                    } else {
+                        // toggle visibility
+                        if (_form.Visible && !_form.HasModalOpened)
+                            _form.Cloack();
+                        else
+                            _form.UnCloack();
                     }
-
-                    // toggle visibility
-                    if (_form.Visible && !_form.HasModalOpened)
-                        _form.Cloack();
-                    else
-                        _form.UnCloack();
                 }
             } catch (Exception e) {
                 ErrorHandler.ShowErrors(e, "Error while loading the main window");

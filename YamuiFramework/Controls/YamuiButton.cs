@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (YamuiButton.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -142,12 +142,6 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Category("Yamui")]
         public event EventHandler<EventArgs> ButtonPressed;
-
-        /// <summary>
-        /// You should register to this event when you want to subscribe to Keydown
-        /// </summary>
-        [Category("Yamui")]
-        public event Action<KeyEventArgs> SuperKeyDown;
         
         #endregion
 
@@ -295,6 +289,15 @@ namespace YamuiFramework.Controls {
 
         #region Keyboard Methods
 
+        /// <summary>
+        /// A key has been pressed on the menu
+        /// </summary>
+        public bool HandleKeyDown(Keys pressedKey) {
+            var evnt = new KeyEventArgs(pressedKey);
+            OnKeyDown(evnt);
+            return evnt.Handled;
+        }
+
         // This is mandatory to be able to handle the ENTER key in key events!!
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
             if (e.KeyCode == Keys.Enter) e.IsInputKey = true;
@@ -302,17 +305,7 @@ namespace YamuiFramework.Controls {
         }
 
         protected override void OnKeyDown(KeyEventArgs e) {
-            OnSuperKeyDown(e);
             base.OnKeyDown(e);
-        }
-
-        /// <summary>
-        /// This method is public because external method should be able to call this to pass a key press to this button...
-        /// </summary>
-        public void OnSuperKeyDown(KeyEventArgs e) {
-            if (SuperKeyDown != null)
-                SuperKeyDown(e);
-
             if (!e.Handled) {
                 if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
                     IsPressed = true;

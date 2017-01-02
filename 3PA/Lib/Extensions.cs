@@ -51,6 +51,41 @@ namespace _3PA.Lib {
             return (T)property.GetCustomAttributes(attrType, false).First();
         }
 
+        /// <summary>
+        /// Returns true of the given object has the given method
+        /// </summary>
+        /// <param name="objectToCheck"></param>
+        /// <param name="methodName"></param>
+        /// <returns></returns>
+        public static bool HasMethod(this object objectToCheck, string methodName) {
+            try {
+                var type = objectToCheck.GetType();
+                return type.GetMethod(methodName) != null;
+            } catch (AmbiguousMatchException) {
+                // ambiguous means there is more than one result,
+                // which means: a method with that name does exist
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Invoke the given method with the given parameters on the given object and returns its value
+        /// Returns null if it failes
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="methodName"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public static object InvokeMethod(this object obj, string methodName, object[] parameters) {
+            try {
+                //Get the method information using the method info class
+                MethodInfo mi = obj.GetType().GetMethod(methodName);
+                return mi != null ? mi.Invoke(obj, parameters) : null;
+            } catch (Exception) {
+                return null;
+            }
+        }
+
         #endregion
 
         #region Enumerable

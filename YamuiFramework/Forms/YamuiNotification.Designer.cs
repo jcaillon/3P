@@ -98,16 +98,13 @@ namespace YamuiFramework.Forms {
             this.Controls.Add(this.contentPanel);
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Movable = false;
             this.Name = "YamuiNotification";
             this.Padding = new System.Windows.Forms.Padding(5, 50, 5, 5);
-            this.Resizable = false;
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.SizeGripStyle = System.Windows.Forms.SizeGripStyle.Hide;
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "YamuiFormMessageBox";
-            this.TopMost = true;
             this.contentPanel.ContentPanel.ResumeLayout(false);
             this.contentPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).EndInit();

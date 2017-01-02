@@ -1,6 +1,6 @@
 ﻿#region header
 // ========================================================================
-// Copyright (c) 2016 - Julien Caillon (julien.caillon@gmail.com)
+// Copyright (c) 2017 - Julien Caillon (julien.caillon@gmail.com)
 // This file (ListItem.cs) is part of YamuiFramework.
 // 
 // YamuiFramework is a free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 // along with YamuiFramework. If not, see <http://www.gnu.org/licenses/>.
 // ========================================================================
 #endregion
-
 using System.Collections.Generic;
 using System.Drawing;
 
@@ -162,37 +161,27 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// to override, should return this item type (a unique int for each item type)
         /// </summary>
-        public virtual int ItemType {
-            get { return 0; }
-        }
+        public virtual int ItemType { get; set; }
 
         /// <summary>
         /// to override, should return the image to display for this item
         /// </summary>
-        public virtual Image ItemImage {
-            get { return null; }
-        }
+        public virtual Image ItemImage { get; set; }
 
         /// <summary>
         /// to override, should return true if the item is to be highlighted
         /// </summary>
-        public virtual bool IsRowHighlighted {
-            get { return false; }
-        }
+        public virtual bool IsRowHighlighted { get; set; }
 
         /// <summary>
         /// to override, should return a string containing the subtext to display
         /// </summary>
-        public virtual string SubText {
-            get { return null; }
-        }
+        public virtual string SubText { get; set; }
 
         /// <summary>
         /// to override, should return a list of images to be displayed (in reverse order) for the item
         /// </summary>
-        public virtual List<Image> TagImages {
-            get { return null; }
-        }
+        public virtual List<Image> TagImages { get; set; }
 
     }
 
@@ -210,16 +199,12 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// to override, does this item have children?
         /// </summary>
-        public virtual bool CanExpand {
-            get { return false; } 
-        }
+        public virtual bool CanExpand { get; set; }
 
         /// <summary>
         /// to override, that should return the list of the children for this item (if any) or null
         /// </summary>
-        public virtual List<FilteredTypeTreeListItem> Children {
-            get { return null; } 
-        }
+        public virtual List<FilteredTypeTreeListItem> Children { get; set; }
         
         /// <summary>
         /// Is this item expanded? (useful only if CanExpand), should only be used in read mode

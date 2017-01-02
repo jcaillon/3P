@@ -21,7 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using YamuiFramework.Animations.Transitions;
+using System.Windows.Forms;
 using YamuiFramework.Controls;
 using YamuiFramework.Forms;
 using _3PA.Interop;
@@ -33,15 +33,18 @@ using _3PA.MainFeatures.Appli.Pages.Set;
 
 namespace _3PA.MainFeatures.Appli {
 
-    internal partial class AppliForm : YamuiForm {
+    internal partial class AppliForm : YamuiMainAppli {
 
         #region fields
+
         /// <summary>
         /// Should be set when you create the new form
         /// CurrentForegroundWindow = WinApi.GetForegroundWindow();
         /// </summary>
         public IntPtr CurrentForegroundWindow;
-        private bool _allowshowdisplay;
+
+        private bool _forcingClose;
+
         #endregion
 
         #region constructor
@@ -102,15 +105,12 @@ namespace _3PA.MainFeatures.Appli {
             // register to Npp
             FormIntegration.RegisterToNpp(Handle);
 
-            Opacity = 0;
-            Visible = false;
-            Tag = false;
-            KeyPreview = true;
         }
 
         #endregion
 
         #region Cloack mechanism
+
         /// <summary>
         /// hides the form
         /// </summary>
@@ -130,10 +130,10 @@ namespace _3PA.MainFeatures.Appli {
         /// <summary>
         /// Call this method instead of Close() to really close this form
         /// </summary>
-        public void ForceClose() {
+        public new void ForceClose() {
             FormIntegration.UnRegisterToNpp(Handle);
-            Tag = true;
-            Close();
+            _forcingClose = true;
+            base.ForceClose();
         }
 
         /// <summary>
@@ -145,48 +145,41 @@ namespace _3PA.MainFeatures.Appli {
             Opacity = Config.Instance.AppliOpacityUnfocused;
         }
 
-        /// <summary>
-        /// When the form gets activated..
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnActivated(EventArgs e) {
-            Opacity = 1;
-            base.OnActivated(e);
-        }
-
         protected override void OnDeactivate(EventArgs e) {
             if (!HasModalOpened)
                 Opacity = Config.Instance.AppliOpacityUnfocused;
             base.OnDeactivate(e);
         }
 
-        /// <summary>
-        /// This ensures the form is never visible at start
-        /// </summary>
-        /// <param name="value"></param>
-        protected override void SetVisibleCore(bool value) {
-            base.SetVisibleCore(_allowshowdisplay ? value : _allowshowdisplay);
-        }
-
-        /// <summary>
-        /// should be called after Show() or ShowDialog() for a sweet animation
-        /// </summary>
-        public void DoShow() {
-            _allowshowdisplay = true;
-            Visible = true;
-            Opacity = 0;
-            Transition.run(this, "Opacity", 1d, new TransitionType_Acceleration(200));
-        }
-
         protected override void OnClosing(CancelEventArgs e) {
-            if (!((bool) Tag)) {
+            if (!_forcingClose) {
                 e.Cancel = true;
                 Cloack();
             } else {
                 base.OnClosing(e);
             }
         }
+
         #endregion
+
+        #region OnKeyDown
+
+        /// <summary>
+        /// A key has been pressed on the menu
+        /// </summary>
+        public bool HandleKeyDown(Keys pressedKey) {
+
+            // hide window on escape
+            if (pressedKey == Keys.Escape) {
+                Cloack();
+                return true;
+            }
+
+            return false;
+        }
+
+        #endregion
+
 
     }
 
@@ -200,4 +193,5 @@ namespace _3PA.MainFeatures.Appli {
         MassCompiler,
         DeploymentRules
     }
+
 }

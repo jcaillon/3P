@@ -64,7 +64,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             // build the interface
             var yPos = static_name.Location.Y + 35;
-            foreach (var item in AppliMenu.Instance.ShortcutableItemList.OrderBy(item => item.ItemName)) {
+            foreach (var item in AppliMenu.Instance.ShortcutableItemList.OrderBy(item => item.DisplayText)) {
 
                 // icon
                 var imgButton = new YamuiPictureBox {
@@ -83,7 +83,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                     Location = new Point(static_name.Location.X, yPos + 2),
                     Size = new Size(340, 10),
                     IsSelectionEnabled = false,
-                    Text = item.ItemName
+                    Text = item.DisplayText
                 };
                 scrollPanel.ContentPanel.Controls.Add(label);
 
@@ -100,7 +100,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
                 };
                 scrollPanel.ContentPanel.Controls.Add(button);
                 button.Click += ButtonOnButtonPressed;
-                tooltip.SetToolTip(button, "<b>" + item.ItemName + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
+                tooltip.SetToolTip(button, "<b>" + item.DisplayText + "</b><br><br>Click to modify this shortcut<br><i>You can press ESCAPE to cancel the changes</i>");
 
                 // reset
                 button = new YamuiButtonImage {
@@ -194,7 +194,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
                 // don't override an existing shortcut
                 if (Config.Instance.ShortCuts.ContainsValue(newSpec)) {
-                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).ItemName, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
+                    UserCommunication.Notify("Sorry, this shortcut is already used by the following function :<br>" + AppliMenu.Instance.ShortcutableItemList.First(item => item.ItemSpec.Equals(newSpec)).DisplayText, MessageImg.MsgInfo, "Modifying shortcut", "Existing key", 3);
                     return true;
                 }
 
