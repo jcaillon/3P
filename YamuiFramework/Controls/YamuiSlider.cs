@@ -117,13 +117,14 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiSlider(int min, int max, int value) {
-            SetStyle(ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.Selectable |
-                     ControlStyles.SupportsTransparentBackColor |
-                     ControlStyles.UserMouse |
-                     ControlStyles.UserPaint, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.Selectable |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.UserMouse |
+                ControlStyles.Opaque, true);
 
             Minimum = min;
             Maximum = max;
@@ -392,5 +393,6 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
     }
 }

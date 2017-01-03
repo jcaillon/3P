@@ -286,6 +286,19 @@ namespace YamuiFramework.Controls {
         #endregion
 
         #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
+        }
+
+        #endregion
+
     }
 
     public sealed class TabPressedEventArgs : EventArgs {

@@ -230,18 +230,14 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region HandleKeyDown
+        #region PerformKeyDown
 
         /// <summary>
-        /// Triggers the KeyDown event with the given key
+        /// Programatically triggers the OnKeyDown event
         /// </summary>
-        /// <param name="keyPressed"></param>
-        /// <returns></returns>
-        public bool HandleKeyDown(Keys keyPressed) {
-            var evnt = new KeyEventArgs(keyPressed);
-            OnKeyDown(evnt);
-
-            if (!evnt.Handled && keyPressed == Keys.Return) {
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            if (!e.Handled && e.KeyCode == Keys.Return) {
                 if (MultiLines) {
                     var initialPos = SelectionStart;
                     Text = Text.Substring(0, initialPos) + Environment.NewLine + (initialPos < TextLength ? Text.Substring(initialPos, TextLength - initialPos) : "");
@@ -251,12 +247,10 @@ namespace YamuiFramework.Controls {
                     return true;
                 }
             }
-            
-            return evnt.Handled;
+            return e.Handled;
         }
 
         #endregion
-
 
     }
 

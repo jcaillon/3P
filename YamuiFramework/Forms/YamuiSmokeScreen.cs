@@ -69,10 +69,12 @@ namespace YamuiFramework.Forms {
         #region Constructor
 
         public YamuiSmokeScreen(Form owner, Rectangle pageRectangle) {
-            SetStyle(ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint |
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
-                ControlStyles.OptimizedDoubleBuffer, true);
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             _pageRectangle = pageRectangle;
             FormBorderStyle = FormBorderStyle.None;

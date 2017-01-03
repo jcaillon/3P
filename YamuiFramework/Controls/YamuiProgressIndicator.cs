@@ -79,12 +79,12 @@ namespace YamuiFramework.Controls {
         #region constructor
 
         public YamuiProgressIndicator() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
-                     ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.UserPaint |
-                     ControlStyles.Selectable |
-                     ControlStyles.AllPaintingInWmPaint, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             Size = new Size(30, 30);
             SetCirclePoints();

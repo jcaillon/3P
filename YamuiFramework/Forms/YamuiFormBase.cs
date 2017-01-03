@@ -70,8 +70,8 @@ namespace YamuiFramework.Forms {
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, 
-                true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             FormBorderStyle = FormBorderStyle.None;
         }
@@ -158,18 +158,13 @@ namespace YamuiFramework.Forms {
         }
 
         #region KeyDown helper
-        
-        protected override void OnKeyDown(KeyEventArgs e) {
-            if (!e.Handled && HandleKeyDown(e.KeyCode))
-                e.Handled = true;
-            base.OnKeyDown(e);
-        }
 
         /// <summary>
-        /// Method called when a key is pressed (override this instead of OnKeyDown if you are running an appli under notepad++)
+        /// Programatically triggers the OnKeyDown event
         /// </summary>
-        public virtual bool HandleKeyDown(Keys keyCode) {
-            return false;
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
         }
 
         #endregion

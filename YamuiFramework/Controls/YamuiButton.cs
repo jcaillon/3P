@@ -29,6 +29,7 @@ using YamuiFramework.Helper;
 using YamuiFramework.Themes;
 
 namespace YamuiFramework.Controls {
+
     [Designer("YamuiFramework.Controls.YamuiButtonDesigner")]
     [ToolboxBitmap(typeof (Button))]
     [DefaultEvent("ButtonPressed")]
@@ -110,7 +111,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public bool DoPressed {
+        public bool VisuallyPressButton {
             get { return IsPressed; }
             set {
                 IsPressed = value;
@@ -139,6 +140,8 @@ namespace YamuiFramework.Controls {
 
         /// <summary>
         /// You should register to this event to know when the button has been pressed (clicked or enter or space)
+        /// The EventArgs can be casted to KeyEventArgs or MouseEventArgs depending on how this was triggered
+        /// You can analyse the MouseEventArgs.Clicks number to know if it's a simple or double click
         /// </summary>
         [Category("Yamui")]
         public event EventHandler<EventArgs> ButtonPressed;
@@ -158,7 +161,6 @@ namespace YamuiFramework.Controls {
         public YamuiButton() {
             // why those styles? check here: https://sites.google.com/site/craigandera/craigs-stuff/windows-forms/flicker-free-control-drawing
             SetStyle(
-                ControlStyles.SupportsTransparentBackColor |
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
@@ -169,12 +171,20 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
-        #region methods
+        #region Methods
         
         private void OnButtonPressed(EventArgs eventArgs) {
             // we could do something here, like preventing the user to click the button when the OnClick is being ran
             if (ButtonPressed != null) 
                 ButtonPressed(this, eventArgs);
+        }
+        
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
         }
 
         #endregion
@@ -191,6 +201,7 @@ namespace YamuiFramework.Controls {
         /// </summary>
         public new void PerformClick() {
             OnButtonPressed(new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
+            base.PerformClick();
         }
 
         #endregion
@@ -214,8 +225,6 @@ namespace YamuiFramework.Controls {
                 }
             }
         }
-
-        protected override void OnPaintBackground(PaintEventArgs e) { }
 
         protected override void OnPaint(PaintEventArgs e) {
 
@@ -281,14 +290,12 @@ namespace YamuiFramework.Controls {
         protected override void OnEnter(EventArgs e) {
             IsFocused = true;
             Invalidate();
-
             base.OnEnter(e);
         }
 
         protected override void OnLeave(EventArgs e) {
             IsFocused = false;
             Invalidate();
-
             base.OnLeave(e);
         }
 
@@ -298,39 +305,28 @@ namespace YamuiFramework.Controls {
 
         // This is mandatory to be able to handle the ENTER key in key events!!
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            base.OnPreviewKeyDown(e);
             if (e.KeyCode == Keys.Enter)
                 e.IsInputKey = true;
+            base.OnPreviewKeyDown(e);
         }
 
         protected override void OnKeyDown(KeyEventArgs e) {
-            base.OnKeyDown(e);
-            if (!e.Handled) {
-                if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
-                    IsPressed = true;
-                    Invalidate();
-                    e.Handled = true;
-                }
+            if (e.KeyCode == Keys.Space || e.KeyCode == Keys.Enter) {
+                IsPressed = true;
+                Invalidate();
+                e.Handled = true;
             }
-        }
-
-        /// <summary>
-        /// A key has been pressed on the menu
-        /// </summary>
-        public bool HandleKeyDown(Keys pressedKey) {
-            var evnt = new KeyEventArgs(pressedKey);
-            OnKeyDown(evnt);
-            return evnt.Handled;
+            base.OnKeyDown(e);
         }
 
         protected override void OnKeyUp(KeyEventArgs e) {
-            base.OnKeyUp(e);
             if (IsPressed) {
                 OnButtonPressed(e);
                 e.Handled = true;
             }
             IsPressed = false;
             Invalidate();
+            base.OnKeyUp(e);
         }
 
         #endregion
@@ -338,33 +334,33 @@ namespace YamuiFramework.Controls {
         #region Mouse Methods
 
         protected override void OnMouseEnter(EventArgs e) {
-            base.OnMouseEnter(e);
             IsHovered = true;
             Invalidate();
+            base.OnMouseEnter(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
-            base.OnMouseDown(e);
             if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
                 IsPressed = true;
                 Invalidate();
             }
+            base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
-            base.OnMouseUp(e);
             if (IsPressed) {
                 OnButtonPressed(e);
             }
             IsPressed = false;
             Invalidate();
+            base.OnMouseUp(e);
         }
 
         protected override void OnMouseLeave(EventArgs e) {
-            base.OnMouseLeave(e);
             IsPressed = false;
             IsHovered = false;
             Invalidate();
+            base.OnMouseLeave(e);
         }
 
         #endregion

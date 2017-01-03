@@ -40,6 +40,19 @@ namespace YamuiFramework.Controls {
 
         #endregion
 
+        #region Constructor
+
+        public YamuiPictureBox() {
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
+        }
+
+        #endregion
+        
         #region Paint Methods
 
         protected override void OnPaintBackground(PaintEventArgs e) { }
@@ -68,6 +81,7 @@ namespace YamuiFramework.Controls {
             }
         }
         #endregion
+
     }
     internal class YamuiImageDesigner : ControlDesigner {
 

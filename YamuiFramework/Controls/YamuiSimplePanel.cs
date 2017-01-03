@@ -43,10 +43,12 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiSimplePanel() {
-            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
         }
 
         #endregion

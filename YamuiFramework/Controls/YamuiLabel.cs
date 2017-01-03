@@ -87,11 +87,13 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiLabel() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
+            SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.Selectable |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
             TabStop = false;
         }
 

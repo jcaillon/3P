@@ -77,10 +77,12 @@ namespace YamuiFramework.Controls {
         #region constructor
 
         public YamuiScrollPanel() {
-            SetStyle(ControlStyles.UserPaint |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             _contentPanel = new YamuiInternalPanel {
                 Location = new Point(0, 0),

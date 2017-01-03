@@ -184,25 +184,24 @@ namespace YamuiFramework.Forms {
                 ActiveControl = Controls.Find("yamuiButton0", false).FirstOrDefault();
         }
 
-        /// <summary>
-        /// A key has been pressed
-        /// </summary>
-        public override bool HandleKeyDown(Keys pressedKey) {
-            switch (pressedKey) {
+        protected override void OnKeyDown(KeyEventArgs e) {
+            switch (e.KeyCode) {
                 case Keys.Escape:
                     // close the form
                     Close();
-                    return true;
+                    e.Handled = true;
+                    break;
                 case Keys.Enter:
                     // click the first button
                     var firstButton = Controls.Find("yamuiButton0", false).FirstOrDefault() as YamuiButton;
                     if (firstButton != null) {
                         firstButton.PerformClick();
-                        return true;
+                        e.Handled = true;
                     }
                     break;
             }
-            return false;
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
         #endregion

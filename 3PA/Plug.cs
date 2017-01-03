@@ -429,11 +429,11 @@ namespace _3PA {
                 // Each control / form that should use a key not handled by Npp should implement a method 
                 // "HandleKeyDown" that will be triggered from here (see below)
                 var curControl = WinApi.GetFocusedControl();
-                var invokeResponse = curControl.InvokeMethod("HandleKeyDown", new[] { (object)key });
+                var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] { (object) new KeyEventArgs(key) });
                 if (invokeResponse != null && (bool)invokeResponse)
                     return true;
                 var curWindow = Control.FromHandle(WinApi.GetForegroundWindow());
-                invokeResponse = curWindow.InvokeMethod("HandleKeyDown", new[] { (object)key });
+                invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] { (object) new KeyEventArgs(key) });
                 if (invokeResponse != null && (bool)invokeResponse)
                     return true;
 

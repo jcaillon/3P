@@ -222,7 +222,60 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region Events
-        
+
+        protected override void OnKeyDown(KeyEventArgs e) {
+            e.Handled = HandleKeyDown(e.KeyCode);
+            if (!e.Handled)
+                base.OnKeyDown(e);
+        }
+
+        /// <summary>
+        /// A key has been pressed on the menu
+        /// </summary>
+        private bool HandleKeyDown(Keys pressedKey) {
+            var initialIndex = _selectedIndex;
+            do {
+                switch (pressedKey) {
+                    case Keys.Left:
+                    case Keys.Escape:
+                        if (_parentMenu != null) {
+                            WinApi.SetForegroundWindow(_parentMenu.Handle);
+                        }
+                        Close();
+                        break;
+                    case Keys.Right:
+                    case Keys.Space:
+                    case Keys.Enter:
+                        OnItemPressed();
+                        break;
+                    case Keys.Up:
+                        _selectedIndex--;
+                        break;
+                    case Keys.Down:
+                        _selectedIndex++;
+                        break;
+                    case Keys.PageDown:
+                        _selectedIndex = _content.Count - 1;
+                        break;
+                    case Keys.PageUp:
+                        _selectedIndex = 0;
+                        break;
+                    default:
+                        return false;
+                }
+                if (_selectedIndex > _content.Count - 1)
+                    _selectedIndex = 0;
+                if (_selectedIndex < 0)
+                    _selectedIndex = _content.Count - 1;
+                if (Controls.Count > 0)
+                    ActiveControl = Controls[_selectedIndex];
+            }
+            // do this while the current button is disabled and we didn't already try every button
+            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
+
+            return true;
+        }
+
         private void ButtonOnPressed(object sender, EventArgs eventArgs) {
             var button = (YamuiMenuButton)sender;
             if (button != null) {
@@ -232,8 +285,7 @@ namespace YamuiFramework.Forms {
         }
 
         private void ButtonOnKeyDown(object sender, KeyEventArgs e) {
-            if (!e.Handled && HandleKeyDown(e.KeyCode))
-                e.Handled = true;
+            OnKeyDown(e);
         }
 
         /// <summary>
@@ -287,53 +339,6 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region methods
-
-        /// <summary>
-        /// A key has been pressed on the menu
-        /// </summary>
-        public override bool HandleKeyDown(Keys pressedKey) {
-            var initialIndex = _selectedIndex;
-            do {
-                switch (pressedKey) {
-                    case Keys.Left:
-                    case Keys.Escape:
-                        if (_parentMenu != null) {
-                            WinApi.SetForegroundWindow(_parentMenu.Handle);
-                        }
-                        Close();
-                        break;
-                    case Keys.Right:
-                    case Keys.Space:
-                    case Keys.Enter:
-                        OnItemPressed();
-                        break;
-                    case Keys.Up:
-                        _selectedIndex--;
-                        break;
-                    case Keys.Down:
-                        _selectedIndex++;
-                        break;
-                    case Keys.PageDown:
-                        _selectedIndex = _content.Count - 1;
-                        break;
-                    case Keys.PageUp:
-                        _selectedIndex = 0;
-                        break;
-                    default:
-                        return false;
-                }
-                if (_selectedIndex > _content.Count - 1)
-                    _selectedIndex = 0;
-                if (_selectedIndex < 0)
-                    _selectedIndex = _content.Count - 1;
-                if (Controls.Count > 0)
-                    ActiveControl = Controls[_selectedIndex];
-            }
-            // do this while the current button is disabled and we didn't already try every button
-            while (_content[_selectedIndex].IsDisabled && initialIndex != _selectedIndex);
-
-            return true;
-        }
 
         private void CloseChildren() {
             if (_childMenu != null) {

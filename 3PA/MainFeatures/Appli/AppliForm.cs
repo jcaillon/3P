@@ -164,18 +164,14 @@ namespace _3PA.MainFeatures.Appli {
 
         #region OnKeyDown
 
-        /// <summary>
-        /// A key has been pressed on the menu
-        /// </summary>
-        public override bool HandleKeyDown(Keys pressedKey) {
-
+        protected override void OnKeyDown(KeyEventArgs e) {
             // hide window on escape
-            if (pressedKey == Keys.Escape) {
+            if (e.KeyCode == Keys.Escape) {
                 Cloack();
-                return true;
+                e.Handled = true;
             }
-
-            return false;
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
         #endregion

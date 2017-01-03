@@ -410,10 +410,13 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region HandleKeyDown
 
-        public override bool HandleKeyDown(Keys pressedKey) {
-            switch (pressedKey) {
+        /// <summary>
+        /// Called when a key is pressed
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e) {
+            switch (e.KeyCode) {
                 case Keys.Left:
-                    if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
+                    if (_isSearching || e.Control) {
                         LeftRight(true);
                     } else {
                         var curItem = SelectedItem as FilteredTypeTreeListItem;
@@ -424,20 +427,21 @@ namespace YamuiFramework.Controls.YamuiList {
                             else {
                                 // select its parent
                                 var lastSep = curItem.PathDescriptor.LastIndexOf(FilteredTypeTreeListItem.TreePathSeparator, StringComparison.CurrentCultureIgnoreCase);
-                                if (lastSep == -1)
-                                    return true;
-                                var parentPath = curItem.PathDescriptor.Substring(0, lastSep);
-                                var idx = SelectedItemIndex;
-                                FilteredTypeTreeListItem itemAbove;
-                                do {
-                                    idx--;
-                                    itemAbove = GetItem(idx) as FilteredTypeTreeListItem;
-                                } while (itemAbove != null && !itemAbove.PathDescriptor.Equals(parentPath));
-                                SelectedItemIndex = idx;
+                                if (lastSep >= 0) {
+                                    var parentPath = curItem.PathDescriptor.Substring(0, lastSep);
+                                    var idx = SelectedItemIndex;
+                                    FilteredTypeTreeListItem itemAbove;
+                                    do {
+                                        idx--;
+                                        itemAbove = GetItem(idx) as FilteredTypeTreeListItem;
+                                    } while (itemAbove != null && !itemAbove.PathDescriptor.Equals(parentPath));
+                                    SelectedItemIndex = idx;
+                                }
                             }
                         }
                     }
-                    return true;
+                    e.Handled = true;
+                    break;
 
                 case Keys.Right:
                     if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
@@ -446,11 +450,13 @@ namespace YamuiFramework.Controls.YamuiList {
                         // expand the current item
                         ExpandCollapse(SelectedItemIndex, ForceExpansion.ForceExpand);
                     }
-                    return true;
+                    e.Handled = true;
+                    break;
             }
-            return base.HandleKeyDown(pressedKey);
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
-
+        
         #endregion
 
     }

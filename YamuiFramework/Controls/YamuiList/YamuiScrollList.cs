@@ -548,7 +548,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     });
 
                     _rows[i].KeyDown += (sender, args) => {
-                        args.Handled = HandleKeyDown(args.KeyCode);
+                        OnKeyDown(args);
                     };
                     _rows[i].ButtonPressed += OnRowClick;
                     _rows[i].DoubleClick += OnRowClick;
@@ -774,10 +774,16 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region Events pushed from the button rows
 
+        protected override void OnKeyDown(KeyEventArgs e) {
+            e.Handled = HandleKeyDown(e.KeyCode);
+            if (!e.Handled)
+                base.OnKeyDown(e);
+        }
+
         /// <summary>
         /// Handles the key pressed for the control
         /// </summary>
-        public virtual bool HandleKeyDown(Keys pressedKey) {
+        private bool HandleKeyDown(Keys pressedKey) {
             var newIndex = SelectedItemIndex;
 
             switch (pressedKey) {
@@ -884,6 +890,14 @@ namespace YamuiFramework.Controls.YamuiList {
         #region Misc
 
         /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
+        }
+
+        /// <summary>
         /// Call this method to make the list focused
         /// </summary>
         public void GrabFocus() {
@@ -933,7 +947,12 @@ namespace YamuiFramework.Controls.YamuiList {
             public Action<ListItem, YamuiListRow, PaintEventArgs> OnRowPaint;
 
             public YamuiListRow() {
-                SetStyle(ControlStyles.StandardClick | ControlStyles.StandardDoubleClick, true);
+                // by default, buttons don't handle double click since a button in windows can only be simply clicked
+                // here we activate the double click
+                SetStyle(
+                    ControlStyles.StandardClick | 
+                    ControlStyles.StandardDoubleClick, 
+                    true);
             }
 
             /// <summary>
@@ -942,12 +961,6 @@ namespace YamuiFramework.Controls.YamuiList {
             protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
                 e.IsInputKey = true;
                 base.OnPreviewKeyDown(e);
-            }
-
-            protected override void OnMouseDown(MouseEventArgs e) {
-                IsPressed = true;
-                Invalidate();
-                base.OnMouseDown(e);
             }
 
             protected override void OnPaint(PaintEventArgs e) {

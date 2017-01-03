@@ -64,10 +64,12 @@ namespace YamuiFramework.Controls {
         #region Constructor
 
         public YamuiTab(List<YamuiMainMenu> content, YamuiMainAppli owner) {
-            SetStyle(ControlStyles.UserPaint |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.OptimizedDoubleBuffer, true);
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
             _content = content;
             _owner = owner;
 
@@ -362,6 +364,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
     }
 
     #region Menu specs

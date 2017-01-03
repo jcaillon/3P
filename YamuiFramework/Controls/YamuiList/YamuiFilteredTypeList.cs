@@ -378,17 +378,23 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region HandleKeyDown
 
-        public override bool HandleKeyDown(Keys pressedKey) {
-            switch (pressedKey) {
+        /// <summary>
+        /// Called when a key is pressed
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e) {
+            switch (e.KeyCode) {
                 case Keys.Left:
                     LeftRight(true);
-                    return true;
+                    e.Handled = true;
+                    break;
 
                 case Keys.Right:
                     LeftRight(false);
-                    return true;
+                    e.Handled = true;
+                    break;
             }
-            return base.HandleKeyDown(pressedKey);
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
         /// <summary>

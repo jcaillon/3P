@@ -42,12 +42,13 @@ namespace YamuiFramework.Controls {
 
         #region Constructor
         public YamuiColorRadioButton() {
-            SetStyle(ControlStyles.SupportsTransparentBackColor |
+            SetStyle(
                 ControlStyles.OptimizedDoubleBuffer |
                 ControlStyles.ResizeRedraw |
                 ControlStyles.UserPaint |
                 ControlStyles.Selectable |
-                ControlStyles.AllPaintingInWmPaint, true);
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
         }
         #endregion
 
@@ -147,6 +148,19 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Programatically triggers the OnKeyDown event
+        /// </summary>
+        public bool PerformKeyDown(KeyEventArgs e) {
+            OnKeyDown(e);
+            return e.Handled;
+        }
+
+        #endregion
+
     }
 
     internal class YamuiColorRadioButtonDesigner : ControlDesigner {

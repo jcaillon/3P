@@ -142,16 +142,18 @@ namespace YamuiFramework.Forms {
         #region override
 
         /// <summary>
-        /// A key has been pressed
+        /// A key was pressed on the form
         /// </summary>
-        public override bool HandleKeyDown(Keys pressedKey) {
-            switch (pressedKey) {
+        protected override void OnKeyDown(KeyEventArgs e) {
+            switch (e.KeyCode) {
                 case Keys.Escape:
                     // close the form
                     Close();
-                    return true;
+                    e.Handled = true;
+                    break;
             }
-            return false;
+            if (!e.Handled)
+                base.OnKeyDown(e);
         }
 
         // get activated window

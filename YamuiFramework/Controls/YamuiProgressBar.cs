@@ -136,12 +136,19 @@ namespace YamuiFramework.Controls {
         private int _marqueePos;
 
         #endregion
-        
-        public YamuiProgressBar() {
-            _tmrMarquee.Tick += _tmrMarquee_Tick;
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint |
-                ControlStyles.AllPaintingInWmPaint | ControlStyles.ResizeRedraw, true);
+        #region Constructor
+
+        public YamuiProgressBar() {
+
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
+
+            _tmrMarquee.Tick += _tmrMarquee_Tick;
 
             // Set defaults
             GradientIntensity = 20;
@@ -150,6 +157,8 @@ namespace YamuiFramework.Controls {
             Size = new Size(200, 23);
         }
 
+        #endregion
+        
         #region Virtual and Overridden
 
         [Description("Occurs when the progress property has changed and the control has invalidated")]
@@ -214,6 +223,8 @@ namespace YamuiFramework.Controls {
         }
         #endregion
 
+        #region Private methods
+
         private void AutoSetIsVertical() {
             Vertical = (Width < Height);
         }
@@ -245,8 +256,8 @@ namespace YamuiFramework.Controls {
                 darkColor2 = ChangeColorBrightness(Desaturate(YamuiThemeManager.Current.AccentColor), _gradientIntensity);
             }
 
-            Rectangle rect = (!_vertical) ? new Rectangle(0, 0, Width, Height / 2) :
-                                 new Rectangle(0, 0, Width / 2, Height);
+            Rectangle rect = (!_vertical) ? new Rectangle(0, 0, Width, Height/2) :
+                new Rectangle(0, 0, Width/2, Height);
 
             if (Enabled) {
                 _backLgb = new LinearGradientBrush(rect, backColor, darkColor, angle, true);
@@ -259,6 +270,8 @@ namespace YamuiFramework.Controls {
             _backLgb.WrapMode = WrapMode.TileFlipX;
             _foreLgb.WrapMode = WrapMode.TileFlipX;
         }
+
+        #endregion
 
         #region Drawing
         private static Color ChangeColorBrightness(Color color, int factor) {
@@ -352,6 +365,7 @@ namespace YamuiFramework.Controls {
         }
 
         #endregion
+
     }
 
     public enum CenterElement {
