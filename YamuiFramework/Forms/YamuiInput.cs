@@ -161,6 +161,8 @@ namespace YamuiFramework.Forms {
             // quickly correct the tab order.. (we created the button from right to left and i'm too lazy to think atm)
             var tabOrderManager = new TabOrderManager(this);
             tabOrderManager.SetTabOrder(TabOrderManager.TabScheme.AcrossFirst);
+
+            KeyPreview = true;
         }
 
         #endregion
@@ -183,31 +185,24 @@ namespace YamuiFramework.Forms {
         }
 
         /// <summary>
-        /// A key has been pressed on the menu
+        /// A key has been pressed
         /// </summary>
-        public bool HandleKeyDown(Keys pressedKey) {
-            var evnt = new KeyEventArgs(pressedKey);
-            OnKeyDown(evnt);
-            return evnt.Handled;
-        }
-
-        protected override void OnKeyDown(KeyEventArgs e) {
-            switch (e.KeyCode) {
+        public override bool HandleKeyDown(Keys pressedKey) {
+            switch (pressedKey) {
                 case Keys.Escape:
                     // close the form
                     Close();
-                    e.Handled = true;
-                    break;
+                    return true;
                 case Keys.Enter:
                     // click the first button
                     var firstButton = Controls.Find("yamuiButton0", false).FirstOrDefault() as YamuiButton;
                     if (firstButton != null) {
                         firstButton.PerformClick();
-                        e.Handled = true;
+                        return true;
                     }
                     break;
             }
-            base.OnKeyDown(e);
+            return false;
         }
 
         #endregion

@@ -376,9 +376,9 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region OnKeyDown
+        #region HandleKeyDown
 
-        public override bool OnKeyDown(Keys pressedKey) {
+        public override bool HandleKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
                     LeftRight(true);
@@ -388,7 +388,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     LeftRight(false);
                     return true;
             }
-            return base.OnKeyDown(pressedKey);
+            return base.HandleKeyDown(pressedKey);
         }
 
         /// <summary>

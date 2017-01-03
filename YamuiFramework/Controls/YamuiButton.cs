@@ -186,6 +186,13 @@ namespace YamuiFramework.Controls {
             Invalidate();
         }
 
+        /// <summary>
+        /// hides the default method
+        /// </summary>
+        public new void PerformClick() {
+            OnButtonPressed(new MouseEventArgs(MouseButtons.Left, 1, 0, 0, 0));
+        }
+
         #endregion
 
         #region Paint Methods
@@ -289,19 +296,11 @@ namespace YamuiFramework.Controls {
 
         #region Keyboard Methods
 
-        /// <summary>
-        /// A key has been pressed on the menu
-        /// </summary>
-        public bool HandleKeyDown(Keys pressedKey) {
-            var evnt = new KeyEventArgs(pressedKey);
-            OnKeyDown(evnt);
-            return evnt.Handled;
-        }
-
         // This is mandatory to be able to handle the ENTER key in key events!!
         protected override void OnPreviewKeyDown(PreviewKeyDownEventArgs e) {
-            if (e.KeyCode == Keys.Enter) e.IsInputKey = true;
             base.OnPreviewKeyDown(e);
+            if (e.KeyCode == Keys.Enter)
+                e.IsInputKey = true;
         }
 
         protected override void OnKeyDown(KeyEventArgs e) {
@@ -315,14 +314,23 @@ namespace YamuiFramework.Controls {
             }
         }
 
+        /// <summary>
+        /// A key has been pressed on the menu
+        /// </summary>
+        public bool HandleKeyDown(Keys pressedKey) {
+            var evnt = new KeyEventArgs(pressedKey);
+            OnKeyDown(evnt);
+            return evnt.Handled;
+        }
+
         protected override void OnKeyUp(KeyEventArgs e) {
+            base.OnKeyUp(e);
             if (IsPressed) {
                 OnButtonPressed(e);
                 e.Handled = true;
             }
             IsPressed = false;
             Invalidate();
-            base.OnKeyUp(e);
         }
 
         #endregion
@@ -330,33 +338,33 @@ namespace YamuiFramework.Controls {
         #region Mouse Methods
 
         protected override void OnMouseEnter(EventArgs e) {
+            base.OnMouseEnter(e);
             IsHovered = true;
             Invalidate();
-            base.OnMouseEnter(e);
         }
 
         protected override void OnMouseDown(MouseEventArgs e) {
+            base.OnMouseDown(e);
             if (e.Button == MouseButtons.Left || (AcceptsRightClick && e.Button == MouseButtons.Right)) {
                 IsPressed = true;
                 Invalidate();
             }
-            base.OnMouseDown(e);
         }
 
         protected override void OnMouseUp(MouseEventArgs e) {
+            base.OnMouseUp(e);
             if (IsPressed) {
                 OnButtonPressed(e);
             }
             IsPressed = false;
             Invalidate();
-            base.OnMouseUp(e);
         }
 
         protected override void OnMouseLeave(EventArgs e) {
+            base.OnMouseLeave(e);
             IsPressed = false;
             IsHovered = false;
             Invalidate();
-            base.OnMouseLeave(e);
         }
 
         #endregion

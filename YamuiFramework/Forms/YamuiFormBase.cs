@@ -146,8 +146,6 @@ namespace YamuiFramework.Forms {
         /// override to make a borderless window movable
         /// </summary>
         protected override void OnMouseDown(MouseEventArgs e) {
-            base.OnMouseDown(e);
-
             if (Movable && e.Button == MouseButtons.Left) {
                 if (WindowState == FormWindowState.Maximized) 
                     return;
@@ -156,7 +154,26 @@ namespace YamuiFramework.Forms {
                 WinApi.ReleaseCapture();
                 WinApi.SendMessage(Handle, (uint)WinApi.Messages.WM_NCLBUTTONDOWN, new IntPtr((int)WinApi.HitTest.HTCAPTION), new IntPtr(0));
             }
+            base.OnMouseDown(e);
         }
+
+        #region KeyDown helper
+        
+        protected override void OnKeyDown(KeyEventArgs e) {
+            if (!e.Handled && HandleKeyDown(e.KeyCode))
+                e.Handled = true;
+            base.OnKeyDown(e);
+        }
+
+        /// <summary>
+        /// Method called when a key is pressed (override this instead of OnKeyDown if you are running an appli under notepad++)
+        /// </summary>
+        public virtual bool HandleKeyDown(Keys keyCode) {
+            return false;
+        }
+
+        #endregion
+
 
         #endregion
 
@@ -179,7 +196,6 @@ namespace YamuiFramework.Forms {
         protected override void OnPaintBackground(PaintEventArgs e) { }
 
         #endregion
-
-
+        
     }
 }

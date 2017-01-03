@@ -548,7 +548,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     });
 
                     _rows[i].KeyDown += (sender, args) => {
-                        args.Handled = OnKeyDown(args.KeyCode);
+                        args.Handled = HandleKeyDown(args.KeyCode);
                     };
                     _rows[i].ButtonPressed += OnRowClick;
                     _rows[i].DoubleClick += OnRowClick;
@@ -777,7 +777,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// <summary>
         /// Handles the key pressed for the control
         /// </summary>
-        public virtual bool OnKeyDown(Keys pressedKey) {
+        public virtual bool HandleKeyDown(Keys pressedKey) {
             var newIndex = SelectedItemIndex;
 
             switch (pressedKey) {

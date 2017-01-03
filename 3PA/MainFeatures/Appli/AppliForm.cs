@@ -167,7 +167,7 @@ namespace _3PA.MainFeatures.Appli {
         /// <summary>
         /// A key has been pressed on the menu
         /// </summary>
-        public bool HandleKeyDown(Keys pressedKey) {
+        public override bool HandleKeyDown(Keys pressedKey) {
 
             // hide window on escape
             if (pressedKey == Keys.Escape) {

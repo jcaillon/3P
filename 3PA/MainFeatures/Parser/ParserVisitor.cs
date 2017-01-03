@@ -918,7 +918,11 @@ namespace _3PA.MainFeatures.Parser {
                 ablParser.Accept(parserVisitor);
 
                 // save it for future uses
-                _savedParserVisitors.Add(fileNameWithParam, parserVisitor);
+                if (_savedParserVisitors.ContainsKey(fileNameWithParam))
+                    _savedParserVisitors[fileNameWithParam] = parserVisitor;
+                else
+                    _savedParserVisitors.Add(fileNameWithParam, parserVisitor);
+
             }
 
             return parserVisitor;

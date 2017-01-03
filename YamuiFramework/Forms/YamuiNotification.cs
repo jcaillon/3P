@@ -141,6 +141,19 @@ namespace YamuiFramework.Forms {
 
         #region override
 
+        /// <summary>
+        /// A key has been pressed
+        /// </summary>
+        public override bool HandleKeyDown(Keys pressedKey) {
+            switch (pressedKey) {
+                case Keys.Escape:
+                    // close the form
+                    Close();
+                    return true;
+            }
+            return false;
+        }
+
         // get activated window
         protected override void OnShown(EventArgs e) {
             // Start the timer animation on the bottom of the notif

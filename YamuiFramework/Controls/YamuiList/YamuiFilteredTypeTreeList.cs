@@ -408,9 +408,9 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region OnKeyDown
+        #region HandleKeyDown
 
-        public override bool OnKeyDown(Keys pressedKey) {
+        public override bool HandleKeyDown(Keys pressedKey) {
             switch (pressedKey) {
                 case Keys.Left:
                     if (_isSearching || ModifierKeys.HasFlag(Keys.Control)) {
@@ -448,7 +448,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                     return true;
             }
-            return base.OnKeyDown(pressedKey);
+            return base.HandleKeyDown(pressedKey);
         }
 
         #endregion

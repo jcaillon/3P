@@ -159,8 +159,8 @@ namespace YamuiFramework.Forms {
                         SubTextOpacity = SubTextOpacity,
                         Enabled = !item.IsDisabled
                     };
-                    button.Click += ButtonOnButtonPressed;
-                    button.PreviewKeyDown += OnPreviewKeyDown;
+                    button.Click += ButtonOnPressed;
+                    button.KeyDown += ButtonOnKeyDown;
                     Controls.Add(button);
                     _content.Add(item);
                     yPos += LineHeight;
@@ -187,14 +187,8 @@ namespace YamuiFramework.Forms {
             // menu position
             Location = GetBestPosition(location);
 
-            // events
-            Deactivate += OnDeactivate;
-            Activated += OnActivated;
-            Closing += OnClosing;
-
             // keydown
             KeyPreview = true;
-            PreviewKeyDown += OnPreviewKeyDown;
 
             // set focused item
             ActiveControl = Controls[_selectedIndex];
@@ -204,6 +198,9 @@ namespace YamuiFramework.Forms {
                 ListOfOpenededMenuHandle = new List<IntPtr>();
             }
             ListOfOpenededMenuHandle.Add(Handle);
+
+            // So that the OnKeyDown event of this form is executed before the HandleKeyDown event of the control focused
+            KeyPreview = true;
         }
 
         #endregion
@@ -225,14 +222,8 @@ namespace YamuiFramework.Forms {
         #endregion
 
         #region Events
-
-        private void OnPreviewKeyDown(object sender, PreviewKeyDownEventArgs previewKeyDownEventArgs) {
-            HandleKeyDown(previewKeyDownEventArgs.KeyCode);
-            previewKeyDownEventArgs.IsInputKey = true;
-        }
-
-
-        private void ButtonOnButtonPressed(object sender, EventArgs eventArgs) {
+        
+        private void ButtonOnPressed(object sender, EventArgs eventArgs) {
             var button = (YamuiMenuButton)sender;
             if (button != null) {
                 _selectedIndex = (int)button.Tag;
@@ -240,14 +231,9 @@ namespace YamuiFramework.Forms {
             }
         }
 
-        private void OnClosing(object sender, CancelEventArgs cancelEventArgs) {
-            _closing = true;
-            ListOfOpenededMenuHandle.Remove(Handle);
-
-            Deactivate -= OnDeactivate;
-            Activated -= OnActivated;
-            Closing -= OnClosing;
-            PreviewKeyDown -= OnPreviewKeyDown;
+        private void ButtonOnKeyDown(object sender, KeyEventArgs e) {
+            if (!e.Handled && HandleKeyDown(e.KeyCode))
+                e.Handled = true;
         }
 
         /// <summary>
@@ -273,21 +259,29 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// Close the menu when the user clicked elsewhere
         /// </summary>
-        private void OnDeactivate(object sender, EventArgs eventArgs) {
+        protected override void OnDeactivate(EventArgs e) {
             // close if the new active windows isn't a menu
             // ReSharper disable once ObjectCreationAsStatement
             new DelayedAction(30, () => {
                 if (!ListOfOpenededMenuHandle.Contains(WinApi.GetForegroundWindow()) && !_closing) {
-                    BeginInvoke((Action) CloseAll);
+                    BeginInvoke((Action)CloseAll);
                 }
             });
+            base.OnDeactivate(e);
         }
-
+        
         /// <summary>
         /// Close all children when a menu is activated
         /// </summary>
-        private void OnActivated(object sender, EventArgs eventArgs) {
+        protected override void OnActivated(EventArgs e) {
             CloseChildren();
+            base.OnActivated(e);
+        }
+
+        protected override void OnClosing(CancelEventArgs e) {
+            _closing = true;
+            ListOfOpenededMenuHandle.Remove(Handle);
+            base.OnClosing(e);
         }
 
         #endregion
@@ -297,7 +291,7 @@ namespace YamuiFramework.Forms {
         /// <summary>
         /// A key has been pressed on the menu
         /// </summary>
-        public bool HandleKeyDown(Keys pressedKey) {
+        public override bool HandleKeyDown(Keys pressedKey) {
             var initialIndex = _selectedIndex;
             do {
                 switch (pressedKey) {

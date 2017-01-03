@@ -84,7 +84,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             };
 
             flFilter1.TextChanged += YamuiFilteredList1.OnTextChangedEvent;
-            flFilter1.KeyDown += (sender, args) => args.Handled = YamuiFilteredList1.OnKeyDown(args.KeyCode);
+            flFilter1.KeyDown += (sender, args) => args.Handled = YamuiFilteredList1.HandleKeyDown(args.KeyCode);
 
 
             // autocompletion list
@@ -95,7 +95,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             yamuiFilteredTypeList1.MoreTypesImage = ImageResources.More;
 
             flFilter1.TextChanged += yamuiFilteredTypeList1.OnTextChangedEvent;
-            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.OnKeyDown(args.KeyCode);
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeList1.HandleKeyDown(args.KeyCode);
             
 
             // tREE
@@ -113,7 +113,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
             });
 
             flFilter1.TextChanged += yamuiFilteredTypeTreeList1.OnTextChangedEvent;
-            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.OnKeyDown(args.KeyCode);
+            flFilter1.KeyDown += (sender, args) => args.Handled = yamuiFilteredTypeTreeList1.HandleKeyDown(args.KeyCode);
 
 
             // -------------------------------------------------------------
