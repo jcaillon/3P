@@ -106,6 +106,12 @@ namespace _3PA.MainFeatures.Parser {
 
         /// <summary>
         /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
+        /// It's the parameters from an include, ex: {1}->SHARED, {& name}->_extension
+        /// </summary>
+        private Dictionary<string, List<Token>> _includeParameters;
+
+        /// <summary>
+        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
         /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
         /// or & DEFINE variables from the current file
         /// </summary>
@@ -142,6 +148,22 @@ namespace _3PA.MainFeatures.Parser {
         public Dictionary<string, ParsedFunction> ParsedPrototypes {
             get { return _functionPrototype; }
         }
+        
+        /// <summary>
+        /// Contains a dictionnary in which each variable name known corresponds to its value tokenized
+        /// It can either be parameters from an include, ex: {1}->SHARED, {& name}->_extension
+        /// or & DEFINE variables from the current file
+        /// </summary>
+        public Dictionary<string, List<Token>> IncludeParameters {
+            get { return _includeParameters; }
+        }
+
+        /// <summary>
+        /// Path to the file being parsed (is added to the parseItem info)
+        /// </summary>
+        public string FilePathBeingParsed {
+            get { return _filePathBeingParsed; }
+        }
 
         #endregion
 
@@ -162,10 +184,13 @@ namespace _3PA.MainFeatures.Parser {
             // process inputs
             _filePathBeingParsed = filePathBeingParsed;
             _matchKnownWords = matchKnownWords && _knownStaticItems != null;
-            _preProcVariables = includeParameters ?? new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase);
+            _includeParameters = includeParameters;
+            _preProcVariables = _includeParameters == null ?
+                new Dictionary<string, List<Token>>(StringComparer.CurrentCultureIgnoreCase):
+                new Dictionary<string, List<Token>>(_includeParameters, StringComparer.CurrentCultureIgnoreCase);
             
             // the proprocessed variable {0} equals to the filename...
-            _preProcVariables.Add("0", new List<Token> { new TokenWord(Path.GetFileName(_filePathBeingParsed), 0, 0, 0, 0) });
+            _preProcVariables.Add("0", new List<Token> { new TokenWord(Path.GetFileName(FilePathBeingParsed), 0, 0, 0, 0) });
 
             // init context
             _context = new ParseContext {
@@ -224,7 +249,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         /// <param name="visitor"></param>
         public void Accept(IParserVisitor visitor) {
-            visitor.PreVisit();
+            visitor.PreVisit(this);
             foreach (var item in _parsedItemList) {
                 item.Accept(visitor);
             }
@@ -698,7 +723,7 @@ namespace _3PA.MainFeatures.Parser {
         /// </summary>
         private void AddParsedItem(ParsedItem item) {
 
-            item.FilePath = _filePathBeingParsed;
+            item.FilePath = FilePathBeingParsed;
             item.Scope = _context.Scope;
 
             // add the item name's to the known words
@@ -1593,7 +1618,7 @@ namespace _3PA.MainFeatures.Parser {
 
                 ParsedPrototype createdProto = new ParsedPrototype(name, functionToken, returnType) {
                     Scope = _context.Scope,
-                    FilePath = _filePathBeingParsed,
+                    FilePath = FilePathBeingParsed,
                     SimpleForward = state == 99, // allows us to know if we expect an implementation in this .p or not
                     EndPosition = token.EndPosition,
                     EndBlockLine = token.Line,

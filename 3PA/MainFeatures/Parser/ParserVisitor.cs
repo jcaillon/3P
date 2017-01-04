@@ -39,7 +39,7 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// We keep tracks of the parsed files, to avoid parsing the same file twice
         /// </summary>
-        private static HashSet<string> _parsedFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
+        private static HashSet<string> _runPersistentFiles = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
         /// Instead of parsing the include files each time we store the results of the parsing to use them when we need it
@@ -78,11 +78,6 @@ namespace _3PA.MainFeatures.Parser {
         private HashSet<string> _definedProcedures = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase);
 
         /// <summary>
-        /// Line info from the parser
-        /// </summary>
-        private Dictionary<int, LineInfo> _lineInfo;
-
-        /// <summary>
         /// contains the list of items that depend on the current file, that list
         /// is updated by the parser's visitor class
         /// </summary>
@@ -92,6 +87,11 @@ namespace _3PA.MainFeatures.Parser {
         /// Contains the list of explorer items for the current file, updated by the parser's visitor class
         /// </summary>
         private List<CodeExplorerItem> _parsedExplorerItemsList = new List<CodeExplorerItem>();
+
+        /// <summary>
+        /// Reference of the parser being visited
+        /// </summary>
+        private Parser _parser;
 
         #endregion
 
@@ -131,22 +131,12 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Constructor
         /// </summary>
-        public ParserVisitor(bool isBaseFile, string parsedFilePath, Dictionary<int, LineInfo> lineInfo) {
-
+        public ParserVisitor(bool isBaseFile) {
             _isBaseFile = isBaseFile;
-            _currentParsedFilePath = parsedFilePath;
-            _currentParsedFileName = Path.GetFileName(parsedFilePath);
-            _lineInfo = lineInfo;
-            if (_lineInfo == null)
-                _lineInfo = new Dictionary<int, LineInfo>();
 
             if (_isBaseFile) {
                 // resets the parsed files for this parsing session
-                _parsedFiles.Clear();
-
-                // if this document is in the Saved parsed visitors, we remove it now and we will add it back when it is parsed
-                if (_savedParserVisitors.ContainsKey(_currentParsedFilePath))
-                    _savedParserVisitors.Remove(_currentParsedFilePath);
+                _runPersistentFiles.Clear();
             }
         }
 
@@ -157,28 +147,41 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// To be executed before the visit starts
         /// </summary>
-        public void PreVisit() {}
+        public void PreVisit(Parser parser) {
+            _parser = parser;
+            _currentParsedFilePath = parser.FilePathBeingParsed;
+            _currentParsedFileName = Path.GetFileName(_currentParsedFilePath);
+
+            // if this document is in the Saved parsed visitors, we remove it now and we will add it back when it is parsed
+            if (_isBaseFile) {
+                foreach (var keyStartingWithPath in _savedParserVisitors.Where(pair => pair.Key.StartsWith(_currentParsedFilePath + "|", StringComparison.CurrentCulture)).Select(pair => pair.Key).ToList()) {
+                    if (_savedParserVisitors.ContainsKey(keyStartingWithPath))
+                        _savedParserVisitors.Remove(keyStartingWithPath);
+                }
+            }
+        }
 
         /// <summary>
         /// To be executed after the visit ends
         /// </summary>
         public void PostVisit() {
-
             if (_isBaseFile) {
-
                 // correct the internal/external type of run statements :
                 foreach (var item in _parsedExplorerItemsList.Where(item => item.Branch == CodeExplorerBranch.Run)) {
                     if (_definedProcedures.Contains(item.DisplayText))
                         item.IconType = CodeExplorerIconType.RunInternal;
                 }
-
-                // save the info for uses in an another file, where this file is run in persistent or included
-                if (!_savedParserVisitors.ContainsKey(_currentParsedFilePath))
-                    _savedParserVisitors.Add(_currentParsedFilePath, this);
-                else
-                    _savedParserVisitors[_currentParsedFilePath] = this;
             }
 
+            // save the info for uses in an another file, where this file is run in persistent or included
+            var pathWithParam = _currentParsedFilePath + "|" + GetParserIncludeParams(_parser.IncludeParameters);
+            if (!_savedParserVisitors.ContainsKey(pathWithParam))
+                _savedParserVisitors.Add(pathWithParam, this);
+            else
+                _savedParserVisitors[pathWithParam] = this;
+
+            // lose parser reference
+            _parser = null;
         }
 
         /// <summary>
@@ -218,9 +221,9 @@ namespace _3PA.MainFeatures.Parser {
             if (pars.HasPersistent && !string.IsNullOrEmpty(fullFilePath)) {
 
                 // ensure to not parse the same file twice in a parser session!
-                if (_parsedFiles.Contains(fullFilePath))
+                if (_runPersistentFiles.Contains(fullFilePath))
                     return;
-                _parsedFiles.Add(fullFilePath);
+                _runPersistentFiles.Add(fullFilePath);
 
                 LoadProcPersistent(fullFilePath, pars.Scope);
             }
@@ -522,13 +525,13 @@ namespace _3PA.MainFeatures.Parser {
 
             // find the end line of the labelled block
             var line = pars.Line + 1;
-            var depth = (_lineInfo.ContainsKey(pars.Line)) ? _lineInfo[pars.Line].BlockDepth : 0;
+            var depth = (_parser.LineInfo.ContainsKey(pars.Line)) ? _parser.LineInfo[pars.Line].BlockDepth : 0;
             bool wentIntoBlock = false;
-            while (_lineInfo.ContainsKey(line)) {
-                if (!wentIntoBlock && _lineInfo[line].BlockDepth > depth) {
+            while (_parser.LineInfo.ContainsKey(line)) {
+                if (!wentIntoBlock && _parser.LineInfo[line].BlockDepth > depth) {
                     wentIntoBlock = true;
-                    depth = _lineInfo[line].BlockDepth;
-                } else if (wentIntoBlock && _lineInfo[line].BlockDepth < depth)
+                    depth = _parser.LineInfo[line].BlockDepth;
+                } else if (wentIntoBlock && _parser.LineInfo[line].BlockDepth < depth)
                     break;
                 line++;
             }
@@ -883,10 +886,10 @@ namespace _3PA.MainFeatures.Parser {
         /// <summary>
         /// Returns a parserVisitor for an existing object, or it create a new one
         /// </summary>
-        /// <param name="fileName"></param>
+        /// <param name="filePath"></param>
         /// <returns></returns>
-        public static ParserVisitor GetParserVisitor(string fileName) {
-            return ParseFile(fileName, null, null);
+        public static ParserVisitor GetParserVisitor(string filePath) {
+            return ParseFile(filePath, null, null);
         }
 
         /// <summary>
@@ -894,38 +897,34 @@ namespace _3PA.MainFeatures.Parser {
         /// Remarks : it doesn't parse the document against known words since this is only useful for
         /// the CURRENT document and not for the others
         /// </summary>
-        private static ParserVisitor ParseFile(string fileName, ParsedScopeItem scopeItem, Dictionary<string, List<Token>> includeParameters) {
+        private static ParserVisitor ParseFile(string filePath, ParsedScopeItem scopeItem, Dictionary<string, List<Token>> includeParameters) {
             ParserVisitor parserVisitor;
 
-            var fileNameWithParam = fileName;
-            if (includeParameters != null) {
-                foreach (var kpv in includeParameters) {
-                    fileNameWithParam += "|" + kpv.Key + "=";
-                    foreach (var token in kpv.Value) {
-                        fileNameWithParam += token.Value;
-                    }
-                }
-            }
-
             // did we already parsed this file in a previous parse session?
-            if (_savedParserVisitors.ContainsKey(fileNameWithParam)) {
-                parserVisitor = _savedParserVisitors[fileNameWithParam];
+            var pathWithParam = filePath + "|" + GetParserIncludeParams(includeParameters);
+            if (_savedParserVisitors.ContainsKey(pathWithParam)) {
+                parserVisitor = _savedParserVisitors[pathWithParam];
             } else {
                 // Parse it
-                var ablParser = new Parser(Utils.ReadAllText(fileName), fileName, scopeItem, includeParameters, false);
-
-                parserVisitor = new ParserVisitor(false, Path.GetFileName(fileName), ablParser.LineInfo);
+                var ablParser = new Parser(Utils.ReadAllText(filePath), filePath, scopeItem, includeParameters, false);
+                parserVisitor = new ParserVisitor(false);
                 ablParser.Accept(parserVisitor);
-
-                // save it for future uses
-                if (_savedParserVisitors.ContainsKey(fileNameWithParam))
-                    _savedParserVisitors[fileNameWithParam] = parserVisitor;
-                else
-                    _savedParserVisitors.Add(fileNameWithParam, parserVisitor);
-
             }
 
             return parserVisitor;
+        }
+
+        private static string GetParserIncludeParams(Dictionary<string, List<Token>> includeParameters) {
+            string param = "";
+            if (includeParameters != null) {
+                foreach (var kpv in includeParameters) {
+                    param += kpv.Key + "=";
+                    foreach (var token in kpv.Value) {
+                        param += token.Value + "|";
+                    }
+                }
+            }
+            return param.TrimEnd('|');
         }
 
         /// <summary>

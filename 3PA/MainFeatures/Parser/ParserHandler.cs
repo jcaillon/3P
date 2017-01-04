@@ -218,7 +218,7 @@ namespace _3PA.MainFeatures.Parser {
                             _ablParser = new Parser(Plug.IsCurrentFileProgress ? Npp.Text : string.Empty, _lastParsedFilePath, null, null, true);
 
                             // visitor
-                            _parserVisitor = new ParserVisitor(true, _lastParsedFilePath, _ablParser.LineInfo);
+                            _parserVisitor = new ParserVisitor(true);
                             _ablParser.Accept(_parserVisitor);
 
                             //watch.Stop();

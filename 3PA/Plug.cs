@@ -109,10 +109,10 @@ namespace _3PA {
         /// </summary>
         public static Queue<Action> ActionsAfterUpdateUi = new Queue<Action>();
 
-        #endregion
-
         private static HashSet<string> _openedFileList = new HashSet<string>(StringComparer.CurrentCultureIgnoreCase); 
 
+        #endregion
+        
         #region Called with no conditions
 
         #region Start
@@ -429,13 +429,17 @@ namespace _3PA {
                 // Each control / form that should use a key not handled by Npp should implement a method 
                 // "HandleKeyDown" that will be triggered from here (see below)
                 var curControl = WinApi.GetFocusedControl();
-                var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] { (object) new KeyEventArgs(key) });
-                if (invokeResponse != null && (bool)invokeResponse)
-                    return true;
+                if (curControl != null) {
+                    var invokeResponse = curControl.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
+                    if (invokeResponse != null && (bool) invokeResponse)
+                        return true;
+                }
                 var curWindow = Control.FromHandle(WinApi.GetForegroundWindow());
-                invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] { (object) new KeyEventArgs(key) });
-                if (invokeResponse != null && (bool)invokeResponse)
-                    return true;
+                if (curWindow != null) {
+                    var invokeResponse = curWindow.InvokeMethod("PerformKeyDown", new[] {(object) new KeyEventArgs(key)});
+                    if (invokeResponse != null && (bool) invokeResponse)
+                        return true;
+                }
 
                 // Close interfacePopups
                 if (key == Keys.PageDown || key == Keys.PageUp || key == Keys.Next || key == Keys.Prior)
@@ -689,9 +693,9 @@ namespace _3PA {
                 // we finished entering a keyword
                 var curPos = Npp.CurrentPosition;
                 int offset;
-                if (c == '\n') {
+                if (c == '\n' || c == '\r') {
                     offset = curPos - Npp.GetLine().Position;
-                    offset += (Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n")) ? 2 : 1;
+                    offset += Npp.GetTextOnLeftOfPos(curPos - offset, 2).Equals("\r\n") ? 2 : 1;
                 } else
                     offset = 1;
 
@@ -699,7 +703,7 @@ namespace _3PA {
                 var keyword = Npp.GetKeyword(searchWordAt);
                 var isNormalContext = Style.IsCarretInNormalContext(searchWordAt);
 
-                if (!String.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoComplete.IsVisible) {
+                if (!string.IsNullOrWhiteSpace(keyword) && isNormalContext && AutoComplete.IsVisible) {
                     string replacementWord = null;
 
                     // automatically insert selected keyword of the completion list

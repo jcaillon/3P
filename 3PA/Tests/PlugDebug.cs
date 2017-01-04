@@ -488,7 +488,7 @@ namespace _3PA.Tests {
 
     internal class OutputParserVisitor : IParserVisitor {
 
-        public void PreVisit() {
+        public void PreVisit(Parser parser) {
             Output = new StringBuilder();
         }
 
