@@ -124,7 +124,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     AcceptsRightClick = true,
                     HideFocusedIndicator = true,
                     Activated = true,
-                    BackGrndImage = GetObjectTypeImage(type),
+                    BackGrndImage = GetObjectTypeImage != null ? GetObjectTypeImage(type) : null,
                     Type = type,
                     Location = new Point(xPos, yPos)
                 };

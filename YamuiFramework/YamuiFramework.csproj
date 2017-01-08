@@ -89,6 +89,9 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Controls\YamuiList\ListItem.cs" />
+    <Compile Include="Controls\YamuiList\YamuiFilterBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
     <Compile Include="Controls\YamuiList\YamuiFilteredList.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -355,6 +358,10 @@
     <Content Include="Resources\ErrorProviderIcons\IcoError.ico" />
     <Content Include="Resources\ErrorProviderIcons\IcoOk.ico" />
     <Content Include="Resources\ErrorProviderIcons\IcoWarning.ico" />
+    <Content Include="Resources\Icons\Erase.png" />
+    <Content Include="Resources\Icons\Filter.png" />
+    <Content Include="Resources\Icons\More.png" />
+    <Content Include="Resources\Icons\Search.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgError.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgHighImportance.png" />
     <Content Include="Resources\MsgBoxAndHtmlImg\MsgInfo.png" />

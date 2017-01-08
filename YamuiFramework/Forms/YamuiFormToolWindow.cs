@@ -38,7 +38,7 @@ namespace YamuiFramework.Forms {
         }
 
         private const int WsExTopmost = 0x00000008;
-        private const int WsExToolwindow = 0x00000008;
+        private const int WsExToolwindow = 0x80;
 
         protected override CreateParams CreateParams {
             get {

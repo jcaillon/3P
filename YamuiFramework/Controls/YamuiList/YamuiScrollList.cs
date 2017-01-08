@@ -332,6 +332,11 @@ namespace YamuiFramework.Controls.YamuiList {
             get { return _items; }
         }
 
+        /// <summary>
+        /// handle the keys pressed in the control, returns true if you actually handled the key
+        /// </summary>
+        public Func<YamuiScrollList, bool> KeyPressed { get; set; }
+
         #endregion
 
         #region public Events
@@ -345,11 +350,6 @@ namespace YamuiFramework.Controls.YamuiList {
         /// Triggered when the ENTER key is pressed
         /// </summary>
         public event Action<YamuiScrollList> EnterPressed;
-
-        /// <summary>
-        /// handle the keys pressed in the control, returns true if you actually handled the key
-        /// </summary>
-        public Func<YamuiScrollList, bool> KeyPressed;
 
         /// <summary>
         /// Triggered when the selected index changes
@@ -408,22 +408,19 @@ namespace YamuiFramework.Controls.YamuiList {
         #region constructor
 
         public YamuiScrollList() {
-            SetStyle(ControlStyles.UserPaint |
-                     ControlStyles.AllPaintingInWmPaint |
-                     ControlStyles.ResizeRedraw |
-                     ControlStyles.OptimizedDoubleBuffer, true);
+
+            SetStyle(
+                ControlStyles.OptimizedDoubleBuffer |
+                ControlStyles.ResizeRedraw |
+                ControlStyles.UserPaint |
+                ControlStyles.AllPaintingInWmPaint |
+                ControlStyles.Opaque, true);
 
             // this usercontrol should not be able to get the focus, only the first button can get it
             SetStyle(ControlStyles.Selectable, false);
 
             ComputeBaseRectangle();
             ComputeScrollBar();
-
-            MouseEnter += (sender, args) => IsHovered = true;
-            MouseLeave += (sender, args) => {
-                if (!new Rectangle(new Point(0, 0), Size).Contains(PointToClient(MousePosition)))
-                    IsHovered = false;
-            };
         }
 
         #endregion
@@ -485,7 +482,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region Draw list
+        #region set
 
         /// <summary>
         /// Set the items that will be displayed in the list
@@ -521,6 +518,10 @@ namespace YamuiFramework.Controls.YamuiList {
             // Correct the top index if needed, in any case this will Refresh the buttons + reposition the thumb
             TopIndex = TopIndex;
         }
+        
+        #endregion
+
+        #region DrawButtons
 
         /// <summary>
         /// This method just add the number of buttons required to display the list
@@ -589,28 +590,6 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Called by default to paint the row if no OnRowPaint is defined
-        /// </summary>
-        protected virtual void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
-            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-            var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
-
-            // background
-            e.Graphics.Clear(backColor);
-
-            // foreground
-            // left line
-            if (row.IsSelected && !item.IsDisabled) {
-                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
-                    e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, row.ClientRectangle.Height));
-                }
-            }
-
-            // text
-            TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), new Rectangle(5, 0, row.ClientRectangle.Width - 5, RowHeight), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
-        }
-
-        /// <summary>
         /// Refresh all the buttons to display the right items
         /// </summary>
         private void RefreshButtons() {
@@ -636,6 +615,47 @@ namespace YamuiFramework.Controls.YamuiList {
                     // repaint
                     _rows[i].Invalidate();
                 }
+            }
+        }
+
+        #endregion
+
+        #region Draw list
+
+        /// <summary>
+        /// Called by default to paint the row if no OnRowPaint is defined
+        /// </summary>
+        protected virtual void RowPaint(ListItem item, YamuiListRow row, PaintEventArgs e) {
+            var backColor = YamuiThemeManager.Current.MenuBg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+            var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
+
+            // background
+            e.Graphics.Clear(backColor);
+
+            // case of a separator
+            if (item.IsSeparator) {
+                var rect = row.ClientRectangle;
+                rect.Height = RowHeight;
+                RowPaintSeparator(e.Graphics, rect);
+                return;
+            }
+
+            // foreground
+            // left line
+            if (row.IsSelected && !item.IsDisabled) {
+                using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.AccentColor)) {
+                    e.Graphics.FillRectangle(b, new Rectangle(0, 0, 3, row.ClientRectangle.Height));
+                }
+            }
+
+            // text
+            TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), new Rectangle(5, 0, row.ClientRectangle.Width - 5, RowHeight), foreColor, TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.NoPadding);
+        }
+
+        protected virtual void RowPaintSeparator(Graphics g, Rectangle drawRect) {
+            using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.FormAltBack)) {
+                var width = (int)(drawRect.Width * 0.45);
+                g.FillRectangle(b, new Rectangle(0, drawRect.Y + drawRect.Height / 2 - 2, width, 4));
             }
         }
 
@@ -713,6 +733,17 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     break;
             }
+        }
+
+        protected override void OnMouseEnter(EventArgs e) {
+            IsHovered = true;
+            base.OnMouseEnter(e);
+        }
+
+        protected override void OnMouseLeave(EventArgs e) {
+            if (!new Rectangle(new Point(0, 0), Size).Contains(PointToClient(MousePosition)))
+                IsHovered = false;
+            base.OnMouseLeave(e);
         }
 
         /// <summary>

@@ -171,6 +171,14 @@ namespace YamuiFramework.Controls.YamuiList {
             // background
             e.Graphics.Clear(backColor);
 
+            // case of a separator
+            if (item.IsSeparator) {
+                var rect = row.ClientRectangle;
+                rect.Height = RowHeight;
+                RowPaintSeparator(e.Graphics, rect);
+                return;
+            }
+
             // foreground
             // left line
             if (row.IsSelected && !item.IsDisabled) {

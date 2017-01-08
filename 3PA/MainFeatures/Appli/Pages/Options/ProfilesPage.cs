@@ -142,7 +142,7 @@ namespace _3PA.MainFeatures.Appli.Pages.Options {
 
             yamuiButton2.Text = @"switch tree mode";
             yamuiButton2.ButtonPressed += (sender, args) => {
-                yamuiFilteredTypeTreeList1.SearchMode = yamuiFilteredTypeTreeList1.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.FilterSortWithNoParent ? YamuiFilteredTypeTreeList.SearchModeOption.FilterOnlyAndIncludeParent : YamuiFilteredTypeTreeList.SearchModeOption.FilterSortWithNoParent;
+                yamuiFilteredTypeTreeList1.SearchMode = yamuiFilteredTypeTreeList1.SearchMode == YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent ? YamuiFilteredTypeTreeList.SearchModeOption.FilterOnlyAndIncludeParent : YamuiFilteredTypeTreeList.SearchModeOption.SearchSortWithNoParent;
             };
 
             yamuiButton3.Text = @"modify root tree";

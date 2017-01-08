@@ -81,7 +81,8 @@ namespace YamuiFramework.Controls.YamuiList {
         #region public properties
 
         /// <summary>
-        /// Should return the image to use for the corresponding type
+        /// Should return the image to use for the corresponding type, it used for the bottom buttons
+        /// (type buttons) and it is used as a default item.Image if the later is null
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Func<int, Image> GetTypeImage { get; set; }
@@ -106,7 +107,8 @@ namespace YamuiFramework.Controls.YamuiList {
         }
 
         /// <summary>
-        /// Space reserved to write the showing x items label
+        /// Space reserved to write the showing x items label,
+        /// set it to 0 to not display the bottom of the list
         /// </summary>
         [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public int BottomHeight {
@@ -143,7 +145,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     var typeItem = item as FilteredTypeListItem;
                     if (typeItem != null) {
                         return (!_typeButtons.ContainsKey(typeItem.ItemType) || _typeButtons[typeItem.ItemType] == null || _typeButtons[typeItem.ItemType].Activated) && 
-                            (_filterPredicate != null ? _filterPredicate(item) : true);
+                            (_filterPredicate == null || _filterPredicate(item));
                     }
                     return false;
                 };
@@ -153,6 +155,21 @@ namespace YamuiFramework.Controls.YamuiList {
         
         #endregion
 
+        #region Paint
+
+        protected override void OnPaintBackground(PaintEventArgs e) {
+            e.Graphics.Clear(!UseCustomBackColor ? YamuiThemeManager.Current.MenuNormalBack : BackColor);
+
+            // text
+            if (BottomHeight > 0) {
+                var textHeight = (BottomHeight - BottomPadding*2)/2;
+                TextRenderer.DrawText(e.Graphics, "Showing", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - BottomHeight + BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+                TextRenderer.DrawText(e.Graphics, _nbItems + " items", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - textHeight - BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
+            }
+        }
+
+        #endregion
+        
         #region Set
 
         /// <summary>
@@ -178,7 +195,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
         protected void ComputeTypeButtonsNeeded(List<ListItem> listItems) {
             // set the type buttons needed
-            _typeList = listItems.Select(x => ((FilteredTypeListItem)x).ItemType).Distinct().ToList();
+            _typeList = listItems.Select(x => ((FilteredTypeListItem)x).ItemType).Where(i => i >= 0).Distinct().ToList();
         }
 
         #endregion
@@ -190,6 +207,9 @@ namespace YamuiFramework.Controls.YamuiList {
         /// </summary>
         protected override void DrawButtons() {
             base.DrawButtons();
+
+            if (BottomHeight == 0)
+                return;
 
             int maxWidthForTypeButtons = Width - BottomPadding * 3 - _itemsNbLabelWidth - 10;
             _nbDisplayableTypeButton = (int) Math.Floor((decimal) maxWidthForTypeButtons / TypeButtonWidth);
@@ -209,7 +229,7 @@ namespace YamuiFramework.Controls.YamuiList {
                         AcceptsRightClick = true,
                         HideFocusedIndicator = true,
                         Activated = true,
-                        BackGrndImage = GetTypeImage(type)
+                        BackGrndImage = GetTypeImage != null ? GetTypeImage(type) : null
                     });
                     _typeButtons[type].ButtonPressed += HandleTypeClick;
                     //htmlToolTip.SetToolTip(but, "The <b>" + type + "</b> category:<br><br><b>Left click</b> to toggle on/off this filter<br><b>Right click</b> to filter for this category only<br><i>(a consecutive right click reactivate all the categories)</i><br><br><i>You can use <b>ALT+RIGHT ARROW KEY</b> (and LEFT ARROW KEY)<br>to quickly activate one category</i>");
@@ -232,6 +252,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 }
             }
             
+            // remove buttons that are no longer used
             var tmpDic = new Dictionary<int, SelectorButton>();
             foreach (int key in _typeButtons.Keys) {
                 if (!_typeList.Contains(key)) {
@@ -257,7 +278,7 @@ namespace YamuiFramework.Controls.YamuiList {
                     // otherwise, we display a "more button" that opens a small interface to show the extra buttons
                     if (_moreButton == null) { 
                         _moreButton = new SelectorButton {
-                            BackGrndImage = MoreTypesImage,
+                            BackGrndImage = MoreTypesImage ?? Resources.Resources.More,
                             Activated = true,
                             Size = new Size(TypeButtonWidth, DefaultBottomHeight),
                             TabStop = false,
@@ -279,16 +300,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #region Draw list
 
-        protected override void OnPaintBackground(PaintEventArgs e) {
-            e.Graphics.Clear(!UseCustomBackColor ? YamuiThemeManager.Current.MenuNormalBack : BackColor);
-
-            // text
-            var textHeight = (BottomHeight - BottomPadding * 2) /2;
-            TextRenderer.DrawText(e.Graphics, "Showing", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - BottomHeight + BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
-            TextRenderer.DrawText(e.Graphics, _nbItems + " items", FontManager.GetFont(FontFunction.Small), new Rectangle(Width - BottomPadding - _itemsNbLabelWidth, Height - textHeight - BottomPadding, _itemsNbLabelWidth, textHeight), YamuiThemeManager.Current.MenuNormalFore, TextRightFlags);
-           
-        }
-
         /// <summary>
         /// Called by default to paint the row if no OnRowPaint is defined
         /// </summary>
@@ -302,11 +313,16 @@ namespace YamuiFramework.Controls.YamuiList {
             if (curItem != null) {
                 var drawRect = row.ClientRectangle;
                 drawRect.Height = RowHeight;
-                DrawFilteredTypeRow(curItem, drawRect, row, e);
+
+                // case of a separator
+                if (item.IsSeparator)
+                    RowPaintSeparator(e.Graphics, drawRect);
+                else
+                    DrawFilteredTypeRow(e.Graphics, curItem, drawRect, row);
             }
         }
 
-        protected virtual void DrawFilteredTypeRow(FilteredTypeListItem item, Rectangle drawRect, YamuiListRow row, PaintEventArgs e) {
+        protected virtual void DrawFilteredTypeRow(Graphics g, FilteredTypeListItem item, Rectangle drawRect, YamuiListRow row) {
 
             var foreColor = YamuiThemeManager.Current.MenuFg(row.IsSelected, row.IsHovered, !item.IsDisabled);
 
@@ -315,7 +331,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 using (SolidBrush b = new SolidBrush(YamuiThemeManager.Current.ButtonImageFocusedIndicator)) {
                     GraphicsPath path = new GraphicsPath();
                     path.AddLines(new[] { new Point(drawRect.X, drawRect.Y), new Point(drawRect.X + drawRect.Height / 2, drawRect.Y), new Point(drawRect.X, drawRect.Y + drawRect.Height / 2), new Point(drawRect.X, drawRect.Y) });
-                    e.Graphics.FillPath(b, path);
+                    g.FillPath(b, path);
                 }
             }
 
@@ -325,7 +341,7 @@ namespace YamuiFramework.Controls.YamuiList {
                 img = GetTypeImage(item.ItemType);
             if (img != null) {
                 var recImg = new Rectangle(new Point(drawRect.X + 1, drawRect.Y + (drawRect.Height - img.Height) / 2), new Size(img.Width, img.Height));
-                e.Graphics.DrawImage(img, recImg);
+                g.DrawImage(img, recImg);
             }
 
             // tag images
@@ -343,7 +359,7 @@ namespace YamuiFramework.Controls.YamuiList {
 
                     foreach (var image in listImg) {
                         xPos += image.Width;
-                        e.Graphics.DrawImage(image, new Rectangle(new Point(drawRect.X + drawRect.Width - xPos, (drawRect.Height - image.Height) / 2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
+                        g.DrawImage(image, new Rectangle(new Point(drawRect.X + drawRect.Width - xPos, (drawRect.Height - image.Height) / 2), new Size(image.Width, image.Height)), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttrib);
                     }
                 }
             }
@@ -357,10 +373,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
                 var drawPoint = new PointF(drawRect.X + drawRect.Width - xPos - textSize.Width - 3, (drawRect.Height / 2) - (textSize.Height / 2) - 1);
                 // using Drawstring here because TextRender (GDI) can't draw semi transparent text
-                e.Graphics.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
+                g.DrawString(subText, textFont, new SolidBrush(Color.FromArgb((int)(SubTextOpacity * 255), subColor)), drawPoint);
 
                 using (var pen = new Pen(Color.FromArgb((int)(SubTextOpacity * 0.8 * 255), subColor), 1) { Alignment = PenAlignment.Left }) {
-                    e.Graphics.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
+                    g.DrawPath(pen, Utilities.GetRoundedRect(drawPoint.X - 2, drawPoint.Y - 1, textSize.Width + 2, textSize.Height + 3, 3f));
                 }
             }
 
@@ -368,10 +384,10 @@ namespace YamuiFramework.Controls.YamuiList {
 
             // letter highlight
             if (!item.IsDisabled)
-                DrawTextHighlighting(e.Graphics, item.FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
+                DrawTextHighlighting(g, item.FilterMatchedRanges, textRectangle, item.DisplayText, TextFlags);
 
             // text
-            TextRenderer.DrawText(e.Graphics, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
+            TextRenderer.DrawText(g, item.DisplayText, FontManager.GetStandardFont(), textRectangle, foreColor, TextFlags);
         }
 
         #endregion
@@ -418,6 +434,7 @@ namespace YamuiFramework.Controls.YamuiList {
             if (_currentButtonIndex > _typeButtons.Count - 1) _currentButtonIndex = 0;
             if (_currentButtonIndex < 0) _currentButtonIndex = _typeButtons.Count - 1;
             SetActiveType(new List<int> { _typeButtons.ElementAt(_currentButtonIndex).Key });
+
         }
 
         #endregion
@@ -532,11 +549,6 @@ namespace YamuiFramework.Controls.YamuiList {
 
         #endregion
 
-        #region Misc
-
-
-
-        #endregion
     }
 
     #region SelectorButtons

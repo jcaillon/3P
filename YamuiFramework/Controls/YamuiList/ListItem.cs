@@ -29,15 +29,37 @@ namespace YamuiFramework.Controls.YamuiList {
     /// </summary>
     public class ListItem {
 
+        #region private
+
+        private bool _isSeparator;
+        private bool _isDisabled;
+
+        #endregion
+        
         /// <summary>
         /// The piece of text displayed in the list
         /// </summary>
         public string DisplayText { get; set; }
 
         /// <summary>
-        /// The item is disabled or not
+        /// The item is disabled or not (a separator is necesseraly disabled)
         /// </summary>
-        public bool IsDisabled { get; set; }
+        public bool IsDisabled {
+            get { return _isDisabled; }
+            set { _isDisabled = _isSeparator || value; }
+        }
+
+        /// <summary>
+        /// true if the item is a separator
+        /// </summary>
+        public bool IsSeparator {
+            get { return _isSeparator; }
+            set {
+                _isSeparator = value;
+                if (_isSeparator)
+                    IsDisabled = true;
+            }
+        }
     }
 
     #endregion
@@ -89,9 +111,16 @@ namespace YamuiFramework.Controls.YamuiList {
             FilterFullyMatch = true;
             FilterDispertionLevel = 0;
 
-            if (string.IsNullOrEmpty(lowerCaseFilterString) || string.IsNullOrEmpty(DisplayText))
+            // not filtering, everything should be included
+            if (string.IsNullOrEmpty(lowerCaseFilterString))
                 return;
-
+            
+            // exclude the separator items and empty text from a match when searching
+            if (IsSeparator || string.IsNullOrEmpty(DisplayText)) {
+                FilterFullyMatch = false;
+                return;
+            }
+            
             var lcText = DisplayText.ToLower();
             var textLenght = lcText.Length;
             var filterLenght = lowerCaseFilterString.Length;
@@ -160,11 +189,14 @@ namespace YamuiFramework.Controls.YamuiList {
         
         /// <summary>
         /// to override, should return this item type (a unique int for each item type)
+        /// if the value is strictly inferior to 0, the button for this type will not appear
+        /// on the bottom of list
         /// </summary>
         public virtual int ItemType { get; set; }
 
         /// <summary>
         /// to override, should return the image to display for this item
+        /// If null, the image corresponding to ItemType will be used instead
         /// </summary>
         public virtual Image ItemImage { get; set; }
 

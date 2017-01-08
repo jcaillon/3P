@@ -78,31 +78,36 @@ namespace YamuiFramework.Resources {
         ///    color: @FormFore;
         ///}
         ///
-        ///body {
-        ///    padding: 0;
-        ///    margin: 0;
-        ///}
-        ///
-        ////* this decorates the html labels */
-        ///.yamui-text { 
-        ///    Font: 12px &quot;Segoe UI&quot;;
-        ///    color: @FormFore;
-        ///    margin: 0;
-        ///    padding: 0;
-        ///}
-        ///
         ////* This is the class of the Html ToolTip */
         ///.yamui-tooltip {
         ///    border: solid 1px @FormBorder;
         ///    background-color: @FormBack;
-        ///    color: @FormFore;
         ///    padding: 5px;
-        ///    Font: 12px &quot;Segoe UI&quot;;
         ///}.
         /// </summary>
         internal static string BaseStyleSheet {
             get {
                 return ResourceManager.GetString("BaseStyleSheet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Erase {
+            get {
+                object obj = ResourceManager.GetObject("Erase", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Filter {
+            get {
+                object obj = ResourceManager.GetObject("Filter", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -133,6 +138,16 @@ namespace YamuiFramework.Resources {
             get {
                 object obj = ResourceManager.GetObject("IcoWarning", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap More {
+            get {
+                object obj = ResourceManager.GetObject("More", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
         
@@ -202,6 +217,16 @@ namespace YamuiFramework.Resources {
         internal static System.Drawing.Bitmap MsgWarning {
             get {
                 object obj = ResourceManager.GetObject("MsgWarning", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Search {
+            get {
+                object obj = ResourceManager.GetObject("Search", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

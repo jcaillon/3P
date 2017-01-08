@@ -186,10 +186,7 @@ namespace YamuiFramework.Forms {
 
             // menu position
             Location = GetBestPosition(location);
-
-            // keydown
-            KeyPreview = true;
-
+            
             // set focused item
             ActiveControl = Controls[_selectedIndex];
 
@@ -433,11 +430,6 @@ namespace YamuiFramework.Forms {
         /// Action to execute on clic
         /// </summary>
         public Action OnClic { get; set; }
-
-        /// <summary>
-        /// true if the item is a separator
-        /// </summary>
-        public bool IsSeparator { get; set; }
 
         /// <summary>
         /// True if the item should be selected by default in the menu 

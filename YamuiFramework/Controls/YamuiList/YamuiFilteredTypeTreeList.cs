@@ -116,7 +116,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// - or we filter + sort and display the list as a simple filtered list with types
         /// </summary>
         public enum SearchModeOption {
-            FilterSortWithNoParent,
+            SearchSortWithNoParent,
             FilterOnlyAndIncludeParent,
         }
 
@@ -325,7 +325,11 @@ namespace YamuiFramework.Controls.YamuiList {
                     }
                 }
 
-                DrawFilteredTypeRow(curItem, shiftedDrawRect, row, e);
+                // case of a separator
+                if (item.IsSeparator)
+                    RowPaintSeparator(e.Graphics, drawRect);
+                else
+                    DrawFilteredTypeRow(e.Graphics, curItem, drawRect, row);
             }
         }
 
@@ -377,7 +381,7 @@ namespace YamuiFramework.Controls.YamuiList {
         /// a tree view to a flat list where we applied the classic filter from the filteredtypelist
         /// </summary>
         private bool SetIsSearching(string stringFilter, SearchModeOption searchMode) {
-            var newIsSearching = !string.IsNullOrEmpty(stringFilter.ToLower().Trim()) && searchMode == SearchModeOption.FilterSortWithNoParent;
+            var newIsSearching = !string.IsNullOrEmpty(stringFilter.ToLower().Trim()) && searchMode == SearchModeOption.SearchSortWithNoParent;
             if (newIsSearching != _isSearching) {
                 _isSearching = newIsSearching;
 

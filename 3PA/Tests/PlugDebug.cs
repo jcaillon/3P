@@ -33,7 +33,9 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Win32.SafeHandles;
 using YamuiFramework.Controls;
+using YamuiFramework.Forms;
 using YamuiFramework.Helper;
+using _3PA.Images;
 using _3PA.Lib;
 using _3PA.MainFeatures;
 using _3PA.MainFeatures.Appli.Pages.Options;
@@ -196,9 +198,19 @@ namespace _3PA.Tests {
             };
             webServiceJson.Execute();
             */
+            var list = AppliMenu.Instance._mainMenuList.ToList();
+            foreach (var menuItem in list) {
+                menuItem.ItemType = -1;
+            }
+            var popup = new YamuiMenuPopup {
+                HtmlTitle = "<div align='center'>Yop</div>",
+                SpawnLocation = Cursor.Position,
+                MenuList = list.Cast<YamuiMenuItem>().ToList()
+            };
+            popup.Show();
 
-            UserCommunication.Notify("test");
-            UserCommunication.Notify("test");
+            //UserCommunication.Notify("test");
+            //UserCommunication.Notify("test");
             /*
             var form = new Form();
             form.Size = new Size(1200, 1000);

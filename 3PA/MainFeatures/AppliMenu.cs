@@ -160,7 +160,7 @@ namespace _3PA.MainFeatures {
         /// </summary>
         public List<MenuItem> ShortcutableItemList { get; set; }
 
-        private List<MenuItem> _mainMenuList;
+        public List<MenuItem> _mainMenuList;
 
         private List<MenuItem> _generateCodeMenuList;
 
